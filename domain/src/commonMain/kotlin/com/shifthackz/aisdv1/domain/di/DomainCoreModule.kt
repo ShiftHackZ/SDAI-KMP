@@ -303,7 +303,6 @@ val coreDomainModule = module {
             serverConfigurationRepository = get(),
             sdModelsRepository = get(),
             sdSamplersRepository = get(),
-            sdLorasRepository = get(),
             sdHyperNetworksRepository = get(),
             sdEmbeddingsRepository = get(),
         )
@@ -491,6 +490,7 @@ val coreDomainModule = module {
     }
     factory<ConnectToA1111UseCase> {
         DefaultConnectToA1111UseCaseImpl(
+            preferenceManager = get(),
             getConfigurationUseCase = get(),
             setServerConfigurationUseCase = get(),
             testConnectivityUseCase = get(),
@@ -499,6 +499,7 @@ val coreDomainModule = module {
     }
     factory<ConnectToSwarmUiUseCase> {
         DefaultConnectToSwarmUiUseCaseImpl(
+            preferenceManager = get(),
             getConfigurationUseCase = get(),
             setServerConfigurationUseCase = get(),
             testSwarmUiConnectivityUseCase = get(),

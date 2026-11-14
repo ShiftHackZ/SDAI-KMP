@@ -29,9 +29,9 @@ fun interface ConnectionTimeoutProvider {
 }
 
 /**
- * Applies the current connection limit before HttpTimeout processes each provider request.
- * Existing generation request/socket overrides are preserved. Engines that do not support
- * independent connect timeouts, including Darwin, retain their platform connection behavior.
+ * Applies the selected connection limit to setup and metadata requests before HttpTimeout runs.
+ * Explicit request/socket limits, including generation overrides, remain independent.
+ * Darwin enforces the request deadline while managing low-level connection timing itself.
  *
  * @param provider Live preference reader, evaluated for each new request.
  * @author Dmitriy Moroz
@@ -44,8 +44,14 @@ internal fun connectionTimeoutPlugin(provider: ConnectionTimeoutProvider) =
             val existing = request.getCapabilityOrNull(HttpTimeoutCapability)
             if (existing != null) {
                 existing.connectTimeoutMillis = limit
+                if (existing.requestTimeoutMillis == null) existing.requestTimeoutMillis = limit
+                if (existing.socketTimeoutMillis == null) existing.socketTimeoutMillis = limit
             } else {
-                request.timeout { connectTimeoutMillis = limit }
+                request.timeout {
+                    connectTimeoutMillis = limit
+                    requestTimeoutMillis = limit
+                    socketTimeoutMillis = limit
+                }
             }
         }
     }

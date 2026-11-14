@@ -162,7 +162,8 @@ import org.koin.dsl.module
  * Data-layer Koin module that wires repositories, network gateways, and persistent data sources.
  *
  * This module binds [NetworkUsageRepositoryImpl] so low-level traffic counters are backed by Room
- * instead of volatile preferences or lifecycle refreshes.
+ * instead of volatile preferences or lifecycle refreshes. Its recorder is initialized at app startup
+ * so setup and generation traffic is counted before the user opens Settings.
  *
  * @author Dmitriy Moroz
  */
@@ -230,7 +231,7 @@ val coreDataModule = module {
     single<SupportersDataSource.Local> {
         SupportersLocalDataSource(dao = get())
     }
-    single<NetworkUsageRepository> {
+    single<NetworkUsageRepository>(createdAtStart = true) {
         NetworkUsageRepositoryImpl(dao = get())
     }
     single<DownloadableModelDataSource.Remote> {

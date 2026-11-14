@@ -1,13 +1,15 @@
 package com.shifthackz.aisdv1.domain.usecase.caching
 
 /**
- * Defines the `DataPreLoaderUseCase` contract for the SDAI domain layer.
+ * Caches remote metadata needed during connection and application startup.
+ * LoRA discovery is deferred until the extras picker is opened, because large
+ * libraries can take longer to scan than the connection deadline permits.
  *
  * @author Dmitriy Moroz
  */
 interface DataPreLoaderUseCase {
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Fetches connection metadata and propagates failures or cancellation to the caller.
      *
      * @author Dmitriy Moroz
      */

@@ -13,7 +13,7 @@ data class Settings(
      * @author Dmitriy Moroz */
     val providerSelectionRevision: Long = 0L,
     /**
-     * Time allowed to establish network provider connections; defaults to 120 seconds.
+     * Deadline for provider setup and metadata requests; defaults to 120 seconds.
      *
      * @author Dmitriy Moroz
      */

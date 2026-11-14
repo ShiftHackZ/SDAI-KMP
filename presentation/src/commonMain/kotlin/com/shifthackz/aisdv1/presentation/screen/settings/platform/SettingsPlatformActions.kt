@@ -25,7 +25,7 @@ interface SettingsPlatformActions : StorageUsageByteMapper {
      */
     val supportsBackgroundGeneration: Boolean
     /**
-     * True when the networking engine supports the connection timeout setting shown in Settings.
+     * True when this platform enforces application setup and metadata request deadlines.
      *
      * @author Dmitriy Moroz
      */

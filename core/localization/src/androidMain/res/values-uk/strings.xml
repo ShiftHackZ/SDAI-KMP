@@ -611,8 +611,8 @@
     <string name="settings_generation_timeout_minutes">%1$s хв</string>
     <string name="settings_generation_timeout_unlimited">Без обмеження</string>
     <string name="settings_connection_timeout">Тайм-аут підключення</string>
-    <string name="settings_connection_timeout_description">Час на підключення до ШІ-провайдера. Застосовується до нових запитів.</string>
-    <string name="settings_connection_timeout_ios_description">iOS автоматично керує часом підключення. Значення зберігається, але не може застосовуватися в iOS.</string>
+    <string name="settings_connection_timeout_description">Час на налаштування підключення до провайдера та запити метаданих. Застосовується до нових запитів.</string>
+    <string name="settings_connection_timeout_ios_description">Обмежує налаштування підключення та запити метаданих. iOS автоматично керує часом низькорівневого підключення.</string>
     <string name="srv_type_open_ai_compatible">OpenAI-сумісний</string>
     <string name="open_ai_compatible_help">Підключіть сервер зображень або проксі через OpenAI Image API. Введіть повний префікс API, наприклад https://host/prefix/v1. Ключ API необов’язковий. Доступні моделі та розміри визначає сервер.</string>
     <string name="open_ai_compatible_url">Базовий URL API (включно з /v1)</string>

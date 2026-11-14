@@ -3,19 +3,28 @@ package com.shifthackz.aisdv1.domain.usecase.settings
 import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
+import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.connectivity.TestArliAiApiKeyUseCase
+import com.shifthackz.aisdv1.domain.usecase.connectivity.TestFalAiApiKeyUseCase
 import com.shifthackz.aisdv1.domain.usecase.connectivity.TestHordeApiKeyUseCase
 import com.shifthackz.aisdv1.domain.usecase.connectivity.TestHuggingFaceApiKeyUseCase
-import com.shifthackz.aisdv1.domain.usecase.connectivity.TestFalAiApiKeyUseCase
 import com.shifthackz.aisdv1.domain.usecase.connectivity.TestOpenAiApiKeyUseCase
 import com.shifthackz.aisdv1.domain.usecase.connectivity.TestStabilityAiApiKeyUseCase
 import com.shifthackz.aisdv1.domain.usecase.connectivity.TestSwarmUiConnectivityUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
- * Implements `DefaultConnectToSwarmUiUseCase` behavior in the SDAI domain layer.
+ * Validates and caches a candidate connection within the selected connection timeout.
+ * Restores the previous configuration when setup fails.
+ *
+ * @param getConfigurationUseCase Reads the current configuration for rollback.
+ * @param setServerConfigurationUseCase Publishes candidate settings and restores failed attempts.
+ * @param preferenceManager Supplies the connection deadline, independently from generation limits.
+ * @param testSwarmUiConnectivityUseCase Validates the candidate Swarm session.
  *
  * @author Dmitriy Moroz
  */
@@ -38,10 +47,11 @@ internal class DefaultConnectToSwarmUiUseCaseImpl(
      * @author Dmitriy Moroz
      */
     private val testSwarmUiConnectivityUseCase: TestSwarmUiConnectivityUseCase,
+    private val preferenceManager: PreferenceManager,
 ) : ConnectToSwarmUiUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Validates the candidate within the selected setup deadline and restores settings on failure.
      *
      * @param url remote URL used by the operation.
      * @param credentials credentials value consumed by the API.
@@ -54,7 +64,7 @@ internal class DefaultConnectToSwarmUiUseCaseImpl(
     ): Result<Unit> {
         var configuration: Configuration? = null
         return try {
-            withTimeout(CONNECTION_TIMEOUT_MILLIS.milliseconds) {
+            withTimeout(setupTimeout()) {
                 val originalConfiguration = getConfigurationUseCase()
                 configuration = originalConfiguration
                 val newConfiguration = originalConfiguration.copy(
@@ -72,6 +82,15 @@ internal class DefaultConnectToSwarmUiUseCaseImpl(
         } catch (t: Throwable) {
             restoreRemoteConfigurationAndFail(configuration, setServerConfigurationUseCase, t)
         }
+    }
+
+    /**
+     * Snapshots the current setup limit; zero keeps the operation cancellable without a deadline.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun setupTimeout(): Duration = preferenceManager.connectionTimeout.seconds.let {
+        if (it > 0) it.seconds else Duration.INFINITE
     }
 }
 
@@ -388,12 +407,6 @@ private suspend fun connectWithApiKey(
     }
 }
 
-/**
- * Exposes the `CONNECTION_TIMEOUT_MILLIS` value used by the SDAI domain layer.
- *
- * @author Dmitriy Moroz
- */
-private const val CONNECTION_TIMEOUT_MILLIS = 30_000L
 /**
  * Exposes the `CONNECTION_DELAY_MILLIS` value used by the SDAI domain layer.
  *

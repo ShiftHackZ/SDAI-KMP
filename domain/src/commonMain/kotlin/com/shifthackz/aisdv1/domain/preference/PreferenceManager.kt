@@ -42,7 +42,8 @@ interface PreferenceManager {
     var imageToImageCfgScale: Float
 
     /**
-     * Time allowed to establish provider connections, independent of generation waiting limits.
+     * Deadline for provider setup and metadata requests, independent of generation waiting limits.
+     * Zero disables application deadlines; platform connection policies may still apply.
      *
      * @author Dmitriy Moroz
      */

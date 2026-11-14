@@ -663,8 +663,8 @@
     <string name="settings_generation_timeout_minutes">%1$s 分钟</string>
     <string name="settings_generation_timeout_unlimited">无限制</string>
     <string name="settings_connection_timeout">连接超时</string>
-    <string name="settings_connection_timeout_description">连接到 AI 服务提供商所允许的时间。适用于新请求。</string>
-    <string name="settings_connection_timeout_ios_description">iOS 自动管理连接时长。此值会被保存，但无法在 iOS 上强制执行。</string>
+    <string name="settings_connection_timeout_description">提供商连接设置和元数据请求的时间限制。适用于新请求。</string>
+    <string name="settings_connection_timeout_ios_description">限制提供商连接设置和元数据请求的时间。iOS 自动管理底层连接时长。</string>
     <string name="srv_type_open_ai_compatible">OpenAI 兼容服务</string>
     <string name="open_ai_compatible_help">通过 OpenAI 图像 API 连接图像服务器或代理。请输入完整的 API 前缀，例如 https://host/prefix/v1。API 密钥可选。支持的模型和尺寸由服务器决定。</string>
     <string name="open_ai_compatible_url">API 基础 URL（包含 /v1）</string>

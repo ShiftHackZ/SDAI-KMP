@@ -6,6 +6,8 @@ import com.shifthackz.aisdv1.core.common.appbuild.BuildVersion
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
+import com.shifthackz.aisdv1.domain.entity.OpenAiOAuthIdentity
+import com.shifthackz.aisdv1.presentation.mocks.mockAiGenerationResult
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalCoreMlModelsUseCase
@@ -78,6 +80,25 @@ class StorageUsageViewModelTest {
         onnxModels = emptyList()
         platformActions.reset()
         router.backInvocations = 0
+    }
+
+    @Test
+    fun `compatible and OAuth gallery images contribute to storage totals`() = runTest {
+        val image = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jO0sAAAAASUVORK5CYII="
+        val compatible = mockAiGenerationResult.copy(
+            id = 1L, image = image, inputImage = "", modelName = "gpt-image-2",
+        )
+        val oauth = compatible.copy(
+            id = 2L, openAiOAuthIdentity = OpenAiOAuthIdentity("test-account", "test-revision"),
+        )
+        coEvery { getAllGalleryUseCase() } returns listOf(compatible, oauth)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val galleryBytes = viewModel.state.value.usage.items.first { it.category == UsageCategory.GALLERY }.bytes
+        assertEquals(image.encodeToByteArray().size * 2L, galleryBytes)
+        assertEquals(galleryBytes, viewModel.state.value.usage.totalBytes)
     }
 
     @Test
