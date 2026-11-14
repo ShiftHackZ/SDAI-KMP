@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.di
 
+import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
 import com.shifthackz.aisdv1.presentation.modal.download.DownloadDialogViewModel
 import com.shifthackz.aisdv1.presentation.modal.embedding.EmbeddingViewModel
 import com.shifthackz.aisdv1.presentation.modal.extras.ExtrasViewModel
@@ -261,6 +262,8 @@ internal fun Module.registerPresentationViewModelBindings() {
             buildInfoProvider = get(),
             generationFormUpdateEvent = get(),
             dimensionValidator = get(),
+            seedValidator = get(),
+            nativeSeedValidator = get(nativeSeedValidatorQualifier),
             localGenerationBenchmarkGateProvider = { get() },
             imageSaver = get(),
             imageSharer = get(),
@@ -290,6 +293,8 @@ internal fun Module.registerPresentationViewModelBindings() {
             buildInfoProvider = get(),
             generationFormUpdateEvent = get(),
             dimensionValidator = get(),
+            seedValidator = get(),
+            nativeSeedValidator = get(nativeSeedValidatorQualifier),
             localGenerationBenchmarkGateProvider = { get() },
             imageSaver = get(),
             imageSharer = get(),

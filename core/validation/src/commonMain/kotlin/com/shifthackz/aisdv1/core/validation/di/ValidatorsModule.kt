@@ -6,11 +6,21 @@ import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidator
 import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidatorImpl
 import com.shifthackz.aisdv1.core.validation.path.FilePathValidator
 import com.shifthackz.aisdv1.core.validation.path.FilePathValidatorImpl
+import com.shifthackz.aisdv1.core.validation.seed.SeedValidator
+import com.shifthackz.aisdv1.core.validation.seed.SeedValidatorImpl
 import com.shifthackz.aisdv1.core.validation.url.UrlValidator
 import com.shifthackz.aisdv1.core.validation.url.UrlValidatorImpl
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
+
+/**
+ * Identifies the seed validator configured for providers that accept the full signed Long range.
+ *
+ * @author Dmitriy Moroz
+ */
+val nativeSeedValidatorQualifier = named("native_seed_validator")
 
 /**
  * Exposes the `validatorsModule` value used by the SDAI validation layer.
@@ -24,4 +34,6 @@ val validatorsModule = module {
 
     factoryOf(::CommonStringValidatorImpl) bind CommonStringValidator::class
     factoryOf(::FilePathValidatorImpl) bind FilePathValidator::class
+    factory<SeedValidator> { SeedValidatorImpl() }
+    factory<SeedValidator>(nativeSeedValidatorQualifier) { SeedValidatorImpl(Long.MAX_VALUE) }
 }

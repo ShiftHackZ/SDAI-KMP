@@ -30,6 +30,8 @@ import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormState
  *
  * @param isLoadingSamplers Whether an AUTOMATIC1111 sampler request is running.
  * @param hasSamplerLoadFailed Whether the sampler field should offer an inline retry.
+ * @param seedValidationError Seed feedback published through the injected validator.
+ * @param subSeedValidationError Variation seed feedback for providers that use it.
  *
  * It extends the shared generation form state with source-image, inpaint, and
  * result handling fields while keeping platform-aware local provider controls
@@ -92,6 +94,8 @@ data class ImageToImageState(
     override val arliAiModel: String = "",
     override val widthValidationError: UiText? = null,
     override val heightValidationError: UiText? = null,
+    override val seedValidationError: UiText? = null,
+    override val subSeedValidationError: UiText? = null,
     override val nsfw: Boolean = false,
     override val batchCount: Int = 1,
     override val hires: HiresConfig = HiresConfig.DISABLED,
@@ -120,6 +124,8 @@ data class ImageToImageState(
         get() = promptValidationError != null ||
             widthValidationError != null ||
             heightValidationError != null ||
+            seedValidationError != null ||
+            subSeedValidationError != null ||
             error != null
 
     val canGenerate: Boolean

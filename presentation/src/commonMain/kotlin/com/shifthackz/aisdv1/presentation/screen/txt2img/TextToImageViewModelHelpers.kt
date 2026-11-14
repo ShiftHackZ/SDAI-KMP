@@ -180,10 +180,7 @@ internal fun TextToImageState.validated(
  * @author Dmitriy Moroz
  */
 internal fun TextToImageState.canGenerate(): Boolean =
-    promptValidationError == null &&
-        widthValidationError == null &&
-        heightValidationError == null &&
-        error == null
+    !hasValidationErrors
 
 /**
  * Executes the `function` step in the SDAI presentation layer.

@@ -697,4 +697,6 @@
     <string name="open_ai_oauth_error">ChatGPT 请求失败。请检查网络、账户访问权限和图像尺寸，然后重试。</string>
     <string name="open_ai_oauth_reset">重置本地会话</string>
     <string name="error_samplers_unavailable">无法加载采样方法。请检查服务器连接后重试。</string>
+    <string name="error_seed_format">请输入非负整数或 -1，也可留空。</string>
+    <string name="error_seed_max">种子值不能大于 %1$s。</string>
 </resources>

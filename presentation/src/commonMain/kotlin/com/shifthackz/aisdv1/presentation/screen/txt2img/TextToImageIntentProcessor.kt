@@ -140,10 +140,10 @@ internal class TextToImageIntentProcessor(
                 it.copy(restoreFaces = intent.value, message = null)
             }
             is TextToImageIntent.UpdateSeed -> updateState {
-                it.copy(seed = intent.value.filter(Char::isDigit), message = null)
+                it.copy(seed = intent.value, message = null)
             }
             is TextToImageIntent.UpdateSubSeed -> updateState {
-                it.copy(subSeed = intent.value.filter(Char::isDigit), message = null)
+                it.copy(subSeed = intent.value, message = null)
             }
             is TextToImageIntent.UpdateSubSeedStrength -> updateState {
                 it.copy(

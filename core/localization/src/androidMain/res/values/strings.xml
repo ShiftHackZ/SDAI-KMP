@@ -682,4 +682,6 @@
     <string name="open_ai_oauth_error">The ChatGPT request failed. Check your connection, account access and selected dimensions, then try again.</string>
     <string name="open_ai_oauth_reset">Reset local session</string>
     <string name="error_samplers_unavailable">Could not load sampling methods. Check the server connection and retry.</string>
+    <string name="error_seed_format">Enter a non-negative whole number, -1, or leave empty.</string>
+    <string name="error_seed_max">Seed must not exceed %1$s.</string>
 </resources>

@@ -645,4 +645,6 @@
     <string name="open_ai_oauth_error">Запит до ChatGPT завершився помилкою. Перевірте з’єднання, доступ облікового запису й розмір зображення, потім повторіть спробу.</string>
     <string name="open_ai_oauth_reset">Скинути локальну сесію</string>
     <string name="error_samplers_unavailable">Не вдалося завантажити методи семплювання. Перевірте з’єднання із сервером і повторіть спробу.</string>
+    <string name="error_seed_format">Введіть невід’ємне ціле число, -1 або залиште поле порожнім.</string>
+    <string name="error_seed_max">Сід не має перевищувати %1$s.</string>
 </resources>
