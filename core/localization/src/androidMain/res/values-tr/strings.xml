@@ -645,4 +645,6 @@
     <string name="open_ai_oauth_error">ChatGPT isteği başarısız oldu. Bağlantınızı, hesap erişimini ve görsel boyutlarını kontrol edip yeniden deneyin.</string>
     <string name="open_ai_oauth_reset">Yerel oturumu sıfırla</string>
     <string name="error_samplers_unavailable">Örnekleme yöntemleri yüklenemedi. Sunucu bağlantısını kontrol edip yeniden deneyin.</string>
+    <string name="error_seed_format">Negatif olmayan bir tam sayı veya -1 girin ya da boş bırakın.</string>
+    <string name="error_seed_max">Tohum değeri %1$s değerini aşmamalıdır.</string>
 </resources>

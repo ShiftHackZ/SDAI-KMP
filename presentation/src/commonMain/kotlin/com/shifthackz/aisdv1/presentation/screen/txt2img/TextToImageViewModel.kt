@@ -7,6 +7,8 @@ import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidator
+import com.shifthackz.aisdv1.core.validation.seed.SeedValidator
+import com.shifthackz.aisdv1.presentation.widget.input.withSeedValidation
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ForgeModule
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
@@ -55,6 +57,8 @@ import kotlinx.coroutines.withContext
  * gates local providers through benchmark recommendations, and delegates actual
  * generation work to the action handler.
  * @param openAiOAuthGateway Observes token-free account revisions captured in submitted OAuth work.
+ * @param nativeSeedValidator Validates native provider seeds using their full integer precision.
+ * @param seedValidator Validates edited, restored and provider-switched seeds before state publication.
  * @param providerSelectionGuard Serializes final UI publication with provider replacement.
  * @author Dmitriy Moroz
  */
@@ -82,6 +86,8 @@ class TextToImageViewModel(
     private val buildInfoProvider: BuildInfoProvider,
     private val generationFormUpdateEvent: GenerationFormUpdateEvent,
     private val dimensionValidator: DimensionValidator,
+    private val seedValidator: SeedValidator,
+    private val nativeSeedValidator: SeedValidator,
     private val localGenerationBenchmarkGateProvider: () -> LocalGenerationBenchmarkGate,
     private val imageSaver: ImageSaver,
     private val imageSharer: ImageSharer,
@@ -100,6 +106,27 @@ class TextToImageViewModel(
     effectDispatcher = dispatchersProvider.immediate,
 ) {
 
+    /**
+     * Publishes form edits with seed feedback from the injected validator in the same state update.
+     * This also revalidates provider switches and metadata restored from history.
+     *
+     * @param mutation transformation of the current generation state.
+     * @author Dmitriy Moroz
+     */
+    private fun updateFormState(mutation: (TextToImageState) -> TextToImageState) {
+        updateState { mutation(it).withSeedValidation(seedValidator, nativeSeedValidator) }
+    }
+
+    /**
+     * Validates seed fields before publishing a complete state supplied by the action handler.
+     *
+     * @param state replacement generation state, including current provider and seed text.
+     * @author Dmitriy Moroz
+     */
+    private fun emitFormState(state: TextToImageState) {
+        emitState(state.withSeedValidation(seedValidator, nativeSeedValidator))
+    }
+
     private var stableDiffusionSamplers: List<String>? = null
     private var stableDiffusionSamplersKey: StableDiffusionSamplersKey? = null
     private var forgeModules: List<ForgeModule>? = null
@@ -115,7 +142,7 @@ class TextToImageViewModel(
             observeOpenAiOAuthIdentity(
                 gateway = openAiOAuthGateway,
                 onIdentity = { identity ->
-                    updateState {
+                    updateFormState {
                         val changed = it.mode == ServerSource.OPEN_AI_OAUTH && it.openAiOAuthRevision != identity?.revision
                         it.copy(
                             openAiOAuthAccountId = identity?.accountId,
@@ -125,7 +152,7 @@ class TextToImageViewModel(
                         )
                     }
                 },
-                onUnavailable = { error -> updateState {
+                onUnavailable = { error -> updateFormState {
                     if (it.mode == ServerSource.OPEN_AI_OAUTH) it.copy(error = UiText.Static(error.localizedDescription())) else it
                 } },
             )
@@ -157,15 +184,15 @@ class TextToImageViewModel(
         imageSharer = imageSharer,
         router = router,
         currentState = { currentState },
-        emitState = ::emitState,
-        updateState = { reducer -> updateState(reducer) },
+        emitState = ::emitFormState,
+        updateState = { reducer -> updateFormState(reducer) },
         launch = { dispatcher, start, block -> launch(dispatcher, start, block) },
         onError = onError,
     )
 
     private val intentProcessor = TextToImageIntentProcessor(
         router = router,
-        updateState = { reducer -> updateState(reducer) },
+        updateState = { reducer -> updateFormState(reducer) },
         generate = actionHandler::generate,
         cancelGeneration = actionHandler::cancelGeneration,
         saveImage = actionHandler::saveImage,
@@ -218,7 +245,7 @@ class TextToImageViewModel(
      */
     private fun applyGenerationResult(ai: AiGenerationResult) {
         val hasDiffusionParameters = ai.samplingSteps > 0
-        updateState { state ->
+        updateFormState { state ->
             state.copy(
                 advancedOptionsVisible = true,
                 prompt = ai.prompt,
@@ -278,7 +305,7 @@ class TextToImageViewModel(
     private fun observeGenerationProgress() {
         launch(dispatchersProvider.immediate) {
             observeHordeProcessStatusUseCase().collect { status ->
-                updateState { state ->
+                updateFormState { state ->
                     val modal = state.screenModal
                     if (modal is GenerationModal.Communicating) {
                         state.copy(screenModal = modal.copy(hordeProcessStatus = status))
@@ -311,7 +338,7 @@ class TextToImageViewModel(
     }
 
     private fun updateLocalGenerationStatus(status: LocalDiffusionStatus) {
-        updateState { state ->
+        updateFormState { state ->
             val modal = state.screenModal
             if (modal is GenerationModal.Generating) {
                 state.copy(screenModal = modal.copy(status = status))
@@ -322,12 +349,12 @@ class TextToImageViewModel(
     }
 
     private fun loadConfiguration() {
-        updateState { it.copy(loadingConfiguration = true, error = null) }
+        updateFormState { it.copy(loadingConfiguration = true, error = null) }
         launch(dispatchersProvider.io) {
             runCatching { getConfigurationUseCase() }
                 .onSuccess { configuration ->
                     withContext(dispatchersProvider.immediate) {
-                        updateState {
+                        updateFormState {
                             it.copy(
                                 loadingConfiguration = false,
                                 openAiCompatibleModel = configuration.openAiCompatibleModel,
@@ -344,7 +371,7 @@ class TextToImageViewModel(
                 }
                 .onFailure { t ->
                     withContext(dispatchersProvider.immediate) {
-                        updateState {
+                        updateFormState {
                             it.copy(
                                 loadingConfiguration = false,
                                 error = t.localizedMessageText(),
@@ -361,13 +388,13 @@ class TextToImageViewModel(
             preferenceManager
                 .observe()
                 .catch { t ->
-                    updateState { it.copy(error = t.localizedMessageText()) }
+                    updateFormState { it.copy(error = t.localizedMessageText()) }
                     onError(t)
                 }
                 .collect { settings ->
                     refreshStableDiffusionMetadataIfNeeded(settings)
                     refreshArliAiModelsIfNeeded(settings)
-                    updateState { state ->
+                    updateFormState { state ->
                         state.withSettings(
                             settings = settings,
                             stableDiffusionSamplers = stableDiffusionSamplers,
@@ -389,7 +416,7 @@ class TextToImageViewModel(
     private fun refreshStableDiffusionMetadataIfNeeded(settings: Settings) {
         if (settings.source != ServerSource.AUTOMATIC1111) {
             samplersLoadJob?.cancel()
-            updateState { it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = false) }
+            updateFormState { it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = false) }
             stableDiffusionSamplersKey = null
             forgeModulesKey = null
             forgeModules = null
@@ -414,7 +441,7 @@ class TextToImageViewModel(
         stableDiffusionSamplers = emptyList()
         forgeModules = emptyList()
         aDetailerAvailable = null
-        updateState {
+        updateFormState {
             it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = false).withSource(
                 source = ServerSource.AUTOMATIC1111,
                 stableDiffusionSamplers = stableDiffusionSamplers,
@@ -437,7 +464,7 @@ class TextToImageViewModel(
     private fun loadSamplers() {
         val key = stableDiffusionSamplersKey ?: return
         if (currentState.isLoadingSamplers) return
-        updateState { it.copy(isLoadingSamplers = true, hasSamplerLoadFailed = false) }
+        updateFormState { it.copy(isLoadingSamplers = true, hasSamplerLoadFailed = false) }
         samplersLoadJob = launch(dispatchersProvider.immediate) {
             try {
                 val samplers = withContext(dispatchersProvider.io) {
@@ -448,7 +475,7 @@ class TextToImageViewModel(
                 ensureActive()
                 if (stableDiffusionSamplersKey != key) return@launch
                 stableDiffusionSamplers = samplers
-                updateState {
+                updateFormState {
                     it.copy(
                         isLoadingSamplers = false,
                         hasSamplerLoadFailed = samplers.isEmpty(),
@@ -463,7 +490,7 @@ class TextToImageViewModel(
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
                 if (stableDiffusionSamplersKey != key) return@launch
-                updateState { it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = true) }
+                updateFormState { it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = true) }
                 onError(error)
             }
         }
@@ -475,7 +502,7 @@ class TextToImageViewModel(
                 .onSuccess { modules ->
                     forgeModules = modules
                     withContext(dispatchersProvider.immediate) {
-                        updateState {
+                        updateFormState {
                             it.withSource(
                                 source = it.mode,
                                 stableDiffusionSamplers = stableDiffusionSamplers,
@@ -489,7 +516,7 @@ class TextToImageViewModel(
                 .onFailure { t ->
                     forgeModules = emptyList()
                     withContext(dispatchersProvider.immediate) {
-                        updateState {
+                        updateFormState {
                             it.withSource(
                                 source = it.mode,
                                 stableDiffusionSamplers = stableDiffusionSamplers,
@@ -506,13 +533,13 @@ class TextToImageViewModel(
 
     private fun loadADetailerAvailability(force: Boolean = false) {
         if (!force && aDetailerAvailable != null) return
-        updateState { it.copy(aDetailerRefreshing = true) }
+        updateFormState { it.copy(aDetailerRefreshing = true) }
         launch(dispatchersProvider.io) {
             runCatching { isADetailerAvailableUseCase() }
                 .onSuccess { available ->
                     aDetailerAvailable = available
                     withContext(dispatchersProvider.immediate) {
-                        updateState {
+                        updateFormState {
                             it.copy(
                                 aDetailerAvailable = available,
                                 aDetailerRefreshing = false,
@@ -524,7 +551,7 @@ class TextToImageViewModel(
                 .onFailure { t ->
                     aDetailerAvailable = false
                     withContext(dispatchersProvider.immediate) {
-                        updateState { state ->
+                        updateFormState { state ->
                             state.copy(
                                 aDetailerAvailable = false,
                                 aDetailerRefreshing = false,
@@ -546,7 +573,7 @@ class TextToImageViewModel(
 
         arliAiModelsKey = key
         arliAiModels = emptyList()
-        updateState {
+        updateFormState {
             it.withSource(
                 source = ServerSource.ARLI_AI,
                 stableDiffusionSamplers = stableDiffusionSamplers,
@@ -569,7 +596,7 @@ class TextToImageViewModel(
                 .onSuccess { models ->
                     arliAiModels = models
                     withContext(dispatchersProvider.immediate) {
-                        updateState {
+                        updateFormState {
                             it.copy(arliAiModel = preferenceManager.arliAiModel)
                                 .withSource(
                                     source = it.mode,
@@ -583,7 +610,7 @@ class TextToImageViewModel(
                 }
                 .onFailure { t ->
                     withContext(dispatchersProvider.immediate) {
-                        updateState { it.copy(error = t.localizedMessageText()) }
+                        updateFormState { it.copy(error = t.localizedMessageText()) }
                     }
                     onError(t)
                 }

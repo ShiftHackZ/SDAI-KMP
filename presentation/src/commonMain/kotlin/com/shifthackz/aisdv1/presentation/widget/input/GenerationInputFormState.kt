@@ -41,6 +41,18 @@ interface GenerationInputFormState {
     val restoreFaces: Boolean
     val seed: String
     val subSeed: String
+    /**
+     * Inline error computed by the owning screen through its injected seed validator.
+     *
+     * @author Dmitriy Moroz
+     */
+    val seedValidationError: UiText?
+    /**
+     * Inline error for a supported variation seed; unused variation values do not block generation.
+     *
+     * @author Dmitriy Moroz
+     */
+    val subSeedValidationError: UiText?
     val subSeedStrength: Float
     val selectedSampler: String
     val selectedScheduler: Scheduler

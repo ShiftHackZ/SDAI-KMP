@@ -3,6 +3,8 @@ package com.shifthackz.aisdv1.presentation.screen.samplers
 import androidx.lifecycle.viewModelScope
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.validation.ValidationResult
+import com.shifthackz.aisdv1.core.validation.seed.SeedValidator
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.Settings
@@ -18,8 +20,11 @@ import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
 import com.shifthackz.aisdv1.presentation.core.GenerationFormUpdateEvent
 import com.shifthackz.aisdv1.presentation.screen.img2img.ImageToImageIntent
 import com.shifthackz.aisdv1.presentation.screen.img2img.ImageToImageViewModel
+import com.shifthackz.aisdv1.presentation.screen.img2img.toImageToImageIntent
 import com.shifthackz.aisdv1.presentation.screen.txt2img.TextToImageIntent
 import com.shifthackz.aisdv1.presentation.screen.txt2img.TextToImageViewModel
+import com.shifthackz.aisdv1.presentation.screen.txt2img.toTextToImageIntent
+import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormState
 import io.mockk.coEvery
 import io.mockk.every
@@ -37,6 +42,8 @@ import kotlinx.coroutines.flow.emptyFlow
  * @param dispatcher Dispatcher sharing the test scheduler and installed Main dispatcher.
  * @param getSamplers Configurable sampler boundary for failed, delayed, empty and successful attempts.
  * @param immediateDispatcher Entry dispatcher, optionally eager to model Main.immediate initialization.
+ * @param seedValidator Seed validator supplied to both production view models; unrelated sampler tests accept all seeds.
+ * @param nativeSeedValidator Validator configured for native providers, independently supplied by seed tests.
  * @author Dmitriy Moroz
  */
 internal class SamplerRecoveryViewModelFixture(
@@ -44,6 +51,10 @@ internal class SamplerRecoveryViewModelFixture(
     dispatcher: CoroutineDispatcher,
     getSamplers: GetStableDiffusionSamplersUseCase,
     immediateDispatcher: CoroutineDispatcher = dispatcher,
+    seedValidator: SeedValidator = mockk {
+        every { this@mockk.invoke(any()) } returns ValidationResult(isValid = true)
+    },
+    nativeSeedValidator: SeedValidator = seedValidator,
 ) {
     val settings = MutableStateFlow(Settings(serverUrl = "http://server-a:7860"))
     val errors = mutableListOf<Throwable>()
@@ -108,6 +119,8 @@ internal class SamplerRecoveryViewModelFixture(
                 buildInfoProvider = BuildInfoProvider.stub,
                 generationFormUpdateEvent = GenerationFormUpdateEvent(),
                 dimensionValidator = mockk(),
+                seedValidator = seedValidator,
+                nativeSeedValidator = nativeSeedValidator,
                 localGenerationBenchmarkGateProvider = { mockk() },
                 imageSaver = mockk(),
                 imageSharer = mockk(),
@@ -144,6 +157,8 @@ internal class SamplerRecoveryViewModelFixture(
                 buildInfoProvider = BuildInfoProvider.stub,
                 generationFormUpdateEvent = GenerationFormUpdateEvent(),
                 dimensionValidator = mockk(),
+                seedValidator = seedValidator,
+                nativeSeedValidator = nativeSeedValidator,
                 localGenerationBenchmarkGateProvider = { mockk() },
                 imageSaver = mockk(),
                 imageSharer = mockk(),
@@ -152,6 +167,17 @@ internal class SamplerRecoveryViewModelFixture(
                 onError = errors::add,
             )
         }
+    }
+
+    /**
+     * Sends an input edit through the selected screen's production event mapping and view model.
+     *
+     * @param event edit emitted by the shared generation form.
+     * @author Dmitriy Moroz
+     */
+    fun process(event: GenerationInputFormEvent) {
+        textToImage?.processIntent(checkNotNull(event.toTextToImageIntent()))
+        imageToImage?.processIntent(checkNotNull(event.toImageToImageIntent()))
     }
 
     /**
