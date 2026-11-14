@@ -648,8 +648,8 @@
     <string name="settings_generation_timeout_minutes">%1$s Min.</string>
     <string name="settings_generation_timeout_unlimited">Unbegrenzt</string>
     <string name="settings_connection_timeout">Verbindungszeitlimit</string>
-    <string name="settings_connection_timeout_description">Zeit zum Verbindungsaufbau mit einem KI-Anbieter. Gilt für neue Anfragen.</string>
-    <string name="settings_connection_timeout_ios_description">iOS verwaltet die Verbindungsdauer automatisch. Dieser Wert wird gespeichert, kann unter iOS aber nicht erzwungen werden.</string>
+    <string name="settings_connection_timeout_description">Zeitlimit für die Einrichtung einer Anbieterverbindung und Metadatenanfragen. Gilt für neue Anfragen.</string>
+    <string name="settings_connection_timeout_ios_description">Begrenzt die Verbindungseinrichtung und Metadatenanfragen. iOS verwaltet die Verbindungsdauer auf Netzwerkebene automatisch.</string>
     <string name="srv_type_open_ai_compatible">OpenAI-kompatibel</string>
     <string name="open_ai_compatible_help">Verbinde einen Bildserver oder Proxy über die OpenAI-Bild-API. Gib das vollständige API-Präfix ein, z. B. https://host/prefix/v1. Der API-Schlüssel ist optional. Der Server bestimmt die unterstützten Modelle und Größen.</string>
     <string name="open_ai_compatible_url">API-Basis-URL (einschließlich /v1)</string>

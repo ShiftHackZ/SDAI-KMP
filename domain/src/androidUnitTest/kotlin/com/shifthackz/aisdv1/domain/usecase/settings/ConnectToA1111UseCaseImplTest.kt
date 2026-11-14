@@ -4,6 +4,9 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.mocks.mockConfiguration
 import com.shifthackz.aisdv1.domain.usecase.caching.DataPreLoaderUseCase
 import com.shifthackz.aisdv1.domain.usecase.connectivity.TestConnectivityUseCase
+import com.shifthackz.aisdv1.domain.entity.NetworkTimeout
+import com.shifthackz.aisdv1.domain.preference.PreferenceManager
+import io.mockk.every
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -20,6 +23,9 @@ class DefaultConnectToA1111UseCaseImplTest {
     private val stubDataPreLoaderUseCase = mockk<DataPreLoaderUseCase>()
 
     private val useCase = DefaultConnectToA1111UseCaseImpl(
+        preferenceManager = mockk<PreferenceManager> {
+            every { connectionTimeout } returns NetworkTimeout.TWO_MINUTES
+        },
         getConfigurationUseCase = stubGetConfigurationUseCase,
         setServerConfigurationUseCase = stubSetServerConfigurationUseCase,
         testConnectivityUseCase = stubTestConnectivityUseCase,

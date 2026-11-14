@@ -611,8 +611,8 @@
     <string name="settings_generation_timeout_minutes">%1$s dk</string>
     <string name="settings_generation_timeout_unlimited">Sınırsız</string>
     <string name="settings_connection_timeout">Bağlantı zaman aşımı</string>
-    <string name="settings_connection_timeout_description">Yapay zekâ sağlayıcısına bağlanmak için izin verilen süre. Yeni istekler için geçerlidir.</string>
-    <string name="settings_connection_timeout_ios_description">iOS bağlantı süresini otomatik olarak yönetir. Bu değer kaydedilir ancak iOS üzerinde uygulanamaz.</string>
+    <string name="settings_connection_timeout_description">Sağlayıcı bağlantı kurulumu ve meta veri istekleri için izin verilen süre. Yeni istekler için geçerlidir.</string>
+    <string name="settings_connection_timeout_ios_description">Sağlayıcı bağlantı kurulumunu ve meta veri isteklerini sınırlar. iOS düşük seviyeli bağlantı süresini otomatik yönetir.</string>
     <string name="srv_type_open_ai_compatible">OpenAI uyumlu</string>
     <string name="open_ai_compatible_help">OpenAI görüntü API’sini kullanan bir görüntü sunucusuna veya proxy’ye bağlanın. Tam API önekini girin, örneğin https://host/prefix/v1. API anahtarı isteğe bağlıdır. Desteklenen modelleri ve boyutları sunucu belirler.</string>
     <string name="open_ai_compatible_url">API temel URL’si (/v1 dahil)</string>
