@@ -2,46 +2,66 @@ package com.shifthackz.aisdv1.data.gateway.mediastore
 
 import android.net.Uri
 import android.os.Environment
+import com.shifthackz.aisdv1.data.export.MediaStoreImageFormatResolver
 import com.shifthackz.aisdv1.domain.entity.MediaStoreInfo
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 import java.io.File
+import java.io.IOException
+import kotlin.jvm.Synchronized
 
 /**
- * Implementation to support old Android versions (12 and lower).
+ * Writes original encoded images to the public Downloads/SDAI folder on Android 12 and earlier.
+ * Keeps the existing external-storage permission behavior while selecting the suffix from the bytes.
  *
- *
- * Working on:
- * - Android 9 API 28 (Emulator)
- * - Android 10 API 29 (Emulator)
- * - Android 11 API 30 (Emulator)
- * - Android 12 API 31 (Emulator)
- *
- * Not working on:
- * - Android 12L API 32 (Emulator)
+ * @param formatResolver Recognizes supported encoded headers before opening the destination.
+ * @author Dmitriy Moroz
  */
 @Deprecated("Deprecated since Android 12, it is here to support old devices.")
-internal class MediaStoreGatewayOldImpl : MediaStoreGateway {
+internal class MediaStoreGatewayOldImpl(
+    private val formatResolver: MediaStoreImageFormatResolver,
+) : MediaStoreGateway {
 
     /**
-     * Executes the `exportToFile` step in the SDAI data layer.
+     * Writes the bytes unchanged under their detected extension, retaining pre-existing files
+     * when a write fails. Newly created partial files are removed and cleanup errors are attached
+     * to the original failure.
+     * Serializes this gateway's exports so failure cleanup cannot delete a concurrent call's output.
      *
-     * @param fileName file name value consumed by the API.
-     * @param content content value consumed by the API.
+     * @param fileName Destination filename stem without an extension.
+     * @param content Original encoded PNG, JPEG or WebP image bytes.
+     * @throws IllegalArgumentException When the image header is unsupported.
+     * @throws IOException When the directory or file cannot be created or written.
      * @author Dmitriy Moroz
      */
+    @Synchronized
     override fun exportToFile(fileName: String, content: ByteArray) {
-        val dirPath = Environment.getExternalStorageDirectory().path + DIR_PATH
-        val dir = File(dirPath)
-        if (!dir.exists()) dir.mkdirs()
-        val file = File("${dirPath}/${fileName}.jpg")
-        if (!file.exists()) file.createNewFile()
-        file.writeBytes(content)
+        val format = formatResolver.resolve(content)
+        val dir = File(Environment.getExternalStorageDirectory().path + DIR_PATH)
+        if (!dir.isDirectory && !dir.mkdirs() && !dir.isDirectory) {
+            throw IOException("Unable to create media export directory")
+        }
+        val file = File(dir, "$fileName.${format.extension}")
+        val hasCreatedFile = file.createNewFile()
+        try {
+            file.writeBytes(content)
+        } catch (failure: Throwable) {
+            if (hasCreatedFile) {
+                try {
+                    if (!file.delete() && file.exists()) {
+                        throw IOException("Unable to remove incomplete media export")
+                    }
+                } catch (cleanupFailure: Throwable) {
+                    if (cleanupFailure !== failure) failure.addSuppressed(cleanupFailure)
+                }
+            }
+            throw failure
+        }
     }
 
     /**
-     * Loads SDAI data through `getInfo`.
+     * Reports the existing Downloads/SDAI directory without creating it.
      *
-     * @return Result produced by `getInfo`.
+     * @return Child count and directory URI, or empty information when the directory is absent.
      * @author Dmitriy Moroz
      */
     override fun getInfo(): MediaStoreInfo {
@@ -56,14 +76,9 @@ internal class MediaStoreGatewayOldImpl : MediaStoreGateway {
         return MediaStoreInfo()
     }
 
-    /**
-     * Provides the `companion object` singleton used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    companion object {
+    private companion object {
         /**
-         * Exposes the `DIR_PATH` value used by the SDAI data layer.
+         * Public export folder relative to the external-storage root.
          *
          * @author Dmitriy Moroz
          */
