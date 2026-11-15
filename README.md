@@ -1,6 +1,6 @@
 # SDAI
 
-<img src="artwork/icon/sdai.png" alt="SDAI Logo" height="54" width="54">
+<img src="artwork/icon/sdai.png" alt="SDAI Logo" height="148" width="148">
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21442838.svg)](https://doi.org/10.5281/zenodo.21442838)
 
