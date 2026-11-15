@@ -160,9 +160,14 @@ jobs:
             exit 1
           fi
 
-          build_tools="$(find "${ANDROID_HOME}/build-tools" -mindepth 1 -maxdepth 1 -type d -print | sort -V | tail -n 1)"
+          # Match the stable release signer and its certificate report format.
+          build_tools="${ANDROID_HOME}/build-tools/35.0.0"
           apksigner="${build_tools}/apksigner"
           zipalign="${build_tools}/zipalign"
+          if [[ ! -x "${apksigner}" || ! -x "${zipalign}" ]]; then
+            echo "Android Build Tools 35.0.0 are required for nightly signing." >&2
+            exit 1
+          fi
 
           signing_dir="${RUNNER_TEMP}/nightly-signing"
           trap 'rm -rf -- "${signing_dir}"' EXIT
