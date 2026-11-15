@@ -17,9 +17,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
@@ -81,7 +81,7 @@ class KtorStabilityAiGenerationApi(
 
     override suspend fun validateBearerToken(apiKey: String) {
         mapStabilityError {
-            httpClient.get {
+            httpClient.boundedGet {
                 url.takeFrom(baseUrl)
                 url.appendPathSegments(PATH_API_VERSION, PATH_USER, PATH_ACCOUNT)
                 header(HttpHeaders.Authorization, "Bearer $apiKey")
@@ -90,18 +90,19 @@ class KtorStabilityAiGenerationApi(
         }
     }
 
-    override suspend fun fetchCredits(apiKey: String): StabilityCreditsResponse = mapStabilityError {
-        httpClient
-            .get {
-                url.takeFrom(baseUrl)
-                url.appendPathSegments(PATH_API_VERSION, PATH_USER, PATH_BALANCE)
-                trackUsage(NetworkUsageCategory.CONFIGS)
-                header(HttpHeaders.Authorization, "Bearer $apiKey")
-                header(HttpHeaders.Accept, ContentType.Application.Json.toString())
-            }
-            .trackedBodyAsText(NetworkUsageCategory.CONFIGS)
-            .let { json.decodeFromString<StabilityCreditsResponse>(it) }
-    }
+    override suspend fun fetchCredits(apiKey: String): StabilityCreditsResponse =
+        mapStabilityError {
+            httpClient
+                .boundedGet {
+                    url.takeFrom(baseUrl)
+                    url.appendPathSegments(PATH_API_VERSION, PATH_USER, PATH_BALANCE)
+                    trackUsage(NetworkUsageCategory.CONFIGS)
+                    header(HttpHeaders.Authorization, "Bearer $apiKey")
+                    header(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                }
+                .trackedBodyAsText(NetworkUsageCategory.CONFIGS)
+                .let { json.decodeFromString<StabilityCreditsResponse>(it) }
+        }
 
     override suspend fun textToImage(
         apiKey: String,
@@ -109,9 +110,14 @@ class KtorStabilityAiGenerationApi(
         request: StabilityTextToImageRequest,
     ): StabilityGenerationResponse = mapStabilityError {
         httpClient
-            .post {
+            .boundedPost {
                 url.takeFrom(baseUrl)
-                url.appendPathSegments(PATH_API_VERSION, PATH_GENERATION, engineId, PATH_TEXT_TO_IMAGE)
+                url.appendPathSegments(
+                    PATH_API_VERSION,
+                    PATH_GENERATION,
+                    engineId,
+                    PATH_TEXT_TO_IMAGE
+                )
                 applyGenerationTimeout(generationTimeoutProvider)
                 header(HttpHeaders.Authorization, "Bearer $apiKey")
                 header(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -131,9 +137,14 @@ class KtorStabilityAiGenerationApi(
         parameters: Map<String, String>,
     ): StabilityGenerationResponse = mapStabilityError {
         httpClient
-            .post {
+            .boundedPost {
                 url.takeFrom(baseUrl)
-                url.appendPathSegments(PATH_API_VERSION, PATH_GENERATION, engineId, PATH_IMAGE_TO_IMAGE)
+                url.appendPathSegments(
+                    PATH_API_VERSION,
+                    PATH_GENERATION,
+                    engineId,
+                    PATH_IMAGE_TO_IMAGE
+                )
                 applyGenerationTimeout(generationTimeoutProvider)
                 trackUsage(NetworkUsageCategory.INFERENCE)
                 recordUsageBytes(
@@ -150,7 +161,10 @@ class KtorStabilityAiGenerationApi(
                                 imageBytes,
                                 Headers.build {
                                     append(HttpHeaders.ContentDisposition, "filename=\"image.png\"")
-                                    append(HttpHeaders.ContentType, ContentType.Image.PNG.toString())
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        ContentType.Image.PNG.toString()
+                                    )
                                 },
                             )
                             parameters.forEach { (key, value) ->

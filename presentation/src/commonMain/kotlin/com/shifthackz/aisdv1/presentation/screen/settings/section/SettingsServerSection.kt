@@ -2,7 +2,6 @@
 
 package com.shifthackz.aisdv1.presentation.screen.settings.section
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,275 +30,273 @@ import com.shifthackz.aisdv1.core.common.math.roundTo
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsIntent
+import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsListItem
 import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsState
 import com.shifthackz.aisdv1.presentation.screen.settings.model.label
 import com.shifthackz.aisdv1.presentation.screen.settings.model.shortTitle
 import com.shifthackz.aisdv1.presentation.screen.settings.model.text
 import com.shifthackz.aisdv1.presentation.widget.item.SettingsHeader
 import com.shifthackz.aisdv1.presentation.widget.item.SettingsItem
+import com.shifthackz.aisdv1.presentation.widget.item.SettingsToggleItem
 import com.shifthackz.aisdv1.presentation.widget.source.BetaBadge
 
 /**
- * Server and app settings section, including usage summary entries that open standalone screens.
+ * Renders one server or application preference row selected by the Settings lazy list.
+ * Usage summaries and actions retain their existing state and navigation contracts.
  *
+ * @param row Logical list item to compose; siblings remain owned by the parent lazy list.
  * @param state Settings state that provides provider, usage summary, and loading values.
  * @param headerModifier Modifier shared by Settings section headers.
  * @param itemModifier Modifier shared by Settings rows.
  * @param warningModifier Modifier used by the background-generation warning copy.
  * @param backgroundGenerationWarningKey Localization key for the current warning copy.
- * @param showConnectionTimeout Whether this platform supports the connection timeout row.
  * @param processIntent Intent sink used to route row actions back to SettingsViewModel.
  *
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun SettingsServerSection(
+    row: SettingsListItem,
     state: SettingsState,
     headerModifier: Modifier,
     itemModifier: Modifier,
     warningModifier: Modifier,
     backgroundGenerationWarningKey: String,
-    showConnectionTimeout: Boolean,
     processIntent: (SettingsIntent) -> Unit,
 ) {
-        if (!state.onBoardingDemo) {
+    val isLoading = state.loading
+    val isBackgroundGenerationEnabled = state.backgroundGeneration
+    val isDeveloperModeEnabled = state.developerMode
+    when (row) {
+        SettingsListItem.SERVER_HEADER -> {
             SettingsHeader(
                 modifier = headerModifier,
-                loading = state.loading,
+                loading = isLoading,
                 text = text("settings_header_server"),
             )
+        }
+
+        SettingsListItem.CONFIGURATION -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.SettingsEthernet,
                 text = text("settings_item_config"),
                 endValueText = state.serverSource.shortTitle().asUiText(),
                 onClick = { processIntent(SettingsIntent.NavigateConfiguration) },
             )
+        }
+
+        SettingsListItem.BENCHMARK -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.Speed,
                 text = text("settings_item_benchmark"),
                 textSuffixContent = { BetaBadge() },
                 onClick = { processIntent(SettingsIntent.NavigateBenchmark) },
             )
-            if (state.showStabilityAiCredits) {
-                SettingsItem(
-                    modifier = itemModifier,
-                    loading = state.loading,
-                    enabled = false,
-                    startIcon = Icons.Default.Circle,
-                    text = text("settings_item_stability_ai_credits"),
-                    endValueText = state.stabilityAiCredits.roundTo(4).toString().asUiText(),
-                )
-            }
-            if (state.showNetworkTimeoutSettings) {
-                if (showConnectionTimeout) {
-                    SettingsItem(
-                        modifier = itemModifier,
-                        loading = state.loading,
-                        startIcon = Icons.Default.Timer,
-                        text = text("settings_connection_timeout"),
-                        endValueText = state.connectionTimeout.label().asUiText(),
-                        onClick = { processIntent(SettingsIntent.PickConnectionTimeout) },
-                    )
-                }
-                SettingsItem(
-                    modifier = itemModifier,
-                    loading = state.loading,
-                    startIcon = Icons.Default.Timer,
-                    text = text("settings_generation_timeout"),
-                    endValueText = state.generationRequestTimeout.label().asUiText(),
-                    onClick = { processIntent(SettingsIntent.PickGenerationTimeout) },
-                )
-            }
-            if (state.showSdModelSelector) {
-                SettingsItem(
-                    modifier = itemModifier,
-                    loading = state.loading,
-                    startIcon = Icons.Default.AutoFixNormal,
-                    text = text("settings_item_sd_model"),
-                    endValueText = state.sdModelSelected.asUiText(),
-                    onClick = { processIntent(SettingsIntent.SdModel.OpenChooser) },
-                )
-            }
-            if (state.showLocalMicrosoftONNXUseNNAPI) {
-                SettingsItem(
-                    modifier = itemModifier,
-                    loading = state.loading,
-                    startIcon = Icons.Default.AccountTree,
-                    text = text("settings_item_local_nnapi"),
-                    endValueText = state.sdModelSelected.asUiText(),
-                    onClick = { processIntent(SettingsIntent.UpdateFlag.NNAPI(!state.localUseNNAPI)) },
-                    endValueContent = {
-                        Switch(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            checked = state.localUseNNAPI,
-                            onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.NNAPI(it)) },
-                        )
-                    },
-                )
-                AnimatedVisibility(visible = !state.loading) {
-                    Text(
-                        modifier = warningModifier,
-                        text = Localization.string("settings_item_local_nnapi_warning"),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
-            }
-            AnimatedVisibility(visible = state.loading || state.backgroundGenerationAvailable) {
-                Column {
-                    SettingsItem(
-                        modifier = itemModifier,
-                        loading = state.loading,
-                        startIcon = Icons.Default.MiscellaneousServices,
-                        text = text("settings_item_background_generation"),
-                        textSuffixContent = { BetaBadge() },
-                        onClick = {
-                            processIntent(SettingsIntent.UpdateFlag.BackgroundGeneration(!state.backgroundGeneration))
-                        },
-                        endValueContent = {
-                            Switch(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                checked = state.backgroundGeneration,
-                                onCheckedChange = {
-                                    processIntent(SettingsIntent.UpdateFlag.BackgroundGeneration(it))
-                                },
-                            )
-                        },
-                    )
-                    AnimatedVisibility(visible = !state.loading) {
-                        Text(
-                            modifier = warningModifier,
-                            text = Localization.string(backgroundGenerationWarningKey),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                }
-            }
-            AnimatedVisibility(visible = !state.loading && state.developerMode) {
-                SettingsItem(
-                    modifier = itemModifier,
-                    loading = state.loading,
-                    startIcon = Icons.Default.DeveloperMode,
-                    text = text("title_debug_menu"),
-                    onClick = { processIntent(SettingsIntent.NavigateDeveloperMode) },
-                )
-            }
+        }
 
+        SettingsListItem.CREDITS -> {
+
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                enabled = false,
+                startIcon = Icons.Default.Circle,
+                text = text("settings_item_stability_ai_credits"),
+                endValueText = state.stabilityAiCredits.roundTo(4).toString().asUiText(),
+            )
+
+        }
+
+        SettingsListItem.CONNECTION_TIMEOUT -> {
+
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = Icons.Default.Timer,
+                text = text("settings_connection_timeout"),
+                endValueText = state.connectionTimeout.label().asUiText(),
+                onClick = { processIntent(SettingsIntent.PickConnectionTimeout) },
+            )
+
+        }
+
+        SettingsListItem.GENERATION_TIMEOUT -> {
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = Icons.Default.Timer,
+                text = text("settings_generation_timeout"),
+                endValueText = state.generationRequestTimeout.label().asUiText(),
+                onClick = { processIntent(SettingsIntent.PickGenerationTimeout) },
+            )
+        }
+
+        SettingsListItem.MODEL -> {
+
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = Icons.Default.AutoFixNormal,
+                text = text("settings_item_sd_model"),
+                endValueText = state.sdModelSelected.asUiText(),
+                onClick = { processIntent(SettingsIntent.SdModel.OpenChooser) },
+            )
+
+        }
+
+        SettingsListItem.NNAPI -> {
+            SettingsToggleItem(
+                modifier = itemModifier,
+                isLoading = isLoading,
+                startIcon = Icons.Default.AccountTree,
+                text = text("settings_item_local_nnapi"),
+                isChecked = state.localUseNNAPI,
+                onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.NNAPI(it)) },
+            )
+        }
+
+        SettingsListItem.NNAPI_WARNING -> {
+
+            Text(
+                modifier = warningModifier,
+                text = Localization.string("settings_item_local_nnapi_warning"),
+                style = MaterialTheme.typography.labelMedium,
+            )
+
+        }
+
+        SettingsListItem.BACKGROUND_GENERATION -> {
+            SettingsToggleItem(
+                modifier = itemModifier,
+                isLoading = isLoading,
+                startIcon = Icons.Default.MiscellaneousServices,
+                text = text("settings_item_background_generation"),
+                textSuffixContent = { BetaBadge() },
+                isChecked = isBackgroundGenerationEnabled,
+                onCheckedChange = {
+                    processIntent(
+                        SettingsIntent.UpdateFlag.BackgroundGeneration(
+                            it
+                        )
+                    )
+                },
+            )
+        }
+
+        SettingsListItem.BACKGROUND_WARNING -> {
+
+            Text(
+                modifier = warningModifier,
+                text = Localization.string(backgroundGenerationWarningKey),
+                style = MaterialTheme.typography.labelMedium,
+            )
+
+        }
+
+        SettingsListItem.DEBUG_MENU -> {
+
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = Icons.Default.DeveloperMode,
+                text = text("title_debug_menu"),
+                onClick = { processIntent(SettingsIntent.NavigateDeveloperMode) },
+            )
+
+        }
+
+        SettingsListItem.APP_HEADER -> {
             SettingsHeader(
                 modifier = headerModifier,
-                loading = state.loading,
+                loading = isLoading,
                 text = text("settings_header_app"),
             )
-            if (state.showMonitorConnectionOption) {
-                SettingsItem(
-                    modifier = itemModifier,
-                    loading = state.loading,
-                    startIcon = Icons.Default.Refresh,
-                    text = text("settings_item_monitor_connection"),
-                    onClick = {
-                        processIntent(SettingsIntent.UpdateFlag.MonitorConnection(!state.monitorConnectivity))
-                    },
-                    endValueContent = {
-                        Switch(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            checked = state.monitorConnectivity,
-                            onCheckedChange = {
-                                processIntent(SettingsIntent.UpdateFlag.MonitorConnection(it))
-                            },
-                        )
-                    },
-                )
-            }
-            SettingsItem(
+        }
+
+        SettingsListItem.MONITOR_CONNECTION -> {
+
+            SettingsToggleItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                isLoading = isLoading,
+                startIcon = Icons.Default.Refresh,
+                text = text("settings_item_monitor_connection"),
+                isChecked = state.monitorConnectivity,
+                onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.MonitorConnection(it)) },
+            )
+
+        }
+
+        SettingsListItem.AUTO_SAVE -> {
+            SettingsToggleItem(
+                modifier = itemModifier,
+                isLoading = isLoading,
                 startIcon = Icons.Default.Save,
                 text = (Localization.string("settings_item_auto_save") +
-                    if (state.backgroundGeneration) "*" else "").asUiText(),
-                onClick = {
-                    processIntent(SettingsIntent.UpdateFlag.AutoSaveResult(!state.autoSaveAiResults))
-                },
-                endValueContent = {
-                    Switch(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        checked = state.autoSaveAiResults,
-                        onCheckedChange = {
-                            processIntent(SettingsIntent.UpdateFlag.AutoSaveResult(it))
-                        },
-                    )
-                },
+                        if (isBackgroundGenerationEnabled) "*" else "").asUiText(),
+                isChecked = state.autoSaveAiResults,
+                onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.AutoSaveResult(it)) },
             )
-            AnimatedVisibility(
-                visible = !state.loading && state.backgroundGeneration,
-            ) {
-                Text(
-                    modifier = warningModifier,
-                    text = Localization.string("settings_item_auto_save_warning"),
-                    style = MaterialTheme.typography.labelMedium,
-                )
-            }
-            SettingsItem(
+        }
+
+        SettingsListItem.AUTO_SAVE_WARNING -> {
+
+            Text(
+                modifier = warningModifier,
+                text = Localization.string("settings_item_auto_save_warning"),
+                style = MaterialTheme.typography.labelMedium,
+            )
+
+        }
+
+        SettingsListItem.MEDIA_STORE -> {
+            SettingsToggleItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                isLoading = isLoading,
                 startIcon = Icons.Default.Folder,
                 text = text("settings_item_auto_save_media_store"),
-                onClick = {
-                    processIntent(SettingsIntent.UpdateFlag.SaveToMediaStore(!state.saveToMediaStore))
-                },
-                endValueContent = {
-                    Switch(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        checked = state.saveToMediaStore,
-                        onCheckedChange = {
-                            processIntent(SettingsIntent.UpdateFlag.SaveToMediaStore(it))
-                        },
-                    )
-                },
+                isChecked = state.saveToMediaStore,
+                onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.SaveToMediaStore(it)) },
             )
-            SettingsItem(
+        }
+
+        SettingsListItem.TAGGED_INPUT -> {
+            SettingsToggleItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                isLoading = isLoading,
                 startIcon = Icons.Default.Tag,
                 text = text("settings_item_tagged_input"),
-                onClick = {
-                    processIntent(SettingsIntent.UpdateFlag.TaggedInput(!state.formPromptTaggedInput))
-                },
-                endValueContent = {
-                    Switch(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        checked = state.formPromptTaggedInput,
-                        onCheckedChange = {
-                            processIntent(SettingsIntent.UpdateFlag.TaggedInput(it))
-                        },
+                isChecked = state.formPromptTaggedInput,
+                onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.TaggedInput(it)) },
+            )
+        }
+
+        SettingsListItem.ADVANCED_DEFAULT -> {
+
+            SettingsToggleItem(
+                modifier = itemModifier,
+                isLoading = isLoading,
+                startIcon = Icons.Default.DynamicForm,
+                text = text("settings_item_advanced_form_default"),
+                isChecked = state.formAdvancedOptionsAlwaysShow,
+                onCheckedChange = {
+                    processIntent(
+                        SettingsIntent.UpdateFlag.AdvancedFormVisibility(
+                            it
+                        )
                     )
                 },
             )
-            if (state.showFormAdvancedOption) {
-                SettingsItem(
-                    modifier = itemModifier,
-                    loading = state.loading,
-                    startIcon = Icons.Default.DynamicForm,
-                    text = text("settings_item_advanced_form_default"),
-                    onClick = {
-                        processIntent(SettingsIntent.UpdateFlag.AdvancedFormVisibility(!state.formAdvancedOptionsAlwaysShow))
-                    },
-                    endValueContent = {
-                        Switch(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            checked = state.formAdvancedOptionsAlwaysShow,
-                            onCheckedChange = {
-                                processIntent(SettingsIntent.UpdateFlag.AdvancedFormVisibility(it))
-                            },
-                        )
-                    },
-                )
-            }
+
+        }
+
+        SettingsListItem.STORAGE_USAGE -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.Storage,
                 text = text("settings_item_storage_usage"),
                 endValueText = state.storageUsageBytes
@@ -312,9 +308,12 @@ internal fun SettingsServerSection(
                     processIntent(SettingsIntent.NavigateStorageUsage)
                 },
             )
+        }
+
+        SettingsListItem.NETWORK_USAGE -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.DataUsage,
                 text = text("settings_item_network_usage"),
                 endValueText = state.networkUsageBytes
@@ -327,6 +326,9 @@ internal fun SettingsServerSection(
                 },
             )
         }
+
+        else -> Unit
+    }
 }
 
 /**

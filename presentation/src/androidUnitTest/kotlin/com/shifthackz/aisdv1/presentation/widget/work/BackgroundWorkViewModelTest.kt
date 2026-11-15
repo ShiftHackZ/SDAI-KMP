@@ -156,6 +156,7 @@ class BackgroundWorkViewModelTest {
         }
 
     private fun TestScope.createViewModel() = BackgroundWorkViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         backgroundWorkObserver = observer,
         imageLoader = imageLoader,
@@ -198,6 +199,7 @@ class BackgroundWorkViewModelTest {
         override fun dismissResult() {
             dismissed = true
         }
+
         override fun refreshStatus() = Unit
         override fun postStatusMessage(title: String, subTitle: String) = Unit
         override fun postSuccessSignal(result: List<AiGenerationResult>) = Unit

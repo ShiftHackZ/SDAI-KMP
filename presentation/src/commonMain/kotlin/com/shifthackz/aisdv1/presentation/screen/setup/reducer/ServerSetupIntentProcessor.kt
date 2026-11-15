@@ -5,7 +5,7 @@ import com.shifthackz.aisdv1.domain.entity.FeatureTag
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.ServerSourceReadiness
 import com.shifthackz.aisdv1.domain.entity.ServerSourceType
-import com.shifthackz.aisdv1.presentation.navigation.router.ServerSetupRouter
+import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
 import com.shifthackz.aisdv1.presentation.model.readinessFor
 import com.shifthackz.aisdv1.presentation.screen.setup.model.HORDE_DEFAULT_API_KEY
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupEffect
@@ -28,6 +28,11 @@ internal class ServerSetupIntentProcessor(
 
     fun process(intent: ServerSetupIntent) {
         when (intent) {
+            ServerSetupIntent.RetryAuthorizationStorage,
+            ServerSetupIntent.RequestAuthorizationReset,
+            ServerSetupIntent.CancelAuthorizationReset,
+            ServerSetupIntent.ConfirmAuthorizationReset -> Unit
+
             ServerSetupIntent.OAuthLogin, ServerSetupIntent.OAuthCancel, ServerSetupIntent.OAuthLogout, ServerSetupIntent.OAuthOpenBrowser -> Unit
             is ServerSetupIntent.AllowLocalCustomModel -> updateState { state ->
                 state.withAllowCustomModel(intent.allow)
@@ -266,8 +271,8 @@ private fun List<ServerSource>.hasSourceFilterMatch(
 ): Boolean = any { source ->
     val sourceReadiness = source.readinessFor(state.platform)
     (type == null || source.type == type) &&
-        (readinessFilters.isEmpty() || sourceReadiness in readinessFilters) &&
-        source.featureTags.containsAll(tags)
+            (readinessFilters.isEmpty() || sourceReadiness in readinessFilters) &&
+            source.featureTags.containsAll(tags)
 }
 
 private fun ServerSetupState.withMatchingFilterSource(): ServerSetupState {

@@ -65,7 +65,8 @@ class EngineSelectionViewModelTest {
     private val stubObserveLocalCoreMlModelsUseCase = mockk<ObserveLocalCoreMlModelsUseCase>()
     private val stubObserveLocalBonsaiModelsUseCase = mockk<ObserveLocalBonsaiModelsUseCase>()
     private val stubObserveLocalSdxlModelsUseCase = mockk<ObserveLocalSdxlModelsUseCase>()
-    private val stubFetchAndGetStabilityAiEnginesUseCase = mockk<FetchAndGetStabilityAiEnginesUseCase>()
+    private val stubFetchAndGetStabilityAiEnginesUseCase =
+        mockk<FetchAndGetStabilityAiEnginesUseCase>()
     private val stubFetchHuggingFaceModelsUseCase = mockk<FetchHuggingFaceModelsUseCase>()
     private val stubFetchAndGetSwarmUiModelsUseCase = mockk<FetchAndGetSwarmUiModelsUseCase>()
 
@@ -359,6 +360,7 @@ class EngineSelectionViewModelTest {
     }
 
     private fun TestScope.createViewModel() = EngineSelectionViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         preferenceManager = stubPreferenceManager,
         getConfigurationUseCase = stubGetConfigurationUseCase,

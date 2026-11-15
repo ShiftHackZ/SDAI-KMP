@@ -2,6 +2,8 @@
 
 package com.shifthackz.aisdv1.presentation.screen.gallery.detail
 
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -9,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryDetailRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryDetailRouter
 import org.koin.core.parameter.parametersOf
 
 /**
@@ -30,6 +32,7 @@ fun GalleryDetailScreen(
     val resolvedRouter = remember(koin, router) {
         router ?: koin.get<GalleryDetailRouter>()
     }
+    val imageLoader = remember(koin) { koin.get<GalleryImageLoader>() }
     val platformActions = remember(koin) { koin.get<GalleryDetailPlatformActions>() }
     val viewModel = remember(
         koin,
@@ -46,6 +49,7 @@ fun GalleryDetailScreen(
         GalleryDetailScreenContent(
             modifier = modifier.fillMaxSize(),
             state = state,
+            imageLoader = imageLoader,
             processIntent = intentHandler,
         )
     }

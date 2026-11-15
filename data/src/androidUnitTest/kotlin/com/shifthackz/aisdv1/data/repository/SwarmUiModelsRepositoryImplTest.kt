@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockSwarmUiModels
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsRemoteDataSource
@@ -22,7 +24,7 @@ class SwarmUiModelsRepositoryImplTest {
     private val stubException = Throwable("Something went wrong.")
     private val stubRemoteDataSource = mockk<SwarmUiModelsRemoteDataSource>()
     private val stubLocalDataSource = mockk<SwarmUiModelsDataSource.Local>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
+    private val stubPreferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val stubSessionPreference = mockk<SessionPreference>(relaxed = true)
     private val stubAuthorizationStore = mockk<AuthorizationStore>()
 
@@ -31,7 +33,11 @@ class SwarmUiModelsRepositoryImplTest {
         localDataSource = stubLocalDataSource,
         preferenceManager = stubPreferenceManager,
         sessionPreference = stubSessionPreference,
-        authorizationStore = stubAuthorizationStore,
+        connections = AuthenticatedConnectionProviderImpl(
+            stubPreferenceManager,
+            stubAuthorizationStore,
+            ProviderSelectionGuard()
+        ),
     )
 
     @Before
@@ -40,7 +46,7 @@ class SwarmUiModelsRepositoryImplTest {
             stubPreferenceManager.swarmUiServerUrl
         } returns BASE_URL
 
-        every {
+        coEvery {
             stubAuthorizationStore.getAuthorizationCredentials()
         } returns AuthorizationCredentials.None
 
@@ -50,78 +56,101 @@ class SwarmUiModelsRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to fetch models, remote returns data, local insert success, expected complete value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, SESSION_ID, AuthorizationCredentials.None)
-        } returns mockSwarmUiModels
+    fun `given attempt to fetch models, remote returns data, local insert success, expected complete value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockSwarmUiModels
 
-        coEvery {
-            stubLocalDataSource.insertModels(any())
-        } returns Unit
+            coEvery {
+                stubLocalDataSource.insertModels(any())
+            } returns Unit
 
-        repository.fetchModels()
+            repository.fetchModels()
 
-        coVerify {
-            stubLocalDataSource.insertModels(mockSwarmUiModels)
+            coVerify {
+                stubLocalDataSource.insertModels(mockSwarmUiModels)
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch models with empty session, expected new session requested before fetch`() = runTest {
-        every {
-            stubSessionPreference.swarmUiSessionId
-        } returns ""
+    fun `given attempt to fetch models with empty session, expected new session requested before fetch`() =
+        runTest {
+            every {
+                stubSessionPreference.swarmUiSessionId
+            } returns ""
 
-        coEvery {
-            stubRemoteDataSource.getNewSession(BASE_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+            coEvery {
+                stubRemoteDataSource.getNewSession(BASE_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
 
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, RENEWED_SESSION_ID, AuthorizationCredentials.None)
-        } returns mockSwarmUiModels
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    RENEWED_SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockSwarmUiModels
 
-        coEvery {
-            stubLocalDataSource.insertModels(any())
-        } returns Unit
+            coEvery {
+                stubLocalDataSource.insertModels(any())
+            } returns Unit
 
-        repository.fetchModels()
+            repository.fetchModels()
 
-        coVerify {
-            stubRemoteDataSource.getNewSession(BASE_URL, AuthorizationCredentials.None)
-            stubLocalDataSource.insertModels(mockSwarmUiModels)
+            coVerify {
+                stubRemoteDataSource.getNewSession(BASE_URL, AuthorizationCredentials.None)
+                stubLocalDataSource.insertModels(mockSwarmUiModels)
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch models with bad session, expected session renewed and fetch retried`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, SESSION_ID, AuthorizationCredentials.None)
-        } throws SwarmUiBadSessionException()
+    fun `given attempt to fetch models with bad session, expected session renewed and fetch retried`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } throws SwarmUiBadSessionException()
 
-        coEvery {
-            stubRemoteDataSource.getNewSession(BASE_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+            coEvery {
+                stubRemoteDataSource.getNewSession(BASE_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
 
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, RENEWED_SESSION_ID, AuthorizationCredentials.None)
-        } returns mockSwarmUiModels
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    RENEWED_SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockSwarmUiModels
 
-        coEvery {
-            stubLocalDataSource.insertModels(any())
-        } returns Unit
+            coEvery {
+                stubLocalDataSource.insertModels(any())
+            } returns Unit
 
-        repository.fetchModels()
+            repository.fetchModels()
 
-        coVerify {
-            stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
-            stubLocalDataSource.insertModels(mockSwarmUiModels)
+            coVerify {
+                stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+                stubLocalDataSource.insertModels(mockSwarmUiModels)
+            }
         }
-    }
 
     @Test
     fun `given attempt to fetch models, remote throws exception, expected error value`() = runTest {
         coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, SESSION_ID, AuthorizationCredentials.None)
+            stubRemoteDataSource.fetchSwarmModels(
+                BASE_URL,
+                SESSION_ID,
+                AuthorizationCredentials.None
+            )
         } throws stubException
 
         val actual = runCatching { repository.fetchModels() }
@@ -130,101 +159,124 @@ class SwarmUiModelsRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to fetch models, remote returns data, local insert fails, expected error value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, SESSION_ID, AuthorizationCredentials.None)
-        } returns mockSwarmUiModels
+    fun `given attempt to fetch models, remote returns data, local insert fails, expected error value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockSwarmUiModels
 
-        coEvery {
-            stubLocalDataSource.insertModels(any())
-        } throws stubException
+            coEvery {
+                stubLocalDataSource.insertModels(any())
+            } throws stubException
 
-        val actual = runCatching { repository.fetchModels() }
+            val actual = runCatching { repository.fetchModels() }
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
-
-    @Test
-    fun `given attempt to get models, local data source returns list, expected valid domain models list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.getModels()
-        } returns mockSwarmUiModels
-
-        val actual = repository.getModels()
-
-        Assert.assertEquals(mockSwarmUiModels, actual)
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
-    fun `given attempt to get models, local data source returns empty list, expected empty domain models list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.getModels()
-        } returns emptyList()
+    fun `given attempt to get models, local data source returns list, expected valid domain models list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.getModels()
+            } returns mockSwarmUiModels
 
-        val actual = repository.getModels()
+            val actual = repository.getModels()
 
-        Assert.assertEquals(emptyList<Any>(), actual)
-    }
-
-    @Test
-    fun `given attempt to get models, local data source throws exception, expected error value`() = runTest {
-        coEvery {
-            stubLocalDataSource.getModels()
-        } throws stubException
-
-        val actual = runCatching { repository.getModels() }
-
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertEquals(mockSwarmUiModels, actual)
+        }
 
     @Test
-    fun `given attempt to fetch and get models, remote returns data, local returns data, expected valid domain models list value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, SESSION_ID, AuthorizationCredentials.None)
-        } returns mockSwarmUiModels
+    fun `given attempt to get models, local data source returns empty list, expected empty domain models list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.getModels()
+            } returns emptyList()
 
-        coEvery {
-            stubLocalDataSource.insertModels(any())
-        } returns Unit
+            val actual = repository.getModels()
 
-        coEvery {
-            stubLocalDataSource.getModels()
-        } returns mockSwarmUiModels
-
-        val actual = repository.fetchAndGetModels()
-
-        Assert.assertEquals(mockSwarmUiModels, actual)
-    }
+            Assert.assertEquals(emptyList<Any>(), actual)
+        }
 
     @Test
-    fun `given attempt to fetch and get models, remote fails, local returns data, expected valid domain models list value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, SESSION_ID, AuthorizationCredentials.None)
-        } throws stubException
+    fun `given attempt to get models, local data source throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.getModels()
+            } throws stubException
 
-        coEvery {
-            stubLocalDataSource.getModels()
-        } returns mockSwarmUiModels
+            val actual = runCatching { repository.getModels() }
 
-        val actual = repository.fetchAndGetModels()
-
-        Assert.assertEquals(mockSwarmUiModels, actual)
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
-    fun `given attempt to fetch and get models, remote fails, local fails, expected valid error value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSwarmModels(BASE_URL, SESSION_ID, AuthorizationCredentials.None)
-        } throws stubException
+    fun `given attempt to fetch and get models, remote returns data, local returns data, expected valid domain models list value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockSwarmUiModels
 
-        coEvery {
-            stubLocalDataSource.getModels()
-        } throws stubException
+            coEvery {
+                stubLocalDataSource.insertModels(any())
+            } returns Unit
 
-        val actual = runCatching { repository.fetchAndGetModels() }
+            coEvery {
+                stubLocalDataSource.getModels()
+            } returns mockSwarmUiModels
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            val actual = repository.fetchAndGetModels()
+
+            Assert.assertEquals(mockSwarmUiModels, actual)
+        }
+
+    @Test
+    fun `given attempt to fetch and get models, remote fails, local returns data, expected valid domain models list value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } throws stubException
+
+            coEvery {
+                stubLocalDataSource.getModels()
+            } returns mockSwarmUiModels
+
+            val actual = repository.fetchAndGetModels()
+
+            Assert.assertEquals(mockSwarmUiModels, actual)
+        }
+
+    @Test
+    fun `given attempt to fetch and get models, remote fails, local fails, expected valid error value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSwarmModels(
+                    BASE_URL,
+                    SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } throws stubException
+
+            coEvery {
+                stubLocalDataSource.getModels()
+            } throws stubException
+
+            val actual = runCatching { repository.fetchAndGetModels() }
+
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     private companion object {
         const val BASE_URL = "http://192.168.0.1:7801"

@@ -2,7 +2,7 @@ package com.shifthackz.aisdv1.presentation.screen.splash
 
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.usecase.splash.SplashNavigationUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.SplashRouter
+import com.shifthackz.aisdv1.core.navigation.router.SplashRouter
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
@@ -85,6 +85,7 @@ class SplashViewModelTest {
         }
 
     private fun TestScope.createViewModel() = SplashViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         splashNavigationUseCase = stubSplashNavigationUseCase,
         splashRouter = stubSplashRouter,

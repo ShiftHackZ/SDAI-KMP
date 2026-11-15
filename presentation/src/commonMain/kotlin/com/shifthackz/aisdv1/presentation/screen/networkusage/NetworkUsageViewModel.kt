@@ -1,12 +1,15 @@
 package com.shifthackz.aisdv1.presentation.screen.networkusage
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.domain.entity.NetworkUsage
 import com.shifthackz.aisdv1.domain.usecase.settings.ObserveNetworkUsageUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ResetNetworkUsageUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.NetworkUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NetworkUsageRouter
 import com.shifthackz.aisdv1.presentation.screen.networkusage.model.NetworkUsageIntent
 import com.shifthackz.aisdv1.presentation.screen.networkusage.model.NetworkUsageState
 import com.shifthackz.aisdv1.presentation.model.UsageCategory
@@ -29,14 +32,18 @@ import kotlinx.coroutines.flow.catch
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class NetworkUsageViewModel(
+    diagnostics: UiDiagnostics,
     dispatchersProvider: DispatchersProvider,
     private val observeNetworkUsageUseCase: ObserveNetworkUsageUseCase,
     private val resetNetworkUsageUseCase: ResetNetworkUsageUseCase,
     private val router: NetworkUsageRouter,
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<NetworkUsageState, NetworkUsageIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.NETWORK_USAGE.asDiagnosticScreen(),
     initialState = NetworkUsageState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

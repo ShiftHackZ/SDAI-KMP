@@ -14,10 +14,10 @@ import com.shifthackz.aisdv1.network.response.FalAiGenerationResponse
 import com.shifthackz.aisdv1.network.response.FalAiQueueStatusResponse
 import com.shifthackz.aisdv1.network.response.FalAiQueueSubmitResponse
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.HttpHeaders
 import io.ktor.http.takeFrom
 
@@ -79,7 +79,7 @@ class KtorFalAiGenerationApi(
      * @author Dmitriy Moroz
      */
     override suspend fun validateApiKey(apiKey: String) {
-        httpClient.get {
+        httpClient.boundedGet {
             url.takeFrom("$apiBaseUrl/$PATH_V1/$PATH_MODELS")
             parameter(QUERY_LIMIT, VALIDATION_LIMIT)
             header(HttpHeaders.Authorization, apiKey.headerValue)
@@ -100,7 +100,7 @@ class KtorFalAiGenerationApi(
         model: String,
         request: FalAiTextToImageRequest,
     ): FalAiQueueSubmitResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom("$queueBaseUrl/$model")
             applyGenerationTimeout(generationTimeoutProvider)
             header(HttpHeaders.Authorization, apiKey.headerValue)
@@ -122,7 +122,7 @@ class KtorFalAiGenerationApi(
         model: String,
         request: FalAiImageToImageRequest,
     ): FalAiQueueSubmitResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom("$queueBaseUrl/$model")
             applyGenerationTimeout(generationTimeoutProvider)
             header(HttpHeaders.Authorization, apiKey.headerValue)
@@ -142,7 +142,7 @@ class KtorFalAiGenerationApi(
         apiKey: String,
         statusUrl: String,
     ): FalAiQueueStatusResponse = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(statusUrl)
             applyGenerationTimeout(generationTimeoutProvider)
             trackUsage(NetworkUsageCategory.INFERENCE)
@@ -162,7 +162,7 @@ class KtorFalAiGenerationApi(
         apiKey: String,
         responseUrl: String,
     ): FalAiGenerationResponse = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(responseUrl)
             applyGenerationTimeout(generationTimeoutProvider)
             trackUsage(NetworkUsageCategory.INFERENCE)
@@ -178,7 +178,7 @@ class KtorFalAiGenerationApi(
      * @author Dmitriy Moroz
      */
     override suspend fun downloadImage(url: String): ByteArray = httpClient
-        .get {
+        .boundedGet {
             this.url.takeFrom(url)
             applyGenerationTimeout(generationTimeoutProvider)
             trackUsage(NetworkUsageCategory.INFERENCE)
@@ -200,18 +200,21 @@ class KtorFalAiGenerationApi(
          * @author Dmitriy Moroz
          */
         const val PATH_V1 = "v1"
+
         /**
          * Exposes the `PATH_MODELS` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_MODELS = "models"
+
         /**
          * Exposes the `QUERY_LIMIT` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val QUERY_LIMIT = "limit"
+
         /**
          * Exposes the `VALIDATION_LIMIT` value used by the SDAI network layer.
          *

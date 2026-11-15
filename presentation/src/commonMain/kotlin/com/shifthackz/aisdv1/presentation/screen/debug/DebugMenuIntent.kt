@@ -9,6 +9,33 @@ import com.shifthackz.aisdv1.core.mvi.MviIntent
  * @author Dmitriy Moroz
  */
 sealed interface DebugMenuIntent : MviIntent {
+    /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object ShareUiCapture : DebugMenuIntent
+
+    /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object ResetUiCapture : DebugMenuIntent
+
+    /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object StopUiCapture : DebugMenuIntent
+
+    /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object StartUiCapture : DebugMenuIntent
 
     /**
      * Provides the `NavigateBack` singleton used by the SDAI presentation layer.

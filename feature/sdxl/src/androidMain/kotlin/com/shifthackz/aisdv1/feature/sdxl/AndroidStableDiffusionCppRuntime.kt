@@ -83,12 +83,14 @@ private fun ByteArray.toBitmap(
         "Unsupported image channel count: $channels."
     }
 
-    val colors = IntArray(width * height)
-    val expected = colors.size * channels
-    require(size >= expected) {
+    val pixelCount = width.toLong() * height
+    require(pixelCount in 1..16_777_216L) { "Unsupported decoded image size." }
+    val expected = pixelCount * channels
+    require(size.toLong() >= expected) {
         "Invalid image payload: expected at least $expected bytes, got $size."
     }
 
+    val colors = IntArray(pixelCount.toInt())
     for (index in colors.indices) {
         val source = index * channels
         val r: Int
@@ -124,8 +126,11 @@ private fun ByteArray.toBitmap(
     return Bitmap.createBitmap(colors, width, height, Bitmap.Config.ARGB_8888)
 }
 
-private fun Bitmap.toPngBase64(): String =
+private fun Bitmap.toPngBase64(): String = try {
     ByteArrayOutputStream().use { stream ->
-        compress(Bitmap.CompressFormat.PNG, 100, stream)
+        check(compress(Bitmap.CompressFormat.PNG, 100, stream))
         Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
     }
+} finally {
+    recycle()
+}

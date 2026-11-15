@@ -5,8 +5,8 @@ import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.splash.SplashNavigationUseCase
-import com.shifthackz.aisdv1.presentation.model.LaunchSource
-import com.shifthackz.aisdv1.presentation.navigation.router.OnBoardingRouter
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.router.OnBoardingRouter
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -83,6 +83,7 @@ class OnBoardingViewModelSplashSourceTest {
             override val immediate: CoroutineDispatcher = dispatcher
         }
         return OnBoardingViewModel(
+            diagnostics = mockk(relaxed = true),
             launchSource = source,
             dispatchersProvider = dispatchersProvider,
             router = stubRouter,

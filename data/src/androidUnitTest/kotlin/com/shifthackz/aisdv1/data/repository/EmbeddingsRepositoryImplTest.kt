@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockEmbeddings
 import com.shifthackz.aisdv1.domain.datasource.EmbeddingsDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsRemoteDataSource
@@ -26,7 +28,7 @@ class EmbeddingsRepositoryImplTest {
     private val stubRdsSwarm = mockk<EmbeddingsDataSource.Remote.SwarmUi>()
     private val stubSwarmSessionRemote = mockk<SwarmUiModelsRemoteDataSource>()
     private val stubLds = mockk<EmbeddingsDataSource.Local>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
+    private val stubPreferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val stubSessionPreference = mockk<SessionPreference>(relaxed = true)
     private val stubAuthorizationStore = mockk<AuthorizationStore>()
 
@@ -37,7 +39,11 @@ class EmbeddingsRepositoryImplTest {
         lds = stubLds,
         preferenceManager = stubPreferenceManager,
         sessionPreference = stubSessionPreference,
-        authorizationStore = stubAuthorizationStore,
+        connections = AuthenticatedConnectionProviderImpl(
+            stubPreferenceManager,
+            stubAuthorizationStore,
+            ProviderSelectionGuard()
+        ),
     )
 
     @Before
@@ -50,7 +56,7 @@ class EmbeddingsRepositoryImplTest {
             stubPreferenceManager.swarmUiServerUrl
         } returns SWARM_URL
 
-        every {
+        coEvery {
             stubAuthorizationStore.getAuthorizationCredentials()
         } returns AuthorizationCredentials.None
 
@@ -60,228 +66,247 @@ class EmbeddingsRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to fetch embeddings, source is AUTOMATIC1111, remote returns data, local insert success, expected complete value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to fetch embeddings, source is AUTOMATIC1111, remote returns data, local insert success, expected complete value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
-        } returns mockEmbeddings
+            coEvery {
+                stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
+            } returns mockEmbeddings
 
-        coEvery {
-            stubLds.insertEmbeddings(any())
-        } returns Unit
+            coEvery {
+                stubLds.insertEmbeddings(any())
+            } returns Unit
 
-        repository.fetchEmbeddings()
+            repository.fetchEmbeddings()
 
-        coVerify {
-            stubLds.insertEmbeddings(mockEmbeddings)
+            coVerify {
+                stubLds.insertEmbeddings(mockEmbeddings)
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch embeddings, source is SWARM_UI, remote returns data, local insert success, expected complete value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.SWARM_UI
+    fun `given attempt to fetch embeddings, source is SWARM_UI, remote returns data, local insert success, expected complete value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.SWARM_UI
 
-        coEvery {
-            stubRdsSwarm.fetchEmbeddings(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
-        } returns mockEmbeddings
+            coEvery {
+                stubRdsSwarm.fetchEmbeddings(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
+            } returns mockEmbeddings
 
-        coEvery {
-            stubLds.insertEmbeddings(any())
-        } returns Unit
+            coEvery {
+                stubLds.insertEmbeddings(any())
+            } returns Unit
 
-        repository.fetchEmbeddings()
+            repository.fetchEmbeddings()
 
-        coVerify {
-            stubLds.insertEmbeddings(mockEmbeddings)
+            coVerify {
+                stubLds.insertEmbeddings(mockEmbeddings)
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch embeddings with empty swarm session, expected new session requested before fetch`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.SWARM_UI
+    fun `given attempt to fetch embeddings with empty swarm session, expected new session requested before fetch`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.SWARM_UI
 
-        every {
-            stubSessionPreference.swarmUiSessionId
-        } returns ""
+            every {
+                stubSessionPreference.swarmUiSessionId
+            } returns ""
 
-        coEvery {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+            coEvery {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
 
-        coEvery {
-            stubRdsSwarm.fetchEmbeddings(SWARM_URL, RENEWED_SESSION_ID, AuthorizationCredentials.None)
-        } returns mockEmbeddings
+            coEvery {
+                stubRdsSwarm.fetchEmbeddings(
+                    SWARM_URL,
+                    RENEWED_SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockEmbeddings
 
-        coEvery {
-            stubLds.insertEmbeddings(any())
-        } returns Unit
+            coEvery {
+                stubLds.insertEmbeddings(any())
+            } returns Unit
 
-        repository.fetchEmbeddings()
+            repository.fetchEmbeddings()
 
-        coVerify {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
-            stubLds.insertEmbeddings(mockEmbeddings)
+            coVerify {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+                stubLds.insertEmbeddings(mockEmbeddings)
+            }
+            verify {
+                stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+            }
         }
-        verify {
-            stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+
+    @Test
+    fun `given attempt to fetch embeddings with bad swarm session, expected session renewed and fetch retried`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.SWARM_UI
+
+            coEvery {
+                stubRdsSwarm.fetchEmbeddings(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
+            } throws SwarmUiBadSessionException()
+
+            coEvery {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
+
+            coEvery {
+                stubRdsSwarm.fetchEmbeddings(
+                    SWARM_URL,
+                    RENEWED_SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockEmbeddings
+
+            coEvery {
+                stubLds.insertEmbeddings(any())
+            } returns Unit
+
+            repository.fetchEmbeddings()
+
+            coVerify {
+                stubLds.insertEmbeddings(mockEmbeddings)
+            }
+            verify {
+                stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch embeddings with bad swarm session, expected session renewed and fetch retried`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.SWARM_UI
+    fun `given attempt to fetch embeddings, remote throws exception, expected error value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRdsSwarm.fetchEmbeddings(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
-        } throws SwarmUiBadSessionException()
+            coEvery {
+                stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
+            } throws stubException
 
-        coEvery {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+            val actual = runCatching { repository.fetchEmbeddings() }
 
-        coEvery {
-            stubRdsSwarm.fetchEmbeddings(SWARM_URL, RENEWED_SESSION_ID, AuthorizationCredentials.None)
-        } returns mockEmbeddings
-
-        coEvery {
-            stubLds.insertEmbeddings(any())
-        } returns Unit
-
-        repository.fetchEmbeddings()
-
-        coVerify {
-            stubLds.insertEmbeddings(mockEmbeddings)
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
         }
-        verify {
-            stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+
+    @Test
+    fun `given attempt to fetch embeddings, remote returns data, local insert fails, expected error value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
+
+            coEvery {
+                stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
+            } returns mockEmbeddings
+
+            coEvery {
+                stubLds.insertEmbeddings(any())
+            } throws stubException
+
+            val actual = runCatching { repository.fetchEmbeddings() }
+
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
         }
-    }
 
     @Test
-    fun `given attempt to fetch embeddings, remote throws exception, expected error value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to get embeddings, local data source returns list, expected valid domain models list value`() =
+        runTest {
+            coEvery {
+                stubLds.getEmbeddings()
+            } returns mockEmbeddings
 
-        coEvery {
-            stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
-        } throws stubException
+            val actual = repository.getEmbeddings()
 
-        val actual = runCatching { repository.fetchEmbeddings() }
-
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertEquals(mockEmbeddings, actual)
+        }
 
     @Test
-    fun `given attempt to fetch embeddings, remote returns data, local insert fails, expected error value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to get embeddings, local data source throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubLds.getEmbeddings()
+            } throws stubException
 
-        coEvery {
-            stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
-        } returns mockEmbeddings
+            val actual = runCatching { repository.getEmbeddings() }
 
-        coEvery {
-            stubLds.insertEmbeddings(any())
-        } throws stubException
-
-        val actual = runCatching { repository.fetchEmbeddings() }
-
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
-    fun `given attempt to get embeddings, local data source returns list, expected valid domain models list value`() = runTest {
-        coEvery {
-            stubLds.getEmbeddings()
-        } returns mockEmbeddings
+    fun `given attempt to fetch and get embeddings, remote returns data, local returns data, expected valid domain models list value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        val actual = repository.getEmbeddings()
+            coEvery {
+                stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
+            } returns mockEmbeddings
 
-        Assert.assertEquals(mockEmbeddings, actual)
-    }
+            coEvery {
+                stubLds.insertEmbeddings(any())
+            } returns Unit
 
-    @Test
-    fun `given attempt to get embeddings, local data source throws exception, expected error value`() = runTest {
-        coEvery {
-            stubLds.getEmbeddings()
-        } throws stubException
+            coEvery {
+                stubLds.getEmbeddings()
+            } returns mockEmbeddings
 
-        val actual = runCatching { repository.getEmbeddings() }
+            val actual = repository.fetchAndGetEmbeddings()
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
-
-    @Test
-    fun `given attempt to fetch and get embeddings, remote returns data, local returns data, expected valid domain models list value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
-
-        coEvery {
-            stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
-        } returns mockEmbeddings
-
-        coEvery {
-            stubLds.insertEmbeddings(any())
-        } returns Unit
-
-        coEvery {
-            stubLds.getEmbeddings()
-        } returns mockEmbeddings
-
-        val actual = repository.fetchAndGetEmbeddings()
-
-        Assert.assertEquals(mockEmbeddings, actual)
-    }
+            Assert.assertEquals(mockEmbeddings, actual)
+        }
 
     @Test
-    fun `given attempt to fetch and get embeddings, remote fails, local returns data, expected valid domain models list value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to fetch and get embeddings, remote fails, local returns data, expected valid domain models list value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
-        } throws stubException
+            coEvery {
+                stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
+            } throws stubException
 
-        coEvery {
-            stubLds.getEmbeddings()
-        } returns mockEmbeddings
+            coEvery {
+                stubLds.getEmbeddings()
+            } returns mockEmbeddings
 
-        val actual = repository.fetchAndGetEmbeddings()
+            val actual = repository.fetchAndGetEmbeddings()
 
-        Assert.assertEquals(mockEmbeddings, actual)
-    }
+            Assert.assertEquals(mockEmbeddings, actual)
+        }
 
     @Test
-    fun `given attempt to fetch and get embeddings, remote fails, local fails, expected valid error value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to fetch and get embeddings, remote fails, local fails, expected valid error value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
-        } throws stubException
+            coEvery {
+                stubRdsA1111.fetchEmbeddings(A1111_URL, AuthorizationCredentials.None)
+            } throws stubException
 
-        coEvery {
-            stubLds.getEmbeddings()
-        } throws stubException
+            coEvery {
+                stubLds.getEmbeddings()
+            } throws stubException
 
-        val actual = runCatching { repository.fetchAndGetEmbeddings() }
+            val actual = runCatching { repository.fetchAndGetEmbeddings() }
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     private companion object {
         const val A1111_URL = "http://192.168.0.1:7860"

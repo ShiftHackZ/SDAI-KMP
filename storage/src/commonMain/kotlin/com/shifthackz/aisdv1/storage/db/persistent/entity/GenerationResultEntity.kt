@@ -162,4 +162,11 @@ data class GenerationResultEntity(
      */
     @ColumnInfo(name = GenerationResultContract.MODEL_NAME, defaultValue = "")
     val modelName: String = "",
+    /**
+     * Content revision; legacy rows retain an empty value until replaced.
+     *
+     * @author Dmitriy Moroz
+     */
+    @ColumnInfo(name = GenerationResultContract.IMAGE_REVISION, defaultValue = "''")
+    val imageRevision: String = "",
 )

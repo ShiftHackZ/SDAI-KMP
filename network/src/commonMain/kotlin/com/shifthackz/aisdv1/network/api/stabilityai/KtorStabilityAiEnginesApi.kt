@@ -7,7 +7,7 @@ import com.shifthackz.aisdv1.network.client.trackUsage
 import com.shifthackz.aisdv1.network.client.trackedBodyAsText
 import com.shifthackz.aisdv1.network.model.StabilityAiEngineRaw
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
@@ -54,7 +54,7 @@ class KtorStabilityAiEnginesApi(
     )
 
     override suspend fun fetchEngines(apiKey: String): List<StabilityAiEngineRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_API_VERSION, PATH_ENGINES, PATH_LIST)
             trackUsage(NetworkUsageCategory.CONFIGS)

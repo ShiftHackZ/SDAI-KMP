@@ -13,7 +13,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.basicAuth
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
@@ -39,7 +39,7 @@ class KtorSwarmUiModelsApi(
         authorization: BasicHttpAuthorization?,
     ): KtorSwarmUiSessionResponse = mapSessionError {
         httpClient
-            .post {
+            .boundedPost {
                 url.takeFrom(baseUrl)
                 url.appendPathSegments(PATH_API, PATH_GET_NEW_SESSION)
                 applyAuthorization(authorization)
@@ -54,7 +54,7 @@ class KtorSwarmUiModelsApi(
         authorization: BasicHttpAuthorization?,
     ): KtorSwarmUiModelsResponse = mapSessionError {
         httpClient
-            .post {
+            .boundedPost {
                 url.takeFrom(baseUrl)
                 url.appendPathSegments(PATH_API, PATH_LIST_MODELS)
                 applyAuthorization(authorization)

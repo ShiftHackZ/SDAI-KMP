@@ -2,7 +2,7 @@ package com.shifthackz.aisdv1.data.repository
 
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionModelsDataSource
 import com.shifthackz.aisdv1.domain.entity.StableDiffusionModel
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionModelsRepository
 
@@ -31,11 +31,11 @@ internal class StableDiffusionModelsRepositoryImpl(
      */
     private val preferenceManager: PreferenceManager,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : StableDiffusionModelsRepository {
 
     /**
@@ -44,9 +44,10 @@ internal class StableDiffusionModelsRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchModels() {
+        val connection = connections.snapshot()
         val models = remoteDataSource.fetchSdModels(
-            baseUrl = preferenceManager.automatic1111ServerUrl,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
         )
         localDataSource.insertModels(models)
     }

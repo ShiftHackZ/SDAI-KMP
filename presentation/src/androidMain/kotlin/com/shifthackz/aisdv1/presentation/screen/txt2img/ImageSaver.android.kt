@@ -4,10 +4,10 @@ import android.content.Context
 import android.util.Base64
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
-import com.shifthackz.aisdv1.core.imageprocessing.Base64ToBitmapConverter
 import com.shifthackz.aisdv1.core.sharing.shareFile
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
-import com.shifthackz.aisdv1.presentation.utils.FileSavableExporter
+import com.shifthackz.aisdv1.presentation.utils.OriginalImageFileExporter
+import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
@@ -118,7 +118,7 @@ internal class AndroidImageSharer(
      *
      * @author Dmitriy Moroz
      */
-    override val fileProviderDescriptor: FileProviderDescriptor,
+    private val fileProviderDescriptor: FileProviderDescriptor,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -126,12 +126,12 @@ internal class AndroidImageSharer(
      */
     private val dispatchersProvider: DispatchersProvider,
     /**
-     * Exposes the `base64ToBitmapConverter` value used by the SDAI presentation layer.
+     * Streams original encoded pixels to a bounded private share file.
      *
      * @author Dmitriy Moroz
      */
-    private val base64ToBitmapConverter: Base64ToBitmapConverter,
-) : ImageSharer, FileSavableExporter.BmpToFile {
+    private val originals: OriginalImageFileExporter,
+) : ImageSharer {
 
     /**
      * Performs the SDAI side effect handled by `share`.
@@ -143,15 +143,22 @@ internal class AndroidImageSharer(
     override suspend fun share(base64: String): ImageShareResult =
         runSharingAction {
             val file = withContext(dispatchersProvider.io) {
-                val bitmap = base64ToBitmapConverter(Base64ToBitmapConverter.Input(base64)).bitmap
-                saveBitmapToFile(createImageFileName(), bitmap)
+                originals.export(base64, UUID.randomUUID().toString())
             }
-            withContext(dispatchersProvider.immediate) {
-                context.shareFile(
-                    file = file,
-                    fileProviderPath = fileProviderDescriptor.providerPath,
-                    fileMimeType = MIME_TYPE_JPG,
-                )
+            var hasLaunchedShare = false
+            try {
+                withContext(dispatchersProvider.immediate) {
+                    context.shareFile(
+                        file = file,
+                        fileProviderPath = fileProviderDescriptor.providerPath,
+                        fileMimeType = when (file.extension) {
+                            "png" -> "image/png"; "webp" -> "image/webp"; else -> "image/jpeg"
+                        },
+                    )
+                    hasLaunchedShare = true
+                }
+            } finally {
+                if (!hasLaunchedShare) file.delete()
             }
         }
 }
@@ -169,7 +176,7 @@ private suspend inline fun runSavingAction(crossinline action: suspend () -> Uni
         ImageSaveResult.Saved
     } catch (e: CancellationException) {
         throw e
-    } catch (t: Throwable) {
+    } catch (t: Exception) {
         ImageSaveResult.Failed(t.message ?: "Unable to save image")
     }
 
@@ -186,7 +193,7 @@ private suspend inline fun runSharingAction(crossinline action: suspend () -> Un
         ImageShareResult.Sent
     } catch (e: CancellationException) {
         throw e
-    } catch (t: Throwable) {
+    } catch (t: Exception) {
         ImageShareResult.Failed(t.message ?: "Unable to share image")
     }
 
@@ -197,6 +204,7 @@ private suspend inline fun runSharingAction(crossinline action: suspend () -> Un
  * @author Dmitriy Moroz
  */
 private fun String.toImageBytes(): ByteArray {
+    if (length > 32 * 1024 * 1024) throw IllegalStateException()
     val raw = substringAfter("base64,", this)
     return Base64.decode(raw, Base64.DEFAULT)
 }

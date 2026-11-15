@@ -16,156 +16,214 @@ interface ConfigurationStore {
      * @author Dmitriy Moroz
      */
     var automatic1111ServerUrl: String
+
     /**
      * Exposes the `swarmUiServerUrl` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var swarmUiServerUrl: String
+
     /**
      * Exposes the `swarmUiModel` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var swarmUiModel: String
+
     /**
      * Exposes the `demoMode` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var demoMode: Boolean
+
     /**
      * Exposes the `source` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var source: ServerSource
-    /** Durable source-selection revision; a source changed away and back has a newer revision.
-     * @author Dmitriy Moroz */
+
+    /**
+     * Durable source-selection revision; a source changed away and back has a newer revision.
+     *
+     * @author Dmitriy Moroz
+     */
     val providerSelectionRevision: Long
+
     /**
      * Exposes the `hordeApiKey` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var hordeApiKey: String
+
     /**
      * Exposes the `openAiApiKey` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var openAiApiKey: String
+
     /**
      * Editable image model identifier supplied to the compatible server.
+     *
      * @author Dmitriy Moroz
      */
     var openAiCompatibleModel: String
+
     /**
      * Optional bearer token for the independent compatible server.
+     *
      * @author Dmitriy Moroz
      */
     var openAiCompatibleApiKey: String
+
     /**
      * Complete HTTP(S) API prefix, including any version and reverse-proxy path.
+     *
      * @author Dmitriy Moroz
      */
     var openAiCompatibleUrl: String
+
     /**
      * Exposes the `huggingFaceApiKey` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var huggingFaceApiKey: String
+
     /**
      * Exposes the `huggingFaceModel` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var huggingFaceModel: String
+
     /**
      * Exposes the `stabilityAiApiKey` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var stabilityAiApiKey: String
+
     /**
      * Exposes the `stabilityAiEngineId` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var stabilityAiEngineId: String
+
     /**
      * Exposes the `falAiApiKey` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var falAiApiKey: String
+
     /**
      * Exposes the `arliAiApiKey` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var arliAiApiKey: String
+
     /**
      * Exposes the `localOnnxModelId` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxModelId: String
+
     /**
      * Exposes the `localOnnxModelPath` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxModelPath: String
+
     /**
      * Exposes the `localMediaPipeModelId` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localMediaPipeModelId: String
+
     /**
      * Exposes the `localMediaPipeModelPath` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localMediaPipeModelPath: String
+
     /**
      * Exposes the `localSdxlModelId` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localSdxlModelId: String
+
     /**
      * Exposes the `localSdxlModelPath` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localSdxlModelPath: String
+
     /**
      * Exposes the `localCoreMlModelId` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localCoreMlModelId: String
+
     /**
      * Exposes the `localCoreMlModelPath` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localCoreMlModelPath: String
+
     /**
      * Exposes the `localBonsaiModelId` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localBonsaiModelId: String
+
     /**
      * Exposes the `localBonsaiModelPath` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     var localBonsaiModelPath: String
+
+    /**
+     * Returns a trusted persisted credential/configuration association, empty for legacy data.
+     * Fails while a previous configuration write has an untrusted memory snapshot.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun getAuthorizationCommitId(): String
+
+    /**
+     * Persists all existing configuration keys and the association in one checked atomic batch.
+     * Called on IO by the serialized configuration transition owner.
+     *
+     * @param configuration Complete candidate configuration.
+     * @param commitId Opaque association supplied by protected credential staging.
+     * @author Dmitriy Moroz
+     */
+    fun commitConfiguration(configuration: Configuration, commitId: String)
+
+    /**
+     * Retries an exact failed configuration batch on IO before its association can be trusted.
+     * Returns false when there was no pending write; failures remain quarantined.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun retryPendingConfiguration(): Boolean
 
     /**
      * Loads SDAI data through `getConfiguration`.

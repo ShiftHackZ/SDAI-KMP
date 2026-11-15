@@ -2,6 +2,8 @@ package com.shifthackz.aisdv1.presentation.model
 
 import androidx.compose.runtime.Immutable
 import com.shifthackz.aisdv1.core.model.UiText
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.HordeProcessStatus
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
@@ -34,6 +36,7 @@ sealed interface GenerationModal {
          * @author Dmitriy Moroz
          */
         data object Running : Background
+
         /**
          * Provides the `Scheduled` singleton used by the SDAI presentation layer.
          *
@@ -94,9 +97,22 @@ sealed interface GenerationModal {
          * @author Dmitriy Moroz
          */
         val status: LocalDiffusionStatus? = null,
+        /**
+         * Captured attempted native engine.
+         *
+         * @author Dmitriy Moroz
+         */
+        val nativeEngine: NativeGenerationEngine? = null,
+        /**
+         * Sanitized stage for this engine.
+         *
+         * @author Dmitriy Moroz
+         */
+        val nativeStage: NativeGenerationStage? = null,
     ) : GenerationModal {
         val pair: Pair<Int, Int>?
-            get() = status?.let { (current, total) -> current to total }
+            get() = status?.takeIf { it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.DENOISING) }
+                ?.let { (current, total) -> current to total }
     }
 
     /**

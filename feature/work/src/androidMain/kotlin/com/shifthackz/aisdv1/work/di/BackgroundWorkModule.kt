@@ -1,6 +1,13 @@
 package com.shifthackz.aisdv1.work.di
 
 import androidx.work.WorkManager
+import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanup
+import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanupImpl
+import com.shifthackz.aisdv1.work.GenerationWorkPayloadStore
+import com.shifthackz.aisdv1.work.FileGenerationWorkPayloadStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import androidx.work.WorkerFactory
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundTaskManager
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
@@ -24,6 +31,20 @@ actual val backgroundWorkModule = module {
     }
 
     factoryOf(::SdaiWorkerFactory) binds arrayOf(SdaiWorkerFactory::class, WorkerFactory::class)
-    singleOf(::BackgroundWorkObserverImpl) bind BackgroundWorkObserver::class
-    factoryOf(::BackgroundTaskManagerImpl) bind BackgroundTaskManager::class
+    single<BackgroundWorkObserver> {
+        BackgroundWorkObserverImpl(
+            get(),
+            CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        )
+    }
+    singleOf(::GenerationWorkPayloadCleanupImpl) bind GenerationWorkPayloadCleanup::class
+    singleOf(::FileGenerationWorkPayloadStore) bind GenerationWorkPayloadStore::class
+    single<BackgroundTaskManager> {
+        BackgroundTaskManagerImpl(
+            get(),
+            get(),
+            get(),
+            CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        )
+    }
 }

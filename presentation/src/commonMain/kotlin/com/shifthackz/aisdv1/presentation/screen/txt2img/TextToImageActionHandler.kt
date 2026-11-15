@@ -28,7 +28,7 @@ import com.shifthackz.aisdv1.feature.benchmark.isLocalGenerationSource
 import com.shifthackz.aisdv1.presentation.core.GenerationPlatformServices
 import com.shifthackz.aisdv1.presentation.core.ViewModelLauncher
 import com.shifthackz.aisdv1.presentation.model.GenerationModal
-import com.shifthackz.aisdv1.presentation.navigation.router.TextToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -218,7 +218,8 @@ internal class TextToImageActionHandler(
 
     fun skipBenchmarkPrompt() {
         localGenerationBenchmarkGateProvider().markFirstBenchmarkPromptAnswered()
-        val pending = pendingGeneration ?: return updateState { it.copy(screenModal = GenerationModal.None) }
+        val pending =
+            pendingGeneration ?: return updateState { it.copy(screenModal = GenerationModal.None) }
         pendingGeneration = null
         updateState { it.copy(screenModal = GenerationModal.None) }
         startGeneration(pending.state, pending.payload)
@@ -228,7 +229,8 @@ internal class TextToImageActionHandler(
         if (suppressFutureWarnings) {
             localGenerationBenchmarkGateProvider().suppressRecommendationWarnings()
         }
-        val pending = pendingGeneration ?: return updateState { it.copy(screenModal = GenerationModal.None) }
+        val pending =
+            pendingGeneration ?: return updateState { it.copy(screenModal = GenerationModal.None) }
         pendingGeneration = null
         updateState { it.copy(screenModal = GenerationModal.None) }
         startGeneration(pending.state, pending.payload)
@@ -245,7 +247,13 @@ internal class TextToImageActionHandler(
     ) {
         pendingGeneration = PendingGeneration(validatedState, payload)
         launch(dispatchersProvider.io, CoroutineStart.DEFAULT) {
-            runCatching { localGenerationBenchmarkGateProvider().evaluate(validatedState.toBenchmarkRequest(payload)) }
+            runCatching {
+                localGenerationBenchmarkGateProvider().evaluate(
+                    validatedState.toBenchmarkRequest(
+                        payload
+                    )
+                )
+            }
                 .onSuccess { result ->
                     withContext(dispatchersProvider.immediate) {
                         when (result) {
@@ -253,9 +261,11 @@ internal class TextToImageActionHandler(
                                 pendingGeneration = null
                                 startGeneration(validatedState, payload)
                             }
+
                             LocalGenerationGateResult.AskRunBenchmark -> updateState {
                                 it.copy(screenModal = GenerationModal.Benchmark.FirstLocalGeneration)
                             }
+
                             is LocalGenerationGateResult.ConfirmExceedsRecommendation -> updateState {
                                 it.copy(
                                     screenModal = GenerationModal.Benchmark.ExceedsRecommendation(
@@ -460,7 +470,9 @@ internal class TextToImageActionHandler(
             val result = runCatching { imageSaver.save(base64) }
                 .getOrElse { t ->
                     if (t is CancellationException) throw t
-                    ImageSaveResult.Failed(t.message ?: Localization.string("error_unable_to_save_image"))
+                    ImageSaveResult.Failed(
+                        t.message ?: Localization.string("error_unable_to_save_image")
+                    )
                 }
             withContext(dispatchersProvider.immediate) {
                 updateState {
@@ -469,10 +481,13 @@ internal class TextToImageActionHandler(
                             savingImage = false,
                             message = Localization.string("success").asUiText(),
                         )
+
                         ImageSaveResult.Unsupported -> it.copy(
                             savingImage = false,
-                            error = Localization.string("error_image_saving_unavailable").asUiText(),
+                            error = Localization.string("error_image_saving_unavailable")
+                                .asUiText(),
                         )
+
                         is ImageSaveResult.Failed -> it.copy(
                             savingImage = false,
                             error = result.message.asUiText(),
@@ -502,7 +517,9 @@ internal class TextToImageActionHandler(
             val result = runCatching { imageSharer.share(base64) }
                 .getOrElse { t ->
                     if (t is CancellationException) throw t
-                    ImageShareResult.Failed(t.message ?: Localization.string("error_unable_to_share_image"))
+                    ImageShareResult.Failed(
+                        t.message ?: Localization.string("error_unable_to_share_image")
+                    )
                 }
             withContext(dispatchersProvider.immediate) {
                 updateState {
@@ -511,10 +528,13 @@ internal class TextToImageActionHandler(
                             sharingImage = false,
                             message = Localization.string("success").asUiText(),
                         )
+
                         ImageShareResult.Unsupported -> it.copy(
                             sharingImage = false,
-                            error = Localization.string("error_image_sharing_unavailable").asUiText(),
+                            error = Localization.string("error_image_sharing_unavailable")
+                                .asUiText(),
                         )
+
                         is ImageShareResult.Failed -> it.copy(
                             sharingImage = false,
                             error = result.message.asUiText(),
@@ -574,7 +594,10 @@ internal class TextToImageActionHandler(
      * @param results Completed generation results; never reused across identities.
      * @author Dmitriy Moroz
      */
-    private suspend fun publishGenerationResults(payload: TextToImagePayload, results: List<AiGenerationResult>) {
+    private suspend fun publishGenerationResults(
+        payload: TextToImagePayload,
+        results: List<AiGenerationResult>
+    ) {
         withContext(dispatchersProvider.immediate) {
             val publish = {
                 updateState {
@@ -597,7 +620,8 @@ internal class TextToImageActionHandler(
                     openAiOAuthGateway.withIdentity(identity) {
                         if (payload.providerSelectionRevision == null || preferenceManager.source != ServerSource.OPEN_AI_OAUTH ||
                             preferenceManager.providerSelectionRevision != payload.providerSelectionRevision ||
-                            results.any { it.openAiOAuthIdentity != identity || it.providerSelectionRevision != payload.providerSelectionRevision })
+                            results.any { it.openAiOAuthIdentity != identity || it.providerSelectionRevision != payload.providerSelectionRevision }
+                        )
                             throw OpenAiOAuthFailure("IDENTITY_CHANGED")
                         publish()
                     }

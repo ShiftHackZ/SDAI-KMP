@@ -1,6 +1,9 @@
 package com.shifthackz.aisdv1.work.di
 
 import android.content.Context
+import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanup
+import com.shifthackz.aisdv1.work.GenerationWorkPayloadStore
+import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
@@ -10,7 +13,7 @@ import com.shifthackz.aisdv1.core.notification.PushNotificationManager
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.InterruptGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
@@ -34,9 +37,12 @@ class SdaiWorkerFactory(
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
     private val observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
-    private val interruptGenerationUseCase: InterruptGenerationUseCase,
+    private val interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val fileProviderDescriptor: FileProviderDescriptor,
     private val activityIntentProvider: ActivityIntentProvider,
+    private val payloads: GenerationWorkPayloadStore,
+    private val nativeGateway: NativeGenerationGateway,
+    private val payloadCleanup: GenerationWorkPayloadCleanup,
 ) : WorkerFactory() {
 
     override fun createWorker(
@@ -47,6 +53,9 @@ class SdaiWorkerFactory(
         return when (workerClassName) {
             TextToImageTask::class.java.name -> TextToImageTask(
                 context = appContext,
+                payloads = payloads,
+                payloadCleanup = payloadCleanup,
+                nativeGateway = nativeGateway,
                 workerParameters = workerParameters,
                 pushNotificationManager = pushNotificationManager,
                 activityIntentProvider = activityIntentProvider,
@@ -56,12 +65,15 @@ class SdaiWorkerFactory(
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
                 observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
                 observeBonsaiProcessStatusUseCase = observeBonsaiProcessStatusUseCase,
-                interruptGenerationUseCase = interruptGenerationUseCase,
+                interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
                 fileProviderDescriptor = fileProviderDescriptor,
             )
 
             ImageToImageTask::class.java.name -> ImageToImageTask(
                 context = appContext,
+                payloads = payloads,
+                payloadCleanup = payloadCleanup,
+                nativeGateway = nativeGateway,
                 workerParameters = workerParameters,
                 pushNotificationManager = pushNotificationManager,
                 activityIntentProvider = activityIntentProvider,
@@ -71,7 +83,7 @@ class SdaiWorkerFactory(
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
                 observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
                 observeBonsaiProcessStatusUseCase = observeBonsaiProcessStatusUseCase,
-                interruptGenerationUseCase = interruptGenerationUseCase,
+                interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
                 fileProviderDescriptor = fileProviderDescriptor,
             )
 

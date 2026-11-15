@@ -4,7 +4,7 @@ import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.usecase.donate.FetchSupportersUseCase
 import com.shifthackz.aisdv1.presentation.mocks.mockSupporters
-import com.shifthackz.aisdv1.presentation.navigation.router.DonateRouter
+import com.shifthackz.aisdv1.core.navigation.router.DonateRouter
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -31,57 +31,61 @@ class DonateViewModelTest {
     private val stubDonateRouter = mockk<DonateRouter>()
 
     @Test
-    fun `initialized, fetch successful, expected UI state with loading false and non empty supporters`() = runTest(testDispatcher) {
-        coEvery {
-            stubFetchSupportersUseCase()
-        } returns mockSupporters
+    fun `initialized, fetch successful, expected UI state with loading false and non empty supporters`() =
+        runTest(testDispatcher) {
+            coEvery {
+                stubFetchSupportersUseCase()
+            } returns mockSupporters
 
-        val viewModel = createViewModel()
-        advanceUntilIdle()
+            val viewModel = createViewModel()
+            advanceUntilIdle()
 
-        val expected = DonateState(
-            loading = false,
-            supporters = mockSupporters,
-        )
-        val actual = viewModel.state.value
-        Assert.assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `initialized, fetch failed, expected UI state with loading false and empty supporters`() = runTest(testDispatcher) {
-        coEvery {
-            stubFetchSupportersUseCase()
-        } throws stubException
-
-        val viewModel = createViewModel()
-        advanceUntilIdle()
-
-        val expected = DonateState(
-            loading = false,
-            supporters = emptyList(),
-        )
-        val actual = viewModel.state.value
-        Assert.assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `given received NavigateBack intent, expected router navigateBack called`() = runTest(testDispatcher) {
-        coEvery {
-            stubFetchSupportersUseCase()
-        } returns mockSupporters
-        every {
-            stubDonateRouter.navigateBack()
-        } returns Unit
-
-        val viewModel = createViewModel()
-        viewModel.processIntent(DonateIntent.NavigateBack)
-
-        verify {
-            stubDonateRouter.navigateBack()
+            val expected = DonateState(
+                loading = false,
+                supporters = mockSupporters,
+            )
+            val actual = viewModel.state.value
+            Assert.assertEquals(expected, actual)
         }
-    }
+
+    @Test
+    fun `initialized, fetch failed, expected UI state with loading false and empty supporters`() =
+        runTest(testDispatcher) {
+            coEvery {
+                stubFetchSupportersUseCase()
+            } throws stubException
+
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            val expected = DonateState(
+                loading = false,
+                supporters = emptyList(),
+            )
+            val actual = viewModel.state.value
+            Assert.assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `given received NavigateBack intent, expected router navigateBack called`() =
+        runTest(testDispatcher) {
+            coEvery {
+                stubFetchSupportersUseCase()
+            } returns mockSupporters
+            every {
+                stubDonateRouter.navigateBack()
+            } returns Unit
+
+            val viewModel = createViewModel()
+            viewModel.processIntent(DonateIntent.NavigateBack)
+
+            verify {
+                stubDonateRouter.navigateBack()
+            }
+        }
 
     private fun TestScope.createViewModel() = DonateViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         fetchSupportersUseCase = stubFetchSupportersUseCase,
         linksProvider = stubLinksProvider,

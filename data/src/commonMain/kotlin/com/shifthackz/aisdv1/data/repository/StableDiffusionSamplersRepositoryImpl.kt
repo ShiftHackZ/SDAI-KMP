@@ -3,7 +3,7 @@ package com.shifthackz.aisdv1.data.repository
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionSamplersDataSource
 import com.shifthackz.aisdv1.domain.entity.StableDiffusionSampler
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionSamplersRepository
 import kotlinx.coroutines.currentCoroutineContext
@@ -17,14 +17,14 @@ import kotlinx.coroutines.sync.withLock
  * @param remoteDataSource Fetches sampler metadata from AUTOMATIC1111.
  * @param localDataSource Stores disposable sampler metadata for this process.
  * @param preferenceManager Supplies the active AUTOMATIC1111 server URL.
- * @param authorizationStore Supplies credentials used to identify the cache owner.
+ * @param connections Supplies consistent server/credential cache ownership.
  * @author Dmitriy Moroz
  */
 internal class StableDiffusionSamplersRepositoryImpl(
     private val remoteDataSource: StableDiffusionSamplersDataSource.Remote,
     private val localDataSource: StableDiffusionSamplersDataSource.Local,
     private val preferenceManager: PreferenceManager,
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : StableDiffusionSamplersRepository {
 
     private val cacheMutex = Mutex()
@@ -38,17 +38,19 @@ internal class StableDiffusionSamplersRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchSamplers() {
-        val serverUrl = preferenceManager.automatic1111ServerUrl
-        val credentials = authorizationStore.getAuthorizationCredentials()
+        val connection = connections.snapshot()
+        val serverUrl = connection.automatic1111Url
+        val credentials = connection.credentials
         val samplers = remoteDataSource.fetchSamplers(
             baseUrl = serverUrl,
             credentials = credentials,
         )
         currentCoroutineContext().ensureActive()
         cacheMutex.withLock {
+            val currentConnection = connections.snapshot()
             if (
-                serverUrl != preferenceManager.automatic1111ServerUrl ||
-                credentials != authorizationStore.getAuthorizationCredentials()
+                serverUrl != currentConnection.automatic1111Url ||
+                credentials != currentConnection.credentials
             ) return@withLock
             cachedServerUrl = null
             cachedCredentials = null
@@ -65,9 +67,10 @@ internal class StableDiffusionSamplersRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun getSamplers(): List<StableDiffusionSampler> = cacheMutex.withLock {
+        val connection = connections.snapshot()
         if (
-            cachedServerUrl != preferenceManager.automatic1111ServerUrl ||
-            cachedCredentials != authorizationStore.getAuthorizationCredentials()
+            cachedServerUrl != connection.automatic1111Url ||
+            cachedCredentials != connection.credentials
         ) {
             emptyList()
         } else {

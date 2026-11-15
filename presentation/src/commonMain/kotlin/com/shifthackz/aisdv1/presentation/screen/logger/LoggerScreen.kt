@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
-import com.shifthackz.aisdv1.presentation.navigation.router.LoggerRouter
+import com.shifthackz.aisdv1.core.navigation.router.LoggerRouter
 import org.koin.core.parameter.parametersOf
 
 /**

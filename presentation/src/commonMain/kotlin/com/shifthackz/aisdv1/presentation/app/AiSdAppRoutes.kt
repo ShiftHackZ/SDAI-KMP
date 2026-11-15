@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,7 +13,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
+import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.model.asUiText
+import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
 import com.shifthackz.aisdv1.core.mvi.MviComponent
+import com.shifthackz.aisdv1.core.navigation.AppRoute
+import com.shifthackz.aisdv1.core.navigation.RootAppRouter
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.presentation.platform.ExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.screen.benchmark.BenchmarkScreen
@@ -34,18 +40,22 @@ import com.shifthackz.aisdv1.presentation.screen.onboarding.OnBoardingContent
 import com.shifthackz.aisdv1.presentation.screen.onboarding.OnBoardingViewModel
 import com.shifthackz.aisdv1.presentation.screen.report.ReportScreen
 import com.shifthackz.aisdv1.presentation.screen.settings.SettingsScreen
-import com.shifthackz.aisdv1.presentation.screen.setup.content.ServerSetupContent
 import com.shifthackz.aisdv1.presentation.screen.setup.ServerSetupViewModel
+import com.shifthackz.aisdv1.presentation.screen.setup.content.ServerSetupContent
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupState
 import com.shifthackz.aisdv1.presentation.screen.setup.platform.rememberServerSetupEffectHandler
 import com.shifthackz.aisdv1.presentation.screen.splash.SplashScreenContent
-import com.shifthackz.aisdv1.presentation.screen.storageusage.StorageUsageScreen
 import com.shifthackz.aisdv1.presentation.screen.splash.SplashViewModel
+import com.shifthackz.aisdv1.presentation.screen.storageusage.StorageUsageScreen
 import com.shifthackz.aisdv1.presentation.screen.txt2img.TextToImageContent
 import com.shifthackz.aisdv1.presentation.screen.txt2img.TextToImageViewModel
-import com.shifthackz.aisdv1.presentation.screen.txt2img.decodeBase64ImageBitmap
 import com.shifthackz.aisdv1.presentation.screen.web.webui.WebUiScreen
+import com.shifthackz.aisdv1.presentation.theme.global.RetainedHomeRouteTheme
+import com.shifthackz.aisdv1.presentation.widget.dialog.ErrorDialog
+import com.shifthackz.aisdv1.presentation.widget.image.DecodedImageBitmap
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.rememberOriginalImage
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
 
@@ -142,6 +152,8 @@ internal fun HomeRoutesScaffold(
 
 /**
  * Keeps previously rendered home tabs alive while hiding inactive tabs at zero size.
+ * Hidden tabs retain their last visible Material theme so palette edits do not reconstruct
+ * invisible forms; the current root theme is applied as soon as a tab becomes visible.
  *
  * @param route Home route represented by this slot.
  * @param activeRoute Currently visible home route.
@@ -158,15 +170,19 @@ internal fun HomeRouteSlot(
     content: @Composable (Modifier) -> Unit,
 ) {
     if (route !in renderedRoutes) return
-    val visible = route == activeRoute
+    val isVisible = route == activeRoute
     Box(
-        modifier = if (visible) {
+        modifier = if (isVisible) {
             Modifier.fillMaxSize()
         } else {
             Modifier.requiredSize(0.dp)
         },
     ) {
-        content(Modifier.fillMaxSize())
+        CompositionLocalProvider(LocalMviVisibility provides isVisible) {
+            RetainedHomeRouteTheme(isVisible = isVisible) {
+                content(Modifier.fillMaxSize())
+            }
+        }
     }
 }
 
@@ -197,7 +213,7 @@ internal fun OverlayRouteContent(
         AppRoute.ImageToImage,
         AppRoute.Gallery,
         AppRoute.Settings,
-        -> Unit
+            -> Unit
 
         AppRoute.StorageUsage -> {
             StorageUsageScreen(
@@ -285,14 +301,14 @@ internal fun OverlayRouteContent(
 
         AppRoute.ImageInPaint -> {
             val state by imageToImageViewModel.state.collectAsState()
-            val image = remember(state.imageBase64) {
-                state.imageBase64.decodeBase64ImageBitmap()
-            }
-            if (image == null) {
-                LaunchedEffect(Unit) {
-                    router.navigateBack()
-                }
-            } else {
+            val decoded = rememberOriginalImage(state.imageBase64)
+            val image = (decoded as? DecodedImageBitmap.Ready)?.image
+            if (decoded == DecodedImageBitmap.Unavailable) {
+                ErrorDialog(
+                    text = Localization.string("error_generic").asUiText(),
+                    onDismissRequest = router::navigateBack
+                )
+            } else if (image != null) {
                 ImageInPaintScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     image = image,
@@ -320,6 +336,7 @@ internal fun OverlayRouteContent(
                 viewModel = historyViewModel,
             ) { state, processIntent ->
                 HistoryScreenContent(
+                    imageLoader = remember(koin) { koin.get<GalleryImageLoader>() },
                     state = state,
                     processIntent = processIntent,
                 )
@@ -353,36 +370,4 @@ internal fun OverlayRouteContent(
             WebUiScreen(router = router)
         }
     }
-}
-
-/**
- * Maps a route back to the home tab that should stay selected underneath it.
- *
- * @author Dmitriy Moroz
- */
-internal fun AppRoute.asHomeTabRoute(): AppRoute? = when (this) {
-    AppRoute.Home,
-    AppRoute.TextToImage,
-    -> AppRoute.TextToImage
-
-    AppRoute.ImageToImage -> AppRoute.ImageToImage
-    AppRoute.Gallery -> AppRoute.Gallery
-    AppRoute.Settings -> AppRoute.Settings
-
-    AppRoute.ImageInPaint,
-    AppRoute.Benchmark,
-    AppRoute.StorageUsage,
-    AppRoute.NetworkUsage,
-    AppRoute.Splash,
-    is AppRoute.OnBoarding,
-    is AppRoute.Setup,
-    AppRoute.ConfigurationLoader,
-    is AppRoute.GalleryDetail,
-    AppRoute.History,
-    is AppRoute.Report,
-    AppRoute.Debug,
-    AppRoute.Logger,
-    AppRoute.Donate,
-    AppRoute.WebUi,
-    -> null
 }

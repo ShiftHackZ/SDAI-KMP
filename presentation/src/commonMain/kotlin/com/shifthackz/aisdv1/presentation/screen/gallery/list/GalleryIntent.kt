@@ -8,6 +8,13 @@ import com.shifthackz.aisdv1.core.mvi.MviIntent
  * @author Dmitriy Moroz
  */
 sealed interface GalleryIntent : MviIntent {
+    /**
+     * Requests metadata around visible positions.
+     *
+     * @param first First visible index.
+     * @author Dmitriy Moroz
+     */
+    data class Viewport(val first: Int) : GalleryIntent
 
     /**
      * Defines the `Export` contract for the SDAI presentation layer.
@@ -74,13 +81,6 @@ sealed interface GalleryIntent : MviIntent {
      * @author Dmitriy Moroz
      */
     data object DismissDialog : GalleryIntent
-
-    /**
-     * Provides the `LoadNextPage` singleton used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    data object LoadNextPage : GalleryIntent
 
     /**
      * Provides the `OpenDrawer` singleton used by the SDAI presentation layer.

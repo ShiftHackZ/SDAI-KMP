@@ -13,13 +13,60 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceType
  * active configuration form, and local-model intents drive download/delete confirmation flows.
  */
 sealed interface ServerSetupIntent : MviIntent {
-    /** Starts device authorization for the selected ChatGPT provider. @author Dmitriy Moroz */
+    /**
+     * Retries protected credentials without replacing storage or resetting configuration.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object RetryAuthorizationStorage : ServerSetupIntent
+
+    /**
+     * Opens confirmation before removing only saved Basic Auth credentials.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object RequestAuthorizationReset : ServerSetupIntent
+
+    /**
+     * Dismisses recovery confirmation without changing stored credentials.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object CancelAuthorizationReset : ServerSetupIntent
+
+    /**
+     * Runs the explicitly confirmed reset; never dispatched by automatic error handling.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object ConfirmAuthorizationReset : ServerSetupIntent
+
+    /**
+     * Starts device authorization for the selected ChatGPT provider.
+     *
+     * @author Dmitriy Moroz
+     */
     data object OAuthLogin : ServerSetupIntent
-    /** Cancels pending polling without deleting the committed session. @author Dmitriy Moroz */
+
+    /**
+     * Cancels pending polling without deleting the committed session.
+     *
+     * @author Dmitriy Moroz
+     */
     data object OAuthCancel : ServerSetupIntent
-    /** Deletes the local protected session, including an unreadable envelope. @author Dmitriy Moroz */
+
+    /**
+     * Deletes the local protected session, including an unreadable envelope.
+     *
+     * @author Dmitriy Moroz
+     */
     data object OAuthLogout : ServerSetupIntent
-    /** Opens the trusted verification page for the current transient device code. @author Dmitriy Moroz */
+
+    /**
+     * Opens the trusted verification page for the current transient device code.
+     *
+     * @author Dmitriy Moroz
+     */
     data object OAuthOpenBrowser : ServerSetupIntent
     data class UpdateServerMode(val mode: ServerSource) : ServerSetupIntent
     data class UpdateSourceSearchQuery(val query: String) : ServerSetupIntent
@@ -27,7 +74,9 @@ sealed interface ServerSetupIntent : MviIntent {
     data class ToggleSourceReadinessFilter(val readiness: ServerSourceReadiness) : ServerSetupIntent
     data class ToggleSourceTagFilter(val tag: FeatureTag) : ServerSetupIntent
     data object ResetSourceFilters : ServerSetupIntent
-    data class UpdateSourceSortOrder(val sortOrder: ServerSetupState.SourceSortOrder) : ServerSetupIntent
+    data class UpdateSourceSortOrder(val sortOrder: ServerSetupState.SourceSortOrder) :
+        ServerSetupIntent
+
     data class UpdateServerUrl(val url: String) : ServerSetupIntent
     data class UpdateSwarmUiUrl(val url: String) : ServerSetupIntent
     data class UpdateAuthType(val type: ServerSetupState.AuthType) : ServerSetupIntent

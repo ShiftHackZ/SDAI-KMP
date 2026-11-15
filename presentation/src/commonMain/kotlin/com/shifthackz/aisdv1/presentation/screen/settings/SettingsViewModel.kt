@@ -1,11 +1,14 @@
 package com.shifthackz.aisdv1.presentation.screen.settings
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.model.Quadruple
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.domain.entity.ColorToken
@@ -19,14 +22,14 @@ import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalCoreMlModelsUse
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMediaPipeModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalOnnxModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalSdxlModelsUseCase
-import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
 import com.shifthackz.aisdv1.domain.usecase.sdmodel.GetStableDiffusionModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.sdmodel.SelectStableDiffusionModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ObserveNetworkUsageUseCase
 import com.shifthackz.aisdv1.domain.usecase.stabilityai.ObserveStabilityAiCreditsUseCase
 import com.shifthackz.aisdv1.presentation.modal.language.applyAppLanguage
-import com.shifthackz.aisdv1.presentation.model.LaunchSource
-import com.shifthackz.aisdv1.presentation.navigation.router.SettingsRouter
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.router.SettingsRouter
 import com.shifthackz.aisdv1.presentation.screen.debug.DebugMenuAccessor
 import com.shifthackz.aisdv1.presentation.screen.drawer.DrawerIntent
 import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsIntent
@@ -59,7 +62,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param observeStabilityAiCreditsUseCase Observes Stability AI credits for Settings summary rows.
  * @param selectStableDiffusionModelUseCase Persists the selected remote model.
  * @param clearAppCacheUseCase Legacy cache use case retained for existing Settings flows.
- * @param getAllGalleryUseCase Reads generated gallery records for storage summaries.
+ * @param galleryReads Reads payload-free gallery storage aggregates.
  * @param getLocalOnnxModelsUseCase Reads locally configured ONNX models.
  * @param getLocalMediaPipeModelsUseCase Reads locally configured MediaPipe models.
  * @param getLocalSdxlModelsUseCase Reads locally configured SDXL models.
@@ -76,15 +79,17 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModel(
+    diagnostics: UiDiagnostics,
     dispatchersProvider: DispatchersProvider,
     getStableDiffusionModelsUseCase: GetStableDiffusionModelsUseCase,
     observeStabilityAiCreditsUseCase: ObserveStabilityAiCreditsUseCase,
     private val selectStableDiffusionModelUseCase: SelectStableDiffusionModelUseCase,
     private val clearAppCacheUseCase: ClearAppCacheUseCase,
-    private val getAllGalleryUseCase: GetAllGalleryUseCase,
+    private val galleryReads: GalleryReadGateway,
     private val getLocalOnnxModelsUseCase: GetLocalOnnxModelsUseCase,
     private val getLocalMediaPipeModelsUseCase: GetLocalMediaPipeModelsUseCase,
     private val getLocalSdxlModelsUseCase: GetLocalSdxlModelsUseCase,
@@ -100,6 +105,8 @@ class SettingsViewModel(
     private val platformActions: SettingsPlatformActions,
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<SettingsState, SettingsIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.SETTINGS.asDiagnosticScreen(),
     initialState = SettingsState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -170,7 +177,7 @@ class SettingsViewModel(
                             localUseNNAPI = settings.localUseNNAPI,
                             backgroundGenerationAvailable = platformActions.supportsBackgroundGeneration,
                             backgroundGeneration = settings.backgroundGeneration &&
-                                platformActions.supportsBackgroundGeneration,
+                                    platformActions.supportsBackgroundGeneration,
                             monitorConnectivity = settings.monitorConnectivity,
                             autoSaveAiResults = settings.autoSaveAiResults,
                             saveToMediaStore = settings.saveToMediaStore,
@@ -429,9 +436,7 @@ class SettingsViewModel(
         val bonsaiModels = getDownloadedModels(getLocalBonsaiModelsUseCase::invoke)
         val coreMlModelIds = coreMlModels.map(LocalAiModel::id)
         val allowedModes = buildInfoProvider.setupAllowedModes()
-        val galleryBytes = getAllGalleryUseCase().sumOf { item ->
-            item.image.storageTextByteSize() + item.inputImage.storageTextByteSize()
-        }
+        val galleryBytes = galleryReads.storageBytes()
         var modelBytes = 0L
         if (ServerSource.LOCAL_MICROSOFT_ONNX in allowedModes) {
             modelBytes += platformActions.mapStorageBytesForUi(
@@ -490,7 +495,7 @@ class SettingsViewModel(
         .getOrDefault(emptyList())
         .filter { model ->
             model.downloaded &&
-                model.id !in customModelIds
+                    model.id !in customModelIds
         }
 
     private fun changeSaveToMediaStoreSetting(value: Boolean) {

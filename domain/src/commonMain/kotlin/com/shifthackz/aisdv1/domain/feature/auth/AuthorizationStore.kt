@@ -7,17 +7,32 @@ package com.shifthackz.aisdv1.domain.feature.auth
  */
 interface AuthorizationStore {
     /**
-     * Loads SDAI data through `getAuthorizationCredentials`.
+     * Awaits protected-store readiness on IO and returns committed credentials.
+     * Unavailable or unreadable storage throws AuthorizationStorageFailure instead of anonymous access.
      *
      * @return Result produced by `getAuthorizationCredentials`.
      * @author Dmitriy Moroz
      */
-    fun getAuthorizationCredentials(): AuthorizationCredentials
+    suspend fun getAuthorizationCredentials(): AuthorizationCredentials
+
     /**
-     * Executes the `storeAuthorizationCredentials` step in the SDAI domain layer.
+     * Commits one complete credential record on IO before acknowledging replacement.
      *
-     * @param credentials credentials value consumed by the API.
+     * @param credentials Complete candidate credential record.
+     * @param commitConfiguration Atomically persists all configuration fields with the supplied opaque ID.
+     * Must not call authorization operations recursively.
      * @author Dmitriy Moroz
      */
-    fun storeAuthorizationCredentials(credentials: AuthorizationCredentials)
+    suspend fun storeAuthorizationCredentials(
+        credentials: AuthorizationCredentials,
+        commitConfiguration: suspend (commitId: String) -> Unit,
+    )
+
+    /**
+     * Removes only saved Basic Auth after an explicit user recovery confirmation.
+     * Encryption keys, OAuth sessions and all unrelated application data remain intact.
+     *
+     * @author Dmitriy Moroz
+     */
+    suspend fun resetAuthorizationCredentials()
 }

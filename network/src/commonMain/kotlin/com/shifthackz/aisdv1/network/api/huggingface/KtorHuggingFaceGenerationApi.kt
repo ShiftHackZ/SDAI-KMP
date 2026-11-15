@@ -10,9 +10,9 @@ import com.shifthackz.aisdv1.network.client.trackedByteArrayBody
 import com.shifthackz.aisdv1.network.request.HuggingFaceGenerationRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ServerResponseException
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -82,7 +82,7 @@ class KtorHuggingFaceGenerationApi(
     )
 
     override suspend fun validateBearerToken(apiKey: String) {
-        httpClient.get {
+        httpClient.boundedGet {
             url.takeFrom(apiBaseUrl)
             url.appendPathSegments(PATH_API, PATH_WHOAMI)
             header(HttpHeaders.Authorization, "Bearer $apiKey")
@@ -95,7 +95,7 @@ class KtorHuggingFaceGenerationApi(
         request: HuggingFaceGenerationRequest,
     ): ByteArray = retryServiceUnavailable {
         httpClient
-            .post {
+            .boundedPost {
                 url.takeFrom(inferenceBaseUrl)
                 url.appendPathSegments(PATH_MODELS, model)
                 applyGenerationTimeout(generationTimeoutProvider)

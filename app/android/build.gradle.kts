@@ -10,6 +10,46 @@ plugins {
 android {
     namespace = "com.shifthackz.aisdv1.app"
 
+    buildTypes {
+        getByName("release") {
+            ndk.debugSymbolLevel = "FULL"
+            buildConfigField("boolean", "UI_DIAGNOSTICS_ENABLED", "false")
+        }
+        getByName("debug") {
+            buildConfigField(
+                "boolean",
+                "UI_DIAGNOSTICS_ENABLED",
+                "true"
+            )
+        }
+        create("profile") {
+            initWith(getByName("release"))
+            matchingFallbacks += "release"
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".profile"
+            buildConfigField(
+                "boolean",
+                "UI_DIAGNOSTICS_ENABLED",
+                "true"
+            )
+        }
+    }
+
+    // Startup providers are disabled; select an explicit optional tracer at the composition root.
+    sourceSets {
+        getByName("release").java.srcDir("src/tracingDisabled/java")
+        listOf("debug", "profile").forEach { variant ->
+            getByName(variant).java.srcDir(
+                if (providers.gradleProperty("sdaiComposeTracing").orNull == "true") {
+                    "src/tracingEnabled/java"
+                } else {
+                    "src/tracingDisabled/java"
+                },
+            )
+        }
+    }
+
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
@@ -22,13 +62,21 @@ android {
 
         buildConfigField("String", "IMAGE_CDN_URL", "\"https://random.imagecdn.app/\"")
         buildConfigField("String", "HUGGING_FACE_URL", "\"https://huggingface.co/\"")
-        buildConfigField("String", "HUGGING_FACE_INFERENCE_URL", "\"https://router.huggingface.co/hf-inference/\"")
+        buildConfigField(
+            "String",
+            "HUGGING_FACE_INFERENCE_URL",
+            "\"https://router.huggingface.co/hf-inference/\""
+        )
         buildConfigField("String", "HORDE_AI_URL", "\"https://stablehorde.net/\"")
         buildConfigField("String", "OPEN_AI_URL", "\"https://api.openai.com/\"")
         buildConfigField("String", "STABILITY_AI_URL", "\"https://api.stability.ai/\"")
 
         buildConfigField("String", "HORDE_AI_SIGN_UP_URL", "\"https://stablehorde.net/register\"")
-        buildConfigField("String", "HUGGING_FACE_INFO_URL", "\"https://huggingface.co/docs/inference-providers/providers/hf-inference\"")
+        buildConfigField(
+            "String",
+            "HUGGING_FACE_INFO_URL",
+            "\"https://huggingface.co/docs/inference-providers/providers/hf-inference\""
+        )
         buildConfigField("String", "OPEN_AI_INFO_URL", "\"https://platform.openai.com/api-keys\"")
         buildConfigField("String", "STABILITY_AI_INFO_URL", "\"https://platform.stability.ai/\"")
         buildConfigField("String", "FAL_AI_INFO_URL", "\"https://fal.ai/dashboard/keys\"")
@@ -40,10 +88,26 @@ android {
         buildConfigField("String", "DONATE_URL", "\"https://sdai.moroz.cc/donate.html\"")
         buildConfigField("String", "PROJECT_WEBSITE_URL", "\"https://sdai.moroz.cc\"")
         buildConfigField("String", "DEVELOPER_WEBSITE_URL", "\"https://moroz.cc\"")
-        buildConfigField("String", "GITHUB_SOURCE_URL", "\"https://github.com/ShiftHackZ/SDAI-KMP\"")
-        buildConfigField("String", "LICENSE_URL", "\"https://github.com/ShiftHackZ/SDAI-KMP/blob/master/LICENSE\"")
-        buildConfigField("String", "SETUP_INSTRUCTIONS_URL", "\"https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki\"")
-        buildConfigField("String", "SWARM_UI_INFO_URL", "\"https://github.com/mcmonkeyprojects/SwarmUI/tree/master/docs\"")
+        buildConfigField(
+            "String",
+            "GITHUB_SOURCE_URL",
+            "\"https://github.com/ShiftHackZ/SDAI-KMP\""
+        )
+        buildConfigField(
+            "String",
+            "LICENSE_URL",
+            "\"https://github.com/ShiftHackZ/SDAI-KMP/blob/master/LICENSE\""
+        )
+        buildConfigField(
+            "String",
+            "SETUP_INSTRUCTIONS_URL",
+            "\"https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki\""
+        )
+        buildConfigField(
+            "String",
+            "SWARM_UI_INFO_URL",
+            "\"https://github.com/mcmonkeyprojects/SwarmUI/tree/master/docs\""
+        )
 
         resourceConfigurations += listOf("en", "ru", "uk", "tr", "zh", "de")
         manifestPlaceholders["excludePermissions"] = "true"
@@ -79,6 +143,7 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
+    implementation(project(":core:ui"))
     implementation(project(":core:imageprocessing"))
     implementation(project(":core:notification"))
     implementation(project(":core:validation"))
@@ -97,10 +162,27 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":demo"))
     implementation(libs.koin.core)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
     implementation(libs.timber)
     implementation(libs.shifthackz.catppuccin.splash)
     implementation(libs.shifthackz.catppuccin.legacy)
     implementation(libs.androidx.work.runtime)
+}
+
+// Reports describe compiler stability/skipping decisions; they do not measure frame performance.
+composeCompiler {
+    if (providers.gradleProperty("sdaiComposeReports").orNull == "true") {
+        metricsDestination.set(layout.buildDirectory.dir("compose-metrics"))
+        reportsDestination.set(layout.buildDirectory.dir("compose-reports"))
+    }
+}
+
+// Runtime tracing is absent from ordinary product dependencies.
+if (providers.gradleProperty("sdaiComposeTracing").orNull == "true") {
+    dependencies {
+        add("debugImplementation", "androidx.compose.runtime:runtime-tracing")
+        add("profileImplementation", "androidx.compose.runtime:runtime-tracing")
+    }
 }

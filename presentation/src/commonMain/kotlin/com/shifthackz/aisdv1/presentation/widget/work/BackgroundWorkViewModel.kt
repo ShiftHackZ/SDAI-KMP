@@ -1,9 +1,12 @@
 package com.shifthackz.aisdv1.presentation.widget.work
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationFailure
 import com.shifthackz.aisdv1.domain.entity.BackgroundWorkResult
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import kotlinx.coroutines.flow.catch
@@ -13,8 +16,10 @@ import kotlinx.coroutines.flow.combine
  * Coordinates `BackgroundWorkViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class BackgroundWorkViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -40,6 +45,8 @@ class BackgroundWorkViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<BackgroundWorkState, BackgroundWorkIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.BACKGROUND_WORK,
     initialState = BackgroundWorkState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -61,6 +68,7 @@ class BackgroundWorkViewModel(
                                 subTitle = work.statusSubTitle,
                                 isError = false,
                                 image = null,
+                                imageBase64 = null,
                             )
                         }
                         return@collect
@@ -70,15 +78,12 @@ class BackgroundWorkViewModel(
                         is BackgroundWorkResult.Success -> Localization.string("notification_finish_title")
                         else -> ""
                     }
-                    val resultSubTitle = (result as? BackgroundWorkResult.Error)
-                        ?.t
-                        ?.message
-                        .orEmpty()
-                    (result as? BackgroundWorkResult.Success)
-                        ?.ai
-                        ?.firstOrNull()
-                        ?.image
-                        ?.also(::setImage)
+                    val failure = (result as? BackgroundWorkResult.Error)?.t
+                    val resultSubTitle = if (failure is NativeGenerationFailure) {
+                        failure.toUserMessage()
+                    } else {
+                        failure?.message.orEmpty()
+                    }
                     updateState {
                         it.copy(
                             visible = result !is BackgroundWorkResult.None,
@@ -88,6 +93,7 @@ class BackgroundWorkViewModel(
                             subTitle = resultSubTitle,
                             isError = result is BackgroundWorkResult.Error,
                             image = null,
+                            imageBase64 = (result as? BackgroundWorkResult.Success)?.ai?.firstOrNull()?.image,
                         )
                     }
                 }
@@ -106,6 +112,7 @@ class BackgroundWorkViewModel(
                         subTitle = "",
                         isError = false,
                         image = null,
+                        imageBase64 = null,
                     )
                 }
                 backgroundWorkObserver.dismissResult()
@@ -113,15 +120,4 @@ class BackgroundWorkViewModel(
         }
     }
 
-    private fun setImage(base64: String) {
-        launch(dispatchersProvider.io) {
-            runCatching { imageLoader.load(base64) }
-                .onFailure(onError)
-                .onSuccess { image ->
-                    updateState {
-                        if (it.running) it else it.copy(image = image)
-                    }
-                }
-        }
-    }
 }

@@ -13,12 +13,32 @@ import kotlinx.coroutines.flow.flowOf
  */
 interface BackgroundWorkObserver {
     /**
+     * Selects the newest scheduled work owner before REPLACE can cancel its predecessor.
+     *
+     * @param ownerId Work UUID.
+     * @author Dmitriy Moroz
+     */
+    fun claimOwner(ownerId: String) = Unit
+
+    /**
+     * Publishes signals atomically only for the current work owner.
+     *
+     * @param ownerId Work UUID.
+     * @param publish Synchronous observer updates.
+     * @author Dmitriy Moroz
+     */
+    fun publishForOwner(ownerId: String, publish: () -> Unit): Boolean {
+        publish(); return true
+    }
+
+    /**
      * Loads SDAI data through `observeStatus`.
      *
      * @return Result produced by `observeStatus`.
      * @author Dmitriy Moroz
      */
     fun observeStatus(): Flow<BackgroundWorkStatus>
+
     /**
      * Loads SDAI data through `observeResult`.
      *
@@ -26,18 +46,21 @@ interface BackgroundWorkObserver {
      * @author Dmitriy Moroz
      */
     fun observeResult(): Flow<BackgroundWorkResult>
+
     /**
      * Executes the `dismissResult` step in the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     fun dismissResult()
+
     /**
      * Executes the `refreshStatus` step in the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     fun refreshStatus()
+
     /**
      * Executes the `postStatusMessage` step in the SDAI domain layer.
      *
@@ -46,6 +69,7 @@ interface BackgroundWorkObserver {
      * @author Dmitriy Moroz
      */
     fun postStatusMessage(title: String, subTitle: String)
+
     /**
      * Executes the `postSuccessSignal` step in the SDAI domain layer.
      *
@@ -53,12 +77,14 @@ interface BackgroundWorkObserver {
      * @author Dmitriy Moroz
      */
     fun postSuccessSignal(result: List<AiGenerationResult>)
+
     /**
      * Executes the `postCancelSignal` step in the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     fun postCancelSignal()
+
     /**
      * Executes the `postFailedSignal` step in the SDAI domain layer.
      *
@@ -66,6 +92,7 @@ interface BackgroundWorkObserver {
      * @author Dmitriy Moroz
      */
     fun postFailedSignal(t: Throwable)
+
     /**
      * Executes the `hasActiveTasks` step in the SDAI domain layer.
      *
@@ -86,25 +113,30 @@ object NoOpBackgroundWorkObserver : BackgroundWorkObserver {
      *
      * @author Dmitriy Moroz
      */
-    override fun observeStatus(): Flow<BackgroundWorkStatus> = flowOf(BackgroundWorkStatus(false, "", ""))
+    override fun observeStatus(): Flow<BackgroundWorkStatus> =
+        flowOf(BackgroundWorkStatus(false, "", ""))
+
     /**
      * Loads SDAI data through `observeResult`.
      *
      * @author Dmitriy Moroz
      */
     override fun observeResult(): Flow<BackgroundWorkResult> = flowOf(BackgroundWorkResult.None)
+
     /**
      * Executes the `dismissResult` step in the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     override fun dismissResult() = Unit
+
     /**
      * Executes the `refreshStatus` step in the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     override fun refreshStatus() = Unit
+
     /**
      * Executes the `postStatusMessage` step in the SDAI domain layer.
      *
@@ -113,6 +145,7 @@ object NoOpBackgroundWorkObserver : BackgroundWorkObserver {
      * @author Dmitriy Moroz
      */
     override fun postStatusMessage(title: String, subTitle: String) = Unit
+
     /**
      * Executes the `postSuccessSignal` step in the SDAI domain layer.
      *
@@ -120,12 +153,14 @@ object NoOpBackgroundWorkObserver : BackgroundWorkObserver {
      * @author Dmitriy Moroz
      */
     override fun postSuccessSignal(result: List<AiGenerationResult>) = Unit
+
     /**
      * Executes the `postCancelSignal` step in the SDAI domain layer.
      *
      * @author Dmitriy Moroz
      */
     override fun postCancelSignal() = Unit
+
     /**
      * Executes the `postFailedSignal` step in the SDAI domain layer.
      *
@@ -133,6 +168,7 @@ object NoOpBackgroundWorkObserver : BackgroundWorkObserver {
      * @author Dmitriy Moroz
      */
     override fun postFailedSignal(t: Throwable) = Unit
+
     /**
      * Executes the `hasActiveTasks` step in the SDAI domain layer.
      *

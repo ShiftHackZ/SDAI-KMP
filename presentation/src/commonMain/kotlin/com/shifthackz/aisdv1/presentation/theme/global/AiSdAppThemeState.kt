@@ -6,46 +6,21 @@ import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 
 /**
- * Carries `AiSdAppThemeState` data through the SDAI presentation layer.
+ * Contains only preferences that determine the application theme. Equal theme selections
+ * remain equal when unrelated preferences change, allowing the root theme to skip updates.
  *
+ * @param shouldUseSystemColorPalette Whether Android dynamic colors replace the static palette.
+ * @param shouldUseSystemDarkTheme Whether system appearance determines light or dark mode.
+ * @param isDarkTheme Whether manual dark mode is selected when system appearance is disabled.
+ * @param colorToken Selected static accent color.
+ * @param darkThemeToken Selected static dark palette.
  * @author Dmitriy Moroz
  */
 @Immutable
 data class AiSdAppThemeState(
-    /**
-     * Exposes the `stateKey` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val stateKey: Long = 0L,
-    /**
-     * Exposes the `systemColorPalette` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val systemColorPalette: Boolean = false,
-    /**
-     * Exposes the `systemDarkTheme` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val systemDarkTheme: Boolean = true,
-    /**
-     * Exposes the `darkTheme` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val darkTheme: Boolean = true,
-    /**
-     * Exposes the `colorToken` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
+    val shouldUseSystemColorPalette: Boolean = false,
+    val shouldUseSystemDarkTheme: Boolean = true,
+    val isDarkTheme: Boolean = true,
     val colorToken: ColorToken = ColorToken.MAUVE,
-    /**
-     * Exposes the `darkThemeToken` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val darkThemeToken: DarkThemeToken = DarkThemeToken.FRAPPE,
 ) : MviState

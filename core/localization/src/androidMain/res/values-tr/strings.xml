@@ -647,4 +647,30 @@
     <string name="error_samplers_unavailable">Örnekleme yöntemleri yüklenemedi. Sunucu bağlantısını kontrol edip yeniden deneyin.</string>
     <string name="error_seed_format">Negatif olmayan bir tam sayı veya -1 girin ya da boş bırakın.</string>
     <string name="error_seed_max">Tohum değeri %1$s değerini aşmamalıdır.</string>
+    <string name="auth_storage_unavailable">Kayıtlı kimlik bilgileri geçici olarak kullanılamıyor. Cihazın kilidini açtıktan sonra yeniden deneyin.</string>
+    <string name="auth_storage_unreadable">Kayıtlı kimlik bilgileri okunamıyor. Yeniden deneyin veya sıfırlayıp tekrar girin.</string>
+    <string name="auth_storage_write_failed">Kimlik bilgileri kaydedilemedi. Bağlanmadan önce yeniden deneyin.</string>
+    <string name="auth_storage_reset">Kayıtlı kimlik bilgilerini sıfırla</string>
+    <string name="auth_storage_reset_confirm">Kayıtlı Basic Auth kimlik bilgileri silinsin mi? Bunları yeniden girmeniz gerekecek. Modeller, görüntüler, diğer ayarlar ve ChatGPT oturumu korunur.</string>
+
+    <string name="ui_diagnostics_title">Arayüz tanılama</string>
+    <string name="ui_diagnostics_capture">Arayüz tanılamasını kaydet</string>
+    <string name="ui_diagnostics_reset">Kaydı sıfırla</string>
+    <string name="ui_diagnostics_share">Kaydı paylaş</string>
+
+    <string name="native_generation_engine_unknown">Yerel motor</string>
+    <string name="native_generation_busy">Başka bir yerel üretim hâlâ durduruluyor. Bekleyip yeniden deneyin.</string>
+    <string name="native_generation_connection">Yerel motor başlatılamadı. Yeniden deneyin.</string>
+    <string name="native_generation_process_died">Yerel motor beklenmedik şekilde durdu. Yeniden deneyin veya model ve arka uç ayarlarını kontrol edin.</string>
+    <string name="native_generation_unresponsive">Yerel motor yanıt vermeyi durdurdu. Yeniden deneyin veya model ve arka uç ayarlarını kontrol edin.</string>
+    <string name="native_generation_engine_failed">Yerel motor üretimi tamamlayamadı. Yeniden denemeden önce model ve arka uç ayarlarını kontrol edin.</string>
+    <string name="native_generation_invalid_result">Yerel motor geçersiz bir görüntü döndürdü. Yeniden deneyin.</string>
+    <string name="native_generation_interrupted">Üretim tamamlanmadan kesildi. Hazır olduğunuzda yeniden deneyin.</string>
+    <string name="native_generation_failure_context">%1$s: %2$s</string>
+    <string name="native_generation_stage_preparing">Model hazırlanıyor…</string>
+    <string name="native_generation_stage_tokenizing">İstem kodlanıyor…</string>
+    <string name="native_generation_stage_denoising">Görsel oluşturuluyor…</string>
+    <string name="native_generation_stage_decoding">Görsel çözümleniyor…</string>
+    <string name="native_generation_stage_running">Görsel motoru çalışıyor…</string>
+    <string name="native_generation_stage_writing_result">Sonuç kaydediliyor…</string>
 </resources>

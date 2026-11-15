@@ -9,9 +9,9 @@ import com.shifthackz.aisdv1.network.client.trackedJsonBody
 import com.shifthackz.aisdv1.network.request.OpenAiRequest
 import com.shifthackz.aisdv1.network.response.OpenAiResponse
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
@@ -64,7 +64,7 @@ class KtorOpenAiGenerationApi(
      * @author Dmitriy Moroz
      */
     override suspend fun validateBearerToken(apiKey: String) {
-        httpClient.get {
+        httpClient.boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_API_VERSION, PATH_MODELS)
             header(HttpHeaders.Authorization, "Bearer $apiKey")
@@ -83,7 +83,7 @@ class KtorOpenAiGenerationApi(
         apiKey: String,
         request: OpenAiRequest,
     ): OpenAiResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_API_VERSION, PATH_IMAGES, PATH_GENERATIONS)
             applyGenerationTimeout(generationTimeoutProvider)
@@ -104,18 +104,21 @@ class KtorOpenAiGenerationApi(
          * @author Dmitriy Moroz
          */
         const val PATH_API_VERSION = "v1"
+
         /**
          * Exposes the `PATH_MODELS` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_MODELS = "models"
+
         /**
          * Exposes the `PATH_IMAGES` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_IMAGES = "images"
+
         /**
          * Exposes the `PATH_GENERATIONS` value used by the SDAI network layer.
          *

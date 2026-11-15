@@ -1,7 +1,8 @@
 package com.shifthackz.aisdv1.feature.auth.di
 
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
-import com.shifthackz.aisdv1.feature.auth.AppleAuthorizationKeyValueStore
+import com.shifthackz.aisdv1.feature.auth.AppleAuthorizationKeyValueStoreProvider
+import com.shifthackz.aisdv1.feature.auth.AuthorizationKeyValueStoreProvider
 import com.shifthackz.aisdv1.feature.auth.AuthorizationStoreImpl
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -13,7 +14,8 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 internal actual fun platformAuthModule(): Module = module {
-    factory<AuthorizationStore> {
-        AuthorizationStoreImpl(AppleAuthorizationKeyValueStore())
+    single<AuthorizationKeyValueStoreProvider> { AppleAuthorizationKeyValueStoreProvider() }
+    single<AuthorizationStore> {
+        AuthorizationStoreImpl(provider = get(), dispatchers = get(), configurationStore = get())
     }
 }

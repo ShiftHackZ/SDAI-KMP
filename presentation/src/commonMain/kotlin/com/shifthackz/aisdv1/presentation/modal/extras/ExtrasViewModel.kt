@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.modal.extras
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.domain.entity.LoRA
 import com.shifthackz.aisdv1.domain.entity.StableDiffusionHyperNetwork
@@ -15,8 +17,10 @@ import com.shifthackz.aisdv1.presentation.utils.ExtrasFormatter
  * Coordinates `ExtrasViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class ExtrasViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -51,6 +55,8 @@ class ExtrasViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<ExtrasState, ExtrasIntent, ExtrasEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.EXTRAS,
     initialState = ExtrasState(source = preferenceManager.source),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

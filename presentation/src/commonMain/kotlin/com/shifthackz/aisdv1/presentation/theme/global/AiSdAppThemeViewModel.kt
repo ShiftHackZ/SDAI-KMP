@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.theme.global
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.core.mvi.EmptyIntent
@@ -8,13 +10,20 @@ import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
- * Coordinates `AiSdAppThemeViewModel` behavior in the SDAI presentation layer.
+ * Observes the persisted theme projection without invalidating the application for unrelated edits.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
+ * @param dispatchersProvider Dispatches initial preference collection and effect delivery.
+ * @param preferenceManager Source of persisted application preferences.
+ * @param onError Receives failures from preference observation.
  */
 class AiSdAppThemeViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -29,6 +38,8 @@ class AiSdAppThemeViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<AiSdAppThemeState, EmptyIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.AI_SD_APP_THEME,
     initialState = AiSdAppThemeState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -37,19 +48,18 @@ class AiSdAppThemeViewModel(
         launch(dispatchersProvider.immediate) {
             preferenceManager
                 .observe()
-                .catch { t -> onError(t) }
-                .collect { settings ->
-                    updateState { state ->
-                        state.copy(
-                            stateKey = state.stateKey + 1L,
-                            systemColorPalette = settings.designUseSystemColorPalette,
-                            systemDarkTheme = settings.designUseSystemDarkTheme,
-                            darkTheme = settings.designDarkTheme,
-                            colorToken = ColorToken.parse(settings.designColorToken),
-                            darkThemeToken = DarkThemeToken.parse(settings.designDarkThemeToken),
-                        )
-                    }
+                .map { settings ->
+                    AiSdAppThemeState(
+                        shouldUseSystemColorPalette = settings.designUseSystemColorPalette,
+                        shouldUseSystemDarkTheme = settings.designUseSystemDarkTheme,
+                        isDarkTheme = settings.designDarkTheme,
+                        colorToken = ColorToken.parse(settings.designColorToken),
+                        darkThemeToken = DarkThemeToken.parse(settings.designDarkThemeToken),
+                    )
                 }
+                .distinctUntilChanged()
+                .catch { t -> onError(t) }
+                .collect { theme -> updateState { theme } }
         }
     }
 

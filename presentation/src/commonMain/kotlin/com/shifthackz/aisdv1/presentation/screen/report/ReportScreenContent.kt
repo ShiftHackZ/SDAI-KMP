@@ -48,7 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.ReportReason
-import com.shifthackz.aisdv1.presentation.screen.txt2img.decodeBase64ImageBitmap
+import com.shifthackz.aisdv1.presentation.widget.image.SampledBase64Image
 import com.shifthackz.aisdv1.presentation.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.theme.textFieldColors
@@ -331,17 +331,14 @@ private fun ReportLoadedContent(
             )
             Spacer(modifier = Modifier.weight(1f))
         } else {
-            val imageBitmap = remember(state.imageBase64) {
-                state.imageBase64.decodeBase64ImageBitmap()
-            }
-            if (imageBitmap != null) {
-                Image(
+            if (state.imageBase64.isNotBlank()) {
+                SampledBase64Image(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .fillMaxWidth(0.45f)
                         .aspectRatio(1f)
                         .clip(RoundedCornerShape(12.dp)),
-                    bitmap = imageBitmap,
+                    base64 = state.imageBase64,
                     contentScale = ContentScale.Crop,
                     contentDescription = strings.imageContentDescription,
                 )

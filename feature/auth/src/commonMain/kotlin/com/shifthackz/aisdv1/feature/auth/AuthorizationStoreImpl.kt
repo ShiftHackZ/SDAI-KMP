@@ -1,113 +1,179 @@
 package com.shifthackz.aisdv1.feature.auth
 
+import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.preference.ConfigurationStore
+import com.shifthackz.aisdv1.feature.auth.transaction.PendingAuthorizationUpdate
+import kotlinx.serialization.json.Json
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
- * Implements `AuthorizationStore` behavior in the SDAI authentication feature layer.
+ * Serializes lazy protected-store initialization and complete credential transactions on IO.
+ * Invalid records are preserved and never become anonymous access.
  *
+ * @param provider Opens storage without doing work during dependency construction.
+ * @param configurationStore Supplies trusted atomic configuration-commit proof for recovery.
+ * @param dispatchers Supplies the IO context for disk and crypto operations.
  * @author Dmitriy Moroz
  */
+@OptIn(ExperimentalUuidApi::class)
 internal class AuthorizationStoreImpl(
-    /**
-     * Exposes the `store` value used by the SDAI authentication feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val store: AuthorizationKeyValueStore,
+    private val provider: AuthorizationKeyValueStoreProvider,
+    private val dispatchers: DispatchersProvider,
+    private val configurationStore: ConfigurationStore,
 ) : AuthorizationStore {
+    private val mutex = Mutex()
+    private var store: AuthorizationKeyValueStore? = null
 
     /**
-     * Loads SDAI data through `getAuthorizationCredentials`.
+     * Reads a complete legacy record; unavailable or unreadable storage fails explicitly.
      *
-     * @return Result produced by `getAuthorizationCredentials`.
      * @author Dmitriy Moroz
      */
-    override fun getAuthorizationCredentials(): AuthorizationCredentials {
-        val typeKey = getCredentialsTypeKey()
-        return getCredentials(typeKey)
-    }
+    override suspend fun getAuthorizationCredentials(): AuthorizationCredentials =
+        withContext(dispatchers.io) {
+            mutex.withLock {
+                // Failed atomic configuration writes cannot certify even a legacy credential record.
+                configurationStore.getAuthorizationCommitId()
+                val current = openStore()
+                try {
+                    reconcilePending(current)
+                    val rawKey = current.getString(KEY_CREDENTIALS_TYPE)
+                    val rawValue = current.getString(KEY_CREDENTIALS_RAW)
+                    if (rawKey.isNullOrEmpty() && rawValue.isNullOrEmpty()) return@withLock AuthorizationCredentials.None
+                    val key = AuthorizationCredentials.Key.entries.firstOrNull { it.key == rawKey }
+                        ?: throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.UNREADABLE)
+                    if (key == AuthorizationCredentials.Key.NONE) return@withLock AuthorizationCredentials.None
+                    if (rawValue.isNullOrEmpty()) throw AuthorizationStorageFailure(
+                        AuthorizationStorageFailure.Reason.UNREADABLE
+                    )
+                    parseByKeyValueToRaw(key, rawValue).toDomain()
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: AuthorizationStorageFailure) {
+                    throw error
+                } catch (_: Exception) {
+                    throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.UNREADABLE)
+                }
+            }
+        }
 
     /**
-     * Executes the `storeAuthorizationCredentials` step in the SDAI authentication feature layer.
+     * Stages candidates without replacing installed credentials, commits configuration and promotes.
+     * An interrupted update is resolved from its durable configuration association before any read.
      *
-     * @param credentials credentials value consumed by the API.
+     * @param credentials Complete replacement record, including an explicit anonymous selection.
+     * @param commitConfiguration Checked atomic configuration writer; must not reenter this store.
      * @author Dmitriy Moroz
      */
-    override fun storeAuthorizationCredentials(credentials: AuthorizationCredentials) {
-        saveCredentialsTypeKey(credentials.key)
-        saveCredentials(credentials)
-    }
-
-    /**
-     * Loads SDAI data through `getCredentialsTypeKey`.
-     *
-     * @return Result produced by `getCredentialsTypeKey`.
-     * @author Dmitriy Moroz
-     */
-    private fun getCredentialsTypeKey(): AuthorizationCredentials.Key {
-        val rawKey = store.getString(KEY_CREDENTIALS_TYPE).orEmpty()
-        if (rawKey.isEmpty()) return AuthorizationCredentials.Key.NONE
-        return AuthorizationCredentials.Key.from(rawKey)
-    }
-
-    /**
-     * Performs the SDAI side effect handled by `saveCredentialsTypeKey`.
-     *
-     * @param key key value consumed by the API.
-     * @author Dmitriy Moroz
-     */
-    private fun saveCredentialsTypeKey(key: AuthorizationCredentials.Key) {
-        store.putString(KEY_CREDENTIALS_TYPE, key.key)
-    }
-
-    /**
-     * Loads SDAI data through `getCredentials`.
-     *
-     * @param key key value consumed by the API.
-     * @return Result produced by `getCredentials`.
-     * @author Dmitriy Moroz
-     */
-    private fun getCredentials(key: AuthorizationCredentials.Key): AuthorizationCredentials {
-        val rawValue = store.getString(KEY_CREDENTIALS_RAW).orEmpty()
-        if (rawValue.isEmpty()) return AuthorizationCredentials.None
-        return try {
-            val rawCredentials = parseByKeyValueToRaw(key, rawValue)
-            rawCredentials.toDomain()
-        } catch (_: Exception) {
-            AuthorizationCredentials.None
+    override suspend fun storeAuthorizationCredentials(
+        credentials: AuthorizationCredentials,
+        commitConfiguration: suspend (String) -> Unit,
+    ) = withContext(dispatchers.io) {
+        mutex.withLock {
+            try {
+                val current = openStore()
+                reconcilePending(current)
+                val pending = PendingAuthorizationUpdate(
+                    id = Uuid.random().toString(),
+                    previousId = configurationStore.getAuthorizationCommitId(),
+                    type = credentials.key.key,
+                    raw = credentials.toRaw().toJson(),
+                )
+                current.putStrings(mapOf(KEY_PENDING to Json.encodeToString(pending)))
+                commitConfiguration(pending.id)
+                promote(current, pending)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: AuthorizationStorageFailure) {
+                throw error
+            } catch (_: Exception) {
+                throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.PERSISTENCE)
+            }
         }
     }
 
     /**
-     * Performs the SDAI side effect handled by `saveCredentials`.
+     * Resolves a durable staging record only from trusted complete configuration persistence.
      *
-     * @param credentials credentials value consumed by the API.
+     * @param current Protected store, owned by this operation under the IO mutex.
      * @author Dmitriy Moroz
      */
-    private fun saveCredentials(credentials: AuthorizationCredentials) {
-        val rawCredentials = credentials.toRaw()
-        val rawValue = rawCredentials.toJson()
-        store.putString(KEY_CREDENTIALS_RAW, rawValue)
+    private fun reconcilePending(current: AuthorizationKeyValueStore) {
+        val encoded = current.getString(KEY_PENDING) ?: return
+        val pending = Json.decodeFromString<PendingAuthorizationUpdate>(encoded)
+        if (pending.version != 1 || pending.id.isBlank()) {
+            throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.UNREADABLE)
+        }
+        when (configurationStore.getAuthorizationCommitId()) {
+            pending.id -> promote(current, pending)
+            pending.previousId -> current.putStrings(mapOf(KEY_PENDING to null))
+            else -> throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.UNREADABLE)
+        }
     }
 
     /**
-     * Provides the `companion object` singleton used by the SDAI authentication feature layer.
+     * Atomically promotes a committed candidate and removes only its staging envelope.
+     *
+     * @param current Serialized protected store.
+     * @param pending Candidate whose matching configuration is durably committed.
+     * @author Dmitriy Moroz
+     */
+    private fun promote(current: AuthorizationKeyValueStore, pending: PendingAuthorizationUpdate) {
+        current.putStrings(
+            mapOf(
+                KEY_CREDENTIALS_TYPE to pending.type,
+                KEY_CREDENTIALS_RAW to pending.raw,
+                KEY_PENDING to null,
+            )
+        )
+    }
+
+    /**
+     * Resets only the legacy credential store after the recovery use case confirms user intent.
      *
      * @author Dmitriy Moroz
      */
-    companion object {
-        /**
-         * Exposes the `KEY_CREDENTIALS_TYPE` value used by the SDAI authentication feature layer.
-         *
-         * @author Dmitriy Moroz
-         */
-        private const val KEY_CREDENTIALS_TYPE = "key_credentials_type"
-        /**
-         * Exposes the `KEY_CREDENTIALS_RAW` value used by the SDAI authentication feature layer.
-         *
-         * @author Dmitriy Moroz
-         */
-        private const val KEY_CREDENTIALS_RAW = "key_credentials_raw"
+    override suspend fun resetAuthorizationCredentials() = withContext(dispatchers.io) {
+        mutex.withLock {
+            store = null
+            try {
+                store = provider.resetAuthorizationStore()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: AuthorizationStorageFailure) {
+                throw error
+            } catch (_: Exception) {
+                throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.PERSISTENCE)
+            }
+        }
+    }
+
+    /**
+     * Opens only on IO under the mutex; initialization failures remain retryable.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun openStore(): AuthorizationKeyValueStore = store ?: try {
+        provider.getAuthorizationStore().also { store = it }
+    } catch (error: CancellationException) {
+        throw error
+    } catch (error: AuthorizationStorageFailure) {
+        throw error
+    } catch (_: Exception) {
+        throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.UNAVAILABLE)
+    }
+
+    private companion object {
+        const val KEY_PENDING = "key_credentials_pending_update"
+        const val KEY_CREDENTIALS_TYPE = "key_credentials_type"
+        const val KEY_CREDENTIALS_RAW = "key_credentials_raw"
     }
 }

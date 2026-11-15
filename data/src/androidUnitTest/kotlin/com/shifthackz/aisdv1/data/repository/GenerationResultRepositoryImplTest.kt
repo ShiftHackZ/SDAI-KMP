@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.data.mocks.mockGalleryItemMetadata
 import com.shifthackz.aisdv1.data.mocks.mockAiGenerationResult
 import com.shifthackz.aisdv1.data.mocks.mockAiGenerationResultPreviews
 import com.shifthackz.aisdv1.data.mocks.mockAiGenerationResults
@@ -25,7 +27,9 @@ class GenerationResultRepositoryImplTest {
     private val stubMediaStoreGateway = mockk<MediaStoreGateway>()
     private val stubLocalDataSource = mockk<GenerationResultDataSource.Local>()
 
+    private val galleryReads = mockk<GalleryReadGateway>()
     private val repository = GenerationResultRepositoryImpl(
+        galleryReads = galleryReads,
         preferenceManager = stubPreferenceManager,
         mediaStoreGateway = stubMediaStoreGateway,
         localDataSource = stubLocalDataSource,
@@ -33,32 +37,43 @@ class GenerationResultRepositoryImplTest {
 
     @Before
     fun initialize() {
+        coEvery { galleryReads.metadata(any()) } returns listOf(
+            mockGalleryItemMetadata.copy(
+                isHidden = false,
+                isLiked = false
+            )
+        )
+        coEvery { stubLocalDataSource.updateHiddenByIdList(any(), any()) } returns Unit
+        coEvery { stubLocalDataSource.updateLikedByIdList(any(), any()) } returns Unit
+
         every {
             stubPreferenceManager.saveToMediaStore
         } returns false
     }
 
     @Test
-    fun `given attempt to get all, local returns data, expected valid domain model list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryAll()
-        } returns mockAiGenerationResults
+    fun `given attempt to get all, local returns data, expected valid domain model list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryAll()
+            } returns mockAiGenerationResults
 
-        val actual = repository.getAll()
+            val actual = repository.getAll()
 
-        Assert.assertEquals(mockAiGenerationResults, actual)
-    }
+            Assert.assertEquals(mockAiGenerationResults, actual)
+        }
 
     @Test
-    fun `given attempt to get all, local returns empty data, expected empty domain model list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryAll()
-        } returns emptyList()
+    fun `given attempt to get all, local returns empty data, expected empty domain model list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryAll()
+            } returns emptyList()
 
-        val actual = repository.getAll()
+            val actual = repository.getAll()
 
-        Assert.assertEquals(emptyList<AiGenerationResult>(), actual)
-    }
+            Assert.assertEquals(emptyList<AiGenerationResult>(), actual)
+        }
 
     @Test
     fun `given attempt to get all, local throws exception, expected error value`() = runTest {
@@ -72,37 +87,40 @@ class GenerationResultRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to get all ids, local returns ids, expected valid id list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryIds()
-        } returns listOf(5598L, 1504L)
+    fun `given attempt to get all ids, local returns ids, expected valid id list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryIds()
+            } returns listOf(5598L, 1504L)
 
-        val actual = repository.getAllIds()
+            val actual = repository.getAllIds()
 
-        Assert.assertEquals(listOf(5598L, 1504L), actual)
-    }
-
-    @Test
-    fun `given attempt to get page, local returns data, expected valid domain model list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryPage(any(), any())
-        } returns mockAiGenerationResults
-
-        val actual = repository.getPage(20, 0)
-
-        Assert.assertEquals(mockAiGenerationResults, actual)
-    }
+            Assert.assertEquals(listOf(5598L, 1504L), actual)
+        }
 
     @Test
-    fun `given attempt to get page, local returns empty data, expected empty domain model list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryPage(any(), any())
-        } returns emptyList()
+    fun `given attempt to get page, local returns data, expected valid domain model list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryPage(any(), any())
+            } returns mockAiGenerationResults
 
-        val actual = repository.getPage(20, 0)
+            val actual = repository.getPage(20, 0)
 
-        Assert.assertEquals(emptyList<AiGenerationResult>(), actual)
-    }
+            Assert.assertEquals(mockAiGenerationResults, actual)
+        }
+
+    @Test
+    fun `given attempt to get page, local returns empty data, expected empty domain model list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryPage(any(), any())
+            } returns emptyList()
+
+            val actual = repository.getPage(20, 0)
+
+            Assert.assertEquals(emptyList<AiGenerationResult>(), actual)
+        }
 
     @Test
     fun `given attempt to get page, local throws exception, expected error value`() = runTest {
@@ -116,48 +134,52 @@ class GenerationResultRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to get preview page, local returns data, expected valid preview list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryPagePreview(any(), any())
-        } returns mockAiGenerationResultPreviews
+    fun `given attempt to get preview page, local returns data, expected valid preview list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryPagePreview(any(), any())
+            } returns mockAiGenerationResultPreviews
 
-        val actual = repository.getPagePreview(30, 0)
+            val actual = repository.getPagePreview(30, 0)
 
-        Assert.assertEquals(mockAiGenerationResultPreviews, actual)
-    }
-
-    @Test
-    fun `given attempt to get preview page, local returns empty data, expected empty preview list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryPagePreview(any(), any())
-        } returns emptyList()
-
-        val actual = repository.getPagePreview(30, 0)
-
-        Assert.assertEquals(emptyList<AiGenerationResultPreview>(), actual)
-    }
+            Assert.assertEquals(mockAiGenerationResultPreviews, actual)
+        }
 
     @Test
-    fun `given attempt to observe preview page, local emits data, expected valid preview list value`() = runTest {
-        every {
-            stubLocalDataSource.observePagePreview(any(), any())
-        } returns flowOf(mockAiGenerationResultPreviews)
+    fun `given attempt to get preview page, local returns empty data, expected empty preview list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryPagePreview(any(), any())
+            } returns emptyList()
 
-        val actual = repository.observePagePreview(30, 0).first()
+            val actual = repository.getPagePreview(30, 0)
 
-        Assert.assertEquals(mockAiGenerationResultPreviews, actual)
-    }
+            Assert.assertEquals(emptyList<AiGenerationResultPreview>(), actual)
+        }
 
     @Test
-    fun `given attempt to get by id, local returns data, expected valid domain model value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryById(any())
-        } returns mockAiGenerationResult
+    fun `given attempt to observe preview page, local emits data, expected valid preview list value`() =
+        runTest {
+            every {
+                stubLocalDataSource.observePagePreview(any(), any())
+            } returns flowOf(mockAiGenerationResultPreviews)
 
-        val actual = repository.getById(5598L)
+            val actual = repository.observePagePreview(30, 0).first()
 
-        Assert.assertEquals(mockAiGenerationResult, actual)
-    }
+            Assert.assertEquals(mockAiGenerationResultPreviews, actual)
+        }
+
+    @Test
+    fun `given attempt to get by id, local returns data, expected valid domain model value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryById(any())
+            } returns mockAiGenerationResult
+
+            val actual = repository.getById(5598L)
+
+            Assert.assertEquals(mockAiGenerationResult, actual)
+        }
 
     @Test
     fun `given attempt to get by id, local throws exception, expected error value`() = runTest {
@@ -171,26 +193,28 @@ class GenerationResultRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to get by id list, local returns data, expected valid domain model list value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryByIdList(any())
-        } returns mockAiGenerationResults
+    fun `given attempt to get by id list, local returns data, expected valid domain model list value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryByIdList(any())
+            } returns mockAiGenerationResults
 
-        val actual = repository.getByIds(listOf(5598L, 151297L))
+            val actual = repository.getByIds(listOf(5598L, 151297L))
 
-        Assert.assertEquals(mockAiGenerationResults, actual)
-    }
+            Assert.assertEquals(mockAiGenerationResults, actual)
+        }
 
     @Test
-    fun `given attempt to delete by id list, local delete success, expected complete value`() = runTest {
-        coEvery {
-            stubLocalDataSource.deleteByIdList(any())
-        } returns Unit
+    fun `given attempt to delete by id list, local delete success, expected complete value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.deleteByIdList(any())
+            } returns Unit
 
-        val actual = runCatching { repository.deleteByIdList(listOf(5598L, 151297L)) }
+            val actual = runCatching { repository.deleteByIdList(listOf(5598L, 151297L)) }
 
-        Assert.assertTrue(actual.isSuccess)
-    }
+            Assert.assertTrue(actual.isSuccess)
+        }
 
     @Test
     fun `given attempt to delete by id list, local delete fails, expected error value`() = runTest {
@@ -248,37 +272,40 @@ class GenerationResultRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to set visibility by ids, local update succeeds, expected complete value`() = runTest {
-        coEvery {
-            stubLocalDataSource.updateHiddenByIdList(listOf(5598L), true)
-        } returns Unit
+    fun `given attempt to set visibility by ids, local update succeeds, expected complete value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.updateHiddenByIdList(listOf(5598L), true)
+            } returns Unit
 
-        val actual = runCatching { repository.setVisibilityByIds(listOf(5598L), true) }
+            val actual = runCatching { repository.setVisibilityByIds(listOf(5598L), true) }
 
-        Assert.assertTrue(actual.isSuccess)
-    }
-
-    @Test
-    fun `given attempt to set visibility by ids, local update fails, expected error value`() = runTest {
-        coEvery {
-            stubLocalDataSource.updateHiddenByIdList(any(), any())
-        } throws stubException
-
-        val actual = runCatching { repository.setVisibilityByIds(listOf(5598L), false) }
-
-        Assert.assertSame(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertTrue(actual.isSuccess)
+        }
 
     @Test
-    fun `given attempt to set liked by ids, local update succeeds, expected complete value`() = runTest {
-        coEvery {
-            stubLocalDataSource.updateLikedByIdList(listOf(5598L), true)
-        } returns Unit
+    fun `given attempt to set visibility by ids, local update fails, expected error value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.updateHiddenByIdList(any(), any())
+            } throws stubException
 
-        val actual = runCatching { repository.setLikedByIds(listOf(5598L), true) }
+            val actual = runCatching { repository.setVisibilityByIds(listOf(5598L), false) }
 
-        Assert.assertTrue(actual.isSuccess)
-    }
+            Assert.assertSame(stubException, actual.exceptionOrNull())
+        }
+
+    @Test
+    fun `given attempt to set liked by ids, local update succeeds, expected complete value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.updateLikedByIdList(listOf(5598L), true)
+            } returns Unit
+
+            val actual = runCatching { repository.setLikedByIds(listOf(5598L), true) }
+
+            Assert.assertTrue(actual.isSuccess)
+        }
 
     @Test
     fun `given attempt to set liked by ids, local update fails, expected error value`() = runTest {
@@ -292,15 +319,16 @@ class GenerationResultRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to insert data, local insert success, expected id of inserted model value`() = runTest {
-        coEvery {
-            stubLocalDataSource.insert(any())
-        } returns mockAiGenerationResult.id
+    fun `given attempt to insert data, local insert success, expected id of inserted model value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.insert(any())
+            } returns mockAiGenerationResult.id
 
-        val actual = repository.insert(mockAiGenerationResult)
+            val actual = repository.insert(mockAiGenerationResult)
 
-        Assert.assertEquals(5598L, actual)
-    }
+            Assert.assertEquals(5598L, actual)
+        }
 
     @Test
     fun `given attempt to insert data, local insert fails, expected error value`() = runTest {
@@ -314,37 +342,39 @@ class GenerationResultRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to toggle image visibility, process succeeds, expected boolean value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryById(any())
-        } returnsMany listOf(
-            mockAiGenerationResult.copy(hidden = false),
-            mockAiGenerationResult.copy(hidden = true),
-        )
+    fun `given attempt to toggle image visibility, process succeeds, expected boolean value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryById(any())
+            } returnsMany listOf(
+                mockAiGenerationResult.copy(hidden = false),
+                mockAiGenerationResult.copy(hidden = true),
+            )
 
-        coEvery {
-            stubLocalDataSource.insert(any())
-        } returns 5598L
+            coEvery {
+                stubLocalDataSource.insert(any())
+            } returns 5598L
 
-        val actual = repository.toggleVisibility(5598L)
+            val actual = repository.toggleVisibility(5598L)
 
-        Assert.assertTrue(actual)
-    }
+            Assert.assertTrue(actual)
+        }
 
     @Test
-    fun `given attempt to toggle image visibility, error occurs, expected boolean value`() = runTest {
-        coEvery {
-            stubLocalDataSource.queryById(any())
-        } returns mockAiGenerationResult
+    fun `given attempt to toggle image visibility, error occurs, expected boolean value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.queryById(any())
+            } returns mockAiGenerationResult
 
-        coEvery {
-            stubLocalDataSource.insert(any())
-        } throws stubException
+            coEvery {
+                stubLocalDataSource.updateHiddenByIdList(any(), any())
+            } throws stubException
 
-        val actual = runCatching { repository.toggleVisibility(5598L) }
+            val actual = runCatching { repository.toggleVisibility(5598L) }
 
-        Assert.assertSame(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertSame(stubException, actual.exceptionOrNull())
+        }
 
     @Test
     fun `given attempt to toggle image like, process succeeds, expected boolean value`() = runTest {
@@ -371,7 +401,7 @@ class GenerationResultRepositoryImplTest {
         } returns mockAiGenerationResult
 
         coEvery {
-            stubLocalDataSource.insert(any())
+            stubLocalDataSource.updateLikedByIdList(any(), any())
         } throws stubException
 
         val actual = runCatching { repository.toggleLike(5598L) }

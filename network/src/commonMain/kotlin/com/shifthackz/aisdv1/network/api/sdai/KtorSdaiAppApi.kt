@@ -9,8 +9,8 @@ import com.shifthackz.aisdv1.network.request.ReportRequest
 import com.shifthackz.aisdv1.network.response.DownloadableModelResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedGet
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
@@ -70,7 +70,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchSupporters(): List<SupporterRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(appBaseUrl)
             url.appendPathSegments(PATH_SUPPORTERS)
         }
@@ -83,7 +83,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchOnnxModels(): List<DownloadableModelResponse> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(appBaseUrl)
             url.appendPathSegments(PATH_MODELS)
             trackUsage(NetworkUsageCategory.CONFIGS)
@@ -97,7 +97,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchMediaPipeModels(): List<DownloadableModelResponse> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(appBaseUrl)
             url.appendPathSegments(PATH_MEDIA_PIPE)
             trackUsage(NetworkUsageCategory.CONFIGS)
@@ -111,7 +111,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchSdxlModels(): List<DownloadableModelResponse> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(appBaseUrl)
             url.appendPathSegments(PATH_SDXL)
             trackUsage(NetworkUsageCategory.CONFIGS)
@@ -125,7 +125,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchCoreMlModels(): List<DownloadableModelResponse> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(appBaseUrl)
             url.appendPathSegments(PATH_CORE_ML)
             trackUsage(NetworkUsageCategory.CONFIGS)
@@ -139,7 +139,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchBonsaiModels(): List<DownloadableModelResponse> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(appBaseUrl)
             url.appendPathSegments(PATH_BONSAI)
             trackUsage(NetworkUsageCategory.CONFIGS)
@@ -153,7 +153,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     override suspend fun postReport(request: ReportRequest) {
-        httpClient.post {
+        httpClient.boundedPost {
             url.takeFrom(reportBaseUrl)
             url.appendPathSegments(PATH_REPORT)
             contentType(ContentType.Application.Json)
@@ -173,36 +173,42 @@ class KtorSdaiAppApi(
          * @author Dmitriy Moroz
          */
         const val PATH_SUPPORTERS = "supporters.json"
+
         /**
          * Exposes the `PATH_MODELS` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_MODELS = "models.json"
+
         /**
          * Exposes the `PATH_MEDIA_PIPE` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_MEDIA_PIPE = "mediapipe.json"
+
         /**
          * Exposes the `PATH_SDXL` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_SDXL = "sdxl.json"
+
         /**
          * Exposes the `PATH_CORE_ML` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_CORE_ML = "coreml.json"
+
         /**
          * Exposes the `PATH_BONSAI` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_BONSAI = "bonsai.json"
+
         /**
          * Exposes the `PATH_REPORT` value used by the SDAI network layer.
          *

@@ -3,7 +3,7 @@ package com.shifthackz.aisdv1.data.repository
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionHyperNetworksDataSource
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.StableDiffusionHyperNetwork
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionHyperNetworksRepository
 
@@ -32,11 +32,11 @@ internal class StableDiffusionHyperNetworksRepositoryImpl(
      */
     private val preferenceManager: PreferenceManager,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : StableDiffusionHyperNetworksRepository {
 
     /**
@@ -45,10 +45,11 @@ internal class StableDiffusionHyperNetworksRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchHyperNetworks() {
+        val connection = connections.snapshot()
         if (preferenceManager.source != ServerSource.AUTOMATIC1111) return
         val hyperNetworks = remoteDataSource.fetchHyperNetworks(
-            baseUrl = preferenceManager.automatic1111ServerUrl,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
         )
         localDataSource.insertHyperNetworks(hyperNetworks)
     }

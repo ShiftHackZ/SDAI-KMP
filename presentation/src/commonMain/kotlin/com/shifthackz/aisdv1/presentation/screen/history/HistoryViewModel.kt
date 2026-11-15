@@ -1,10 +1,13 @@
 package com.shifthackz.aisdv1.presentation.screen.history
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
-import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.HistoryRouter
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.core.navigation.router.HistoryRouter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 
@@ -12,20 +15,17 @@ import kotlinx.coroutines.withContext
  * Coordinates `HistoryViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class HistoryViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     private val dispatchersProvider: DispatchersProvider,
-    /**
-     * Exposes the `getAllGalleryUseCase` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val getAllGalleryUseCase: GetAllGalleryUseCase,
+    private val galleryReads: GalleryReadGateway,
     /**
      * Exposes the `router` value used by the SDAI presentation layer.
      *
@@ -39,6 +39,8 @@ class HistoryViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<HistoryState, HistoryIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.HISTORY.asDiagnosticScreen(),
     initialState = HistoryState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -57,7 +59,7 @@ class HistoryViewModel(
     private fun loadHistory() {
         updateState { it.copy(loading = true, error = null) }
         launch(dispatchersProvider.io) {
-            runCatching { getAllGalleryUseCase().filterNot { it.hidden } }
+            runCatching { galleryReads.history() }
                 .onSuccess { items ->
                     withContext(dispatchersProvider.immediate) {
                         updateState {

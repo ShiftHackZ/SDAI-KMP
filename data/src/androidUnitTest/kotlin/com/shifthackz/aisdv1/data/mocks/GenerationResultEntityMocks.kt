@@ -29,7 +29,6 @@ val mockGenerationResultEntities = listOf(mockGenerationResultEntity)
 
 val mockGenerationResultPreviewEntity = GenerationResultPreviewEntity(
     id = 5598L,
-    imageBase64 = "img",
     hidden = false,
     liked = true,
 )

@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.shifthackz.aisdv1.presentation"
-    testOptions.unitTests{
+    testOptions.unitTests {
         all { test ->
             test.jvmArgs(
                 "--add-opens", "java.base/java.lang=ALL-UNNAMED",
@@ -114,4 +114,12 @@ kotlin {
 dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.test.compose.manifest)
+}
+
+// Reports describe compiler stability/skipping decisions; they do not measure frame performance.
+composeCompiler {
+    if (providers.gradleProperty("sdaiComposeReports").orNull == "true") {
+        metricsDestination.set(layout.buildDirectory.dir("compose-metrics"))
+        reportsDestination.set(layout.buildDirectory.dir("compose-reports"))
+    }
 }

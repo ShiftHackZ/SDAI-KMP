@@ -1,21 +1,24 @@
+@file:OptIn(ExperimentalUuidApi::class)
+
 package com.shifthackz.aisdv1.presentation.widget.work
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import com.shifthackz.aisdv1.core.imageprocessing.Base64ToBitmapConverter
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
- * Coordinates `AndroidBackgroundWorkImageLoader` behavior in the SDAI presentation layer.
+ * Provides a bounded compatibility preview for consumers outside the measured Compose widget.
  *
  * @author Dmitriy Moroz
  */
-class AndroidBackgroundWorkImageLoader(
+internal class AndroidBackgroundWorkImageLoader(
     /**
-     * Exposes the `base64ToBitmapConverter` value used by the SDAI presentation layer.
+     * Shared sampled image owner; normal widget rendering measures its own visible slot.
      *
      * @author Dmitriy Moroz
      */
-    private val base64ToBitmapConverter: Base64ToBitmapConverter,
+    private val images: GalleryImageLoader,
 ) : BackgroundWorkImageLoader {
 
     /**
@@ -25,6 +28,6 @@ class AndroidBackgroundWorkImageLoader(
      * @return Result produced by `load`.
      * @author Dmitriy Moroz
      */
-    override suspend fun load(base64: String): ImageBitmap =
-        base64ToBitmapConverter(Base64ToBitmapConverter.Input(base64)).bitmap.asImageBitmap()
+    override suspend fun load(base64: String): ImageBitmap? =
+        images.loadTransient(Uuid.random().toString(), base64, false, 128)
 }

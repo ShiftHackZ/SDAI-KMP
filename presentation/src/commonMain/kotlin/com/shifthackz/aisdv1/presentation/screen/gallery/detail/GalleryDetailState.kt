@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.screen.gallery.detail
 
+import kotlin.uuid.Uuid
+import kotlin.uuid.ExperimentalUuidApi
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageBitmap
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -100,6 +102,12 @@ data class GalleryDetailContent(
      * @author Dmitriy Moroz
      */
     val imageBase64: String,
+    /**
+     * Persisted content identity for bounded display requests.
+     *
+     * @author Dmitriy Moroz
+     */
+    val imageRevision: String = "",
     /**
      * Exposes the `image` value used by the SDAI presentation layer.
      *
@@ -229,12 +237,14 @@ sealed interface GalleryDetailDialog {
      * @author Dmitriy Moroz
      */
     data object None : GalleryDetailDialog
+
     /**
      * Provides the `DeleteConfirm` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object DeleteConfirm : GalleryDetailDialog
+
     /**
      * Carries `Error` data through the SDAI presentation layer.
      *
@@ -280,6 +290,7 @@ enum class GalleryDetailTab {
  * @return Result produced by `toGalleryDetailContent`.
  * @author Dmitriy Moroz
  */
+@OptIn(ExperimentalUuidApi::class)
 internal fun AiGenerationResult.toGalleryDetailContent(
     showReportButton: Boolean,
 ): GalleryDetailContent =
@@ -288,6 +299,7 @@ internal fun AiGenerationResult.toGalleryDetailContent(
         generationType = type,
         id = id,
         imageBase64 = image,
+        imageRevision = imageRevision.ifBlank { Uuid.random().toString() },
         image = null,
         inputImageBase64 = inputImage.takeIf { type == AiGenerationResult.Type.IMAGE_TO_IMAGE },
         inputImage = null,

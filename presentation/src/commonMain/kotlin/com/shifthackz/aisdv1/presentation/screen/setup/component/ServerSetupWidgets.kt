@@ -93,6 +93,7 @@ internal fun ServerSetupModal(
                 }
             },
         )
+
         ServerSetupState.Modal.None -> Unit
         ServerSetupState.Modal.SourceFilters -> Unit
         ServerSetupState.Modal.SourceSort -> Unit
@@ -183,75 +184,77 @@ internal fun ServerSetupModal(
 }
 
 internal fun ServerSource.icon(platform: Platform): ImageVector = when (this) {
-        ServerSource.AUTOMATIC1111,
-        ServerSource.SWARM_UI,
-        ServerSource.OPEN_AI_COMPATIBLE,
+    ServerSource.AUTOMATIC1111,
+    ServerSource.SWARM_UI,
+    ServerSource.OPEN_AI_COMPATIBLE,
         -> Icons.Default.Computer
 
-        ServerSource.HORDE,
-        ServerSource.HUGGING_FACE,
-        ServerSource.OPEN_AI,
-        ServerSource.OPEN_AI_OAUTH,
-        ServerSource.STABILITY_AI,
-        ServerSource.FAL_AI,
-        ServerSource.ARLI_AI,
+    ServerSource.HORDE,
+    ServerSource.HUGGING_FACE,
+    ServerSource.OPEN_AI,
+    ServerSource.OPEN_AI_OAUTH,
+    ServerSource.STABILITY_AI,
+    ServerSource.FAL_AI,
+    ServerSource.ARLI_AI,
         -> Icons.Default.Cloud
 
-        ServerSource.LOCAL_MICROSOFT_ONNX,
-        ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
-        ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
+    ServerSource.LOCAL_MICROSOFT_ONNX,
+    ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
+    ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
         -> Icons.Default.Android
 
-        ServerSource.LOCAL_APPLE_CORE_ML,
+    ServerSource.LOCAL_APPLE_CORE_ML,
         -> BrandIcons.Apple
 
+    ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
+        Platform.ANDROID -> Icons.Default.Android
+        Platform.IOS -> BrandIcons.Apple
+    }
+}
+
+internal fun ServerSource.title(strings: ServerSetupStrings, platform: Platform): String =
+    when (this) {
+        ServerSource.AUTOMATIC1111 -> strings.automaticTitle
+        ServerSource.SWARM_UI -> strings.swarmTitle
+        ServerSource.HORDE -> strings.hordeTitle
+        ServerSource.HUGGING_FACE -> strings.huggingFaceTitle
+        ServerSource.OPEN_AI_COMPATIBLE -> strings.openAiCompatibleTitle
+        ServerSource.OPEN_AI_OAUTH -> Localization.string("srv_type_open_ai_oauth")
+        ServerSource.OPEN_AI -> strings.openAiTitle
+        ServerSource.STABILITY_AI -> strings.stabilityTitle
+        ServerSource.FAL_AI -> strings.falAiTitle
+        ServerSource.ARLI_AI -> strings.arliAiTitle
+        ServerSource.LOCAL_MICROSOFT_ONNX -> strings.localDiffusionTitle
+        ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> strings.mediaPipeTitle
+        ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.sdxlTitle
+        ServerSource.LOCAL_APPLE_CORE_ML -> strings.coreMlTitle
         ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
-            Platform.ANDROID -> Icons.Default.Android
-            Platform.IOS -> BrandIcons.Apple
+            Platform.ANDROID -> strings.bonsaiAndroidTitle
+            Platform.IOS -> strings.bonsaiTitle
         }
     }
 
-internal fun ServerSource.title(strings: ServerSetupStrings, platform: Platform): String = when (this) {
-    ServerSource.AUTOMATIC1111 -> strings.automaticTitle
-    ServerSource.SWARM_UI -> strings.swarmTitle
-    ServerSource.HORDE -> strings.hordeTitle
-    ServerSource.HUGGING_FACE -> strings.huggingFaceTitle
-    ServerSource.OPEN_AI_COMPATIBLE -> strings.openAiCompatibleTitle
-    ServerSource.OPEN_AI_OAUTH -> Localization.string("srv_type_open_ai_oauth")
-    ServerSource.OPEN_AI -> strings.openAiTitle
-    ServerSource.STABILITY_AI -> strings.stabilityTitle
-    ServerSource.FAL_AI -> strings.falAiTitle
-    ServerSource.ARLI_AI -> strings.arliAiTitle
-    ServerSource.LOCAL_MICROSOFT_ONNX -> strings.localDiffusionTitle
-    ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> strings.mediaPipeTitle
-    ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.sdxlTitle
-    ServerSource.LOCAL_APPLE_CORE_ML -> strings.coreMlTitle
-    ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
-        Platform.ANDROID -> strings.bonsaiAndroidTitle
-        Platform.IOS -> strings.bonsaiTitle
+internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platform): String =
+    when (this) {
+        ServerSource.AUTOMATIC1111 -> strings.automaticSubtitle
+        ServerSource.SWARM_UI -> strings.swarmSubtitle
+        ServerSource.HORDE -> strings.hordeSubtitle
+        ServerSource.HUGGING_FACE -> strings.huggingFaceSubtitle
+        ServerSource.OPEN_AI_COMPATIBLE -> strings.openAiCompatibleSubtitle
+        ServerSource.OPEN_AI_OAUTH -> Localization.string("open_ai_oauth_help")
+        ServerSource.OPEN_AI -> strings.openAiSubtitle
+        ServerSource.STABILITY_AI -> strings.stabilitySubtitle
+        ServerSource.FAL_AI -> strings.falAiSubtitle
+        ServerSource.ARLI_AI -> strings.arliAiSubtitle
+        ServerSource.LOCAL_MICROSOFT_ONNX -> strings.localDiffusionSubtitle
+        ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> strings.mediaPipeSubtitle
+        ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.sdxlSubtitle
+        ServerSource.LOCAL_APPLE_CORE_ML -> strings.coreMlSubtitle
+        ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
+            Platform.ANDROID -> strings.bonsaiAndroidSubtitle
+            Platform.IOS -> strings.bonsaiSubtitle
+        }
     }
-}
-
-internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platform): String = when (this) {
-    ServerSource.AUTOMATIC1111 -> strings.automaticSubtitle
-    ServerSource.SWARM_UI -> strings.swarmSubtitle
-    ServerSource.HORDE -> strings.hordeSubtitle
-    ServerSource.HUGGING_FACE -> strings.huggingFaceSubtitle
-    ServerSource.OPEN_AI_COMPATIBLE -> strings.openAiCompatibleSubtitle
-    ServerSource.OPEN_AI_OAUTH -> Localization.string("open_ai_oauth_help")
-    ServerSource.OPEN_AI -> strings.openAiSubtitle
-    ServerSource.STABILITY_AI -> strings.stabilitySubtitle
-    ServerSource.FAL_AI -> strings.falAiSubtitle
-    ServerSource.ARLI_AI -> strings.arliAiSubtitle
-    ServerSource.LOCAL_MICROSOFT_ONNX -> strings.localDiffusionSubtitle
-    ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> strings.mediaPipeSubtitle
-    ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.sdxlSubtitle
-    ServerSource.LOCAL_APPLE_CORE_ML -> strings.coreMlSubtitle
-    ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
-        Platform.ANDROID -> strings.bonsaiAndroidSubtitle
-        Platform.IOS -> strings.bonsaiSubtitle
-    }
-}
 
 internal fun ServerSetupState.ValidationError.message(
     strings: ServerSetupStrings,
@@ -264,38 +267,44 @@ internal fun ServerSetupState.ValidationError.message(
 }
 
 internal val ServerSetupState.mainButtonEnabled: Boolean
-    get() = when (step) {
-        ServerSetupState.Step.SOURCE -> true
-        ServerSetupState.Step.CONFIGURE -> when (mode) {
-            ServerSource.OPEN_AI_OAUTH -> openAiOAuthAccount != null && !openAiOAuthBusy
-            ServerSource.LOCAL_MICROSOFT_ONNX -> localOnnxCustomModel ||
-                localOnnxModels.any { it.selected && it.downloaded }
+    get() = when {
+        isAuthorizationStorageBusy -> false
+        step == ServerSetupState.Step.CONFIGURE && authorizationStorageFailure != null &&
+                (mode == ServerSource.SWARM_UI || mode == ServerSource.AUTOMATIC1111) -> false
 
-            ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> localMediaPipeCustomModel ||
-                localMediaPipeModels.any { it.selected && it.downloaded }
+        else -> when (step) {
+            ServerSetupState.Step.SOURCE -> true
+            ServerSetupState.Step.CONFIGURE -> when (mode) {
+                ServerSource.OPEN_AI_OAUTH -> openAiOAuthAccount != null && !openAiOAuthBusy
+                ServerSource.LOCAL_MICROSOFT_ONNX -> localOnnxCustomModel ||
+                        localOnnxModels.any { it.selected && it.downloaded }
 
-            ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> localSdxlCustomModel ||
-                localSdxlModels.any { it.selected && it.downloaded }
+                ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> localMediaPipeCustomModel ||
+                        localMediaPipeModels.any { it.selected && it.downloaded }
 
-            ServerSource.LOCAL_APPLE_CORE_ML -> localCoreMlModels.any { model ->
-                model.selected &&
-                    model.downloaded &&
-                    model.id !in CoreMlModelSupport.unsupportedModelIds
+                ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> localSdxlCustomModel ||
+                        localSdxlModels.any { it.selected && it.downloaded }
+
+                ServerSource.LOCAL_APPLE_CORE_ML -> localCoreMlModels.any { model ->
+                    model.selected &&
+                            model.downloaded &&
+                            model.id !in CoreMlModelSupport.unsupportedModelIds
+                }
+
+                ServerSource.LOCAL_APPLE_BONSAI -> localBonsaiModels.any { model ->
+                    model.selected &&
+                            model.downloaded &&
+                            model.id !in BonsaiModelSupport.unsupportedModelIds
+                }
+
+                else -> true
             }
-
-            ServerSource.LOCAL_APPLE_BONSAI -> localBonsaiModels.any { model ->
-                model.selected &&
-                    model.downloaded &&
-                    model.id !in BonsaiModelSupport.unsupportedModelIds
-            }
-
-            else -> true
         }
     }
 
 internal val ServerSetupState.LocalModel.isCustom: Boolean
     get() = id == LocalAiModel.CustomOnnx.id ||
-        id == LocalAiModel.CustomMediaPipe.id ||
-        id == LocalAiModel.CustomSdxl.id ||
-        id == LocalAiModel.CustomCoreMl.id ||
-        id == LocalAiModel.CustomBonsai.id
+            id == LocalAiModel.CustomMediaPipe.id ||
+            id == LocalAiModel.CustomSdxl.id ||
+            id == LocalAiModel.CustomCoreMl.id ||
+            id == LocalAiModel.CustomBonsai.id

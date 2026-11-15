@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.shifthackz.aisdv1.storage.db.persistent.contract.GenerationResultContract
+import com.shifthackz.aisdv1.storage.db.persistent.entity.GenerationResultMetadataEntity
 import com.shifthackz.aisdv1.storage.db.persistent.entity.GenerationResultEntity
 import com.shifthackz.aisdv1.storage.db.persistent.entity.GenerationResultPreviewEntity
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +24,7 @@ interface GenerationResultDao {
      * @return Result produced by `query`.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC")
+    @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC")
     suspend fun query(): List<GenerationResultEntity>
 
     /**
@@ -34,7 +35,7 @@ interface GenerationResultDao {
      * @return Result produced by `queryPage`.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC LIMIT :limit OFFSET :offset ")
+    @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC LIMIT :limit OFFSET :offset ")
     suspend fun queryPage(limit: Int, offset: Int): List<GenerationResultEntity>
 
     /**
@@ -49,11 +50,11 @@ interface GenerationResultDao {
         """
         SELECT
             ${GenerationResultContract.ID},
-            ${GenerationResultContract.IMAGE_BASE_64},
+            ${GenerationResultContract.IMAGE_REVISION},
             ${GenerationResultContract.HIDDEN},
             ${GenerationResultContract.LIKED}
         FROM ${GenerationResultContract.TABLE}
-        ORDER BY ${GenerationResultContract.CREATED_AT} DESC
+        ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC
         LIMIT :limit OFFSET :offset
         """,
     )
@@ -67,7 +68,7 @@ interface GenerationResultDao {
      * @return Result produced by `observePage`.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC LIMIT :limit OFFSET :offset ")
+    @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC LIMIT :limit OFFSET :offset ")
     fun observePage(limit: Int, offset: Int): Flow<List<GenerationResultEntity>>
 
     /**
@@ -82,11 +83,11 @@ interface GenerationResultDao {
         """
         SELECT
             ${GenerationResultContract.ID},
-            ${GenerationResultContract.IMAGE_BASE_64},
+            ${GenerationResultContract.IMAGE_REVISION},
             ${GenerationResultContract.HIDDEN},
             ${GenerationResultContract.LIKED}
         FROM ${GenerationResultContract.TABLE}
-        ORDER BY ${GenerationResultContract.CREATED_AT} DESC
+        ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC
         LIMIT :limit OFFSET :offset
         """,
     )
@@ -107,7 +108,7 @@ interface GenerationResultDao {
      * @return Result produced by `queryIds`.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT ${GenerationResultContract.ID} FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC")
+    @Query("SELECT ${GenerationResultContract.ID} FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC")
     suspend fun queryIds(): List<Long>
 
     /**
@@ -185,4 +186,81 @@ interface GenerationResultDao {
      */
     @Query("DELETE FROM ${GenerationResultContract.TABLE}")
     suspend fun deleteAll()
+
+    /**
+     * Observes stable global positions without image payloads.
+     *
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id FROM generation_results ORDER BY created_at DESC, id DESC")
+    fun observeIds(): Flow<List<Long>>
+
+    /**
+     * Reads a bounded metadata window.
+     *
+     * @param limit Maximum rows.
+     * @param offset Global starting position.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset")
+    fun observeMetadata(limit: Int, offset: Int): Flow<List<GenerationResultMetadataEntity>>
+
+    /**
+     * Loads metadata for selected rows, without materializing originals.
+     *
+     * @param ids Selected IDs, chunked by the caller.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results WHERE id IN (:ids)")
+    suspend fun queryMetadata(ids: List<Long>): List<GenerationResultMetadataEntity>
+
+    /**
+     * Reads lightweight flags for selection across metadata-window eviction.
+     *
+     * @param ids Selected identities, chunked by the caller.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id, hidden, liked, image_revision FROM generation_results WHERE id IN (:ids)")
+    suspend fun queryFlags(ids: List<Long>): List<GenerationResultPreviewEntity>
+
+    /**
+     * Observes one metadata row, including same-ID replacement.
+     *
+     * @param id Persisted identity.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results WHERE id = :id LIMIT 1")
+    fun observeMetadataItem(id: Long): Flow<GenerationResultMetadataEntity?>
+
+    /**
+     * Loads history parameters without image payloads.
+     *
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results WHERE hidden = 0 ORDER BY created_at DESC, id DESC")
+    suspend fun queryHistoryMetadata(): List<GenerationResultMetadataEntity>
+
+    /**
+     * Counts UTF8 payload bytes inside SQLite.
+     *
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT COALESCE(SUM(length(CAST(image_base_64 AS BLOB)) + length(CAST(original_image_base_64 AS BLOB))), 0) FROM generation_results")
+    suspend fun queryImageStorageBytes(): Long
+
+    /**
+     * Reads a revision-matched image only when its encoded size fits the budget.
+     *
+     * @param id Persisted image ID.
+     * @param revision Expected content identity.
+     * @param isInput Whether to read the original input.
+     * @param maxChars Maximum Base64 characters admitted before materialization.
+     * @author Dmitriy Moroz
+     */
+    @Query(
+        """SELECT CASE WHEN :isInput THEN original_image_base_64 ELSE image_base_64 END
+        FROM generation_results WHERE id = :id AND image_revision = :revision
+        AND length(CASE WHEN :isInput THEN original_image_base_64 ELSE image_base_64 END) <= :maxChars LIMIT 1"""
+    )
+    suspend fun queryImage(id: Long, revision: String, isInput: Boolean, maxChars: Int): String?
 }

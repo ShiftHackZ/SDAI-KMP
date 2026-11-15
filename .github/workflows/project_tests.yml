@@ -29,5 +29,16 @@ jobs:
       - name: Grant execute permissions for gradlew
         run: chmod +x ./gradlew
 
+      - name: Lint Kotlin sources
+        run: ./gradlew kotlinLint --no-daemon
+
+      - name: Upload Kotlin lint reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-lint-reports
+          path: build/reports/kotlinLint/
+          if-no-files-found: ignore
+
       - name: Run Tests with Gradle
         run: ./gradlew clean testDebugUnitTest

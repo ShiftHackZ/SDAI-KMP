@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.screen.img2img
 
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
@@ -23,7 +24,7 @@ import com.shifthackz.aisdv1.feature.benchmark.isLocalGenerationSource
 import com.shifthackz.aisdv1.presentation.core.GenerationPlatformServices
 import com.shifthackz.aisdv1.presentation.core.ViewModelLauncher
 import com.shifthackz.aisdv1.presentation.model.GenerationModal
-import com.shifthackz.aisdv1.presentation.navigation.router.ImageToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSaveResult
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSaver
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageShareResult
@@ -49,6 +50,7 @@ internal class ImageToImageActionHandler(
      * @author Dmitriy Moroz
      */
     private val dispatchersProvider: DispatchersProvider,
+    private val originalImageBudget: OriginalImageBudget,
     /**
      * Exposes the `getRandomImageUseCase` value used by the SDAI presentation layer.
      *
@@ -239,15 +241,18 @@ internal class ImageToImageActionHandler(
                         results = emptyList(),
                     )
                 }
+
                 ImageToImagePickResult.Cancelled -> updateState {
                     it.copy(pickingImage = false)
                 }
+
                 ImageToImagePickResult.Unsupported -> updateState {
                     it.copy(
                         pickingImage = false,
                         error = Localization.string("error_image_picking_unavailable"),
                     )
                 }
+
                 is ImageToImagePickResult.Failed -> updateState {
                     it.copy(
                         pickingImage = false,
@@ -274,7 +279,12 @@ internal class ImageToImageActionHandler(
             )
         }
         launch(dispatchersProvider.io, CoroutineStart.DEFAULT) {
-            runCatching { cropBase64ImageToSquare(Base64.encode(getRandomImageUseCase())) }
+            runCatching {
+                cropBase64ImageToSquare(
+                    Base64.encode(getRandomImageUseCase()),
+                    originalImageBudget
+                )
+            }
                 .onSuccess { base64 ->
                     withContext(dispatchersProvider.immediate) {
                         updateState {
@@ -337,7 +347,8 @@ internal class ImageToImageActionHandler(
 
     fun skipBenchmarkPrompt() {
         localGenerationBenchmarkGateProvider().markFirstBenchmarkPromptAnswered()
-        val pending = pendingGenerationState ?: return updateState { it.copy(screenModal = GenerationModal.None) }
+        val pending = pendingGenerationState
+            ?: return updateState { it.copy(screenModal = GenerationModal.None) }
         pendingGenerationState = null
         updateState { it.copy(screenModal = GenerationModal.None) }
         startGeneration(pending)
@@ -347,7 +358,8 @@ internal class ImageToImageActionHandler(
         if (suppressFutureWarnings) {
             localGenerationBenchmarkGateProvider().suppressRecommendationWarnings()
         }
-        val pending = pendingGenerationState ?: return updateState { it.copy(screenModal = GenerationModal.None) }
+        val pending = pendingGenerationState
+            ?: return updateState { it.copy(screenModal = GenerationModal.None) }
         pendingGenerationState = null
         updateState { it.copy(screenModal = GenerationModal.None) }
         startGeneration(pending)
@@ -362,7 +374,13 @@ internal class ImageToImageActionHandler(
         pendingGenerationState = validatedState
         launch(dispatchersProvider.io, CoroutineStart.DEFAULT) {
             val requestPayload = validatedState.mapToPayload()
-            runCatching { localGenerationBenchmarkGateProvider().evaluate(validatedState.toBenchmarkRequest(requestPayload)) }
+            runCatching {
+                localGenerationBenchmarkGateProvider().evaluate(
+                    validatedState.toBenchmarkRequest(
+                        requestPayload
+                    )
+                )
+            }
                 .onSuccess { result ->
                     withContext(dispatchersProvider.immediate) {
                         when (result) {
@@ -370,9 +388,11 @@ internal class ImageToImageActionHandler(
                                 pendingGenerationState = null
                                 startGeneration(validatedState)
                             }
+
                             LocalGenerationGateResult.AskRunBenchmark -> updateState {
                                 it.copy(screenModal = GenerationModal.Benchmark.FirstLocalGeneration)
                             }
+
                             is LocalGenerationGateResult.ConfirmExceedsRecommendation -> updateState {
                                 it.copy(
                                     screenModal = GenerationModal.Benchmark.ExceedsRecommendation(
@@ -423,7 +443,13 @@ internal class ImageToImageActionHandler(
                 val maskBase64 = validatedState.inPaint
                     .takeIf { validatedState.sourceSupportsInPaint }
                     ?.takeIf(ImageInPaintState::hasMask)
-                    ?.let { encodeInPaintMaskBase64(validatedState.imageBase64, it.strokes) }
+                    ?.let {
+                        encodeInPaintMaskBase64(
+                            validatedState.imageBase64,
+                            it.strokes,
+                            originalImageBudget
+                        )
+                    }
                     ?: ""
                 if (
                     validatedState.sourceSupportsInPaint &&
@@ -606,7 +632,9 @@ internal class ImageToImageActionHandler(
             val result = runCatching { imageSaver.save(base64) }
                 .getOrElse { t ->
                     if (t is CancellationException) throw t
-                    ImageSaveResult.Failed(t.message ?: Localization.string("error_unable_to_save_image"))
+                    ImageSaveResult.Failed(
+                        t.message ?: Localization.string("error_unable_to_save_image")
+                    )
                 }
             withContext(dispatchersProvider.immediate) {
                 updateState {
@@ -615,11 +643,16 @@ internal class ImageToImageActionHandler(
                             savingImage = false,
                             message = Localization.string("message_image_saved"),
                         )
+
                         ImageSaveResult.Unsupported -> it.copy(
                             savingImage = false,
                             error = Localization.string("error_image_saving_unavailable"),
                         )
-                        is ImageSaveResult.Failed -> it.copy(savingImage = false, error = result.message)
+
+                        is ImageSaveResult.Failed -> it.copy(
+                            savingImage = false,
+                            error = result.message
+                        )
                     }
                 }
             }
@@ -639,7 +672,9 @@ internal class ImageToImageActionHandler(
             val result = runCatching { imageSharer.share(base64) }
                 .getOrElse { t ->
                     if (t is CancellationException) throw t
-                    ImageShareResult.Failed(t.message ?: Localization.string("error_unable_to_share_image"))
+                    ImageShareResult.Failed(
+                        t.message ?: Localization.string("error_unable_to_share_image")
+                    )
                 }
             withContext(dispatchersProvider.immediate) {
                 updateState {
@@ -648,11 +683,16 @@ internal class ImageToImageActionHandler(
                             sharingImage = false,
                             message = Localization.string("message_share_sheet_opened"),
                         )
+
                         ImageShareResult.Unsupported -> it.copy(
                             sharingImage = false,
                             error = Localization.string("error_image_sharing_unavailable"),
                         )
-                        is ImageShareResult.Failed -> it.copy(sharingImage = false, error = result.message)
+
+                        is ImageShareResult.Failed -> it.copy(
+                            sharingImage = false,
+                            error = result.message
+                        )
                     }
                 }
             }

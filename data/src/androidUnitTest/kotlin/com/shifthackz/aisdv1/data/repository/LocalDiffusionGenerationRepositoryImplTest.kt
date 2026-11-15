@@ -1,13 +1,12 @@
 package com.shifthackz.aisdv1.data.repository
 
-import android.graphics.Bitmap
-import com.shifthackz.aisdv1.core.imageprocessing.BitmapToBase64Converter
+import com.shifthackz.aisdv1.data.local.DownloadableModelFileStore
+import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.data.mocks.mockLocalAiModel
 import com.shifthackz.aisdv1.data.mocks.mockTextToImagePayload
 import com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
-import com.shifthackz.aisdv1.domain.feature.diffusion.LocalDiffusion
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
@@ -29,14 +28,13 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class LocalDiffusionGenerationRepositoryImplTest {
 
-    private val stubBitmap = mockk<Bitmap>()
     private val stubException = Throwable("Something went wrong.")
     private val stubStatus = MutableSharedFlow<LocalDiffusionStatus>()
     private val stubMediaStoreGateway = mockk<MediaStoreGateway>()
-    private val stubBitmapToBase64Converter = mockk<BitmapToBase64Converter>()
     private val stubLocalDataSource = mockk<GenerationResultDataSource.Local>()
     private val stubPreferenceManager = mockk<PreferenceManager>()
-    private val stubLocalDiffusion = mockk<LocalDiffusion>()
+    private val stubNativeGateway = mockk<NativeGenerationGateway>()
+    private val stubModelFiles = mockk<DownloadableModelFileStore>()
     private val stubDownloadableLocalDataSource = mockk<DownloadableModelDataSource.Local>()
     private val stubBackgroundWorkObserver = mockk<BackgroundWorkObserver>()
 
@@ -44,20 +42,25 @@ class LocalDiffusionGenerationRepositoryImplTest {
         mediaStoreGateway = stubMediaStoreGateway,
         localDataSource = stubLocalDataSource,
         preferenceManager = stubPreferenceManager,
-        localDiffusion = stubLocalDiffusion,
+        nativeGateway = stubNativeGateway,
         downloadableLocalDataSource = stubDownloadableLocalDataSource,
-        bitmapToBase64Converter = stubBitmapToBase64Converter,
+        modelFileStore = stubModelFiles,
         backgroundWorkObserver = stubBackgroundWorkObserver,
     )
 
     @Before
     fun initialize() {
+        every { stubPreferenceManager.localOnnxModelId } returns mockLocalAiModel.id
+        every { stubPreferenceManager.localOnnxCustomModelPath } returns ""
+        every { stubPreferenceManager.localOnnxUseNNAPI } returns false
+        every { stubModelFiles.resolvePath(any()) } returns "/model"
+        coEvery { stubNativeGateway.cancelActive() } returns true
         every {
             stubBackgroundWorkObserver.hasActiveTasks()
         } returns false
 
         every {
-            stubLocalDiffusion.observeStatus()
+            stubNativeGateway.observeStatus(any())
         } returns stubStatus
 
         every {
@@ -66,63 +69,67 @@ class LocalDiffusionGenerationRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to observe status, local emits two values, expected same values with same order`() = runTest {
-        val values = mutableListOf<LocalDiffusionStatus>()
-        val job = launch {
-            repository
-                .observeStatus()
-                .take(2)
-                .toList(values)
+    fun `given attempt to observe status, local emits two values, expected same values with same order`() =
+        runTest {
+            val values = mutableListOf<LocalDiffusionStatus>()
+            val job = launch {
+                repository
+                    .observeStatus()
+                    .take(2)
+                    .toList(values)
+            }
+            runCurrent()
+
+            stubStatus.emit(LocalDiffusionStatus(1, 2))
+            stubStatus.emit(LocalDiffusionStatus(2, 2))
+            job.join()
+
+            Assert.assertEquals(
+                listOf(LocalDiffusionStatus(1, 2), LocalDiffusionStatus(2, 2)),
+                values,
+            )
         }
-        runCurrent()
-
-        stubStatus.emit(LocalDiffusionStatus(1, 2))
-        stubStatus.emit(LocalDiffusionStatus(2, 2))
-        job.join()
-
-        Assert.assertEquals(
-            listOf(LocalDiffusionStatus(1, 2), LocalDiffusionStatus(2, 2)),
-            values,
-        )
-    }
 
     @Test
-    fun `given attempt to observe status, local throws exception, expected error value`() = runTest {
-        every {
-            stubLocalDiffusion.observeStatus()
-        } returns flow { throw stubException }
+    fun `given attempt to observe status, local throws exception, expected error value`() =
+        runTest {
+            every {
+                stubNativeGateway.observeStatus(any())
+            } returns flow { throw stubException }
 
-        val actual = runCatching { repository.observeStatus().toList() }
+            val actual = runCatching { repository.observeStatus().toList() }
 
-        assertStubException(actual)
-    }
-
-    @Test
-    fun `given attempt to interrupt generation, remote completes, expected complete value`() = runTest {
-        coEvery {
-            stubLocalDiffusion.interrupt()
-        } returns Unit
-
-        val actual = runCatching { repository.interruptGeneration() }
-
-        Assert.assertTrue(actual.isSuccess)
-    }
+            assertStubException(actual)
+        }
 
     @Test
-    fun `given attempt to interrupt generation, remote throws exception, expected error value`() = runTest {
-        coEvery {
-            stubLocalDiffusion.interrupt()
-        } throws stubException
+    fun `given attempt to interrupt generation, remote completes, expected complete value`() =
+        runTest {
+            coEvery {
+                stubNativeGateway.cancelActive()
+            } returns true
 
-        val actual = runCatching { repository.interruptGeneration() }
+            val actual = runCatching { repository.interruptGeneration() }
 
-        assertStubException(actual)
-    }
+            Assert.assertTrue(actual.isSuccess)
+        }
+
+    @Test
+    fun `given attempt to interrupt generation, remote throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubNativeGateway.cancelActive()
+            } throws stubException
+
+            val actual = runCatching { repository.interruptGeneration() }
+
+            assertStubException(actual)
+        }
 
     @Test
     fun `given attempt to generate from text, no selected model, expected error value`() = runTest {
         coEvery {
-            stubDownloadableLocalDataSource.getSelectedOnnx()
+            stubDownloadableLocalDataSource.getById(any())
         } throws stubException
 
         val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
@@ -131,63 +138,57 @@ class LocalDiffusionGenerationRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to generate from text, has selected not downloaded model, expected IllegalStateException error value`() = runTest {
-        coEvery {
-            stubDownloadableLocalDataSource.getSelectedOnnx()
-        } returns mockLocalAiModel.copy(downloaded = false)
+    fun `given attempt to generate from text, has selected not downloaded model, expected IllegalStateException error value`() =
+        runTest {
+            coEvery {
+                stubDownloadableLocalDataSource.getById(any())
+            } returns mockLocalAiModel.copy(downloaded = false)
 
-        coEvery {
-            stubLocalDiffusion.process(any())
-        } returns stubBitmap
+            coEvery {
+                stubNativeGateway.generate(any())
+            } returns "base64"
 
-        every {
-            stubBitmapToBase64Converter(any())
-        } returns BitmapToBase64Converter.Output("base64")
 
-        val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
-        val error = actual.exceptionOrNull()
+            val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
+            val error = actual.exceptionOrNull()
 
-        Assert.assertTrue(error is IllegalStateException)
-        Assert.assertEquals("Model not downloaded.", error?.message)
-    }
+            Assert.assertTrue(error is IllegalStateException)
+            Assert.assertEquals("Model not downloaded.", error?.message)
+        }
 
     @Test
-    fun `given attempt to generate from text, has selected downloaded model, local process success, expected valid domain model value`() = runTest {
-        coEvery {
-            stubDownloadableLocalDataSource.getSelectedOnnx()
-        } returns mockLocalAiModel.copy(downloaded = true)
+    fun `given attempt to generate from text, has selected downloaded model, local process success, expected valid domain model value`() =
+        runTest {
+            coEvery {
+                stubDownloadableLocalDataSource.getById(any())
+            } returns mockLocalAiModel.copy(downloaded = true)
 
-        coEvery {
-            stubLocalDiffusion.process(any())
-        } returns stubBitmap
+            coEvery {
+                stubNativeGateway.generate(any())
+            } returns "base64"
 
-        every {
-            stubBitmapToBase64Converter(any())
-        } returns BitmapToBase64Converter.Output("base64")
 
-        val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
+            val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
 
-        Assert.assertTrue(actual.isSuccess)
-    }
+            Assert.assertTrue(actual.isSuccess)
+        }
 
     @Test
-    fun `given attempt to generate from text, has selected downloaded model, local process fails, expected error value`() = runTest {
-        coEvery {
-            stubDownloadableLocalDataSource.getSelectedOnnx()
-        } returns mockLocalAiModel.copy(downloaded = true)
+    fun `given attempt to generate from text, has selected downloaded model, local process fails, expected error value`() =
+        runTest {
+            coEvery {
+                stubDownloadableLocalDataSource.getById(any())
+            } returns mockLocalAiModel.copy(downloaded = true)
 
-        coEvery {
-            stubLocalDiffusion.process(any())
-        } throws stubException
+            coEvery {
+                stubNativeGateway.generate(any())
+            } throws stubException
 
-        every {
-            stubBitmapToBase64Converter(any())
-        } returns BitmapToBase64Converter.Output("base64")
 
-        val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
+            val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
 
-        assertStubException(actual)
-    }
+            assertStubException(actual)
+        }
 
     private fun <T> assertStubException(actual: Result<T>) {
         val error = actual.exceptionOrNull()

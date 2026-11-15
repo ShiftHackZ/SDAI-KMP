@@ -42,36 +42,42 @@ import platform.UIKit.UIView
  * @author Dmitriy Moroz
  */
 internal const val TEXT_FIELD_CORNER_RADIUS = 4.0
+
 /**
  * Exposes the `FIELD_TOP` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val FIELD_TOP = 8.0
+
 /**
  * Exposes the `MIN_FIELD_HEIGHT` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MIN_FIELD_HEIGHT = 56.0
+
 /**
  * Exposes the `LABEL_HEIGHT` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val LABEL_HEIGHT = 20.0
+
 /**
  * Exposes the `MULTILINE_TOP_INSET` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MULTILINE_TOP_INSET = 16.0
+
 /**
  * Exposes the `MULTILINE_HORIZONTAL_INSET` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MULTILINE_HORIZONTAL_INSET = 14.0
+
 /**
  * Exposes the `MULTILINE_BOTTOM_INSET` value used by the SDAI presentation layer.
  *
@@ -80,21 +86,23 @@ internal const val MULTILINE_HORIZONTAL_INSET = 14.0
 internal const val MULTILINE_BOTTOM_INSET = 10.0
 
 /**
- * Renders the `PlatformOutlinedTextField` UI for the SDAI presentation layer.
+ * Displays the iOS outlined input using a native UITextField or UITextView. Native focus pins
+ * its surrounding lazy item so scrolling retains the active view, first responder and selection.
+ * Text remains caller-owned; UIKit callbacks and selection synchronization are unchanged.
  *
- * @param value value value consumed by the API.
- * @param onValueChange callback invoked by the component.
- * @param label label value consumed by the API.
- * @param containerColor container color value consumed by the API.
- * @param textColor text color value consumed by the API.
- * @param hintColor hint color value consumed by the API.
- * @param modifier Compose modifier applied to the rendered UI.
- * @param enabled enabled value consumed by the API.
- * @param error error value consumed by the API.
- * @param keyboardType keyboard type value consumed by the API.
- * @param visualTransformation visual transformation value consumed by the API.
- * @param trailingIcon trailing icon value consumed by the API.
- * @param singleLine single line value consumed by the API.
+ * @param value Current caller-owned text rendered by the native editor.
+ * @param onValueChange Receives native editing changes without replacing the text-selection API.
+ * @param label Placeholder and floating-label text.
+ * @param containerColor Background of the native editor and outlined container.
+ * @param textColor Foreground used for entered text.
+ * @param hintColor Color used when the label is not floating.
+ * @param modifier Layout applied to the field and optional validation feedback.
+ * @param enabled Whether the native control accepts editing.
+ * @param error Optional validation message and error styling trigger.
+ * @param keyboardType Requested native keyboard layout.
+ * @param visualTransformation Enables secure entry when different from VisualTransformation.None.
+ * @param trailingIcon Optional Compose action overlaid at the editor's trailing edge.
+ * @param singleLine Whether to use UITextField instead of multiline UITextView.
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalComposeUiApi::class)
@@ -114,19 +122,20 @@ internal actual fun PlatformOutlinedTextField(
     trailingIcon: @Composable (() -> Unit)?,
     singleLine: Boolean,
 ) {
-    var focused by remember { mutableStateOf(false) }
+    var isFocused by remember { mutableStateOf(false) }
+    RetainFocusedNativeEditor(isFocused = isFocused)
     val colors = MaterialTheme.colorScheme
     val borderColor = when {
         error != null -> colors.error
-        focused -> colors.primary
+        isFocused -> colors.primary
         else -> colors.outline
     }
     val labelColor = when {
         error != null -> colors.error
-        focused -> colors.primary
+        isFocused -> colors.primary
         else -> hintColor
     }
-    val floatingLabel = focused || value.isNotEmpty()
+    val floatingLabel = isFocused || value.isNotEmpty()
     val textLines = if (singleLine) {
         1
     } else {
@@ -157,7 +166,7 @@ internal actual fun PlatformOutlinedTextField(
                     PlatformTextInputView(singleLine = singleLine).apply {
                         setFieldValue(value)
                         onTextChanged = onValueChange
-                        onFocusChanged = { focused = it }
+                        onFocusChanged = { isFocused = it }
                         configure(
                             label = label,
                             floatingLabel = floatingLabel,
@@ -176,7 +185,7 @@ internal actual fun PlatformOutlinedTextField(
                 },
                 update = { inputView ->
                     inputView.onTextChanged = onValueChange
-                    inputView.onFocusChanged = { focused = it }
+                    inputView.onFocusChanged = { isFocused = it }
                     inputView.setFieldValue(value)
                     inputView.configure(
                         label = label,

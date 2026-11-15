@@ -2,8 +2,8 @@
 
 package com.shifthackz.aisdv1.presentation.screen.img2img
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -32,9 +32,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -42,6 +45,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.model.compactDisplayName
+import com.shifthackz.aisdv1.presentation.platform.rememberExternalUrlLauncher
+import com.shifthackz.aisdv1.presentation.widget.image.rememberPreviewImage
+import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.widget.scrollbar.verticalScrollbar
 
 
@@ -106,7 +112,6 @@ internal fun UnsupportedImageToImageBody(
  *
  * @param state state rendered or processed by the component.
  * @param strings strings value consumed by the API.
- * @param inputImageBitmap input image bitmap value consumed by the API.
  * @param promptChipTextFieldState prompt chip text field state value consumed by the API.
  * @param negativePromptChipTextFieldState negative prompt chip text field state value consumed by the API.
  * @param processIntent process intent value consumed by the API.
@@ -117,39 +122,51 @@ internal fun UnsupportedImageToImageBody(
 internal fun ImageToImageBody(
     state: ImageToImageState,
     strings: ImageToImageStrings,
-    inputImageBitmap: ImageBitmap?,
     promptChipTextFieldState: MutableState<TextFieldValue>,
     negativePromptChipTextFieldState: MutableState<TextFieldValue>,
     processIntent: (ImageToImageIntent) -> Unit,
     onInPaintClick: () -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val urlLauncher = rememberExternalUrlLauncher()
+    val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
+        { event ->
+            if (event == GenerationInputFormEvent.OpenADetailerInstallInstructions) {
+                urlLauncher.openUrl("https://github.com/Bing-su/adetailer#install")
+            } else event.toImageToImageIntent()?.let(processIntent)
+        }
+    }
+    val denoisingStrength = state.denoisingStrength
+    val afterSlidersSection: @Composable () -> Unit = remember(denoisingStrength, processIntent) {
+        { DenoisingStrengthSlider(denoisingStrength, processIntent) }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .verticalScrollbar(listState),
         state = listState,
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item {
-            ImageInputSection(
-                state = state,
-                strings = strings,
-                image = inputImageBitmap,
-                processIntent = processIntent,
-                onInPaintClick = onInPaintClick,
-            )
+        item(key = "generation-input-image") {
+            BoxWithConstraints(Modifier.padding(bottom = 16.dp)) {
+                val edge = with(LocalDensity.current) { maxWidth.roundToPx() }
+                ImageInputSection(
+                    state = state,
+                    strings = strings,
+                    image = rememberPreviewImage(state.imageBase64, edge),
+                    processIntent = processIntent,
+                    onInPaintClick = onInPaintClick,
+                )
+            }
         }
-        item {
-            ImageToImageForm(
-                state = state,
-                strings = strings,
-                promptChipTextFieldState = promptChipTextFieldState,
-                negativePromptChipTextFieldState = negativePromptChipTextFieldState,
-                processIntent = processIntent,
-            )
-        }
+        imageToImageFormItems(
+            state = state,
+            strings = strings,
+            promptChipTextFieldState = promptChipTextFieldState,
+            negativePromptChipTextFieldState = negativePromptChipTextFieldState,
+            onEvent = onEvent,
+            afterSlidersSection = afterSlidersSection,
+        )
 
     }
 }

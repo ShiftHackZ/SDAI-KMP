@@ -43,6 +43,9 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -59,6 +62,7 @@ import kotlin.random.Random
  *
  * @param modifier Compose modifier applied to the rendered UI.
  * @param state state rendered or processed by the component.
+ * @param imageLoader Injected sampled image loader; null is reserved for static previews.
  * @param processIntent process intent value consumed by the API.
  * @author Dmitriy Moroz
  */
@@ -66,9 +70,15 @@ import kotlin.random.Random
 fun GalleryScreenContent(
     modifier: Modifier = Modifier,
     state: GalleryState,
+    imageLoader: GalleryImageLoader? = null,
     processIntent: (GalleryIntent) -> Unit = {},
 ) {
     val listState = rememberLazyGridState()
+    val metadata = remember(state.items) { state.items.associateBy(GalleryGridItemUi::id) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }.distinctUntilChanged()
+            .collect { processIntent(GalleryIntent.Viewport(it)) }
+    }
 
     Box(modifier) {
         Scaffold(
@@ -117,7 +127,7 @@ fun GalleryScreenContent(
                             ) { isInSelectionMode ->
                                 if (!isInSelectionMode) {
                                     AnimatedVisibility(
-                                        visible = state.items.isNotEmpty(),
+                                        visible = state.itemIds.isNotEmpty(),
                                         enter = fadeIn(),
                                         exit = fadeOut(),
                                     ) {
@@ -229,7 +239,8 @@ fun GalleryScreenContent(
                         .padding(top = paddingValues.calculateTopPadding()),
                     grid = state.grid,
                 )
-                state.items.isEmpty() -> GalleryEmptyState(Modifier.fillMaxSize())
+
+                state.itemIds.isEmpty() -> GalleryEmptyState(Modifier.fillMaxSize())
                 else -> LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxSize()
@@ -242,9 +253,13 @@ fun GalleryScreenContent(
                     state = listState,
                 ) {
                     items(
-                        items = state.items,
-                        key = GalleryGridItemUi::id,
-                    ) { item ->
+                        items = state.itemIds,
+                        key = { it },
+                    ) { id ->
+                        val item = metadata[id]
+                        if (item == null) {
+                            GalleryUiItemShimmer(); return@items
+                        }
                         val selected = state.selection.contains(item.id)
                         GalleryUiItem(
                             modifier = Modifier
@@ -255,6 +270,7 @@ fun GalleryScreenContent(
                                     },
                                 ),
                             item = item,
+                            imageLoader = imageLoader,
                             selectionMode = state.selectionMode,
                             checked = selected,
                             onCheckedChange = {
@@ -268,14 +284,6 @@ fun GalleryScreenContent(
                                 processIntent(GalleryIntent.OpenItem(it.id))
                             },
                         )
-                    }
-                    if (state.canLoadMore) {
-                        item(key = "load_next_page") {
-                            LaunchedEffect(state.nextPage) {
-                                processIntent(GalleryIntent.LoadNextPage)
-                            }
-                            GalleryUiItemShimmer()
-                        }
                     }
                     items(2, key = { "bottom_spacer_$it" }) {
                         Spacer(modifier = Modifier.height(32.dp))

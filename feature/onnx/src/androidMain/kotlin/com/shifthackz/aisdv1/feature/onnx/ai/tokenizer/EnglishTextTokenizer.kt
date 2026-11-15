@@ -7,10 +7,8 @@ import ai.onnxruntime.OrtSession
 import android.text.TextUtils
 import android.util.JsonReader
 import android.util.Pair
-import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.common.log.debugLog
 import com.shifthackz.aisdv1.core.common.log.errorLog
-import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.KEY_INPUT_IDS
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.ORT
@@ -18,9 +16,9 @@ import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.ORT_KEY_MODEL_F
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.TAG
 import com.shifthackz.aisdv1.feature.onnx.ai.extensions.halfCorner
 import com.shifthackz.aisdv1.feature.onnx.ai.extensions.toArrays
-import com.shifthackz.aisdv1.feature.onnx.environment.LocalModelIdProvider
 import com.shifthackz.aisdv1.feature.onnx.environment.OrtEnvironmentProvider
-import com.shifthackz.aisdv1.feature.onnx.extensions.modelPathPrefix
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRuntimeConfiguration
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRunController
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -30,7 +28,11 @@ import java.util.Locale
 import java.util.regex.Pattern
 
 /**
- * Coordinates `EnglishTextTokenizer` behavior in the SDAI ONNX local diffusion feature layer.
+ * Text encoder with job-scoped model configuration and explicitly owned session/input tensors.
+ *
+ * @param ortEnvironmentProvider Child native environment.
+ * @param configuration Immutable model location.
+ * @param controller Cooperative cancellation without concurrent session close.
  *
  * @author Dmitriy Moroz
  */
@@ -41,24 +43,8 @@ internal class EnglishTextTokenizer(
      * @author Dmitriy Moroz
      */
     private val ortEnvironmentProvider: OrtEnvironmentProvider,
-    /**
-     * Exposes the `fileProviderDescriptor` value used by the SDAI ONNX local diffusion feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val fileProviderDescriptor: FileProviderDescriptor,
-    /**
-     * Exposes the `localModelIdProvider` value used by the SDAI ONNX local diffusion feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val localModelIdProvider: LocalModelIdProvider,
-    /**
-     * Exposes the `preferenceManager` value used by the SDAI ONNX local diffusion feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val preferenceManager: PreferenceManager,
+    private val configuration: OnnxRuntimeConfiguration,
+    private val controller: OnnxRunController,
 ) : LocalDiffusionTextTokenizer {
 
     /**
@@ -74,12 +60,14 @@ internal class EnglishTextTokenizer(
      * @author Dmitriy Moroz
      */
     private val encoder: MutableMap<String, Int> = HashMap()
+
     /**
      * Exposes the `decoder` value used by the SDAI ONNX local diffusion feature layer.
      *
      * @author Dmitriy Moroz
      */
     private val decoder: MutableMap<Int, String> = HashMap()
+
     /**
      * Exposes the `bpeRanks` value used by the SDAI ONNX local diffusion feature layer.
      *
@@ -93,6 +81,7 @@ internal class EnglishTextTokenizer(
      * @author Dmitriy Moroz
      */
     private var isInitMap = false
+
     /**
      * Exposes the `session` value used by the SDAI ONNX local diffusion feature layer.
      *
@@ -117,12 +106,14 @@ internal class EnglishTextTokenizer(
             debugLog("{$TAG} {TOKENIZER} {initialize} Session already initialized, skipping...")
             return
         }
-        val options = OrtSession.SessionOptions()
-        options.addConfigEntry(ORT_KEY_MODEL_FORMAT, ORT)
-        session = ortEnvironmentProvider.get().createSession(
-            "${modelPathPrefix(preferenceManager, fileProviderDescriptor, localModelIdProvider)}/${LocalDiffusionContract.TOKENIZER_MODEL}",
-            options
-        )
+        controller.checkActive()
+        OrtSession.SessionOptions().use { options ->
+            options.addConfigEntry(ORT_KEY_MODEL_FORMAT, ORT)
+            session = ortEnvironmentProvider.get().createSession(
+                "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_MODEL}",
+                options,
+            )
+        }
         debugLog("{$TAG} {TOKENIZER} {initialize} Session created successfully!")
         if (!isInitMap) {
             encoder.putAll(loadEncoder())
@@ -159,7 +150,7 @@ internal class EnglishTextTokenizer(
         }
         val ints = IntArray(result.size)
         for (i in result.indices) ints[i] = result[i]
-        val resultString =  String(ints, 0, ints.size)
+        val resultString = String(ints, 0, ints.size)
         debugLog("{$TAG} {TOKENIZER} {decode} Decode was successful!")
         return resultString
     }
@@ -225,19 +216,13 @@ internal class EnglishTextTokenizer(
             debugLog("{$TAG} {TOKENIZER} {tensor} Input ids array is null, skipping.")
             return null
         }
-        val inputIds = OnnxTensor.createTensor(
-            ortEnvironmentProvider.get(),
-            IntBuffer.wrap(ids),
-            longArrayOf(1, ids.size.toLong())
-        )
-        val input: MutableMap<String, OnnxTensor> = HashMap()
-        input[KEY_INPUT_IDS] = inputIds
-        val result = session!!.run(input)
-        val lastHiddenState = result[0].value
-        result.close()
-        val tensor = OnnxTensor.createTensor(ortEnvironmentProvider.get(), lastHiddenState)
-        debugLog("{$TAG} {TOKENIZER} {tensor} Tensor formation was successful!")
-        return tensor
+        return OnnxTensor.createTensor(
+            ortEnvironmentProvider.get(), IntBuffer.wrap(ids), longArrayOf(1, ids.size.toLong()),
+        ).use { inputIds ->
+            controller.run(checkNotNull(session), mapOf(KEY_INPUT_IDS to inputIds)).use { result ->
+                OnnxTensor.createTensor(ortEnvironmentProvider.get(), result[0].value)
+            }
+        }
     }
 
     /**
@@ -348,7 +333,8 @@ internal class EnglishTextTokenizer(
     private fun loadEncoder(): Map<String, Int> {
         val map: MutableMap<String, Int> = HashMap()
         try {
-            val path = "${modelPathPrefix(preferenceManager, fileProviderDescriptor, localModelIdProvider)}/${LocalDiffusionContract.TOKENIZER_VOCABULARY}"
+            val path =
+                "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_VOCABULARY}"
             val jsonReader = JsonReader(InputStreamReader(FileInputStream(path)))
             jsonReader.beginObject()
             while (jsonReader.hasNext()) {
@@ -387,7 +373,7 @@ internal class EnglishTextTokenizer(
     private fun loadBpeRanks(): Map<Pair<String, String>, Int?> {
         val result: MutableMap<Pair<String, String>, Int?> = HashMap()
         try {
-            val path = "${modelPathPrefix(preferenceManager, fileProviderDescriptor, localModelIdProvider)}/${LocalDiffusionContract.TOKENIZER_MERGES}"
+            val path = "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_MERGES}"
             val reader = BufferedReader(InputStreamReader(FileInputStream(path)))
             var line: String
             var startLine = 1
@@ -419,6 +405,7 @@ internal class EnglishTextTokenizer(
          *
          * @author Dmitriy Moroz
          */
-        private const val TOKENIZER_REGEX = "'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"
+        private const val TOKENIZER_REGEX =
+            "'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"
     }
 }

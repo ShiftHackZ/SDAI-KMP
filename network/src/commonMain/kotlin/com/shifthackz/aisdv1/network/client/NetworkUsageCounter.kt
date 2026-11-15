@@ -41,7 +41,8 @@ enum class NetworkUsageCategory {
  *
  * @author Dmitriy Moroz
  */
-internal val NetworkUsageCategoryAttribute = AttributeKey<NetworkUsageCategory>("SDAI.NetworkUsageCategory")
+internal val NetworkUsageCategoryAttribute =
+    AttributeKey<NetworkUsageCategory>("SDAI.NetworkUsageCategory")
 
 /**
  * Marks a request so shared Ktor plumbing can identify its traffic bucket.
@@ -93,7 +94,7 @@ fun HttpRequestBuilder.setTrackedTextBody(
     contentType: ContentType = ContentType.Application.Json,
 ) {
     trackUsage(category)
-    NetworkUsageCounter.record(category, body.encodeToByteArray().size.toLong())
+    NetworkUsageCounter.record(category, body.utf8Size())
     contentType(contentType)
     setBody(TextContent(body, contentType))
 }
@@ -139,7 +140,7 @@ suspend fun HttpResponse.trackedBodyAsText(
     category: NetworkUsageCategory,
 ): String {
     val text = bodyAsText()
-    NetworkUsageCounter.record(category, text.encodeToByteArray().size.toLong())
+    NetworkUsageCounter.record(category, text.utf8Size())
     return text
 }
 
@@ -186,4 +187,31 @@ object NetworkUsageCounter {
     fun record(category: NetworkUsageCategory, bytes: Long) {
         if (bytes > 0L) recorder?.invoke(category, bytes)
     }
+}
+
+/**
+ * Counts UTF8 bytes without allocating a duplicate payload-sized byte array.
+ * Unpaired UTF16 surrogates follow Kotlin's replacement-byte encoding.
+ *
+ * @receiver Text whose encoded storage size is requested.
+ * @author Dmitriy Moroz
+ */
+fun String.utf8Size(): Long {
+    var count = 0L
+    var index = 0
+    while (index < length) {
+        val value = this[index].code
+        count += when {
+            value < 0x80 -> 1
+            value < 0x800 -> 2
+            value in 0xD800..0xDBFF && index + 1 < length && this[index + 1].code in 0xDC00..0xDFFF -> {
+                index++; 4
+            }
+
+            value in 0xD800..0xDFFF -> 1
+            else -> 3
+        }
+        index++
+    }
+    return count
 }

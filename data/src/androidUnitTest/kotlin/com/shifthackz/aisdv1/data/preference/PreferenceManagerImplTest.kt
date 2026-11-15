@@ -24,35 +24,44 @@ class PreferenceManagerImplTest {
     }
 
     @Test
-    fun `given user reads default serverUrl, changes it, expected default value, then changed value, observer emits changed value`() = runTest {
-        Assert.assertEquals("", preferenceManager.automatic1111ServerUrl)
+    fun `given user reads default serverUrl, changes it, expected default value, then changed value, observer emits changed value`() =
+        runTest {
+            Assert.assertEquals("", preferenceManager.automatic1111ServerUrl)
 
-        preferenceManager.automatic1111ServerUrl = "https://192.168.0.1:7860//"
+            preferenceManager.automatic1111ServerUrl = "https://192.168.0.1:7860//"
 
-        Assert.assertEquals("https://192.168.0.1:7860", preferenceManager.automatic1111ServerUrl)
-        Assert.assertEquals("https://192.168.0.1:7860", preferenceManager.observe().first().serverUrl)
-    }
-
-    @Test
-    fun `given user reads default demoMode, changes it, expected default value, then changed value, observer emits changed value`() = runTest {
-        Assert.assertFalse(preferenceManager.demoMode)
-
-        preferenceManager.demoMode = true
-
-        Assert.assertTrue(preferenceManager.demoMode)
-        Assert.assertTrue(preferenceManager.observe().first().demoMode)
-    }
+            Assert.assertEquals(
+                "https://192.168.0.1:7860",
+                preferenceManager.automatic1111ServerUrl
+            )
+            Assert.assertEquals(
+                "https://192.168.0.1:7860",
+                preferenceManager.observe().first().serverUrl
+            )
+        }
 
     @Test
-    fun `given user reads default monitorConnectivity, changes it, expected default value, then changed value, observer emits changed value`() = runTest {
-        preferenceManager.source = ServerSource.AUTOMATIC1111
-        Assert.assertFalse(preferenceManager.monitorConnectivity)
+    fun `given user reads default demoMode, changes it, expected default value, then changed value, observer emits changed value`() =
+        runTest {
+            Assert.assertFalse(preferenceManager.demoMode)
 
-        preferenceManager.monitorConnectivity = true
+            preferenceManager.demoMode = true
 
-        Assert.assertTrue(preferenceManager.monitorConnectivity)
-        Assert.assertTrue(preferenceManager.observe().first().monitorConnectivity)
-    }
+            Assert.assertTrue(preferenceManager.demoMode)
+            Assert.assertTrue(preferenceManager.observe().first().demoMode)
+        }
+
+    @Test
+    fun `given user reads default monitorConnectivity, changes it, expected default value, then changed value, observer emits changed value`() =
+        runTest {
+            preferenceManager.source = ServerSource.AUTOMATIC1111
+            Assert.assertFalse(preferenceManager.monitorConnectivity)
+
+            preferenceManager.monitorConnectivity = true
+
+            Assert.assertTrue(preferenceManager.monitorConnectivity)
+            Assert.assertTrue(preferenceManager.observe().first().monitorConnectivity)
+        }
 
     @Test
     fun `given source without own server tag, monitorConnectivity remains false`() = runTest {
@@ -64,69 +73,78 @@ class PreferenceManagerImplTest {
     }
 
     @Test
-    fun `given user reads autoSaveAiResults, changes it, expected changed value, observer emits changed value`() = runTest {
-        preferenceManager.autoSaveAiResults = false
-        Assert.assertFalse(preferenceManager.autoSaveAiResults)
+    fun `given user reads autoSaveAiResults, changes it, expected changed value, observer emits changed value`() =
+        runTest {
+            preferenceManager.autoSaveAiResults = false
+            Assert.assertFalse(preferenceManager.autoSaveAiResults)
 
-        preferenceManager.autoSaveAiResults = true
+            preferenceManager.autoSaveAiResults = true
 
-        Assert.assertTrue(preferenceManager.autoSaveAiResults)
-        Assert.assertTrue(preferenceManager.observe().first().autoSaveAiResults)
-    }
-
-    @Test
-    fun `given user reads saveToMediaStore, changes it, expected changed value, observer emits changed value`() = runTest {
-        preferenceManager.saveToMediaStore = false
-        Assert.assertFalse(preferenceManager.saveToMediaStore)
-
-        preferenceManager.saveToMediaStore = true
-
-        Assert.assertTrue(preferenceManager.saveToMediaStore)
-        Assert.assertTrue(preferenceManager.observe().first().saveToMediaStore)
-    }
+            Assert.assertTrue(preferenceManager.autoSaveAiResults)
+            Assert.assertTrue(preferenceManager.observe().first().autoSaveAiResults)
+        }
 
     @Test
-    fun `given user changes form options, expected changed values and observer emits changed values`() = runTest {
-        preferenceManager.formAdvancedOptionsAlwaysShow = true
-        preferenceManager.formPromptTaggedInput = true
+    fun `given user reads saveToMediaStore, changes it, expected changed value, observer emits changed value`() =
+        runTest {
+            preferenceManager.saveToMediaStore = false
+            Assert.assertFalse(preferenceManager.saveToMediaStore)
 
-        val settings = preferenceManager.observe().first()
+            preferenceManager.saveToMediaStore = true
 
-        Assert.assertTrue(preferenceManager.formAdvancedOptionsAlwaysShow)
-        Assert.assertTrue(preferenceManager.formPromptTaggedInput)
-        Assert.assertTrue(settings.formAdvancedOptionsAlwaysShow)
-        Assert.assertTrue(settings.formPromptTaggedInput)
-    }
-
-    @Test
-    fun `given user reads default source, changes it, expected default value, then changed value, observer emits changed value`() = runTest {
-        Assert.assertEquals(ServerSource.AUTOMATIC1111, preferenceManager.source)
-
-        preferenceManager.source = ServerSource.LOCAL_MICROSOFT_ONNX
-
-        Assert.assertEquals(ServerSource.LOCAL_MICROSOFT_ONNX, preferenceManager.source)
-        Assert.assertEquals(ServerSource.LOCAL_MICROSOFT_ONNX, preferenceManager.observe().first().source)
-    }
+            Assert.assertTrue(preferenceManager.saveToMediaStore)
+            Assert.assertTrue(preferenceManager.observe().first().saveToMediaStore)
+        }
 
     @Test
-    fun `given user reads default sdModel, changes it, expected default value, then changed value, observer emits changed value`() = runTest {
-        Assert.assertEquals("", preferenceManager.sdModel)
+    fun `given user changes form options, expected changed values and observer emits changed values`() =
+        runTest {
+            preferenceManager.formAdvancedOptionsAlwaysShow = true
+            preferenceManager.formPromptTaggedInput = true
 
-        preferenceManager.sdModel = "model1504"
+            val settings = preferenceManager.observe().first()
 
-        Assert.assertEquals("model1504", preferenceManager.sdModel)
-        Assert.assertEquals("model1504", preferenceManager.observe().first().sdModel)
-    }
+            Assert.assertTrue(preferenceManager.formAdvancedOptionsAlwaysShow)
+            Assert.assertTrue(preferenceManager.formPromptTaggedInput)
+            Assert.assertTrue(settings.formAdvancedOptionsAlwaysShow)
+            Assert.assertTrue(settings.formPromptTaggedInput)
+        }
 
     @Test
-    fun `given user reads default hordeApiKey, changes it, expected default value, then changed value, observer emits changed value`() = runTest {
-        Assert.assertEquals("", preferenceManager.hordeApiKey)
+    fun `given user reads default source, changes it, expected default value, then changed value, observer emits changed value`() =
+        runTest {
+            Assert.assertEquals(ServerSource.AUTOMATIC1111, preferenceManager.source)
 
-        preferenceManager.hordeApiKey = "key"
+            preferenceManager.source = ServerSource.LOCAL_MICROSOFT_ONNX
 
-        Assert.assertEquals("key", preferenceManager.hordeApiKey)
-        Assert.assertEquals("key", preferenceManager.observe().first().hordeApiKey)
-    }
+            Assert.assertEquals(ServerSource.LOCAL_MICROSOFT_ONNX, preferenceManager.source)
+            Assert.assertEquals(
+                ServerSource.LOCAL_MICROSOFT_ONNX,
+                preferenceManager.observe().first().source
+            )
+        }
+
+    @Test
+    fun `given user reads default sdModel, changes it, expected default value, then changed value, observer emits changed value`() =
+        runTest {
+            Assert.assertEquals("", preferenceManager.sdModel)
+
+            preferenceManager.sdModel = "model1504"
+
+            Assert.assertEquals("model1504", preferenceManager.sdModel)
+            Assert.assertEquals("model1504", preferenceManager.observe().first().sdModel)
+        }
+
+    @Test
+    fun `given user reads default hordeApiKey, changes it, expected default value, then changed value, observer emits changed value`() =
+        runTest {
+            Assert.assertEquals("", preferenceManager.hordeApiKey)
+
+            preferenceManager.hordeApiKey = "key"
+
+            Assert.assertEquals("key", preferenceManager.hordeApiKey)
+            Assert.assertEquals("key", preferenceManager.observe().first().hordeApiKey)
+        }
 
     @Test
     fun `given user reads and changes api keys, expected changed values`() {
@@ -181,53 +199,64 @@ class PreferenceManagerImplTest {
     }
 
     @Test
-    fun `given user changes design options, expected changed values and observer emits changed values`() = runTest {
-        preferenceManager.designUseSystemColorPalette = true
-        preferenceManager.designUseSystemDarkTheme = false
-        preferenceManager.designDarkTheme = false
-        preferenceManager.designColorToken = "${ColorToken.PEACH}"
-        preferenceManager.designDarkThemeToken = "${DarkThemeToken.MOCHA}"
+    fun `given user changes design options, expected changed values and observer emits changed values`() =
+        runTest {
+            preferenceManager.designUseSystemColorPalette = true
+            preferenceManager.designUseSystemDarkTheme = false
+            preferenceManager.designDarkTheme = false
+            preferenceManager.designColorToken = "${ColorToken.PEACH}"
+            preferenceManager.designDarkThemeToken = "${DarkThemeToken.MOCHA}"
 
-        val settings = preferenceManager.observe().first()
+            val settings = preferenceManager.observe().first()
 
-        Assert.assertTrue(preferenceManager.designUseSystemColorPalette)
-        Assert.assertFalse(preferenceManager.designUseSystemDarkTheme)
-        Assert.assertFalse(preferenceManager.designDarkTheme)
-        Assert.assertEquals("${ColorToken.PEACH}", preferenceManager.designColorToken)
-        Assert.assertEquals("${DarkThemeToken.MOCHA}", preferenceManager.designDarkThemeToken)
-        Assert.assertTrue(settings.designUseSystemColorPalette)
-        Assert.assertFalse(settings.designUseSystemDarkTheme)
-        Assert.assertFalse(settings.designDarkTheme)
-        Assert.assertEquals("${ColorToken.PEACH}", settings.designColorToken)
-        Assert.assertEquals("${DarkThemeToken.MOCHA}", settings.designDarkThemeToken)
-    }
-
-    @Test
-    fun `given user changes background and gallery values, expected changed values and observer emits changed values`() = runTest {
-        preferenceManager.backgroundGeneration = true
-        preferenceManager.backgroundProcessCount = 3
-        preferenceManager.galleryGrid = Grid.Fixed3
-
-        val settings = preferenceManager.observe().first()
-
-        Assert.assertTrue(preferenceManager.backgroundGeneration)
-        Assert.assertEquals(3, preferenceManager.backgroundProcessCount)
-        Assert.assertEquals(Grid.Fixed3, preferenceManager.galleryGrid)
-        Assert.assertTrue(settings.backgroundGeneration)
-        Assert.assertEquals(Grid.Fixed3, settings.galleryGrid)
-    }
+            Assert.assertTrue(preferenceManager.designUseSystemColorPalette)
+            Assert.assertFalse(preferenceManager.designUseSystemDarkTheme)
+            Assert.assertFalse(preferenceManager.designDarkTheme)
+            Assert.assertEquals("${ColorToken.PEACH}", preferenceManager.designColorToken)
+            Assert.assertEquals("${DarkThemeToken.MOCHA}", preferenceManager.designDarkThemeToken)
+            Assert.assertTrue(settings.designUseSystemColorPalette)
+            Assert.assertFalse(settings.designUseSystemDarkTheme)
+            Assert.assertFalse(settings.designDarkTheme)
+            Assert.assertEquals("${ColorToken.PEACH}", settings.designColorToken)
+            Assert.assertEquals("${DarkThemeToken.MOCHA}", settings.designDarkThemeToken)
+        }
 
     @Test
-    fun `given user changes language, expected changed value and observer emits changed value`() = runTest {
-        preferenceManager.languageCode = "uk"
+    fun `given user changes background and gallery values, expected changed values and observer emits changed values`() =
+        runTest {
+            preferenceManager.backgroundGeneration = true
+            preferenceManager.backgroundProcessCount = 3
+            preferenceManager.galleryGrid = Grid.Fixed3
 
-        val settings = preferenceManager.observe().first()
+            val settings = preferenceManager.observe().first()
 
-        Assert.assertEquals("uk", preferenceManager.languageCode)
-        Assert.assertEquals("uk", settings.languageCode)
-    }
+            Assert.assertTrue(preferenceManager.backgroundGeneration)
+            Assert.assertEquals(3, preferenceManager.backgroundProcessCount)
+            Assert.assertEquals(Grid.Fixed3, preferenceManager.galleryGrid)
+            Assert.assertTrue(settings.backgroundGeneration)
+            Assert.assertEquals(Grid.Fixed3, settings.galleryGrid)
+        }
+
+    @Test
+    fun `given user changes language, expected changed value and observer emits changed value`() =
+        runTest {
+            preferenceManager.languageCode = "uk"
+
+            val settings = preferenceManager.observe().first()
+
+            Assert.assertEquals("uk", preferenceManager.languageCode)
+            Assert.assertEquals("uk", settings.languageCode)
+        }
 
     private class InMemoryKeyValueStore : KeyValueStore {
+        override fun putConfigurationDurably(
+            strings: Map<String, String>,
+            booleans: Map<String, Boolean>
+        ) {
+            strings.forEach { (key, value) -> putString(key, value) }
+            booleans.forEach { (key, value) -> putBoolean(key, value) }
+        }
+
         private val strings = mutableMapOf<String, String>()
         private val booleans = mutableMapOf<String, Boolean>()
         private val ints = mutableMapOf<String, Int>()

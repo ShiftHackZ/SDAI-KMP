@@ -1,7 +1,8 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.domain.entity.ForgeModule
 import com.shifthackz.aisdv1.domain.datasource.ForgeModulesDataSource
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.ForgeModulesRepository
 
@@ -24,11 +25,11 @@ internal class ForgeModulesRepositoryImpl(
      */
     private val preferenceManager: PreferenceManager,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : ForgeModulesRepository {
 
     /**
@@ -37,8 +38,11 @@ internal class ForgeModulesRepositoryImpl(
      * @return Result produced by `fetchModules`.
      * @author Dmitriy Moroz
      */
-    override suspend fun fetchModules() = remoteDataSource.fetchModules(
-        baseUrl = preferenceManager.automatic1111ServerUrl,
-        credentials = authorizationStore.getAuthorizationCredentials(),
-    )
+    override suspend fun fetchModules(): List<ForgeModule> {
+        val connection = connections.snapshot()
+        return remoteDataSource.fetchModules(
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
+        )
+    }
 }

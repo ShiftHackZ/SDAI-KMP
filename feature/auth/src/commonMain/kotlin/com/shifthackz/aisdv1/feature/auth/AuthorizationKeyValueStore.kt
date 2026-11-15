@@ -1,25 +1,25 @@
 package com.shifthackz.aisdv1.feature.auth
 
 /**
- * Defines the `AuthorizationKeyValueStore` contract for the SDAI authentication feature layer.
+ * Synchronous platform storage, accessed only by the serialized authorization IO owner.
  *
  * @author Dmitriy Moroz
  */
 internal interface AuthorizationKeyValueStore {
     /**
-     * Loads SDAI data through `getString`.
+     * Reads a protected value without masking unavailable storage as missing credentials.
      *
-     * @param key key value consumed by the API.
-     * @return Result produced by `getString`.
+     * @param key Existing credential preference key.
      * @author Dmitriy Moroz
      */
     fun getString(key: String): String?
+
     /**
-     * Executes the `putString` step in the SDAI authentication feature layer.
+     * Commits all entries as one complete record before returning. Following a failed write,
+     * further reads must reconcile the last confirmed record or fail explicitly.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param values Entries to update atomically; null removes a staging entry.
      * @author Dmitriy Moroz
      */
-    fun putString(key: String, value: String)
+    fun putStrings(values: Map<String, String?>)
 }

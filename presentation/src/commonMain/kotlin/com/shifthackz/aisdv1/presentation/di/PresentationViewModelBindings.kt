@@ -7,25 +7,25 @@ import com.shifthackz.aisdv1.presentation.modal.extras.ExtrasViewModel
 import com.shifthackz.aisdv1.presentation.modal.history.InputHistoryViewModel
 import com.shifthackz.aisdv1.presentation.modal.tag.EditTagViewModel
 import com.shifthackz.aisdv1.presentation.model.ExtraType
-import com.shifthackz.aisdv1.presentation.model.LaunchSource
-import com.shifthackz.aisdv1.presentation.navigation.router.ConfigurationLoaderRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.BenchmarkRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.DebugMenuRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.DonateRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryDetailRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.HistoryRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.ImageToImageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.LoggerRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NetworkUsageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.OnBoardingRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.ReportRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.ServerSetupRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.SettingsRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.SplashRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.StorageUsageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.TextToImageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.WebUiRouter
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.router.ConfigurationLoaderRouter
+import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
+import com.shifthackz.aisdv1.core.navigation.router.DebugMenuRouter
+import com.shifthackz.aisdv1.core.navigation.router.DonateRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryDetailRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryRouter
+import com.shifthackz.aisdv1.core.navigation.router.HistoryRouter
+import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.LoggerRouter
+import com.shifthackz.aisdv1.core.navigation.router.NetworkUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.OnBoardingRouter
+import com.shifthackz.aisdv1.core.navigation.router.ReportRouter
+import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
+import com.shifthackz.aisdv1.core.navigation.router.SettingsRouter
+import com.shifthackz.aisdv1.core.navigation.router.SplashRouter
+import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.WebUiRouter
 import com.shifthackz.aisdv1.presentation.screen.benchmark.BenchmarkViewModel
 import com.shifthackz.aisdv1.presentation.screen.debug.DebugMenuPlatformActions
 import com.shifthackz.aisdv1.presentation.screen.debug.DebugMenuViewModel
@@ -72,12 +72,14 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory {
         AiSdAppThemeViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             preferenceManager = get(),
         )
     }
     factory { (splashRouter: SplashRouter) ->
         SplashViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             splashNavigationUseCase = get(),
             splashRouter = splashRouter,
@@ -85,6 +87,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (launchSource: LaunchSource, router: OnBoardingRouter) ->
         OnBoardingViewModel(
+            diagnostics = get(),
             launchSource = launchSource,
             dispatchersProvider = get(),
             router = router,
@@ -95,6 +98,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: ConfigurationLoaderRouter) ->
         ConfigurationLoaderViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             dataPreLoaderUseCase = get(),
             getConfigurationUseCase = get(),
@@ -103,6 +107,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: BenchmarkRouter) ->
         BenchmarkViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             benchmarkManager = get(),
             router = router,
@@ -111,6 +116,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: DonateRouter) ->
         DonateViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             fetchSupportersUseCase = get(),
             linksProvider = get(),
@@ -119,6 +125,8 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: DebugMenuRouter, platformActions: DebugMenuPlatformActions) ->
         DebugMenuViewModel(
+            diagnosticReports = get(),
+            diagnostics = get(),
             dispatchersProvider = get(),
             preferenceManager = get(),
             debugInsertBadBase64UseCase = get(),
@@ -128,6 +136,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: LoggerRouter) ->
         LoggerViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             logReader = get(),
             platformActions = get(),
@@ -136,12 +145,13 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: SettingsRouter, platformActions: SettingsPlatformActions) ->
         SettingsViewModel(
+            galleryReads = get(),
+            diagnostics = get(),
             dispatchersProvider = get(),
             getStableDiffusionModelsUseCase = get(),
             observeStabilityAiCreditsUseCase = get(),
             selectStableDiffusionModelUseCase = get(),
             clearAppCacheUseCase = get(),
-            getAllGalleryUseCase = get(),
             getLocalOnnxModelsUseCase = get(),
             getLocalMediaPipeModelsUseCase = get(),
             getLocalSdxlModelsUseCase = get(),
@@ -159,8 +169,9 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: StorageUsageRouter, platformActions: StorageUsagePlatformActions) ->
         StorageUsageViewModel(
+            galleryReads = get(),
+            diagnostics = get(),
             dispatchersProvider = get(),
-            getAllGalleryUseCase = get(),
             deleteAllGalleryUseCase = get(),
             getLocalOnnxModelsUseCase = get(),
             getLocalMediaPipeModelsUseCase = get(),
@@ -176,6 +187,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: NetworkUsageRouter) ->
         NetworkUsageViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             observeNetworkUsageUseCase = get(),
             resetNetworkUsageUseCase = get(),
@@ -184,6 +196,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (itemId: Long, router: ReportRouter) ->
         ReportViewModel(
+            diagnostics = get(),
             itemId = itemId,
             dispatchersProvider = get(),
             sendReportUseCase = get(),
@@ -195,6 +208,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (prompt: String, negativePrompt: String, type: ExtraType) ->
         ExtrasViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             fetchAndGetLorasUseCase = get(),
             fetchAndGetHyperNetworksUseCase = get(),
@@ -206,6 +220,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (prompt: String, negativePrompt: String) ->
         EmbeddingViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             fetchAndGetEmbeddingsUseCase = get(),
             preferenceManager = get(),
@@ -215,6 +230,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (prompt: String, negativePrompt: String, tag: String, isNegative: Boolean) ->
         EditTagViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             prompt = prompt,
             negativePrompt = negativePrompt,
@@ -224,12 +240,15 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory {
         InputHistoryViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
-            getGenerationResultPagedUseCase = get(),
+            galleryReads = get(),
+            getGenerationResultUseCase = get(),
         )
     }
     factory { (modelId: String) ->
         DownloadDialogViewModel(
+            diagnostics = get(),
             modelId = modelId,
             getLocalModelUseCase = get(),
             dispatchersProvider = get(),
@@ -237,6 +256,8 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: TextToImageRouter) ->
         TextToImageViewModel(
+            nativeGenerationGateway = get(),
+            diagnostics = get(),
             openAiOAuthGateway = get(),
             providerSelectionGuard = get(),
             dispatchersProvider = get(),
@@ -272,6 +293,8 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: ImageToImageRouter, platformActions: ImageToImagePlatformActions) ->
         ImageToImageViewModel(
+            originalImageBudget = get(),
+            diagnostics = get(),
             dispatchersProvider = get(),
             getConfigurationUseCase = get(),
             getStableDiffusionSamplersUseCase = get(),
@@ -304,13 +327,17 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: HistoryRouter) ->
         HistoryViewModel(
+            galleryReads = get(),
+            diagnostics = get(),
             dispatchersProvider = get(),
-            getAllGalleryUseCase = get(),
             router = router,
         )
     }
     factory { (router: GalleryRouter) ->
         GalleryViewModel(
+            memoryBudget = get(),
+            galleryReads = get(),
+            diagnostics = get(),
             dispatchersProvider = get(),
             getMediaStoreInfoUseCase = get(),
             backgroundWorkObserver = get(),
@@ -319,18 +346,20 @@ internal fun Module.registerPresentationViewModelBindings() {
             deleteGalleryItemsUseCase = get(),
             setGalleryItemsVisibilityUseCase = get(),
             setGalleryItemsLikedUseCase = get(),
-            getGenerationResultPagedUseCase = get(),
             galleryExportService = get(),
             galleryRouter = router,
         )
     }
     factory { (itemId: Long, router: GalleryDetailRouter, platformActions: GalleryDetailPlatformActions) ->
         GalleryDetailViewModel(
+            galleryReads = get(),
+            contentCache = get(),
+            diagnostics = get(),
             itemId = itemId,
             dispatchersProvider = get(),
             buildInfoProvider = get(),
             getGenerationResultUseCase = get(),
-            getAllGalleryUseCase = get(),
+            getAllGalleryIdsUseCase = get(),
             getLastResultFromCacheUseCase = get(),
             deleteGalleryItemUseCase = get(),
             toggleImageVisibilityUseCase = get(),
@@ -342,10 +371,13 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (launchSource: LaunchSource, router: ServerSetupRouter) ->
         ServerSetupViewModel(
+            diagnostics = get(),
             launchSource = launchSource,
             dispatchersProvider = get(),
             buildInfoProvider = get(),
             getConfigurationUseCase = get(),
+            retryAuthorizationStorageUseCase = get(),
+            resetAuthorizationCredentialsUseCase = get(),
             getLocalOnnxModelsUseCase = get(),
             getLocalMediaPipeModelsUseCase = get(),
             getLocalSdxlModelsUseCase = get(),
@@ -382,6 +414,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory {
         EngineSelectionViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             fetchAndGetSwarmUiModelsUseCase = get(),
             observeLocalOnnxModelsUseCase = get(),
@@ -398,6 +431,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: WebUiRouter) ->
         WebUiViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             preferenceManager = get(),
             router = router,
@@ -405,6 +439,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory {
         ConnectivityViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             observeServerConnectivityUseCase = get(),
             getMonitorConnectivityUseCase = get(),
@@ -413,6 +448,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory {
         BackgroundWorkViewModel(
+            diagnostics = get(),
             dispatchersProvider = get(),
             backgroundWorkObserver = get(),
             imageLoader = get(),

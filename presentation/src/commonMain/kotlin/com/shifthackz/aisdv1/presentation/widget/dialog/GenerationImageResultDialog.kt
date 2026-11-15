@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
-import com.shifthackz.aisdv1.presentation.screen.txt2img.decodeBase64ImageBitmap
+import com.shifthackz.aisdv1.presentation.widget.image.SampledBase64Image
 
 /**
  * Renders the `GenerationImageResultDialog` UI for the SDAI presentation layer.
@@ -76,9 +76,8 @@ fun GenerationImageResultDialog(
                     .padding(horizontal = 16.dp, vertical = 16.dp)
                     .fillMaxWidth(0.96f),
             ) {
-                val image = imageBase64.decodeBase64ImageBitmap()
-                if (image != null) {
-                    Image(
+                run {
+                    SampledBase64Image(
                         modifier = Modifier
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = 300.dp)
@@ -86,8 +85,8 @@ fun GenerationImageResultDialog(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                        ) { onViewDetailRequest() },
-                        bitmap = image,
+                            ) { onViewDetailRequest() },
+                        base64 = imageBase64,
                         contentDescription = Localization.string("action_generate"),
                     )
                 }
@@ -216,8 +215,8 @@ private fun GenerationBatchImageItem(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        result.image.decodeBase64ImageBitmap()?.let { image ->
-            Image(
+        run {
+            SampledBase64Image(
                 modifier = Modifier
                     .fillMaxSize()
                     .then(
@@ -232,7 +231,7 @@ private fun GenerationBatchImageItem(
                             }
                         },
                     ),
-                bitmap = image,
+                base64 = result.image,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )

@@ -4,6 +4,7 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
 import com.shifthackz.aisdv1.domain.mocks.ConfigurationStoreStub
 import com.shifthackz.aisdv1.domain.mocks.mockConfiguration
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -21,11 +22,12 @@ class DefaultGetConfigurationUseCaseImplTest {
     )
 
     @Test
-    fun `given configuration read success, expected valid configuration domain model value`() = runTest {
-        every {
-            stubAuthorizationStore.getAuthorizationCredentials()
-        } returns AuthorizationCredentials.None
+    fun `given configuration read success, expected valid configuration domain model value`() =
+        runTest {
+            coEvery {
+                stubAuthorizationStore.getAuthorizationCredentials()
+            } returns AuthorizationCredentials.None
 
-        assertEquals(mockConfiguration, useCase())
-    }
+            assertEquals(mockConfiguration, useCase())
+        }
 }

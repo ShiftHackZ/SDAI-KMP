@@ -1,23 +1,31 @@
 package com.shifthackz.aisdv1.data.repository
 
-import com.shifthackz.aisdv1.core.imageprocessing.BitmapToBase64Converter
 import com.shifthackz.aisdv1.data.core.CoreGenerationRepository
+import com.shifthackz.aisdv1.data.local.DownloadableModelFileStore
 import com.shifthackz.aisdv1.data.mappers.mapLocalDiffusionToAiGenResult
 import com.shifthackz.aisdv1.data.mappers.withModelName
+import com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
-import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
-import com.shifthackz.aisdv1.domain.feature.mediapipe.MediaPipe
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
+import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.MediaPipeGenerationRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
- * Implements `MediaPipeGenerationRepository` behavior in the SDAI data layer.
+ * Maps the isolated PNG result directly to application/gallery models without a host bitmap.
  *
+ * @param mediaStoreGateway Existing original export gateway.
+ * @param localDataSource Existing gallery writer.
+ * @param backgroundWorkObserver Work persistence policy.
+ * @param preferenceManager Model configuration captured before suspension.
+ * @param nativeGateway Sole native attempt owner.
+ * @param downloadableLocalDataSource Captured model's metadata.
+ * @param modelFileStore Model location resolver.
  * @author Dmitriy Moroz
  */
 internal class MediaPipeGenerationRepositoryImpl(
@@ -25,37 +33,43 @@ internal class MediaPipeGenerationRepositoryImpl(
     localDataSource: GenerationResultDataSource.Local,
     backgroundWorkObserver: BackgroundWorkObserver,
     private val preferenceManager: PreferenceManager,
-    /**
-     * Exposes the `mediaPipe` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val mediaPipe: MediaPipe,
-    /**
-     * Exposes the `bitmapToBase64Converter` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val bitmapToBase64Converter: BitmapToBase64Converter,
+    private val nativeGateway: NativeGenerationGateway,
+    private val downloadableLocalDataSource: DownloadableModelDataSource.Local,
+    private val modelFileStore: DownloadableModelFileStore,
 ) : CoreGenerationRepository(
-    mediaStoreGateway = mediaStoreGateway,
-    localDataSource = localDataSource,
-    preferenceManager = preferenceManager,
-    backgroundWorkObserver = backgroundWorkObserver,
+    mediaStoreGateway,
+    localDataSource,
+    preferenceManager,
+    backgroundWorkObserver
 ), MediaPipeGenerationRepository {
 
-    override suspend fun generateFromText(payload: TextToImagePayload): AiGenerationResult = withContext(Dispatchers.Default) {
-        mediaPipe
-            .process(payload)
-            .let(BitmapToBase64Converter::Input)
-            .let(bitmapToBase64Converter::invoke)
-            .base64ImageString
-            .let { base64 -> payload to base64 }
-            .mapLocalDiffusionToAiGenResult()
-            .withModelName(
-                preferenceManager.localMediaPipeModelId
-                    .ifBlank { preferenceManager.localMediaPipeCustomModelPath },
+    /**
+     * Captures model configuration once, then preserves the existing result and persistence mapping.
+     *
+     * @param payload Immutable generation parameters.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun generateFromText(payload: TextToImagePayload) = run {
+        val id = preferenceManager.localMediaPipeModelId
+        val customPath = preferenceManager.localMediaPipeCustomModelPath
+        val isNnapiEnabled = false
+        val model = downloadableLocalDataSource.getById(id)
+        check(model.downloaded) { "Model not downloaded." }
+        val modelPath =
+            if (id == LocalAiModel.CustomMediaPipe.id) customPath else modelFileStore.resolvePath(
+                model
             )
+        val modelName = model.name.ifBlank { id }
+        val encoded = nativeGateway.generate(
+            NativeGenerationRequest(
+                NativeGenerationEngine.MEDIA_PIPE,
+                payload,
+                modelPath,
+                isNnapiEnabled
+            )
+        )
+        insertGenerationResult(
+            (payload to encoded).mapLocalDiffusionToAiGenResult().withModelName(modelName)
+        )
     }
-        .let { result -> insertGenerationResult(result) }
 }

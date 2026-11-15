@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.screen.settings
 
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.appbuild.BuildVersion
@@ -22,8 +23,8 @@ import com.shifthackz.aisdv1.domain.usecase.sdmodel.SelectStableDiffusionModelUs
 import com.shifthackz.aisdv1.domain.usecase.settings.ObserveNetworkUsageUseCase
 import com.shifthackz.aisdv1.domain.usecase.stabilityai.ObserveStabilityAiCreditsUseCase
 import com.shifthackz.aisdv1.presentation.mocks.mockStableDiffusionModels
-import com.shifthackz.aisdv1.presentation.model.LaunchSource
-import com.shifthackz.aisdv1.presentation.navigation.router.SettingsRouter
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.router.SettingsRouter
 import com.shifthackz.aisdv1.presentation.screen.debug.DebugMenuAccessor
 import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsIntent
 import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsModal
@@ -64,6 +65,7 @@ class SettingsViewModelTest {
     private val observeStabilityAiCreditsUseCase = mockk<ObserveStabilityAiCreditsUseCase>()
     private val selectStableDiffusionModelUseCase = mockk<SelectStableDiffusionModelUseCase>()
     private val clearAppCacheUseCase = mockk<ClearAppCacheUseCase>()
+    private val galleryReads = mockk<GalleryReadGateway>()
     private val getAllGalleryUseCase = mockk<GetAllGalleryUseCase>()
     private val getLocalOnnxModelsUseCase = mockk<GetLocalOnnxModelsUseCase>()
     private val getLocalMediaPipeModelsUseCase = mockk<GetLocalMediaPipeModelsUseCase>()
@@ -85,6 +87,7 @@ class SettingsViewModelTest {
         coEvery { getStableDiffusionModelsUseCase() } returns mockStableDiffusionModels
         coEvery { clearAppCacheUseCase() } returns Unit
         coEvery { getAllGalleryUseCase() } returns emptyList()
+        coEvery { galleryReads.storageBytes() } coAnswers { getAllGalleryUseCase().sumOf { it.image.encodeToByteArray().size.toLong() + it.inputImage.encodeToByteArray().size } }
         coEvery { getLocalOnnxModelsUseCase() } returns emptyList()
         coEvery { getLocalMediaPipeModelsUseCase() } returns emptyList()
         coEvery { getLocalSdxlModelsUseCase() } returns emptyList()
@@ -156,15 +159,16 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `given platform hides filesystem residue, expected settings storage summary is empty`() = runTest {
-        platformActions.visibleStorageThresholdBytes = 1024L
-        platformActions.appCacheBytes = 64L
-        val viewModel = createViewModel()
-        advanceUntilIdle()
+    fun `given platform hides filesystem residue, expected settings storage summary is empty`() =
+        runTest {
+            platformActions.visibleStorageThresholdBytes = 1024L
+            platformActions.appCacheBytes = 64L
+            val viewModel = createViewModel()
+            advanceUntilIdle()
 
-        assertEquals(0L, viewModel.state.value.storageUsageBytes)
-        assertEquals(64L, platformActions.appCacheBytes)
-    }
+            assertEquals(0L, viewModel.state.value.storageUsageBytes)
+            assertEquals(64L, platformActions.appCacheBytes)
+        }
 
     @Test
     fun `given launch url intents, expected platform opens configured urls`() = runTest {
@@ -173,18 +177,22 @@ class SettingsViewModelTest {
         viewModel.processIntent(SettingsIntent.LaunchUrl.OpenPolicy)
         viewModel.processIntent(SettingsIntent.LaunchUrl.OpenSourceCode)
 
-        assertEquals(listOf("https://policy.test", "https://source.test"), platformActions.openedUrls)
+        assertEquals(
+            listOf("https://policy.test", "https://source.test"),
+            platformActions.openedUrls
+        )
     }
 
     @Test
-    fun `given background generation enabled and permission granted, expected preference updated`() = runTest {
-        val viewModel = createViewModel()
+    fun `given background generation enabled and permission granted, expected preference updated`() =
+        runTest {
+            val viewModel = createViewModel()
 
-        viewModel.processIntent(SettingsIntent.UpdateFlag.BackgroundGeneration(true))
-        advanceUntilIdle()
+            viewModel.processIntent(SettingsIntent.UpdateFlag.BackgroundGeneration(true))
+            advanceUntilIdle()
 
-        verify { preferenceManager.backgroundGeneration = true }
-    }
+            verify { preferenceManager.backgroundGeneration = true }
+        }
 
     @Test
     fun `given denied storage permission, expected manual permission modal`() = runTest {
@@ -208,15 +216,16 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `given usage navigation intents, expected router opens standalone usage routes`() = runTest {
-        val viewModel = createViewModel()
+    fun `given usage navigation intents, expected router opens standalone usage routes`() =
+        runTest {
+            val viewModel = createViewModel()
 
-        viewModel.processIntent(SettingsIntent.NavigateStorageUsage)
-        viewModel.processIntent(SettingsIntent.NavigateNetworkUsage)
+            viewModel.processIntent(SettingsIntent.NavigateStorageUsage)
+            viewModel.processIntent(SettingsIntent.NavigateNetworkUsage)
 
-        assertEquals(true, router.storageUsageOpened)
-        assertEquals(true, router.networkUsageOpened)
-    }
+            assertEquals(true, router.storageUsageOpened)
+            assertEquals(true, router.networkUsageOpened)
+        }
 
     @Test
     fun `given language selected, expected preference updated and modal closed`() = runTest {
@@ -238,12 +247,13 @@ class SettingsViewModelTest {
         }
         viewModelScope = CoroutineScope(SupervisorJob() + dispatcher)
         return SettingsViewModel(
+            galleryReads = galleryReads,
+            diagnostics = mockk(relaxed = true),
             dispatchersProvider = dispatchersProvider,
             getStableDiffusionModelsUseCase = getStableDiffusionModelsUseCase,
             observeStabilityAiCreditsUseCase = observeStabilityAiCreditsUseCase,
             selectStableDiffusionModelUseCase = selectStableDiffusionModelUseCase,
             clearAppCacheUseCase = clearAppCacheUseCase,
-            getAllGalleryUseCase = getAllGalleryUseCase,
             getLocalOnnxModelsUseCase = getLocalOnnxModelsUseCase,
             getLocalMediaPipeModelsUseCase = getLocalMediaPipeModelsUseCase,
             getLocalSdxlModelsUseCase = getLocalSdxlModelsUseCase,
@@ -260,6 +270,7 @@ class SettingsViewModelTest {
         )
     }
 }
+
 private object TestBuildInfoProvider : BuildInfoProvider {
     override val isDebug: Boolean = true
     override val buildNumber: Int = 5598

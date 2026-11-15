@@ -16,8 +16,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.basicAuth
-import io.ktor.client.request.get
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedGet
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
@@ -46,7 +46,7 @@ class KtorSwarmUiGenerationApi(
         authorization: BasicHttpAuthorization?,
     ): KtorSwarmUiGenerationResponse = mapSessionError {
         httpClient
-            .post {
+            .boundedPost {
                 url.takeFrom(baseUrl)
                 url.appendPathSegments(PATH_API, PATH_GENERATE)
                 applyGenerationTimeout(generationTimeoutProvider)
@@ -60,7 +60,7 @@ class KtorSwarmUiGenerationApi(
         url: String,
         authorization: BasicHttpAuthorization?,
     ): ByteArray = httpClient
-        .get {
+        .boundedGet {
             this.url.takeFrom(url)
             applyGenerationTimeout(generationTimeoutProvider)
             trackUsage(NetworkUsageCategory.INFERENCE)

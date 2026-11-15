@@ -53,9 +53,9 @@ fun LookAndFeelPageContent(
     var themeState by remember {
         mutableStateOf(
             AiSdAppThemeState(
-                systemColorPalette = false,
-                systemDarkTheme = false,
-                darkTheme = darkTheme,
+                shouldUseSystemColorPalette = false,
+                shouldUseSystemDarkTheme = false,
+                isDarkTheme = darkTheme,
                 darkThemeToken = darkThemeToken,
             ),
         )

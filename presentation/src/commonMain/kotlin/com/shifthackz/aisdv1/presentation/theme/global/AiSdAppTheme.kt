@@ -8,9 +8,9 @@ import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
 
 /**
- * Renders the `AiSdAppTheme` UI for the SDAI presentation layer.
+ * Observes persisted theme selection and provides it to the application content.
  *
- * @param content content value consumed by the API.
+ * @param content Application UI rendered inside the selected Material theme.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -27,11 +27,12 @@ fun AiSdAppTheme(
 }
 
 /**
- * Renders the `AiSdAppTheme` UI for the SDAI presentation layer.
+ * Applies the selected Material theme, retaining palette and typography objects while their
+ * inputs remain unchanged. System appearance still participates in dark-mode selection.
  *
- * @param state state rendered or processed by the component.
- * @param applySystemBars apply system bars value consumed by the API.
- * @param content content value consumed by the API.
+ * @param state Persisted theme preferences, independent of other application settings.
+ * @param applySystemBars Whether platform system bars follow the selected appearance.
+ * @param content Application UI rendered inside the selected Material theme.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -40,22 +41,28 @@ fun AiSdAppTheme(
     applySystemBars: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val isDark = if (state.systemDarkTheme) {
+    val isDark = if (state.shouldUseSystemDarkTheme) {
         isSystemInDarkTheme()
     } else {
-        state.darkTheme
+        state.isDarkTheme
     }
     val dynamicColorScheme = dynamicColorSchemeOrNull(
-        useDynamicColors = state.systemColorPalette,
+        useDynamicColors = state.shouldUseSystemColorPalette,
         isDark = isDark,
     )
-    MaterialTheme(
-        colorScheme = dynamicColorScheme ?: catppuccinColorScheme(
+    val staticColorScheme = remember(state.colorToken, state.darkThemeToken, isDark) {
+        catppuccinColorScheme(
             token = state.colorToken,
             darkThemeToken = state.darkThemeToken,
             isDark = isDark,
-        ),
-        typography = catppuccinTypography(isDark, state.darkThemeToken),
+        )
+    }
+    val typography = remember(isDark, state.darkThemeToken) {
+        catppuccinTypography(isDark, state.darkThemeToken)
+    }
+    MaterialTheme(
+        colorScheme = dynamicColorScheme ?: staticColorScheme,
+        typography = typography,
     ) {
         if (applySystemBars) {
             ApplySystemBarTheme(

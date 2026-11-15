@@ -37,7 +37,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.presentation.model.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.presentation.screen.onboarding.page.FormPageContent
 import com.shifthackz.aisdv1.presentation.screen.onboarding.page.LocalDiffusionPageContent
 import com.shifthackz.aisdv1.presentation.screen.onboarding.page.LookAndFeelPageContent

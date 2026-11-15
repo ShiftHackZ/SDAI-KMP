@@ -1,7 +1,7 @@
 package com.shifthackz.aisdv1.presentation.screen.logger
 
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
-import com.shifthackz.aisdv1.presentation.navigation.router.LoggerRouter
+import com.shifthackz.aisdv1.core.navigation.router.LoggerRouter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -116,6 +116,7 @@ class LoggerViewModelTest {
         }
 
     private fun TestScope.createViewModel() = LoggerViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         logReader = stubLogReader,
         platformActions = stubPlatformActions,

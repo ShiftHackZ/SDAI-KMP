@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
-import com.shifthackz.aisdv1.presentation.navigation.router.DonateRouter
+import com.shifthackz.aisdv1.core.navigation.router.DonateRouter
 import com.shifthackz.aisdv1.presentation.platform.rememberExternalUrlLauncher
 import org.koin.core.parameter.parametersOf
 

@@ -1,17 +1,22 @@
 package com.shifthackz.aisdv1.presentation.screen.logger
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
-import com.shifthackz.aisdv1.presentation.navigation.router.LoggerRouter
+import com.shifthackz.aisdv1.core.navigation.router.LoggerRouter
 import kotlinx.coroutines.withContext
 
 /**
  * Coordinates `LoggerViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class LoggerViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -43,6 +48,8 @@ class LoggerViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<LoggerState, LoggerIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.LOGGER.asDiagnosticScreen(),
     initialState = LoggerState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

@@ -647,4 +647,30 @@
     <string name="error_samplers_unavailable">Не удалось загрузить методы сэмплирования. Проверьте соединение с сервером и повторите попытку.</string>
     <string name="error_seed_format">Введите неотрицательное целое число, -1 или оставьте поле пустым.</string>
     <string name="error_seed_max">Сид не должен превышать %1$s.</string>
+    <string name="auth_storage_unavailable">Сохранённые учётные данные временно недоступны. Повторите попытку после разблокировки устройства.</string>
+    <string name="auth_storage_unreadable">Не удалось прочитать сохранённые учётные данные. Повторите попытку или сбросьте их и введите заново.</string>
+    <string name="auth_storage_write_failed">Не удалось сохранить учётные данные. Повторите попытку перед подключением.</string>
+    <string name="auth_storage_reset">Сбросить сохранённые учётные данные</string>
+    <string name="auth_storage_reset_confirm">Удалить сохранённые учётные данные Basic Auth? Их потребуется ввести заново. Модели, изображения, другие настройки и вход в ChatGPT будут сохранены.</string>
+
+    <string name="ui_diagnostics_title">Диагностика интерфейса</string>
+    <string name="ui_diagnostics_capture">Записывать диагностику интерфейса</string>
+    <string name="ui_diagnostics_reset">Сбросить запись</string>
+    <string name="ui_diagnostics_share">Поделиться записью</string>
+
+    <string name="native_generation_engine_unknown">Локальный движок</string>
+    <string name="native_generation_busy">Другая локальная генерация ещё останавливается. Подождите и повторите попытку.</string>
+    <string name="native_generation_connection">Не удалось запустить локальный движок. Повторите попытку.</string>
+    <string name="native_generation_process_died">Локальный движок неожиданно остановился. Повторите попытку или проверьте настройки модели и бэкенда.</string>
+    <string name="native_generation_unresponsive">Локальный движок перестал отвечать. Повторите попытку или проверьте настройки модели и бэкенда.</string>
+    <string name="native_generation_engine_failed">Локальный движок не смог завершить генерацию. Проверьте настройки модели и бэкенда перед повторной попыткой.</string>
+    <string name="native_generation_invalid_result">Локальный движок вернул некорректное изображение. Повторите попытку.</string>
+    <string name="native_generation_interrupted">Генерация была прервана. Повторите попытку, когда будете готовы.</string>
+    <string name="native_generation_failure_context">%1$s: %2$s</string>
+    <string name="native_generation_stage_preparing">Подготовка модели…</string>
+    <string name="native_generation_stage_tokenizing">Кодирование запроса…</string>
+    <string name="native_generation_stage_denoising">Генерация изображения…</string>
+    <string name="native_generation_stage_decoding">Декодирование изображения…</string>
+    <string name="native_generation_stage_running">Работает движок изображений…</string>
+    <string name="native_generation_stage_writing_result">Сохранение результата…</string>
 </resources>

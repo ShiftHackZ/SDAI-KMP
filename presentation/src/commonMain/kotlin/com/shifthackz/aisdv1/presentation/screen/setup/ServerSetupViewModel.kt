@@ -1,15 +1,19 @@
 package com.shifthackz.aisdv1.presentation.screen.setup
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.domain.entity.OpenAiCompatibleHttpFailure
 import com.shifthackz.aisdv1.presentation.model.localizedDescription
 import com.shifthackz.aisdv1.presentation.model.observeOpenAiOAuthIdentity
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.cancel
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.validation.common.CommonStringValidator
 import com.shifthackz.aisdv1.core.validation.path.FilePathValidator
@@ -20,6 +24,8 @@ import com.shifthackz.aisdv1.domain.entity.OpenAiCompatibleConnection
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
 import com.shifthackz.aisdv1.domain.entity.OpenAiOAuthFailure
+import com.shifthackz.aisdv1.domain.usecase.settings.RetryAuthorizationStorageUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.ResetAuthorizationCredentialsUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.SetServerConfigurationUseCase
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
@@ -46,8 +52,8 @@ import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToSdxlUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToStabilityAiUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToSwarmUiUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
-import com.shifthackz.aisdv1.presentation.model.LaunchSource
-import com.shifthackz.aisdv1.presentation.navigation.router.ServerSetupRouter
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
 import com.shifthackz.aisdv1.presentation.screen.setup.model.HORDE_DEFAULT_API_KEY
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupEffect
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupIntent
@@ -71,6 +77,8 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Owns provider setup state, validation, local model downloads, and final connection side effects.
  *
+ * @param retryAuthorizationStorageUseCase Completes checked local persistence after an explicit retry.
+ * @param resetAuthorizationCredentialsUseCase Resets only saved Basic Auth after dedicated confirmation.
  * @param launchSource Screen that opened setup, used to decide back navigation and completion route.
  * @param dispatchersProvider App coroutine dispatchers used by setup work.
  * @param buildInfoProvider Build metadata used to filter platform-supported local providers.
@@ -107,8 +115,10 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class ServerSetupViewModel(
+    diagnostics: UiDiagnostics,
     private val launchSource: LaunchSource = LaunchSource.SPLASH,
     private val dispatchersProvider: DispatchersProvider,
     private val buildInfoProvider: BuildInfoProvider,
@@ -145,8 +155,12 @@ class ServerSetupViewModel(
     private val router: ServerSetupRouter,
     private val openAiOAuthGateway: OpenAiOAuthGateway,
     private val setServerConfigurationUseCase: SetServerConfigurationUseCase,
+    private val retryAuthorizationStorageUseCase: RetryAuthorizationStorageUseCase,
+    private val resetAuthorizationCredentialsUseCase: ResetAuthorizationCredentialsUseCase,
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<ServerSetupState, ServerSetupIntent, ServerSetupEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.SERVER_SETUP.asDiagnosticScreen(),
     initialState = ServerSetupState(
         showBackNavArrow = launchSource == LaunchSource.SETTINGS,
         platform = buildInfoProvider.platform,
@@ -167,10 +181,16 @@ class ServerSetupViewModel(
                 onIdentity = { identity ->
                     updateState { it.copy(openAiOAuthAccount = identity?.accountId) }
                 },
-                onUnavailable = { error -> updateState {
-                    it.copy(openAiOAuthStorageError = true,
-                        modal = if (it.mode == ServerSource.OPEN_AI_OAUTH) ServerSetupState.Modal.Error(error.localizedDescription()) else it.modal)
-                } },
+                onUnavailable = { error ->
+                    updateState {
+                        it.copy(
+                            openAiOAuthStorageError = true,
+                            modal = if (it.mode == ServerSource.OPEN_AI_OAUTH) ServerSetupState.Modal.Error(
+                                error.localizedDescription()
+                            ) else it.modal
+                        )
+                    }
+                },
                 onReady = { updateState { it.copy(openAiOAuthStorageError = false) } },
             )
         }
@@ -228,10 +248,12 @@ class ServerSetupViewModel(
             }
                 .onSuccess { state ->
                     withContext(dispatchersProvider.immediate) {
-                        emitState(state.copy(
-                            openAiOAuthAccount = currentState.openAiOAuthAccount,
-                            openAiOAuthStorageError = currentState.openAiOAuthStorageError,
-                        ))
+                        emitState(
+                            state.copy(
+                                openAiOAuthAccount = currentState.openAiOAuthAccount,
+                                openAiOAuthStorageError = currentState.openAiOAuthStorageError,
+                            )
+                        )
                     }
                 }
                 .onFailure { t ->
@@ -265,24 +287,60 @@ class ServerSetupViewModel(
 
     override fun processIntent(intent: ServerSetupIntent) {
         when (intent) {
-            ServerSetupIntent.OAuthLogin -> { startOAuthLogin(); return }
-            ServerSetupIntent.OAuthCancel -> { cancelOAuthLogin(); return }
+            ServerSetupIntent.RetryAuthorizationStorage -> {
+                recoverAuthorizationStorage(shouldReset = false); return
+            }
+
+            ServerSetupIntent.RequestAuthorizationReset -> {
+                updateState { it.copy(isAuthorizationResetConfirmationVisible = true) }
+                return
+            }
+
+            ServerSetupIntent.CancelAuthorizationReset -> {
+                updateState { it.copy(isAuthorizationResetConfirmationVisible = false) }
+                return
+            }
+
+            ServerSetupIntent.ConfirmAuthorizationReset -> {
+                if (currentState.isAuthorizationResetConfirmationVisible) recoverAuthorizationStorage(
+                    shouldReset = true
+                )
+                return
+            }
+
+            ServerSetupIntent.OAuthLogin -> {
+                startOAuthLogin(); return
+            }
+
+            ServerSetupIntent.OAuthCancel -> {
+                cancelOAuthLogin(); return
+            }
+
             ServerSetupIntent.OAuthLogout -> {
                 cancelOAuthLogin()
                 launch(dispatchersProvider.io) {
                     try {
                         openAiOAuthGateway.logout()
-                        updateState { it.copy(openAiOAuthAccount = null, openAiOAuthStorageError = false) }
+                        updateState {
+                            it.copy(
+                                openAiOAuthAccount = null,
+                                openAiOAuthStorageError = false
+                            )
+                        }
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: OpenAiOAuthFailure) {
+                        updateState { it.copy(modal = ServerSetupState.Modal.Error(error.localizedDescription())) }
                     }
-                    catch (error: CancellationException) { throw error }
-                    catch (error: OpenAiOAuthFailure) { updateState { it.copy(modal = ServerSetupState.Modal.Error(error.localizedDescription())) } }
                 }
                 return
             }
+
             ServerSetupIntent.OAuthOpenBrowser -> {
                 if (currentState.openAiOAuthCode != null) emitEffect(ServerSetupEffect.OpenUrl("https://auth.openai.com/codex/device"))
                 return
             }
+
             is ServerSetupIntent.UpdateServerMode, ServerSetupIntent.NavigateBack -> cancelOAuthLogin()
             else -> Unit
         }
@@ -296,6 +354,7 @@ class ServerSetupViewModel(
     /**
      * Releases the factory-created setup ViewModel when its route leaves composition.
      * Pending authorization, protected identity initialization and subscriptions cannot outlive it.
+     *
      * @author Dmitriy Moroz
      */
     fun onRouteDisposed() {
@@ -304,13 +363,54 @@ class ServerSetupViewModel(
     }
 
     private fun validateAndConnectToServer() {
+        if (currentState.isAuthorizationStorageBusy) return
+        val requiresAuthorization = currentState.mode == ServerSource.SWARM_UI ||
+                currentState.mode == ServerSource.AUTOMATIC1111
+        if (requiresAuthorization && currentState.authorizationStorageFailure != null) return
         if (!validate()) return
         connectToServer()
     }
 
     /**
+     * Retries storage or completes explicitly confirmed recovery without discarding editable settings.
+     *
+     * @param shouldReset True only after the dedicated destructive-action confirmation.
+     * @author Dmitriy Moroz
+     */
+    private fun recoverAuthorizationStorage(shouldReset: Boolean) {
+        if (currentState.isAuthorizationStorageBusy) return
+        updateState {
+            it.copy(
+                isAuthorizationStorageBusy = true,
+                isAuthorizationResetConfirmationVisible = false
+            )
+        }
+        launch(dispatchersProvider.io) {
+            try {
+                if (shouldReset) resetAuthorizationCredentialsUseCase() else retryAuthorizationStorageUseCase()
+                val configuration = getConfigurationUseCase()
+                updateState {
+                    if (configuration.authorizationStorageFailure == null) {
+                        it.withCredentials(configuration.authCredentials)
+                            .copy(authorizationStorageFailure = null)
+                    } else {
+                        it.copy(authorizationStorageFailure = configuration.authorizationStorageFailure)
+                    }
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: AuthorizationStorageFailure) {
+                updateState { it.copy(authorizationStorageFailure = error.reason) }
+            } finally {
+                updateState { it.copy(isAuthorizationStorageBusy = false) }
+            }
+        }
+    }
+
+    /**
      * Invalidates pending UI callbacks, cancels polling and discards only the transient device code.
      * The previously committed protected session remains unchanged.
+     *
      * @author Dmitriy Moroz
      */
     private fun cancelOAuthLogin() {
@@ -323,6 +423,7 @@ class ServerSetupViewModel(
     /**
      * Starts one device authorization attempt for the active OAuth form and publishes safe UI state.
      * Superseded attempts cannot restore their code, account or error after route cancellation.
+     *
      * @author Dmitriy Moroz
      */
     private fun startOAuthLogin() {
@@ -334,9 +435,15 @@ class ServerSetupViewModel(
                 val identity = openAiOAuthGateway.login { code, _ ->
                     if (attempt == oauthAttempt) updateState { it.copy(openAiOAuthCode = code) }
                 }
-                if (attempt == oauthAttempt) updateState { it.copy(openAiOAuthAccount = identity.accountId, openAiOAuthStorageError = false) }
-            } catch (error: CancellationException) { throw error }
-            catch (error: OpenAiOAuthFailure) {
+                if (attempt == oauthAttempt) updateState {
+                    it.copy(
+                        openAiOAuthAccount = identity.accountId,
+                        openAiOAuthStorageError = false
+                    )
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: OpenAiOAuthFailure) {
                 if (attempt == oauthAttempt) updateState {
                     it.copy(
                         openAiOAuthStorageError = it.openAiOAuthStorageError || error.category == "STORAGE",
@@ -344,7 +451,12 @@ class ServerSetupViewModel(
                     )
                 }
             } finally {
-                if (attempt == oauthAttempt) updateState { it.copy(openAiOAuthBusy = false, openAiOAuthCode = null) }
+                if (attempt == oauthAttempt) updateState {
+                    it.copy(
+                        openAiOAuthBusy = false,
+                        openAiOAuthCode = null
+                    )
+                }
             }
         }
     }
@@ -373,14 +485,23 @@ class ServerSetupViewModel(
                     ServerSource.OPEN_AI_COMPATIBLE -> connectToOpenAiCompatibleUseCase(
                         url = currentState.openAiCompatibleUrl,
                         apiKey = currentState.openAiCompatibleApiKey,
-                    ).map { outcome -> connectionUnverified = outcome == OpenAiCompatibleConnection.UNVERIFIED }
+                    ).map { outcome ->
+                        connectionUnverified = outcome == OpenAiCompatibleConnection.UNVERIFIED
+                    }
+
                     ServerSource.OPEN_AI -> connectToOpenAi()
                     ServerSource.OPEN_AI_OAUTH -> {
                         if (openAiOAuthGateway.currentIdentity() == null) throw OpenAiOAuthFailure("LOGIN_REQUIRED")
                         val previous = getConfigurationUseCase()
-                        setServerConfigurationUseCase(previous.copy(source = ServerSource.OPEN_AI_OAUTH, demoMode = false))
+                        setServerConfigurationUseCase(
+                            previous.copy(
+                                source = ServerSource.OPEN_AI_OAUTH,
+                                demoMode = false
+                            )
+                        )
                         Result.success(Unit)
                     }
+
                     ServerSource.STABILITY_AI -> connectToStabilityAi()
                     ServerSource.FAL_AI -> connectToFalAi()
                     ServerSource.ARLI_AI -> connectToArliAi()
@@ -407,7 +528,10 @@ class ServerSetupViewModel(
                         updateState { state ->
                             state.copy(
                                 modal = ServerSetupState.Modal.Error(
-                                    (t as? OpenAiOAuthFailure)?.localizedDescription() ?: (t as? OpenAiCompatibleHttpFailure)?.localizedDescription() ?: t.message ?: Localization.string("error_invalid"),
+                                    (t as? AuthorizationStorageFailure)?.localizedDescription()
+                                        ?: (t as? OpenAiOAuthFailure)?.localizedDescription()
+                                        ?: (t as? OpenAiCompatibleHttpFailure)?.localizedDescription()
+                                        ?: t.message ?: Localization.string("error_invalid"),
                                 ),
                             )
                         }

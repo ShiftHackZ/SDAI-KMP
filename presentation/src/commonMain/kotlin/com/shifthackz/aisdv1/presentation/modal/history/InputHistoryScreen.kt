@@ -35,6 +35,13 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import com.shifthackz.aisdv1.presentation.widget.image.LocalGalleryImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.rememberGalleryImage
+import com.shifthackz.aisdv1.presentation.widget.image.DecodedImageBitmap
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -117,7 +124,7 @@ fun InputHistoryScreen(
             modifier = modifier.fillMaxSize(),
             state = state,
             processIntent = processIntent,
-            onGenerationSelected = onGenerationSelected,
+            onGenerationSelected = { id -> viewModel.select(id, onGenerationSelected) },
         )
     }
 }
@@ -136,7 +143,7 @@ private fun ScreenContent(
     modifier: Modifier = Modifier,
     state: InputHistoryState,
     processIntent: (InputHistoryIntent) -> Unit = {},
-    onGenerationSelected: (AiGenerationResult) -> Unit = {},
+    onGenerationSelected: (Long) -> Unit = {},
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
@@ -148,12 +155,14 @@ private fun ScreenContent(
                 message = state.error,
                 processIntent = processIntent,
             )
+
             state.items.isEmpty() -> Text(
                 modifier = Modifier.padding(24.dp),
                 text = Localization.string("gallery_empty_title"),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
@@ -165,7 +174,7 @@ private fun ScreenContent(
                 ) { itemUi ->
                     InputHistoryItem(
                         item = itemUi,
-                        onClick = { onGenerationSelected(it.generationResult) },
+                        onClick = { onGenerationSelected(it.generationResult.id) },
                     )
                 }
                 if (state.canLoadMore) {
@@ -232,7 +241,17 @@ private fun InputHistoryItem(
     item: InputHistoryItemUi,
     onClick: (InputHistoryItemUi) -> Unit = {},
 ) {
-    val (generation, image) = item
+    val generation = item.generationResult
+    var edge by remember { mutableIntStateOf(0) }
+    val loader = LocalGalleryImageLoader.current
+    val image = loader?.let {
+        (rememberGalleryImage(
+            it,
+            generation.id,
+            generation.imageRevision,
+            edge = edge
+        ).value as? DecodedImageBitmap.Ready)?.image
+    }
     val itemPropertyText: (String, Any?) -> AnnotatedString = { key, value ->
         buildAnnotatedString {
             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -259,6 +278,7 @@ private fun InputHistoryItem(
             Image(
                 modifier = Modifier
                     .fillMaxWidth(0.36f)
+                    .onSizeChanged { edge = maxOf(it.width, it.height) }
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(12.dp)),
                 bitmap = image,
@@ -269,6 +289,7 @@ private fun InputHistoryItem(
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.36f)
+                    .onSizeChanged { edge = maxOf(it.width, it.height) }
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center,

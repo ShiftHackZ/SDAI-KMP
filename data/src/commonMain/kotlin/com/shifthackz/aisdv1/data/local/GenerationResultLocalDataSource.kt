@@ -7,6 +7,8 @@ import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResultPreview
 import com.shifthackz.aisdv1.storage.db.persistent.dao.GenerationResultDao
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.map
  *
  * @author Dmitriy Moroz
  */
+@OptIn(ExperimentalUuidApi::class)
 internal class GenerationResultLocalDataSource(
     /**
      * Exposes the `dao` value used by the SDAI data layer.
@@ -32,7 +35,7 @@ internal class GenerationResultLocalDataSource(
      * @author Dmitriy Moroz
      */
     override suspend fun insert(result: AiGenerationResult): Long =
-        dao.insert(result.mapDomainToEntity())
+        dao.insert(result.mapDomainToEntity().copy(imageRevision = Uuid.random().toString()))
 
     /**
      * Executes the `queryAll` step in the SDAI data layer.
@@ -62,7 +65,10 @@ internal class GenerationResultLocalDataSource(
      * @return Result produced by `queryPagePreview`.
      * @author Dmitriy Moroz
      */
-    override suspend fun queryPagePreview(limit: Int, offset: Int): List<AiGenerationResultPreview> =
+    override suspend fun queryPagePreview(
+        limit: Int,
+        offset: Int
+    ): List<AiGenerationResultPreview> =
         dao.queryPagePreview(limit, offset).mapPreviewEntityToDomain()
 
     /**
@@ -84,7 +90,10 @@ internal class GenerationResultLocalDataSource(
      * @return Result produced by `observePagePreview`.
      * @author Dmitriy Moroz
      */
-    override fun observePagePreview(limit: Int, offset: Int): Flow<List<AiGenerationResultPreview>> =
+    override fun observePagePreview(
+        limit: Int,
+        offset: Int
+    ): Flow<List<AiGenerationResultPreview>> =
         dao.observePagePreview(limit, offset).map { it.mapPreviewEntityToDomain() }
 
     /**

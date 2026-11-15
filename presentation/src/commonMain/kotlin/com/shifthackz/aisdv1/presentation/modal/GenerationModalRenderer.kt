@@ -2,6 +2,7 @@
 
 package com.shifthackz.aisdv1.presentation.modal
 
+import com.shifthackz.aisdv1.presentation.widget.work.localizedText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -72,9 +73,12 @@ fun GenerationModalRenderer(
         )
 
         is GenerationModal.Generating -> ProgressDialog(
-            title = screenModal.title ?: Localization.string("communicating_local_title").asUiText(),
+            title = screenModal.title ?: Localization.string("communicating_local_title")
+                .asUiText(),
             canDismiss = false,
             step = screenModal.pair,
+            subTitle = (screenModal.nativeStage?.localizedText()
+                ?: Localization.string("communicating_progress_sub_title")).asUiText(),
             content = screenModal.canCancel.takeIf { it }?.let {
                 {
                     ProgressDialogCancelButton(onClick = onCancelGeneration)

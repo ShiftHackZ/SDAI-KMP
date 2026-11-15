@@ -7,7 +7,6 @@ import android.util.Pair
 import com.shifthackz.aisdv1.feature.onnx.entity.Array3D
 import com.shifthackz.aisdv1.feature.onnx.entity.LocalDiffusionTensor
 import com.shifthackz.aisdv1.feature.onnx.environment.OrtEnvironmentProvider
-import org.koin.java.KoinJavaComponent.inject
 import java.nio.FloatBuffer
 
 /**
@@ -15,11 +14,15 @@ import java.nio.FloatBuffer
  *
  * @param data data value consumed by the API.
  * @param dimensions dimensions value consumed by the API.
+ * @param ortEnvironmentProvider Injected environment owning the tensor.
  * @return Result produced by `duplicate`.
  * @author Dmitriy Moroz
  */
-internal fun duplicate(data: FloatArray, dimensions: LongArray?): LocalDiffusionTensor<*> {
-    val ortEnvironmentProvider: OrtEnvironmentProvider by inject(OrtEnvironmentProvider::class.java)
+internal fun duplicate(
+    data: FloatArray,
+    dimensions: LongArray?,
+    ortEnvironmentProvider: OrtEnvironmentProvider
+): LocalDiffusionTensor<*> {
     val floats = FloatArray(data.size * 2)
     System.arraycopy(data, 0, floats, 0, data.size)
     System.arraycopy(data, 0, floats, data.size, data.size)
@@ -38,7 +41,8 @@ internal fun duplicate(data: FloatArray, dimensions: LongArray?): LocalDiffusion
  * Executes the `multipleTensorsByFloat` step in the SDAI ONNX local diffusion feature layer.
  *
  * @param data data value consumed by the API.
- * @param value value value consumed by the API.
+ * @param value Scale applied in place to the caller-owned array.
+ * @param ortEnvironmentProvider Injected environment owning the resulting tensor.
  * @param dimensions dimensions value consumed by the API.
  * @return Result produced by `multipleTensorsByFloat`.
  * @author Dmitriy Moroz
@@ -47,8 +51,8 @@ internal fun multipleTensorsByFloat(
     data: FloatArray,
     value: Float,
     dimensions: LongArray?,
+    ortEnvironmentProvider: OrtEnvironmentProvider,
 ): LocalDiffusionTensor<*> {
-    val ortEnvironmentProvider: OrtEnvironmentProvider by inject(OrtEnvironmentProvider::class.java)
     for (i in data.indices) {
         data[i] = data[i] * value
     }

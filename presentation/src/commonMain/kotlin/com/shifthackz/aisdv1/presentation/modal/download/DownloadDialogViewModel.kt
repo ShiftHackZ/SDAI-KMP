@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.modal.download
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalModelUseCase
 
@@ -8,8 +10,10 @@ import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalModelUseCase
  * Coordinates `DownloadDialogViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class DownloadDialogViewModel(
+    diagnostics: UiDiagnostics,
     modelId: String,
     /**
      * Exposes the `getLocalModelUseCase` value used by the SDAI presentation layer.
@@ -30,6 +34,8 @@ class DownloadDialogViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<DownloadDialogState, DownloadDialogIntent, DownloadDialogEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.DOWNLOAD_DIALOG,
     initialState = DownloadDialogState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

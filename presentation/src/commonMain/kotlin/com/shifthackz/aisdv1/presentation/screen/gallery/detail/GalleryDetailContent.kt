@@ -42,9 +42,14 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSubtree
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -56,10 +61,11 @@ import com.shifthackz.aisdv1.presentation.generated.resources.Res
 import com.shifthackz.aisdv1.presentation.generated.resources.ic_share
 import com.shifthackz.aisdv1.presentation.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.rememberGalleryImage
 import com.shifthackz.aisdv1.presentation.widget.image.DecodedImageBitmap
 import com.shifthackz.aisdv1.presentation.widget.image.ZoomableImage
 import com.shifthackz.aisdv1.presentation.widget.image.ZoomableImageSource
-import com.shifthackz.aisdv1.presentation.widget.image.rememberDecodedImageBitmap
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -68,6 +74,7 @@ import org.jetbrains.compose.resources.painterResource
  *
  * @param modifier Compose modifier applied to the rendered UI.
  * @param state state rendered or processed by the component.
+ * @param imageLoader Injected sampled image loader; null is reserved for static previews.
  * @param processIntent process intent value consumed by the API.
  * @author Dmitriy Moroz
  */
@@ -75,6 +82,7 @@ import org.jetbrains.compose.resources.painterResource
 fun GalleryDetailScreenContent(
     modifier: Modifier = Modifier,
     state: GalleryDetailState,
+    imageLoader: GalleryImageLoader? = null,
     processIntent: (GalleryDetailIntent) -> Unit = {},
 ) {
     Box(modifier = modifier) {
@@ -125,6 +133,7 @@ fun GalleryDetailScreenContent(
                     GalleryDetailContentState(
                         modifier = contentModifier,
                         state = state,
+                        imageLoader = imageLoader,
                         content = state.content,
                         onCopyTextClick = { value ->
                             processIntent(GalleryDetailIntent.CopyToClipboard(value))
@@ -357,15 +366,17 @@ internal fun GalleryDetailContentState(
     modifier: Modifier = Modifier,
     state: GalleryDetailState,
     content: GalleryDetailContent,
+    imageLoader: GalleryImageLoader? = null,
     onCopyTextClick: (String) -> Unit = {},
     onPageSelected: (Int) -> Unit = {},
 ) {
     when (state.selectedTab) {
         GalleryDetailTab.IMAGE -> {
-            if (content.imageBase64.isNotBlank()) {
+            if (content.id > 0 || content.imageBase64.isNotBlank()) {
                 SwipeableGalleryImage(
                     modifier = modifier,
                     selectedTab = state.selectedTab,
+                    imageLoader = imageLoader,
                     content = content,
                     pagerContents = state.pagerContents,
                     pagerContentStartIndex = state.pagerContentStartIndex,
@@ -375,11 +386,13 @@ internal fun GalleryDetailContentState(
                 )
             }
         }
+
         GalleryDetailTab.ORIGINAL -> {
             if (content.inputImageBase64 != null) {
                 SwipeableGalleryImage(
                     modifier = modifier,
                     selectedTab = state.selectedTab,
+                    imageLoader = imageLoader,
                     content = content,
                     pagerContents = state.pagerContents,
                     pagerContentStartIndex = state.pagerContentStartIndex,
@@ -389,6 +402,7 @@ internal fun GalleryDetailContentState(
                 )
             }
         }
+
         GalleryDetailTab.INFO -> GalleryDetailsTable(
             modifier = modifier,
             content = content,
@@ -414,6 +428,7 @@ internal fun GalleryDetailContentState(
 private fun SwipeableGalleryImage(
     modifier: Modifier = Modifier,
     selectedTab: GalleryDetailTab,
+    imageLoader: GalleryImageLoader? = null,
     content: GalleryDetailContent,
     pagerContents: List<GalleryDetailContent>,
     pagerContentStartIndex: Int,
@@ -421,80 +436,88 @@ private fun SwipeableGalleryImage(
     pagerPageCount: Int,
     onPageSelected: (Int) -> Unit = {},
 ) {
-    val pageCount = pagerPageCount.takeIf { it > 0 } ?: pagerContents.size.coerceAtLeast(1)
-    val currentPage = pagerCurrentIndex.coerceIn(0, pageCount - 1)
-    val pagerState = rememberPagerState(
-        initialPage = currentPage,
-        pageCount = { pageCount },
-    )
-    val currentImageScale = remember(content.id, selectedTab) { mutableFloatStateOf(1f) }
-
-    LaunchedEffect(selectedTab, currentPage) {
-        currentImageScale.floatValue = 1f
-        if (pagerState.currentPage != currentPage) {
-            pagerState.scrollToPage(currentPage)
-        }
-    }
-
-    LaunchedEffect(pagerState.settledPage, currentPage, pagerContentStartIndex, pagerContents) {
-        if (pagerState.settledPage != currentPage) {
-            onPageSelected(pagerState.settledPage)
-        }
-    }
-
-    HorizontalPager(
-        modifier = modifier,
-        state = pagerState,
-        userScrollEnabled = currentImageScale.floatValue <= GALLERY_PAGER_ZOOM_LOCK_SCALE,
-    ) { page ->
-        val pageContent = pagerContents.getOrNull(page - pagerContentStartIndex)
-        if (pageContent == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-            )
-            return@HorizontalPager
-        }
-        val base64 = pageContent.selectedImageBase64OrNull(selectedTab)
-        if (base64 == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-            )
-            return@HorizontalPager
-        }
-
-        val isCurrentPage = pageContent.id == content.id
-        val decodedImage by rememberDecodedImageBitmap(
-            key = "${pageContent.id}_${selectedTab.name}",
-            base64 = base64,
+    UiDiagnosticSection(UiDiagnosticSubtree.GALLERY_DETAIL_IMAGE) {
+        val pageCount = pagerPageCount.takeIf { it > 0 } ?: pagerContents.size.coerceAtLeast(1)
+        val currentPage = pagerCurrentIndex.coerceIn(0, pageCount - 1)
+        val pagerState = rememberPagerState(
+            initialPage = currentPage,
+            pageCount = { pageCount },
         )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-        ) {
-            when (val image = decodedImage) {
-                DecodedImageBitmap.Loading -> Box(
+        val currentImageScale = remember(content.id, selectedTab) { mutableFloatStateOf(1f) }
+
+        LaunchedEffect(selectedTab, currentPage) {
+            currentImageScale.floatValue = 1f
+            if (pagerState.currentPage != currentPage) {
+                pagerState.scrollToPage(currentPage)
+            }
+        }
+
+        LaunchedEffect(pagerState.settledPage, currentPage, pagerContentStartIndex, pagerContents) {
+            if (pagerState.settledPage != currentPage) {
+                onPageSelected(pagerState.settledPage)
+            }
+        }
+
+        HorizontalPager(
+            modifier = modifier,
+            state = pagerState,
+            userScrollEnabled = currentImageScale.floatValue <= GALLERY_PAGER_ZOOM_LOCK_SCALE,
+        ) { page ->
+            val pageContent = pagerContents.getOrNull(page - pagerContentStartIndex)
+            if (pageContent == null) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .shimmer(),
+                        .background(MaterialTheme.colorScheme.background),
                 )
-                is DecodedImageBitmap.Ready -> ZoomableImage(
-                    modifier = Modifier.fillMaxSize(),
-                    source = ZoomableImageSource.Bitmap(image.image),
-                    hideImage = pageContent.hidden && selectedTab == GalleryDetailTab.IMAGE,
-                    fitToWidth = true,
-                    gesturesEnabled = isCurrentPage,
-                    onScaleChange = { scale ->
-                        if (isCurrentPage) {
-                            currentImageScale.floatValue = scale
-                        }
-                    },
+                return@HorizontalPager
+            }
+            val base64 = pageContent.selectedImageBase64OrNull(selectedTab)
+            if (pageContent.id <= 0 && base64 == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
                 )
-                DecodedImageBitmap.Unavailable -> Unit
+                return@HorizontalPager
+            }
+
+            val isCurrentPage = pageContent.id == content.id
+            var imageEdge by remember(pageContent.id, selectedTab) { mutableIntStateOf(0) }
+            val decodedImage = if (imageLoader != null) {
+                rememberGalleryImage(
+                    imageLoader, pageContent.id, pageContent.imageRevision,
+                    selectedTab == GalleryDetailTab.ORIGINAL, imageEdge,
+                    transientBase64 = base64.takeIf { pageContent.id <= 0 }).value
+            } else DecodedImageBitmap.Unavailable
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { imageEdge = maxOf(it.width, it.height) }
+                    .background(MaterialTheme.colorScheme.background),
+            ) {
+                when (val image = decodedImage) {
+                    DecodedImageBitmap.Loading -> Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .shimmer(),
+                    )
+
+                    is DecodedImageBitmap.Ready -> ZoomableImage(
+                        modifier = Modifier.fillMaxSize(),
+                        source = ZoomableImageSource.Bitmap(image.image),
+                        hideImage = pageContent.hidden && selectedTab == GalleryDetailTab.IMAGE,
+                        fitToWidth = true,
+                        gesturesEnabled = isCurrentPage,
+                        onScaleChange = { scale ->
+                            if (isCurrentPage) {
+                                currentImageScale.floatValue = scale
+                            }
+                        },
+                    )
+
+                    DecodedImageBitmap.Unavailable -> Unit
+                }
             }
         }
     }

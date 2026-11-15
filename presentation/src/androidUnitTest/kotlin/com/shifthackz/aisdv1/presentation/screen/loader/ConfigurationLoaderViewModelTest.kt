@@ -5,7 +5,7 @@ import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.usecase.caching.DataPreLoaderUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.ConfigurationLoaderRouter
+import com.shifthackz.aisdv1.core.navigation.router.ConfigurationLoaderRouter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -139,6 +139,7 @@ class ConfigurationLoaderViewModelTest {
         }
 
     private fun TestScope.createViewModel() = ConfigurationLoaderViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         dataPreLoaderUseCase = stubDataPreLoaderUseCase,
         getConfigurationUseCase = stubGetConfigurationUseCase,

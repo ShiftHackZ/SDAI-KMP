@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.widget.connectivity
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.core.mvi.EmptyIntent
@@ -17,8 +19,10 @@ import kotlinx.coroutines.withContext
  * Coordinates `ConnectivityViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class ConnectivityViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -50,6 +54,8 @@ class ConnectivityViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<ConnectivityState, EmptyIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.CONNECTIVITY,
     initialState = ConnectivityState.Uninitialized(
         enabled = getMonitorConnectivityUseCase(),
     ),

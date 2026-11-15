@@ -111,6 +111,7 @@ class DownloadDialogViewModelTest {
         }
 
     private fun TestScope.createViewModel() = DownloadDialogViewModel(
+        diagnostics = mockk(relaxed = true),
         modelId = MODEL_ID,
         getLocalModelUseCase = stubGetLocalModelUseCase,
         dispatchersProvider = dispatchersProvider,

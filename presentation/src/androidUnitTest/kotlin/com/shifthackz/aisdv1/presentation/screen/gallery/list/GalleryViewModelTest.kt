@@ -1,5 +1,11 @@
 package com.shifthackz.aisdv1.presentation.screen.gallery.list
 
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.presentation.mocks.mockGalleryMemoryBudget
+import com.shifthackz.aisdv1.presentation.mocks.mockAiGenerationResult
+import com.shifthackz.aisdv1.presentation.mocks.toGalleryMetadata
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResultPreview
 import com.shifthackz.aisdv1.domain.entity.Grid
@@ -12,8 +18,9 @@ import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemsUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.GetMediaStoreInfoUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.SetGalleryItemsLikedUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.SetGalleryItemsVisibilityUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultPagedUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryRouter
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultCountUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultPreviewPageUseCase
+import com.shifthackz.aisdv1.core.navigation.router.GalleryRouter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -48,8 +55,11 @@ class GalleryViewModelTest {
     private val deleteGalleryItemsUseCase = mockk<DeleteGalleryItemsUseCase>()
     private val setGalleryItemsVisibilityUseCase = mockk<SetGalleryItemsVisibilityUseCase>()
     private val setGalleryItemsLikedUseCase = mockk<SetGalleryItemsLikedUseCase>()
-    private val getGenerationResultPagedUseCase = mockk<GetGenerationResultPagedUseCase>()
+    private val observeGenerationResultPreviewPageUseCase =
+        mockk<ObserveGenerationResultPreviewPageUseCase>()
+    private val observeGenerationResultCountUseCase = mockk<ObserveGenerationResultCountUseCase>()
     private val galleryExportService = mockk<GalleryExportService>()
+    private val galleryReads = mockk<GalleryReadGateway>()
     private val galleryRouter = mockk<GalleryRouter>(relaxed = true)
 
     @Before
@@ -62,9 +72,33 @@ class GalleryViewModelTest {
             folderUri = "content://gallery",
         )
         every {
-            getGenerationResultPagedUseCase.observePreview(limit = PAGE_SIZE, offset = 0)
+            observeGenerationResultPreviewPageUseCase(limit = PAGE_SIZE, offset = 0)
         } returns flowOf(listOf(generationResultPreview(id = 1L, hidden = false)))
-        every { getGenerationResultPagedUseCase.observeCount() } returns flowOf(5)
+        every { observeGenerationResultCountUseCase() } returns flowOf(5)
+        every { galleryReads.observeIds() } answers { observeGenerationResultCountUseCase().map { (1L..it.toLong()).toList() } }
+        every {
+            galleryReads.observeMetadata(
+                any(),
+                any()
+            )
+        } answers {
+            observeGenerationResultPreviewPageUseCase(
+                PAGE_SIZE,
+                0
+            ).map { rows ->
+                rows.map { row ->
+                    mockAiGenerationResult.copy(
+                        id = row.id,
+                        hidden = row.hidden,
+                        liked = row.liked
+                    ).toGalleryMetadata()
+                }
+            }
+        }
+        coEvery { galleryReads.flags(any()) } coAnswers {
+            val ids = firstArg<List<Long>>()
+            observeGenerationResultPreviewPageUseCase(PAGE_SIZE, 0).first().filter { it.id in ids }
+        }
     }
 
     @Test
@@ -77,10 +111,9 @@ class GalleryViewModelTest {
                 GalleryState(
                     loading = false,
                     items = listOf(
-                        GalleryGridItemUi(id = 1L, imageBase64 = "", hidden = false),
+                        GalleryGridItemUi(id = 1L, hidden = false),
                     ),
-                    nextPage = 1,
-                    canLoadMore = true,
+                    itemIds = (1L..5L).toList(),
                     mediaStoreInfo = MediaStoreInfo(5, "content://gallery"),
                     grid = Grid.Fixed3,
                 ),
@@ -158,7 +191,7 @@ class GalleryViewModelTest {
     fun `given hidden selection visibility toggled, expected items unhidden and selection cleared`() =
         runTest(testDispatcher) {
             every {
-                getGenerationResultPagedUseCase.observePreview(limit = PAGE_SIZE, offset = 0)
+                observeGenerationResultPreviewPageUseCase(limit = PAGE_SIZE, offset = 0)
             } returns flowOf(listOf(generationResultPreview(id = 1L, hidden = true)))
             coEvery { setGalleryItemsVisibilityUseCase(listOf(1L), false) } returns Unit
             val viewModel = createViewModel()
@@ -197,7 +230,7 @@ class GalleryViewModelTest {
     fun `given liked selection like toggled, expected items unliked and selection cleared`() =
         runTest(testDispatcher) {
             every {
-                getGenerationResultPagedUseCase.observePreview(limit = PAGE_SIZE, offset = 0)
+                observeGenerationResultPreviewPageUseCase(limit = PAGE_SIZE, offset = 0)
             } returns flowOf(listOf(generationResultPreview(id = 1L, hidden = false, liked = true)))
             coEvery { setGalleryItemsLikedUseCase(listOf(1L), false) } returns Unit
             val viewModel = createViewModel()
@@ -215,6 +248,9 @@ class GalleryViewModelTest {
         }
 
     private fun TestScope.createViewModel() = GalleryViewModel(
+        galleryReads = galleryReads,
+        memoryBudget = mockGalleryMemoryBudget,
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         getMediaStoreInfoUseCase = getMediaStoreInfoUseCase,
         backgroundWorkObserver = backgroundWorkObserver,
@@ -223,17 +259,16 @@ class GalleryViewModelTest {
         deleteGalleryItemsUseCase = deleteGalleryItemsUseCase,
         setGalleryItemsVisibilityUseCase = setGalleryItemsVisibilityUseCase,
         setGalleryItemsLikedUseCase = setGalleryItemsLikedUseCase,
-        getGenerationResultPagedUseCase = getGenerationResultPagedUseCase,
         galleryExportService = galleryExportService,
         galleryRouter = galleryRouter,
     )
 
-    private fun generationResultPreview(id: Long, hidden: Boolean, liked: Boolean = false) = AiGenerationResultPreview(
-        id = id,
-        image = "",
-        hidden = hidden,
-        liked = liked,
-    )
+    private fun generationResultPreview(id: Long, hidden: Boolean, liked: Boolean = false) =
+        AiGenerationResultPreview(
+            id = id,
+            hidden = hidden,
+            liked = liked,
+        )
 
     private companion object {
         const val PAGE_SIZE = 30

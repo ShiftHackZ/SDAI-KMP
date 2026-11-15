@@ -46,6 +46,12 @@ data class BackgroundWorkState(
      */
     val image: ImageBitmap? = null,
     /**
+     * One original result; display sampling belongs to the visible slot.
+     *
+     * @author Dmitriy Moroz
+     */
+    val imageBase64: String? = null,
+    /**
      * Exposes the `isError` value used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz

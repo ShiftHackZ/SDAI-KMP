@@ -8,15 +8,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TextSnippet
@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.widget.item.SettingsHeaderContent
 import com.shifthackz.aisdv1.presentation.widget.scrollbar.verticalScrollbar
 
 /**
@@ -55,6 +56,31 @@ import com.shifthackz.aisdv1.presentation.widget.scrollbar.verticalScrollbar
  * @author Dmitriy Moroz
  */
 data class DebugMenuScreenStrings(
+    /**
+     * Diagnostic control label.
+     *
+     * @author Dmitriy Moroz
+     */
+    val diagnosticSection: String = "",
+    /**
+     * Label of the process-wide capture switch; disabled recording retains the snapshot.
+     *
+     * @author Dmitriy Moroz
+     */
+    val diagnosticCapture: String = "",
+    /**
+     * Diagnostic control label.
+     *
+     * @author Dmitriy Moroz
+     */
+    val diagnosticReset: String = "",
+    /**
+     * Diagnostic control label.
+     *
+     * @author Dmitriy Moroz
+     */
+    val diagnosticShare: String = "",
+
     /**
      * Exposes the `title` value used by the SDAI presentation layer.
      *
@@ -148,6 +174,18 @@ data class DebugMenuScreenStrings(
  */
 data class DebugMenuScreenContentState(
     /**
+     * Whether this platform/build supports runtime capture.
+     *
+     * @author Dmitriy Moroz
+     */
+    val isUiDiagnosticsSupported: Boolean = false,
+    /**
+     * Explicit capture switch; counts never trigger state changes.
+     *
+     * @author Dmitriy Moroz
+     */
+    val isUiDiagnosticsCapturing: Boolean = false,
+    /**
      * Exposes the `localDiffusionAllowCancel` value used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
@@ -186,53 +224,89 @@ data class DebugMenuScreenContentState(
  */
 sealed interface DebugMenuAction {
     /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object ShareUiCapture : DebugMenuAction
+
+    /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object ResetUiCapture : DebugMenuAction
+
+    /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object StopUiCapture : DebugMenuAction
+
+    /**
+     * Explicit bounded diagnostic capture action.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object StartUiCapture : DebugMenuAction
+
+    /**
      * Provides the `NavigateBack` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object NavigateBack : DebugMenuAction
+
     /**
      * Provides the `ViewLogs` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object ViewLogs : DebugMenuAction
+
     /**
      * Provides the `ClearLogs` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object ClearLogs : DebugMenuAction
+
     /**
      * Provides the `RestartTxt2Img` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object RestartTxt2Img : DebugMenuAction
+
     /**
      * Provides the `RestartImg2Img` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object RestartImg2Img : DebugMenuAction
+
     /**
      * Provides the `CancelAllWork` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object CancelAllWork : DebugMenuAction
+
     /**
      * Provides the `ToggleLocalDiffusionCancel` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object ToggleLocalDiffusionCancel : DebugMenuAction
+
     /**
      * Provides the `RequestLocalDiffusionScheduler` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object RequestLocalDiffusionScheduler : DebugMenuAction
+
     /**
      * Provides the `InsertBadBase64` singleton used by the SDAI presentation layer.
      *
@@ -295,7 +369,7 @@ fun DebugMenuScreenContent(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
 
-            DebugMenuHeader(
+            SettingsHeaderContent(
                 modifier = headerModifier,
                 text = strings.mainSection,
             )
@@ -312,8 +386,43 @@ fun DebugMenuScreenContent(
                 onClick = { processAction(DebugMenuAction.ClearLogs) },
             )
 
+            if (state.isUiDiagnosticsSupported) {
+                SettingsHeaderContent(text = strings.diagnosticSection, modifier = headerModifier)
+                Row(
+                    modifier = itemModifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
+                        .defaultMinSize(minHeight = 50.dp)
+                        .toggleable(
+                            value = state.isUiDiagnosticsCapturing,
+                            role = Role.Switch,
+                            onValueChange = { shouldCapture ->
+                                processAction(if (shouldCapture) DebugMenuAction.StartUiCapture else DebugMenuAction.StopUiCapture)
+                            },
+                        )
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = strings.diagnosticCapture,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(checked = state.isUiDiagnosticsCapturing, onCheckedChange = null)
+                }
+                DebugMenuItem(
+                    text = strings.diagnosticReset,
+                    modifier = itemModifier,
+                    onClick = { processAction(DebugMenuAction.ResetUiCapture) })
+                DebugMenuItem(
+                    text = strings.diagnosticShare,
+                    modifier = itemModifier,
+                    onClick = { processAction(DebugMenuAction.ShareUiCapture) })
+            }
+
             if (state.showWorkManagerSection) {
-                DebugMenuHeader(
+                SettingsHeaderContent(
                     modifier = headerModifier,
                     text = strings.workManagerSection,
                 )
@@ -338,7 +447,7 @@ fun DebugMenuScreenContent(
             }
 
             if (state.showLocalDiffusionSection) {
-                DebugMenuHeader(
+                SettingsHeaderContent(
                     modifier = headerModifier,
                     text = strings.localDiffusionSection,
                 )
@@ -368,7 +477,7 @@ fun DebugMenuScreenContent(
             }
 
             if (state.showQualityAssuranceSection) {
-                DebugMenuHeader(
+                SettingsHeaderContent(
                     modifier = headerModifier,
                     text = strings.qualityAssuranceSection,
                 )
@@ -381,55 +490,6 @@ fun DebugMenuScreenContent(
             }
         }
     }
-}
-
-/**
- * Renders the `DebugMenuHeader` UI for the SDAI presentation layer.
- *
- * @param text text value consumed by the API.
- * @param modifier Compose modifier applied to the rendered UI.
- * @author Dmitriy Moroz
- */
-@Composable
-private fun DebugMenuHeader(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        HeaderLine()
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            text = text,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        HeaderLine(inverse = true)
-    }
-}
-
-/**
- * Renders the `HeaderLine` UI for the SDAI presentation layer.
- *
- * @param modifier Compose modifier applied to the rendered UI.
- * @param inverse inverse value consumed by the API.
- * @author Dmitriy Moroz
- */
-@Composable
-private fun RowScope.HeaderLine(
-    modifier: Modifier = Modifier,
-    inverse: Boolean = false,
-) {
-    val color = MaterialTheme.colorScheme.primary.copy(alpha = if (inverse) 0.25f else 0.7f)
-    Spacer(
-        modifier = modifier
-            .weight(1f)
-            .height(1.dp)
-            .padding(vertical = 6.dp)
-            .background(color = color),
-    )
 }
 
 /**

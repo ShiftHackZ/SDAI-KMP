@@ -7,6 +7,14 @@ import com.shifthackz.aisdv1.domain.preference.ConfigurationStore
 class ConfigurationStoreStub(
     configuration: Configuration = mockConfiguration,
 ) : ConfigurationStore {
+    private var authorizationCommitId = ""
+    override fun getAuthorizationCommitId(): String = authorizationCommitId
+    override fun retryPendingConfiguration(): Boolean = false
+    override fun commitConfiguration(configuration: Configuration, commitId: String) {
+        setConfiguration(configuration)
+        authorizationCommitId = commitId
+    }
+
     override var automatic1111ServerUrl: String = configuration.serverUrl
     override var swarmUiServerUrl: String = configuration.swarmUiUrl
     override var swarmUiModel: String = configuration.swarmUiModel

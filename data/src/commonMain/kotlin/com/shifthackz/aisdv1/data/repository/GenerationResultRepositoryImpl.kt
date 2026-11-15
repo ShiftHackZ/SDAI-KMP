@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+
 import com.shifthackz.aisdv1.data.core.CoreMediaStoreRepository
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Persists and exports gallery results while rejecting stale OAuth account/source snapshots.
+ *
  * @param preferenceManager Current source selection and export preferences.
  * @param mediaStoreGateway Platform media export adapter.
  * @param localDataSource Gallery database operations.
@@ -27,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
  */
 internal class GenerationResultRepositoryImpl(
     private val preferenceManager: PreferenceManager,
+    private val galleryReads: GalleryReadGateway,
     mediaStoreGateway: MediaStoreGateway,
     /**
      * Exposes the `localDataSource` value used by the SDAI data layer.
@@ -96,7 +100,10 @@ internal class GenerationResultRepositoryImpl(
      * @return Result produced by `observePagePreview`.
      * @author Dmitriy Moroz
      */
-    override fun observePagePreview(limit: Int, offset: Int): Flow<List<AiGenerationResultPreview>> =
+    override fun observePagePreview(
+        limit: Int,
+        offset: Int
+    ): Flow<List<AiGenerationResultPreview>> =
         localDataSource.observePagePreview(limit, offset)
 
     /**
@@ -127,6 +134,7 @@ internal class GenerationResultRepositoryImpl(
     /**
      * Inserts and optionally exports a result under its original OAuth account and selection revision.
      * Rejects stale unsaved OAuth results before persistence; ordinary gallery results use normal storage.
+     *
      * @param result Image and transient identity snapshot captured during generation.
      * @return Database identifier of the persisted gallery result.
      * @throws OpenAiOAuthFailure When the result's login or provider selection is no longer current.
@@ -140,7 +148,8 @@ internal class GenerationResultRepositoryImpl(
                 sessions.currentIdentity()
                 sessions.withIdentity(OAuthIdentity(identity.accountId, identity.revision)) {
                     if (preferenceManager.source != ServerSource.OPEN_AI_OAUTH || result.providerSelectionRevision == null ||
-                        preferenceManager.providerSelectionRevision != result.providerSelectionRevision)
+                        preferenceManager.providerSelectionRevision != result.providerSelectionRevision
+                    )
                         throw OpenAiOAuthFailure("IDENTITY_CHANGED")
                     insertAndExport(result)
                 }
@@ -208,9 +217,9 @@ internal class GenerationResultRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun toggleVisibility(id: Long): Boolean {
-        val updated = localDataSource.queryById(id).let { it.copy(hidden = !it.hidden) }
-        localDataSource.insert(updated)
-        return localDataSource.queryById(id).hidden
+        val shouldHide = !galleryReads.metadata(listOf(id)).first().isHidden
+        localDataSource.updateHiddenByIdList(listOf(id), shouldHide)
+        return shouldHide
     }
 
     /**
@@ -221,13 +230,14 @@ internal class GenerationResultRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun toggleLike(id: Long): Boolean {
-        val updated = localDataSource.queryById(id).let { it.copy(liked = !it.liked) }
-        localDataSource.insert(updated)
-        return localDataSource.queryById(id).liked
+        val shouldLike = !galleryReads.metadata(listOf(id)).first().isLiked
+        localDataSource.updateLikedByIdList(listOf(id), shouldLike)
+        return shouldLike
     }
 
     /**
      * Writes the gallery row and applies normal media export preferences.
+     *
      * @param result Decoded image candidate whose identity has already been checked when applicable.
      * @author Dmitriy Moroz
      */

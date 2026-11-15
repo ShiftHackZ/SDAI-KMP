@@ -15,9 +15,9 @@ import com.shifthackz.aisdv1.network.response.HordeGenerationCheckResponse
 import com.shifthackz.aisdv1.network.response.HordeUserResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
@@ -75,7 +75,7 @@ class KtorHordeGenerationApi(
         apiKey: String,
         request: HordeGenerationAsyncRequest,
     ): HordeGenerationAsyncResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_API, PATH_VERSION, PATH_GENERATE, PATH_ASYNC)
             applyGenerationTimeout(generationTimeoutProvider)
@@ -96,7 +96,7 @@ class KtorHordeGenerationApi(
         apiKey: String,
         id: String,
     ): HordeGenerationCheckResponse = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_API, PATH_VERSION, PATH_GENERATE, PATH_CHECK, id)
             applyGenerationTimeout(generationTimeoutProvider)
@@ -117,7 +117,7 @@ class KtorHordeGenerationApi(
         apiKey: String,
         id: String,
     ): HordeGenerationCheckFullResponse = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_API, PATH_VERSION, PATH_GENERATE, PATH_STATUS, id)
             applyGenerationTimeout(generationTimeoutProvider)
@@ -134,7 +134,7 @@ class KtorHordeGenerationApi(
      * @author Dmitriy Moroz
      */
     override suspend fun checkHordeApiKey(apiKey: String): HordeUserResponse = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_API, PATH_VERSION, PATH_FIND_USER)
             trackUsage(NetworkUsageCategory.CONFIGS)
@@ -168,7 +168,7 @@ class KtorHordeGenerationApi(
      * @author Dmitriy Moroz
      */
     override suspend fun downloadImage(url: String): ByteArray = httpClient
-        .get {
+        .boundedGet {
             this.url.takeFrom(url)
             applyGenerationTimeout(generationTimeoutProvider)
             trackUsage(NetworkUsageCategory.INFERENCE)
@@ -198,42 +198,49 @@ class KtorHordeGenerationApi(
          * @author Dmitriy Moroz
          */
         const val HEADER_API_KEY = "apikey"
+
         /**
          * Exposes the `PATH_API` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_API = "api"
+
         /**
          * Exposes the `PATH_VERSION` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_VERSION = "v2"
+
         /**
          * Exposes the `PATH_GENERATE` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_GENERATE = "generate"
+
         /**
          * Exposes the `PATH_ASYNC` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_ASYNC = "async"
+
         /**
          * Exposes the `PATH_CHECK` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_CHECK = "check"
+
         /**
          * Exposes the `PATH_STATUS` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_STATUS = "status"
+
         /**
          * Exposes the `PATH_FIND_USER` value used by the SDAI network layer.
          *

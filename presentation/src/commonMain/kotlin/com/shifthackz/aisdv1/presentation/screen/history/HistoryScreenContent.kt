@@ -30,16 +30,24 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSubtree
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.layout.onSizeChanged
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.rememberGalleryImage
+import com.shifthackz.aisdv1.presentation.widget.image.DecodedImageBitmap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
-import com.shifthackz.aisdv1.presentation.screen.txt2img.decodeBase64ImageBitmap
+import com.shifthackz.aisdv1.domain.entity.GalleryItemMetadata
 import com.shifthackz.aisdv1.presentation.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.widget.scrollbar.verticalScrollbar
 
@@ -78,7 +86,7 @@ data class HistoryStrings(
      *
      * @author Dmitriy Moroz
      */
-    val resultMeta: (AiGenerationResult) -> String = { item ->
+    val resultMeta: (GalleryItemMetadata) -> String = { item ->
         Localization.string(
             "history_result_meta",
             item.width,
@@ -93,6 +101,7 @@ data class HistoryStrings(
  * Renders the `HistoryScreenContent` UI for the SDAI presentation layer.
  *
  * @param state state rendered or processed by the component.
+ * @param imageLoader Injected sampled image loader; null is reserved for static previews.
  * @param processIntent process intent value consumed by the API.
  * @param modifier Compose modifier applied to the rendered UI.
  * @param strings strings value consumed by the API.
@@ -101,6 +110,7 @@ data class HistoryStrings(
 @Composable
 fun HistoryScreenContent(
     state: HistoryState,
+    imageLoader: GalleryImageLoader? = null,
     processIntent: (HistoryIntent) -> Unit,
     modifier: Modifier = Modifier,
     strings: HistoryStrings = HistoryStrings(),
@@ -148,12 +158,14 @@ fun HistoryScreenContent(
                     strings = strings,
                     processIntent = processIntent,
                 )
+
                 state.items.isEmpty() -> Text(
                     modifier = Modifier.padding(24.dp),
                     text = strings.empty,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+
                 else -> {
                     val listState = rememberLazyListState()
                     LazyColumn(
@@ -166,10 +178,11 @@ fun HistoryScreenContent(
                     ) {
                         items(
                             items = state.items,
-                            key = AiGenerationResult::id,
+                            key = GalleryItemMetadata::id,
                         ) { item ->
                             HistoryItem(
                                 item = item,
+                                imageLoader = imageLoader,
                                 strings = strings,
                             )
                         }
@@ -226,73 +239,83 @@ private fun HistoryError(
  */
 @Composable
 private fun HistoryItem(
-    item: AiGenerationResult,
+    item: GalleryItemMetadata,
+    imageLoader: GalleryImageLoader? = null,
     strings: HistoryStrings,
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp,
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    UiDiagnosticSection(UiDiagnosticSubtree.HISTORY_IMAGE) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 1.dp,
         ) {
-            val imageBitmap = remember(item.image) {
-                item.image.decodeBase64ImageBitmap()
-            }
-            if (imageBitmap != null) {
-                Image(
-                    modifier = Modifier
-                        .weight(0.38f)
-                        .aspectRatio(item.aspectRatio),
-                    bitmap = imageBitmap,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .weight(0.38f)
-                        .aspectRatio(item.aspectRatio),
-                    contentAlignment = Alignment.Center,
+            Row(
+                modifier = Modifier.padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                var imageEdge by remember(item.id) { mutableIntStateOf(0) }
+                val decoded = if (imageLoader != null) rememberGalleryImage(
+                    imageLoader,
+                    item.id,
+                    item.imageRevision,
+                    edge = imageEdge
+                ).value else DecodedImageBitmap.Unavailable
+                val imageBitmap = (decoded as? DecodedImageBitmap.Ready)?.image
+                if (imageBitmap != null) {
+                    Image(
+                        modifier = Modifier
+                            .weight(0.38f)
+                            .onSizeChanged { imageEdge = maxOf(it.width, it.height) }
+                            .aspectRatio(item.aspectRatio),
+                        bitmap = imageBitmap,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .weight(0.38f)
+                            .onSizeChanged { imageEdge = maxOf(it.width, it.height) }
+                            .aspectRatio(item.aspectRatio),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(36.dp),
+                            imageVector = Icons.Default.AutoFixNormal,
+                            contentDescription = strings.imageUnavailable,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+                Column(
+                    modifier = Modifier.weight(0.62f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Icon(
-                        modifier = Modifier.size(36.dp),
-                        imageVector = Icons.Default.AutoFixNormal,
-                        contentDescription = strings.imageUnavailable,
-                        tint = MaterialTheme.colorScheme.primary,
+                    Text(
+                        text = item.prompt.ifBlank { item.type.key },
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = strings.resultMeta(item),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
-            }
-            Column(
-                modifier = Modifier.weight(0.62f),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = item.prompt.ifBlank { item.type.key },
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = strings.resultMeta(item),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
             }
         }
     }
 }
 
 /**
- * Exposes the `AiGenerationResult` value used by the SDAI presentation layer.
+ * Exposes the `GalleryItemMetadata` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
-private val AiGenerationResult.aspectRatio: Float
+private val GalleryItemMetadata.aspectRatio: Float
     get() = if (width > 0 && height > 0) width.toFloat() / height.toFloat() else 1f

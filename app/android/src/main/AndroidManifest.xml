@@ -48,6 +48,12 @@
         </provider>
 
         <service
+            android:name="com.shifthackz.aisdv1.app.inference.NativeGenerationService"
+            android:process=":inference"
+            android:exported="false"
+            android:stopWithTask="false" />
+
+        <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"
             tools:node="merge" />

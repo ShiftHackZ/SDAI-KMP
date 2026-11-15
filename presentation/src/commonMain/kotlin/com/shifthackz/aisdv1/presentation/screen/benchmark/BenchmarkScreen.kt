@@ -69,7 +69,7 @@ import com.shifthackz.aisdv1.feature.benchmark.accelerationCapabilities
 import com.shifthackz.aisdv1.presentation.di.initKoin
 import com.shifthackz.aisdv1.presentation.model.compactDisplayName
 import com.shifthackz.aisdv1.presentation.model.isAvailableOn
-import com.shifthackz.aisdv1.presentation.navigation.router.BenchmarkRouter
+import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
 import com.shifthackz.aisdv1.presentation.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.widget.dialog.ProgressDialog
@@ -492,6 +492,7 @@ private fun ProviderRecommendationBlock(
             pending -> ProviderRecommendationNote(
                 text = Localization.string("benchmark_recommendations_empty"),
             )
+
             !recommendation.recommended -> {
                 InfoRow(
                     Localization.string("benchmark_status"),
@@ -503,6 +504,7 @@ private fun ProviderRecommendationBlock(
                     ProviderRecommendationNote(text = issue.localizedText())
                 }
             }
+
             else -> {
                 InfoRow(
                     Localization.string("benchmark_recommended_size"),
@@ -752,7 +754,7 @@ private fun BenchmarkDeviceInfo.localBenchmarkProviders(): List<ServerSource> =
     platform.toPlatformOrNull()?.let { targetPlatform ->
         ServerSource.entries.filter { source ->
             source.type == ServerSourceType.LOCAL &&
-                source.isAvailableOn(targetPlatform)
+                    source.isAvailableOn(targetPlatform)
         }
     }.orEmpty()
 
@@ -803,18 +805,25 @@ private fun BenchmarkPlatform.toPlatformOrNull(): Platform? = when (this) {
 private fun BenchmarkProviderIssue.localizedText(): String = when (this) {
     BenchmarkProviderIssue.PLATFORM_UNSUPPORTED ->
         Localization.string("benchmark_issue_platform_unsupported")
+
     BenchmarkProviderIssue.LOW_MEMORY ->
         Localization.string("benchmark_issue_low_memory")
+
     BenchmarkProviderIssue.LOW_SCORE ->
         Localization.string("benchmark_issue_low_score")
+
     BenchmarkProviderIssue.ONNX_SLOW_LOW_MEMORY ->
         Localization.string("benchmark_issue_onnx_slow_low_memory")
+
     BenchmarkProviderIssue.MEDIAPIPE_UNSTABLE_LOW_MEMORY ->
         Localization.string("benchmark_issue_mediapipe_unstable_low_memory")
+
     BenchmarkProviderIssue.SDXL_TINY_EXPERIMENTAL_ONLY ->
         Localization.string("benchmark_issue_sdxl_tiny_experimental_only")
+
     BenchmarkProviderIssue.SDXL_BACKEND_NOT_VALIDATED ->
         Localization.string("benchmark_issue_sdxl_backend_not_validated")
+
     BenchmarkProviderIssue.ACCELERATOR_API_NOT_AVAILABLE ->
         Localization.string("benchmark_issue_accelerator_api_not_available")
 }

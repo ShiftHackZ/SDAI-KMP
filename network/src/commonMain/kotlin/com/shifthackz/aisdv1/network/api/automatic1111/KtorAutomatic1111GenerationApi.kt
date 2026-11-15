@@ -13,8 +13,8 @@ import com.shifthackz.aisdv1.network.response.SdGenerationResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.basicAuth
-import io.ktor.client.request.get
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedGet
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
 
@@ -40,7 +40,7 @@ class KtorAutomatic1111GenerationApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ) {
-        httpClient.get {
+        httpClient.boundedGet {
             url.takeFrom(baseUrl)
             applyAuthorization(authorization)
         }
@@ -51,7 +51,7 @@ class KtorAutomatic1111GenerationApi(
         authorization: BasicHttpAuthorization?,
         request: TextToImageRequest,
     ): SdGenerationResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_TXT_TO_IMG)
             applyGenerationTimeout(generationTimeoutProvider)
@@ -65,7 +65,7 @@ class KtorAutomatic1111GenerationApi(
         authorization: BasicHttpAuthorization?,
         request: ImageToImageRequest,
     ): SdGenerationResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_IMG_TO_IMG)
             applyGenerationTimeout(generationTimeoutProvider)
@@ -78,7 +78,7 @@ class KtorAutomatic1111GenerationApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ) {
-        httpClient.post {
+        httpClient.boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_INTERRUPT)
             applyAuthorization(authorization)

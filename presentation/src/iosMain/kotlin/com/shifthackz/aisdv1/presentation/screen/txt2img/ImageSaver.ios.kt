@@ -87,9 +87,11 @@ private class IosImageSaver : ImageSaver {
  * @author Dmitriy Moroz
  */
 @OptIn(BetaInteropApi::class, ExperimentalEncodingApi::class, ExperimentalForeignApi::class)
-private fun String.decodeGeneratedImageData(): NSData {
+internal fun String.decodeGeneratedImageData(): NSData {
+    require(length <= 32 * 1024 * 1024)
     val raw = substringAfter("base64,", this).filterNot(Char::isWhitespace)
     val bytes = Base64.Default.decode(raw)
+    require(bytes.isNotEmpty() && bytes.size <= 24 * 1024 * 1024)
     return bytes.usePinned { pinned ->
         NSData.create(
             bytes = pinned.addressOf(0),

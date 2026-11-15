@@ -1,7 +1,8 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.domain.entity.StableDiffusionScripts
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionScriptsDataSource
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionScriptsRepository
 
@@ -24,11 +25,11 @@ internal class StableDiffusionScriptsRepositoryImpl(
      */
     private val preferenceManager: PreferenceManager,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : StableDiffusionScriptsRepository {
 
     /**
@@ -37,8 +38,11 @@ internal class StableDiffusionScriptsRepositoryImpl(
      * @return Result produced by `fetchScripts`.
      * @author Dmitriy Moroz
      */
-    override suspend fun fetchScripts() = remoteDataSource.fetchScripts(
-        baseUrl = preferenceManager.automatic1111ServerUrl,
-        credentials = authorizationStore.getAuthorizationCredentials(),
-    )
+    override suspend fun fetchScripts(): StableDiffusionScripts {
+        val connection = connections.snapshot()
+        return remoteDataSource.fetchScripts(
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
+        )
+    }
 }

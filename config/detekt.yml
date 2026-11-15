@@ -1,0 +1,41 @@
+# Deliberately explicit: correctness rules that work without a platform classpath.
+# Formatting remains owned by Android Studio's project code style. No baseline.
+config:
+  validation: true
+  warningsAsErrors: true
+
+exceptions:
+  active: true
+  ExceptionRaisedInUnexpectedLocation:
+    active: true
+  ReturnFromFinally:
+    active: true
+  ThrowingExceptionFromFinally:
+    active: true
+  ThrowingNewInstanceOfSameException:
+    active: true
+
+potential-bugs:
+  active: true
+  EqualsAlwaysReturnsTrueOrFalse:
+    active: true
+  EqualsWithHashCodeExist:
+    active: true
+  InvalidRange:
+    active: true
+  IteratorHasNextCallsNextMethod:
+    active: true
+  IteratorNotThrowingNoSuchElementException:
+    active: true
+  UnusedUnaryOperator:
+    active: true
+  UselessPostfixExpression:
+    active: true
+  WrongEqualsTypeParameter:
+    active: true
+
+empty-blocks:
+  active: true
+  EmptyCatchBlock:
+    active: true
+    allowedExceptionNameRegex: "_|(ignore|expected).*"

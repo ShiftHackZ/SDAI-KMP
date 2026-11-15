@@ -1,6 +1,12 @@
 package com.shifthackz.aisdv1.work.task
 
 import android.content.Context
+import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanup
+import com.shifthackz.aisdv1.work.GenerationWorkPayloadStore
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationOwner
+import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
+import kotlinx.coroutines.withContext
 import androidx.work.WorkerParameters
 import com.shifthackz.aisdv1.core.common.appbuild.ActivityIntentProvider
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
@@ -9,7 +15,7 @@ import com.shifthackz.aisdv1.core.common.log.errorLog
 import com.shifthackz.aisdv1.core.notification.PushNotificationManager
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.domain.usecase.generation.InterruptGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
@@ -37,13 +43,17 @@ internal class TextToImageTask(
     observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
     observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
-    interruptGenerationUseCase: InterruptGenerationUseCase,
+    interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val preferenceManager: PreferenceManager,
     private val backgroundWorkObserver: BackgroundWorkObserver,
     private val textToImageUseCase: TextToImageUseCase,
     private val fileProviderDescriptor: FileProviderDescriptor,
+    private val payloads: GenerationWorkPayloadStore,
+    private val payloadCleanup: GenerationWorkPayloadCleanup,
+    nativeGateway: NativeGenerationGateway,
 ) : CoreGenerationWorker(
     context = context,
+    nativeGateway = nativeGateway,
     workerParameters = workerParameters,
     pushNotificationManager = pushNotificationManager,
     activityIntentProvider = activityIntentProvider,
@@ -52,7 +62,7 @@ internal class TextToImageTask(
     observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
     observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
     observeBonsaiProcessStatusUseCase = observeBonsaiProcessStatusUseCase,
-    interruptGenerationUseCase = interruptGenerationUseCase,
+    interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
 ) {
 
     override val notificationId: Int = NOTIFICATION_TEXT_TO_IMAGE_FOREGROUND
@@ -60,41 +70,22 @@ internal class TextToImageTask(
     override val genericNotificationId: Int = NOTIFICATION_TEXT_TO_IMAGE_GENERIC
 
     override suspend fun doWork(): Result {
-        // Workaround for LocalDiffusion provider:
-        //
-        // If LocalDiffusion process previously died, prevent WorkManager to go to infinite
-        // task repeat loop.
-        if (preferenceManager.backgroundProcessCount > 0) {
-            handleProcess()
-            handleError(Throwable("Background process count > 0"))
-            clearSubscriptions()
-            preferenceManager.backgroundProcessCount = 0
-            debugLog("Background process count > 0! Skipping task.")
-            return Result.failure()
-        }
-
-        preferenceManager.backgroundProcessCount++
+        if (!backgroundWorkObserver.publishForOwner(id.toString()) {
+                backgroundWorkObserver.refreshStatus()
+                backgroundWorkObserver.dismissResult()
+            }) return Result.failure()
         handleStart()
-        backgroundWorkObserver.refreshStatus()
-        backgroundWorkObserver.dismissResult()
         debugLog("Starting TextToImageTask!")
 
         return try {
-            val file = File(fileProviderDescriptor.workCacheDirPath, Constants.FILE_TEXT_TO_IMAGE)
-            if (!file.exists()) {
-                preferenceManager.backgroundProcessCount--
-                val t = Throwable("File is null.")
-                handleError(t)
-                clearSubscriptions()
-                errorLog(t, "Payload file does not exist.")
-                return Result.failure()
-            }
-
-            val bytes = file.readBytes()
+            val bytes = payloads.read(
+                id.toString(),
+                Constants.FILE_TEXT_TO_IMAGE,
+                inputData.getBoolean(Constants.IMMUTABLE_PAYLOAD, false)
+            )
             val payload = bytes.toTextToImagePayload()
 
             if (payload == null) {
-                preferenceManager.backgroundProcessCount--
                 val t = Throwable("Payload is null.")
                 handleError(t)
                 clearSubscriptions()
@@ -102,20 +93,33 @@ internal class TextToImageTask(
                 return Result.failure()
             }
 
+            source = payload.sourceSnapshot ?: source
+            if (runAttemptCount > 0 && source in setOf(
+                    ServerSource.LOCAL_MICROSOFT_ONNX,
+                    ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
+                    ServerSource.LOCAL_STABLE_DIFFUSION_CPP
+                )
+            ) {
+                error("Interrupted native work requires an explicit retry.")
+            }
             listenSourceStatus()
 
             handleProcess()
-            runCatching { textToImageUseCase(payload) }
+            runCatching {
+                withContext(NativeGenerationOwner(id.toString())) {
+                    textToImageUseCase(
+                        payload
+                    )
+                }
+            }
                 .fold(
                     onSuccess = { result ->
-                        preferenceManager.backgroundProcessCount--
                         handleSuccess(result)
                         debugLog("Generation finished successfully!")
                         Result.success()
                     },
                     onFailure = { t ->
                         if (t is CancellationException) throw t
-                        preferenceManager.backgroundProcessCount--
                         handleError(t)
                         errorLog(t, "Caught exception from TextToImageUseCase!")
                         Result.failure()
@@ -125,12 +129,12 @@ internal class TextToImageTask(
             handleCancellation()
             throw e
         } catch (e: Exception) {
-            preferenceManager.backgroundProcessCount--
             handleError(e)
             errorLog(e, "Caught exception from TextToImageTask worker!")
             Result.failure()
         } finally {
             clearSubscriptions()
+            payloadCleanup.complete(id, isStopped)
         }
     }
 }
