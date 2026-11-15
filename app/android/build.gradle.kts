@@ -169,6 +169,10 @@ dependencies {
     implementation(libs.shifthackz.catppuccin.splash)
     implementation(libs.shifthackz.catppuccin.legacy)
     implementation(libs.androidx.work.runtime)
+    testImplementation(libs.test.junit)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.test.coroutines)
+    testImplementation(libs.test.roboelectric)
 }
 
 // Reports describe compiler stability/skipping decisions; they do not measure frame performance.

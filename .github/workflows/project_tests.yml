@@ -41,4 +41,4 @@ jobs:
           if-no-files-found: ignore
 
       - name: Run Tests with Gradle
-        run: ./gradlew clean testDebugUnitTest
+        run: ./gradlew clean testDebugUnitTest :app:testFullDebugUnitTest
