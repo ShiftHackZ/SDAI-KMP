@@ -104,7 +104,12 @@ jobs:
             echo
             echo "Changed files since \`${NIGHTLY_TAG}\`:"
             echo
-            sed 's/^/- `/' "${RUNNER_TEMP}/nightly-changed-files.txt" | sed 's/$/`/' || true
+            sed -n '1,100{s/^/- `/;s/$/`/;p;}' "${RUNNER_TEMP}/nightly-changed-files.txt"
+            changed_count="$(wc -l < "${RUNNER_TEMP}/nightly-changed-files.txt")"
+            if (( changed_count > 100 )); then
+              echo
+              echo "Showing the first 100 of ${changed_count} changed files."
+            fi
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Set up JDK 17
@@ -176,12 +181,13 @@ jobs:
           "${apksigner}" sign --ks "${keystore}" --ks-key-alias "${ANDROID_RELEASE_KEY_ALIAS}" \
             --ks-pass env:ANDROID_RELEASE_STORE_PASSWORD --key-pass env:ANDROID_RELEASE_KEY_PASSWORD \
             --out "${signed_apk}" "${aligned_apk}"
-          "${apksigner}" verify --print-certs "${signed_apk}" > "${output_dir}/apksigner.txt"
+          "${apksigner}" verify --print-certs "${signed_apk}" | tee "${output_dir}/apksigner.txt"
 
           expected_cert="$(printf '%s' "${ANDROID_RELEASE_CERT_SHA256}" | tr -d '[:space:]:' | tr '[:upper:]' '[:lower:]')"
           actual_cert="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "${output_dir}/apksigner.txt" | tr '[:upper:]' '[:lower:]')"
           if [[ ! "${expected_cert}" =~ ^[0-9a-f]{64}$ || "${actual_cert}" != "${expected_cert}" ]]; then
             echo "Signed APK certificate does not match the release certificate." >&2
+            printf 'Expected SHA-256: %s\nParsed SHA-256: %s\n' "${expected_cert}" "${actual_cert}" >&2
             exit 1
           fi
 
