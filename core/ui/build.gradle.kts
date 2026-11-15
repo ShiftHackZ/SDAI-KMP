@@ -9,7 +9,10 @@ android {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            api(project(":core:navigation"))
             implementation(project(":core:common"))
+            implementation(libs.koin.core)
+            implementation(libs.androidx.lifecycle.compose)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.runtime)
@@ -39,4 +42,12 @@ kotlin {
 
 dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+// Reports describe compiler stability/skipping decisions; they do not measure frame performance.
+composeCompiler {
+    if (providers.gradleProperty("sdaiComposeReports").orNull == "true") {
+        metricsDestination.set(layout.buildDirectory.dir("compose-metrics"))
+        reportsDestination.set(layout.buildDirectory.dir("compose-reports"))
+    }
 }

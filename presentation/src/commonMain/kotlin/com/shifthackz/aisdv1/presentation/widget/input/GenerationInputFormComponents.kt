@@ -25,10 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.core.model.asString
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.theme.sliderColors
 import com.shifthackz.aisdv1.presentation.theme.textFieldColors
+import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.BATCH_RANGE_FAL_AI_MAX
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.BATCH_RANGE_MAX
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.BATCH_RANGE_MIN
 import com.shifthackz.aisdv1.presentation.widget.input.chip.ChipTextFieldEvent
@@ -36,23 +38,25 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * Renders the `GenerationBatchComponent` UI for the SDAI presentation layer.
+ * Displays provider-bounded batch size without depending on prompt or other form values.
  *
- * @param state state rendered or processed by the component.
+ * @param mode Provider determining the supported batch range.
+ * @param requestedBatchCount Current batch size before display clamping.
  * @param onEvent callback invoked by the component.
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun GenerationBatchComponent(
-    state: GenerationInputFormState,
+    mode: ServerSource,
+    requestedBatchCount: Int,
     onEvent: (GenerationInputFormEvent) -> Unit,
 ) {
-    val maxBatchCount = if (state.mode == ServerSource.FAL_AI) {
+    val maxBatchCount = if (mode == ServerSource.FAL_AI) {
         BATCH_RANGE_FAL_AI_MAX
     } else {
         BATCH_RANGE_MAX
     }
-    val batchCount = state.batchCount.coerceIn(BATCH_RANGE_MIN, maxBatchCount)
+    val batchCount = requestedBatchCount.coerceIn(BATCH_RANGE_MIN, maxBatchCount)
     Text(
         modifier = Modifier.padding(top = 8.dp),
         text = Localization.string("hint_batch", "$batchCount"),
@@ -71,31 +75,37 @@ internal fun GenerationBatchComponent(
 }
 
 /**
- * Renders the `GenerationSizeTextFieldsComponent` UI for the SDAI presentation layer.
+ * Displays validated pixel dimensions and aspect-ratio actions independently of other form values.
  *
  * @param modifier Compose modifier applied to the rendered UI.
- * @param state state rendered or processed by the component.
+ * @param width Current editable width text.
+ * @param height Current editable height text.
+ * @param widthValidationError Owning screen's width validation feedback.
+ * @param heightValidationError Owning screen's height validation feedback.
  * @param onEvent callback invoked by the component.
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun RowScope.GenerationSizeTextFieldsComponent(
     modifier: Modifier = Modifier,
-    state: GenerationInputFormState,
+    width: String,
+    height: String,
+    widthValidationError: UiText?,
+    heightValidationError: UiText?,
     onEvent: (GenerationInputFormEvent) -> Unit,
 ) {
-    var ratioMenuExpanded by remember { mutableStateOf(false) }
+    var isRatioMenuExpanded by remember { mutableStateOf(false) }
     OutlinedTextField(
         modifier = modifier.padding(end = 4.dp),
-        value = state.width,
+        value = width,
         onValueChange = { value ->
             if (value.length <= 4) {
                 onEvent(GenerationInputFormEvent.UpdateWidth(value.filter { it.isDigit() }))
             }
         },
-        isError = state.widthValidationError != null,
+        isError = widthValidationError != null,
         supportingText = {
-            state.widthValidationError?.let {
+            widthValidationError?.let {
                 Text(
                     it.asString(),
                     color = MaterialTheme.colorScheme.error
@@ -108,15 +118,15 @@ internal fun RowScope.GenerationSizeTextFieldsComponent(
     )
     OutlinedTextField(
         modifier = modifier.padding(horizontal = 4.dp),
-        value = state.height,
+        value = height,
         onValueChange = { value ->
             if (value.length <= 4) {
                 onEvent(GenerationInputFormEvent.UpdateHeight(value.filter { it.isDigit() }))
             }
         },
-        isError = state.heightValidationError != null,
+        isError = heightValidationError != null,
         supportingText = {
-            state.heightValidationError?.let {
+            heightValidationError?.let {
                 Text(
                     it.asString(),
                     color = MaterialTheme.colorScheme.error
@@ -138,7 +148,7 @@ internal fun RowScope.GenerationSizeTextFieldsComponent(
         }
         Box {
             IconButton(
-                onClick = { ratioMenuExpanded = true },
+                onClick = { isRatioMenuExpanded = true },
             ) {
                 Icon(
                     imageVector = Icons.Default.AspectRatio,
@@ -146,14 +156,14 @@ internal fun RowScope.GenerationSizeTextFieldsComponent(
                 )
             }
             DropdownMenu(
-                expanded = ratioMenuExpanded,
-                onDismissRequest = { ratioMenuExpanded = false },
+                expanded = isRatioMenuExpanded,
+                onDismissRequest = { isRatioMenuExpanded = false },
             ) {
                 GenerationAspectRatio.entries.forEach { ratio ->
                     DropdownMenuItem(
                         text = { Text(ratio.displayName) },
                         onClick = {
-                            ratioMenuExpanded = false
+                            isRatioMenuExpanded = false
                             onEvent(GenerationInputFormEvent.ApplyAspectRatio(ratio))
                         },
                     )
@@ -163,7 +173,6 @@ internal fun RowScope.GenerationSizeTextFieldsComponent(
     }
 }
 
-private const val BATCH_RANGE_FAL_AI_MAX = 4
 
 /**
  * Executes the `processTaggedPrompt` step in the SDAI presentation layer.

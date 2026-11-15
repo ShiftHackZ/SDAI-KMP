@@ -40,7 +40,6 @@ import com.shifthackz.aisdv1.presentation.modal.GenerationModalRenderer
 import com.shifthackz.aisdv1.presentation.modal.embedding.EmbeddingScreen
 import com.shifthackz.aisdv1.presentation.modal.extras.ExtrasScreen
 import com.shifthackz.aisdv1.presentation.modal.tag.EditTagDialog
-import com.shifthackz.aisdv1.presentation.screen.txt2img.decodeBase64ImageBitmap
 import com.shifthackz.aisdv1.presentation.widget.toolbar.GenerationBottomToolbar
 import com.shifthackz.aisdv1.presentation.widget.work.BackgroundWorkWidget
 
@@ -230,9 +229,6 @@ fun ImageToImageContent(
     val promptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     val negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     var activeModal by remember { mutableStateOf<ImageToImagePanel?>(null) }
-    val inputImageBitmap = remember(state.imageBase64) {
-        state.imageBase64.decodeBase64ImageBitmap()
-    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -365,7 +361,6 @@ fun ImageToImageContent(
                 ImageToImageBody(
                     state = state,
                     strings = strings,
-                    inputImageBitmap = inputImageBitmap,
                     promptChipTextFieldState = promptChipTextFieldState,
                     negativePromptChipTextFieldState = negativePromptChipTextFieldState,
                     processIntent = processIntent,
@@ -396,6 +391,7 @@ fun ImageToImageContent(
             },
             onClose = { activeModal = null },
         )
+
         is ImageToImagePanel.Extras -> ExtrasScreen(
             prompt = modal.prompt,
             negativePrompt = modal.negativePrompt,
@@ -405,6 +401,7 @@ fun ImageToImageContent(
             },
             onClose = { activeModal = null },
         )
+
         ImageToImagePanel.History -> GenerationHistoryDialog(
             onClose = { activeModal = null },
             onGenerationSelected = { ai ->

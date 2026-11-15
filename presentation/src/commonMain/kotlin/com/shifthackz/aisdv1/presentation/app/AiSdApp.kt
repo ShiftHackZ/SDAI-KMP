@@ -1,9 +1,18 @@
 package com.shifthackz.aisdv1.presentation.app
 
+import com.shifthackz.aisdv1.core.navigation.asHomeTabRoute
+import com.shifthackz.aisdv1.core.navigation.RootAppRouter
+import com.shifthackz.aisdv1.core.navigation.AppRoute
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
+import com.shifthackz.aisdv1.presentation.widget.image.LocalOriginalImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.LocalGalleryImageLoader
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,7 +58,8 @@ fun AiSdApp() {
     val canNavigateBack by router.canNavigateBack.collectAsState()
     val languageCode by Localization.languageCodeFlow.collectAsState()
     val urlLauncher = rememberExternalUrlLauncher()
-    val imageToImagePlatformActions = rememberImageToImagePlatformActions()
+    val imageToImagePlatformActions =
+        rememberImageToImagePlatformActions(remember(koin) { koin.get<OriginalImageBudget>() })
     val textToImageViewModel = remember(koin, router) {
         koin.get<TextToImageViewModel> {
             parametersOf(router)
@@ -83,40 +93,45 @@ fun AiSdApp() {
         onBack = router::navigateBack,
     )
 
-    AiSdAppTheme {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .clearFocusOnTap(),
-            color = MaterialTheme.colorScheme.background,
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                val shellHomeRoute = selectedHomeRoute ?: lastHomeRoute
-                val renderedHomeRoutes = (visitedHomeRoutes + listOfNotNull(shellHomeRoute)).distinct()
+    CompositionLocalProvider(
+        LocalGalleryImageLoader provides remember(koin) { koin.get<GalleryImageLoader>() },
+        LocalOriginalImageLoader provides remember(koin) { koin.get<OriginalImageLoader>() }) {
+        AiSdAppTheme {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clearFocusOnTap(),
+                color = MaterialTheme.colorScheme.background,
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    val shellHomeRoute = selectedHomeRoute ?: lastHomeRoute
+                    val renderedHomeRoutes =
+                        (visitedHomeRoutes + listOfNotNull(shellHomeRoute)).distinct()
 
-                if (shellHomeRoute != null) {
-                    HomeRoutesScaffold(
-                        languageCode = languageCode,
-                        activeRoute = shellHomeRoute,
-                        renderedRoutes = renderedHomeRoutes,
-                        router = router,
-                        buildInfoProvider = koin.get<BuildInfoProvider>(),
-                        preferenceManager = preferenceManager,
-                        showHomeChrome = selectedHomeRoute != null,
-                        textToImageViewModel = textToImageViewModel,
-                        imageToImageViewModel = imageToImageViewModel,
-                    )
-                }
+                    if (shellHomeRoute != null) {
+                        HomeRoutesScaffold(
+                            languageCode = languageCode,
+                            activeRoute = shellHomeRoute,
+                            renderedRoutes = renderedHomeRoutes,
+                            router = router,
+                            buildInfoProvider = koin.get<BuildInfoProvider>(),
+                            preferenceManager = preferenceManager,
+                            showHomeChrome = selectedHomeRoute != null,
+                            textToImageViewModel = textToImageViewModel,
+                            imageToImageViewModel = imageToImageViewModel,
+                        )
+                    }
 
-                if (selectedHomeRoute == null) {
-                    OverlayRouteContent(
-                        languageCode = languageCode,
-                        route = currentRoute,
-                        koin = koin,
-                        router = router,
-                        urlLauncher = urlLauncher,
-                        imageToImageViewModel = imageToImageViewModel,
-                    )
+                    if (selectedHomeRoute == null) {
+                        OverlayRouteContent(
+                            languageCode = languageCode,
+                            route = currentRoute,
+                            koin = koin,
+                            router = router,
+                            urlLauncher = urlLauncher,
+                            imageToImageViewModel = imageToImageViewModel,
+                        )
+                    }
                 }
             }
         }

@@ -10,13 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,121 +24,88 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.model.asString
 import com.shifthackz.aisdv1.presentation.model.compactDisplayName
 import com.shifthackz.aisdv1.presentation.platform.rememberExternalUrlLauncher
-import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputForm
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormEvent
+import com.shifthackz.aisdv1.presentation.widget.input.generationInputFormItems
 import com.shifthackz.aisdv1.presentation.widget.scrollbar.verticalScrollbar
 
 
 /**
- * Renders the `TextToImageBody` UI for the SDAI presentation layer.
+ * Displays the text-to-image card as independently composed list items. Advanced fields below
+ * the viewport are not constructed when the user expands options.
  *
- * @param state state rendered or processed by the component.
- * @param strings strings value consumed by the API.
- * @param promptChipTextFieldState prompt chip text field state value consumed by the API.
- * @param negativePromptChipTextFieldState negative prompt chip text field state value consumed by the API.
- * @param processIntent process intent value consumed by the API.
+ * @param state Current generation inputs, provider and status.
+ * @param strings Localized screen labels retained by the screen contract.
+ * @param promptChipTextFieldState Caller-owned prompt selection and chip editing state.
+ * @param negativePromptChipTextFieldState Caller-owned negative-prompt chip editing state.
+ * @param processIntent Receives generation edits and extension actions.
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun TextToImageBody(
     state: TextToImageState,
     strings: TextToImageStrings,
-    promptChipTextFieldState: androidx.compose.runtime.MutableState<TextFieldValue>,
-    negativePromptChipTextFieldState: androidx.compose.runtime.MutableState<TextFieldValue>,
+    promptChipTextFieldState: MutableState<TextFieldValue>,
+    negativePromptChipTextFieldState: MutableState<TextFieldValue>,
     processIntent: (TextToImageIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val urlLauncher = rememberExternalUrlLauncher()
+    val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
+        { event ->
+            if (event == GenerationInputFormEvent.OpenADetailerInstallInstructions) {
+                urlLauncher.openUrl(ADETAILER_INSTALL_URL)
+            } else event.toTextToImageIntent()?.let(processIntent)
+        }
+    }
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScrollbar(listState),
+        modifier = Modifier.fillMaxSize().verticalScrollbar(listState),
         state = listState,
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item {
-            TextToImageForm(
-                state = state,
-                strings = strings,
-                promptChipTextFieldState = promptChipTextFieldState,
-                negativePromptChipTextFieldState = negativePromptChipTextFieldState,
-                processIntent = processIntent,
-            )
-        }
-
-    }
-}
-
-/**
- * Renders the `TextToImageForm` UI for the SDAI presentation layer.
- *
- * @param state state rendered or processed by the component.
- * @param strings strings value consumed by the API.
- * @param promptChipTextFieldState prompt chip text field state value consumed by the API.
- * @param negativePromptChipTextFieldState negative prompt chip text field state value consumed by the API.
- * @param processIntent process intent value consumed by the API.
- * @author Dmitriy Moroz
- */
-@Composable
-internal fun TextToImageForm(
-    state: TextToImageState,
-    strings: TextToImageStrings,
-    promptChipTextFieldState: androidx.compose.runtime.MutableState<TextFieldValue>,
-    negativePromptChipTextFieldState: androidx.compose.runtime.MutableState<TextFieldValue>,
-    processIntent: (TextToImageIntent) -> Unit,
-) {
-    val urlLauncher = rememberExternalUrlLauncher()
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Text(
-                text = state.mode.compactDisplayName(state.platform),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            GenerationInputForm(
-                modifier = Modifier.fillMaxWidth(),
-                state = state,
-                promptChipTextFieldState = promptChipTextFieldState,
-                negativePromptChipTextFieldState = negativePromptChipTextFieldState,
-                onEvent = { event ->
-                    if (event == GenerationInputFormEvent.OpenADetailerInstallInstructions) {
-                        urlLauncher.openUrl(ADETAILER_INSTALL_URL)
-                    } else {
-                        event.toTextToImageIntent()?.let(processIntent)
+        generationInputFormItems(
+            state = state,
+            isImg2Img = false,
+            promptChipTextFieldState = promptChipTextFieldState,
+            negativePromptChipTextFieldState = negativePromptChipTextFieldState,
+            onEvent = onEvent,
+            header = {
+                Text(
+                    modifier = Modifier.padding(bottom = 14.dp),
+                    text = state.mode.compactDisplayName(state.platform),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            footer = {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    state.error?.let { message ->
+                        Text(
+                            modifier = Modifier.padding(top = 14.dp),
+                            text = message.asString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
-                },
-            )
-
-            state.error?.let { message ->
-                Text(
-                    text = message.asString(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-
-            state.message?.let { message ->
-                Text(
-                    text = message.asString(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-
-            if (state.generating) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-        }
+                    state.message?.let { message ->
+                        Text(
+                            modifier = Modifier.padding(top = if (state.error == null) 14.dp else 0.dp),
+                            text = message.asString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    if (state.generating) {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().padding(
+                                top = if (state.error == null && state.message == null) 14.dp else 0.dp,
+                            ),
+                        )
+                    }
+                }
+            },
+        )
     }
 }
 

@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.modal.embedding
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.sdembedding.FetchAndGetEmbeddingsUseCase
@@ -12,8 +14,10 @@ import com.shifthackz.aisdv1.presentation.utils.ExtrasFormatter
  * Coordinates `EmbeddingViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class EmbeddingViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -41,6 +45,8 @@ class EmbeddingViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<EmbeddingState, EmbeddingIntent, ExtrasEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.EMBEDDING,
     initialState = EmbeddingState(source = preferenceManager.source),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

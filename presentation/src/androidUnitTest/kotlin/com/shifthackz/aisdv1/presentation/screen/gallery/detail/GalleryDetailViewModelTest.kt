@@ -1,5 +1,10 @@
 package com.shifthackz.aisdv1.presentation.screen.gallery.detail
 
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.presentation.mocks.mockGalleryMemoryBudget
+import com.shifthackz.aisdv1.presentation.mocks.toGalleryMetadata
+import io.mockk.every
+import kotlinx.coroutines.flow.emptyFlow
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.appbuild.BuildVersion
@@ -8,13 +13,13 @@ import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.usecase.caching.GetLastResultFromCacheUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemUseCase
-import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
+import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryIdsUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.ToggleImageLikeUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.ToggleImageVisibilityUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultUseCase
 import com.shifthackz.aisdv1.presentation.core.GenerationFormUpdateEvent
 import com.shifthackz.aisdv1.presentation.mocks.mockAiGenerationResult
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryDetailRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryDetailRouter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -46,21 +51,31 @@ class GalleryDetailViewModelTest {
         override val platform: Platform = Platform.ANDROID
     }
     private val getGenerationResultUseCase = mockk<GetGenerationResultUseCase>()
-    private val getAllGalleryUseCase = mockk<GetAllGalleryUseCase>()
+    private val getAllGalleryIdsUseCase = mockk<GetAllGalleryIdsUseCase>()
     private val getLastResultFromCacheUseCase = mockk<GetLastResultFromCacheUseCase>()
     private val deleteGalleryItemUseCase = mockk<DeleteGalleryItemUseCase>()
     private val toggleImageVisibilityUseCase = mockk<ToggleImageVisibilityUseCase>()
     private val toggleImageLikeUseCase = mockk<ToggleImageLikeUseCase>()
     private val generationFormUpdateEvent = mockk<GenerationFormUpdateEvent>(relaxed = true)
     private val router = mockk<GalleryDetailRouter>(relaxed = true)
+    private val galleryReads = mockk<GalleryReadGateway>()
     private val platformActions = mockk<GalleryDetailPlatformActions>()
 
     @Before
     fun initialize() {
+        coEvery { galleryReads.metadata(any()) } coAnswers {
+            firstArg<List<Long>>().map {
+                getGenerationResultUseCase(
+                    it
+                ).toGalleryMetadata()
+            }
+        }
+        every { galleryReads.observeItem(any()) } returns emptyFlow()
+
         coEvery { getGenerationResultUseCase(any()) } answers {
             mockAiGenerationResult.copy(id = invocation.args.first() as Long)
         }
-        coEvery { getAllGalleryUseCase.ids() } returns listOf(mockAiGenerationResult.id)
+        coEvery { getAllGalleryIdsUseCase() } returns listOf(mockAiGenerationResult.id)
         coEvery { getLastResultFromCacheUseCase() } returns mockAiGenerationResult
         coEvery { platformActions.copyText(any()) } returns GalleryDetailActionResult.Done
         coEvery { platformActions.saveImage(any()) } returns GalleryDetailActionResult.Done
@@ -74,8 +89,8 @@ class GalleryDetailViewModelTest {
             val viewModel = createViewModel()
             advanceUntilIdle()
 
-            val expectedContent = mockAiGenerationResult.toGalleryDetailContent(
-                showReportButton = true,
+            val expectedContent = mockAiGenerationResult.toGalleryMetadata().toGalleryDetailContent(
+                shouldShowReportButton = true,
             )
             Assert.assertEquals(
                 GalleryDetailState(
@@ -96,14 +111,14 @@ class GalleryDetailViewModelTest {
             val items = (1L..8L).map { id ->
                 mockAiGenerationResult.copy(id = id)
             }
-            coEvery { getAllGalleryUseCase.ids() } returns items.map(AiGenerationResult::id)
+            coEvery { getAllGalleryIdsUseCase() } returns items.map(AiGenerationResult::id)
             val viewModel = createViewModel(itemId = 4L)
             advanceUntilIdle()
 
-            Assert.assertEquals(0, viewModel.state.value.pagerContentStartIndex)
+            Assert.assertEquals(2, viewModel.state.value.pagerContentStartIndex)
             Assert.assertEquals(3, viewModel.state.value.pagerCurrentIndex)
             Assert.assertEquals(
-                listOf(1L, 2L, 3L, 4L, 5L, 6L, 7L),
+                listOf(3L, 4L, 5L),
                 viewModel.state.value.pagerContents.map(GalleryDetailContent::id),
             )
         }
@@ -114,7 +129,7 @@ class GalleryDetailViewModelTest {
             val items = (1L..8L).map { id ->
                 mockAiGenerationResult.copy(id = id)
             }
-            coEvery { getAllGalleryUseCase.ids() } returns items.map(AiGenerationResult::id)
+            coEvery { getAllGalleryIdsUseCase() } returns items.map(AiGenerationResult::id)
             val viewModel = createViewModel(itemId = 4L)
             advanceUntilIdle()
 
@@ -122,10 +137,10 @@ class GalleryDetailViewModelTest {
             advanceUntilIdle()
 
             Assert.assertEquals(6L, viewModel.state.value.content?.id)
-            Assert.assertEquals(2, viewModel.state.value.pagerContentStartIndex)
+            Assert.assertEquals(4, viewModel.state.value.pagerContentStartIndex)
             Assert.assertEquals(5, viewModel.state.value.pagerCurrentIndex)
             Assert.assertEquals(
-                listOf(3L, 4L, 5L, 6L, 7L, 8L),
+                listOf(5L, 6L, 7L),
                 viewModel.state.value.pagerContents.map(GalleryDetailContent::id),
             )
         }
@@ -174,7 +189,7 @@ class GalleryDetailViewModelTest {
             val items = (1L..3L).map { id ->
                 mockAiGenerationResult.copy(id = id)
             }
-            coEvery { getAllGalleryUseCase.ids() } returns items.map(AiGenerationResult::id)
+            coEvery { getAllGalleryIdsUseCase() } returns items.map(AiGenerationResult::id)
             coEvery { deleteGalleryItemUseCase(2L) } returns Unit
             val viewModel = createViewModel(itemId = 2L)
             advanceUntilIdle()
@@ -215,7 +230,7 @@ class GalleryDetailViewModelTest {
                 platformActions.shareText(
                     match { text ->
                         text.contains(mockAiGenerationResult.prompt) &&
-                            text.contains(mockAiGenerationResult.negativePrompt)
+                                text.contains(mockAiGenerationResult.negativePrompt)
                     },
                 )
             }
@@ -293,11 +308,14 @@ class GalleryDetailViewModelTest {
         itemId: Long = ITEM_ID,
         pagerBuffer: Int = GALLERY_DETAIL_PAGER_BUFFER,
     ) = GalleryDetailViewModel(
+        galleryReads = galleryReads,
+        contentCache = BoundedGalleryDetailContentCache(mockGalleryMemoryBudget),
+        diagnostics = mockk(relaxed = true),
         itemId = itemId,
         dispatchersProvider = dispatchersProvider,
         buildInfoProvider = buildInfoProvider,
         getGenerationResultUseCase = getGenerationResultUseCase,
-        getAllGalleryUseCase = getAllGalleryUseCase,
+        getAllGalleryIdsUseCase = getAllGalleryIdsUseCase,
         getLastResultFromCacheUseCase = getLastResultFromCacheUseCase,
         deleteGalleryItemUseCase = deleteGalleryItemUseCase,
         toggleImageVisibilityUseCase = toggleImageVisibilityUseCase,

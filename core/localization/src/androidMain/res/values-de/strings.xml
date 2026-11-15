@@ -684,4 +684,30 @@
     <string name="error_samplers_unavailable">Die Sampling-Methoden konnten nicht geladen werden. Prüfe die Serververbindung und versuche es erneut.</string>
     <string name="error_seed_format">Eine nicht negative ganze Zahl oder -1 eingeben oder das Feld leer lassen.</string>
     <string name="error_seed_max">Der Seed darf %1$s nicht überschreiten.</string>
+    <string name="auth_storage_unavailable">Gespeicherte Anmeldedaten sind vorübergehend nicht verfügbar. Nach dem Entsperren erneut versuchen.</string>
+    <string name="auth_storage_unreadable">Gespeicherte Anmeldedaten können nicht gelesen werden. Erneut versuchen oder zurücksetzen und neu eingeben.</string>
+    <string name="auth_storage_write_failed">Anmeldedaten konnten nicht gespeichert werden. Vor dem Verbinden erneut versuchen.</string>
+    <string name="auth_storage_reset">Gespeicherte Anmeldedaten zurücksetzen</string>
+    <string name="auth_storage_reset_confirm">Gespeicherte Basic-Auth-Anmeldedaten entfernen? Sie müssen sie erneut eingeben. Modelle, Bilder, andere Einstellungen und die ChatGPT-Anmeldung bleiben erhalten.</string>
+
+    <string name="ui_diagnostics_title">UI-Diagnose</string>
+    <string name="ui_diagnostics_capture">UI-Diagnose aufzeichnen</string>
+    <string name="ui_diagnostics_reset">Aufzeichnung zurücksetzen</string>
+    <string name="ui_diagnostics_share">Aufzeichnung teilen</string>
+
+    <string name="native_generation_engine_unknown">Lokale Engine</string>
+    <string name="native_generation_busy">Eine andere lokale Generierung wird noch beendet. Bitte warten und erneut versuchen.</string>
+    <string name="native_generation_connection">Die lokale Engine konnte nicht gestartet werden. Erneut versuchen.</string>
+    <string name="native_generation_process_died">Die lokale Engine wurde unerwartet beendet. Erneut versuchen oder Modell- und Backend-Einstellungen prüfen.</string>
+    <string name="native_generation_unresponsive">Die lokale Engine antwortet nicht mehr. Erneut versuchen oder Modell- und Backend-Einstellungen prüfen.</string>
+    <string name="native_generation_engine_failed">Die lokale Engine konnte die Generierung nicht abschließen. Vor einem erneuten Versuch Modell- und Backend-Einstellungen prüfen.</string>
+    <string name="native_generation_invalid_result">Die lokale Engine hat ein ungültiges Bild zurückgegeben. Erneut versuchen.</string>
+    <string name="native_generation_interrupted">Die Generierung wurde unterbrochen. Bei Bedarf erneut versuchen.</string>
+    <string name="native_generation_failure_context">%1$s: %2$s</string>
+    <string name="native_generation_stage_preparing">Modell wird vorbereitet…</string>
+    <string name="native_generation_stage_tokenizing">Prompt wird kodiert…</string>
+    <string name="native_generation_stage_denoising">Bild wird generiert…</string>
+    <string name="native_generation_stage_decoding">Bild wird dekodiert…</string>
+    <string name="native_generation_stage_running">Bildgenerator wird ausgeführt…</string>
+    <string name="native_generation_stage_writing_result">Ergebnis wird gespeichert…</string>
 </resources>

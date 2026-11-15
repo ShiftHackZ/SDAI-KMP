@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.screen.img2img
 
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
+
 import androidx.compose.runtime.Composable
 
 /**
@@ -41,18 +43,21 @@ sealed interface ImageToImagePickResult {
      * @author Dmitriy Moroz
      */
     data class Selected(val base64: String) : ImageToImagePickResult
+
     /**
      * Provides the `Cancelled` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object Cancelled : ImageToImagePickResult
+
     /**
      * Provides the `Unsupported` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object Unsupported : ImageToImagePickResult
+
     /**
      * Carries `Failed` data through the SDAI presentation layer.
      *
@@ -80,10 +85,13 @@ data object NoOpImageToImagePlatformActions : ImageToImagePlatformActions {
 }
 
 /**
- * Renders the `rememberImageToImagePlatformActions` UI for the SDAI presentation layer.
+ * Creates the remembered native picker for explicit image-to-image input selection.
+ * Conversion and normalization use background execution; cancellation and unsupported picker
+ * outcomes remain distinct from invalid or rejected image content.
  *
- * @return Result produced by `rememberImageToImagePlatformActions`.
+ * @param budget Encoded/pixel admission for native picker conversion.
+ * @return Native input actions using the composition root's admission budget.
  * @author Dmitriy Moroz
  */
 @Composable
-expect fun rememberImageToImagePlatformActions(): ImageToImagePlatformActions
+expect fun rememberImageToImagePlatformActions(budget: OriginalImageBudget): ImageToImagePlatformActions

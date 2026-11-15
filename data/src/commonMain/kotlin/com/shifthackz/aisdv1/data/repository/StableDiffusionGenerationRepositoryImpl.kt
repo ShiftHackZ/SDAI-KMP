@@ -9,7 +9,7 @@ import com.shifthackz.aisdv1.domain.demo.TextToImageDemo
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ImageToImagePayload
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
@@ -37,11 +37,11 @@ internal class StableDiffusionGenerationRepositoryImpl(
      */
     private val preferenceManager: PreferenceManager,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
     /**
      * Exposes the `textToImageDemo` value used by the SDAI data layer.
      *
@@ -62,27 +62,30 @@ internal class StableDiffusionGenerationRepositoryImpl(
 ), StableDiffusionGenerationRepository {
 
     override suspend fun checkApiAvailability() {
+        val connection = connections.snapshot()
         remoteDataSource.checkAvailability(
-            baseUrl = preferenceManager.automatic1111ServerUrl,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
         )
     }
 
     override suspend fun checkApiAvailability(url: String) {
+        val connection = connections.snapshot(automatic1111Url = url)
         remoteDataSource.checkAvailability(
             baseUrl = url,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            credentials = connection.credentials,
         )
     }
 
     override suspend fun generateFromText(payload: TextToImagePayload): List<AiGenerationResult> {
+        val connection = connections.snapshot()
         val ai =
             if (preferenceManager.demoMode) List(payload.batchCount.coerceAtLeast(1)) {
                 textToImageDemo.getDemoBase64(payload)
             }
             else remoteDataSource.textToImage(
-                baseUrl = preferenceManager.automatic1111ServerUrl,
-                credentials = authorizationStore.getAuthorizationCredentials(),
+                baseUrl = connection.automatic1111Url,
+                credentials = connection.credentials,
                 payload = payload,
             )
 
@@ -92,13 +95,14 @@ internal class StableDiffusionGenerationRepositoryImpl(
     }
 
     override suspend fun generateFromImage(payload: ImageToImagePayload): List<AiGenerationResult> {
+        val connection = connections.snapshot()
         val ai =
             if (preferenceManager.demoMode) List(payload.batchCount.coerceAtLeast(1)) {
                 imageToImageDemo.getDemoBase64(payload)
             }
             else remoteDataSource.imageToImage(
-                baseUrl = preferenceManager.automatic1111ServerUrl,
-                credentials = authorizationStore.getAuthorizationCredentials(),
+                baseUrl = connection.automatic1111Url,
+                credentials = connection.credentials,
                 payload = payload,
             )
 
@@ -108,9 +112,10 @@ internal class StableDiffusionGenerationRepositoryImpl(
     }
 
     override suspend fun interruptGeneration() {
+        val connection = connections.snapshot()
         remoteDataSource.interruptGeneration(
-            baseUrl = preferenceManager.automatic1111ServerUrl,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
         )
     }
 }

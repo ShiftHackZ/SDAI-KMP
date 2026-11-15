@@ -14,12 +14,15 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
+apply(from = "gradle/kotlin-lint.gradle.kts")
+
 val documentedProjects = listOf(
     ":app",
     ":core:common",
     ":core:imageprocessing",
     ":core:localization",
     ":core:notification",
+    ":core:navigation",
     ":core:ui",
     ":core:validation",
     ":data",
@@ -71,8 +74,8 @@ subprojects {
                     remoteUrl.set(
                         URI(
                             "https://github.com/ShiftHackZ/SDAI-KMP/tree/master/" +
-                                projectDir.relativeTo(rootProject.projectDir).path +
-                                "/src"
+                                    projectDir.relativeTo(rootProject.projectDir).path +
+                                    "/src"
                         )
                     )
                     remoteLineSuffix.set("#L")
@@ -147,7 +150,8 @@ val decorateDokkaHtml by tasks.registering {
         docsDir.walkTopDown()
             .filter { it.isFile && it.extension == "html" }
             .forEach { file ->
-                val relativePath = docsDir.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '/')
+                val relativePath = docsDir.toPath().relativize(file.toPath()).toString()
+                    .replace(File.separatorChar, '/')
                 val canonicalPath = if (relativePath == "index.html") "" else relativePath
                 val canonicalUrl = "https://sdai.moroz.cc/docs/$canonicalPath"
                 var html = file.readText()

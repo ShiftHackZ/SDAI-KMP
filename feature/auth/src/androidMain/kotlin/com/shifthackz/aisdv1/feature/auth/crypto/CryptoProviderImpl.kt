@@ -1,89 +1,48 @@
 package com.shifthackz.aisdv1.feature.auth.crypto
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.feature.auth.AuthorizationKeyValueStore
+import java.security.GeneralSecurityException
 
 /**
- * Implements `CryptoProvider` behavior in the SDAI authentication feature layer.
+ * Opens legacy encrypted preferences without touching Keystore during construction.
+ * The serialized authorization owner invokes this on IO and never deletes keys on failure.
  *
+ * @param context Application context for the existing protected preference file.
  * @author Dmitriy Moroz
  */
+@Suppress("DEPRECATION")
 internal class CryptoProviderImpl(private val context: Context) : CryptoProvider {
-
     /**
-     * Loads SDAI data through `getAuthorizationStore`.
+     * Preserves the installed filename, master-key alias and cipher schemes.
      *
-     * @return Result produced by `getAuthorizationStore`.
      * @author Dmitriy Moroz
      */
-    override fun getAuthorizationStore(): AuthorizationKeyValueStore {
+    override fun getAuthorizationStore(): AuthorizationKeyValueStore = try {
         val preferences = EncryptedSharedPreferences.create(
-            KEY_PREFERENCE_AUTHORIZATION,
-            getMasterKeyAlias(),
+            "sdai_authorization_preference",
+            MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
             context,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
         )
-        return SharedPreferencesAuthorizationKeyValueStore(preferences)
+        SharedPreferencesAuthorizationKeyValueStore(preferences)
+    } catch (_: GeneralSecurityException) {
+        throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.UNREADABLE)
     }
 
     /**
-     * Loads SDAI data through `getMasterKeyAlias`.
+     * Deletes only the confirmed credential preference file, never its shared Keystore alias.
      *
      * @author Dmitriy Moroz
      */
-    private fun getMasterKeyAlias() = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-
-    /**
-     * Provides the `companion object` singleton used by the SDAI authentication feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    companion object {
-        /**
-         * Exposes the `KEY_PREFERENCE_AUTHORIZATION` value used by the SDAI authentication feature layer.
-         *
-         * @author Dmitriy Moroz
-         */
-        private const val KEY_PREFERENCE_AUTHORIZATION = "sdai_authorization_preference"
-    }
-}
-
-/**
- * Coordinates `SharedPreferencesAuthorizationKeyValueStore` behavior in the SDAI authentication feature layer.
- *
- * @author Dmitriy Moroz
- */
-private class SharedPreferencesAuthorizationKeyValueStore(
-    /**
-     * Exposes the `preferences` value used by the SDAI authentication feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val preferences: SharedPreferences,
-) : AuthorizationKeyValueStore {
-    /**
-     * Loads SDAI data through `getString`.
-     *
-     * @param key key value consumed by the API.
-     * @author Dmitriy Moroz
-     */
-    override fun getString(key: String): String? = preferences.getString(key, null)
-
-    /**
-     * Executes the `putString` step in the SDAI authentication feature layer.
-     *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
-     * @author Dmitriy Moroz
-     */
-    override fun putString(key: String, value: String) {
-        preferences
-            .edit()
-            .putString(key, value)
-            .apply()
+    override fun resetAuthorizationStore(): AuthorizationKeyValueStore {
+        if (!context.deleteSharedPreferences("sdai_authorization_preference")) {
+            throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.PERSISTENCE)
+        }
+        return getAuthorizationStore()
     }
 }

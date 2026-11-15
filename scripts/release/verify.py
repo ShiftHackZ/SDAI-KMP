@@ -15,6 +15,8 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 
+from native_symbols import verify_archive
+
 MAX_REFERENCE_BYTES = 512 * 1024 * 1024
 FOSS_CERTIFICATE = "8974efc853e2d5e93eb29dd809fc57cae7411fcfaca03de3f7c152f441a90064"
 
@@ -178,7 +180,14 @@ def main():
                 "version_name": version, "version_code": int(code), "application_id": app_id,
                 "unsigned_rebuild_comparison": "byte_identical", "reference_comparison": reference,
                 "fdroid_pipeline_execution": "not_run"}
+    diagnostic_archives = [path.parent / "native-diagnostics.zip" for path in (first, second)]
+    manifests = [verify_archive(archive, package, metadata)
+                 for archive, package in zip(diagnostic_archives, (first, second))]
+    require(manifests[0] == manifests[1], "Independent native diagnostics manifests differ.")
+    require(file_digest(diagnostic_archives[0]) == file_digest(diagnostic_archives[1]),
+            "Independent native diagnostics archives differ.")
     shutil.copyfile(first, output / ("unsigned." + format_))
+    shutil.copyfile(diagnostic_archives[0], output / "native-diagnostics.zip")
     write_json(output / "metadata.json", metadata)
     print(json.dumps(metadata, sort_keys=True))
 

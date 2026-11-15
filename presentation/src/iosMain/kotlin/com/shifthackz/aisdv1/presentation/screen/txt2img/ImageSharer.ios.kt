@@ -1,6 +1,12 @@
 package com.shifthackz.aisdv1.presentation.screen.txt2img
 
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.NSTemporaryDirectory
+import platform.Foundation.NSURL
+import platform.Foundation.NSUUID
+import platform.Foundation.NSFileManager
+import platform.Foundation.writeToURL
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIModalPresentationFullScreen
@@ -22,6 +28,7 @@ actual fun createPlatformImageSharer(): ImageSharer = IosImageSharer()
  *
  * @author Dmitriy Moroz
  */
+@OptIn(ExperimentalForeignApi::class)
 private class IosImageSharer : ImageSharer {
 
     /**
@@ -32,26 +39,46 @@ private class IosImageSharer : ImageSharer {
      * @author Dmitriy Moroz
      */
     override suspend fun share(base64: String): ImageShareResult {
-        val image = runCatching { base64.decodeGeneratedUiImage() }.getOrElse { t ->
+        val file = runCatching {
+            val data = base64.decodeGeneratedImageData()
+            val header =
+                base64.substringAfter("base64,", base64).take(64).filterNot(Char::isWhitespace)
+            val extension = when {
+                header.startsWith("iVBORw0KGgo") -> "png"
+                header.startsWith("/9j/") -> "jpg"
+                header.startsWith("UklGR") -> "webp"
+                else -> throw IllegalStateException()
+            }
+            val url =
+                NSURL.fileURLWithPath(NSTemporaryDirectory() + "sdai_" + NSUUID().UUIDString + "." + extension)
+            check(data.writeToURL(url, true))
+            url
+        }.getOrElse { t ->
             return ImageShareResult.Failed(t.message ?: "Unable to decode generated image")
         }
 
         return suspendCancellableCoroutine { continuation ->
             dispatch_async(dispatch_get_main_queue()) {
+                if (!continuation.isActive) {
+                    NSFileManager.defaultManager.removeItemAtURL(file, null); return@dispatch_async
+                }
                 val presenter = UIApplication.sharedApplication
                     .rootViewController()
                     ?.topMostPresentedViewController()
                 if (presenter == null) {
                     if (continuation.isActive) {
+                        NSFileManager.defaultManager.removeItemAtURL(file, null)
                         continuation.resume(ImageShareResult.Failed("Unable to open share sheet"))
                     }
                     return@dispatch_async
                 }
 
                 val controller = UIActivityViewController(
-                    activityItems = listOf(image),
+                    activityItems = listOf(file),
                     applicationActivities = null,
                 )
+                controller.completionWithItemsHandler =
+                    { _, _, _, _ -> NSFileManager.defaultManager.removeItemAtURL(file, null) }
                 controller.modalPresentationStyle = UIModalPresentationFullScreen
                 presenter.presentViewController(
                     viewControllerToPresent = controller,

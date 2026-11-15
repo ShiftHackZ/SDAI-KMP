@@ -1,15 +1,18 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
 import com.shifthackz.aisdv1.data.mocks.mockAiGenerationResult
 import com.shifthackz.aisdv1.data.mocks.mockImageToImagePayload
 import com.shifthackz.aisdv1.data.mocks.mockTextToImagePayload
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiGenerationDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsRemoteDataSource
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.preference.SessionPreference
 import com.shifthackz.aisdv1.network.exception.SwarmUiBadSessionException
@@ -30,7 +33,7 @@ class SwarmUiGenerationRepositoryImplTest {
     private val stubLocalDataSource = mockk<GenerationResultDataSource.Local>()
     private val stubRemoteDataSource = mockk<SwarmUiGenerationDataSource.Remote>()
     private val stubSwarmSessionRemote = mockk<SwarmUiModelsRemoteDataSource>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
+    private val stubPreferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val stubSessionPreference = mockk<SessionPreference>(relaxed = true)
     private val stubAuthorizationStore = mockk<AuthorizationStore>()
     private val stubBackgroundWorkObserver = mockk<BackgroundWorkObserver>()
@@ -40,7 +43,11 @@ class SwarmUiGenerationRepositoryImplTest {
         localDataSource = stubLocalDataSource,
         remoteDataSource = stubRemoteDataSource,
         sessionPreference = stubSessionPreference,
-        authorizationStore = stubAuthorizationStore,
+        connections = AuthenticatedConnectionProviderImpl(
+            stubPreferenceManager,
+            stubAuthorizationStore,
+            ProviderSelectionGuard()
+        ),
         swarmSessionRemoteDataSource = stubSwarmSessionRemote,
         preferenceManager = stubPreferenceManager,
         backgroundWorkObserver = stubBackgroundWorkObserver,
@@ -64,7 +71,7 @@ class SwarmUiGenerationRepositoryImplTest {
             stubPreferenceManager.swarmUiModel
         } returns MODEL
 
-        every {
+        coEvery {
             stubAuthorizationStore.getAuthorizationCredentials()
         } returns AuthorizationCredentials.None
 
@@ -74,77 +81,112 @@ class SwarmUiGenerationRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to check api availability with cached session, expected complete value`() = runTest {
-        repository.checkApiAvailability()
+    fun `given attempt to check api availability with cached session, expected complete value`() =
+        runTest {
+            repository.checkApiAvailability()
 
-        coVerify(exactly = 0) {
-            stubSwarmSessionRemote.getNewSession(any(), any())
+            coVerify(exactly = 0) {
+                stubSwarmSessionRemote.getNewSession(any(), any())
+            }
         }
-    }
 
     @Test
-    fun `given attempt to check api availability with empty session, expected new session requested`() = runTest {
-        every {
-            stubSessionPreference.swarmUiSessionId
-        } returns ""
+    fun `given attempt to check api availability with empty session, expected new session requested`() =
+        runTest {
+            every {
+                stubSessionPreference.swarmUiSessionId
+            } returns ""
 
-        coEvery {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+            coEvery {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
 
-        repository.checkApiAvailability()
+            repository.checkApiAvailability()
 
-        coVerify {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+            coVerify {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+            }
+            verify {
+                stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+            }
         }
-        verify {
-            stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
-        }
-    }
 
     @Test
-    fun `given attempt to check api availability by url, expected forced new session requested`() = runTest {
-        coEvery {
-            stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+    fun `given attempt to check api availability by url, expected forced new session requested`() =
+        runTest {
+            every {
+                stubPreferenceManager.swarmUiServerUrl
+            } returns CHECK_URL
 
-        repository.checkApiAvailability(CHECK_URL)
+            coEvery {
+                stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
 
-        coVerify {
-            stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
+            repository.checkApiAvailability(CHECK_URL)
+
+            coVerify(exactly = 1) {
+                stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
+            }
+            verify {
+                stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+            }
         }
-        verify {
-            stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
-        }
-    }
 
     @Test
-    fun `given attempt to check api availability by url, remote throws exception, expected error value`() = runTest {
-        coEvery {
-            stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
-        } throws stubException
+    fun `given attempt to check api availability by url, remote throws exception, expected error value`() =
+        runTest {
+            every {
+                stubPreferenceManager.swarmUiServerUrl
+            } returns CHECK_URL
 
-        val actual = runCatching { repository.checkApiAvailability(CHECK_URL) }
+            coEvery {
+                stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
+            } throws stubException
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            val actual = runCatching { repository.checkApiAvailability(CHECK_URL) }
+
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+            coVerify(exactly = 1) {
+                stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
+            }
+        }
 
     @Test
-    fun `given attempt to generate from text, remote returns result, expected valid domain model value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.textToImage(
-                SWARM_URL,
-                SESSION_ID,
-                MODEL,
-                AuthorizationCredentials.None,
-                mockTextToImagePayload,
+    fun `given api availability url differs from configured url, expected failure without session renewal`() =
+        runTest {
+            val actual = runCatching { repository.checkApiAvailability(CHECK_URL) }
+
+            val failure = actual.exceptionOrNull()
+            Assert.assertTrue(failure is AuthorizationStorageFailure)
+            Assert.assertEquals(
+                AuthorizationStorageFailure.Reason.UNAVAILABLE,
+                (failure as AuthorizationStorageFailure).reason,
             )
-        } returns mockAiGenerationResult
+            coVerify(exactly = 0) {
+                stubSwarmSessionRemote.getNewSession(any(), any())
+            }
+            verify(exactly = 0) {
+                stubSessionPreference.swarmUiSessionId = any()
+            }
+        }
 
-        val actual = repository.generateFromText(mockTextToImagePayload)
+    @Test
+    fun `given attempt to generate from text, remote returns result, expected valid domain model value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.textToImage(
+                    SWARM_URL,
+                    SESSION_ID,
+                    MODEL,
+                    AuthorizationCredentials.None,
+                    mockTextToImagePayload,
+                )
+            } returns mockAiGenerationResult
 
-        Assert.assertEquals(mockAiGenerationResult.copy(modelName = MODEL), actual)
-    }
+            val actual = repository.generateFromText(mockTextToImagePayload)
+
+            Assert.assertEquals(mockAiGenerationResult.copy(modelName = MODEL), actual)
+        }
 
     @Test
     fun `given attempt to generate from text with bad session, expected session renewed and generation retried`() =
@@ -182,43 +224,46 @@ class SwarmUiGenerationRepositoryImplTest {
         }
 
     @Test
-    fun `given attempt to generate from text, remote throws exception, expected error value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.textToImage(any(), any(), any(), any(), any())
-        } throws stubException
+    fun `given attempt to generate from text, remote throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.textToImage(any(), any(), any(), any(), any())
+            } throws stubException
 
-        val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
+            val actual = runCatching { repository.generateFromText(mockTextToImagePayload) }
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
-
-    @Test
-    fun `given attempt to generate from image, remote returns result, expected valid domain model value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.imageToImage(
-                SWARM_URL,
-                SESSION_ID,
-                MODEL,
-                AuthorizationCredentials.None,
-                mockImageToImagePayload,
-            )
-        } returns mockAiGenerationResult
-
-        val actual = repository.generateFromImage(mockImageToImagePayload)
-
-        Assert.assertEquals(mockAiGenerationResult.copy(modelName = MODEL), actual)
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
-    fun `given attempt to generate from image, remote throws exception, expected error value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.imageToImage(any(), any(), any(), any(), any())
-        } throws stubException
+    fun `given attempt to generate from image, remote returns result, expected valid domain model value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.imageToImage(
+                    SWARM_URL,
+                    SESSION_ID,
+                    MODEL,
+                    AuthorizationCredentials.None,
+                    mockImageToImagePayload,
+                )
+            } returns mockAiGenerationResult
 
-        val actual = runCatching { repository.generateFromImage(mockImageToImagePayload) }
+            val actual = repository.generateFromImage(mockImageToImagePayload)
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertEquals(mockAiGenerationResult.copy(modelName = MODEL), actual)
+        }
+
+    @Test
+    fun `given attempt to generate from image, remote throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.imageToImage(any(), any(), any(), any(), any())
+            } throws stubException
+
+            val actual = runCatching { repository.generateFromImage(mockImageToImagePayload) }
+
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     private companion object {
         const val SWARM_URL = "http://192.168.0.1:7801"

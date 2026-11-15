@@ -15,6 +15,7 @@ import com.shifthackz.aisdv1.core.common.extensions.showToast
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.utils.PermissionUtil
 import com.shifthackz.aisdv1.presentation.utils.ReportProblemEmailComposer
+import org.koin.compose.koinInject
 import java.io.File
 import kotlinx.coroutines.CompletableDeferred
 
@@ -26,8 +27,10 @@ import kotlinx.coroutines.CompletableDeferred
 @Composable
 actual fun rememberSettingsPlatformActions(): SettingsPlatformActions {
     val context = LocalContext.current
+    val reportComposer: ReportProblemEmailComposer = koinInject()
     val storagePermissionResult = remember { mutableStateOf<CompletableDeferred<Boolean>?>(null) }
-    val notificationPermissionResult = remember { mutableStateOf<CompletableDeferred<Boolean>?>(null) }
+    val notificationPermissionResult =
+        remember { mutableStateOf<CompletableDeferred<Boolean>?>(null) }
     val storagePermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { result ->
@@ -41,9 +44,15 @@ actual fun rememberSettingsPlatformActions(): SettingsPlatformActions {
         notificationPermissionResult.value = null
     }
 
-    return remember(context, storagePermissionLauncher, notificationPermissionLauncher) {
+    return remember(
+        context,
+        reportComposer,
+        storagePermissionLauncher,
+        notificationPermissionLauncher
+    ) {
         AndroidSettingsPlatformActions(
             context = context,
+            reportComposer = reportComposer,
             launchStoragePermission = storagePermissionLauncher::launch,
             launchNotificationPermission = notificationPermissionLauncher::launch,
             storagePermissionResult = storagePermissionResult,
@@ -56,6 +65,7 @@ actual fun rememberSettingsPlatformActions(): SettingsPlatformActions {
  * Android bridge used by Settings for permissions plus cache/model byte summaries.
  *
  * @param context Android context used for permissions, app-private storage, links, and toasts.
+ * @param reportComposer Injected user-composed problem-report boundary.
  * @param launchStoragePermission Launcher for Android storage/media runtime permissions.
  * @param launchNotificationPermission Launcher for Android notification runtime permission.
  * @param storagePermissionResult Pending storage permission continuation.
@@ -65,6 +75,7 @@ actual fun rememberSettingsPlatformActions(): SettingsPlatformActions {
  */
 private class AndroidSettingsPlatformActions(
     private val context: Context,
+    private val reportComposer: ReportProblemEmailComposer,
     private val launchStoragePermission: (Array<String>) -> Unit,
     private val launchNotificationPermission: (String) -> Unit,
     private val storagePermissionResult: MutableState<CompletableDeferred<Boolean>?>,
@@ -143,7 +154,7 @@ private class AndroidSettingsPlatformActions(
     }
 
     override fun shareLogFile() {
-        ReportProblemEmailComposer().invoke(context)
+        reportComposer.invoke(context)
     }
 
     override fun showDeveloperModeUnlocked() {

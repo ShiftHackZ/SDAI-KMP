@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.screen.storageusage
 
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.appbuild.BuildVersion
@@ -16,7 +17,7 @@ import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalOnnxModelsUseCa
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalSdxlModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteAllGalleryUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.StorageUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageIntent
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageModal
 import com.shifthackz.aisdv1.presentation.screen.storageusage.platform.StorageUsagePlatformActions
@@ -46,6 +47,7 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class StorageUsageViewModelTest {
 
+    private val galleryReads = mockk<GalleryReadGateway>()
     private val getAllGalleryUseCase = mockk<GetAllGalleryUseCase>()
     private val deleteAllGalleryUseCase = mockk<DeleteAllGalleryUseCase>()
     private val getLocalOnnxModelsUseCase = mockk<GetLocalOnnxModelsUseCase>()
@@ -64,6 +66,7 @@ class StorageUsageViewModelTest {
     @Before
     fun initialize() {
         coEvery { getAllGalleryUseCase() } returns emptyList()
+        coEvery { galleryReads.storageBytes() } coAnswers { getAllGalleryUseCase().sumOf { it.image.encodeToByteArray().size.toLong() + it.inputImage.encodeToByteArray().size } }
         coEvery { deleteAllGalleryUseCase() } returns Unit
         coEvery { getLocalOnnxModelsUseCase() } answers { onnxModels }
         coEvery { getLocalMediaPipeModelsUseCase() } returns emptyList()
@@ -84,7 +87,8 @@ class StorageUsageViewModelTest {
 
     @Test
     fun `compatible and OAuth gallery images contribute to storage totals`() = runTest {
-        val image = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jO0sAAAAASUVORK5CYII="
+        val image =
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jO0sAAAAASUVORK5CYII="
         val compatible = mockAiGenerationResult.copy(
             id = 1L, image = image, inputImage = "", modelName = "gpt-image-2",
         )
@@ -96,7 +100,8 @@ class StorageUsageViewModelTest {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        val galleryBytes = viewModel.state.value.usage.items.first { it.category == UsageCategory.GALLERY }.bytes
+        val galleryBytes =
+            viewModel.state.value.usage.items.first { it.category == UsageCategory.GALLERY }.bytes
         assertEquals(image.encodeToByteArray().size * 2L, galleryBytes)
         assertEquals(galleryBytes, viewModel.state.value.usage.totalBytes)
     }
@@ -214,8 +219,9 @@ class StorageUsageViewModelTest {
         }
         viewModelScope = CoroutineScope(SupervisorJob() + dispatcher)
         return StorageUsageViewModel(
+            galleryReads = galleryReads,
+            diagnostics = mockk(relaxed = true),
             dispatchersProvider = dispatchersProvider,
-            getAllGalleryUseCase = getAllGalleryUseCase,
             deleteAllGalleryUseCase = deleteAllGalleryUseCase,
             getLocalOnnxModelsUseCase = getLocalOnnxModelsUseCase,
             getLocalMediaPipeModelsUseCase = getLocalMediaPipeModelsUseCase,

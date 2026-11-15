@@ -12,9 +12,9 @@ import com.shifthackz.aisdv1.network.response.OpenAiCompatibleResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
@@ -42,7 +42,7 @@ class KtorOpenAiCompatibleApi(
      * @author Dmitriy Moroz
      */
     override suspend fun probe(baseUrl: String, apiKey: String): Boolean {
-        val response = httpClient.get {
+        val response = httpClient.boundedGet {
             expectSuccess = false
             url.takeFrom(baseUrl.trimEnd('/'))
             url.appendPathSegments("models")
@@ -69,7 +69,7 @@ class KtorOpenAiCompatibleApi(
         apiKey: String,
         request: OpenAiCompatibleRequest,
     ): OpenAiCompatibleResponse {
-        val response = httpClient.post {
+        val response = httpClient.boundedPost {
             expectSuccess = false
             url.takeFrom(baseUrl.trimEnd('/'))
             url.appendPathSegments("images", "generations")
@@ -94,7 +94,7 @@ class KtorOpenAiCompatibleApi(
         val parsed = Url(url)
         require(parsed.protocol == URLProtocol.HTTP || parsed.protocol == URLProtocol.HTTPS) { "Invalid image URL" }
         require(parsed.host.isNotBlank() && parsed.user == null && parsed.password == null) { "Invalid image URL" }
-        val response = imageClient.get(parsed) {
+        val response = imageClient.boundedGet(parsed) {
             expectSuccess = false
             applyGenerationTimeout(generationTimeoutProvider)
         }
@@ -110,6 +110,7 @@ class KtorOpenAiCompatibleApi(
      * @author Dmitriy Moroz
      */
     private fun HttpRequestBuilder.optionalBearer(apiKey: String) {
-        apiKey.trim().takeIf(String::isNotEmpty)?.let { header(HttpHeaders.Authorization, "Bearer $it") }
+        apiKey.trim().takeIf(String::isNotEmpty)
+            ?.let { header(HttpHeaders.Authorization, "Bearer $it") }
     }
 }

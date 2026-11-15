@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
-import com.shifthackz.aisdv1.presentation.navigation.router.SettingsRouter
+import com.shifthackz.aisdv1.core.navigation.router.SettingsRouter
 import com.shifthackz.aisdv1.presentation.screen.drawer.DrawerIntent
 import com.shifthackz.aisdv1.presentation.screen.settings.content.ContentSettingsState
 import com.shifthackz.aisdv1.presentation.screen.settings.modal.SettingsModalRenderer

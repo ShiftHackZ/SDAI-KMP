@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.widget.engine
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.domain.entity.Configuration
@@ -35,9 +37,11 @@ import kotlin.time.Duration.Companion.milliseconds
  * Coordinates `EngineSelectionViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EngineSelectionViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -117,6 +121,8 @@ class EngineSelectionViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<EngineSelectionState, EngineSelectionIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.ENGINE_SELECTION,
     initialState = EngineSelectionState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -265,11 +271,11 @@ class EngineSelectionViewModel(
             ServerSource.LOCAL_APPLE_BONSAI,
             ServerSource.HORDE,
             ServerSource.OPEN_AI,
-        ServerSource.OPEN_AI_COMPATIBLE,
-        ServerSource.OPEN_AI_OAUTH,
+            ServerSource.OPEN_AI_COMPATIBLE,
+            ServerSource.OPEN_AI_OAUTH,
             ServerSource.FAL_AI,
             ServerSource.ARLI_AI,
-            -> remoteOptions
+                -> remoteOptions
         }
     }
 
@@ -279,9 +285,12 @@ class EngineSelectionViewModel(
             ServerSource.SWARM_UI -> preferenceManager.swarmUiModel = intent.value
             ServerSource.HUGGING_FACE -> preferenceManager.huggingFaceModel =
                 intent.value.safeHuggingFaceModelAlias()
+
             ServerSource.STABILITY_AI -> preferenceManager.stabilityAiEngineId = intent.value
             ServerSource.LOCAL_MICROSOFT_ONNX -> preferenceManager.localOnnxModelId = intent.value
-            ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> preferenceManager.localSdxlModelId = intent.value
+            ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> preferenceManager.localSdxlModelId =
+                intent.value
+
             ServerSource.LOCAL_APPLE_CORE_ML -> preferenceManager.localCoreMlModelId = intent.value
             ServerSource.LOCAL_APPLE_BONSAI -> preferenceManager.localBonsaiModelId = intent.value
             else -> Unit
@@ -380,12 +389,12 @@ private fun Configuration.hasSwarmEndpoint(): Boolean = swarmUiUrl.isMobileRemot
 private fun String.isMobileRemoteEndpoint(): Boolean {
     val value = trim().lowercase()
     return value.isNotBlank() &&
-        !value.startsWith("http://localhost") &&
-        !value.startsWith("https://localhost") &&
-        !value.startsWith("http://127.0.0.1") &&
-        !value.startsWith("https://127.0.0.1") &&
-        !value.startsWith("http://[::1]") &&
-        !value.startsWith("https://[::1]")
+            !value.startsWith("http://localhost") &&
+            !value.startsWith("https://localhost") &&
+            !value.startsWith("http://127.0.0.1") &&
+            !value.startsWith("https://127.0.0.1") &&
+            !value.startsWith("http://[::1]") &&
+            !value.startsWith("https://[::1]")
 }
 
 /**

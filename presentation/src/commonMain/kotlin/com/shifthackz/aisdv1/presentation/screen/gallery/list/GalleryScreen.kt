@@ -5,6 +5,7 @@
 
 package com.shifthackz.aisdv1.presentation.screen.gallery.list
 
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -12,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryRouter
 import org.koin.core.parameter.parametersOf
 
 /**
@@ -33,6 +34,7 @@ fun GalleryScreen(
     val resolvedGalleryRouter = remember(koin, galleryRouter) {
         galleryRouter ?: koin.get<GalleryRouter>()
     }
+    val imageLoader = remember(koin) { koin.get<GalleryImageLoader>() }
     val platformActions = remember(koin) { koin.get<GalleryPlatformActions>() }
     val viewModel = remember(
         koin,
@@ -50,6 +52,7 @@ fun GalleryScreen(
                 is GalleryEffect.OpenMediaStoreFolder -> {
                     platformActions.openMediaStoreFolder(effect.folderUri)
                 }
+
                 is GalleryEffect.ShareExport -> {
                     platformActions.shareExport(effect.filePath)
                 }
@@ -62,6 +65,7 @@ fun GalleryScreen(
         GalleryScreenContent(
             modifier = modifier,
             state = state,
+            imageLoader = imageLoader,
             processIntent = intentHandler,
         )
     }

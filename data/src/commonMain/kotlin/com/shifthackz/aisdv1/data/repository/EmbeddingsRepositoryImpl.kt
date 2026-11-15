@@ -5,7 +5,7 @@ import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsRemoteDataSource
 import com.shifthackz.aisdv1.domain.entity.Embedding
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.preference.SessionPreference
 import com.shifthackz.aisdv1.domain.repository.EmbeddingsRepository
@@ -54,11 +54,11 @@ internal class EmbeddingsRepositoryImpl(
      */
     private val sessionPreference: SessionPreference,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : EmbeddingsRepository {
 
     /**
@@ -67,10 +67,11 @@ internal class EmbeddingsRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchEmbeddings() {
+        val connection = connections.snapshot()
         val embeddings = when (preferenceManager.source) {
             ServerSource.AUTOMATIC1111 -> rdsA1111.fetchEmbeddings(
-                baseUrl = preferenceManager.automatic1111ServerUrl,
-                credentials = authorizationStore.getAuthorizationCredentials(),
+                baseUrl = connection.automatic1111Url,
+                credentials = connection.credentials,
             )
 
             ServerSource.SWARM_UI -> fetchSwarmEmbeddings()
@@ -105,8 +106,9 @@ internal class EmbeddingsRepositoryImpl(
      * @author Dmitriy Moroz
      */
     private suspend fun fetchSwarmEmbeddings(): List<Embedding> {
-        val baseUrl = preferenceManager.swarmUiServerUrl
-        val credentials = authorizationStore.getAuthorizationCredentials()
+        val connection = connections.snapshot()
+        val baseUrl = connection.swarmUiUrl
+        val credentials = connection.credentials
         val sessionId = getSessionId(baseUrl, credentials)
         return try {
             rdsSwarm.fetchEmbeddings(baseUrl, sessionId, credentials)

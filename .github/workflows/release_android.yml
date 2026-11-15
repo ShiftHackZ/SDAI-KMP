@@ -32,6 +32,9 @@ on:
       foss_reference_sha256:
         description: Required SHA-256 when a FOSS reference URL is provided.
         default: ""
+      diagnostics_release_tag:
+        description: Optional existing version release to receive matching diagnostics (requires signing).
+        default: ""
 
 permissions:
   contents: read
@@ -91,6 +94,19 @@ jobs:
           FOSS_REFERENCE_URL: ${{ inputs.foss_reference_url }}
           FOSS_REFERENCE_SHA256: ${{ inputs.foss_reference_sha256 }}
         run: python3 ci/scripts/release/plan.py source
+
+      - name: Check the existing diagnostics release
+        if: inputs.diagnostics_release_tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.diagnostics_release_tag }}
+          SHOULD_SIGN: ${{ inputs.sign }}
+          SOURCE_SHA: ${{ steps.plan.outputs.source_sha }}
+          VERSION_NAME: ${{ steps.plan.outputs.version_name }}
+        run: |
+          [[ "$SHOULD_SIGN" == true ]] || { echo 'Diagnostics attachment requires signed outputs.' >&2; exit 1; }
+          python3 ci/scripts/release/publish_diagnostics.py --check-release-only \
+            --tag "$RELEASE_TAG" --source-sha "$SOURCE_SHA" --version "$VERSION_NAME"
 
   build:
     name: Build ${{ matrix.flavor }} ${{ matrix.format }} (${{ matrix.attempt }}/2)
@@ -282,6 +298,7 @@ jobs:
         run: |
           bash ci/scripts/release/sign.sh "$FLAVOR" "$FORMAT" "verified/unsigned.$FORMAT" "$RUNNER_TEMP/signed" "$VERSION_NAME"
           cp verified/metadata.json verified/toolchain.json verified/submodules.txt "$RUNNER_TEMP/signed/"
+          cp verified/native-diagnostics.zip "$RUNNER_TEMP/signed/sdai-$FLAVOR-$FORMAT-$VERSION_NAME-native-diagnostics.zip"
 
       - name: Verify signed APK against the independent rebuild
         if: matrix.format == 'apk'
@@ -317,3 +334,38 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 14
+
+  attach-diagnostics:
+    name: Preserve diagnostics on the existing version release
+    if: inputs.sign && inputs.diagnostics_release_tag != ''
+    needs: [plan, sign]
+    runs-on: ubuntu-24.04
+    environment: android-release
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout trusted diagnostics tools
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: ci
+          persist-credentials: false
+          sparse-checkout: scripts/release
+
+      - name: Download the signed outputs
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: sdai-*
+          path: signed
+
+      - name: Validate and attach exact-match diagnostics
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.diagnostics_release_tag }}
+          SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+        run: |
+          python3 ci/scripts/release/publish_diagnostics.py signed --check-only \
+            --tag "$RELEASE_TAG" --source-sha "$SOURCE_SHA"
+          python3 ci/scripts/release/publish_diagnostics.py signed \
+            --tag "$RELEASE_TAG" --source-sha "$SOURCE_SHA"

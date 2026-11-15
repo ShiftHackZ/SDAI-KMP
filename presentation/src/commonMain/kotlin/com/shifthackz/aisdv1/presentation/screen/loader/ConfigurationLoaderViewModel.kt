@@ -1,6 +1,9 @@
 package com.shifthackz.aisdv1.presentation.screen.loader
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.core.mvi.EmptyIntent
@@ -8,7 +11,7 @@ import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.usecase.caching.DataPreLoaderUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.ConfigurationLoaderRouter
+import com.shifthackz.aisdv1.core.navigation.router.ConfigurationLoaderRouter
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration.Companion.milliseconds
@@ -17,8 +20,10 @@ import kotlin.time.Duration.Companion.milliseconds
  * Coordinates `ConfigurationLoaderViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class ConfigurationLoaderViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -50,6 +55,8 @@ class ConfigurationLoaderViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<ConfigurationLoaderState, EmptyIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.CONFIGURATION_LOADER.asDiagnosticScreen(),
     initialState = ConfigurationLoaderState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -112,7 +119,7 @@ private fun Configuration.requiresRemotePreload(): Boolean = when (source) {
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
     ServerSource.LOCAL_APPLE_CORE_ML,
     ServerSource.LOCAL_APPLE_BONSAI,
-    -> false
+        -> false
 }
 
 /**
@@ -124,10 +131,10 @@ private fun Configuration.requiresRemotePreload(): Boolean = when (source) {
 private fun String.isMobileRemoteEndpoint(): Boolean {
     val value = trim().lowercase()
     return value.isNotBlank() &&
-        !value.startsWith("http://localhost") &&
-        !value.startsWith("https://localhost") &&
-        !value.startsWith("http://127.0.0.1") &&
-        !value.startsWith("https://127.0.0.1") &&
-        !value.startsWith("http://[::1]") &&
-        !value.startsWith("https://[::1]")
+            !value.startsWith("http://localhost") &&
+            !value.startsWith("https://localhost") &&
+            !value.startsWith("http://127.0.0.1") &&
+            !value.startsWith("https://127.0.0.1") &&
+            !value.startsWith("http://[::1]") &&
+            !value.startsWith("https://[::1]")
 }

@@ -5,7 +5,7 @@ import com.shifthackz.aisdv1.domain.entity.OpenAiSize
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.model.GenerationModal
 import com.shifthackz.aisdv1.presentation.model.PromptTagEditRequest
-import com.shifthackz.aisdv1.presentation.navigation.router.ImageToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationAspectRatio
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -115,6 +115,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             ImageToImageIntent.Generate -> generate()
             ImageToImageIntent.RunBenchmarkFromPrompt -> Unit
             ImageToImageIntent.SkipBenchmarkPrompt -> Unit
@@ -130,12 +131,14 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             ImageToImageIntent.ClearInPaintMask -> updateState { state ->
                 state.copy(
                     inPaint = state.inPaint.copy(strokes = emptyList()),
                     message = null,
                 )
             }
+
             ImageToImageIntent.DismissError -> updateState { it.copy(error = null) }
             ImageToImageIntent.DismissMessage -> updateState { it.copy(message = null) }
             ImageToImageIntent.DismissEditTag -> updateState { it.copy(editTag = null) }
@@ -148,6 +151,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.SaveResult -> saveImage(intent.base64)
             is ImageToImageIntent.ShareResult -> shareImage(intent.base64)
             is ImageToImageIntent.SaveGenerationResults -> saveGenerationResults(intent.results)
@@ -163,6 +167,7 @@ internal class ImageToImageIntentProcessor(
                     ),
                 )
             }
+
             is ImageToImageIntent.ApplyPrompts -> updateState {
                 it.copy(
                     prompt = intent.prompt,
@@ -171,16 +176,29 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
-            is ImageToImageIntent.ApplyGenerationResult -> applyGenerationResult(intent.ai, intent.inputImage)
+
+            is ImageToImageIntent.ApplyGenerationResult -> applyGenerationResult(
+                intent.ai,
+                intent.inputImage
+            )
+
             is ImageToImageIntent.UpdateAdvancedOptionsVisibility -> updateState {
                 it.copy(advancedOptionsVisible = intent.visible)
             }
+
             is ImageToImageIntent.UpdatePrompt -> updateState {
-                it.copy(prompt = intent.value, promptValidationError = null, error = null, message = null)
+                it.copy(
+                    prompt = intent.value,
+                    promptValidationError = null,
+                    error = null,
+                    message = null
+                )
             }
+
             is ImageToImageIntent.UpdateNegativePrompt -> updateState {
                 it.copy(negativePrompt = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateWidth -> updateState {
                 it.copy(
                     width = intent.value.filter(Char::isDigit),
@@ -189,6 +207,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateHeight -> updateState {
                 it.copy(
                     height = intent.value.filter(Char::isDigit),
@@ -197,6 +216,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             ImageToImageIntent.SwapDimensions -> updateState {
                 it.copy(
                     width = it.height,
@@ -207,6 +227,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.ApplyAspectRatio -> updateState {
                 val (width, height) = it.dimensionsFor(intent.ratio)
                 it.copy(
@@ -218,6 +239,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateSamplingSteps -> updateState {
                 val minSteps = it.falAiModel.minInferenceSteps.takeIf { _ ->
                     it.mode == ServerSource.FAL_AI
@@ -227,6 +249,7 @@ internal class ImageToImageIntentProcessor(
                 } ?: if (it.mode == ServerSource.ARLI_AI) MAX_ARLI_AI_STEPS else MAX_STEPS
                 it.copy(samplingSteps = intent.value.coerceIn(minSteps, maxSteps), message = null)
             }
+
             is ImageToImageIntent.UpdateCfgScale -> updateState {
                 val minCfg = it.falAiModel.minGuidanceScale.takeIf { _ ->
                     it.mode == ServerSource.FAL_AI
@@ -236,38 +259,53 @@ internal class ImageToImageIntentProcessor(
                 } ?: MAX_CFG_SCALE
                 it.copy(cfgScale = intent.value.coerceIn(minCfg, maxCfg), message = null)
             }
+
             is ImageToImageIntent.UpdateRestoreFaces -> updateState {
                 it.copy(restoreFaces = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateSeed -> updateState {
                 it.copy(seed = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateSubSeed -> updateState {
                 it.copy(subSeed = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateSubSeedStrength -> updateState {
                 it.copy(
-                    subSeedStrength = intent.value.coerceIn(MIN_SUB_SEED_STRENGTH, MAX_SUB_SEED_STRENGTH),
+                    subSeedStrength = intent.value.coerceIn(
+                        MIN_SUB_SEED_STRENGTH,
+                        MAX_SUB_SEED_STRENGTH
+                    ),
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateSampler -> updateState {
                 it.copy(selectedSampler = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateScheduler -> updateState {
                 it.copy(selectedScheduler = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateNsfw -> updateState {
                 it.copy(nsfw = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateBatchCount -> updateState {
                 val maxBatch = if (it.mode == ServerSource.FAL_AI) {
                     MAX_FAL_AI_BATCH_COUNT
                 } else {
                     MAX_BATCH_COUNT
                 }
-                it.copy(batchCount = intent.value.coerceIn(MIN_BATCH_COUNT, maxBatch), message = null)
+                it.copy(
+                    batchCount = intent.value.coerceIn(MIN_BATCH_COUNT, maxBatch),
+                    message = null
+                )
             }
+
             is ImageToImageIntent.UpdateOpenAiModel -> updateState { state ->
                 val size = if (state.openAiSize.supportedModels.contains(intent.value)) {
                     state.openAiSize
@@ -276,15 +314,19 @@ internal class ImageToImageIntentProcessor(
                 }
                 state.copy(openAiModel = intent.value, openAiSize = size, message = null)
             }
+
             is ImageToImageIntent.UpdateOpenAiSize -> updateState {
                 it.copy(openAiSize = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateOpenAiQuality -> updateState {
                 it.copy(openAiQuality = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateFalAiModel -> updateState {
-                val acceleration = it.falAiAcceleration.takeIf(intent.value.supportedAccelerations::contains)
-                    ?: intent.value.supportedAccelerations.first()
+                val acceleration =
+                    it.falAiAcceleration.takeIf(intent.value.supportedAccelerations::contains)
+                        ?: intent.value.supportedAccelerations.first()
                 it.copy(
                     falAiModel = intent.value,
                     falAiAcceleration = acceleration,
@@ -299,6 +341,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateFalAiImageSize -> updateState {
                 it.copy(
                     falAiImageSize = intent.value,
@@ -309,33 +352,44 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateFalAiAcceleration -> updateState {
                 it.copy(falAiAcceleration = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateFalAiSyncMode -> updateState {
                 it.copy(falAiSyncMode = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateArliAiModel -> updateState {
                 it.copy(arliAiModel = intent.value, message = null, error = null)
             }
+
             is ImageToImageIntent.UpdateStabilityAiStyle -> updateState {
                 it.copy(selectedStylePreset = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateStabilityAiClipGuidance -> updateState {
                 it.copy(selectedClipGuidancePreset = intent.value, message = null)
             }
+
             is ImageToImageIntent.UpdateADetailerConfig -> updateState {
                 it.copy(aDetailer = intent.value, message = null)
             }
+
             ImageToImageIntent.RefreshADetailerAvailability -> Unit
             ImageToImageIntent.RetrySamplers -> Unit
             ImageToImageIntent.OpenADetailerInstallInstructions -> Unit
             is ImageToImageIntent.UpdateDenoisingStrength -> updateState {
                 it.copy(
-                    denoisingStrength = intent.value.coerceIn(MIN_DENOISING_STRENGTH, MAX_DENOISING_STRENGTH),
+                    denoisingStrength = intent.value.coerceIn(
+                        MIN_DENOISING_STRENGTH,
+                        MAX_DENOISING_STRENGTH
+                    ),
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateInPaintBrushSize -> updateState { state ->
                 state.copy(
                     inPaint = state.inPaint.copy(
@@ -347,6 +401,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateInPaintMaskBlur -> updateState { state ->
                 state.copy(
                     inPaint = state.inPaint.copy(
@@ -358,6 +413,7 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateInPaintOnlyMaskedPadding -> updateState { state ->
                 state.copy(
                     inPaint = state.inPaint.copy(
@@ -369,12 +425,15 @@ internal class ImageToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is ImageToImageIntent.UpdateInPaintMaskMode -> updateState { state ->
                 state.copy(inPaint = state.inPaint.copy(maskMode = intent.value), message = null)
             }
+
             is ImageToImageIntent.UpdateInPaintMaskContent -> updateState { state ->
                 state.copy(inPaint = state.inPaint.copy(maskContent = intent.value), message = null)
             }
+
             is ImageToImageIntent.UpdateInPaintArea -> updateState { state ->
                 state.copy(inPaint = state.inPaint.copy(area = intent.value), message = null)
             }

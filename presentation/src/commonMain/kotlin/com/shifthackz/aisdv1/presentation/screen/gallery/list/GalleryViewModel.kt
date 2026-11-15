@@ -1,7 +1,10 @@
 package com.shifthackz.aisdv1.presentation.screen.gallery.list
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.domain.entity.BackgroundWorkResult
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
@@ -11,34 +14,30 @@ import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemsUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.GetMediaStoreInfoUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.SetGalleryItemsLikedUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.SetGalleryItemsVisibilityUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultPagedUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryRouter
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryMemoryBudget
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 
 /**
- * Exposes the `GALLERY_FIRST_PAGE` value used by the SDAI presentation layer.
+ * Owns stable gallery positions, a bounded metadata window and selection across window eviction.
+ *
+ * @param galleryReads Payload-free catalog and metadata reads.
+ * @param memoryBudget Explicit metadata window and prefetch limits.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
-private const val GALLERY_FIRST_PAGE = 0
-/**
- * Exposes the `GALLERY_PAGE_SIZE` value used by the SDAI presentation layer.
- *
- * @author Dmitriy Moroz
- */
-private const val GALLERY_PAGE_SIZE = 30
-
-/**
- * Coordinates `GalleryViewModel` behavior in the SDAI presentation layer.
- *
- * @author Dmitriy Moroz
- */
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class GalleryViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -88,12 +87,6 @@ class GalleryViewModel(
      */
     private val setGalleryItemsLikedUseCase: SetGalleryItemsLikedUseCase,
     /**
-     * Exposes the `getGenerationResultPagedUseCase` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val getGenerationResultPagedUseCase: GetGenerationResultPagedUseCase,
-    /**
      * Exposes the `galleryExportService` value used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
@@ -105,6 +98,8 @@ class GalleryViewModel(
      * @author Dmitriy Moroz
      */
     private val galleryRouter: GalleryRouter,
+    private val galleryReads: GalleryReadGateway,
+    private val memoryBudget: GalleryMemoryBudget,
     /**
      * Exposes the `onError` value used by the SDAI presentation layer.
      *
@@ -112,10 +107,12 @@ class GalleryViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<GalleryState, GalleryIntent, GalleryEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.GALLERY.asDiagnosticScreen(),
     initialState = GalleryState(grid = preferenceManager.galleryGrid),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
-    private val requestedLimit = MutableStateFlow(GALLERY_PAGE_SIZE)
+    private val windowOffset = MutableStateFlow(0)
 
     init {
         observePreferences()
@@ -126,15 +123,20 @@ class GalleryViewModel(
 
     override fun processIntent(intent: GalleryIntent) {
         when (intent) {
-            GalleryIntent.DismissDialog -> setActiveDialog(GalleryDialog.None)
+            is GalleryIntent.Viewport -> windowOffset.value =
+                (intent.first - memoryBudget.metadataPrefetch).coerceAtLeast(0)
 
-            GalleryIntent.LoadNextPage -> loadNextPage()
+            GalleryIntent.DismissDialog -> setActiveDialog(GalleryDialog.None)
 
             GalleryIntent.Export.All.Request -> setActiveDialog(GalleryDialog.ConfirmExport(true))
 
             GalleryIntent.Export.All.Confirm -> launchGalleryExport(exportAll = true)
 
-            GalleryIntent.Export.Selection.Request -> setActiveDialog(GalleryDialog.ConfirmExport(false))
+            GalleryIntent.Export.Selection.Request -> setActiveDialog(
+                GalleryDialog.ConfirmExport(
+                    false
+                )
+            )
 
             GalleryIntent.Export.Selection.Confirm -> launchGalleryExport(exportAll = false)
 
@@ -149,14 +151,17 @@ class GalleryViewModel(
                 it.copy(
                     selectionMode = intent.flag,
                     selection = if (!intent.flag) emptyList() else it.selection,
+                    selectedFlags = if (!intent.flag) emptyList() else it.selectedFlags,
                 )
             }
 
-            is GalleryIntent.ToggleItemSelection -> updateState {
-                val newSelection = it.selection.toMutableList()
-                if (intent.id in newSelection) newSelection.remove(intent.id)
-                else newSelection.add(intent.id)
-                it.copy(selection = newSelection)
+            is GalleryIntent.ToggleItemSelection -> {
+                updateState {
+                    val newSelection = it.selection.toMutableList()
+                    if (intent.id in newSelection) newSelection.remove(intent.id)
+                    else newSelection.add(intent.id)
+                    it.copy(selection = newSelection)
+                }; refreshSelection()
             }
 
             GalleryIntent.Delete.Selection.Request -> setActiveDialog(GalleryDialog.DeleteSelectionConfirm)
@@ -216,56 +221,66 @@ class GalleryViewModel(
 
     private fun observeGallery() {
         launch(dispatchersProvider.io) {
-            requestedLimit
-                .flatMapLatest { limit ->
-                    combine(
-                        getGenerationResultPagedUseCase.observePreview(
-                            limit = limit,
-                            offset = GALLERY_FIRST_PAGE,
-                        ),
-                        getGenerationResultPagedUseCase.observeCount(),
-                    ) { results, count ->
-                        val items = results.map { result ->
-                            GalleryGridItemUi(
-                                id = result.id,
-                                imageBase64 = result.image,
-                                hidden = result.hidden,
-                                liked = result.liked,
-                            )
-                        }
-                        GalleryPageSnapshot(
-                            limit = limit,
-                            items = items,
-                            totalCount = count,
-                        )
-                    }
+            galleryReads.observeIds().catch { onError(it) }.collect { ids ->
+                val existing = ids.toHashSet()
+                updateState {
+                    it.copy(
+                        itemIds = ids,
+                        selection = it.selection.filter(existing::contains)
+                    )
                 }
+                refreshSelection()
+            }
+        }
+        launch(dispatchersProvider.io) {
+            windowOffset.flatMapLatest { offset ->
+                galleryReads.observeMetadata(
+                    memoryBudget.metadataWindow,
+                    offset
+                )
+            }
                 .catch { t ->
+                    if (t is CancellationException) throw t
                     onError(t)
                     updateState {
                         it.copy(
                             loading = false,
-                            loadingNextPage = false,
-                            canLoadMore = false,
-                            dialog = GalleryDialog.Error(
-                                t.message ?: Localization.string("error_generic"),
-                            ),
+                            dialog = GalleryDialog.Error(Localization.string("error_generic"))
                         )
                     }
-                }
-                .collect { snapshot ->
-                    val itemIds = snapshot.items.mapTo(mutableSetOf()) { it.id }
-                    updateState { current ->
-                        current.copy(
+                }.collect { results ->
+                    updateState {
+                        it.copy(
                             loading = false,
-                            loadingNextPage = false,
-                            items = snapshot.items,
-                            nextPage = snapshot.limit / GALLERY_PAGE_SIZE,
-                            canLoadMore = snapshot.items.size < snapshot.totalCount,
-                            selection = current.selection.filter(itemIds::contains),
-                        )
+                            items = results.map { row ->
+                                GalleryGridItemUi(
+                                    id = row.id,
+                                    hidden = row.isHidden,
+                                    liked = row.isLiked,
+                                    imageRevision = row.imageRevision
+                                )
+                            })
                     }
+                    refreshSelection()
                 }
+        }
+    }
+
+    private fun refreshSelection() {
+        val ids = currentState.selection
+        launch(dispatchersProvider.io) {
+            runCatching { galleryReads.flags(ids) }.onSuccess { rows ->
+                updateState { state ->
+                    if (state.selection != ids) state else state.copy(selectedFlags = rows.map { row ->
+                        GalleryGridItemUi(
+                            id = row.id,
+                            hidden = row.hidden,
+                            liked = row.liked,
+                            imageRevision = row.imageRevision
+                        )
+                    })
+                }
+            }.onFailure { if (it is CancellationException) throw it else onError(it) }
         }
     }
 
@@ -279,15 +294,6 @@ class GalleryViewModel(
         }
     }
 
-    private fun loadNextPage() {
-        val state = currentState
-        if (!state.canLoadMore || state.loading || state.loadingNextPage) return
-        updateState {
-            it.copy(loadingNextPage = true)
-        }
-        requestedLimit.value += GALLERY_PAGE_SIZE
-    }
-
     private fun launchDeletion(action: suspend () -> Unit) {
         setActiveDialog(GalleryDialog.None)
         launch(dispatchersProvider.io) {
@@ -295,7 +301,10 @@ class GalleryViewModel(
                 .onFailure { t ->
                     onError(t)
                     setActiveDialog(
-                        GalleryDialog.Error(t.message ?: Localization.string("error_generic")),
+                        GalleryDialog.Error(
+                            t.message?.takeIf(String::isNotBlank)
+                                ?: Localization.string("error_generic")
+                        ),
                     )
                 }
                 .onSuccess {
@@ -303,6 +312,7 @@ class GalleryViewModel(
                         it.copy(
                             selectionMode = false,
                             selection = emptyList(),
+                            selectedFlags = emptyList(),
                         )
                     }
                     refreshGallery()
@@ -314,13 +324,18 @@ class GalleryViewModel(
         val state = currentState
         val ids = state.selection
         if (ids.isEmpty()) return
-        val hidden = state.shouldHideSelection
         launch(dispatchersProvider.io) {
-            runCatching { setGalleryItemsVisibilityUseCase(ids, hidden) }
+            runCatching {
+                val shouldHide = galleryReads.flags(ids).any { !it.hidden }
+                setGalleryItemsVisibilityUseCase(ids, shouldHide)
+            }
                 .onFailure { t ->
                     onError(t)
                     setActiveDialog(
-                        GalleryDialog.Error(t.message ?: Localization.string("error_generic")),
+                        GalleryDialog.Error(
+                            t.message?.takeIf(String::isNotBlank)
+                                ?: Localization.string("error_generic")
+                        ),
                     )
                 }
                 .onSuccess {
@@ -328,6 +343,7 @@ class GalleryViewModel(
                         it.copy(
                             selectionMode = false,
                             selection = emptyList(),
+                            selectedFlags = emptyList(),
                         )
                     }
                     refreshGallery()
@@ -339,13 +355,18 @@ class GalleryViewModel(
         val state = currentState
         val ids = state.selection
         if (ids.isEmpty()) return
-        val liked = state.shouldLikeSelection
         launch(dispatchersProvider.io) {
-            runCatching { setGalleryItemsLikedUseCase(ids, liked) }
+            runCatching {
+                val shouldLike = galleryReads.flags(ids).any { !it.liked }
+                setGalleryItemsLikedUseCase(ids, shouldLike)
+            }
                 .onFailure { t ->
                     onError(t)
                     setActiveDialog(
-                        GalleryDialog.Error(t.message ?: Localization.string("error_generic")),
+                        GalleryDialog.Error(
+                            t.message?.takeIf(String::isNotBlank)
+                                ?: Localization.string("error_generic")
+                        ),
                     )
                 }
                 .onSuccess {
@@ -353,6 +374,7 @@ class GalleryViewModel(
                         it.copy(
                             selectionMode = false,
                             selection = emptyList(),
+                            selectedFlags = emptyList(),
                         )
                     }
                     refreshGallery()
@@ -369,7 +391,10 @@ class GalleryViewModel(
                 .onFailure { t ->
                     onError(t)
                     setActiveDialog(
-                        GalleryDialog.Error(t.message ?: Localization.string("error_generic")),
+                        GalleryDialog.Error(
+                            t.message?.takeIf(String::isNotBlank)
+                                ?: Localization.string("error_generic")
+                        ),
                     )
                 }
                 .onSuccess { result ->
@@ -387,29 +412,3 @@ class GalleryViewModel(
         it.copy(dialog = dialog, dropdownMenuShow = false)
     }
 }
-
-/**
- * Carries `GalleryPageSnapshot` data through the SDAI presentation layer.
- *
- * @author Dmitriy Moroz
- */
-private data class GalleryPageSnapshot(
-    /**
-     * Exposes the `limit` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val limit: Int,
-    /**
-     * Exposes the `items` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val items: List<GalleryGridItemUi>,
-    /**
-     * Exposes the `totalCount` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val totalCount: Int,
-)

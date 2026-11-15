@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.modal.tag
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.presentation.utils.ExtrasFormatter
 
@@ -13,14 +15,18 @@ import com.shifthackz.aisdv1.presentation.utils.ExtrasFormatter
  * @param tag tag value consumed by the API.
  * @param isNegative is negative value consumed by the API.
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class EditTagViewModel(
+    diagnostics: UiDiagnostics,
     dispatchersProvider: DispatchersProvider,
     prompt: String,
     negativePrompt: String,
     tag: String,
     isNegative: Boolean,
 ) : BaseMviViewModel<EditTagState, EditTagIntent, EditTagEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = UiDiagnosticComponent.EDIT_TAG,
     initialState = EditTagState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

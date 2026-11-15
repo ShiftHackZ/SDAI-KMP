@@ -17,13 +17,6 @@ data class GenerationResultPreviewEntity(
     @ColumnInfo(name = GenerationResultContract.ID)
     val id: Long,
     /**
-     * Exposes the `imageBase64` value used by the SDAI storage layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    @ColumnInfo(name = GenerationResultContract.IMAGE_BASE_64)
-    val imageBase64: String,
-    /**
      * Exposes the `hidden` value used by the SDAI storage layer.
      *
      * @author Dmitriy Moroz
@@ -37,4 +30,11 @@ data class GenerationResultPreviewEntity(
      */
     @ColumnInfo(name = GenerationResultContract.LIKED)
     val liked: Boolean = false,
+    /**
+     * Changes for every supported image replacement.
+     *
+     * @author Dmitriy Moroz
+     */
+    @ColumnInfo(name = GenerationResultContract.IMAGE_REVISION)
+    val imageRevision: String = "",
 )

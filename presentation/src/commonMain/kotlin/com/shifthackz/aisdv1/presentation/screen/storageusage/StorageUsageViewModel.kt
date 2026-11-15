@@ -1,7 +1,10 @@
 package com.shifthackz.aisdv1.presentation.screen.storageusage
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
@@ -13,8 +16,8 @@ import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMediaPipeModels
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalOnnxModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalSdxlModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteAllGalleryUseCase
-import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.StorageUsageRouter
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
 import com.shifthackz.aisdv1.presentation.screen.setup.viewmodel.setupAllowedModes
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageIntent
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageModal
@@ -39,7 +42,7 @@ import kotlinx.coroutines.flow.map
  * so Settings summaries and the standalone screen refresh from the same invalidation signal.
  *
  * @param dispatchersProvider App coroutine dispatchers used by the MVI base class and IO work.
- * @param getAllGalleryUseCase Reads generated gallery records whose payload strings are counted.
+ * @param galleryReads Reads payload-free gallery storage aggregates.
  * @param deleteAllGalleryUseCase Deletes gallery records after explicit user confirmation.
  * @param getLocalOnnxModelsUseCase Reads locally configured ONNX models.
  * @param getLocalMediaPipeModelsUseCase Reads locally configured MediaPipe models.
@@ -53,10 +56,12 @@ import kotlinx.coroutines.flow.map
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class StorageUsageViewModel(
+    diagnostics: UiDiagnostics,
     dispatchersProvider: DispatchersProvider,
-    private val getAllGalleryUseCase: GetAllGalleryUseCase,
+    private val galleryReads: GalleryReadGateway,
     private val deleteAllGalleryUseCase: DeleteAllGalleryUseCase,
     private val getLocalOnnxModelsUseCase: GetLocalOnnxModelsUseCase,
     private val getLocalMediaPipeModelsUseCase: GetLocalMediaPipeModelsUseCase,
@@ -70,6 +75,8 @@ class StorageUsageViewModel(
     private val platformActions: StorageUsagePlatformActions,
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<StorageUsageState, StorageUsageIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.STORAGE_USAGE.asDiagnosticScreen(),
     initialState = StorageUsageState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -148,9 +155,7 @@ class StorageUsageViewModel(
             add(
                 UsageItem(
                     category = UsageCategory.GALLERY,
-                    bytes = getAllGalleryUseCase().sumOf { item ->
-                        item.image.storageTextByteSize() + item.inputImage.storageTextByteSize()
-                    },
+                    bytes = galleryReads.storageBytes(),
                 ),
             )
             if (ServerSource.LOCAL_MICROSOFT_ONNX in allowedModes) {
@@ -169,7 +174,11 @@ class StorageUsageViewModel(
                     UsageItem(
                         category = UsageCategory.MODELS_MEDIAPIPE,
                         bytes = platformActions.mapStorageBytesForUi(
-                            platformActions.getDownloadedModelsBytes(mediaPipeModels.map(LocalAiModel::id)),
+                            platformActions.getDownloadedModelsBytes(
+                                mediaPipeModels.map(
+                                    LocalAiModel::id
+                                )
+                            ),
                         ),
                         modelIds = mediaPipeModels.map(LocalAiModel::id),
                     ),
@@ -316,7 +325,7 @@ class StorageUsageViewModel(
             UsageCategory.MODELS_SDXL,
             UsageCategory.MODELS_CORE_ML,
             UsageCategory.MODELS_BONSAI,
-            -> currentState.usage.items
+                -> currentState.usage.items
                 .firstOrNull { it.category == category }
                 ?.modelIds
                 ?.forEach { id -> deleteModelUseCase(id) }
@@ -329,7 +338,7 @@ class StorageUsageViewModel(
             UsageCategory.TRAFFIC_MODELS,
             UsageCategory.TRAFFIC_CONFIGS,
             UsageCategory.TRAFFIC_INFERENCE,
-            -> Unit
+                -> Unit
         }
     }
 
@@ -367,7 +376,7 @@ class StorageUsageViewModel(
         .getOrDefault(emptyList())
         .filter { model ->
             model.downloaded &&
-                model.id !in customModelIds
+                    model.id !in customModelIds
         }
 }
 

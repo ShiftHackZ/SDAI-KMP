@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockStableDiffusionSamplers
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionSamplersDataSource
 import com.shifthackz.aisdv1.domain.entity.StableDiffusionSampler
@@ -33,7 +35,7 @@ class StableDiffusionSamplersRecoveryTest {
 
     private val remote = mockk<StableDiffusionSamplersDataSource.Remote>()
     private val local = mockk<StableDiffusionSamplersDataSource.Local>()
-    private val preferences = mockk<PreferenceManager>()
+    private val preferences = mockk<PreferenceManager>(relaxed = true)
     private val authorization = mockk<AuthorizationStore>()
     private var serverUrl = "http://server-a:7860"
     private var credentials: AuthorizationCredentials = AuthorizationCredentials.None
@@ -43,7 +45,7 @@ class StableDiffusionSamplersRecoveryTest {
     @Before
     fun initialize() {
         every { preferences.automatic1111ServerUrl } answers { serverUrl }
-        every { authorization.getAuthorizationCredentials() } answers { credentials }
+        coEvery { authorization.getAuthorizationCredentials() } answers { credentials }
         coEvery { remote.fetchSamplers(any(), any()) } returns mockStableDiffusionSamplers
         coEvery { local.getSamplers() } answers { cachedSamplers }
         coEvery { local.insertSamplers(any()) } coAnswers { cachedSamplers = firstArg() }
@@ -86,7 +88,12 @@ class StableDiffusionSamplersRecoveryTest {
         coEvery { remote.fetchSamplers(any(), any()) } coAnswers { response.await() }
         val request = async { repository.fetchSamplers() }
         runCurrent()
-        coVerify(exactly = 1) { remote.fetchSamplers("http://server-a:7860", AuthorizationCredentials.None) }
+        coVerify(exactly = 1) {
+            remote.fetchSamplers(
+                "http://server-a:7860",
+                AuthorizationCredentials.None
+            )
+        }
 
         serverUrl = "http://server-b:7860"
         response.complete(mockStableDiffusionSamplers)
@@ -154,7 +161,8 @@ class StableDiffusionSamplersRecoveryTest {
     @Test
     fun `a cancelled cache replacement does not expose partially written data`() = runTest {
         repository.fetchSamplers()
-        val partialReplacement = mockStableDiffusionSamplers.take(1).map { it.copy(name = "partial-${it.name}") }
+        val partialReplacement =
+            mockStableDiffusionSamplers.take(1).map { it.copy(name = "partial-${it.name}") }
         val replacementStarted = CompletableDeferred<Unit>()
         val releaseReplacement = CompletableDeferred<Unit>()
         coEvery { local.insertSamplers(any()) } coAnswers {
@@ -181,6 +189,10 @@ class StableDiffusionSamplersRecoveryTest {
         remoteDataSource = remote,
         localDataSource = local,
         preferenceManager = preferences,
-        authorizationStore = authorization,
+        connections = AuthenticatedConnectionProviderImpl(
+            preferences,
+            authorization,
+            ProviderSelectionGuard()
+        ),
     )
 }

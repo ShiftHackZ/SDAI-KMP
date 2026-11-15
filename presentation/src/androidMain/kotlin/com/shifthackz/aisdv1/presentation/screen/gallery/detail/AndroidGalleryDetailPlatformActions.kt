@@ -5,13 +5,12 @@ import android.content.ClipboardManager
 import android.content.Context
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
-import com.shifthackz.aisdv1.core.imageprocessing.Base64ToBitmapConverter
-import com.shifthackz.aisdv1.core.imageprocessing.Base64ToBitmapConverter.Input
 import com.shifthackz.aisdv1.core.sharing.shareFile
 import com.shifthackz.aisdv1.core.sharing.shareText
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSaveResult
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSaver
-import com.shifthackz.aisdv1.presentation.utils.FileSavableExporter
+import com.shifthackz.aisdv1.presentation.utils.OriginalImageFileExporter
+import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 
@@ -32,7 +31,7 @@ internal class AndroidGalleryDetailPlatformActions(
      *
      * @author Dmitriy Moroz
      */
-    override val fileProviderDescriptor: FileProviderDescriptor,
+    private val fileProviderDescriptor: FileProviderDescriptor,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -40,18 +39,18 @@ internal class AndroidGalleryDetailPlatformActions(
      */
     private val dispatchersProvider: DispatchersProvider,
     /**
-     * Exposes the `base64ToBitmapConverter` value used by the SDAI presentation layer.
+     * Streams original encoded pixels to a bounded private share file.
      *
      * @author Dmitriy Moroz
      */
-    private val base64ToBitmapConverter: Base64ToBitmapConverter,
+    private val originals: OriginalImageFileExporter,
     /**
      * Exposes the `imageSaver` value used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     private val imageSaver: ImageSaver,
-) : GalleryDetailPlatformActions, FileSavableExporter.BmpToFile {
+) : GalleryDetailPlatformActions {
 
     /**
      * Performs the SDAI side effect handled by `saveImage`.
@@ -77,15 +76,22 @@ internal class AndroidGalleryDetailPlatformActions(
     override suspend fun shareImage(base64: String): GalleryDetailActionResult =
         runPlatformAction {
             val file = withContext(dispatchersProvider.io) {
-                val bitmap = base64ToBitmapConverter(Input(base64)).bitmap
-                saveBitmapToFile(System.currentTimeMillis().toString(), bitmap)
+                originals.export(base64, UUID.randomUUID().toString())
             }
-            withContext(dispatchersProvider.immediate) {
-                context.shareFile(
-                    file = file,
-                    fileProviderPath = fileProviderDescriptor.providerPath,
-                    fileMimeType = MIME_TYPE_JPG,
-                )
+            var hasLaunchedShare = false
+            try {
+                withContext(dispatchersProvider.immediate) {
+                    context.shareFile(
+                        file = file,
+                        fileProviderPath = fileProviderDescriptor.providerPath,
+                        fileMimeType = when (file.extension) {
+                            "png" -> "image/png"; "webp" -> "image/webp"; else -> "image/jpeg"
+                        },
+                    )
+                    hasLaunchedShare = true
+                }
+            } finally {
+                if (!hasLaunchedShare) file.delete()
             }
         }
 
@@ -113,7 +119,8 @@ internal class AndroidGalleryDetailPlatformActions(
     override suspend fun copyText(text: String): GalleryDetailActionResult =
         runPlatformAction {
             withContext(dispatchersProvider.immediate) {
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboard =
+                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText(CLIP_LABEL, text))
             }
         }
@@ -131,7 +138,7 @@ internal class AndroidGalleryDetailPlatformActions(
             GalleryDetailActionResult.Done
         } catch (e: CancellationException) {
             throw e
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             GalleryDetailActionResult.Failed(t.message ?: "Unable to complete action")
         }
 
@@ -147,6 +154,7 @@ internal class AndroidGalleryDetailPlatformActions(
          * @author Dmitriy Moroz
          */
         const val CLIP_LABEL = "SDAI gallery detail"
+
         /**
          * Exposes the `MIME_TYPE_JPG` value used by the SDAI presentation layer.
          *

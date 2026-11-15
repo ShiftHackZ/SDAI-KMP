@@ -109,6 +109,7 @@ class ConnectivityViewModelTest {
         }
 
     private fun TestScope.createViewModel() = ConnectivityViewModel(
+        diagnostics = mockk(relaxed = true),
         observeServerConnectivityUseCase = stubObserveSeverConnectivityUseCase,
         getMonitorConnectivityUseCase = stubGetMonitorConnectivityUseCase,
         observeMonitorConnectivityUseCase = stubObserveMonitorConnectivityUseCase,

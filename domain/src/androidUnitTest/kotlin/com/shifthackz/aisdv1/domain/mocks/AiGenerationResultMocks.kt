@@ -28,7 +28,6 @@ val mockAiGenerationResults = listOf(mockAiGenerationResult)
 
 val mockAiGenerationResultPreview = AiGenerationResultPreview(
     id = 5598L,
-    image = "img",
     hidden = false,
     liked = true,
 )

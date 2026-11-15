@@ -85,8 +85,6 @@ private fun Window.applySystemBars(
         setBackgroundDrawable(ColorDrawable(color))
         decorView.setBackgroundColor(color)
         decorView.rootView.setBackgroundColor(color)
-        decorView.findViewById<View?>(android.R.id.statusBarBackground)?.setBackgroundColor(color)
-        decorView.findViewById<View?>(android.R.id.navigationBarBackground)?.setBackgroundColor(color)
         statusBarColor = color
         navigationBarColor = color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -128,7 +126,7 @@ private fun Window.applySystemBarIconMode(lightBars: Boolean) {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         val mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
-            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
         val appearance = if (lightBars) mask else 0
         insetsController?.setSystemBarsAppearance(appearance, mask)
     }

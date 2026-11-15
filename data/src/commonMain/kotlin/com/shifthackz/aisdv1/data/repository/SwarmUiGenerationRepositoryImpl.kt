@@ -9,7 +9,7 @@ import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ImageToImagePayload
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
@@ -39,11 +39,11 @@ internal class SwarmUiGenerationRepositoryImpl(
      */
     private val sessionPreference: SessionPreference,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
     /**
      * Exposes the `swarmSessionRemoteDataSource` value used by the SDAI data layer.
      *
@@ -64,23 +64,26 @@ internal class SwarmUiGenerationRepositoryImpl(
 ), SwarmUiGenerationRepository {
 
     override suspend fun checkApiAvailability() {
+        val connection = connections.snapshot()
         getSessionId(
-            baseUrl = preferenceManager.swarmUiServerUrl,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            baseUrl = connection.swarmUiUrl,
+            credentials = connection.credentials,
         )
     }
 
     override suspend fun checkApiAvailability(url: String) {
+        val connection = connections.snapshot(swarmUiUrl = url)
         forceRenewSession(
             baseUrl = url,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            credentials = connection.credentials,
         )
     }
 
     override suspend fun generateFromText(payload: TextToImagePayload): AiGenerationResult {
-        val baseUrl = preferenceManager.swarmUiServerUrl
-        val credentials = authorizationStore.getAuthorizationCredentials()
-        val model = preferenceManager.swarmUiModel
+        val connection = connections.snapshot()
+        val baseUrl = connection.swarmUiUrl
+        val credentials = connection.credentials
+        val model = connection.swarmUiModel
         val sessionId = getSessionId(baseUrl, credentials)
         val ai = try {
             remoteDataSource.textToImage(baseUrl, sessionId, model, credentials, payload)
@@ -92,9 +95,10 @@ internal class SwarmUiGenerationRepositoryImpl(
     }
 
     override suspend fun generateFromImage(payload: ImageToImagePayload): AiGenerationResult {
-        val baseUrl = preferenceManager.swarmUiServerUrl
-        val credentials = authorizationStore.getAuthorizationCredentials()
-        val model = preferenceManager.swarmUiModel
+        val connection = connections.snapshot()
+        val baseUrl = connection.swarmUiUrl
+        val credentials = connection.credentials
+        val model = connection.swarmUiModel
         val sessionId = getSessionId(baseUrl, credentials)
         val ai = try {
             remoteDataSource.imageToImage(baseUrl, sessionId, model, credentials, payload)

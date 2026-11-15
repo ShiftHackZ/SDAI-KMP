@@ -9,6 +9,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(
     "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
     "-ffile-prefix-map=${CMAKE_BINARY_DIR}=."
+    "-ffile-prefix-map=${CMAKE_ANDROID_NDK}=/android-ndk"
 )
 
 add_library(

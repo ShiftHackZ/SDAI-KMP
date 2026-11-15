@@ -4,7 +4,7 @@ import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.OpenAiSize
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.model.PromptTagEditRequest
-import com.shifthackz.aisdv1.presentation.navigation.router.TextToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationAspectRatio
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants
 import kotlin.math.max
@@ -60,6 +60,7 @@ internal class TextToImageIntentProcessor(
                     ),
                 )
             }
+
             is TextToImageIntent.ApplyPrompts -> updateState {
                 it.copy(
                     prompt = intent.prompt,
@@ -68,16 +69,25 @@ internal class TextToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is TextToImageIntent.ApplyGenerationResult -> applyGenerationResult(intent.ai)
             is TextToImageIntent.UpdateAdvancedOptionsVisibility -> updateState {
                 it.copy(advancedOptionsVisible = intent.visible)
             }
+
             is TextToImageIntent.UpdatePrompt -> updateState {
-                it.copy(prompt = intent.value, promptValidationError = null, error = null, message = null)
+                it.copy(
+                    prompt = intent.value,
+                    promptValidationError = null,
+                    error = null,
+                    message = null
+                )
             }
+
             is TextToImageIntent.UpdateNegativePrompt -> updateState {
                 it.copy(negativePrompt = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateWidth -> updateState {
                 it.copy(
                     width = intent.value.filter(Char::isDigit),
@@ -86,6 +96,7 @@ internal class TextToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is TextToImageIntent.UpdateHeight -> updateState {
                 it.copy(
                     height = intent.value.filter(Char::isDigit),
@@ -94,6 +105,7 @@ internal class TextToImageIntentProcessor(
                     message = null,
                 )
             }
+
             TextToImageIntent.SwapDimensions -> updateState {
                 it.copy(
                     width = it.height,
@@ -104,6 +116,7 @@ internal class TextToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is TextToImageIntent.ApplyAspectRatio -> updateState {
                 val (width, height) = it.dimensionsFor(intent.ratio)
                 it.copy(
@@ -115,6 +128,7 @@ internal class TextToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is TextToImageIntent.UpdateSamplingSteps -> updateState {
                 val minSteps = it.falAiModel.minInferenceSteps.takeIf { _ ->
                     it.mode == ServerSource.FAL_AI
@@ -127,6 +141,7 @@ internal class TextToImageIntentProcessor(
                 }
                 it.copy(samplingSteps = intent.value.coerceIn(minSteps, maxSteps), message = null)
             }
+
             is TextToImageIntent.UpdateCfgScale -> updateState {
                 val minCfg = it.falAiModel.minGuidanceScale.takeIf { _ ->
                     it.mode == ServerSource.FAL_AI
@@ -136,41 +151,57 @@ internal class TextToImageIntentProcessor(
                 } ?: MAX_CFG_SCALE
                 it.copy(cfgScale = intent.value.coerceIn(minCfg, maxCfg), message = null)
             }
+
             is TextToImageIntent.UpdateRestoreFaces -> updateState {
                 it.copy(restoreFaces = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateSeed -> updateState {
                 it.copy(seed = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateSubSeed -> updateState {
                 it.copy(subSeed = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateSubSeedStrength -> updateState {
                 it.copy(
-                    subSeedStrength = intent.value.coerceIn(MIN_SUB_SEED_STRENGTH, MAX_SUB_SEED_STRENGTH),
+                    subSeedStrength = intent.value.coerceIn(
+                        MIN_SUB_SEED_STRENGTH,
+                        MAX_SUB_SEED_STRENGTH
+                    ),
                     message = null,
                 )
             }
+
             is TextToImageIntent.UpdateSampler -> updateState {
                 it.copy(selectedSampler = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateScheduler -> updateState {
                 it.copy(selectedScheduler = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateForgeModules -> updateState {
                 it.copy(selectedForgeModules = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateNsfw -> updateState {
                 it.copy(nsfw = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateBatchCount -> updateState {
                 val maxBatch = if (it.mode == ServerSource.FAL_AI) {
                     MAX_FAL_AI_BATCH_COUNT
                 } else {
                     MAX_BATCH_COUNT
                 }
-                it.copy(batchCount = intent.value.coerceIn(MIN_BATCH_COUNT, maxBatch), message = null)
+                it.copy(
+                    batchCount = intent.value.coerceIn(MIN_BATCH_COUNT, maxBatch),
+                    message = null
+                )
             }
+
             is TextToImageIntent.UpdateOpenAiModel -> updateState { state ->
                 val size = if (state.openAiSize.supportedModels.contains(intent.value)) {
                     state.openAiSize
@@ -181,15 +212,19 @@ internal class TextToImageIntentProcessor(
                 }
                 state.copy(openAiModel = intent.value, openAiSize = size, message = null)
             }
+
             is TextToImageIntent.UpdateOpenAiSize -> updateState {
                 it.copy(openAiSize = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateOpenAiQuality -> updateState {
                 it.copy(openAiQuality = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateFalAiModel -> updateState {
-                val acceleration = it.falAiAcceleration.takeIf(intent.value.supportedAccelerations::contains)
-                    ?: intent.value.supportedAccelerations.first()
+                val acceleration =
+                    it.falAiAcceleration.takeIf(intent.value.supportedAccelerations::contains)
+                        ?: intent.value.supportedAccelerations.first()
                 it.copy(
                     falAiModel = intent.value,
                     falAiAcceleration = acceleration,
@@ -204,6 +239,7 @@ internal class TextToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is TextToImageIntent.UpdateFalAiImageSize -> updateState {
                 it.copy(
                     falAiImageSize = intent.value,
@@ -214,36 +250,47 @@ internal class TextToImageIntentProcessor(
                     message = null,
                 )
             }
+
             is TextToImageIntent.UpdateFalAiAcceleration -> updateState {
                 it.copy(falAiAcceleration = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateSdxlBackend -> updateState {
                 it.copy(sdxlBackend = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateBonsaiBackend -> updateState {
                 it.copy(bonsaiBackend = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateFalAiSyncMode -> updateState {
                 it.copy(falAiSyncMode = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateOpenAiCompatibleModel -> updateState {
                 it.copy(openAiCompatibleModel = intent.value, message = null, error = null)
             }
+
             is TextToImageIntent.UpdateArliAiModel -> updateState {
                 it.copy(arliAiModel = intent.value, message = null, error = null)
             }
+
             is TextToImageIntent.UpdateStabilityAiStyle -> updateState {
                 it.copy(selectedStylePreset = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateStabilityAiClipGuidance -> updateState {
                 it.copy(selectedClipGuidancePreset = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateHiresConfig -> updateState {
                 it.copy(hires = intent.value, message = null)
             }
+
             is TextToImageIntent.UpdateADetailerConfig -> updateState {
                 it.copy(aDetailer = intent.value, message = null)
             }
+
             TextToImageIntent.RefreshADetailerAvailability -> Unit
             TextToImageIntent.RetrySamplers -> Unit
             TextToImageIntent.OpenADetailerInstallInstructions -> Unit

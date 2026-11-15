@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.presentation.screen.img2img
 
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
+
+import com.shifthackz.aisdv1.core.localization.Localization
+import kotlinx.cinterop.useContents
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -29,15 +33,18 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
- * Renders the `rememberImageToImagePlatformActions` UI for the SDAI presentation layer.
+ * Creates the remembered native picker for explicit image-to-image input selection.
+ * Conversion and normalization use background execution; cancellation and unsupported picker
+ * outcomes remain distinct from invalid or rejected image content.
  *
- * @return Result produced by `rememberImageToImagePlatformActions`.
+ * @param budget Encoded/pixel admission for native picker conversion.
+ * @return Native input actions using the composition root's admission budget.
  * @author Dmitriy Moroz
  */
 @Composable
-actual fun rememberImageToImagePlatformActions(): ImageToImagePlatformActions {
+actual fun rememberImageToImagePlatformActions(budget: OriginalImageBudget): ImageToImagePlatformActions {
     val picker = remember { IosImagePicker() }
-    return remember(picker) {
+    return remember(picker, budget) {
         object : ImageToImagePlatformActions {
             override suspend fun pickImage(source: ImageToImagePickSource): ImageToImagePickResult =
                 when (val outcome = picker.pick(source)) {
@@ -45,9 +52,12 @@ actual fun rememberImageToImagePlatformActions(): ImageToImagePlatformActions {
                     is IosImagePickOutcome.Failed -> ImageToImagePickResult.Failed(outcome.message)
                     IosImagePickOutcome.Unsupported -> ImageToImagePickResult.Unsupported
                     is IosImagePickOutcome.Selected -> withContext(Dispatchers.Default) {
+                        if (!outcome.image.fitsPixelBudget(budget.maxPixels)) return@withContext ImageToImagePickResult.Failed(
+                            Localization.string("error_invalid")
+                        )
                         outcome.image
                             .base64Jpeg()
-                            ?.let { cropBase64ImageToSquare(it) }
+                            ?.let { cropBase64ImageToSquare(it, budget) }
                             ?.let(ImageToImagePickResult::Selected)
                             ?: ImageToImagePickResult.Failed("Unable to read selected image")
                     }
@@ -69,18 +79,21 @@ private sealed interface IosImagePickOutcome {
      * @author Dmitriy Moroz
      */
     data class Selected(val image: UIImage) : IosImagePickOutcome
+
     /**
      * Provides the `Cancelled` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object Cancelled : IosImagePickOutcome
+
     /**
      * Provides the `Unsupported` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object Unsupported : IosImagePickOutcome
+
     /**
      * Carries `Failed` data through the SDAI presentation layer.
      *
@@ -261,6 +274,7 @@ private fun UIViewController.topMostPresentedViewController(): UIViewController 
  */
 private val UI_IMAGE_PICKER_SOURCE_TYPE_PHOTO_LIBRARY =
     UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypePhotoLibrary
+
 /**
  * Exposes the `UI_IMAGE_PICKER_SOURCE_TYPE_CAMERA` value used by the SDAI presentation layer.
  *
@@ -268,3 +282,16 @@ private val UI_IMAGE_PICKER_SOURCE_TYPE_PHOTO_LIBRARY =
  */
 private val UI_IMAGE_PICKER_SOURCE_TYPE_CAMERA =
     UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
+
+/**
+ * Checks native pixel coordinates before JPEG conversion can rasterize the selected UIImage.
+ *
+ * @param maxPixels Full-resolution conversion limit supplied by composition.
+ * @author Dmitriy Moroz
+ */
+@OptIn(ExperimentalForeignApi::class)
+private fun UIImage.fitsPixelBudget(maxPixels: Long): Boolean = size.useContents {
+    val pixelWidth = width * scale
+    val pixelHeight = height * scale
+    pixelWidth.isFinite() && pixelHeight.isFinite() && pixelWidth > 0 && pixelHeight > 0 && pixelWidth * pixelHeight <= maxPixels
+}

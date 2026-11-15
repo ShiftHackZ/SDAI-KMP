@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
@@ -25,7 +26,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -34,116 +35,91 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
-import com.shifthackz.aisdv1.presentation.platform.rememberExternalUrlLauncher
-import com.shifthackz.aisdv1.presentation.screen.txt2img.decodeBase64ImageBitmap
-import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputForm
+import com.shifthackz.aisdv1.presentation.widget.image.SampledBase64Image
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormEvent
+import com.shifthackz.aisdv1.presentation.widget.input.generationInputFormItems
 
 
 /**
- * Renders the `ImageToImageForm` UI for the SDAI presentation layer.
+ * Emits image-to-image fields into the screen's existing lazy list, preserving the source-image
+ * item above this card and mounting only advanced controls needed by the viewport.
  *
- * @param state state rendered or processed by the component.
- * @param strings strings value consumed by the API.
- * @param promptChipTextFieldState prompt chip text field state value consumed by the API.
- * @param negativePromptChipTextFieldState negative prompt chip text field state value consumed by the API.
- * @param processIntent process intent value consumed by the API.
+ * @receiver The image-to-image screen's vertical lazy list.
+ * @param state Current provider values, validation and generation status.
+ * @param strings Localized labels and unsupported-provider feedback.
+ * @param promptChipTextFieldState Caller-owned prompt chip editing state.
+ * @param negativePromptChipTextFieldState Caller-owned negative-prompt chip editing state.
+ * @param onEvent Receives edits and extension actions from shared generation fields.
+ * @param afterSlidersSection Stable denoising controls supplied by the composing screen.
  * @author Dmitriy Moroz
  */
-@Composable
-internal fun ImageToImageForm(
+internal fun LazyListScope.imageToImageFormItems(
     state: ImageToImageState,
     strings: ImageToImageStrings,
-    promptChipTextFieldState: androidx.compose.runtime.MutableState<TextFieldValue>,
-    negativePromptChipTextFieldState: androidx.compose.runtime.MutableState<TextFieldValue>,
-    processIntent: (ImageToImageIntent) -> Unit,
+    promptChipTextFieldState: MutableState<TextFieldValue>,
+    negativePromptChipTextFieldState: MutableState<TextFieldValue>,
+    onEvent: (GenerationInputFormEvent) -> Unit,
+    afterSlidersSection: @Composable () -> Unit,
 ) {
-    val urlLauncher = rememberExternalUrlLauncher()
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp,
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            GenerationInputForm(
-                state = state,
-                isImg2Img = true,
-                textFieldContainerColor = MaterialTheme.colorScheme.surface,
-                promptChipTextFieldState = promptChipTextFieldState,
-                negativePromptChipTextFieldState = negativePromptChipTextFieldState,
-                onEvent = { event ->
-                    if (event == GenerationInputFormEvent.OpenADetailerInstallInstructions) {
-                        urlLauncher.openUrl(ADETAILER_INSTALL_URL)
-                    } else {
-                        event.toImageToImageIntent()?.let(processIntent)
-                    }
-                },
-                afterSlidersSection = {
-                    DenoisingStrengthSlider(
-                        state = state,
-                        strings = strings,
-                        processIntent = processIntent,
+    generationInputFormItems(
+        state = state,
+        isImg2Img = true,
+        promptChipTextFieldState = promptChipTextFieldState,
+        negativePromptChipTextFieldState = negativePromptChipTextFieldState,
+        onEvent = onEvent,
+        afterSlidersSection = afterSlidersSection,
+        footer = {
+            val hasFooter =
+                state.promptValidationError != null || !state.sourceSupportsImageToImage ||
+                        state.error != null || state.message != null || state.generating
+            if (hasFooter) Column(
+                modifier = Modifier.padding(top = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                state.promptValidationError?.let { message ->
+                    Text(
+                        message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                },
-            )
-
-            state.promptValidationError?.let { message ->
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
+                }
+                if (!state.sourceSupportsImageToImage) {
+                    Text(
+                        strings.sourceUnavailable,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                state.error?.let { message ->
+                    Text(
+                        message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                state.message?.let { message ->
+                    Text(
+                        message,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                if (state.generating) LinearProgressIndicator(Modifier.fillMaxWidth())
             }
-
-            if (!state.sourceSupportsImageToImage) {
-                Text(
-                    text = strings.sourceUnavailable,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-
-            state.error?.let { message ->
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-
-            state.message?.let { message ->
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-
-            if (state.generating) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-        }
-    }
+        },
+    )
 }
 
-private const val ADETAILER_INSTALL_URL = "https://github.com/Bing-su/adetailer#install"
-
 /**
- * Renders the `DenoisingStrengthSlider` UI for the SDAI presentation layer.
+ * Displays image-to-image denoising strength independently of prompt and result state.
  *
- * @param state state rendered or processed by the component.
- * @param strings strings value consumed by the API.
- * @param processIntent process intent value consumed by the API.
+ * @param denoisingStrength Current strength in the supported zero-to-one range.
+ * @param processIntent Receives slider edits for the owning screen.
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun DenoisingStrengthSlider(
-    state: ImageToImageState,
-    strings: ImageToImageStrings,
+    denoisingStrength: Float,
     processIntent: (ImageToImageIntent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -155,13 +131,13 @@ internal fun DenoisingStrengthSlider(
             Text(
                 text = Localization.string(
                     "hint_denoising_strength",
-                    state.denoisingStrength.roundToString(),
+                    denoisingStrength.roundToString(),
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Slider(
-            value = state.denoisingStrength,
+            value = denoisingStrength,
             onValueChange = {
                 processIntent(ImageToImageIntent.UpdateDenoisingStrength(it))
             },
@@ -198,15 +174,12 @@ internal fun GeneratedImageItem(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            val imageBitmap = remember(result.image) {
-                result.image.decodeBase64ImageBitmap()
-            }
-            if (imageBitmap != null) {
-                Image(
+            if (result.image.isNotBlank()) {
+                SampledBase64Image(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(result.aspectRatio),
-                    bitmap = imageBitmap,
+                    base64 = result.image,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                 )

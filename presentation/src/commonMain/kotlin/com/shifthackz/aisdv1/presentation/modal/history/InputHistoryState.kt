@@ -1,9 +1,7 @@
 package com.shifthackz.aisdv1.presentation.modal.history
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.ImageBitmap
 import com.shifthackz.aisdv1.core.mvi.MviState
-import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 
 /**
  * Carries `InputHistoryState` data through the SDAI presentation layer.
@@ -49,24 +47,3 @@ data class InputHistoryState(
      */
     val error: String? = null,
 ) : MviState
-
-/**
- * Carries `InputHistoryItemUi` data through the SDAI presentation layer.
- *
- * @author Dmitriy Moroz
- */
-@Immutable
-data class InputHistoryItemUi(
-    /**
-     * Exposes the `generationResult` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val generationResult: AiGenerationResult,
-    /**
-     * Exposes the `image` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val image: ImageBitmap? = null,
-)

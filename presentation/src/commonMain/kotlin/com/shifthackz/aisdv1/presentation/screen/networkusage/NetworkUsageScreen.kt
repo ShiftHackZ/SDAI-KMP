@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
-import com.shifthackz.aisdv1.presentation.navigation.router.NetworkUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NetworkUsageRouter
 import com.shifthackz.aisdv1.presentation.screen.networkusage.model.NetworkUsageIntent
 import com.shifthackz.aisdv1.presentation.screen.networkusage.model.NetworkUsageState
 import com.shifthackz.aisdv1.presentation.widget.usage.UsageScreenContent

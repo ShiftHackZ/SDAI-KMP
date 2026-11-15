@@ -15,8 +15,12 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 internal actual fun platformAuthModule(): Module = module {
-    factory<CryptoProvider> { CryptoProviderImpl(androidContext()) }
-    factory<AuthorizationStore> {
-        AuthorizationStoreImpl(get<CryptoProvider>().getAuthorizationStore())
+    single<CryptoProvider> { CryptoProviderImpl(androidContext()) }
+    single<AuthorizationStore> {
+        AuthorizationStoreImpl(
+            provider = get<CryptoProvider>(),
+            dispatchers = get(),
+            configurationStore = get()
+        )
     }
 }

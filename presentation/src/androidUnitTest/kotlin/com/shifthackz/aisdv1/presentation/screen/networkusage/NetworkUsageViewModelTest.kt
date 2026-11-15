@@ -4,7 +4,7 @@ import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.entity.NetworkUsage
 import com.shifthackz.aisdv1.domain.usecase.settings.ObserveNetworkUsageUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ResetNetworkUsageUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.NetworkUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NetworkUsageRouter
 import com.shifthackz.aisdv1.presentation.screen.networkusage.model.NetworkUsageIntent
 import com.shifthackz.aisdv1.presentation.model.UsageCategory
 import io.mockk.coEvery
@@ -133,6 +133,7 @@ class NetworkUsageViewModelTest {
         }
         viewModelScope = CoroutineScope(SupervisorJob() + dispatcher)
         return NetworkUsageViewModel(
+            diagnostics = mockk(relaxed = true),
             dispatchersProvider = dispatchersProvider,
             observeNetworkUsageUseCase = observeNetworkUsageUseCase,
             resetNetworkUsageUseCase = resetNetworkUsageUseCase,

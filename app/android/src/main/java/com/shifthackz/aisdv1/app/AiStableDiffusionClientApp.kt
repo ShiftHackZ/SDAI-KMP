@@ -2,6 +2,12 @@ package com.shifthackz.aisdv1.app
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.app.ActivityManager
+import android.os.Build
+import android.os.Process
+import com.shifthackz.aisdv1.app.di.inferenceChildModule
+import com.shifthackz.aisdv1.app.di.inferenceHostModule
+import com.shifthackz.aisdv1.app.inference.InferenceServiceDependencies
 import android.database.CursorWindow
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
@@ -22,6 +28,7 @@ import com.shifthackz.aisdv1.domain.di.coreDomainModule
 import com.shifthackz.aisdv1.domain.di.domainModule
 import com.shifthackz.aisdv1.network.di.coreNetworkModule
 import com.shifthackz.aisdv1.network.di.networkModule
+import com.shifthackz.aisdv1.core.mvi.diagnostics.uiDiagnosticsModule
 import com.shifthackz.aisdv1.presentation.di.presentationModule
 import com.shifthackz.aisdv1.work.di.SdaiWorkerFactory
 import com.shifthackz.aisdv1.work.di.backgroundWorkModule
@@ -32,9 +39,29 @@ import timber.log.Timber
 
 class AiStableDiffusionClientApp : Application() {
 
+    /**
+     * Minimal child composition; the host never accesses runtime collaborators.
+     *
+     * @author Dmitriy Moroz
+     */
+    internal lateinit var inferenceDependencies: InferenceServiceDependencies
+        private set
+
+
     override fun onCreate() {
         super.onCreate()
+        val processName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) getProcessName()
+        else getSystemService(ActivityManager::class.java).runningAppProcesses?.firstOrNull { it.pid == Process.myPid() }?.processName
+        if (processName == "${packageName}:inference") {
+            val graph = startKoin {
+                androidContext(this@AiStableDiffusionClientApp)
+                modules(inferenceChildModule)
+            }
+            inferenceDependencies = graph.koin.get()
+            return
+        }
         StrictMode.setVmPolicy(VmPolicy.Builder().build())
+        initializeComposeTracing(this)
         initializeKoin()
         initializeLogging()
         initializeUncaughtExceptionHandler()
@@ -74,8 +101,10 @@ class AiStableDiffusionClientApp : Application() {
             validatorsModule,
             imageProcessingModule,
             *presentationModule,
+            uiDiagnosticsModule(isEnabled = BuildConfig.UI_DIAGNOSTICS_ENABLED),
             preferenceModule,
             providersModule,
+            inferenceHostModule,
         )
     }
 
@@ -89,11 +118,8 @@ class AiStableDiffusionClientApp : Application() {
     private fun initializeUncaughtExceptionHandler() {
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            try {
-                errorLog(throwable)
-            } finally {
-                defaultHandler?.uncaughtException(thread, throwable) ?: throw throwable
-            }
+            runCatching { errorLog(throwable) }
+            defaultHandler?.uncaughtException(thread, throwable) ?: throw throwable
         }
     }
 

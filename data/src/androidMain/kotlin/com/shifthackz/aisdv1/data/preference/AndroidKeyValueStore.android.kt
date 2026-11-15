@@ -2,104 +2,185 @@ package com.shifthackz.aisdv1.data.preference
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import org.koin.mp.KoinPlatform
 
 /**
- * Coordinates `AndroidPreferencesKeyValueStore` behavior in the SDAI data layer.
+ * Shared preference-suite owner that hides unconfirmed configuration memory from all readers.
+ * Unrelated settings remain writable; checked persistence never holds the memory lock.
  *
+ * @param preferences Existing platform preference cache.
  * @author Dmitriy Moroz
  */
 private class AndroidPreferencesKeyValueStore(
-    /**
-     * Exposes the `preferences` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val preferences: SharedPreferences,
 ) : KeyValueStore {
+    private val memoryLock = Any()
 
     /**
-     * Loads SDAI data through `getString`.
+     * Serializes only short memory operations, never disk commit or synchronization.
      *
-     * @param key key value consumed by the API.
-     * @param default default value consumed by the API.
-     * @return Result produced by `getString`.
+     * @param block Non-suspending preference memory access.
+     * @return Result of the serialized operation.
      * @author Dmitriy Moroz
      */
-    override fun getString(key: String, default: String): String =
-        preferences.getString(key, default) ?: default
+    private fun <T> withMemoryLock(block: () -> T): T = synchronized(memoryLock, block)
+
+    private var configurationMask: ConfigurationMemoryMask? = null
+    private var isBatchInFlight = false
 
     /**
-     * Executes the `putString` step in the SDAI data layer.
+     * Returns the last trusted string while its configuration write is pending.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Existing preference key.
+     * @param default Caller fallback, including when the trusted entry was absent.
      * @author Dmitriy Moroz
      */
-    override fun putString(key: String, value: String) {
+    override fun getString(key: String, default: String): String = withMemoryLock {
+        val mask = configurationMask
+        if (mask != null && mask.strings.containsKey(key)) mask.strings[key] ?: default
+        else preferences.getString(key, default) ?: default
+    }
+
+    /**
+     * Updates an unrelated setting; a pending configuration owns its masked keys exclusively.
+     *
+     * @param key Existing preference key; conflicting configuration writes fail explicitly.
+     * @param value New ordinary setting value.
+     * @author Dmitriy Moroz
+     */
+    override fun putString(key: String, value: String) = withMemoryLock {
+        requireWritable(key)
         preferences.edit().putString(key, value).apply()
     }
 
     /**
-     * Commits an atomic preference value synchronously; a failed disk write throws.
-     * @param key Stable preference key.
-     * @param value Complete source/revision envelope to commit.
+     * Uses the same trusted-memory and exact-retry rules for a standalone durable identity write.
+     *
+     * @param key Existing source/revision key; a conflicting pending batch fails explicitly.
+     * @param value Complete encoded identity value, masked until checked persistence succeeds.
      * @author Dmitriy Moroz
      */
-    override fun putStringDurably(key: String, value: String) {
-        check(preferences.edit().putString(key, value).commit()) { "Provider selection could not be persisted" }
+    override fun putStringDurably(key: String, value: String) =
+        putConfigurationDurably(mapOf(key to value), emptyMap())
+
+    /**
+     * Masks complete configuration keys before platform memory can change, then checks disk.
+     * Failure retains the original trusted view; only an identical complete retry is admitted.
+     * Successful persistence exposes the complete candidate atomically to subsequent readers.
+     *
+     * @param strings Complete candidate string entries, including credential association.
+     * @param booleans Complete candidate boolean entries.
+     * @author Dmitriy Moroz
+     */
+    override fun putConfigurationDurably(
+        strings: Map<String, String>,
+        booleans: Map<String, Boolean>
+    ) {
+        val batch = withMemoryLock {
+            if (isBatchInFlight) persistenceFailure()
+            val current = configurationMask
+            if (current != null && !current.matches(strings, booleans)) persistenceFailure()
+            if (current == null) configurationMask = ConfigurationMemoryMask(
+                strings.keys.associateWith { key -> preferences.getString(key, null) },
+                booleans.keys.associateWith { key ->
+                    if (preferences.contains(key)) preferences.getBoolean(
+                        key,
+                        false
+                    ) else null
+                },
+                strings.toMap(),
+                booleans.toMap(),
+            )
+            isBatchInFlight = true
+            checkNotNull(configurationMask)
+        }
+        var hasPersisted = false
+        try {
+            check(preferences.edit().apply {
+                batch.candidateStrings.forEach { (key, value) -> putString(key, value) }
+                batch.candidateBooleans.forEach { (key, value) -> putBoolean(key, value) }
+            }.commit()) { "Configuration persistence failed" }
+            hasPersisted = true
+        } finally {
+            withMemoryLock {
+                if (hasPersisted) configurationMask = null
+                isBatchInFlight = false
+            }
+        }
     }
 
     /**
-     * Loads SDAI data through `getBoolean`.
+     * Returns the trusted boolean or the caller default for an absent trusted entry.
      *
-     * @param key key value consumed by the API.
-     * @param default default value consumed by the API.
-     * @return Result produced by `getBoolean`.
+     * @param key Existing boolean preference key.
+     * @param default Caller fallback preserved during pending configuration persistence.
      * @author Dmitriy Moroz
      */
-    override fun getBoolean(key: String, default: Boolean): Boolean =
-        preferences.getBoolean(key, default)
+    override fun getBoolean(key: String, default: Boolean): Boolean = withMemoryLock {
+        val mask = configurationMask
+        if (mask != null && mask.booleans.containsKey(key)) mask.booleans[key] ?: default
+        else preferences.getBoolean(key, default)
+    }
 
     /**
-     * Executes the `putBoolean` step in the SDAI data layer.
+     * Writes unrelated booleans without exposing or overwriting masked configuration entries.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Existing preference key; pending configuration conflicts fail explicitly.
+     * @param value New ordinary boolean value.
      * @author Dmitriy Moroz
      */
-    override fun putBoolean(key: String, value: Boolean) {
+    override fun putBoolean(key: String, value: Boolean) = withMemoryLock {
+        requireWritable(key)
         preferences.edit().putBoolean(key, value).apply()
     }
 
     /**
-     * Loads SDAI data through `getInt`.
+     * Reads an ordinary integer; configuration batches contain no integer entries.
      *
-     * @param key key value consumed by the API.
-     * @param default default value consumed by the API.
-     * @return Result produced by `getInt`.
+     * @param key Existing integer preference key.
+     * @param default Caller fallback for an absent value.
      * @author Dmitriy Moroz
      */
     override fun getInt(key: String, default: Int): Int =
-        preferences.getInt(key, default)
+        withMemoryLock { preferences.getInt(key, default) }
 
     /**
-     * Executes the `putInt` step in the SDAI data layer.
+     * Writes an ordinary integer, rejecting accidental overlap with pending configuration keys.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Existing integer preference key.
+     * @param value New ordinary integer value.
      * @author Dmitriy Moroz
      */
-    override fun putInt(key: String, value: Int) {
+    override fun putInt(key: String, value: Int) = withMemoryLock {
+        requireWritable(key)
         preferences.edit().putInt(key, value).apply()
     }
+
+    /**
+     * Refuses conflicting standalone writes rather than replacing pending transaction ownership.
+     *
+     * @param key Preference key requested by an ordinary setter.
+     * @author Dmitriy Moroz
+     */
+    private fun requireWritable(key: String) {
+        if (configurationMask?.contains(key) == true) persistenceFailure()
+    }
+
+    /**
+     * Reports a safe retryable persistence conflict without exposing candidate or trusted values.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun persistenceFailure(): Nothing =
+        throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.PERSISTENCE)
 }
 
 /**
- * Creates the SDAI value produced by `createKeyValueStore`.
+ * Opens one platform preference-suite owner; DI shares it across settings and configuration.
  *
- * @param name name value consumed by the API.
- * @return Result produced by `createKeyValueStore`.
+ * @param name Existing suite filename, preserving installed configuration compatibility.
+ * @return Owner whose trusted read view masks unconfirmed complete configuration writes.
  * @author Dmitriy Moroz
  */
 internal actual fun createKeyValueStore(name: String): KeyValueStore {

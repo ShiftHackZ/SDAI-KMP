@@ -7,7 +7,7 @@ import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
-import com.shifthackz.aisdv1.presentation.navigation.router.StorageUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageIntent
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageModal
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageState
@@ -139,7 +139,7 @@ private fun UsageItem.deleteDescription(): String = when (category) {
     UsageCategory.MODELS_SDXL,
     UsageCategory.MODELS_CORE_ML,
     UsageCategory.MODELS_BONSAI,
-    -> Localization.string(
+        -> Localization.string(
         "settings_usage_delete_models_text",
         bytes.formatBytes(),
         category.title(),
@@ -148,7 +148,7 @@ private fun UsageItem.deleteDescription(): String = when (category) {
     UsageCategory.TRAFFIC_MODELS,
     UsageCategory.TRAFFIC_CONFIGS,
     UsageCategory.TRAFFIC_INFERENCE,
-    -> ""
+        -> ""
 }
 
 private fun StorageUsageModal.ClearAll.deleteDescription(): String = Localization.string(
@@ -161,12 +161,12 @@ private fun List<String>.joinLocalized(): String = when (size) {
     0 -> ""
     1 -> first()
     2 -> first() +
-        Localization.string("settings_usage_list_last_separator") +
-        last()
+            Localization.string("settings_usage_list_last_separator") +
+            last()
 
     else -> dropLast(1).joinToString(Localization.string("settings_usage_list_separator")) +
-        Localization.string("settings_usage_list_last_separator") +
-        last()
+            Localization.string("settings_usage_list_last_separator") +
+            last()
 }
 
 private fun Long.formatBytes(): String {

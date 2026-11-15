@@ -3,9 +3,13 @@ package com.shifthackz.aisdv1.presentation.screen.txt2img
 import androidx.compose.ui.graphics.ImageBitmap
 
 /**
- * Converts SDAI data with `decodeBase64ImageBitmap`.
+ * Decodes the original pixel dimensions for an explicitly opened editor.
+ * Dimension admission precedes bitmap rasterization; display previews use the sampled loader.
+ * The caller owns background dispatch, encoded-byte admission and decode concurrency.
  *
- * @return Result produced by `decodeBase64ImageBitmap`.
+ * @receiver Original Base64 image, optionally prefixed by a data URI.
+ * @param maxPixels Maximum admitted original pixel count.
+ * @return Full-resolution image, or null for invalid content or rejected dimensions.
  * @author Dmitriy Moroz
  */
-internal expect fun String.decodeBase64ImageBitmap(): ImageBitmap?
+internal expect fun String.decodeBase64ImageBitmap(maxPixels: Long): ImageBitmap?

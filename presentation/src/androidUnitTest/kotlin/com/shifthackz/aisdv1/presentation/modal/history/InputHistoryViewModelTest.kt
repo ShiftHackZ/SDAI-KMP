@@ -2,8 +2,12 @@ package com.shifthackz.aisdv1.presentation.modal.history
 
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.mocks.toGalleryMetadata
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultPagedUseCase
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import kotlinx.coroutines.flow.flow
+import io.mockk.every
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -27,10 +31,22 @@ class InputHistoryViewModelTest {
         override val immediate: CoroutineDispatcher = testDispatcher
     }
     private val getGenerationResultPagedUseCase = mockk<GetGenerationResultPagedUseCase>()
+    private val galleryReads = mockk<GalleryReadGateway>()
 
     @Before
     fun initialize() {
         Localization.setLanguageCode("en")
+        every { galleryReads.observeMetadata(any(), any()) } answers {
+            val limit = firstArg<Int>()
+            val offset = secondArg<Int>()
+            flow {
+                emit(
+                    getGenerationResultPagedUseCase(
+                        limit,
+                        offset
+                    ).map { it.toGalleryMetadata() })
+            }
+        }
         coEvery {
             getGenerationResultPagedUseCase(limit = PAGE_SIZE, offset = 0)
         } returns listOf(generationResult(id = 1L))
@@ -49,7 +65,7 @@ class InputHistoryViewModelTest {
                 InputHistoryState(
                     loading = false,
                     items = listOf(
-                        InputHistoryItemUi(generationResult = generationResult(id = 1L)),
+                        InputHistoryItemUi(generationResult = generationResult(id = 1L).toGalleryMetadata()),
                     ),
                     nextPage = 1,
                     canLoadMore = true,
@@ -77,8 +93,8 @@ class InputHistoryViewModelTest {
                 InputHistoryState(
                     loading = false,
                     items = listOf(
-                        InputHistoryItemUi(generationResult = generationResult(id = 1L)),
-                        InputHistoryItemUi(generationResult = generationResult(id = 2L)),
+                        InputHistoryItemUi(generationResult = generationResult(id = 1L).toGalleryMetadata()),
+                        InputHistoryItemUi(generationResult = generationResult(id = 2L).toGalleryMetadata()),
                     ),
                     nextPage = 2,
                     canLoadMore = true,
@@ -103,7 +119,7 @@ class InputHistoryViewModelTest {
                 InputHistoryState(
                     loading = false,
                     items = listOf(
-                        InputHistoryItemUi(generationResult = generationResult(id = 1L)),
+                        InputHistoryItemUi(generationResult = generationResult(id = 1L).toGalleryMetadata()),
                     ),
                     nextPage = 2,
                     canLoadMore = false,
@@ -134,7 +150,7 @@ class InputHistoryViewModelTest {
                 InputHistoryState(
                     loading = false,
                     items = listOf(
-                        InputHistoryItemUi(generationResult = generationResult(id = 1L)),
+                        InputHistoryItemUi(generationResult = generationResult(id = 1L).toGalleryMetadata()),
                     ),
                     nextPage = 1,
                     canLoadMore = true,
@@ -144,8 +160,10 @@ class InputHistoryViewModelTest {
         }
 
     private fun TestScope.createViewModel() = InputHistoryViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
-        getGenerationResultPagedUseCase = getGenerationResultPagedUseCase,
+        galleryReads = galleryReads,
+        getGenerationResultUseCase = mockk(relaxed = true),
     )
 
     private fun generationResult(id: Long) = AiGenerationResult(
@@ -170,6 +188,6 @@ class InputHistoryViewModelTest {
     )
 
     private companion object {
-        const val PAGE_SIZE = 1000
+        const val PAGE_SIZE = 60
     }
 }

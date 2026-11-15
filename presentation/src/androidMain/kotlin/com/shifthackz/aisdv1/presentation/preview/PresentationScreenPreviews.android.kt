@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.preview
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -29,7 +30,7 @@ import com.shifthackz.aisdv1.presentation.screen.txt2img.TextToImageContent
 import com.shifthackz.aisdv1.presentation.screen.txt2img.TextToImageState
 import com.shifthackz.aisdv1.presentation.theme.global.AiSdAppTheme
 import com.shifthackz.aisdv1.presentation.theme.global.AiSdAppThemeState
-import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputForm
+import com.shifthackz.aisdv1.presentation.widget.input.generationInputFormItems
 
 @Preview(name = "Txt2Img screen", widthDp = 360, heightDp = 740, showBackground = true)
 @Composable
@@ -59,12 +60,17 @@ private fun ImageToImageUnsupportedPreview() {
 @Composable
 private fun GenerationInputFormPreview() {
     PreviewTheme {
-        GenerationInputForm(
-            modifier = Modifier.padding(16.dp),
-            state = previewTextToImageState(),
-            promptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) },
-            negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) },
-        )
+        val promptState = remember { mutableStateOf(TextFieldValue()) }
+        val negativePromptState = remember { mutableStateOf(TextFieldValue()) }
+        LazyColumn(Modifier.padding(16.dp)) {
+            generationInputFormItems(
+                state = previewTextToImageState(),
+                isImg2Img = false,
+                promptChipTextFieldState = promptState,
+                negativePromptChipTextFieldState = negativePromptState,
+                onEvent = {},
+            )
+        }
     }
 }
 
@@ -150,8 +156,8 @@ private fun PreviewTheme(
 ) {
     AiSdAppTheme(
         state = AiSdAppThemeState(
-            systemDarkTheme = false,
-            darkTheme = darkTheme,
+            shouldUseSystemDarkTheme = false,
+            isDarkTheme = darkTheme,
             colorToken = ColorToken.MAUVE,
         ),
         applySystemBars = false,

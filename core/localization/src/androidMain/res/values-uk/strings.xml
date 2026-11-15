@@ -647,4 +647,30 @@
     <string name="error_samplers_unavailable">Не вдалося завантажити методи семплювання. Перевірте з’єднання із сервером і повторіть спробу.</string>
     <string name="error_seed_format">Введіть невід’ємне ціле число, -1 або залиште поле порожнім.</string>
     <string name="error_seed_max">Сід не має перевищувати %1$s.</string>
+    <string name="auth_storage_unavailable">Збережені облікові дані тимчасово недоступні. Повторіть спробу після розблокування пристрою.</string>
+    <string name="auth_storage_unreadable">Не вдалося прочитати збережені облікові дані. Повторіть спробу або скиньте їх і введіть знову.</string>
+    <string name="auth_storage_write_failed">Не вдалося зберегти облікові дані. Повторіть спробу перед підключенням.</string>
+    <string name="auth_storage_reset">Скинути збережені облікові дані</string>
+    <string name="auth_storage_reset_confirm">Видалити збережені облікові дані Basic Auth? Їх потрібно буде ввести знову. Моделі, зображення, інші налаштування та вхід у ChatGPT буде збережено.</string>
+
+    <string name="ui_diagnostics_title">Діагностика інтерфейсу</string>
+    <string name="ui_diagnostics_capture">Записувати діагностику інтерфейсу</string>
+    <string name="ui_diagnostics_reset">Скинути запис</string>
+    <string name="ui_diagnostics_share">Поділитися записом</string>
+
+    <string name="native_generation_engine_unknown">Локальний рушій</string>
+    <string name="native_generation_busy">Інша локальна генерація ще зупиняється. Зачекайте й повторіть спробу.</string>
+    <string name="native_generation_connection">Не вдалося запустити локальний рушій. Повторіть спробу.</string>
+    <string name="native_generation_process_died">Локальний рушій несподівано зупинився. Повторіть спробу або перевірте налаштування моделі та бекенду.</string>
+    <string name="native_generation_unresponsive">Локальний рушій перестав відповідати. Повторіть спробу або перевірте налаштування моделі та бекенду.</string>
+    <string name="native_generation_engine_failed">Локальний рушій не зміг завершити генерацію. Перевірте налаштування моделі та бекенду перед повторною спробою.</string>
+    <string name="native_generation_invalid_result">Локальний рушій повернув некоректне зображення. Повторіть спробу.</string>
+    <string name="native_generation_interrupted">Генерацію було перервано. Повторіть спробу, коли будете готові.</string>
+    <string name="native_generation_failure_context">%1$s: %2$s</string>
+    <string name="native_generation_stage_preparing">Підготовка моделі…</string>
+    <string name="native_generation_stage_tokenizing">Кодування запиту…</string>
+    <string name="native_generation_stage_denoising">Генерація зображення…</string>
+    <string name="native_generation_stage_decoding">Декодування зображення…</string>
+    <string name="native_generation_stage_running">Працює рушій зображень…</string>
+    <string name="native_generation_stage_writing_result">Збереження результату…</string>
 </resources>

@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -36,16 +37,18 @@ import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.theme.textFieldColors
 
 /**
- * Renders the `SliderTextInputField` UI for the SDAI presentation layer.
+ * Displays a bounded numeric editor and slider. The float editor saves its draft by the owning
+ * lazy item key, while actual parameter values remain owned by the generation screen.
+ * Losing focus discards unapplied edits; external values synchronize when the editor is unfocused.
  *
- * @param value value value consumed by the API.
- * @param onValueChange callback invoked by the component.
- * @param modifier Compose modifier applied to the rendered UI.
- * @param valueRange value range value consumed by the API.
- * @param valueDiff value diff value consumed by the API.
- * @param fractionDigits fraction digits value consumed by the API.
- * @param steps steps value consumed by the API.
- * @param sliderColors slider colors value consumed by the API.
+ * @param value Current applied numeric parameter supplied by the owning screen.
+ * @param onValueChange Receives a clamped, rounded value from the slider, step buttons or Apply action.
+ * @param modifier Layout and styling applied to the editor and slider container.
+ * @param valueRange Inclusive bounds used to clamp edited and slider values.
+ * @param valueDiff Amount added or subtracted by the step buttons.
+ * @param fractionDigits Decimal precision used for displayed and applied parameter values.
+ * @param steps Number of intermediate slider stops; zero allows continuous slider movement.
+ * @param sliderColors Theme colors used for the slider thumb, track and tick marks.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -70,16 +73,18 @@ fun SliderTextInputField(
 )
 
 /**
- * Renders the `SliderTextInputField` UI for the SDAI presentation layer.
+ * Displays a bounded numeric editor and slider. The float editor saves its draft by the owning
+ * lazy item key, while actual parameter values remain owned by the generation screen.
+ * Losing focus discards unapplied edits; external values synchronize when the editor is unfocused.
  *
- * @param value value value consumed by the API.
- * @param onValueChange callback invoked by the component.
- * @param modifier Compose modifier applied to the rendered UI.
- * @param valueRange value range value consumed by the API.
- * @param valueDiff value diff value consumed by the API.
- * @param fractionDigits fraction digits value consumed by the API.
- * @param steps steps value consumed by the API.
- * @param sliderColors slider colors value consumed by the API.
+ * @param value Current applied numeric parameter supplied by the owning screen.
+ * @param onValueChange Receives a clamped, rounded value from the slider, step buttons or Apply action.
+ * @param modifier Layout and styling applied to the editor and slider container.
+ * @param valueRange Inclusive bounds used to clamp edited and slider values.
+ * @param valueDiff Amount added or subtracted by the step buttons.
+ * @param fractionDigits Decimal precision used for displayed and applied parameter values.
+ * @param steps Number of intermediate slider stops; zero allows continuous slider movement.
+ * @param sliderColors Theme colors used for the slider thumb, track and tick marks.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -93,8 +98,10 @@ fun SliderTextInputField(
     steps: Int = 0,
     sliderColors: SliderColors = SliderDefaults.colors(),
 ) {
-    var text by remember { mutableStateOf(value.roundTo(fractionDigits).toString()) }
-    var focused by remember { mutableStateOf(false) }
+    val stateText = value.roundTo(fractionDigits).toString()
+    var text by rememberSaveable { mutableStateOf(stateText) }
+    var lastStateText by rememberSaveable { mutableStateOf(stateText) }
+    var isFocused by remember { mutableStateOf(false) }
     val callback: (Float) -> Unit = { newValue ->
         newValue
             .coerceIn(valueRange)
@@ -102,12 +109,13 @@ fun SliderTextInputField(
             .also { text = "$it" }
             .let(onValueChange::invoke)
     }
-    val isNotApplied = text.toFloatOrNull()?.roundTo(fractionDigits) != value.roundTo(fractionDigits)
+    val isNotApplied =
+        text.toFloatOrNull()?.roundTo(fractionDigits) != value.roundTo(fractionDigits)
     val isValid = text.isNotBlank() && (text.toFloatOrNull()?.let { it in valueRange } ?: false)
-    val stateText = value.roundTo(fractionDigits).toString()
-    LaunchedEffect(focused, stateText) {
-        if (!focused) {
+    LaunchedEffect(isFocused, stateText) {
+        if (!isFocused && lastStateText != stateText) {
             text = stateText
+            lastStateText = stateText
         }
     }
     Column(modifier = modifier) {
@@ -115,7 +123,10 @@ fun SliderTextInputField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
-                .onFocusChanged { focused = it.isFocused },
+                .onFocusChanged { focusState ->
+                    if (isFocused && !focusState.isFocused) text = stateText
+                    isFocused = focusState.isFocused
+                },
             value = if (fractionDigits != 0) text else text.replace(".0", ""),
             onValueChange = { newText ->
                 text = newText
@@ -149,29 +160,29 @@ fun SliderTextInputField(
                     }
                 } else {
                     Row {
-                        val decEnabled = value > valueRange.start
-                        val incEnabled = value < valueRange.endInclusive
+                        val isDecrementEnabled = value > valueRange.start
+                        val isIncrementEnabled = value < valueRange.endInclusive
                         IconButton(
-                            enabled = decEnabled,
+                            enabled = isDecrementEnabled,
                             onClick = { callback(value - valueDiff) },
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onBackground.copy(
-                                    alpha = if (decEnabled) 1f else 0.5f,
+                                    alpha = if (isDecrementEnabled) 1f else 0.5f,
                                 ),
                             )
                         }
                         IconButton(
-                            enabled = incEnabled,
+                            enabled = isIncrementEnabled,
                             onClick = { callback(value + valueDiff) },
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowUp,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onBackground.copy(
-                                    alpha = if (incEnabled) 1f else 0.5f,
+                                    alpha = if (isIncrementEnabled) 1f else 0.5f,
                                 ),
                             )
                         }

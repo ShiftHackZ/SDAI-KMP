@@ -10,6 +10,18 @@ import com.shifthackz.aisdv1.core.mvi.MviState
  */
 data class DebugMenuState(
     /**
+     * Whether this platform/build supports runtime capture.
+     *
+     * @author Dmitriy Moroz
+     */
+    val isUiDiagnosticsSupported: Boolean = false,
+    /**
+     * Explicit capture switch; counts never trigger state changes.
+     *
+     * @author Dmitriy Moroz
+     */
+    val isUiDiagnosticsCapturing: Boolean = false,
+    /**
      * Exposes the `screenModal` value used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
@@ -59,6 +71,7 @@ sealed interface DebugMenuModal {
      * @author Dmitriy Moroz
      */
     data object None : DebugMenuModal
+
     /**
      * Carries `LDScheduler` data through the SDAI presentation layer.
      *

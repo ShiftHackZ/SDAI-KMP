@@ -7,9 +7,9 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 /**
- * Executes the `platformBonsaiModule` step in the SDAI Bonsai feature layer.
+ * Registers the Android host gateway facade without constructing or loading Bonsai JNI.
  *
- * @return Result produced by `platformBonsaiModule`.
+ * @return Host bindings; the inference service composes its native adapter separately.
  * @author Dmitriy Moroz
  */
 internal actual fun platformBonsaiModule() = module {

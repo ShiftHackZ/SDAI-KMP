@@ -13,65 +13,98 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsIntent
-import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsState
+import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsListItem
 import com.shifthackz.aisdv1.presentation.screen.settings.model.text
 import com.shifthackz.aisdv1.presentation.widget.item.SettingsHeader
 import com.shifthackz.aisdv1.presentation.widget.item.SettingsItem
 
+/**
+ * Renders application information links without observing unrelated preferences.
+ *
+ * @param row Logical list item to compose; siblings remain owned by the parent lazy list.
+ * @param isLoading Whether preference placeholders are visible.
+ * @param headerModifier Layout applied to the section header.
+ * @param itemModifier Layout applied to each link row.
+ * @param processIntent Receives link and version actions from the section.
+ * @author Dmitriy Moroz
+ */
 @Composable
 internal fun SettingsInfoSection(
-    state: SettingsState,
+    row: SettingsListItem,
+    isLoading: Boolean,
     headerModifier: Modifier,
     itemModifier: Modifier,
     processIntent: (SettingsIntent) -> Unit,
 ) {
-        if (!state.onBoardingDemo) {
+    when (row) {
+        SettingsListItem.INFO_HEADER -> {
             SettingsHeader(
                 modifier = headerModifier,
-                loading = state.loading,
+                loading = isLoading,
                 text = text("settings_header_info"),
             )
+        }
+
+        SettingsListItem.DONATE -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.MonetizationOn,
                 text = text("settings_item_donate"),
                 onClick = { processIntent(SettingsIntent.Action.Donate) },
             )
+        }
+
+        SettingsListItem.ONBOARDING -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.AllInclusive,
                 text = text("settings_item_on_boarding"),
                 onClick = { processIntent(SettingsIntent.Action.OnBoarding) },
             )
+        }
+
+        SettingsListItem.REPORT_PROBLEM -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.Report,
                 text = text("settings_item_report_problem"),
                 onClick = { processIntent(SettingsIntent.Action.ReportProblem) },
             )
+        }
+
+        SettingsListItem.PRIVACY -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.Policy,
                 text = text("settings_item_policy"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenPolicy) },
             )
+        }
+
+        SettingsListItem.LICENSE -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.Gavel,
                 text = text("settings_item_license"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenLicense) },
             )
+        }
+
+        SettingsListItem.SOURCE_CODE -> {
             SettingsItem(
                 modifier = itemModifier,
-                loading = state.loading,
+                loading = isLoading,
                 startIcon = Icons.Default.Code,
                 text = text("settings_item_source"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenSourceCode) },
             )
         }
+
+        else -> Unit
+    }
 }

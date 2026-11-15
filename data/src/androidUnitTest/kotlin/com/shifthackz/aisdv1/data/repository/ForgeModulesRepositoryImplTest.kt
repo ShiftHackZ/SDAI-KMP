@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.domain.datasource.ForgeModulesDataSource
 import com.shifthackz.aisdv1.domain.entity.ForgeModule
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
@@ -20,40 +22,46 @@ class ForgeModulesRepositoryImplTest {
     private val stubCredentials = AuthorizationCredentials.HttpBasic("user", "password")
     private val stubException = RuntimeException("Something went wrong.")
     private val stubRemoteDataSource = mockk<ForgeModulesDataSource>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
+    private val stubPreferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val stubAuthorizationStore = mockk<AuthorizationStore>()
 
     private val repository = ForgeModulesRepositoryImpl(
         remoteDataSource = stubRemoteDataSource,
         preferenceManager = stubPreferenceManager,
-        authorizationStore = stubAuthorizationStore,
+        connections = AuthenticatedConnectionProviderImpl(
+            stubPreferenceManager,
+            stubAuthorizationStore,
+            ProviderSelectionGuard()
+        ),
     )
 
     @Before
     fun initialize() {
         every { stubPreferenceManager.automatic1111ServerUrl } returns stubBaseUrl
-        every { stubAuthorizationStore.getAuthorizationCredentials() } returns stubCredentials
+        coEvery { stubAuthorizationStore.getAuthorizationCredentials() } returns stubCredentials
     }
 
     @Test
-    fun `given attempt to fetch forge modules, remote returns data, expected valid modules list value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchModules(stubBaseUrl, stubCredentials)
-        } returns mockForgeModules
+    fun `given attempt to fetch forge modules, remote returns data, expected valid modules list value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchModules(stubBaseUrl, stubCredentials)
+            } returns mockForgeModules
 
-        assertEquals(mockForgeModules, repository.fetchModules())
-    }
+            assertEquals(mockForgeModules, repository.fetchModules())
+        }
 
     @Test
-    fun `given attempt to fetch forge modules, remote throws exception, expected error value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchModules(stubBaseUrl, stubCredentials)
-        } throws stubException
+    fun `given attempt to fetch forge modules, remote throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchModules(stubBaseUrl, stubCredentials)
+            } throws stubException
 
-        val actual = runCatching { repository.fetchModules() }.exceptionOrNull()
+            val actual = runCatching { repository.fetchModules() }.exceptionOrNull()
 
-        assertTrue(actual === stubException)
-    }
+            assertTrue(actual === stubException)
+        }
 
     private companion object {
         val mockForgeModules = listOf(

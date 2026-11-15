@@ -1,10 +1,7 @@
 package com.shifthackz.aisdv1.presentation.widget.input
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasSetTextAction
@@ -14,8 +11,8 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.core.validation.di.validatorsModule
 import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
+import com.shifthackz.aisdv1.core.validation.di.validatorsModule
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -25,10 +22,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.dsl.koinApplication
 import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.ParameterizedRobolectricTestRunner.Parameters
 import org.robolectric.annotation.Config
-import org.koin.dsl.koinApplication
 
 /**
  * Repeats seed-field interactions for both generation screens and both seed controls.
@@ -62,9 +59,9 @@ class GenerationSeedFieldTest(
         )
         compose.setContent {
             MaterialTheme {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
-                    GenerationInputAdvancedOptions(
-                        state = fixture.state,
+                LazyColumn {
+                    generationInputAdvancedItems(
+                        state = fixture.state.toAdvancedOptionsState(),
                         isImg2Img = isImg2Img,
                         onEvent = fixture::process,
                         afterSlidersSection = {},
@@ -91,7 +88,10 @@ class GenerationSeedFieldTest(
                 val value = currentSeed()
                 val seed = value.toLongOrNull()
                 assertNotNull("Dice must emit an integer: $value", seed)
-                assertTrue("Seed must match A1111 random range: $value", seed!! in 0L..4_294_967_293L)
+                assertTrue(
+                    "Seed must match A1111 random range: $value",
+                    seed!! in 0L..4_294_967_293L
+                )
                 assertEquals(seed, value.toDouble().toLong())
                 assertPayloadAndOtherSeed(value)
                 assertFalse(fixture.hasValidationErrors)
@@ -166,7 +166,8 @@ class GenerationSeedFieldTest(
     private val fieldIndex: Int
         get() = if (isVariationSeed) 1 else 0
 
-    private fun currentSeed(): String = if (isVariationSeed) fixture.state.subSeed else fixture.state.seed
+    private fun currentSeed(): String =
+        if (isVariationSeed) fixture.state.subSeed else fixture.state.seed
 
     private fun seedField(): SemanticsNodeInteraction = compose.onNode(
         hasSetTextAction() and hasText(Localization.string(if (isVariationSeed) "hint_sub_seed" else "hint_seed")),

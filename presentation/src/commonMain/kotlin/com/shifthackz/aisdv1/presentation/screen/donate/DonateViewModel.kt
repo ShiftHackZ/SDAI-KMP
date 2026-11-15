@@ -1,18 +1,23 @@
 package com.shifthackz.aisdv1.presentation.screen.donate
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.domain.usecase.donate.FetchSupportersUseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.DonateRouter
+import com.shifthackz.aisdv1.core.navigation.router.DonateRouter
 import kotlinx.coroutines.withContext
 
 /**
  * Coordinates `DonateViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class DonateViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
      *
@@ -44,6 +49,8 @@ class DonateViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<DonateState, DonateIntent, DonateEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.DONATE.asDiagnosticScreen(),
     initialState = DonateState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

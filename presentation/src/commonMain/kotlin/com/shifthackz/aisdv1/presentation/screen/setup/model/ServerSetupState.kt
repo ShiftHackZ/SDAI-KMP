@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.presentation.screen.setup.model
 import androidx.compose.runtime.Immutable
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.mvi.MviState
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.DownloadState
 import com.shifthackz.aisdv1.domain.entity.FeatureTag
@@ -19,6 +20,10 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
  * The first group of fields controls provider discovery and filtering, the middle group stores
  * per-provider form inputs, and the local model lists mirror downloadable model state for each
  * local runtime. Derived properties expose the active provider's local model selection.
+ *
+ * @param authorizationStorageFailure Safe failure retained separately from absent credentials.
+ * @param isAuthorizationStorageBusy Whether explicit retry/reset is pending.
+ * @param isAuthorizationResetConfirmationVisible Whether the user is confirming removal of saved Basic Auth.
  * @param openAiOAuthAccount Token-free account identifier, or null before initialization/sign-in.
  * @param openAiOAuthCode Transient device code displayed only during the current login attempt.
  * @param openAiOAuthBusy Whether device authorization is pending; disables conflicting actions.
@@ -58,6 +63,9 @@ data class ServerSetupState(
     val hordeDefaultApiKey: Boolean = false,
     val demoMode: Boolean = false,
     val demoModeUrl: String = "",
+    val authorizationStorageFailure: AuthorizationStorageFailure.Reason? = null,
+    val isAuthorizationStorageBusy: Boolean = false,
+    val isAuthorizationResetConfirmationVisible: Boolean = false,
     val authType: AuthType = AuthType.ANONYMOUS,
     val login: String = "",
     val password: String = "",
@@ -375,17 +383,22 @@ fun Configuration.toServerSetupState(
     val safeMode = source.takeIf(allowedModes::contains) ?: ServerSource.AUTOMATIC1111
     val supportedHuggingFaceAliases = HuggingFaceModel.supportedHfInferenceTextToImageAliases
     val safeHuggingFaceModels = (
-        huggingFaceModels
-            .filter(supportedHuggingFaceAliases::contains)
-            .ifEmpty { HuggingFaceModel.supportedHfInferenceTextToImageModels.map(HuggingFaceModel::alias) }
-            + HuggingFaceModel.default.alias
-    )
+            huggingFaceModels
+                .filter(supportedHuggingFaceAliases::contains)
+                .ifEmpty {
+                    HuggingFaceModel.supportedHfInferenceTextToImageModels.map(
+                        HuggingFaceModel::alias
+                    )
+                }
+                    + HuggingFaceModel.default.alias
+            )
         .distinct()
     val safeHuggingFaceModel = huggingFaceModel
         .takeIf(safeHuggingFaceModels::contains)
         ?: HuggingFaceModel.default.alias
     return ServerSetupState(
         loadingConfiguration = false,
+        authorizationStorageFailure = authorizationStorageFailure,
         showBackNavArrow = showBackNavArrow,
         mode = safeMode,
         platform = platform,

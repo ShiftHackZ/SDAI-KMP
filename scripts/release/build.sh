@@ -63,6 +63,9 @@ mapfile -t artifacts < <(find "$artifact_dir" -maxdepth 1 -type f -name "*.${for
 [[ "${#artifacts[@]}" == 1 ]] || { echo 'Expected exactly one unsigned artifact' >&2; exit 1; }
 cp "${artifacts[0]}" "${output_dir}/unsigned.${format}"
 cp "${script_dir}/toolchain.json" "${output_dir}/toolchain.json"
+python3 "${script_dir}/native_symbols.py" "$source_dir" "${output_dir}/unsigned.${format}" \
+    "${output_dir}/native-diagnostics.zip" --flavor "$flavor" \
+    --source-sha "$expected_sha" --toolchain "${script_dir}/toolchain.json"
 cp "${RUNNER_TEMP:-/tmp}/sdai-submodules.txt" "${output_dir}/submodules.txt"
 {
     printf 'Source SHA: %s\nSource epoch: %s\n' "$expected_sha" "$SOURCE_DATE_EPOCH"

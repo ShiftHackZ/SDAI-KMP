@@ -13,12 +13,6 @@ data class AiGenerationResultPreview(
      */
     val id: Long,
     /**
-     * Exposes the `image` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val image: String,
-    /**
      * Exposes the `hidden` value used by the SDAI domain layer.
      *
      * @author Dmitriy Moroz
@@ -30,4 +24,10 @@ data class AiGenerationResultPreview(
      * @author Dmitriy Moroz
      */
     val liked: Boolean = false,
+    /**
+     * Changes for every supported image replacement.
+     *
+     * @author Dmitriy Moroz
+     */
+    val imageRevision: String = "",
 )

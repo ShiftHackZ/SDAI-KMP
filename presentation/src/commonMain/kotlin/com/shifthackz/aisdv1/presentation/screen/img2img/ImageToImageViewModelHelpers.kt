@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.screen.img2img
 
+import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.core.model.asUiText
@@ -19,54 +20,63 @@ import com.shifthackz.aisdv1.presentation.model.GenerationModal
  * @author Dmitriy Moroz
  */
 internal const val MIN_STEPS = 1
+
 /**
  * Exposes the `MAX_STEPS` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MAX_STEPS = 150
+
 /**
  * Exposes the `MIN_BATCH_COUNT` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MIN_BATCH_COUNT = 1
+
 /**
  * Exposes the `MAX_BATCH_COUNT` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MAX_BATCH_COUNT = 20
+
 /**
  * Exposes the `MIN_CFG_SCALE` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MIN_CFG_SCALE = 1f
+
 /**
  * Exposes the `MAX_CFG_SCALE` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MAX_CFG_SCALE = 35f
+
 /**
  * Exposes the `MIN_SUB_SEED_STRENGTH` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MIN_SUB_SEED_STRENGTH = 0f
+
 /**
  * Exposes the `MAX_SUB_SEED_STRENGTH` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MAX_SUB_SEED_STRENGTH = 1f
+
 /**
  * Exposes the `MIN_DENOISING_STRENGTH` value used by the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
  */
 internal const val MIN_DENOISING_STRENGTH = 0f
+
 /**
  * Exposes the `MAX_DENOISING_STRENGTH` value used by the SDAI presentation layer.
  *
@@ -95,9 +105,10 @@ internal data class StableDiffusionSamplersKey(
 )
 
 /**
- * Executes the `progressModal` step in the SDAI presentation layer.
+ * Builds progress controls for the captured source and platform.
+ * Android gateway engines remain cancellable throughout load, inference and decoding.
  *
- * @param canCancelLocalGeneration can cancel local generation value consumed by the API.
+ * @param canCancelLocalGeneration Existing cancellation preference for runtimes outside the Android gateway.
  * @author Dmitriy Moroz
  */
 internal fun ImageToImageState.progressModal(
@@ -113,7 +124,11 @@ internal fun ImageToImageState.progressModal(
         } else {
             null
         },
-        canCancel = canCancelLocalGeneration,
+        canCancel = canCancelLocalGeneration || (platform == Platform.ANDROID && mode in setOf(
+            ServerSource.LOCAL_MICROSOFT_ONNX,
+            ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
+            ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
+        )),
     )
 } else {
     GenerationModal.Communicating()
@@ -154,15 +169,22 @@ internal fun ImageToImageState.validated(
     val widthResult = dimensionValidator(width)
     val heightResult = dimensionValidator(height)
     val sourceError = when {
-        (mode == ServerSource.OPEN_AI_COMPATIBLE || mode == ServerSource.OPEN_AI_OAUTH) -> Localization.string("open_ai_compatible_img2img_unsupported")
+        (mode == ServerSource.OPEN_AI_COMPATIBLE || mode == ServerSource.OPEN_AI_OAUTH) -> Localization.string(
+            "open_ai_compatible_img2img_unsupported"
+        )
+
         !sourceSupportsImageToImage && mode == ServerSource.OPEN_AI ->
             Localization.string("error_img2img_openai_unsupported")
+
         !sourceSupportsImageToImage ->
             Localization.string("error_img2img_local_android_only")
+
         mode == ServerSource.ARLI_AI && arliAiModel.isBlank() ->
             Localization.string("error_invalid")
+
         imageBase64.isBlank() ->
             Localization.string("error_img2img_select_input")
+
         else -> null
     }
     return copy(
@@ -188,7 +210,7 @@ internal fun ValidationResult<DimensionValidator.Error>.errorText(): UiText? {
             is DimensionValidator.Error.BiggerThanMaximum -> "Maximum ${error.max}px"
             DimensionValidator.Error.Unexpected,
             null,
-            -> "Invalid value"
+                -> "Invalid value"
         },
     )
 }
@@ -209,16 +231,22 @@ internal fun ImageToImageState.withSettings(
     arliAiModels: List<String>?,
 ): ImageToImageState =
     copy(arliAiModel = settings.arliAiModel)
-        .withSource(settings.source, stableDiffusionSamplers, forgeModules, aDetailerAvailable, arliAiModels)
+        .withSource(
+            settings.source,
+            stableDiffusionSamplers,
+            forgeModules,
+            aDetailerAvailable,
+            arliAiModels
+        )
         .copy(
-        advancedToggleButtonVisible = !settings.formAdvancedOptionsAlwaysShow,
-        advancedOptionsVisible = if (settings.formAdvancedOptionsAlwaysShow) {
-            true
-        } else {
-            advancedOptionsVisible
-        },
-        formPromptTaggedInput = settings.formPromptTaggedInput,
-    )
+            advancedToggleButtonVisible = !settings.formAdvancedOptionsAlwaysShow,
+            advancedOptionsVisible = if (settings.formAdvancedOptionsAlwaysShow) {
+                true
+            } else {
+                advancedOptionsVisible
+            },
+            formPromptTaggedInput = settings.formPromptTaggedInput,
+        )
 
 /**
  * Executes the `withSource` step in the SDAI presentation layer.
@@ -285,8 +313,9 @@ internal fun Throwable.localizedMessageText(): UiText {
     val text = when {
         message == null -> Localization.string("error_invalid")
         message.contains("out of memory", ignoreCase = true) ||
-            message.contains("OutOfMemoryError", ignoreCase = true) ->
+                message.contains("OutOfMemoryError", ignoreCase = true) ->
             Localization.string("error_generation_out_of_memory")
+
         else -> message
     }
     return UiText.Static(text)
@@ -303,8 +332,9 @@ internal fun Throwable.localizedMessageString(): String {
     return when {
         message == null -> Localization.string("error_invalid")
         message.contains("out of memory", ignoreCase = true) ||
-            message.contains("OutOfMemoryError", ignoreCase = true) ->
+                message.contains("OutOfMemoryError", ignoreCase = true) ->
             Localization.string("error_generation_out_of_memory")
+
         else -> message
     }
 }

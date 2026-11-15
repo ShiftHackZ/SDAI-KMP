@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.data.di
 
+import com.shifthackz.aisdv1.data.gateway.GalleryReadGatewayImpl
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+
 import com.shifthackz.aisdv1.domain.repository.OpenAiCompatibleGenerationRepository
 import com.shifthackz.aisdv1.domain.datasource.OpenAiCompatibleGenerationDataSource
 import com.shifthackz.aisdv1.data.remote.KtorOpenAiCompatibleGenerationRemoteDataSource
@@ -9,6 +12,8 @@ import com.shifthackz.aisdv1.domain.repository.OpenAiOAuthGenerationRepository
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
 import com.shifthackz.aisdv1.data.feature.openaioauth.OpenAiOAuthGatewayImpl
 import com.shifthackz.aisdv1.core.common.extensions.fixUrlSlashes
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.data.gateway.ServerConnectivityGatewayImpl
 import com.shifthackz.aisdv1.data.local.ArliAiModelsLocalDataSource
 import com.shifthackz.aisdv1.data.local.DownloadableModelFileStore
@@ -168,6 +173,14 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDataModule = module {
+    single<GalleryReadGateway> { GalleryReadGatewayImpl(get()) }
+    single<AuthenticatedConnectionProvider> {
+        AuthenticatedConnectionProviderImpl(
+            get(),
+            get(),
+            get()
+        )
+    }
     includes(databaseModule, preferenceDataModule, swarmUiModelsDataModule)
 
     single {
@@ -263,6 +276,7 @@ val coreDataModule = module {
     }
     single<GenerationResultRepository> {
         GenerationResultRepositoryImpl(
+            galleryReads = get(),
             oauthSessions = { get() },
             selectionGuard = get(),
             preferenceManager = get(),
@@ -464,7 +478,7 @@ val coreDataModule = module {
             localDataSource = get(),
             remoteDataSource = get(),
             preferenceManager = get(),
-            authorizationStore = get(),
+            connections = get(),
             textToImageDemo = get(),
             imageToImageDemo = get(),
         )
@@ -477,7 +491,7 @@ val coreDataModule = module {
             remoteDataSource = get(),
             localDataSource = get(),
             preferenceManager = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     single<StableDiffusionSamplersDataSource.Remote> {
@@ -488,7 +502,7 @@ val coreDataModule = module {
             remoteDataSource = get(),
             localDataSource = get(),
             preferenceManager = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     single<ForgeModulesDataSource> {
@@ -498,7 +512,7 @@ val coreDataModule = module {
         ForgeModulesRepositoryImpl(
             remoteDataSource = get(),
             preferenceManager = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     single<StableDiffusionScriptsDataSource> {
@@ -508,7 +522,7 @@ val coreDataModule = module {
         StableDiffusionScriptsRepositoryImpl(
             remoteDataSource = get(),
             preferenceManager = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     single<ServerConfigurationDataSource.Remote> {
@@ -519,7 +533,7 @@ val coreDataModule = module {
             remoteDataSource = get(),
             localDataSource = get(),
             preferenceManager = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     single<SwarmUiModelsRemoteDataSource> {
@@ -535,7 +549,7 @@ val coreDataModule = module {
             backgroundWorkObserver = get(),
             preferenceManager = get(),
             sessionPreference = get(),
-            authorizationStore = get(),
+            connections = get(),
             swarmSessionRemoteDataSource = get(),
             remoteDataSource = get(),
         )
@@ -554,7 +568,7 @@ val coreDataModule = module {
             lds = get(),
             preferenceManager = get(),
             sessionPreference = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     single<EmbeddingsDataSource.Remote.Automatic1111> {
@@ -568,7 +582,7 @@ val coreDataModule = module {
             remoteDataSource = get(),
             localDataSource = get(),
             preferenceManager = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     single<EmbeddingsDataSource.Remote.SwarmUi> {
@@ -582,7 +596,7 @@ val coreDataModule = module {
             lds = get(),
             preferenceManager = get(),
             sessionPreference = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
 }

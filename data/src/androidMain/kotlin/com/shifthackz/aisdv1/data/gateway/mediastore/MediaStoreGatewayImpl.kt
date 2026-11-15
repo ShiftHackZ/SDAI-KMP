@@ -44,9 +44,16 @@ internal class MediaStoreGatewayImpl(
      * @author Dmitriy Moroz
      */
     override fun exportToFile(fileName: String, content: ByteArray) {
+        val mimeType = when {
+            content.size >= 8 && content[0] == 0x89.toByte() && content[1] == 0x50.toByte() -> "image/png"
+            content.size >= 12 && content.copyOfRange(8, 12)
+                .decodeToString() == "WEBP" -> "image/webp"
+
+            else -> "image/jpeg"
+        }
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
             put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/SDAI/")
         }
 
@@ -57,7 +64,7 @@ internal class MediaStoreGatewayImpl(
             extVolumeUri,
             null,
             MediaStore.MediaColumns.DISPLAY_NAME + " = ? AND " + MediaStore.MediaColumns.MIME_TYPE + " = ?",
-            arrayOf(fileName, "image/jpeg"),
+            arrayOf(fileName, mimeType),
             null
         )
 

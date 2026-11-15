@@ -36,7 +36,8 @@ import org.junit.Test
 class LargeLoraCatalogViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val fetchLoras = mockk<FetchAndGetLorasUseCase>()
-    private val catalogs = List(2_500) { LoRA("lora_$it", "alias_$it", "models/Lora/$it.safetensors") }
+    private val catalogs =
+        List(2_500) { LoRA("lora_$it", "alias_$it", "models/Lora/$it.safetensors") }
     private val viewModels = mutableListOf<ExtrasViewModel>()
 
     @Before
@@ -96,6 +97,7 @@ class LargeLoraCatalogViewModelTest {
      * @author Dmitriy Moroz
      */
     private fun createViewModel(prompt: String): ExtrasViewModel = ExtrasViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = object : DispatchersProvider {
             override val io = dispatcher
             override val ui = dispatcher

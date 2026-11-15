@@ -8,7 +8,7 @@ import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
 import com.shifthackz.aisdv1.presentation.model.ErrorState
-import com.shifthackz.aisdv1.presentation.navigation.router.ReportRouter
+import com.shifthackz.aisdv1.core.navigation.router.ReportRouter
 import com.shifthackz.aisdv1.presentation.widget.dialog.ErrorDialog
 import org.koin.core.parameter.parametersOf
 
@@ -57,6 +57,7 @@ fun ReportScreen(
                 text = Localization.string("error_generic").asUiText(),
                 onDismissRequest = { intentHandler(ReportIntent.DismissError) },
             )
+
             is ErrorState.WithMessage -> ErrorDialog(
                 text = error.message,
                 onDismissRequest = { intentHandler(ReportIntent.DismissError) },

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.preference
 
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
+import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.HuggingFaceModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.preference.ConfigurationStore
@@ -77,6 +79,7 @@ internal class KeyValueConfigurationStore(
 
     /**
      * Complete HTTP(S) API prefix, including any version and reverse-proxy path.
+     *
      * @author Dmitriy Moroz
      */
     override var openAiCompatibleUrl: String
@@ -85,6 +88,7 @@ internal class KeyValueConfigurationStore(
 
     /**
      * Optional bearer token for the independent compatible server.
+     *
      * @author Dmitriy Moroz
      */
     override var openAiCompatibleApiKey: String
@@ -93,6 +97,7 @@ internal class KeyValueConfigurationStore(
 
     /**
      * Editable image model identifier supplied to the compatible server.
+     *
      * @author Dmitriy Moroz
      */
     override var openAiCompatibleModel: String
@@ -252,6 +257,82 @@ internal class KeyValueConfigurationStore(
         get() = keyValueStore.getString(KEY_BONSAI_CUSTOM_MODEL_PATH)
         set(value) = keyValueStore.putString(KEY_BONSAI_CUSTOM_MODEL_PATH, value)
 
+    private var pendingStrings: Map<String, String>? = null
+    private var pendingBooleans: Map<String, Boolean>? = null
+
+    /**
+     * Refuses to certify SharedPreferences memory following any failed checked batch.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun getAuthorizationCommitId(): String {
+        if (pendingStrings != null) throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.PERSISTENCE)
+        return keyValueStore.getString("key_authorization_commit_id")
+    }
+
+    /**
+     * Persists a complete existing-format snapshot and association together, retaining failed intent.
+     *
+     * @param configuration Validated complete candidate.
+     * @param commitId Opaque association of staged protected credentials.
+     * @author Dmitriy Moroz
+     */
+    override fun commitConfiguration(configuration: Configuration, commitId: String) {
+        retryPendingConfiguration()
+        val previous = keyValueStore.readProviderSelection()
+        val revision = if (previous.first == configuration.source) previous.second else {
+            check(previous.second < Long.MAX_VALUE) { "Provider selection revision exhausted" }
+            previous.second + 1
+        }
+        pendingStrings = mapOf(
+            KEY_SERVER_URL to configuration.serverUrl.fixUrlSlashes(),
+            KEY_SWARM_SERVER_URL to configuration.swarmUiUrl.fixUrlSlashes(),
+            KEY_SWARM_MODEL to configuration.swarmUiModel,
+            KEY_HORDE_API_KEY to configuration.hordeApiKey,
+            KEY_OPEN_AI_API_KEY to configuration.openAiApiKey,
+            KEY_OPEN_AI_COMPATIBLE_MODEL to configuration.openAiCompatibleModel,
+            KEY_OPEN_AI_COMPATIBLE_API_KEY to configuration.openAiCompatibleApiKey,
+            KEY_OPEN_AI_COMPATIBLE_URL to configuration.openAiCompatibleUrl,
+            KEY_HUGGING_FACE_API_KEY to configuration.huggingFaceApiKey,
+            KEY_HUGGING_FACE_MODEL_KEY to configuration.huggingFaceModel,
+            KEY_STABILITY_AI_API_KEY to configuration.stabilityAiApiKey,
+            KEY_STABILITY_AI_ENGINE_ID_KEY to configuration.stabilityAiEngineId,
+            KEY_FAL_AI_API_KEY to configuration.falAiApiKey,
+            KEY_ARLI_AI_API_KEY to configuration.arliAiApiKey,
+            KEY_LOCAL_MODEL_ID to configuration.localOnnxModelId,
+            KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH to configuration.localOnnxModelPath,
+            KEY_MEDIA_PIPE_MODEL_ID to configuration.localMediaPipeModelId,
+            KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH to configuration.localMediaPipeModelPath,
+            KEY_SDXL_MODEL_ID to configuration.localSdxlModelId,
+            KEY_SDXL_CUSTOM_MODEL_PATH to configuration.localSdxlModelPath,
+            KEY_CORE_ML_MODEL_ID to configuration.localCoreMlModelId,
+            KEY_CORE_ML_CUSTOM_MODEL_PATH to configuration.localCoreMlModelPath,
+            KEY_BONSAI_MODEL_ID to configuration.localBonsaiModelId,
+            KEY_BONSAI_CUSTOM_MODEL_PATH to configuration.localBonsaiModelPath,
+            "key_provider_selection_state" to "${configuration.source.key}|$revision",
+            "key_authorization_commit_id" to commitId,
+        )
+        pendingBooleans = mapOf(KEY_DEMO_MODE to configuration.demoMode)
+        retryPendingConfiguration()
+    }
+
+    /**
+     * Repeats the exact failed batch without advancing its captured revision or accepting memory state.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun retryPendingConfiguration(): Boolean {
+        val strings = pendingStrings ?: return false
+        try {
+            keyValueStore.putConfigurationDurably(strings, pendingBooleans.orEmpty())
+        } catch (_: Exception) {
+            throw AuthorizationStorageFailure(AuthorizationStorageFailure.Reason.PERSISTENCE)
+        }
+        pendingStrings = null
+        pendingBooleans = null
+        return true
+    }
+
     /**
      * Executes the `fixUrlSlashes` step in the SDAI data layer.
      *
@@ -278,60 +359,70 @@ internal class KeyValueConfigurationStore(
          * @author Dmitriy Moroz
          */
         const val KEY_SERVER_URL = "key_server_url"
+
         /**
          * Exposes the `KEY_SWARM_SERVER_URL` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SWARM_SERVER_URL = "key_swarm_server_url"
+
         /**
          * Exposes the `KEY_SWARM_MODEL` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SWARM_MODEL = "key_swarm_model"
+
         /**
          * Exposes the `KEY_DEMO_MODE` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DEMO_MODE = "key_demo_mode"
+
         /**
          * Exposes the `KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH = "key_local_diffusion_custom_model_path"
+
         /**
          * Exposes the `KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH = "key_mediapipe_custom_model_path"
+
         /**
          * Exposes the `KEY_CORE_ML_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_CORE_ML_CUSTOM_MODEL_PATH = "key_core_ml_custom_model_path"
+
         /**
          * Exposes the `KEY_BONSAI_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_BONSAI_CUSTOM_MODEL_PATH = "key_bonsai_custom_model_path"
+
         /**
          * Exposes the `KEY_SDXL_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SDXL_CUSTOM_MODEL_PATH = "key_sdxl_custom_model_path"
+
         /**
          * Exposes the `KEY_SERVER_SOURCE` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SERVER_SOURCE = "key_server_source"
+
         /**
          * Exposes the `KEY_HORDE_API_KEY` value used by the SDAI data layer.
          *
@@ -341,78 +432,91 @@ internal class KeyValueConfigurationStore(
         const val KEY_OPEN_AI_COMPATIBLE_URL = "key_open_ai_compatible_url"
         const val KEY_OPEN_AI_COMPATIBLE_API_KEY = "key_open_ai_compatible_api_key"
         const val KEY_OPEN_AI_COMPATIBLE_MODEL = "key_open_ai_compatible_model"
+
         /**
          * Exposes the `KEY_OPEN_AI_API_KEY` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_OPEN_AI_API_KEY = "key_open_ai_api_key"
+
         /**
          * Exposes the `KEY_HUGGING_FACE_API_KEY` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_HUGGING_FACE_API_KEY = "key_hugging_face_api_key"
+
         /**
          * Exposes the `KEY_HUGGING_FACE_MODEL_KEY` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_HUGGING_FACE_MODEL_KEY = "key_hugging_face_model_key"
+
         /**
          * Exposes the `KEY_STABILITY_AI_API_KEY` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_STABILITY_AI_API_KEY = "key_stability_ai_api_key"
+
         /**
          * Exposes the `KEY_FAL_AI_API_KEY` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_FAL_AI_API_KEY = "key_fal_ai_api_key"
+
         /**
          * Exposes the `KEY_ARLI_AI_API_KEY` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_ARLI_AI_API_KEY = "key_arli_ai_api_key"
+
         /**
          * Exposes the `KEY_STABILITY_AI_ENGINE_ID_KEY` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_STABILITY_AI_ENGINE_ID_KEY = "key_stability_ai_engine_id_key"
+
         /**
          * Exposes the `KEY_MEDIA_PIPE_MODEL_ID` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_MEDIA_PIPE_MODEL_ID = "key_mediapipe_model_id"
+
         /**
          * Exposes the `KEY_CORE_ML_MODEL_ID` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_CORE_ML_MODEL_ID = "key_core_ml_model_id"
+
         /**
          * Exposes the `KEY_BONSAI_MODEL_ID` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_BONSAI_MODEL_ID = "key_bonsai_model_id"
+
         /**
          * Exposes the `KEY_SDXL_MODEL_ID` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SDXL_MODEL_ID = "key_sdxl_model_id"
+
         /**
          * Exposes the `KEY_LOCAL_MODEL_ID` value used by the SDAI data layer.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_LOCAL_MODEL_ID = "key_local_model_id"
+
         /**
          * Exposes the `URL_PROTOCOL_MARKER` value used by the SDAI data layer.
          *

@@ -1,8 +1,11 @@
 package com.shifthackz.aisdv1.presentation.screen.txt2img
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.core.model.UiText
@@ -11,6 +14,9 @@ import com.shifthackz.aisdv1.core.validation.seed.SeedValidator
 import com.shifthackz.aisdv1.presentation.widget.input.withSeedValidation
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ForgeModule
+import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
+import kotlinx.coroutines.flow.combine
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
@@ -43,7 +49,7 @@ import com.shifthackz.aisdv1.feature.benchmark.LocalGenerationBenchmarkGate
 import com.shifthackz.aisdv1.presentation.core.GenerationFormUpdateEvent
 import com.shifthackz.aisdv1.presentation.core.GenerationPlatformServices
 import com.shifthackz.aisdv1.presentation.model.GenerationModal
-import com.shifthackz.aisdv1.presentation.navigation.router.TextToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
@@ -56,13 +62,17 @@ import kotlinx.coroutines.withContext
  * It loads provider configuration, mirrors the shared generation form state,
  * gates local providers through benchmark recommendations, and delegates actual
  * generation work to the action handler.
+ *
  * @param openAiOAuthGateway Observes token-free account revisions captured in submitted OAuth work.
  * @param nativeSeedValidator Validates native provider seeds using their full integer precision.
  * @param seedValidator Validates edited, restored and provider-switched seeds before state publication.
  * @param providerSelectionGuard Serializes final UI publication with provider replacement.
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
+ * @param nativeGenerationGateway Engine-specific progress/stages for the captured generation modal.
  */
 class TextToImageViewModel(
+    diagnostics: UiDiagnostics,
     private val dispatchersProvider: DispatchersProvider,
     private val getConfigurationUseCase: GetConfigurationUseCase,
     private val getStableDiffusionSamplersUseCase: GetStableDiffusionSamplersUseCase,
@@ -73,6 +83,7 @@ class TextToImageViewModel(
     private val saveGenerationResultUseCase: SaveGenerationResultUseCase,
     private val saveLastResultToCacheUseCase: SaveLastResultToCacheUseCase,
     private val interruptGenerationUseCase: InterruptGenerationUseCase,
+    private val nativeGenerationGateway: NativeGenerationGateway,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
     private val observeStableDiffusionCppProcessStatusUseCase: ObserveStableDiffusionCppProcessStatusUseCase,
@@ -96,6 +107,8 @@ class TextToImageViewModel(
     private val providerSelectionGuard: ProviderSelectionGuard,
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<TextToImageState, TextToImageIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.TEXT_TO_IMAGE.asDiagnosticScreen(),
     initialState = TextToImageState(
         openAiCompatibleModel = preferenceManager.openAiCompatibleModel,
         samplingSteps = preferenceManager.textToImageSamplingSteps,
@@ -143,7 +156,8 @@ class TextToImageViewModel(
                 gateway = openAiOAuthGateway,
                 onIdentity = { identity ->
                     updateFormState {
-                        val changed = it.mode == ServerSource.OPEN_AI_OAUTH && it.openAiOAuthRevision != identity?.revision
+                        val changed =
+                            it.mode == ServerSource.OPEN_AI_OAUTH && it.openAiOAuthRevision != identity?.revision
                         it.copy(
                             openAiOAuthAccountId = identity?.accountId,
                             openAiOAuthRevision = identity?.revision,
@@ -152,9 +166,15 @@ class TextToImageViewModel(
                         )
                     }
                 },
-                onUnavailable = { error -> updateFormState {
-                    if (it.mode == ServerSource.OPEN_AI_OAUTH) it.copy(error = UiText.Static(error.localizedDescription())) else it
-                } },
+                onUnavailable = { error ->
+                    updateFormState {
+                        if (it.mode == ServerSource.OPEN_AI_OAUTH) it.copy(
+                            error = UiText.Static(
+                                error.localizedDescription()
+                            )
+                        ) else it
+                    }
+                },
             )
         }
         loadConfiguration()
@@ -214,23 +234,28 @@ class TextToImageViewModel(
             TextToImageIntent.RetrySamplers -> {
                 if (stableDiffusionSamplers.isNullOrEmpty()) loadSamplers()
             }
+
             TextToImageIntent.RefreshADetailerAvailability -> loadADetailerAvailability(force = true)
             TextToImageIntent.OpenADetailerInstallInstructions -> Unit
             TextToImageIntent.RunBenchmarkFromPrompt -> actionHandler.runBenchmarkFromPrompt()
             TextToImageIntent.SkipBenchmarkPrompt -> actionHandler.skipBenchmarkPrompt()
             TextToImageIntent.ContinueAfterBenchmarkWarning ->
                 actionHandler.continueAfterBenchmarkWarning(suppressFutureWarnings = false)
+
             TextToImageIntent.SuppressBenchmarkWarningAndContinue ->
                 actionHandler.continueAfterBenchmarkWarning(suppressFutureWarnings = true)
+
             TextToImageIntent.DismissModal -> actionHandler.dismissBenchmarkDialog()
             is TextToImageIntent.UpdateOpenAiCompatibleModel -> {
                 preferenceManager.openAiCompatibleModel = intent.value
                 intentProcessor.process(intent)
             }
+
             is TextToImageIntent.UpdateArliAiModel -> {
                 preferenceManager.arliAiModel = intent.value
                 intentProcessor.process(intent)
             }
+
             else -> intentProcessor.process(intent)
         }
         persistGenerationParameters()
@@ -303,6 +328,27 @@ class TextToImageViewModel(
     }
 
     private fun observeGenerationProgress() {
+        NativeGenerationEngine.entries.forEach { engine ->
+            launch(dispatchersProvider.immediate) {
+                combine(
+                    nativeGenerationGateway.observeStage(engine),
+                    nativeGenerationGateway.observeStatus(engine)
+                ) { stage, status -> stage to status }
+                    .collect { (stage, status) ->
+                        updateFormState { state ->
+                            val modal = state.screenModal
+                            if (modal is GenerationModal.Generating && modal.nativeEngine == engine)
+                                state.copy(
+                                    screenModal = modal.copy(
+                                        nativeStage = stage,
+                                        status = status
+                                    )
+                                )
+                            else state
+                        }
+                    }
+            }
+        }
         launch(dispatchersProvider.immediate) {
             observeHordeProcessStatusUseCase().collect { status ->
                 updateFormState { state ->
@@ -340,7 +386,7 @@ class TextToImageViewModel(
     private fun updateLocalGenerationStatus(status: LocalDiffusionStatus) {
         updateFormState { state ->
             val modal = state.screenModal
-            if (modal is GenerationModal.Generating) {
+            if (modal is GenerationModal.Generating && modal.nativeEngine == null) {
                 state.copy(screenModal = modal.copy(status = status))
             } else {
                 state

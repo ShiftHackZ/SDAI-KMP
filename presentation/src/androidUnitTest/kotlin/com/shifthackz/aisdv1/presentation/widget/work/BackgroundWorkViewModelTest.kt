@@ -66,7 +66,7 @@ class BackgroundWorkViewModelTest {
         }
 
     @Test
-    fun `given background work success, expected finish title and image loaded`() =
+    fun `given background work success, expected finish title and preview payload without eager decoding`() =
         runTest(testDispatcher) {
             observer.result = flowOf(
                 BackgroundWorkResult.Success(
@@ -82,11 +82,11 @@ class BackgroundWorkViewModelTest {
                     visible = true,
                     dismissible = true,
                     title = Localization.string("notification_finish_title", languageCode = "en"),
-                    image = imageBitmap,
+                    imageBase64 = "base64-result",
                 ),
                 viewModel.state.value,
             )
-            Assert.assertEquals("base64-result", imageLoader.lastBase64)
+            Assert.assertNull(imageLoader.lastBase64)
         }
 
     @Test
@@ -156,6 +156,7 @@ class BackgroundWorkViewModelTest {
         }
 
     private fun TestScope.createViewModel() = BackgroundWorkViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         backgroundWorkObserver = observer,
         imageLoader = imageLoader,
@@ -198,6 +199,7 @@ class BackgroundWorkViewModelTest {
         override fun dismissResult() {
             dismissed = true
         }
+
         override fun refreshStatus() = Unit
         override fun postStatusMessage(title: String, subTitle: String) = Unit
         override fun postSuccessSignal(result: List<AiGenerationResult>) = Unit

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.domain.usecase.connectivity
 
+import com.shifthackz.aisdv1.domain.entity.AuthenticatedConnection
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionGenerationDataSource
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
@@ -22,12 +24,22 @@ class DefaultTestConnectivityUseCaseImplTest {
 
     private val useCase = DefaultTestConnectivityUseCaseImpl(
         remoteDataSource = stubRemoteDataSource,
-        authorizationStore = stubAuthorizationStore,
+        connections = mockk<AuthenticatedConnectionProvider> {
+            coEvery { snapshot(any(), any()) } coAnswers {
+                AuthenticatedConnection(
+                    STUB_URL,
+                    "",
+                    "",
+                    stubAuthorizationStore.getAuthorizationCredentials(),
+                    0L
+                )
+            }
+        },
     )
 
     @Test
     fun `given connection to server can be established, expected complete value`() = runTest {
-        every {
+        coEvery {
             stubAuthorizationStore.getAuthorizationCredentials()
         } returns AuthorizationCredentials.None
 
@@ -40,7 +52,7 @@ class DefaultTestConnectivityUseCaseImplTest {
 
     @Test
     fun `given connection to server can not be established, expected error value`() = runTest {
-        every {
+        coEvery {
             stubAuthorizationStore.getAuthorizationCredentials()
         } returns AuthorizationCredentials.None
 

@@ -11,10 +11,6 @@ import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.common.time.TimeProvider
-import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.feature.onnx.entity.LocalDiffusionFlag
-import com.shifthackz.aisdv1.feature.onnx.environment.DeviceNNAPIFlagProvider
-import com.shifthackz.aisdv1.feature.onnx.environment.LocalModelIdProvider
 import com.shifthackz.aisdv1.presentation.activity.AiStableDiffusionActivity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -88,21 +84,10 @@ val providersModule = module {
             override val providerPath: String = "${androidApplication().packageName}.fileprovider"
             override val imagesCacheDirPath: String = "${androidApplication().cacheDir}/images"
             override val logsCacheDirPath: String = "${androidApplication().cacheDir}/logs"
-            override val localModelDirPath: String = "${androidApplication().filesDir.absolutePath}/model"
+            override val localModelDirPath: String =
+                "${androidApplication().filesDir.absolutePath}/model"
             override val workCacheDirPath: String = "${androidApplication().cacheDir}/work"
         }
-    }
-
-    single {
-        DeviceNNAPIFlagProvider {
-            get<PreferenceManager>().localOnnxUseNNAPI
-                .let { nnApi -> if (nnApi) LocalDiffusionFlag.NN_API else LocalDiffusionFlag.CPU }
-                .let(LocalDiffusionFlag::value)
-        }
-    }
-
-    single {
-        LocalModelIdProvider { get<PreferenceManager>().localOnnxModelId }
     }
 
     single {

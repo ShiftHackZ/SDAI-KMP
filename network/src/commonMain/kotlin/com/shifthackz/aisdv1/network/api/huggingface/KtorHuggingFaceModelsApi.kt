@@ -6,7 +6,7 @@ import com.shifthackz.aisdv1.network.client.trackUsage
 import com.shifthackz.aisdv1.network.client.trackedJsonBody
 import com.shifthackz.aisdv1.network.model.HuggingFaceModelRaw
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
@@ -54,7 +54,7 @@ class KtorHuggingFaceModelsApi(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchTextToImageModels(): List<HuggingFaceModelRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(apiBaseUrl)
             url.appendPathSegments(PATH_API, PATH_MODELS)
             trackUsage(NetworkUsageCategory.CONFIGS)
@@ -76,42 +76,49 @@ class KtorHuggingFaceModelsApi(
          * @author Dmitriy Moroz
          */
         const val PATH_API = "api"
+
         /**
          * Exposes the `PATH_MODELS` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PATH_MODELS = "models"
+
         /**
          * Exposes the `QUERY_INFERENCE_PROVIDER` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val QUERY_INFERENCE_PROVIDER = "inference_provider"
+
         /**
          * Exposes the `QUERY_PIPELINE_TAG` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val QUERY_PIPELINE_TAG = "pipeline_tag"
+
         /**
          * Exposes the `QUERY_LIMIT` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val QUERY_LIMIT = "limit"
+
         /**
          * Exposes the `PROVIDER_HF_INFERENCE` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PROVIDER_HF_INFERENCE = "hf-inference"
+
         /**
          * Exposes the `PIPELINE_TEXT_TO_IMAGE` value used by the SDAI network layer.
          *
          * @author Dmitriy Moroz
          */
         const val PIPELINE_TEXT_TO_IMAGE = "text-to-image"
+
         /**
          * Exposes the `QUERY_LIMIT_VALUE` value used by the SDAI network layer.
          *

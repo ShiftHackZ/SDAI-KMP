@@ -6,6 +6,13 @@ package com.shifthackz.aisdv1.work
  * @author Dmitriy Moroz
  */
 internal object Constants {
+    /**
+     * Marks requests whose payload is keyed by the WorkManager UUID.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val IMMUTABLE_PAYLOAD = "immutable_payload"
+
 
     /**
      * Exposes the `NOTIFICATION_TEXT_TO_IMAGE_FOREGROUND` value used by the SDAI background work feature layer.
@@ -13,18 +20,21 @@ internal object Constants {
      * @author Dmitriy Moroz
      */
     const val NOTIFICATION_TEXT_TO_IMAGE_FOREGROUND = 5598
+
     /**
      * Exposes the `NOTIFICATION_TEXT_TO_IMAGE_GENERIC` value used by the SDAI background work feature layer.
      *
      * @author Dmitriy Moroz
      */
     const val NOTIFICATION_TEXT_TO_IMAGE_GENERIC = 5599
+
     /**
      * Exposes the `NOTIFICATION_IMAGE_TO_IMAGE_FOREGROUND` value used by the SDAI background work feature layer.
      *
      * @author Dmitriy Moroz
      */
     const val NOTIFICATION_IMAGE_TO_IMAGE_FOREGROUND = 151297
+
     /**
      * Exposes the `NOTIFICATION_IMAGE_TO_IMAGE_GENERIC` value used by the SDAI background work feature layer.
      *
@@ -45,6 +55,7 @@ internal object Constants {
      * @author Dmitriy Moroz
      */
     const val FILE_TEXT_TO_IMAGE = "txt2img.bin"
+
     /**
      * Exposes the `FILE_IMAGE_TO_IMAGE` value used by the SDAI background work feature layer.
      *

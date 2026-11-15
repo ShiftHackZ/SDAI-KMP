@@ -8,7 +8,7 @@ import com.shifthackz.aisdv1.domain.datasource.OpenAiGenerationDataSource
 import com.shifthackz.aisdv1.domain.datasource.StabilityAiGenerationDataSource
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionGenerationDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsRemoteDataSource
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.ConfigurationStore
 
 /**
@@ -24,11 +24,11 @@ internal class DefaultTestConnectivityUseCaseImpl(
      */
     private val remoteDataSource: StableDiffusionGenerationDataSource.Remote,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI domain layer.
+     * Captures protected credentials with the validated connection destination.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : TestConnectivityUseCase {
 
     /**
@@ -38,9 +38,10 @@ internal class DefaultTestConnectivityUseCaseImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun invoke(url: String) {
+        val connection = connections.snapshot(automatic1111Url = url)
         remoteDataSource.checkAvailability(
             baseUrl = url,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            credentials = connection.credentials,
         )
     }
 }
@@ -58,11 +59,11 @@ internal class DefaultTestSwarmUiConnectivityUseCaseImpl(
      */
     private val remoteDataSource: SwarmUiModelsRemoteDataSource,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI domain layer.
+     * Captures protected credentials with the validated connection destination.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : TestSwarmUiConnectivityUseCase {
 
     /**
@@ -72,9 +73,10 @@ internal class DefaultTestSwarmUiConnectivityUseCaseImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun invoke(url: String) {
+        val connection = connections.snapshot(swarmUiUrl = url)
         remoteDataSource.getNewSession(
             baseUrl = url,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            credentials = connection.credentials,
         )
     }
 }

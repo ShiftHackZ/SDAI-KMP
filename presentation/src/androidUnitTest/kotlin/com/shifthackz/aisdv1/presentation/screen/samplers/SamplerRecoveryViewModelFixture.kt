@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.screen.samplers
 
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
 import androidx.lifecycle.viewModelScope
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
@@ -90,6 +91,11 @@ internal class SamplerRecoveryViewModelFixture(
     init {
         if (type == AiGenerationResult.Type.TEXT_TO_IMAGE) {
             textToImage = TextToImageViewModel(
+                nativeGenerationGateway = mockk {
+                    every { observeStage(any()) } returns emptyFlow()
+                    every { observeStatus(any()) } returns emptyFlow()
+                },
+                diagnostics = mockk(relaxed = true),
                 dispatchersProvider = dispatchers,
                 getConfigurationUseCase = configuration,
                 getStableDiffusionSamplersUseCase = getSamplers,
@@ -136,6 +142,8 @@ internal class SamplerRecoveryViewModelFixture(
         } else {
             textToImage = null
             imageToImage = ImageToImageViewModel(
+                originalImageBudget = OriginalImageBudget(32 * 1024 * 1024, 16_777_216L),
+                diagnostics = mockk(relaxed = true),
                 dispatchersProvider = dispatchers,
                 getConfigurationUseCase = configuration,
                 getStableDiffusionSamplersUseCase = getSamplers,

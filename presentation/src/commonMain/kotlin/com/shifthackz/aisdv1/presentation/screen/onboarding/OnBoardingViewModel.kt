@@ -1,14 +1,17 @@
 package com.shifthackz.aisdv1.presentation.screen.onboarding
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.splash.SplashNavigationUseCase
-import com.shifthackz.aisdv1.presentation.model.LaunchSource
-import com.shifthackz.aisdv1.presentation.navigation.router.OnBoardingRouter
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.router.OnBoardingRouter
 import com.shifthackz.aisdv1.presentation.navigation.router.postOnBoardingNavigation
 import kotlinx.coroutines.withContext
 
@@ -16,8 +19,10 @@ import kotlinx.coroutines.withContext
  * Coordinates `OnBoardingViewModel` behavior in the SDAI presentation layer.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class OnBoardingViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `launchSource` value used by the SDAI presentation layer.
      *
@@ -55,6 +60,8 @@ class OnBoardingViewModel(
      */
     private val buildInfoProvider: BuildInfoProvider,
 ) : BaseMviViewModel<OnBoardingState, OnBoardingIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.ON_BOARDING.asDiagnosticScreen(),
     initialState = OnBoardingState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {

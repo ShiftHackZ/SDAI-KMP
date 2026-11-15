@@ -12,7 +12,7 @@ import com.shifthackz.aisdv1.core.model.asString
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.presentation.di.initKoin
 import com.shifthackz.aisdv1.presentation.modal.ldscheduler.LDSchedulerBottomSheet
-import com.shifthackz.aisdv1.presentation.navigation.router.DebugMenuRouter
+import com.shifthackz.aisdv1.core.navigation.router.DebugMenuRouter
 import org.koin.core.parameter.parametersOf
 
 /**
@@ -81,6 +81,11 @@ fun DebugMenuScreen(
 @Composable
 internal fun debugMenuScreenStrings() = DebugMenuScreenStrings(
     title = Localization.string("title_debug_menu"),
+    diagnosticSection = Localization.string("ui_diagnostics_title"),
+    diagnosticCapture = Localization.string("ui_diagnostics_capture"),
+    diagnosticReset = Localization.string("ui_diagnostics_reset"),
+    diagnosticShare = Localization.string("ui_diagnostics_share"),
+
     mainSection = Localization.string("debug_section_main"),
     actionLogger = Localization.string("debug_action_logger"),
     actionLoggerClear = Localization.string("debug_action_logger_clear"),
@@ -103,6 +108,8 @@ internal fun debugMenuScreenStrings() = DebugMenuScreenStrings(
  */
 @Composable
 internal fun DebugMenuState.toContentState() = DebugMenuScreenContentState(
+    isUiDiagnosticsSupported = isUiDiagnosticsSupported,
+    isUiDiagnosticsCapturing = isUiDiagnosticsCapturing,
     localDiffusionAllowCancel = localDiffusionAllowCancel,
     localDiffusionSchedulerThread = localDiffusionSchedulerThread.mapToUi().asString(),
     showWorkManagerSection = showWorkManagerSection,
@@ -116,6 +123,10 @@ internal fun DebugMenuState.toContentState() = DebugMenuScreenContentState(
  * @author Dmitriy Moroz
  */
 internal fun DebugMenuAction.toIntent(): DebugMenuIntent = when (this) {
+    DebugMenuAction.StartUiCapture -> DebugMenuIntent.StartUiCapture
+    DebugMenuAction.StopUiCapture -> DebugMenuIntent.StopUiCapture
+    DebugMenuAction.ResetUiCapture -> DebugMenuIntent.ResetUiCapture
+    DebugMenuAction.ShareUiCapture -> DebugMenuIntent.ShareUiCapture
     DebugMenuAction.NavigateBack -> DebugMenuIntent.NavigateBack
     DebugMenuAction.ViewLogs -> DebugMenuIntent.ViewLogs
     DebugMenuAction.ClearLogs -> DebugMenuIntent.ClearLogs

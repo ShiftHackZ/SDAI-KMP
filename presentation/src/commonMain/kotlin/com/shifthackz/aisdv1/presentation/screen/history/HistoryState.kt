@@ -2,7 +2,7 @@ package com.shifthackz.aisdv1.presentation.screen.history
 
 import androidx.compose.runtime.Immutable
 import com.shifthackz.aisdv1.core.mvi.MviState
-import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
+import com.shifthackz.aisdv1.domain.entity.GalleryItemMetadata
 
 /**
  * Carries `HistoryState` data through the SDAI presentation layer.
@@ -22,7 +22,7 @@ data class HistoryState(
      *
      * @author Dmitriy Moroz
      */
-    val items: List<AiGenerationResult> = emptyList(),
+    val items: List<GalleryItemMetadata> = emptyList(),
     /**
      * Exposes the `error` value used by the SDAI presentation layer.
      *

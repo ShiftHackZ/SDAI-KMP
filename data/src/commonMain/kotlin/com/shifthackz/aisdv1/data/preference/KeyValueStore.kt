@@ -1,66 +1,84 @@
 package com.shifthackz.aisdv1.data.preference
 
 /**
- * Defines the `KeyValueStore` contract for the SDAI data layer.
+ * Shared typed preference owner for ordinary settings and checked complete configuration writes.
+ * Pending configuration keys retain their last trusted read view; unrelated settings remain usable.
  *
  * @author Dmitriy Moroz
  */
 internal interface KeyValueStore {
     /**
-     * Loads SDAI data through `getString`.
+     * Reads a trusted string, using the caller fallback when its prior entry was absent.
      *
-     * @param key key value consumed by the API.
-     * @param default default value consumed by the API.
-     * @return Result produced by `getString`.
+     * @param key Existing preference key.
+     * @param default Fallback retained while a replacement remains unconfirmed.
      * @author Dmitriy Moroz
      */
     fun getString(key: String, default: String = ""): String
+
     /**
-     * Executes the `putString` step in the SDAI data layer.
+     * Writes an ordinary setting; platform owners reject overlap with a pending configuration.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Existing preference key.
+     * @param value New ordinary string value.
      * @author Dmitriy Moroz
      */
     fun putString(key: String, value: String)
+
     /**
-     * Commits an identity-sensitive value before reporting success to a queued-work producer.
-     * @param key Stable application preference key.
-     * @param value Complete atomic value to persist.
+     * Requests checked persistence for an identity value before reporting success to its producer.
+     * Platform owners apply the same trusted-memory/exact-retry rules as complete batches.
+     *
+     * @param key Existing identity preference key.
+     * @param value Complete encoded source/revision value.
      * @author Dmitriy Moroz
      */
     fun putStringDurably(key: String, value: String) = putString(key, value)
+
     /**
-     * Loads SDAI data through `getBoolean`.
+     * Checks a complete configuration batch without publishing unconfirmed platform memory.
+     * All readers retain prior values/defaults on failure until an identical full retry succeeds.
+     * Ordinary writes to these pending keys fail explicitly; unrelated settings remain usable.
+     * Platform implementations release their memory lock before disk persistence.
      *
-     * @param key key value consumed by the API.
-     * @param default default value consumed by the API.
-     * @return Result produced by `getBoolean`.
+     * @param strings Complete existing string preference keys and candidate values.
+     * @param booleans Complete existing boolean preference keys and candidate values.
+     * @author Dmitriy Moroz
+     */
+    fun putConfigurationDurably(strings: Map<String, String>, booleans: Map<String, Boolean>)
+
+    /**
+     * Reads a trusted boolean, preserving defaults for previously absent configuration entries.
+     *
+     * @param key Existing boolean preference key.
+     * @param default Fallback for an absent trusted entry.
      * @author Dmitriy Moroz
      */
     fun getBoolean(key: String, default: Boolean = false): Boolean
+
     /**
-     * Executes the `putBoolean` step in the SDAI data layer.
+     * Writes an ordinary boolean, rejecting conflicts with pending configuration ownership.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Existing preference key.
+     * @param value New ordinary boolean value.
      * @author Dmitriy Moroz
      */
     fun putBoolean(key: String, value: Boolean)
+
     /**
-     * Loads SDAI data through `getInt`.
+     * Reads an ordinary integer; complete configuration batches have no integer entries.
      *
-     * @param key key value consumed by the API.
-     * @param default default value consumed by the API.
-     * @return Result produced by `getInt`.
+     * @param key Existing integer preference key.
+     * @param default Fallback for an absent entry.
      * @author Dmitriy Moroz
      */
     fun getInt(key: String, default: Int = 0): Int
+
     /**
-     * Executes the `putInt` step in the SDAI data layer.
+     * Writes an ordinary integer, rejecting accidental overlap with pending configuration keys.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Existing integer preference key.
+     * @param value New ordinary integer value.
      * @author Dmitriy Moroz
      */
     fun putInt(key: String, value: Int)

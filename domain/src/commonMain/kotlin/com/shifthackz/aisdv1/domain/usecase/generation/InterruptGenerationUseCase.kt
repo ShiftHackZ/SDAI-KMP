@@ -1,13 +1,13 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
 /**
- * Defines the `InterruptGenerationUseCase` contract for the SDAI domain layer.
+ * Cancels generation requested by the user, using the active native owner before the selected source.
  *
  * @author Dmitriy Moroz
  */
 interface InterruptGenerationUseCase {
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Requests cancellation of active native work, or interrupts the currently selected source.
      *
      * @author Dmitriy Moroz
      */

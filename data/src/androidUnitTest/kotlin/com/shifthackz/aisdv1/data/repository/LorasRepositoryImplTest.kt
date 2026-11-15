@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockStableDiffusionLoras
 import com.shifthackz.aisdv1.domain.datasource.LorasDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsRemoteDataSource
@@ -26,7 +28,7 @@ class LorasRepositoryImplTest {
     private val stubRdsSwarm = mockk<LorasDataSource.Remote.SwarmUi>()
     private val stubSwarmSessionRemote = mockk<SwarmUiModelsRemoteDataSource>()
     private val stubLds = mockk<LorasDataSource.Local>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
+    private val stubPreferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val stubSessionPreference = mockk<SessionPreference>(relaxed = true)
     private val stubAuthorizationStore = mockk<AuthorizationStore>()
 
@@ -37,7 +39,11 @@ class LorasRepositoryImplTest {
         lds = stubLds,
         preferenceManager = stubPreferenceManager,
         sessionPreference = stubSessionPreference,
-        authorizationStore = stubAuthorizationStore,
+        connections = AuthenticatedConnectionProviderImpl(
+            stubPreferenceManager,
+            stubAuthorizationStore,
+            ProviderSelectionGuard()
+        ),
     )
 
     @Before
@@ -50,7 +56,7 @@ class LorasRepositoryImplTest {
             stubPreferenceManager.swarmUiServerUrl
         } returns SWARM_URL
 
-        every {
+        coEvery {
             stubAuthorizationStore.getAuthorizationCredentials()
         } returns AuthorizationCredentials.None
 
@@ -60,111 +66,123 @@ class LorasRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to fetch loras, source is AUTOMATIC1111, remote returns data, local insert success, expected complete value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to fetch loras, source is AUTOMATIC1111, remote returns data, local insert success, expected complete value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
-        } returns mockStableDiffusionLoras
+            coEvery {
+                stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
+            } returns mockStableDiffusionLoras
 
-        coEvery {
-            stubLds.insertLoras(any())
-        } returns Unit
+            coEvery {
+                stubLds.insertLoras(any())
+            } returns Unit
 
-        repository.fetchLoras()
+            repository.fetchLoras()
 
-        coVerify {
-            stubLds.insertLoras(mockStableDiffusionLoras)
+            coVerify {
+                stubLds.insertLoras(mockStableDiffusionLoras)
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch loras, source is SWARM_UI, remote returns data, local insert success, expected complete value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.SWARM_UI
+    fun `given attempt to fetch loras, source is SWARM_UI, remote returns data, local insert success, expected complete value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.SWARM_UI
 
-        coEvery {
-            stubRdsSwarm.fetchLoras(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
-        } returns mockStableDiffusionLoras
+            coEvery {
+                stubRdsSwarm.fetchLoras(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
+            } returns mockStableDiffusionLoras
 
-        coEvery {
-            stubLds.insertLoras(any())
-        } returns Unit
+            coEvery {
+                stubLds.insertLoras(any())
+            } returns Unit
 
-        repository.fetchLoras()
+            repository.fetchLoras()
 
-        coVerify {
-            stubLds.insertLoras(mockStableDiffusionLoras)
+            coVerify {
+                stubLds.insertLoras(mockStableDiffusionLoras)
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch loras with empty swarm session, expected new session requested before fetch`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.SWARM_UI
+    fun `given attempt to fetch loras with empty swarm session, expected new session requested before fetch`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.SWARM_UI
 
-        every {
-            stubSessionPreference.swarmUiSessionId
-        } returns ""
+            every {
+                stubSessionPreference.swarmUiSessionId
+            } returns ""
 
-        coEvery {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+            coEvery {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
 
-        coEvery {
-            stubRdsSwarm.fetchLoras(SWARM_URL, RENEWED_SESSION_ID, AuthorizationCredentials.None)
-        } returns mockStableDiffusionLoras
+            coEvery {
+                stubRdsSwarm.fetchLoras(
+                    SWARM_URL,
+                    RENEWED_SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockStableDiffusionLoras
 
-        coEvery {
-            stubLds.insertLoras(any())
-        } returns Unit
+            coEvery {
+                stubLds.insertLoras(any())
+            } returns Unit
 
-        repository.fetchLoras()
+            repository.fetchLoras()
 
-        coVerify {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
-            stubLds.insertLoras(mockStableDiffusionLoras)
+            coVerify {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+                stubLds.insertLoras(mockStableDiffusionLoras)
+            }
+            verify {
+                stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+            }
         }
-        verify {
-            stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
-        }
-    }
 
     @Test
-    fun `given attempt to fetch loras with bad swarm session, expected session renewed and fetch retried`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.SWARM_UI
+    fun `given attempt to fetch loras with bad swarm session, expected session renewed and fetch retried`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.SWARM_UI
 
-        coEvery {
-            stubRdsSwarm.fetchLoras(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
-        } throws SwarmUiBadSessionException()
+            coEvery {
+                stubRdsSwarm.fetchLoras(SWARM_URL, SESSION_ID, AuthorizationCredentials.None)
+            } throws SwarmUiBadSessionException()
 
-        coEvery {
-            stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
-        } returns RENEWED_SESSION_ID
+            coEvery {
+                stubSwarmSessionRemote.getNewSession(SWARM_URL, AuthorizationCredentials.None)
+            } returns RENEWED_SESSION_ID
 
-        coEvery {
-            stubRdsSwarm.fetchLoras(SWARM_URL, RENEWED_SESSION_ID, AuthorizationCredentials.None)
-        } returns mockStableDiffusionLoras
+            coEvery {
+                stubRdsSwarm.fetchLoras(
+                    SWARM_URL,
+                    RENEWED_SESSION_ID,
+                    AuthorizationCredentials.None
+                )
+            } returns mockStableDiffusionLoras
 
-        coEvery {
-            stubLds.insertLoras(any())
-        } returns Unit
+            coEvery {
+                stubLds.insertLoras(any())
+            } returns Unit
 
-        repository.fetchLoras()
+            repository.fetchLoras()
 
-        coVerify {
-            stubLds.insertLoras(mockStableDiffusionLoras)
+            coVerify {
+                stubLds.insertLoras(mockStableDiffusionLoras)
+            }
+            verify {
+                stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
+            }
         }
-        verify {
-            stubSessionPreference.swarmUiSessionId = RENEWED_SESSION_ID
-        }
-    }
 
     @Test
     fun `given attempt to fetch loras, remote throws exception, expected error value`() = runTest {
@@ -182,106 +200,112 @@ class LorasRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to fetch loras, remote returns data, local insert fails, expected error value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to fetch loras, remote returns data, local insert fails, expected error value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
-        } returns mockStableDiffusionLoras
+            coEvery {
+                stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
+            } returns mockStableDiffusionLoras
 
-        coEvery {
-            stubLds.insertLoras(any())
-        } throws stubException
+            coEvery {
+                stubLds.insertLoras(any())
+            } throws stubException
 
-        val actual = runCatching { repository.fetchLoras() }
+            val actual = runCatching { repository.fetchLoras() }
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
-
-    @Test
-    fun `given attempt to get loras, local data source returns list, expected valid domain models list value`() = runTest {
-        coEvery {
-            stubLds.getLoras()
-        } returns mockStableDiffusionLoras
-
-        val actual = repository.getLoras()
-
-        Assert.assertEquals(mockStableDiffusionLoras, actual)
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
-    fun `given attempt to get loras, local data source throws exception, expected error value`() = runTest {
-        coEvery {
-            stubLds.getLoras()
-        } throws stubException
+    fun `given attempt to get loras, local data source returns list, expected valid domain models list value`() =
+        runTest {
+            coEvery {
+                stubLds.getLoras()
+            } returns mockStableDiffusionLoras
 
-        val actual = runCatching { repository.getLoras() }
+            val actual = repository.getLoras()
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
-
-    @Test
-    fun `given attempt to fetch and get loras, remote returns data, local returns data, expected valid domain models list value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
-
-        coEvery {
-            stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
-        } returns mockStableDiffusionLoras
-
-        coEvery {
-            stubLds.insertLoras(any())
-        } returns Unit
-
-        coEvery {
-            stubLds.getLoras()
-        } returns mockStableDiffusionLoras
-
-        val actual = repository.fetchAndGetLoras()
-
-        Assert.assertEquals(mockStableDiffusionLoras, actual)
-    }
+            Assert.assertEquals(mockStableDiffusionLoras, actual)
+        }
 
     @Test
-    fun `given attempt to fetch and get loras, remote fails, local returns data, expected valid domain models list value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to get loras, local data source throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubLds.getLoras()
+            } throws stubException
 
-        coEvery {
-            stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
-        } throws stubException
+            val actual = runCatching { repository.getLoras() }
 
-        coEvery {
-            stubLds.getLoras()
-        } returns mockStableDiffusionLoras
-
-        val actual = repository.fetchAndGetLoras()
-
-        Assert.assertEquals(mockStableDiffusionLoras, actual)
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
-    fun `given attempt to fetch and get loras, remote fails, local fails, expected valid error value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to fetch and get loras, remote returns data, local returns data, expected valid domain models list value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
-        } throws stubException
+            coEvery {
+                stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
+            } returns mockStableDiffusionLoras
 
-        coEvery {
-            stubLds.getLoras()
-        } throws stubException
+            coEvery {
+                stubLds.insertLoras(any())
+            } returns Unit
 
-        val actual = runCatching { repository.fetchAndGetLoras() }
+            coEvery {
+                stubLds.getLoras()
+            } returns mockStableDiffusionLoras
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            val actual = repository.fetchAndGetLoras()
+
+            Assert.assertEquals(mockStableDiffusionLoras, actual)
+        }
+
+    @Test
+    fun `given attempt to fetch and get loras, remote fails, local returns data, expected valid domain models list value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
+
+            coEvery {
+                stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
+            } throws stubException
+
+            coEvery {
+                stubLds.getLoras()
+            } returns mockStableDiffusionLoras
+
+            val actual = repository.fetchAndGetLoras()
+
+            Assert.assertEquals(mockStableDiffusionLoras, actual)
+        }
+
+    @Test
+    fun `given attempt to fetch and get loras, remote fails, local fails, expected valid error value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
+
+            coEvery {
+                stubRdsA1111.fetchLoras(A1111_URL, AuthorizationCredentials.None)
+            } throws stubException
+
+            coEvery {
+                stubLds.getLoras()
+            } throws stubException
+
+            val actual = runCatching { repository.fetchAndGetLoras() }
+
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     private companion object {
         const val A1111_URL = "http://192.168.0.1:7860"

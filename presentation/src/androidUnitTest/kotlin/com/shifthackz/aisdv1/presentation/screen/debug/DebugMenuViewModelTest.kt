@@ -6,7 +6,7 @@ import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.Settings
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.debug.DebugInsertBadBase64UseCase
-import com.shifthackz.aisdv1.presentation.navigation.router.DebugMenuRouter
+import com.shifthackz.aisdv1.core.navigation.router.DebugMenuRouter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -191,6 +191,8 @@ class DebugMenuViewModelTest {
         }
 
     private fun TestScope.createViewModel() = DebugMenuViewModel(
+        diagnosticReports = mockk(relaxed = true),
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         preferenceManager = stubPreferenceManager,
         debugInsertBadBase64UseCase = stubDebugInsertBadBase64UseCase,

@@ -1,7 +1,9 @@
 package com.shifthackz.aisdv1.domain.di
 
-import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToOpenAiCompatibleUseCase
-import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToOpenAiCompatibleUseCaseImpl
+import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
+import com.shifthackz.aisdv1.domain.gateway.NoOpNativeGenerationGateway
+import com.shifthackz.aisdv1.domain.usecase.arliai.FetchAndGetArliAiModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.arliai.FetchAndGetArliAiModelsUseCaseImpl
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundTaskManager
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.feature.work.NoOpBackgroundTaskManager
@@ -21,14 +23,12 @@ import com.shifthackz.aisdv1.domain.repository.NoOpLocalDiffusionGenerationRepos
 import com.shifthackz.aisdv1.domain.repository.NoOpMediaPipeGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.NoOpNetworkUsageRepository
 import com.shifthackz.aisdv1.domain.repository.NoOpStableDiffusionCppGenerationRepository
-import com.shifthackz.aisdv1.domain.usecase.arliai.FetchAndGetArliAiModelsUseCase
-import com.shifthackz.aisdv1.domain.usecase.arliai.FetchAndGetArliAiModelsUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.caching.AppCacheCleaner
+import com.shifthackz.aisdv1.domain.usecase.caching.ClearAppCacheUseCase
 import com.shifthackz.aisdv1.domain.repository.NoOpWakeLockRepository
 import com.shifthackz.aisdv1.domain.repository.NetworkUsageRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionCppGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.WakeLockRepository
-import com.shifthackz.aisdv1.domain.usecase.caching.AppCacheCleaner
-import com.shifthackz.aisdv1.domain.usecase.caching.ClearAppCacheUseCase
 import com.shifthackz.aisdv1.domain.usecase.caching.ClearAppCacheUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.caching.DataPreLoaderUseCase
 import com.shifthackz.aisdv1.domain.usecase.caching.DataPreLoaderUseCaseImpl
@@ -97,6 +97,8 @@ import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemsUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemsUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryIdsUseCase
+import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryIdsUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.gallery.GetGalleryItemsUseCase
@@ -121,10 +123,20 @@ import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptGenerationUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultCountUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultCountUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultPageUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultPageUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultPreviewPageUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationResultPreviewPageUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
@@ -149,10 +161,10 @@ import com.shifthackz.aisdv1.domain.usecase.sdmodel.GetStableDiffusionModelsUseC
 import com.shifthackz.aisdv1.domain.usecase.sdmodel.GetStableDiffusionModelsUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.sdmodel.SelectStableDiffusionModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.sdmodel.SelectStableDiffusionModelUseCaseImpl
-import com.shifthackz.aisdv1.domain.usecase.sdscript.IsADetailerAvailableUseCase
-import com.shifthackz.aisdv1.domain.usecase.sdscript.IsADetailerAvailableUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.sdsampler.GetStableDiffusionSamplersUseCase
 import com.shifthackz.aisdv1.domain.usecase.sdsampler.GetStableDiffusionSamplersUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.sdscript.IsADetailerAvailableUseCase
+import com.shifthackz.aisdv1.domain.usecase.sdscript.IsADetailerAvailableUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToA1111UseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToArliAiUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToBonsaiUseCase
@@ -166,6 +178,7 @@ import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToLocalDiffusionUseC
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToLocalDiffusionUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToMediaPipeUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToMediaPipeUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToOpenAiCompatibleUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToOpenAiUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToSdxlUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToSdxlUseCaseImpl
@@ -176,6 +189,7 @@ import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToArliAiUseCa
 import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToFalAiUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToHordeUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToHuggingFaceUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToOpenAiCompatibleUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToOpenAiUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToStabilityAiUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.DefaultConnectToSwarmUiUseCaseImpl
@@ -184,8 +198,12 @@ import com.shifthackz.aisdv1.domain.usecase.settings.DefaultSetServerConfigurati
 import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ObserveNetworkUsageUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ObserveNetworkUsageUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.settings.ResetAuthorizationCredentialsUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.ResetAuthorizationCredentialsUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.ResetNetworkUsageUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ResetNetworkUsageUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.settings.RetryAuthorizationStorageUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.RetryAuthorizationStorageUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.settings.SetServerConfigurationUseCase
 import com.shifthackz.aisdv1.domain.usecase.splash.SplashNavigationUseCase
 import com.shifthackz.aisdv1.domain.usecase.splash.SplashNavigationUseCaseImpl
@@ -214,6 +232,7 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDomainModule = module {
+    single<NativeGenerationGateway> { NoOpNativeGenerationGateway }
     single { ProviderSelectionGuard() }
     single<ServerConnectivityGateway> { NoOpServerConnectivityGateway }
     single<BackgroundWorkObserver> { NoOpBackgroundWorkObserver }
@@ -253,13 +272,13 @@ val coreDomainModule = module {
     factory<TestConnectivityUseCase> {
         DefaultTestConnectivityUseCaseImpl(
             remoteDataSource = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     factory<TestSwarmUiConnectivityUseCase> {
         DefaultTestSwarmUiConnectivityUseCaseImpl(
             remoteDataSource = get(),
-            authorizationStore = get(),
+            connections = get(),
         )
     }
     factory<TestHordeApiKeyUseCase> {
@@ -420,13 +439,26 @@ val coreDomainModule = module {
     }
     factory<InterruptGenerationUseCase> {
         InterruptGenerationUseCaseImpl(
+            preferenceManager = get(),
+            nativeGenerationGateway = get(),
+            interruptSourceGenerationUseCase = get(),
+        )
+    }
+    factory<InterruptWorkerGenerationUseCase> {
+        InterruptWorkerGenerationUseCaseImpl(
+            nativeGenerationGateway = get(),
+            interruptSourceGenerationUseCase = get(),
+            buildInfoProvider = get(),
+        )
+    }
+    factory<InterruptSourceGenerationUseCase> {
+        InterruptSourceGenerationUseCaseImpl(
             stableDiffusionGenerationRepository = get(),
             hordeGenerationRepository = get(),
             localDiffusionGenerationRepository = get(),
             stableDiffusionCppGenerationRepository = get(),
             coreMlGenerationRepository = get(),
             bonsaiGenerationRepository = get(),
-            preferenceManager = get(),
         )
     }
     factory<SaveGenerationResultUseCase> {
@@ -437,6 +469,18 @@ val coreDomainModule = module {
     }
     factory<GetGenerationResultPagedUseCase> {
         GetGenerationResultPagedUseCaseImpl(repository = get())
+    }
+    factory<ObserveGenerationResultPageUseCase> {
+        ObserveGenerationResultPageUseCaseImpl(repository = get())
+    }
+    factory<ObserveGenerationResultPreviewPageUseCase> {
+        ObserveGenerationResultPreviewPageUseCaseImpl(repository = get())
+    }
+    factory<ObserveGenerationResultCountUseCase> {
+        ObserveGenerationResultCountUseCaseImpl(repository = get())
+    }
+    factory<GetAllGalleryIdsUseCase> {
+        GetAllGalleryIdsUseCaseImpl(repository = get())
     }
     factory<GetAllGalleryUseCase> {
         GetAllGalleryUseCaseImpl(repository = get())
@@ -468,6 +512,23 @@ val coreDomainModule = module {
     factory<ToggleImageLikeUseCase> {
         ToggleImageLikeUseCaseImpl(repository = get())
     }
+    factory<ResetAuthorizationCredentialsUseCase> {
+        ResetAuthorizationCredentialsUseCaseImpl(
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    factory<RetryAuthorizationStorageUseCase> {
+        RetryAuthorizationStorageUseCaseImpl(
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     factory<GetConfigurationUseCase> {
         DefaultGetConfigurationUseCaseImpl(
             configurationStore = get(),
@@ -476,6 +537,7 @@ val coreDomainModule = module {
     }
     factory<SetServerConfigurationUseCase> {
         DefaultSetServerConfigurationUseCaseImpl(
+            dispatchersProvider = get(),
             providerSelectionGuard = get(),
             configurationStore = get(),
             authorizationStore = get(),

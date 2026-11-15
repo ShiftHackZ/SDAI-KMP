@@ -1,29 +1,40 @@
 package com.shifthackz.aisdv1.presentation.screen.gallery.detail
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import kotlinx.coroutines.Job
+
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.usecase.caching.GetLastResultFromCacheUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.DeleteGalleryItemUseCase
-import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
+import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryIdsUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.ToggleImageLikeUseCase
 import com.shifthackz.aisdv1.domain.usecase.gallery.ToggleImageVisibilityUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultUseCase
 import com.shifthackz.aisdv1.presentation.core.GenerationFormUpdateEvent
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryDetailRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryDetailRouter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 
 /**
- * Coordinates `GalleryDetailViewModel` behavior in the SDAI presentation layer.
+ * Owns revision-aware gallery navigation without retaining original payloads for persisted rows.
+ *
+ * @param galleryReads Payload-free metadata and replacement observation.
+ * @param contentCache Injected bounded navigation metadata cache.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class GalleryDetailViewModel(
+    diagnostics: UiDiagnostics,
     /**
      * Exposes the `itemId` value used by the SDAI presentation layer.
      *
@@ -49,11 +60,11 @@ class GalleryDetailViewModel(
      */
     private val getGenerationResultUseCase: GetGenerationResultUseCase,
     /**
-     * Exposes the `getAllGalleryUseCase` value used by the SDAI presentation layer.
+     * Loads ordered gallery identities for navigation without retaining image payloads.
      *
      * @author Dmitriy Moroz
      */
-    private val getAllGalleryUseCase: GetAllGalleryUseCase,
+    private val getAllGalleryIdsUseCase: GetAllGalleryIdsUseCase,
     /**
      * Exposes the `getLastResultFromCacheUseCase` value used by the SDAI presentation layer.
      *
@@ -96,6 +107,8 @@ class GalleryDetailViewModel(
      * @author Dmitriy Moroz
      */
     private val platformActions: GalleryDetailPlatformActions,
+    private val galleryReads: GalleryReadGateway,
+    private val contentCache: GalleryDetailContentCache,
     /**
      * Exposes the `pagerBuffer` value used by the SDAI presentation layer.
      *
@@ -109,18 +122,26 @@ class GalleryDetailViewModel(
      */
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<GalleryDetailState, GalleryDetailIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.GALLERY_DETAIL.asDiagnosticScreen(),
     initialState = GalleryDetailState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
+
+
+    private var currentItemId: Long = itemId
+    private val safePagerBuffer = pagerBuffer.coerceIn(0, 1)
+    private var galleryItemIds: List<Long> = emptyList()
+    private var navigationRevision = 0L
+    private var navigationJob: Job? = null
+    private var prefetchJob: Job? = null
+    private var metadataJob: Job? = null
+    private var observedId: Long? = null
 
     init {
         load()
     }
 
-    private var currentItemId: Long = itemId
-    private val safePagerBuffer = pagerBuffer.coerceAtLeast(0)
-    private var galleryItemIds: List<Long> = emptyList()
-    private val contentCache = mutableMapOf<Long, GalleryDetailContent>()
     private val showReportButton: Boolean
         get() = buildInfoProvider.type != BuildType.FOSS
 
@@ -141,9 +162,11 @@ class GalleryDetailViewModel(
             GalleryDetailIntent.SendTo.Img2Img -> sendPromptToGenerationScreen(
                 AiGenerationResult.Type.IMAGE_TO_IMAGE,
             )
+
             GalleryDetailIntent.SendTo.Txt2Img -> sendPromptToGenerationScreen(
                 AiGenerationResult.Type.TEXT_TO_IMAGE,
             )
+
             GalleryDetailIntent.Share.Image -> shareImage()
             GalleryDetailIntent.Share.Params -> shareParams()
             GalleryDetailIntent.ToggleLike -> toggleLike()
@@ -152,32 +175,33 @@ class GalleryDetailViewModel(
     }
 
     private fun load() {
-        launch(dispatchersProvider.io) {
+        val id = currentItemId
+        val revision = ++navigationRevision
+        navigationJob?.cancel()
+        prefetchJob?.cancel()
+        navigationJob = launch(dispatchersProvider.io) {
             runCatching {
                 val ids = getGalleryItemIds()
-                val result = getGenerationResult(currentItemId)
-                val resolvedIds = when {
-                    ids.isEmpty() -> ids
-                    result.id in ids -> ids
-                    else -> listOf(result.id)
-                }
-                val itemIndex = resolvedIds.indexOf(result.id)
-                galleryItemIds = resolvedIds
-                result.cachedContent() to itemIndex
-            }
-                .onFailure(::handleFailure)
-                .onSuccess { (content, itemIndex) ->
+                val result = getDisplayMetadata(id)
+                ids to result
+            }.onFailure { if (revision == navigationRevision) handleFailure(it) }
+                .onSuccess { (ids, result) ->
                     withContext(dispatchersProvider.immediate) {
-                        setCurrentContent(
-                            content = content,
-                            itemIndex = itemIndex,
-                            decodeMissing = true,
-                        )
+                        if (revision != navigationRevision || currentItemId != id) return@withContext
+                        galleryItemIds = if (result.id in ids) ids else listOf(result.id)
+                        val index = galleryItemIds.indexOf(result.id)
+                        setCurrentContent(result, index, true)
+                        prefetchPagerWindow(index)
                     }
-                    prefetchPagerWindow(itemIndex)
                 }
         }
     }
+
+    private suspend fun getDisplayMetadata(id: Long): GalleryDetailContent =
+        if (id <= 0) getLastResultFromCacheUseCase().also {
+            if (it.image.length + it.inputImage.length > 32 * 1024 * 1024) throw IllegalStateException()
+        }.toGalleryDetailContent(showReportButton)
+        else galleryReads.metadata(listOf(id)).first().toGalleryDetailContent(showReportButton)
 
     private fun copyToClipboard(text: String) {
         launch(dispatchersProvider.io) {
@@ -187,9 +211,11 @@ class GalleryDetailViewModel(
 
     private fun saveImage() {
         val content = currentState.content ?: return
-        val imageBase64 = content.selectedImageBase64(currentState.selectedTab)
+        val tab = currentState.selectedTab
         launch(dispatchersProvider.io) {
-            platformActions.saveImage(imageBase64).handlePlatformResult()
+            val result = getGenerationResult(content.id)
+            val original = if (tab == GalleryDetailTab.ORIGINAL) result.inputImage else result.image
+            platformActions.saveImage(original).handlePlatformResult()
         }
     }
 
@@ -202,9 +228,11 @@ class GalleryDetailViewModel(
 
     private fun shareImage() {
         val content = currentState.content ?: return
-        val imageBase64 = content.selectedImageBase64(currentState.selectedTab)
+        val tab = currentState.selectedTab
         launch(dispatchersProvider.io) {
-            platformActions.shareImage(imageBase64).handlePlatformResult()
+            val result = getGenerationResult(content.id)
+            val original = if (tab == GalleryDetailTab.ORIGINAL) result.inputImage else result.image
+            platformActions.shareImage(original).handlePlatformResult()
         }
     }
 
@@ -343,20 +371,14 @@ class GalleryDetailViewModel(
     }
 
     private fun navigateToPage(page: Int) {
-        val targetId = galleryItemIds.getOrNull(page) ?: currentState.galleryItemIds.getOrNull(page) ?: return
+        val targetId =
+            galleryItemIds.getOrNull(page) ?: currentState.galleryItemIds.getOrNull(page) ?: return
         if (targetId == currentState.content?.id) return
+        navigationRevision++
+        navigationJob?.cancel()
+        prefetchJob?.cancel()
         currentItemId = targetId
-        val cachedContent = contentCache[targetId]
-        if (cachedContent != null) {
-            setCurrentContent(
-                content = cachedContent,
-                itemIndex = page,
-                decodeMissing = false,
-            )
-            prefetchPagerWindow(page)
-        } else {
-            loadPage(page, targetId)
-        }
+        loadPage(page, targetId)
     }
 
     private suspend fun GalleryDetailActionResult.handlePlatformResult() {
@@ -367,6 +389,7 @@ class GalleryDetailViewModel(
                     GalleryDetailDialog.Error(Localization.string("error_generic")),
                 )
             }
+
             is GalleryDetailActionResult.Failed -> withContext(dispatchersProvider.immediate) {
                 setActiveDialog(GalleryDetailDialog.Error(message))
             }
@@ -380,7 +403,7 @@ class GalleryDetailViewModel(
             it.copy(
                 loading = false,
                 dialog = GalleryDetailDialog.Error(
-                    t.message ?: Localization.string("error_generic"),
+                    t.message?.takeIf(String::isNotBlank) ?: Localization.string("error_generic"),
                 ),
             )
         }
@@ -392,7 +415,7 @@ class GalleryDetailViewModel(
     }
 
     private suspend fun getGalleryItemIds(): List<Long> =
-        if (currentItemId <= 0) emptyList() else getAllGalleryUseCase.ids()
+        if (currentItemId <= 0) emptyList() else getAllGalleryIdsUseCase()
 
     private fun createPagerWindow(
         galleryItemIds: List<Long>,
@@ -452,16 +475,17 @@ class GalleryDetailViewModel(
         if (content.id == id) update(content) else content
     }
 
-    private fun AiGenerationResult.cachedContent(): GalleryDetailContent =
-        contentCache.getOrPut(id) {
-            toGalleryDetailContent(showReportButton = showReportButton)
-        }
-
     private fun setCurrentContent(
         content: GalleryDetailContent,
         itemIndex: Int,
         decodeMissing: Boolean,
     ) {
+        val keep = galleryItemIds.subList(
+            (itemIndex - 1).coerceAtLeast(0),
+            (itemIndex + 2).coerceIn(0, galleryItemIds.size)
+        ).toSet() + content.id
+        contentCache.retain(keep)
+        observeCurrentMetadata(content.id)
         val tabs = GalleryDetailTab.consume(content.generationType)
         val selectedTab = currentState.selectedTab.takeIf(tabs::contains) ?: tabs.first()
         val pagerWindow = createPagerWindow(
@@ -484,34 +508,50 @@ class GalleryDetailViewModel(
         }
     }
 
-    private fun prefetchPagerWindow(itemIndex: Int) {
-        if (itemIndex == -1 || galleryItemIds.isEmpty()) return
-        val snapshot = galleryItemIds
-        launch(dispatchersProvider.io) {
-            val startIndex = (itemIndex - safePagerBuffer).coerceAtLeast(0)
-            val endIndex = (itemIndex + safePagerBuffer + 1).coerceAtMost(snapshot.size)
-            val changed = snapshot
-                .subList(startIndex, endIndex)
-                .fold(false) { hasChanges, id ->
-                    if (contentCache.containsKey(id)) {
-                        hasChanges
+    private fun observeCurrentMetadata(id: Long) {
+        if (observedId == id) return
+        observedId = id
+        metadataJob?.cancel()
+        if (id <= 0) return
+        metadataJob = launch(dispatchersProvider.io) {
+            galleryReads.observeItem(id).collect { row ->
+                withContext(dispatchersProvider.immediate) {
+                    if (currentItemId != id) return@withContext
+                    if (row == null) {
+                        contentCache.remove(id)
+                        router.navigateBack()
                     } else {
-                        getGenerationResult(id).cachedContent()
-                        true
+                        val refreshed = row.toGalleryDetailContent(showReportButton)
+                        if (currentState.content != refreshed) {
+                            contentCache[id] = refreshed
+                            setCurrentContent(refreshed, galleryItemIds.indexOf(id), false)
+                        }
                     }
                 }
-
-            val currentContent = contentCache[currentItemId] ?: return@launch
-            val currentIndex = galleryItemIds.indexOf(currentItemId)
-            if (changed && currentIndex != -1) {
-                withContext(dispatchersProvider.immediate) {
-                    setCurrentContent(
-                        content = currentContent,
-                        itemIndex = currentIndex,
-                        decodeMissing = false,
-                    )
-                }
             }
+        }
+    }
+
+    private fun prefetchPagerWindow(itemIndex: Int) {
+        prefetchJob?.cancel()
+        if (itemIndex < 0 || galleryItemIds.isEmpty()) return
+        val revision = navigationRevision
+        val snapshot = galleryItemIds
+        val currentId = currentItemId
+        val ids = snapshot.subList(
+            (itemIndex - safePagerBuffer).coerceAtLeast(0),
+            (itemIndex + safePagerBuffer + 1).coerceAtMost(snapshot.size)
+        )
+        prefetchJob = launch(dispatchersProvider.io) {
+            runCatching { galleryReads.metadata(ids) }.onSuccess { rows ->
+                withContext(dispatchersProvider.immediate) {
+                    if (revision != navigationRevision || currentId != currentItemId || snapshot != galleryItemIds) return@withContext
+                    rows.filter { it.id != currentId }.forEach {
+                        contentCache[it.id] = it.toGalleryDetailContent(showReportButton)
+                    }
+                    contentCache[currentId]?.let { setCurrentContent(it, itemIndex, false) }
+                }
+            }.onFailure { if (it is CancellationException) throw it else onError(it) }
         }
     }
 
@@ -542,18 +582,18 @@ class GalleryDetailViewModel(
     }
 
     private fun loadPage(page: Int, id: Long) {
-        launch(dispatchersProvider.io) {
-            runCatching { getGenerationResult(id).cachedContent() }
-                .onFailure(::handleFailure)
-                .onSuccess { content ->
+        val revision = ++navigationRevision
+        navigationJob?.cancel()
+        prefetchJob?.cancel()
+        navigationJob = launch(dispatchersProvider.io) {
+            runCatching { getDisplayMetadata(id) }
+                .onFailure { if (revision == navigationRevision) handleFailure(it) }
+                .onSuccess { result ->
                     withContext(dispatchersProvider.immediate) {
-                        val itemIndex = galleryItemIds.indexOf(id).takeIf { it != -1 } ?: page
-                        setCurrentContent(
-                            content = content,
-                            itemIndex = itemIndex,
-                            decodeMissing = false,
-                        )
-                        prefetchPagerWindow(itemIndex)
+                        if (revision != navigationRevision || currentItemId != id) return@withContext
+                        val index = galleryItemIds.indexOf(id).takeIf { it >= 0 } ?: page
+                        setCurrentContent(result, index, false)
+                        prefetchPagerWindow(index)
                     }
                 }
         }

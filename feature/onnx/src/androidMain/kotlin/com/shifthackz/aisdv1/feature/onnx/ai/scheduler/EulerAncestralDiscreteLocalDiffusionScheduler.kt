@@ -15,29 +15,29 @@ import com.shifthackz.aisdv1.feature.onnx.entity.Array3D
 import com.shifthackz.aisdv1.feature.onnx.entity.LocalDiffusionConfig
 import com.shifthackz.aisdv1.feature.onnx.entity.LocalDiffusionTensor
 import com.shifthackz.aisdv1.feature.onnx.environment.OrtEnvironmentProvider
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.nio.FloatBuffer
 import java.util.Random
 import kotlin.math.cos
 import kotlin.math.pow
 
 /**
- * Coordinates `EulerAncestralDiscreteLocalDiffusionScheduler` behavior in the SDAI ONNX local diffusion feature layer.
+ * Job-scoped scheduler retaining existing Euler math and injected tensor ownership.
+ *
+ * @param ortEnvironmentProvider Child environment used for all scheduler tensors.
+ * @param config Scheduler coefficients; configured by the module factory.
  *
  * @author Dmitriy Moroz
  */
 internal class EulerAncestralDiscreteLocalDiffusionScheduler(
+    private val ortEnvironmentProvider: OrtEnvironmentProvider,
     /**
      * Exposes the `config` value used by the SDAI ONNX local diffusion feature layer.
      *
      * @author Dmitriy Moroz
      */
     private val config: LocalDiffusionConfig = LocalDiffusionConfig(),
-) : LocalDiffusionScheduler, KoinComponent {
-    
-    private val ortEnvironmentProvider: OrtEnvironmentProvider by inject()
-    
+) : LocalDiffusionScheduler {
+
     private val random = Random()
     private val betas: MutableList<Float> = ArrayList()
     private val alphas: MutableList<Float> = ArrayList()
@@ -54,6 +54,7 @@ internal class EulerAncestralDiscreteLocalDiffusionScheduler(
             config.trainedBetas.isNotEmpty() -> {
                 betas.addAll(config.trainedBetas)
             }
+
             config.betaSchedule == BETA_SCHEDULER_LINEAR -> {
                 val array: DoubleArray = lineSpace(
                     config.betaStart.toDouble(),
@@ -64,6 +65,7 @@ internal class EulerAncestralDiscreteLocalDiffusionScheduler(
                     betas.add(value.toFloat())
                 }
             }
+
             config.betaSchedule == BETA_SCHEDULER_SCALED_LINEAR -> {
                 val array: DoubleArray = lineSpace(
                     config.betaStart.toDouble().pow(0.5),
@@ -74,6 +76,7 @@ internal class EulerAncestralDiscreteLocalDiffusionScheduler(
                     betas.add(array[i].pow(2.0).toFloat())
                 }
             }
+
             config.betaSchedule == BETA_SCHEDULER_SQUARED_v2 -> {
                 betas.addAll(betasForAlphaBar(numTrainTimeSteps))
             }
@@ -140,8 +143,19 @@ internal class EulerAncestralDiscreteLocalDiffusionScheduler(
         return result
     }
 
-    override fun scaleModelInput(sample: LocalDiffusionTensor<*>, stepIndex: Int): LocalDiffusionTensor<*> {
-        val sampleArray: FloatArray = sample.tensor.floatBuffer.array()
+    /**
+     * Scales a borrowed input without taking its ownership; caller closes both wrappers.
+     *
+     * @param sample Borrowed tensor and shape.
+     * @param stepIndex Current scheduler step.
+     * @author Dmitriy Moroz
+     */
+    override fun scaleModelInput(
+        sample: LocalDiffusionTensor<*>,
+        stepIndex: Int
+    ): LocalDiffusionTensor<*> {
+        val sampleArray =
+            sample.tensor.floatBuffer.let { buffer -> FloatArray(buffer.remaining()).also(buffer::get) }
         val sigma = sigmas[stepIndex]
         val dataSet = FloatArray(sampleArray.size)
         for (i in dataSet.indices) {
@@ -159,7 +173,11 @@ internal class EulerAncestralDiscreteLocalDiffusionScheduler(
         )
     }
 
-    override fun step(modelOutput: LocalDiffusionTensor<*>, stepIndex: Int, sample: LocalDiffusionTensor<*>): LocalDiffusionTensor<*> {
+    override fun step(
+        modelOutput: LocalDiffusionTensor<*>,
+        stepIndex: Int,
+        sample: LocalDiffusionTensor<*>
+    ): LocalDiffusionTensor<*> {
         val sampleArray = sample.buffer as Array3D<FloatArray>
         val outputArray = modelOutput.buffer as Array3D<FloatArray>
         val sigma = sigmas[stepIndex].toDouble()
@@ -188,6 +206,7 @@ internal class EulerAncestralDiscreteLocalDiffusionScheduler(
                     }
                 }
             }
+
             PREDICTION_V -> {
                 predictionOriginalSample = Array(dim1) {
                     Array(dim2) {
@@ -200,9 +219,10 @@ internal class EulerAncestralDiscreteLocalDiffusionScheduler(
                     for (j in 0 until dim2) {
                         for (k in 0 until dim3) {
                             for (l in 0 until dim4) {
-                                predictionOriginalSample[i][j][k][l] = (outputArray[i][j][k][l] * (-sigma / (sigma.pow(
-                                    2.0
-                                ) + 1)).pow(0.5) + sampleArray[i][j][k][l] / (sigma.pow(2.0) + 1)).toFloat()
+                                predictionOriginalSample[i][j][k][l] =
+                                    (outputArray[i][j][k][l] * (-sigma / (sigma.pow(
+                                        2.0
+                                    ) + 1)).pow(0.5) + sampleArray[i][j][k][l] / (sigma.pow(2.0) + 1)).toFloat()
                             }
                         }
                     }

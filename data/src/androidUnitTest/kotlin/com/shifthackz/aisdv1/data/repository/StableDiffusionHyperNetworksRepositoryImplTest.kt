@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockStableDiffusionHyperNetworks
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionHyperNetworksDataSource
 import com.shifthackz.aisdv1.domain.entity.ServerSource
@@ -20,14 +22,18 @@ class StableDiffusionHyperNetworksRepositoryImplTest {
     private val stubException = Throwable("Something went wrong.")
     private val stubRemoteDataSource = mockk<StableDiffusionHyperNetworksDataSource.Remote>()
     private val stubLocalDataSource = mockk<StableDiffusionHyperNetworksDataSource.Local>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
+    private val stubPreferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val stubAuthorizationStore = mockk<AuthorizationStore>()
 
     private val repository = StableDiffusionHyperNetworksRepositoryImpl(
         remoteDataSource = stubRemoteDataSource,
         localDataSource = stubLocalDataSource,
         preferenceManager = stubPreferenceManager,
-        authorizationStore = stubAuthorizationStore,
+        connections = AuthenticatedConnectionProviderImpl(
+            stubPreferenceManager,
+            stubAuthorizationStore,
+            ProviderSelectionGuard()
+        ),
     )
 
     @Before
@@ -36,7 +42,7 @@ class StableDiffusionHyperNetworksRepositoryImplTest {
             stubPreferenceManager.automatic1111ServerUrl
         } returns A1111_URL
 
-        every {
+        coEvery {
             stubAuthorizationStore.getAuthorizationCredentials()
         } returns AuthorizationCredentials.None
     }
@@ -64,33 +70,35 @@ class StableDiffusionHyperNetworksRepositoryImplTest {
         }
 
     @Test
-    fun `given attempt to fetch hyper networks, source is SWARM_UI, expected no remote fetch`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.SWARM_UI
+    fun `given attempt to fetch hyper networks, source is SWARM_UI, expected no remote fetch`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.SWARM_UI
 
-        repository.fetchHyperNetworks()
+            repository.fetchHyperNetworks()
 
-        coVerify(exactly = 0) {
-            stubRemoteDataSource.fetchHyperNetworks(any(), any())
-            stubLocalDataSource.insertHyperNetworks(any())
+            coVerify(exactly = 0) {
+                stubRemoteDataSource.fetchHyperNetworks(any(), any())
+                stubLocalDataSource.insertHyperNetworks(any())
+            }
         }
-    }
 
     @Test
-    fun `given attempt to fetch hyper networks, remote throws exception, expected error value`() = runTest {
-        every {
-            stubPreferenceManager.source
-        } returns ServerSource.AUTOMATIC1111
+    fun `given attempt to fetch hyper networks, remote throws exception, expected error value`() =
+        runTest {
+            every {
+                stubPreferenceManager.source
+            } returns ServerSource.AUTOMATIC1111
 
-        coEvery {
-            stubRemoteDataSource.fetchHyperNetworks(A1111_URL, AuthorizationCredentials.None)
-        } throws stubException
+            coEvery {
+                stubRemoteDataSource.fetchHyperNetworks(A1111_URL, AuthorizationCredentials.None)
+            } throws stubException
 
-        val actual = runCatching { repository.fetchHyperNetworks() }
+            val actual = runCatching { repository.fetchHyperNetworks() }
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
     fun `given attempt to fetch hyper networks, remote returns data, local insert fails, expected error value`() =
@@ -137,15 +145,16 @@ class StableDiffusionHyperNetworksRepositoryImplTest {
         }
 
     @Test
-    fun `given attempt to get hyper networks, local data source throws exception, expected error value`() = runTest {
-        coEvery {
-            stubLocalDataSource.getHyperNetworks()
-        } throws stubException
+    fun `given attempt to get hyper networks, local data source throws exception, expected error value`() =
+        runTest {
+            coEvery {
+                stubLocalDataSource.getHyperNetworks()
+            } throws stubException
 
-        val actual = runCatching { repository.getHyperNetworks() }
+            val actual = runCatching { repository.getHyperNetworks() }
 
-        Assert.assertEquals(stubException, actual.exceptionOrNull())
-    }
+            Assert.assertEquals(stubException, actual.exceptionOrNull())
+        }
 
     @Test
     fun `given attempt to fetch and get hyper networks, remote returns data, local returns data, expected valid domain models list value`() =

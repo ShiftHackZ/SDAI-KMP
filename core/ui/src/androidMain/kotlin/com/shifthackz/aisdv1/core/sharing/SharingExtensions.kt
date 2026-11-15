@@ -57,7 +57,8 @@ fun Context.shareFile(
  * @param email email value consumed by the API.
  * @param subject subject value consumed by the API.
  * @param body body value consumed by the API.
- * @param file file used by the operation.
+ * @param file Existing optional attachment.
+ * @param extraFiles Additional files explicitly selected for this share action.
  * @param fileProviderPath file provider path value consumed by the API.
  * @author Dmitriy Moroz
  */
@@ -67,19 +68,26 @@ fun Context.shareEmail(
     body: String = "",
     file: File? = null,
     fileProviderPath: String = "",
+    extraFiles: List<File> = emptyList(),
 ) {
-    val uri: Uri? = file?.let { uriFromFile(it, fileProviderPath) }
-    val emailIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "message/rfc822"
-        putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
-        putExtra(Intent.EXTRA_SUBJECT, subject)
-        putExtra(Intent.EXTRA_TEXT, body)
-        uri?.let {
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            clipData = ClipData.newUri(contentResolver, file?.name ?: "attachment", it)
-            putExtra(Intent.EXTRA_STREAM, it)
+    val attachments =
+        (listOfNotNull(file) + extraFiles).distinct().map { uriFromFile(it, fileProviderPath) }
+    val emailIntent =
+        Intent(if (attachments.size > 1) Intent.ACTION_SEND_MULTIPLE else Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+            if (attachments.isNotEmpty()) {
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                clipData =
+                    ClipData.newUri(contentResolver, "attachments", attachments.first()).apply {
+                        attachments.drop(1).forEach { addItem(ClipData.Item(it)) }
+                    }
+                if (attachments.size == 1) putExtra(Intent.EXTRA_STREAM, attachments.first())
+                else putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(attachments))
+            }
         }
-    }
     startChooserActivity(emailIntent, null)
 }
 

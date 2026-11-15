@@ -42,6 +42,7 @@ fun AiGenerationResult.mapDomainToEntity(): GenerationResultEntity = with(this) 
         hidden = hidden,
         liked = liked,
         modelName = modelName,
+        imageRevision = imageRevision,
     )
 }
 //endregion
@@ -83,6 +84,7 @@ fun GenerationResultEntity.mapEntityToDomain(): AiGenerationResult = with(this) 
         hidden = hidden,
         liked = liked,
         modelName = modelName,
+        imageRevision = imageRevision,
     )
 }
 
@@ -100,12 +102,13 @@ fun List<GenerationResultPreviewEntity>.mapPreviewEntityToDomain(): List<AiGener
  *
  * @author Dmitriy Moroz
  */
-fun GenerationResultPreviewEntity.mapPreviewEntityToDomain(): AiGenerationResultPreview = with(this) {
-    AiGenerationResultPreview(
-        id = id,
-        image = imageBase64,
-        hidden = hidden,
-        liked = liked,
-    )
-}
+fun GenerationResultPreviewEntity.mapPreviewEntityToDomain(): AiGenerationResultPreview =
+    with(this) {
+        AiGenerationResultPreview(
+            id = id,
+            imageRevision = imageRevision,
+            hidden = hidden,
+            liked = liked,
+        )
+    }
 //endregion

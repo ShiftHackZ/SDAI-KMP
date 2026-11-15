@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <mutex>
+#include <memory>
+#include <new>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -407,7 +409,7 @@ jbyteArray native_generate(
     jint sampler,
     jintArray shape,
     jobject callback
-) {
+) try {
     if (shape == nullptr || env->GetArrayLength(shape) < 3) {
         throw_illegal_state(env, "Native output shape must contain at least 3 items.");
         return nullptr;
@@ -435,13 +437,18 @@ jbyteArray native_generate(
     }
 
     ProgressCallbackState callback_state;
+    struct CallbackCleanup {
+        JNIEnv* env;
+        ProgressCallbackState& state;
+        ~CallbackCleanup() {
+            sd_set_progress_callback(nullptr, nullptr);
+            if (state.callback != nullptr) env->DeleteGlobalRef(state.callback);
+        }
+    } callback_cleanup{env, callback_state};
     callback_state.callback = env->NewGlobalRef(callback);
     callback_state.on_progress = env->GetMethodID(callback_class, "onProgress", "(II)V");
 
     if (callback_state.callback == nullptr || callback_state.on_progress == nullptr) {
-        if (callback_state.callback != nullptr) {
-            env->DeleteGlobalRef(callback_state.callback);
-        }
         throw_illegal_state(env, "Unable to initialize stable-diffusion.cpp progress callback.");
         return nullptr;
     }
@@ -468,20 +475,31 @@ jbyteArray native_generate(
     gen_params.vae_tiling_params.tile_size_y = 512;
     gen_params.vae_tiling_params.target_overlap = 0.5f;
 
-    sd_image_t* images = generate_image(context, &gen_params);
-    sd_set_progress_callback(nullptr, nullptr);
-
-    env->DeleteGlobalRef(callback_state.callback);
+    auto release_images = [count = gen_params.batch_count](sd_image_t* images) {
+        if (images != nullptr) free_sd_images(images, count);
+    };
+    std::unique_ptr<sd_image_t, decltype(release_images)> images(
+        generate_image(context, &gen_params), release_images
+    );
 
     if (g_cancel_requested) {
-        free_sd_images(images, gen_params.batch_count);
         throw_cancelled(env);
         return nullptr;
     }
 
-    jbyteArray result = copy_first_image(env, images, gen_params.batch_count, shape);
-    free_sd_images(images, gen_params.batch_count);
+    jbyteArray result = copy_first_image(env, images.get(), gen_params.batch_count, shape);
     return result;
+} catch (const std::bad_alloc&) {
+    if (!env->ExceptionCheck()) throw_java(env, "java/lang/OutOfMemoryError", "Native inference allocation failed.");
+    return nullptr;
+} catch (const std::exception&) {
+    // A C++ exception is recoverable at this JNI boundary; the child is discarded after failure.
+    // Fatal signals and ggml_abort are intentionally not intercepted.
+    if (!env->ExceptionCheck()) throw_illegal_state(env, "Native inference backend is unavailable or incompatible.");
+    return nullptr;
+} catch (...) {
+    if (!env->ExceptionCheck()) throw_illegal_state(env, "Native inference failed.");
+    return nullptr;
 }
 
 void native_interrupt(JNIEnv* env, jobject thiz) {

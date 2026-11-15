@@ -19,8 +19,8 @@ import com.shifthackz.aisdv1.network.response.KtorSdEmbeddingsResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.basicAuth
-import io.ktor.client.request.get
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedGet
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
 
@@ -44,7 +44,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): List<StableDiffusionLoraRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_LORAS)
             applyMetadataRequest(authorization)
@@ -55,7 +55,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): KtorSdEmbeddingsResponse = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_EMBEDDINGS)
             applyMetadataRequest(authorization)
@@ -66,7 +66,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): List<StableDiffusionHyperNetworkRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_HYPER_NETWORKS)
             applyMetadataRequest(authorization)
@@ -77,7 +77,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): List<KtorStableDiffusionModelRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_SD_MODELS)
             applyMetadataRequest(authorization)
@@ -88,7 +88,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): List<StableDiffusionSamplerRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_SAMPLERS)
             applyMetadataRequest(authorization)
@@ -99,7 +99,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): List<ForgeModuleRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_SD_MODULES)
             applyMetadataRequest(authorization)
@@ -110,7 +110,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): StableDiffusionScriptsRaw = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_SCRIPTS)
             applyMetadataRequest(authorization)
@@ -121,7 +121,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): List<StableDiffusionScriptInfoRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_SCRIPT_INFO)
             applyMetadataRequest(authorization)
@@ -132,7 +132,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): List<StableDiffusionExtensionRaw> = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_EXTENSIONS)
             applyMetadataRequest(authorization)
@@ -143,7 +143,7 @@ class KtorAutomatic1111MetadataApi(
         baseUrl: String,
         authorization: BasicHttpAuthorization?,
     ): ServerConfigurationRaw = httpClient
-        .get {
+        .boundedGet {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_OPTIONS)
             applyMetadataRequest(authorization)
@@ -155,7 +155,7 @@ class KtorAutomatic1111MetadataApi(
         authorization: BasicHttpAuthorization?,
         request: ServerConfigurationRaw,
     ) {
-        httpClient.post {
+        httpClient.boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_OPTIONS)
             applyMetadataRequest(authorization)

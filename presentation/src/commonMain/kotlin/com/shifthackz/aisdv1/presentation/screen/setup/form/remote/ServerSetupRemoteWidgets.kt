@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.screen.setup.component.AuthorizationStorageRecovery
 import com.shifthackz.aisdv1.presentation.screen.setup.component.message
 import com.shifthackz.aisdv1.presentation.screen.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupIntent
@@ -72,6 +73,10 @@ internal fun AuthFields(
     strings: ServerSetupStrings,
     processIntent: (ServerSetupIntent) -> Unit,
 ) {
+    if (state.authorizationStorageFailure != null) {
+        AuthorizationStorageRecovery(state = state, processIntent = processIntent)
+        return
+    }
     Text(
         modifier = Modifier.padding(top = 4.dp),
         text = strings.authTitle,
@@ -116,8 +121,10 @@ internal fun AuthFields(
                 PasswordVisualTransformation()
             },
             trailingIcon = {
-                val image = if (state.passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
-                val description = if (state.passwordVisible) strings.hidePassword else strings.showPassword
+                val image =
+                    if (state.passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                val description =
+                    if (state.passwordVisible) strings.hidePassword else strings.showPassword
                 IconButton(
                     onClick = {
                         processIntent(

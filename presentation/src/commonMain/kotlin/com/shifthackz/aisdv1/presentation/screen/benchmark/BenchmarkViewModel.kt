@@ -1,8 +1,11 @@
 package com.shifthackz.aisdv1.presentation.screen.benchmark
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.feature.benchmark.BenchmarkManager
@@ -10,7 +13,7 @@ import com.shifthackz.aisdv1.feature.benchmark.BenchmarkPlatform
 import com.shifthackz.aisdv1.feature.benchmark.BenchmarkProviderIssue
 import com.shifthackz.aisdv1.feature.benchmark.BenchmarkProviderRecommendation
 import com.shifthackz.aisdv1.feature.benchmark.BenchmarkResult
-import com.shifthackz.aisdv1.presentation.navigation.router.BenchmarkRouter
+import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
 import com.shifthackz.aisdv1.domain.entity.SdxlBackend
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.model.compactDisplayName
@@ -24,14 +27,18 @@ import kotlinx.coroutines.withContext
  * which only reads hardware metadata and runs bounded synthetic CPU/memory work.
  *
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class BenchmarkViewModel(
+    diagnostics: UiDiagnostics,
     private val dispatchersProvider: DispatchersProvider,
     private val benchmarkManager: BenchmarkManager,
     private val router: BenchmarkRouter,
     private val platformActions: BenchmarkPlatformActions,
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<BenchmarkState, BenchmarkIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.BENCHMARK.asDiagnosticScreen(),
     initialState = BenchmarkState(),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
@@ -134,6 +141,7 @@ class BenchmarkViewModel(
                 BenchmarkActionResult.Unsupported -> withContext(dispatchersProvider.immediate) {
                     updateState { it.copy(error = Localization.string("error_generic")) }
                 }
+
                 is BenchmarkActionResult.Failed -> withContext(dispatchersProvider.immediate) {
                     updateState { it.copy(error = result.message) }
                 }
@@ -163,13 +171,27 @@ private fun BenchmarkResult.shareText(): String = buildString {
     appendLine("${Localization.string("benchmark_device")}: ${deviceInfo.deviceName()}")
     appendLine("${Localization.string("benchmark_cpu")}: ${deviceInfo.cpuName}")
     appendLine("${Localization.string("benchmark_gpu")}: ${deviceInfo.gpuName}")
-    appendLine("${Localization.string("benchmark_ram")}: ${Localization.string("benchmark_mb", deviceInfo.totalRamMb)}")
-    appendLine("${Localization.string("benchmark_estimated_time_short")}: ${Localization.string("benchmark_seconds", estimatedTimeSeconds)}")
+    appendLine(
+        "${Localization.string("benchmark_ram")}: ${
+            Localization.string(
+                "benchmark_mb",
+                deviceInfo.totalRamMb
+            )
+        }"
+    )
+    appendLine(
+        "${Localization.string("benchmark_estimated_time_short")}: ${
+            Localization.string(
+                "benchmark_seconds",
+                estimatedTimeSeconds
+            )
+        }"
+    )
     providerRecommendations.forEach { recommendation ->
         appendLine()
         appendLine(
             "${recommendation.provider.compactDisplayName(deviceInfo.platform.toPlatform())} " +
-                Localization.string("benchmark_recommendations"),
+                    Localization.string("benchmark_recommendations"),
         )
         if (recommendation.recommended) {
             appendLine("${Localization.string("benchmark_recommended_size")}: ${recommendation.width} x ${recommendation.height}")
@@ -198,18 +220,25 @@ private fun BenchmarkProviderRecommendation.backgroundLabel(): String =
 private fun BenchmarkProviderIssue.localizedText(): String = when (this) {
     BenchmarkProviderIssue.PLATFORM_UNSUPPORTED ->
         Localization.string("benchmark_issue_platform_unsupported")
+
     BenchmarkProviderIssue.LOW_MEMORY ->
         Localization.string("benchmark_issue_low_memory")
+
     BenchmarkProviderIssue.LOW_SCORE ->
         Localization.string("benchmark_issue_low_score")
+
     BenchmarkProviderIssue.ONNX_SLOW_LOW_MEMORY ->
         Localization.string("benchmark_issue_onnx_slow_low_memory")
+
     BenchmarkProviderIssue.MEDIAPIPE_UNSTABLE_LOW_MEMORY ->
         Localization.string("benchmark_issue_mediapipe_unstable_low_memory")
+
     BenchmarkProviderIssue.SDXL_TINY_EXPERIMENTAL_ONLY ->
         Localization.string("benchmark_issue_sdxl_tiny_experimental_only")
+
     BenchmarkProviderIssue.SDXL_BACKEND_NOT_VALIDATED ->
         Localization.string("benchmark_issue_sdxl_backend_not_validated")
+
     BenchmarkProviderIssue.ACCELERATOR_API_NOT_AVAILABLE ->
         Localization.string("benchmark_issue_accelerator_api_not_available")
 }
@@ -219,7 +248,7 @@ private fun SdxlBackend.displayName(): String = displayName
 private fun BenchmarkPlatform.toPlatform(): Platform = when (this) {
     BenchmarkPlatform.ANDROID,
     BenchmarkPlatform.UNKNOWN,
-    -> Platform.ANDROID
+        -> Platform.ANDROID
 
     BenchmarkPlatform.IOS -> Platform.IOS
 }

@@ -2,7 +2,7 @@ package com.shifthackz.aisdv1.data.repository
 
 import com.shifthackz.aisdv1.domain.datasource.ServerConfigurationDataSource
 import com.shifthackz.aisdv1.domain.entity.ServerConfiguration
-import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
+import com.shifthackz.aisdv1.domain.gateway.AuthenticatedConnectionProvider
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.ServerConfigurationRepository
 
@@ -31,11 +31,11 @@ internal class ServerConfigurationRepositoryImpl(
      */
     private val preferenceManager: PreferenceManager,
     /**
-     * Exposes the `authorizationStore` value used by the SDAI data layer.
+     * Captures consistent connection inputs before starting network work.
      *
      * @author Dmitriy Moroz
      */
-    private val authorizationStore: AuthorizationStore,
+    private val connections: AuthenticatedConnectionProvider,
 ) : ServerConfigurationRepository {
 
     /**
@@ -44,9 +44,10 @@ internal class ServerConfigurationRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun fetchConfiguration() {
+        val connection = connections.snapshot()
         val configuration = remoteDataSource.fetchConfiguration(
-            baseUrl = preferenceManager.automatic1111ServerUrl,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
         )
         localDataSource.save(configuration)
     }
@@ -76,9 +77,10 @@ internal class ServerConfigurationRepositoryImpl(
      * @author Dmitriy Moroz
      */
     override suspend fun updateConfiguration(configuration: ServerConfiguration) {
+        val connection = connections.snapshot()
         remoteDataSource.updateConfiguration(
-            baseUrl = preferenceManager.automatic1111ServerUrl,
-            credentials = authorizationStore.getAuthorizationCredentials(),
+            baseUrl = connection.automatic1111Url,
+            credentials = connection.credentials,
             configuration = configuration,
         )
     }

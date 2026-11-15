@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.presentation.di
 
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.BoundedOriginalImageLoader
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.createPlatformBuildInfoProvider
 import com.shifthackz.aisdv1.core.common.links.DefaultLinksProvider
@@ -11,42 +14,44 @@ import com.shifthackz.aisdv1.core.common.time.TimeProvider
 import com.shifthackz.aisdv1.presentation.core.GenerationFormUpdateEvent
 import com.shifthackz.aisdv1.presentation.core.GenerationPlatformServices
 import com.shifthackz.aisdv1.presentation.core.NoOpGenerationPlatformServices
-import com.shifthackz.aisdv1.presentation.navigation.router.ConfigurationLoaderRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.BenchmarkRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.DebugMenuRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.DonateRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryDetailRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.GalleryRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.ImageToImageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.LoggerRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NetworkUsageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpConfigurationLoaderRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpBenchmarkRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpDebugMenuRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpDonateRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpGalleryDetailRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpGalleryRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpImageToImageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpLoggerRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpNetworkUsageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpOnBoardingRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpReportRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpServerSetupRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpSettingsRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpSplashRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpStorageUsageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpTextToImageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.NoOpWebUiRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.OnBoardingRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.ReportRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.ServerSetupRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.SettingsRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.SplashRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.StorageUsageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.TextToImageRouter
-import com.shifthackz.aisdv1.presentation.navigation.router.WebUiRouter
+import com.shifthackz.aisdv1.core.navigation.router.ConfigurationLoaderRouter
+import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
+import com.shifthackz.aisdv1.core.navigation.router.DebugMenuRouter
+import com.shifthackz.aisdv1.core.navigation.router.DonateRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryDetailRouter
+import com.shifthackz.aisdv1.core.navigation.router.GalleryRouter
+import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.LoggerRouter
+import com.shifthackz.aisdv1.core.navigation.router.NetworkUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpConfigurationLoaderRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpBenchmarkRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpDebugMenuRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpDonateRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpGalleryDetailRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpGalleryRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpImageToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpLoggerRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpNetworkUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpOnBoardingRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpReportRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpServerSetupRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpSettingsRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpSplashRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpStorageUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpTextToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpWebUiRouter
+import com.shifthackz.aisdv1.core.navigation.router.OnBoardingRouter
+import com.shifthackz.aisdv1.core.navigation.router.ReportRouter
+import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
+import com.shifthackz.aisdv1.core.navigation.router.SettingsRouter
+import com.shifthackz.aisdv1.core.navigation.router.SplashRouter
+import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
+import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.WebUiRouter
 import com.shifthackz.aisdv1.presentation.screen.benchmark.BenchmarkPlatformActions
 import com.shifthackz.aisdv1.presentation.screen.benchmark.createDefaultBenchmarkPlatformActions
+import com.shifthackz.aisdv1.presentation.screen.debug.UiDiagnosticReportActions
+import com.shifthackz.aisdv1.presentation.screen.debug.NoOpUiDiagnosticReportActions
 import com.shifthackz.aisdv1.presentation.screen.debug.DebugMenuAccessor
 import com.shifthackz.aisdv1.presentation.screen.debug.DebugMenuPlatformActions
 import com.shifthackz.aisdv1.presentation.screen.debug.NoOpDebugMenuPlatformActions
@@ -72,7 +77,15 @@ import com.shifthackz.aisdv1.presentation.screen.txt2img.createPlatformImageSave
 import com.shifthackz.aisdv1.presentation.screen.txt2img.createPlatformImageSharer
 import com.shifthackz.aisdv1.presentation.widget.work.BackgroundWorkImageLoader
 import com.shifthackz.aisdv1.presentation.widget.work.NoOpBackgroundWorkImageLoader
+import com.shifthackz.aisdv1.core.mvi.diagnostics.uiDiagnosticsModule
+import com.shifthackz.aisdv1.presentation.screen.gallery.detail.GalleryDetailContentCache
+import com.shifthackz.aisdv1.presentation.screen.gallery.detail.BoundedGalleryDetailContentCache
 import org.koin.core.module.Module
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryMemoryBudget
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageLoader
+import com.shifthackz.aisdv1.presentation.widget.image.GalleryImageDecoder
+import com.shifthackz.aisdv1.presentation.widget.image.PlatformGalleryImageDecoder
+import com.shifthackz.aisdv1.presentation.widget.image.BoundedGalleryImageLoader
 
 /**
  * Registers presentation-layer singleton services and default no-op router bindings.
@@ -85,6 +98,20 @@ import org.koin.core.module.Module
  * @author Dmitriy Moroz
  */
 internal fun Module.registerPresentationCoreBindings() {
+    single {
+        GalleryMemoryBudget(
+            cacheEntries = 32, cacheBytes = 24L * 1024 * 1024, concurrentDecodes = 2,
+            encodedChars = 32 * 1024 * 1024, maxDisplayEdge = 2048, detailEntries = 3,
+            detailMetadataBytes = 2L * 1024 * 1024, metadataWindow = 120, metadataPrefetch = 30
+        )
+    }
+    factory<GalleryDetailContentCache> { BoundedGalleryDetailContentCache(get()) }
+    single<GalleryImageDecoder> { PlatformGalleryImageDecoder() }
+    single { OriginalImageBudget(encodedChars = 32 * 1024 * 1024, maxPixels = 16_777_216L) }
+    single<OriginalImageLoader> { BoundedOriginalImageLoader(get(), get()) }
+    single<GalleryImageLoader> { BoundedGalleryImageLoader(get(), get(), get(), get()) }
+    includes(uiDiagnosticsModule(isEnabled = false))
+    single<UiDiagnosticReportActions> { NoOpUiDiagnosticReportActions }
     single<LinksProvider> { DefaultLinksProvider }
     single<BuildInfoProvider> { createPlatformBuildInfoProvider() }
     single<DispatchersProvider> { DefaultDispatchersProvider }

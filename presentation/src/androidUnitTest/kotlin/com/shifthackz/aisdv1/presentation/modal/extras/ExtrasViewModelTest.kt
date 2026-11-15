@@ -92,35 +92,37 @@ class ExtrasViewModelTest {
     }
 
     @Test
-    fun `given received ApplyPrompts intent, expected ApplyPrompts effect delivered to effect collector`() = runTest {
-        mockInitialData()
-        val viewModel = createViewModel()
-        advanceUntilIdle()
+    fun `given received ApplyPrompts intent, expected ApplyPrompts effect delivered to effect collector`() =
+        runTest {
+            mockInitialData()
+            val viewModel = createViewModel()
+            advanceUntilIdle()
 
-        viewModel.processIntent(ExtrasIntent.ApplyPrompts)
-        advanceUntilIdle()
+            viewModel.processIntent(ExtrasIntent.ApplyPrompts)
+            advanceUntilIdle()
 
-        val expected = ExtrasEffect.ApplyPrompts(
-            prompt = "prompt <lora:alias_5598:1>",
-            negativePrompt = "negative",
-        )
-        val actual = viewModel.effect.firstOrNull()
-        Assert.assertEquals(expected, actual)
-    }
+            val expected = ExtrasEffect.ApplyPrompts(
+                prompt = "prompt <lora:alias_5598:1>",
+                negativePrompt = "negative",
+            )
+            val actual = viewModel.effect.firstOrNull()
+            Assert.assertEquals(expected, actual)
+        }
 
     @Test
-    fun `given received Close intent, expected Close effect delivered to effect collector`() = runTest {
-        mockInitialData()
-        val viewModel = createViewModel()
-        advanceUntilIdle()
+    fun `given received Close intent, expected Close effect delivered to effect collector`() =
+        runTest {
+            mockInitialData()
+            val viewModel = createViewModel()
+            advanceUntilIdle()
 
-        viewModel.processIntent(ExtrasIntent.Close)
-        advanceUntilIdle()
+            viewModel.processIntent(ExtrasIntent.Close)
+            advanceUntilIdle()
 
-        val expected = ExtrasEffect.Close
-        val actual = viewModel.effect.firstOrNull()
-        Assert.assertEquals(expected, actual)
-    }
+            val expected = ExtrasEffect.Close
+            val actual = viewModel.effect.firstOrNull()
+            Assert.assertEquals(expected, actual)
+        }
 
     @Test
     fun `given received ToggleItem intent, expected prompt updated in UI state`() = runTest {
@@ -149,6 +151,7 @@ class ExtrasViewModelTest {
     private fun TestScope.createViewModel(): ExtrasViewModel {
         val dispatcher = StandardTestDispatcher(testScheduler)
         return ExtrasViewModel(
+            diagnostics = mockk(relaxed = true),
             dispatchersProvider = testDispatchersProvider(dispatcher),
             fetchAndGetLorasUseCase = stubFetchAndGetLorasUseCase,
             fetchAndGetHyperNetworksUseCase = stubFetchAndGetHyperNetworksUseCase,
@@ -159,9 +162,10 @@ class ExtrasViewModelTest {
         )
     }
 
-    private fun testDispatchersProvider(dispatcher: CoroutineDispatcher) = object : DispatchersProvider {
-        override val io: CoroutineDispatcher = dispatcher
-        override val ui: CoroutineDispatcher = dispatcher
-        override val immediate: CoroutineDispatcher = dispatcher
-    }
+    private fun testDispatchersProvider(dispatcher: CoroutineDispatcher) =
+        object : DispatchersProvider {
+            override val io: CoroutineDispatcher = dispatcher
+            override val ui: CoroutineDispatcher = dispatcher
+            override val immediate: CoroutineDispatcher = dispatcher
+        }
 }

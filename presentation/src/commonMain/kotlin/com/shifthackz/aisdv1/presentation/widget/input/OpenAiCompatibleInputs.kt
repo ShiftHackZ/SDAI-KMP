@@ -24,41 +24,78 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
  * @author Dmitriy Moroz
  */
 @Composable
-internal fun OpenAiCompatibleInputs(state: GenerationInputFormState, onEvent: (GenerationInputFormEvent) -> Unit) {
+internal fun OpenAiCompatibleInputs(
+    state: GenerationInputFormState,
+    onEvent: (GenerationInputFormEvent) -> Unit
+) {
     Column {
-        if (state.mode == ServerSource.OPEN_AI_OAUTH) Text("gpt-image-2")
-        else PlatformOutlinedTextField(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            value = state.openAiCompatibleModel,
-            onValueChange = { onEvent(GenerationInputFormEvent.UpdateOpenAiCompatibleModel(it)) },
-            label = Localization.string("open_ai_compatible_model"),
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            textColor = MaterialTheme.colorScheme.onSurface,
-            hintColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        OpenAiCompatibleModelInput(state, onEvent)
+        OpenAiCompatibleDimensionsInput(state, onEvent)
+        GenerationBatchComponent(state.mode, state.batchCount, onEvent)
+    }
+}
+
+/**
+ * Displays the compatible provider's editable model or the fixed OAuth model label.
+ *
+ * @param state Current provider and arbitrary model name.
+ * @param onEvent Receives compatible-model text changes.
+ * @author Dmitriy Moroz
+ */
+@Composable
+internal fun OpenAiCompatibleModelInput(
+    state: GenerationInputFormState,
+    onEvent: (GenerationInputFormEvent) -> Unit
+) {
+
+    if (state.mode == ServerSource.OPEN_AI_OAUTH) Text("gpt-image-2")
+    else PlatformOutlinedTextField(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        value = state.openAiCompatibleModel,
+        onValueChange = { onEvent(GenerationInputFormEvent.UpdateOpenAiCompatibleModel(it)) },
+        label = Localization.string("open_ai_compatible_model"),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        textColor = MaterialTheme.colorScheme.onSurface,
+        hintColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        singleLine = true,
+    )
+
+}
+
+/**
+ * Displays unrestricted compatible-provider pixel dimensions as a paired horizontal control.
+ *
+ * @param state Current dimension text and validation feedback.
+ * @param onEvent Receives width and height text edits.
+ * @author Dmitriy Moroz
+ */
+@Composable
+internal fun OpenAiCompatibleDimensionsInput(
+    state: GenerationInputFormState,
+    onEvent: (GenerationInputFormEvent) -> Unit
+) {
+    Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+
+        OutlinedTextField(
+            modifier = Modifier.weight(1f).padding(end = 4.dp),
+            value = state.width,
+            onValueChange = { onEvent(GenerationInputFormEvent.UpdateWidth(it)) },
+            label = { Text(Localization.string("width")) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = state.widthValidationError != null,
+            supportingText = { state.widthValidationError?.let { Text(it.asString()) } },
             singleLine = true,
         )
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            OutlinedTextField(
-                modifier = Modifier.weight(1f).padding(end = 4.dp),
-                value = state.width,
-                onValueChange = { onEvent(GenerationInputFormEvent.UpdateWidth(it)) },
-                label = { Text(Localization.string("width")) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                isError = state.widthValidationError != null,
-                supportingText = { state.widthValidationError?.let { Text(it.asString()) } },
-                singleLine = true,
-            )
-            OutlinedTextField(
-                modifier = Modifier.weight(1f).padding(start = 4.dp),
-                value = state.height,
-                onValueChange = { onEvent(GenerationInputFormEvent.UpdateHeight(it)) },
-                label = { Text(Localization.string("height")) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                isError = state.heightValidationError != null,
-                supportingText = { state.heightValidationError?.let { Text(it.asString()) } },
-                singleLine = true,
-            )
-        }
-        GenerationBatchComponent(state, onEvent)
+        OutlinedTextField(
+            modifier = Modifier.weight(1f).padding(start = 4.dp),
+            value = state.height,
+            onValueChange = { onEvent(GenerationInputFormEvent.UpdateHeight(it)) },
+            label = { Text(Localization.string("height")) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = state.heightValidationError != null,
+            supportingText = { state.heightValidationError?.let { Text(it.asString()) } },
+            singleLine = true,
+        )
+
     }
 }

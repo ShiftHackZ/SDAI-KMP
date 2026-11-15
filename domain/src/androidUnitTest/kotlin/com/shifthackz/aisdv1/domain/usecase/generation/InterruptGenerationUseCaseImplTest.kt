@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.gateway.NoOpNativeGenerationGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.BonsaiGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.CoreMlGenerationRepository
@@ -19,22 +20,29 @@ import org.junit.Test
 class InterruptGenerationUseCaseImplTest {
 
     private val stubException = RuntimeException("Can not interrupt generation.")
-    private val stubStableDiffusionGenerationRepository = mockk<StableDiffusionGenerationRepository>()
+    private val stubStableDiffusionGenerationRepository =
+        mockk<StableDiffusionGenerationRepository>()
     private val stubHordeGenerationRepository = mockk<HordeGenerationRepository>()
     private val stubLocalDiffusionGenerationRepository = mockk<LocalDiffusionGenerationRepository>()
-    private val stubStableDiffusionCppGenerationRepository = mockk<StableDiffusionCppGenerationRepository>()
+    private val stubStableDiffusionCppGenerationRepository =
+        mockk<StableDiffusionCppGenerationRepository>()
     private val stubCoreMlGenerationRepository = mockk<CoreMlGenerationRepository>()
     private val stubBonsaiGenerationRepository = mockk<BonsaiGenerationRepository>()
     private val stubPreferenceManager = mockk<PreferenceManager>()
 
-    private val useCase = InterruptGenerationUseCaseImpl(
+    private val interruptSourceGenerationUseCase = InterruptSourceGenerationUseCaseImpl(
         stableDiffusionGenerationRepository = stubStableDiffusionGenerationRepository,
         hordeGenerationRepository = stubHordeGenerationRepository,
         localDiffusionGenerationRepository = stubLocalDiffusionGenerationRepository,
         stableDiffusionCppGenerationRepository = stubStableDiffusionCppGenerationRepository,
         coreMlGenerationRepository = stubCoreMlGenerationRepository,
         bonsaiGenerationRepository = stubBonsaiGenerationRepository,
+    )
+
+    private val useCase = InterruptGenerationUseCaseImpl(
         preferenceManager = stubPreferenceManager,
+        nativeGenerationGateway = NoOpNativeGenerationGateway,
+        interruptSourceGenerationUseCase = interruptSourceGenerationUseCase,
     )
 
     @Test
@@ -68,14 +76,15 @@ class InterruptGenerationUseCaseImplTest {
     }
 
     @Test
-    fun `given source is LOCAL_STABLE_DIFFUSION_CPP, expected stable diffusion cpp interrupt`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.LOCAL_STABLE_DIFFUSION_CPP
-        coEvery { stubStableDiffusionCppGenerationRepository.interruptGeneration() } returns Unit
+    fun `given source is LOCAL_STABLE_DIFFUSION_CPP, expected stable diffusion cpp interrupt`() =
+        runTest {
+            every { stubPreferenceManager.source } returns ServerSource.LOCAL_STABLE_DIFFUSION_CPP
+            coEvery { stubStableDiffusionCppGenerationRepository.interruptGeneration() } returns Unit
 
-        useCase()
+            useCase()
 
-        coVerify(exactly = 1) { stubStableDiffusionCppGenerationRepository.interruptGeneration() }
-    }
+            coVerify(exactly = 1) { stubStableDiffusionCppGenerationRepository.interruptGeneration() }
+        }
 
     @Test
     fun `given source is LOCAL_APPLE_CORE_ML, expected core ml interrupt`() = runTest {

@@ -26,6 +26,11 @@ import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSaver
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSharer
 import com.shifthackz.aisdv1.presentation.widget.work.AndroidBackgroundWorkImageLoader
 import com.shifthackz.aisdv1.presentation.widget.work.BackgroundWorkImageLoader
+import com.shifthackz.aisdv1.presentation.utils.ReportProblemEmailComposer
+import com.shifthackz.aisdv1.presentation.screen.debug.AndroidUiDiagnosticReportActions
+import com.shifthackz.aisdv1.presentation.screen.debug.UiDiagnosticReportActions
+import com.shifthackz.aisdv1.presentation.utils.OriginalImageFileExporter
+import com.shifthackz.aisdv1.presentation.utils.StreamingOriginalImageFileExporter
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
@@ -33,19 +38,39 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 internal val uiUtilsModule = module {
+    single<OriginalImageFileExporter> { StreamingOriginalImageFileExporter(get(), get()) }
+    factoryOf(::ReportProblemEmailComposer)
+    factory<UiDiagnosticReportActions> {
+        AndroidUiDiagnosticReportActions(
+            androidContext(),
+            get(),
+            get(),
+            get()
+        )
+    }
     factoryOf(::GalleryExporter) bind GalleryExportService::class
-    factory { AndroidGalleryPlatformActions(androidContext(), get()) } bind GalleryPlatformActions::class
+    factory {
+        AndroidGalleryPlatformActions(
+            androidContext(),
+            get()
+        )
+    } bind GalleryPlatformActions::class
     factory {
         AndroidGalleryDetailPlatformActions(
             context = androidContext(),
             fileProviderDescriptor = get(),
             dispatchersProvider = get(),
-            base64ToBitmapConverter = get(),
+            originals = get(),
             imageSaver = get(),
         )
     } bind GalleryDetailPlatformActions::class
     factoryOf(::AndroidLogReader) bind LogReader::class
-    factory { AndroidBenchmarkPlatformActions(androidContext(), get()) } bind BenchmarkPlatformActions::class
+    factory {
+        AndroidBenchmarkPlatformActions(
+            androidContext(),
+            get()
+        )
+    } bind BenchmarkPlatformActions::class
     factory { AndroidLoggerPlatformActions(androidContext()) } bind LoggerPlatformActions::class
     factoryOf(::AndroidDebugMenuPlatformActions) bind DebugMenuPlatformActions::class
     factoryOf(::AndroidBackgroundWorkImageLoader) bind BackgroundWorkImageLoader::class
@@ -62,7 +87,7 @@ internal val uiUtilsModule = module {
             context = androidContext(),
             fileProviderDescriptor = get(),
             dispatchersProvider = get(),
-            base64ToBitmapConverter = get(),
+            originals = get(),
         )
     }
     singleOf(::GenerationFormUpdateEvent)

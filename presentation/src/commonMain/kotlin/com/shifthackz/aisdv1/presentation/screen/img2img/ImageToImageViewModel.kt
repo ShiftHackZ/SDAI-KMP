@@ -1,9 +1,13 @@
 package com.shifthackz.aisdv1.presentation.screen.img2img
 
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
+import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidator
@@ -35,7 +39,7 @@ import com.shifthackz.aisdv1.feature.benchmark.LocalGenerationBenchmarkGate
 import com.shifthackz.aisdv1.presentation.core.GenerationFormUpdateEvent
 import com.shifthackz.aisdv1.presentation.core.GenerationPlatformServices
 import com.shifthackz.aisdv1.presentation.model.GenerationModal
-import com.shifthackz.aisdv1.presentation.navigation.router.ImageToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSaver
 import com.shifthackz.aisdv1.presentation.screen.txt2img.ImageSharer
 import kotlinx.coroutines.CancellationException
@@ -54,8 +58,11 @@ import kotlinx.coroutines.withContext
  * @param nativeSeedValidator Validates native provider seeds using their full integer precision.
  * @param seedValidator Validates edited, restored and provider-switched seeds before state publication.
  * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
+ * @param originalImageBudget Full-resolution transform admission from DI.
  */
 class ImageToImageViewModel(
+    diagnostics: UiDiagnostics,
     private val dispatchersProvider: DispatchersProvider,
     private val getConfigurationUseCase: GetConfigurationUseCase,
     private val getStableDiffusionSamplersUseCase: GetStableDiffusionSamplersUseCase,
@@ -84,8 +91,11 @@ class ImageToImageViewModel(
     private val imageSharer: ImageSharer,
     private val router: ImageToImageRouter,
     private val platformActions: ImageToImagePlatformActions,
+    private val originalImageBudget: OriginalImageBudget,
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<ImageToImageState, ImageToImageIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.IMAGE_TO_IMAGE.asDiagnosticScreen(),
     initialState = ImageToImageState(
         samplingSteps = preferenceManager.imageToImageSamplingSteps,
         cfgScale = preferenceManager.imageToImageCfgScale,
@@ -153,6 +163,7 @@ class ImageToImageViewModel(
         imageSharer = imageSharer,
         router = router,
         platformActions = platformActions,
+        originalImageBudget = originalImageBudget,
         currentState = { currentState },
         emitState = ::emitFormState,
         updateState = { reducer -> updateFormState(reducer) },
@@ -186,19 +197,23 @@ class ImageToImageViewModel(
             ImageToImageIntent.RetrySamplers -> {
                 if (stableDiffusionSamplers.isNullOrEmpty()) loadSamplers()
             }
+
             ImageToImageIntent.RefreshADetailerAvailability -> loadADetailerAvailability(force = true)
             ImageToImageIntent.OpenADetailerInstallInstructions -> Unit
             ImageToImageIntent.RunBenchmarkFromPrompt -> actionHandler.runBenchmarkFromPrompt()
             ImageToImageIntent.SkipBenchmarkPrompt -> actionHandler.skipBenchmarkPrompt()
             ImageToImageIntent.ContinueAfterBenchmarkWarning ->
                 actionHandler.continueAfterBenchmarkWarning(suppressFutureWarnings = false)
+
             ImageToImageIntent.SuppressBenchmarkWarningAndContinue ->
                 actionHandler.continueAfterBenchmarkWarning(suppressFutureWarnings = true)
+
             ImageToImageIntent.DismissModal -> actionHandler.dismissBenchmarkDialog()
             is ImageToImageIntent.UpdateArliAiModel -> {
                 preferenceManager.arliAiModel = intent.value
                 intentProcessor.process(intent)
             }
+
             else -> intentProcessor.process(intent)
         }
         persistGenerationParameters()
@@ -363,7 +378,11 @@ class ImageToImageViewModel(
             preferenceManager
                 .observe()
                 .catch { t ->
-                    updateFormState { it.copy(error = t.message ?: Localization.string("error_invalid")) }
+                    updateFormState {
+                        it.copy(
+                            error = t.message ?: Localization.string("error_invalid")
+                        )
+                    }
                     onError(t)
                 }
                 .collect { settings ->

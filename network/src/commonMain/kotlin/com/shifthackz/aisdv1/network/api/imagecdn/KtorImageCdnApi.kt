@@ -3,7 +3,7 @@ package com.shifthackz.aisdv1.network.api.imagecdn
 import com.shifthackz.aisdv1.network.client.createConfiguredHttpClient
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
 import kotlin.random.Random
@@ -49,7 +49,7 @@ class KtorImageCdnApi(
         .nextInt(MIN, MAX + 1)
         .toString()
         .let { size ->
-            httpClient.get {
+            httpClient.boundedGet {
                 url.takeFrom(baseUrl)
                 url.appendPathSegments(size, size)
             }
@@ -68,6 +68,7 @@ class KtorImageCdnApi(
          * @author Dmitriy Moroz
          */
         const val MIN = 400
+
         /**
          * Exposes the `MAX` value used by the SDAI network layer.
          *

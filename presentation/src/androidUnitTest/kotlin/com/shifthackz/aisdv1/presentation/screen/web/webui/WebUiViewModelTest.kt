@@ -2,7 +2,7 @@ package com.shifthackz.aisdv1.presentation.screen.web.webui
 
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.presentation.navigation.router.WebUiRouter
+import com.shifthackz.aisdv1.core.navigation.router.WebUiRouter
 import com.shifthackz.aisdv1.presentation.stub.stubDispatchersProvider
 import io.mockk.every
 import io.mockk.mockk
@@ -75,6 +75,7 @@ class WebUiViewModelTest {
         }
 
     private fun TestScope.createViewModel() = WebUiViewModel(
+        diagnostics = mockk(relaxed = true),
         dispatchersProvider = stubDispatchersProvider,
         preferenceManager = stubPreferenceManager,
         router = stubRouter,

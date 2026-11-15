@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
+import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockStableDiffusionSamplers
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionSamplersDataSource
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
@@ -21,94 +23,104 @@ class StableDiffusionSamplersRepositoryImplTest {
     private val stubException = RuntimeException("Something went wrong.")
     private val stubRemoteDataSource = mockk<StableDiffusionSamplersDataSource.Remote>()
     private val stubLocalDataSource = mockk<StableDiffusionSamplersDataSource.Local>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
+    private val stubPreferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val stubAuthorizationStore = mockk<AuthorizationStore>()
 
     private val repository = StableDiffusionSamplersRepositoryImpl(
         remoteDataSource = stubRemoteDataSource,
         localDataSource = stubLocalDataSource,
         preferenceManager = stubPreferenceManager,
-        authorizationStore = stubAuthorizationStore,
+        connections = AuthenticatedConnectionProviderImpl(
+            stubPreferenceManager,
+            stubAuthorizationStore,
+            ProviderSelectionGuard()
+        ),
     )
 
     @Before
     fun initialize() {
         every { stubPreferenceManager.automatic1111ServerUrl } returns stubBaseUrl
-        every { stubAuthorizationStore.getAuthorizationCredentials() } returns stubCredentials
+        coEvery { stubAuthorizationStore.getAuthorizationCredentials() } returns stubCredentials
     }
 
     @Test
-    fun `given attempt to fetch samplers, remote returns data, local insert success, expected complete value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSamplers(stubBaseUrl, stubCredentials)
-        } returns mockStableDiffusionSamplers
+    fun `given attempt to fetch samplers, remote returns data, local insert success, expected complete value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSamplers(stubBaseUrl, stubCredentials)
+            } returns mockStableDiffusionSamplers
 
-        coEvery {
-            stubLocalDataSource.insertSamplers(mockStableDiffusionSamplers)
-        } returns Unit
+            coEvery {
+                stubLocalDataSource.insertSamplers(mockStableDiffusionSamplers)
+            } returns Unit
 
-        val actual = runCatching { repository.fetchSamplers() }
+            val actual = runCatching { repository.fetchSamplers() }
 
-        assertTrue(actual.isSuccess)
-    }
-
-    @Test
-    fun `given attempt to fetch samplers, remote throws exception, local insert success, expected error value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSamplers(stubBaseUrl, stubCredentials)
-        } throws stubException
-
-        val actual = runCatching { repository.fetchSamplers() }.exceptionOrNull()
-
-        assertTrue(actual === stubException)
-    }
+            assertTrue(actual.isSuccess)
+        }
 
     @Test
-    fun `given attempt to fetch samplers, remote returns data, local insert fails, expected error value`() = runTest {
-        coEvery {
-            stubRemoteDataSource.fetchSamplers(stubBaseUrl, stubCredentials)
-        } returns mockStableDiffusionSamplers
+    fun `given attempt to fetch samplers, remote throws exception, local insert success, expected error value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSamplers(stubBaseUrl, stubCredentials)
+            } throws stubException
 
-        coEvery {
-            stubLocalDataSource.insertSamplers(mockStableDiffusionSamplers)
-        } throws stubException
+            val actual = runCatching { repository.fetchSamplers() }.exceptionOrNull()
 
-        val actual = runCatching { repository.fetchSamplers() }.exceptionOrNull()
-
-        assertTrue(actual === stubException)
-    }
+            assertTrue(actual === stubException)
+        }
 
     @Test
-    fun `given attempt to get samplers, local data source returns list, expected valid domain models list value`() = runTest {
-        populateCache()
-        coEvery {
-            stubLocalDataSource.getSamplers()
-        } returns mockStableDiffusionSamplers
+    fun `given attempt to fetch samplers, remote returns data, local insert fails, expected error value`() =
+        runTest {
+            coEvery {
+                stubRemoteDataSource.fetchSamplers(stubBaseUrl, stubCredentials)
+            } returns mockStableDiffusionSamplers
 
-        assertEquals(mockStableDiffusionSamplers, repository.getSamplers())
-    }
+            coEvery {
+                stubLocalDataSource.insertSamplers(mockStableDiffusionSamplers)
+            } throws stubException
 
-    @Test
-    fun `given attempt to get samplers, local data source returns empty list, expected empty domain models list value`() = runTest {
-        populateCache()
-        coEvery {
-            stubLocalDataSource.getSamplers()
-        } returns emptyList()
+            val actual = runCatching { repository.fetchSamplers() }.exceptionOrNull()
 
-        assertEquals(emptyList<Any>(), repository.getSamplers())
-    }
+            assertTrue(actual === stubException)
+        }
 
     @Test
-    fun `given attempt to get samplers, local data source throws exception, expected error value`() = runTest {
-        populateCache()
-        coEvery {
-            stubLocalDataSource.getSamplers()
-        } throws stubException
+    fun `given attempt to get samplers, local data source returns list, expected valid domain models list value`() =
+        runTest {
+            populateCache()
+            coEvery {
+                stubLocalDataSource.getSamplers()
+            } returns mockStableDiffusionSamplers
 
-        val actual = runCatching { repository.getSamplers() }.exceptionOrNull()
+            assertEquals(mockStableDiffusionSamplers, repository.getSamplers())
+        }
 
-        assertTrue(actual === stubException)
-    }
+    @Test
+    fun `given attempt to get samplers, local data source returns empty list, expected empty domain models list value`() =
+        runTest {
+            populateCache()
+            coEvery {
+                stubLocalDataSource.getSamplers()
+            } returns emptyList()
+
+            assertEquals(emptyList<Any>(), repository.getSamplers())
+        }
+
+    @Test
+    fun `given attempt to get samplers, local data source throws exception, expected error value`() =
+        runTest {
+            populateCache()
+            coEvery {
+                stubLocalDataSource.getSamplers()
+            } throws stubException
+
+            val actual = runCatching { repository.getSamplers() }.exceptionOrNull()
+
+            assertTrue(actual === stubException)
+        }
 
     /**
      * Associates the local cache fixture with the configured connection before reading it.

@@ -1,8 +1,11 @@
 # SDAI
 
+<img src="artwork/icon/sdai.png" alt="SDAI Logo" height="54" width="54">
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21442838.svg)](https://doi.org/10.5281/zenodo.21442838)
+
 ![Google Play](https://img.shields.io/endpoint?color=blue&logo=google-play&logoColor=white&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.shifthackz.aisdv1.app%26l%3DGoogle%2520Play%26m%3D%24version)
-![F-Droid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Ff-droid.org%2Fapi%2Fv1%2Fpackages%2Fcom.shifthackz.aisdv1.app.foss&query=%24.packages%5B0%5D.versionName&label=F-Droid&link=https%3A%2F%2Ff-droid.org%2Fpackages%2Fcom.shifthackz.aisdv1.app.foss%2F)
+![F-Droid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Ff-droid.org%2Fapi%2Fv1%2Fpackages%2Fcom.shifthackz.aisdv1.app.foss&query=%24.packages%5B0%5D.versionName&label=F-Droid&logo=fdroid&link=https%3A%2F%2Ff-droid.org%2Fpackages%2Fcom.shifthackz.aisdv1.app.foss%2F)
 [![App Store](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fitunes.apple.com%2Flookup%3Fid%3D6778314183%26country%3Dus&query=%24.results%5B0%5D.version&label=App%20Store&logo=appstore&logoColor=white&color=blue)](https://apps.apple.com/us/app/sdai-ai-image-generator/id6778314183)
 
 [Website](https://sdai.moroz.cc) | [Google Play](https://play.google.com/store/apps/details?id=com.shifthackz.aisdv1.app) | [F-Droid](https://f-droid.org/packages/com.shifthackz.aisdv1.app.foss) | [App Store](https://apps.apple.com/us/app/sdai-ai-image-generator/id6778314183) | [Nightly Build](https://github.com/ShiftHackZ/SDAI-KMP/releases/download/nightly/sdai-full-nightly.apk) | [Telegram](https://t.me/sdai_app) | [Discord](https://discord.gg/jzdR9m8Ves) | [4PDA](https://4pda.to/forum/index.php?showtopic=1082639)
@@ -27,6 +30,7 @@ Root-level Markdown documents:
 - [Screenshot generation](SCREENSHOT_GENERATION.md)
 - [Nightly Android builds](NIGHTLY_BUILDS.md)
 - [Git workflow](GIT_WORKFLOW.md)
+- [Kotlin lint](KOTLIN_LINT.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
 
 ## Why SDAI
@@ -124,9 +128,9 @@ iOS uses the shared mobile experience with remote generation providers, Silicon 
 - Server availability monitoring for compatible own-server modes.
 - Storage usage and network usage screens for gallery/cache/model files and provider traffic counters.
 
-## Setup
+## Supported AI image generation providers
 
-### Option 1: AUTOMATIC1111 WebUI
+### AUTOMATIC1111 WebUI
 
 Use this if you already run [AUTOMATIC1111 WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) locally, on a server, or in a notebook environment.
 
@@ -137,11 +141,11 @@ Use this if you already run [AUTOMATIC1111 WebUI](https://github.com/AUTOMATIC11
 
 Demo mode is available from the setup screen if you want to explore the app without connecting to a real generator.
 
-### Option 2: SwarmUI
+### SwarmUI
 
 Use this if your generation environment is powered by [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI). Start SwarmUI in server mode, copy the reachable URL, then choose SwarmUI during SDAI setup.
 
-### Option 3: OpenAI-compatible
+### OpenAI-compatible
 
 Use this Stable provider on Android (all flavors) or iOS with an image server or separately running proxy that implements the OpenAI Images API.
 
@@ -157,55 +161,55 @@ SDAI supports text-to-image, sequential batches and image responses containing B
 
 A separately hosted [openai-oauth](https://github.com/EvanZhouDev/openai-oauth) proxy is one example; its ChatGPT sign-in runs outside SDAI. This provider keeps its URL, optional key and model independent of the official OpenAI provider. See the [complete setup and troubleshooting guide](https://sdai.moroz.cc/openai-compatible.html) and [consumed API contract](network/openai-compatible.openapi.json).
 
-### Option 4: AI Horde
+### AI Horde
 
 [AI Horde](https://stablehorde.net/) is a crowdsourced distributed cluster of image generation workers. SDAI can use the default anonymous key (`0000000000`) or your own key from [stablehorde.net/register](https://stablehorde.net/register).
 
-### Option 5: Hugging Face Inference API
+### Hugging Face Inference API
 
 [Hugging Face Inference API](https://huggingface.co/docs/api-inference/index) lets SDAI call hosted public or private image models. Create an API key in [Hugging Face account settings](https://huggingface.co/settings/tokens), then select the Hugging Face provider in SDAI.
 
-### Option 6: OpenAI
+### OpenAI API
 
 OpenAI image generation in SDAI uses GPT Image models through the Images API. Create an API key in [OpenAI API key settings](https://platform.openai.com/api-keys), then select OpenAI in SDAI.
 
-### ChatGPT OAuth (Beta)
+### ChatGPT OAuth
 
 Choose **ChatGPT OAuth** immediately after OpenAI in Configuration on Android or iOS. Enable device-code login in ChatGPT account security settings if needed, tap **Sign in with ChatGPT**, open the trusted sign-in page and enter the code shown by SDAI. Return to the app and tap **Connect** once signed in. Generate with `gpt-image-2`, positive width/height and sequential batches. No API key, external proxy or desktop credential file is required.
 
 Sessions use Android Keystore-backed storage and iOS Keychain. Sign out in provider configuration to remove the local session. The integration uses an unofficial backend; model access, limits and service changes depend on OpenAI. Image editing, chat and Stable Diffusion controls are unsupported. See the [provider guide](https://sdai.moroz.cc/openai-oauth.html).
 
-### Option 7: Stability AI
+### Stability AI
 
 [Stability AI](https://platform.stability.ai/) support uses the Stability image API. Create an API key on the [Stability AI keys page](https://platform.stability.ai/account/keys), then select Stability AI and choose an engine in SDAI.
 
-### Option 8: Fal.ai
+### Fal.ai
 
 [Fal.ai](https://fal.ai/) support uses the Fal.ai queue API for compatible FLUX text-to-image and image-to-image endpoints. Create an API key in the [Fal.ai dashboard](https://fal.ai/dashboard/keys), then select Fal.ai in SDAI and choose the endpoint from the shared generation form.
 
-### Option 9: ArliAI
+### ArliAI
 
 [ArliAI](https://www.arliai.com/quick-start) support uses the ArliAI SDNext-compatible image API. Create an ArliAI API key, select ArliAI in SDAI, connect, and choose the checkpoint from the shared generation form after model discovery completes.
 
-### Option 10: Local Diffusion with Microsoft ONNX Runtime
+### Local Diffusion with Microsoft ONNX Runtime
 
 Use this on Android for on-device txt2img generation. Download or provide a compatible ONNX local diffusion model, select it in setup, and generate without sending prompts to a remote service.
 
-### Option 11: Local Diffusion with Google AI MediaPipe
+### Local Diffusion with Google AI MediaPipe
 
 Use this on Android for on-device txt2img generation through Google AI MediaPipe. This provider is available only in `playstore` and `full` Android flavors.
 
-### Option 12: Local SDXL with stable-diffusion.cpp
+### Local SDXL with stable-diffusion.cpp
 
 Use this on Android for on-device SDXL-compatible txt2img generation through stable-diffusion.cpp. Download a supported model from the in-app SDXL catalog or provide a compatible local single-file model outside the Play build, then choose the runtime backend from Auto, CPU, OpenCL, or Vulkan. Mobile SDXL is memory-heavy, so the catalog starts with compact/quantized GGUF options such as SSD-1B / LCM-style models before larger desktop-class SDXL files.
 
-### Option 13: Silicon Diffusion Core ML
+### Silicon Diffusion Core ML
 
 Use this on iOS for on-device image generation through Core ML. Download a supported Core ML model from the in-app catalog or import a compatible local model package, select it during setup, and generate without sending prompts or source images to a remote service.
 
 The first-party catalog intentionally starts with Apple/Hugging Face Stable Diffusion 1.x and 2.x palettized Core ML archives. SDXL archives are not exposed by default until memory and execution-plan compatibility are stable across a tested device matrix.
 
-### Option 14: PrismML Bonsai Image 4B
+### PrismML Bonsai Image 4B
 
 Use this for on-device text-to-image generation with PrismML Bonsai Image 4B. Download a supported Bonsai Ternary or Binary model archive from the in-app catalog, select it during setup, and generate without sending prompts to a remote service.
 

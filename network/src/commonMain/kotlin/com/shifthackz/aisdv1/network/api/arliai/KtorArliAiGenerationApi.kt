@@ -12,9 +12,9 @@ import com.shifthackz.aisdv1.network.request.ArliAiImageToImageRequest
 import com.shifthackz.aisdv1.network.request.ArliAiTextToImageRequest
 import com.shifthackz.aisdv1.network.response.SdGenerationResponse
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import com.shifthackz.aisdv1.network.client.boundedGet
 import io.ktor.client.request.header
-import io.ktor.client.request.post
+import com.shifthackz.aisdv1.network.client.boundedPost
 import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
@@ -73,12 +73,13 @@ class KtorArliAiGenerationApi(
      *
      * @author Dmitriy Moroz
      */
-    override suspend fun fetchModels(apiKey: String): List<KtorStableDiffusionModelRaw> = httpClient.get {
-        url.takeFrom(baseUrl)
-        url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_SD_MODELS)
-        header(HttpHeaders.Authorization, apiKey.headerValue)
-        trackUsage(NetworkUsageCategory.CONFIGS)
-    }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
+    override suspend fun fetchModels(apiKey: String): List<KtorStableDiffusionModelRaw> =
+        httpClient.boundedGet {
+            url.takeFrom(baseUrl)
+            url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_SD_MODELS)
+            header(HttpHeaders.Authorization, apiKey.headerValue)
+            trackUsage(NetworkUsageCategory.CONFIGS)
+        }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
     /**
      * Sends text-to-image generation and records request plus response bytes as inference traffic.
@@ -93,7 +94,7 @@ class KtorArliAiGenerationApi(
         apiKey: String,
         request: ArliAiTextToImageRequest,
     ): SdGenerationResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_TXT_TO_IMG)
             applyGenerationTimeout(generationTimeoutProvider)
@@ -115,7 +116,7 @@ class KtorArliAiGenerationApi(
         apiKey: String,
         request: ArliAiImageToImageRequest,
     ): SdGenerationResponse = httpClient
-        .post {
+        .boundedPost {
             url.takeFrom(baseUrl)
             url.appendPathSegments(PATH_SD_API, PATH_V1, PATH_IMG_TO_IMG)
             applyGenerationTimeout(generationTimeoutProvider)

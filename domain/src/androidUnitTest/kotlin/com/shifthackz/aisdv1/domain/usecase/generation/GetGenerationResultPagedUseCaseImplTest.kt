@@ -1,13 +1,9 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
-import com.shifthackz.aisdv1.domain.mocks.mockAiGenerationResultPreviews
 import com.shifthackz.aisdv1.domain.mocks.mockAiGenerationResults
 import com.shifthackz.aisdv1.domain.repository.GenerationResultRepository
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
@@ -33,15 +29,16 @@ class GetGenerationResultPagedUseCaseImplTest {
     }
 
     @Test
-    fun `given repository returned empty page with no items, expected empty list value`() = runTest {
-        coEvery {
-            stubRepository.getPage(any(), any())
-        } returns emptyList()
+    fun `given repository returned empty page with no items, expected empty list value`() =
+        runTest {
+            coEvery {
+                stubRepository.getPage(any(), any())
+            } returns emptyList()
 
-        val actual = useCase(20, 5598)
+            val actual = useCase(20, 5598)
 
-        assertTrue(actual.isEmpty())
-    }
+            assertTrue(actual.isEmpty())
+        }
 
     @Test
     fun `given repository thrown exception, expected error value`() = runTest {
@@ -52,16 +49,5 @@ class GetGenerationResultPagedUseCaseImplTest {
         val actual = runCatching { useCase(20, 5598) }.exceptionOrNull()
 
         assertSame(stubException, actual)
-    }
-
-    @Test
-    fun `given repository observes preview page, expected valid preview list value`() = runTest {
-        every {
-            stubRepository.observePagePreview(any(), any())
-        } returns flowOf(mockAiGenerationResultPreviews)
-
-        val actual = useCase.observePreview(30, 0).first()
-
-        assertEquals(mockAiGenerationResultPreviews, actual)
     }
 }

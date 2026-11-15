@@ -19,29 +19,23 @@ data class GalleryState(
      */
     val loading: Boolean = true,
     /**
-     * Exposes the `loadingNextPage` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val loadingNextPage: Boolean = false,
-    /**
      * Exposes the `items` value used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     val items: List<GalleryGridItemUi> = emptyList(),
     /**
-     * Exposes the `nextPage` value used by the SDAI presentation layer.
+     * Stable global positions without originals.
      *
      * @author Dmitriy Moroz
      */
-    val nextPage: Int = 0,
+    val itemIds: List<Long> = emptyList(),
     /**
-     * Exposes the `canLoadMore` value used by the SDAI presentation layer.
+     * Selected flags survive metadata-window eviction.
      *
      * @author Dmitriy Moroz
      */
-    val canLoadMore: Boolean = true,
+    val selectedFlags: List<GalleryGridItemUi> = emptyList(),
     /**
      * Exposes the `dialog` value used by the SDAI presentation layer.
      *
@@ -85,7 +79,7 @@ data class GalleryState(
      * @author Dmitriy Moroz
      */
     val selectedItems: List<GalleryGridItemUi>
-        get() = items.filter { it.id in selection }
+        get() = selectedFlags.filter { it.id in selection }
 
     /**
      * Exposes the `shouldHideSelection` value used by the SDAI presentation layer.
@@ -117,18 +111,21 @@ sealed interface GalleryDialog {
      * @author Dmitriy Moroz
      */
     data object None : GalleryDialog
+
     /**
      * Provides the `DeleteAllConfirm` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object DeleteAllConfirm : GalleryDialog
+
     /**
      * Provides the `DeleteSelectionConfirm` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object DeleteSelectionConfirm : GalleryDialog
+
     /**
      * Carries `ConfirmExport` data through the SDAI presentation layer.
      *
@@ -136,12 +133,14 @@ sealed interface GalleryDialog {
      * @author Dmitriy Moroz
      */
     data class ConfirmExport(val exportAll: Boolean) : GalleryDialog
+
     /**
      * Provides the `ExportInProgress` singleton used by the SDAI presentation layer.
      *
      * @author Dmitriy Moroz
      */
     data object ExportInProgress : GalleryDialog
+
     /**
      * Carries `Error` data through the SDAI presentation layer.
      *
@@ -165,11 +164,11 @@ data class GalleryGridItemUi(
      */
     val id: Long,
     /**
-     * Exposes the `image` value used by the SDAI presentation layer.
+     * Opaque image identity, independent of payload length.
      *
      * @author Dmitriy Moroz
      */
-    val imageBase64: String,
+    val imageRevision: String = "",
     /**
      * Exposes the `hidden` value used by the SDAI presentation layer.
      *
