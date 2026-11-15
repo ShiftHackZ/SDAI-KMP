@@ -3,111 +3,99 @@ package com.shifthackz.aisdv1.data.gateway.mediastore
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import com.shifthackz.aisdv1.core.common.extensions.uriFromFile
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
+import com.shifthackz.aisdv1.data.export.MediaStoreImageFormatResolver
 import com.shifthackz.aisdv1.domain.entity.MediaStoreInfo
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 import java.io.File
+import java.io.IOException
+import kotlin.jvm.Synchronized
 
 /**
- * Implementation to support actual Android versions (12L and higher).
+ * Writes original image bytes to Downloads/SDAI through MediaStore on Android 12L and later.
+ * Filename suffix and MIME type come from the encoded image, preserving upstream metadata.
  *
- *
- * Works on:
- * - Android 12 API 32 (Emulator)
- * - Android 13 API 33 (Google Pixel 7 Pro, Graphene OS)
+ * @param context Application context supplying the media content resolver.
+ * @param fileProviderDescriptor FileProvider authority used to expose the folder returned by [getInfo].
+ * @param formatResolver Recognizes supported encoded headers before any destination is opened.
+ * @author Dmitriy Moroz
  */
 internal class MediaStoreGatewayImpl(
-    /**
-     * Exposes the `context` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val context: Context,
-    /**
-     * Exposes the `fileProviderDescriptor` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val fileProviderDescriptor: FileProviderDescriptor,
+    private val formatResolver: MediaStoreImageFormatResolver,
 ) : MediaStoreGateway {
 
     /**
-     * Executes the `exportToFile` step in the SDAI data layer.
+     * Saves the unmodified image under its detected extension and MIME type.
+     * Reuses only a matching entry in Downloads/SDAI. Failed writes remove newly created entries;
+     * a pre-existing destination is retained, and cleanup failures are attached to the write failure.
+     * Serializes this gateway's exports so failure cleanup cannot delete a concurrent call's output.
      *
-     * @param fileName file name value consumed by the API.
-     * @param content content value consumed by the API.
+     * @param fileName Destination filename stem without an extension.
+     * @param content Original encoded PNG, JPEG or WebP image bytes.
+     * @throws IllegalArgumentException When the image header is unsupported.
+     * @throws IOException When the media provider cannot open or write the destination.
      * @author Dmitriy Moroz
      */
+    @Synchronized
     override fun exportToFile(fileName: String, content: ByteArray) {
-        val mimeType = when {
-            content.size >= 8 && content[0] == 0x89.toByte() && content[1] == 0x50.toByte() -> "image/png"
-            content.size >= 12 && content.copyOfRange(8, 12)
-                .decodeToString() == "WEBP" -> "image/webp"
-
-            else -> "image/jpeg"
-        }
+        val format = formatResolver.resolve(content)
+        val displayName = "$fileName.${format.extension}"
+        val relativePath = "${Environment.DIRECTORY_DOWNLOADS}/SDAI/"
         val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/SDAI/")
+            put(MediaStore.MediaColumns.DISPLAY_NAME, displayName)
+            put(MediaStore.MediaColumns.MIME_TYPE, format.mimeType)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
         }
-
-        val extVolumeUri: Uri = MediaStore.Files.getContentUri("external")
-
-        // query for the file
-        val cursor: Cursor? = context.contentResolver.query(
-            extVolumeUri,
+        val resolver = context.contentResolver
+        val volumeUri = MediaStore.Files.getContentUri("external")
+        val existingFileUri = (resolver.query(
+            volumeUri,
+            arrayOf(MediaStore.MediaColumns._ID),
+            "${MediaStore.MediaColumns.DISPLAY_NAME} = ? AND " +
+                "${MediaStore.MediaColumns.MIME_TYPE} = ? AND " +
+                "${MediaStore.MediaColumns.RELATIVE_PATH} = ?",
+            arrayOf(displayName, format.mimeType, relativePath),
             null,
-            MediaStore.MediaColumns.DISPLAY_NAME + " = ? AND " + MediaStore.MediaColumns.MIME_TYPE + " = ?",
-            arrayOf(fileName, mimeType),
-            null
-        )
-
-        var fileUri: Uri? = null
-
-        // if file found
-        if (cursor != null && cursor.count > 0) {
-            // get URI
-            while (cursor.moveToNext()) {
-                val nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
-                if (nameIndex > -1) {
-                    val displayName = cursor.getString(nameIndex)
-                    if (displayName == fileName) {
-                        val idIndex = cursor.getColumnIndex(MediaStore.MediaColumns._ID)
-                        if (idIndex > -1) {
-                            val id = cursor.getLong(idIndex)
-                            fileUri = ContentUris.withAppendedId(extVolumeUri, id)
-                        }
+        ) ?: throw IOException("Unable to query media export destination")).use { cursor ->
+            if (cursor.moveToFirst()) {
+                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
+                ContentUris.withAppendedId(volumeUri, id)
+            } else {
+                null
+            }
+        }
+        val fileUri = existingFileUri ?: resolver.insert(volumeUri, contentValues)
+            ?: throw IOException("Unable to create media export destination")
+        try {
+            (resolver.openOutputStream(fileUri, "wt")
+                ?: throw IOException("Unable to open media export destination")).use { output ->
+                output.write(content)
+            }
+        } catch (failure: Throwable) {
+            if (existingFileUri == null) {
+                try {
+                    if (resolver.delete(fileUri, null, null) == 0) {
+                        throw IOException("Unable to remove incomplete media export")
                     }
+                } catch (cleanupFailure: Throwable) {
+                    if (cleanupFailure !== failure) failure.addSuppressed(cleanupFailure)
                 }
             }
-
-            cursor.close()
-        } else {
-            // insert new file otherwise
-
-            fileUri = context.contentResolver.insert(extVolumeUri, contentValues)
-        }
-
-        if (fileUri != null) {
-            val os = context.contentResolver.openOutputStream(fileUri, "wt")
-
-            if (os != null) {
-                os.write(content)
-                os.close()
-            }
+            throw failure
         }
     }
 
     /**
-     * Loads SDAI data through `getInfo`.
+     * Resolves a filesystem folder from the first available MediaStore file for legacy folder UI.
+     * Returns empty information when no usable folder is available or the provider rejects access.
      *
-     * @return Result produced by `getInfo`.
+     * @return Folder URI and child count, or empty information when the folder cannot be resolved.
      * @author Dmitriy Moroz
      */
     override fun getInfo(): MediaStoreInfo {
