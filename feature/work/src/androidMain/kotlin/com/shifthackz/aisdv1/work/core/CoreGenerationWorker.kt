@@ -17,7 +17,6 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +32,19 @@ import com.shifthackz.aisdv1.core.localization.R as LocalizationR
  *
  * It owns cancellation, progress subscriptions, foreground notifications, and
  * background observer updates that are common to txt2img and img2img work.
+ * Android Bonsai uses the same child lifecycle and owner-scoped cancellation as other native engines.
+ *
+ * @param context Worker application context.
+ * @param workerParameters WorkManager identity and lifecycle parameters.
+ * @param pushNotificationManager Publishes foreground and terminal notifications.
+ * @param activityIntentProvider Opens the application from notifications.
+ * @param preferenceManager Initial source and legacy local runtime preferences.
+ * @param nativeGateway Observes and cancels isolated native attempts without loading engines.
+ * @param backgroundWorkObserver Publishes state only for the current worker owner.
+ * @param observeHordeProcessStatusUseCase Supplies remote Horde queue progress.
+ * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy local runtime progress.
+ * @param interruptWorkerGenerationUseCase Cancels the captured source for this exact worker.
+ * @author Dmitriy Moroz
  */
 internal abstract class CoreGenerationWorker(
     context: Context,
@@ -44,7 +56,6 @@ internal abstract class CoreGenerationWorker(
     private val backgroundWorkObserver: BackgroundWorkObserver,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
-    private val observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
     private val interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
 ) : NotificationWorker(
     context = context,
@@ -57,12 +68,18 @@ internal abstract class CoreGenerationWorker(
 
     protected var source = preferenceManager.source
 
+    /**
+     * Stops observations and cancels the captured source; native cancellation requires this worker's UUID.
+     *
+     * @author Dmitriy Moroz
+     */
     protected suspend fun handleCancellation() {
         clearSubscriptions()
         runCatching {
             if (source in setOf(
                     ServerSource.LOCAL_MICROSOFT_ONNX,
                     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
+                    ServerSource.LOCAL_APPLE_BONSAI,
                     ServerSource.LOCAL_STABLE_DIFFUSION_CPP
                 ) ||
                 backgroundWorkObserver.publishForOwner(id.toString()) {}
@@ -76,13 +93,18 @@ internal abstract class CoreGenerationWorker(
         coroutineScope.coroutineContext.cancelChildren()
     }
 
+    /**
+     * Subscribes to the captured source, using child stages for every Android native engine.
+     *
+     * @author Dmitriy Moroz
+     */
     protected fun listenSourceStatus() {
         when (source) {
             ServerSource.HORDE -> listenHordeStatus()
             ServerSource.LOCAL_MICROSOFT_ONNX -> listenNativeStatus(NativeGenerationEngine.ONNX)
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> listenNativeStatus(NativeGenerationEngine.SDCPP)
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> listenNativeStatus(NativeGenerationEngine.MEDIA_PIPE)
-            ServerSource.LOCAL_APPLE_BONSAI -> listenBonsaiStatus()
+            ServerSource.LOCAL_APPLE_BONSAI -> listenNativeStatus(NativeGenerationEngine.BONSAI)
             else -> Unit
         }
     }
@@ -194,35 +216,6 @@ internal abstract class CoreGenerationWorker(
         }
     }
 
-    protected fun listenBonsaiStatus() {
-        coroutineScope.launch {
-            observeBonsaiProcessStatusUseCase()
-                .catch { t -> errorLog(t) }
-                .collect { status ->
-                    val title =
-                        applicationContext.getString(LocalizationR.string.notification_running_title)
-                    val subTitle = applicationContext.getString(
-                        LocalizationR.string.communicating_status_steps,
-                        status.current.toString(),
-                        status.total.toString(),
-                    )
-                    backgroundWorkObserver.publishForOwner(id.toString()) {
-                        backgroundWorkObserver.postStatusMessage(
-                            title,
-                            subTitle
-                        )
-                    }
-                    setForegroundNotification(
-                        title = title,
-                        body = subTitle,
-                        silent = true,
-                        progress = status.current to status.total,
-                        canCancel = true,
-                    )
-                }
-        }
-    }
-
     protected fun handleStart() {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
         val title = applicationContext.getString(LocalizationR.string.notification_started_title)
@@ -232,12 +225,19 @@ internal abstract class CoreGenerationWorker(
         handleProcess()
     }
 
+    /**
+     * Publishes initial progress only while this worker owns background state.
+     * Native sources start with PREPARING before child callbacks arrive.
+     *
+     * @author Dmitriy Moroz
+     */
     protected fun handleProcess() {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
         val title = applicationContext.getString(LocalizationR.string.notification_running_title)
         val subTitle = if (source in setOf(
                 ServerSource.LOCAL_MICROSOFT_ONNX,
                 ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
+                ServerSource.LOCAL_APPLE_BONSAI,
                 ServerSource.LOCAL_GOOGLE_MEDIA_PIPE
             )
         ) stageText(NativeGenerationStage.PREPARING) else applicationContext.getString(LocalizationR.string.notification_running_sub_title)

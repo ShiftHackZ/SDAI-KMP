@@ -448,6 +448,7 @@ val coreDomainModule = module {
         InterruptWorkerGenerationUseCaseImpl(
             nativeGenerationGateway = get(),
             interruptSourceGenerationUseCase = get(),
+            buildInfoProvider = get(),
         )
     }
     factory<InterruptSourceGenerationUseCase> {

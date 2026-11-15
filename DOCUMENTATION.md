@@ -25,6 +25,23 @@ When changing provider behavior, keep the README, website and FAQ, privacy
 description, localized store metadata and screenshot caption sources aligned
 with the implementation.
 
+## Android native inference ownership
+
+ONNX, MediaPipe, stable-diffusion.cpp and experimental PrismML Bonsai execute in
+the private `:inference` process. Foreground generation and WorkManager use the
+same host gateway; WorkManager owns scheduling and notifications while the child
+owns native loading and execution. Feature host bindings must remain gateway
+facades. Child-only Koin modules are composed per attempt by the engine factory.
+
+Requests capture model paths, prompts, image parameters and backend choices in
+bounded app-private files. Binder carries attempt identities and sanitized
+progress. The host validates a complete PNG before repository persistence.
+Cancellation follows the attempt owner, with bounded child termination when the
+runtime does not cooperate. Interrupted native work requires explicit retry and
+is never replayed automatically. Isolation contains process-local failures; it
+does not prevent device-wide memory pressure or GPU driver failures. iOS keeps
+its existing Core ML and Bonsai MLX execution paths.
+
 ## UI performance diagnostics
 
 Android provides a separate `profile` build type, derived from release with shell

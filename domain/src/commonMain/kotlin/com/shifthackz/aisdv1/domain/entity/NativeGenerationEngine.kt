@@ -5,4 +5,4 @@ package com.shifthackz.aisdv1.domain.entity
  *
  * @author Dmitriy Moroz
  */
-enum class NativeGenerationEngine { ONNX, MEDIA_PIPE, SDCPP }
+enum class NativeGenerationEngine { ONNX, MEDIA_PIPE, SDCPP, BONSAI }

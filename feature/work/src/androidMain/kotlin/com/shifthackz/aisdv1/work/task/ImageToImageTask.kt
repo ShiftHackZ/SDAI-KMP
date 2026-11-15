@@ -12,7 +12,6 @@ import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.work.Constants
@@ -29,6 +28,23 @@ import java.io.File
  * The task reads the cached serialized payload, subscribes to provider progress,
  * runs the image-to-image use case, and publishes the result or failure through
  * the common generation notification flow.
+ * Bonsai remains text-to-image only and is not dispatched by this worker.
+ *
+ * @param context Worker application context.
+ * @param workerParameters Durable WorkManager task identity.
+ * @param pushNotificationManager Publishes foreground and terminal notifications.
+ * @param activityIntentProvider Opens the app from notifications.
+ * @param preferenceManager Supplies the source for legacy work.
+ * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
+ * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy runtime progress.
+ * @param interruptWorkerGenerationUseCase Cancels captured source work for this worker.
+ * @param backgroundWorkObserver Owns background presentation state.
+ * @param imageToImageUseCase Routes the existing image-to-image request.
+ * @param fileProviderDescriptor Legacy work file location descriptor.
+ * @param payloads Reads immutable work input.
+ * @param payloadCleanup Cleans up terminal request files and retains retry input.
+ * @param nativeGateway Shared native lifecycle dependency of the worker base.
+ * @author Dmitriy Moroz
  */
 internal class ImageToImageTask(
     context: Context,
@@ -38,7 +54,6 @@ internal class ImageToImageTask(
     preferenceManager: PreferenceManager,
     observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
-    observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
     interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val backgroundWorkObserver: BackgroundWorkObserver,
     private val imageToImageUseCase: ImageToImageUseCase,
@@ -56,7 +71,6 @@ internal class ImageToImageTask(
     backgroundWorkObserver = backgroundWorkObserver,
     observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
     observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
-    observeBonsaiProcessStatusUseCase = observeBonsaiProcessStatusUseCase,
     interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
 ) {
 

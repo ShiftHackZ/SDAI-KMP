@@ -16,6 +16,7 @@ internal fun NativeGenerationFailure.toUserMessage(): String {
         NativeGenerationEngine.ONNX -> "ONNX"
         NativeGenerationEngine.MEDIA_PIPE -> "MediaPipe"
         NativeGenerationEngine.SDCPP -> "SDCPP"
+        NativeGenerationEngine.BONSAI -> "Bonsai"
         null -> Localization.string("native_generation_engine_unknown")
     }
     val reasonKey = when (category) {
@@ -27,7 +28,8 @@ internal fun NativeGenerationFailure.toUserMessage(): String {
         NativeGenerationFailure.Category.INVALID_RESULT -> "native_generation_invalid_result"
         NativeGenerationFailure.Category.INTERRUPTED -> "native_generation_interrupted"
     }
-    val attemptedEngine = backend?.let { "$engineName / ${it.displayName}" } ?: engineName
+    val backendName = backend?.displayName ?: bonsaiBackend?.displayName
+    val attemptedEngine = backendName?.let { "$engineName / $it" } ?: engineName
     return Localization.string(
         "native_generation_failure_context",
         attemptedEngine,

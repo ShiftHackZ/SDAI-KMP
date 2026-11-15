@@ -1,17 +1,18 @@
 package com.shifthackz.aisdv1.data.repository
 
 import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
-import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockAiGenerationResult
 import com.shifthackz.aisdv1.data.mocks.mockImageToImagePayload
 import com.shifthackz.aisdv1.data.mocks.mockTextToImagePayload
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiGenerationDataSource
 import com.shifthackz.aisdv1.domain.datasource.SwarmUiModelsRemoteDataSource
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.preference.SessionPreference
 import com.shifthackz.aisdv1.network.exception.SwarmUiBadSessionException
@@ -113,13 +114,17 @@ class SwarmUiGenerationRepositoryImplTest {
     @Test
     fun `given attempt to check api availability by url, expected forced new session requested`() =
         runTest {
+            every {
+                stubPreferenceManager.swarmUiServerUrl
+            } returns CHECK_URL
+
             coEvery {
                 stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
             } returns RENEWED_SESSION_ID
 
             repository.checkApiAvailability(CHECK_URL)
 
-            coVerify {
+            coVerify(exactly = 1) {
                 stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
             }
             verify {
@@ -130,6 +135,10 @@ class SwarmUiGenerationRepositoryImplTest {
     @Test
     fun `given attempt to check api availability by url, remote throws exception, expected error value`() =
         runTest {
+            every {
+                stubPreferenceManager.swarmUiServerUrl
+            } returns CHECK_URL
+
             coEvery {
                 stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
             } throws stubException
@@ -137,6 +146,28 @@ class SwarmUiGenerationRepositoryImplTest {
             val actual = runCatching { repository.checkApiAvailability(CHECK_URL) }
 
             Assert.assertEquals(stubException, actual.exceptionOrNull())
+            coVerify(exactly = 1) {
+                stubSwarmSessionRemote.getNewSession(CHECK_URL, AuthorizationCredentials.None)
+            }
+        }
+
+    @Test
+    fun `given api availability url differs from configured url, expected failure without session renewal`() =
+        runTest {
+            val actual = runCatching { repository.checkApiAvailability(CHECK_URL) }
+
+            val failure = actual.exceptionOrNull()
+            Assert.assertTrue(failure is AuthorizationStorageFailure)
+            Assert.assertEquals(
+                AuthorizationStorageFailure.Reason.UNAVAILABLE,
+                (failure as AuthorizationStorageFailure).reason,
+            )
+            coVerify(exactly = 0) {
+                stubSwarmSessionRemote.getNewSession(any(), any())
+            }
+            verify(exactly = 0) {
+                stubSessionPreference.swarmUiSessionId = any()
+            }
         }
 
     @Test

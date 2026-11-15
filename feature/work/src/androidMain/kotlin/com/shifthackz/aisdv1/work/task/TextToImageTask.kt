@@ -16,7 +16,6 @@ import com.shifthackz.aisdv1.core.notification.PushNotificationManager
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase
@@ -34,6 +33,23 @@ import java.io.File
  * The task reads the cached generation payload, starts provider-specific
  * progress observation, executes txt2img generation, and reports success,
  * cancellation, or failure through the foreground notification path.
+ * Native attempts, including Bonsai, are never automatically replayed after interruption.
+ *
+ * @param context Worker application context.
+ * @param workerParameters Durable task identity and retry count.
+ * @param pushNotificationManager Publishes foreground and terminal notifications.
+ * @param activityIntentProvider Opens the app from notifications.
+ * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
+ * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy runtime progress.
+ * @param interruptWorkerGenerationUseCase Cancels only native work owned by this UUID.
+ * @param preferenceManager Supplies the source for legacy payloads without a snapshot.
+ * @param backgroundWorkObserver Owns current background presentation state.
+ * @param textToImageUseCase Routes immutable inputs and sequential batches.
+ * @param fileProviderDescriptor Legacy work file location descriptor.
+ * @param payloads Reads the immutable work request.
+ * @param payloadCleanup Retains retry input and cleans up terminal request files.
+ * @param nativeGateway Observes the child and preserves per-attempt ownership.
+ * @author Dmitriy Moroz
  */
 internal class TextToImageTask(
     context: Context,
@@ -42,7 +58,6 @@ internal class TextToImageTask(
     activityIntentProvider: ActivityIntentProvider,
     observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
-    observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
     interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val preferenceManager: PreferenceManager,
     private val backgroundWorkObserver: BackgroundWorkObserver,
@@ -61,7 +76,6 @@ internal class TextToImageTask(
     backgroundWorkObserver = backgroundWorkObserver,
     observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
     observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
-    observeBonsaiProcessStatusUseCase = observeBonsaiProcessStatusUseCase,
     interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
 ) {
 
@@ -69,6 +83,12 @@ internal class TextToImageTask(
 
     override val genericNotificationId: Int = NOTIFICATION_TEXT_TO_IMAGE_GENERIC
 
+    /**
+     * Runs one captured request with worker ownership; interrupted native work requires explicit retry.
+     * Cancellation and failure clear subscriptions and retain input according to payload cleanup policy.
+     *
+     * @author Dmitriy Moroz
+     */
     override suspend fun doWork(): Result {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {
                 backgroundWorkObserver.refreshStatus()
@@ -97,6 +117,7 @@ internal class TextToImageTask(
             if (runAttemptCount > 0 && source in setOf(
                     ServerSource.LOCAL_MICROSOFT_ONNX,
                     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
+                    ServerSource.LOCAL_APPLE_BONSAI,
                     ServerSource.LOCAL_STABLE_DIFFUSION_CPP
                 )
             ) {

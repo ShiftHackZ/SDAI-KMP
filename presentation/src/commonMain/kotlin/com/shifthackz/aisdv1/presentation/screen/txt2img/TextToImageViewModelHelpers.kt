@@ -13,7 +13,9 @@ import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ArliAiSampler
 import com.shifthackz.aisdv1.domain.entity.ForgeModule
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationFailure
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
+import com.shifthackz.aisdv1.presentation.widget.work.toUserMessage
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.Settings
 import com.shifthackz.aisdv1.domain.entity.StabilityAiSampler
@@ -127,7 +129,9 @@ internal fun TextToImageState.progressModal(
 
     mode == ServerSource.LOCAL_APPLE_BONSAI -> GenerationModal.Generating(
         title = "Bonsai Image".asUiText(),
-        canCancel = canCancelLocalGeneration,
+        canCancel = canCancelLocalGeneration || platform == Platform.ANDROID,
+        nativeEngine = NativeGenerationEngine.BONSAI.takeIf { platform == Platform.ANDROID },
+        nativeStage = NativeGenerationStage.PREPARING.takeIf { platform == Platform.ANDROID },
     )
 
     localSourceSelected -> GenerationModal.Generating(
@@ -357,14 +361,16 @@ internal fun TextToImageState.withSource(
 }
 
 /**
- * Executes the `localizedMessageText` step in the SDAI presentation layer.
+ * Converts provider and controlled native failures into localized recovery text.
+ * Native failures use the captured engine/backend without displaying native exception contents.
  *
- * @return Result produced by `localizedMessageText`.
+ * @return Message suitable for a generation error modal.
  * @author Dmitriy Moroz
  */
 internal fun Throwable.localizedMessageText(): UiText {
     val message = message
     val text = when {
+        this is NativeGenerationFailure -> toUserMessage()
         this is OpenAiOAuthFailure -> localizedDescription()
         this is OpenAiCompatibleHttpFailure -> localizedDescription()
         this is OpenAiCompatibleImageFailure -> Localization.string("open_ai_compatible_image_failure")

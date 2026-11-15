@@ -5,16 +5,18 @@ import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Defines the `BonsaiDiffusion` contract for the SDAI domain layer.
+ * Cross-platform Bonsai generation boundary used by the shared repository.
+ * Android submits work through the isolated inference gateway; iOS uses its registered MLX runtime.
  *
  * @author Dmitriy Moroz
  */
 interface BonsaiDiffusion {
     /**
-     * Executes the `process` step in the SDAI domain layer.
+     * Generates with the captured payload and selected model resources.
+     * Android returns one validated image per gateway attempt; the shared use case owns batch sequencing.
      *
-     * @param payload generation payload used by the operation.
-     * @param modelPath local model directory selected by the user.
+     * @param payload Captured generation parameters and platform backend selection.
+     * @param modelPath Downloaded or custom model directory selected before generation.
      * @return Base64-encoded generated image.
      * @author Dmitriy Moroz
      */
@@ -24,16 +26,17 @@ interface BonsaiDiffusion {
     ): String
 
     /**
-     * Performs the SDAI side effect handled by `interrupt`.
+     * Requests cancellation of the current platform operation.
+     * Android delegates to the active native gateway; worker callers use owner-scoped cancellation instead.
      *
      * @author Dmitriy Moroz
      */
     suspend fun interrupt()
 
     /**
-     * Loads SDAI data through `observeStatus`.
+     * Observes Bonsai progress without initializing the model or native runtime in the Android host.
      *
-     * @return Result produced by `observeStatus`.
+     * @return Platform runtime counters; Android lifecycle stages are observed through the native gateway.
      * @author Dmitriy Moroz
      */
     fun observeStatus(): Flow<LocalDiffusionStatus>

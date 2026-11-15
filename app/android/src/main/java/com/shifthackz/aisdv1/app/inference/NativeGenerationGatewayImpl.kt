@@ -89,7 +89,8 @@ internal class NativeGenerationGatewayImpl(
         if (!admission.tryLock()) throw NativeGenerationFailure(
             NativeGenerationFailure.Category.BUSY,
             request.engine,
-            request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP })
+            request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
+            request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI })
         val job = UUID.randomUUID().toString()
         val start = System.currentTimeMillis()
         val owner = currentCoroutineContext()[NativeGenerationOwner]?.nextKey()
@@ -139,12 +140,14 @@ internal class NativeGenerationGatewayImpl(
             throw NativeGenerationFailure(
                 failure.category,
                 request.engine,
-                request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP })
+                request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
+                request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI })
         } catch (_: Exception) {
             throw NativeGenerationFailure(
                 NativeGenerationFailure.Category.INVALID_RESULT,
                 request.engine,
-                request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP })
+                request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
+                request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI })
         } finally {
             hasCommittedTerminal = !hasBegun
             try {
@@ -182,6 +185,7 @@ internal class NativeGenerationGatewayImpl(
         if (!hasCommittedTerminal) throw NativeGenerationFailure(
             NativeGenerationFailure.Category.INVALID_RESULT, request.engine,
             request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
+            request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI },
         )
         return output
     }

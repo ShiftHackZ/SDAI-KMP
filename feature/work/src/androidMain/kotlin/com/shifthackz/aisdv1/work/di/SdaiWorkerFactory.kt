@@ -14,7 +14,6 @@ import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase
@@ -27,6 +26,21 @@ import com.shifthackz.aisdv1.work.task.TextToImageTask
  * The factory keeps foreground notification dependencies and local-generation
  * progress observers in one place so background txt2img/img2img tasks use the
  * same runtime status pipeline as foreground generation.
+ *
+ * @param backgroundWorkObserver Owns current background presentation state.
+ * @param pushNotificationManager Publishes worker notifications.
+ * @param preferenceManager Supplies legacy source and cancellation settings.
+ * @param textToImageUseCase Executes captured text-to-image requests.
+ * @param imageToImageUseCase Executes existing image-to-image requests.
+ * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
+ * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy runtime progress.
+ * @param interruptWorkerGenerationUseCase Cancels only work owned by the requested worker.
+ * @param fileProviderDescriptor Legacy work file location descriptor.
+ * @param activityIntentProvider Creates app navigation intents for notifications.
+ * @param payloads Reads immutable work files.
+ * @param nativeGateway Shared child-process status and cancellation gateway.
+ * @param payloadCleanup Cleans terminal request files and retains retry input.
+ * @author Dmitriy Moroz
  */
 class SdaiWorkerFactory(
     private val backgroundWorkObserver: BackgroundWorkObserver,
@@ -36,7 +50,6 @@ class SdaiWorkerFactory(
     private val imageToImageUseCase: ImageToImageUseCase,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
-    private val observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
     private val interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val fileProviderDescriptor: FileProviderDescriptor,
     private val activityIntentProvider: ActivityIntentProvider,
@@ -45,6 +58,14 @@ class SdaiWorkerFactory(
     private val payloadCleanup: GenerationWorkPayloadCleanup,
 ) : WorkerFactory() {
 
+    /**
+     * Constructs supported workers with the shared native gateway; unknown classes use other factories.
+     *
+     * @param appContext WorkManager application context.
+     * @param workerClassName Fully qualified worker class name supplied by WorkManager.
+     * @param workerParameters Durable worker identity and input parameters.
+     * @author Dmitriy Moroz
+     */
     override fun createWorker(
         appContext: Context,
         workerClassName: String,
@@ -64,7 +85,6 @@ class SdaiWorkerFactory(
                 textToImageUseCase = textToImageUseCase,
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
                 observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
-                observeBonsaiProcessStatusUseCase = observeBonsaiProcessStatusUseCase,
                 interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
                 fileProviderDescriptor = fileProviderDescriptor,
             )
@@ -82,7 +102,6 @@ class SdaiWorkerFactory(
                 imageToImageUseCase = imageToImageUseCase,
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
                 observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
-                observeBonsaiProcessStatusUseCase = observeBonsaiProcessStatusUseCase,
                 interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
                 fileProviderDescriptor = fileProviderDescriptor,
             )

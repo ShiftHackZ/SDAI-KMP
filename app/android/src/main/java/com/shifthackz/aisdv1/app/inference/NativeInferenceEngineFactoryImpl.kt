@@ -4,6 +4,7 @@ import android.content.Context
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.feature.diffusion.NativeInferenceEngine
+import com.shifthackz.aisdv1.feature.bonsai.di.bonsaiInferenceModule
 import com.shifthackz.aisdv1.feature.mediapipe.di.mediaPipeInferenceModule
 import com.shifthackz.aisdv1.feature.onnx.di.onnxInferenceModule
 import com.shifthackz.aisdv1.feature.sdxl.di.sdxlInferenceModule
@@ -31,6 +32,7 @@ internal class NativeInferenceEngineFactoryImpl(private val context: Context) :
                     NativeGenerationEngine.ONNX -> onnxInferenceModule(request)
                     NativeGenerationEngine.MEDIA_PIPE -> mediaPipeInferenceModule(context)
                     NativeGenerationEngine.SDCPP -> sdxlInferenceModule()
+                    NativeGenerationEngine.BONSAI -> bonsaiInferenceModule()
                 }
             )
         }

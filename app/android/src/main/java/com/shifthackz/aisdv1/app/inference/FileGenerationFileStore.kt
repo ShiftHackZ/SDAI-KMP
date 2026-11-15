@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.app.inference
 
 import android.content.Context
 import android.util.AtomicFile
+import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.entity.SdxlBackend
@@ -23,7 +24,8 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
     private val root = File(context.filesDir, "inference/jobs")
 
     /**
-     * Atomically commits a versioned request JSON file within the 4 MiB request limit.
+     * Atomically commits a version-2 request JSON file within the 4 MiB request limit.
+     * Captures both engine backend selections and NSFW; each child attempt generates one image.
      *
      * @param job Attempt UUID.
      * @param request Captured generation inputs.
@@ -31,25 +33,28 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
      */
     override fun writeRequest(job: String, request: NativeGenerationRequest) {
         val p = request.payload
-        val json = JSONObject().put("version", 1).put("engine", request.engine.name)
+        val json = JSONObject().put("version", 2).put("engine", request.engine.name)
             .put("model", request.modelPath).put("nnapi", request.isNnapiEnabled)
             .put("prompt", p.prompt).put("negative", p.negativePrompt)
             .put("steps", p.samplingSteps).put("cfg", p.cfgScale.toDouble())
             .put("width", p.width).put("height", p.height).put("seed", p.seed)
             .put("sampler", p.sampler).put("backend", p.sdxlBackend.name)
+            .put("bonsaiBackend", p.bonsaiBackend.name).put("nsfw", p.nsfw)
         write(job, "request.json", json.toString().toByteArray(), MAX_REQUEST_BYTES)
     }
 
     /**
      * Reads and validates the captured request, including model readability and parameter limits.
      * Missing, malformed or unsupported request data fails instead of supplying defaults.
+     * Version-1 files are abandoned transient attempts, never migrated or replayed.
      *
      * @param job Validated attempt UUID.
      * @author Dmitriy Moroz
      */
     override fun readRequest(job: String): NativeGenerationRequest {
         val json = JSONObject(read(job, "request.json", MAX_REQUEST_BYTES).toString(Charsets.UTF_8))
-        require(json.getInt("version") == 1)
+        require(json.getInt("version") == 2)
+        require(json.get("nsfw") is Boolean)
         val path = json.getString("model")
         require(path.isNotBlank() && '\u0000' !in path && File(path).canRead())
         val width = json.getInt("width")
@@ -63,13 +68,26 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
             modelPath = File(path).canonicalPath,
             isNnapiEnabled = json.getBoolean("nnapi"),
             payload = TextToImagePayload(
-                prompt = json.getString("prompt"), negativePrompt = json.getString("negative"),
-                samplingSteps = steps, cfgScale = cfg, width = width, height = height,
-                seed = json.getString("seed"), sampler = json.getString("sampler"),
+                prompt = json.getString("prompt"),
+                negativePrompt = json.getString("negative"),
+                samplingSteps = steps,
+                cfgScale = cfg,
+                width = width,
+                height = height,
+                seed = json.getString("seed"),
+                sampler = json.getString("sampler"),
                 sdxlBackend = SdxlBackend.valueOf(json.getString("backend")),
-                restoreFaces = false, subSeed = "", subSeedStrength = 0f, nsfw = false,
-                batchCount = 1, style = null, quality = null, openAiModel = null,
-                stabilityAiClipGuidance = null, stabilityAiStylePreset = null,
+                bonsaiBackend = BonsaiBackend.valueOf(json.getString("bonsaiBackend")),
+                restoreFaces = false,
+                subSeed = "",
+                subSeedStrength = 0f,
+                nsfw = json.getBoolean("nsfw"),
+                batchCount = 1,
+                style = null,
+                quality = null,
+                openAiModel = null,
+                stabilityAiClipGuidance = null,
+                stabilityAiStylePreset = null,
             ),
         )
     }

@@ -1,7 +1,6 @@
 package com.shifthackz.aisdv1.data.repository
 
 import com.shifthackz.aisdv1.data.gateway.AuthenticatedConnectionProviderImpl
-import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.data.mocks.mockAiGenerationResult
 import com.shifthackz.aisdv1.data.mocks.mockImageToImagePayload
 import com.shifthackz.aisdv1.data.mocks.mockTextToImagePayload
@@ -9,12 +8,15 @@ import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionGenerationDataSource
 import com.shifthackz.aisdv1.domain.demo.ImageToImageDemo
 import com.shifthackz.aisdv1.domain.demo.TextToImageDemo
+import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -99,6 +101,10 @@ class StableDiffusionGenerationRepositoryImplTest {
     @Test
     fun `given attempt to check api availability by url, remote completes, expected complete value`() =
         runTest {
+            every {
+                stubPreferenceManager.automatic1111ServerUrl
+            } returns CUSTOM_BASE_URL
+
             coEvery {
                 stubRemoteDataSource.checkAvailability(CUSTOM_BASE_URL, AUTHORIZATION_CREDENTIALS)
             } returns Unit
@@ -106,11 +112,18 @@ class StableDiffusionGenerationRepositoryImplTest {
             val actual = runCatching { repository.checkApiAvailability(CUSTOM_BASE_URL) }
 
             Assert.assertTrue(actual.isSuccess)
+            coVerify(exactly = 1) {
+                stubRemoteDataSource.checkAvailability(CUSTOM_BASE_URL, AUTHORIZATION_CREDENTIALS)
+            }
         }
 
     @Test
     fun `given attempt to check api availability by url, remote throws exception, expected error value`() =
         runTest {
+            every {
+                stubPreferenceManager.automatic1111ServerUrl
+            } returns CUSTOM_BASE_URL
+
             coEvery {
                 stubRemoteDataSource.checkAvailability(CUSTOM_BASE_URL, AUTHORIZATION_CREDENTIALS)
             } throws stubException
@@ -118,6 +131,25 @@ class StableDiffusionGenerationRepositoryImplTest {
             val actual = runCatching { repository.checkApiAvailability(CUSTOM_BASE_URL) }
 
             Assert.assertSame(stubException, actual.exceptionOrNull())
+            coVerify(exactly = 1) {
+                stubRemoteDataSource.checkAvailability(CUSTOM_BASE_URL, AUTHORIZATION_CREDENTIALS)
+            }
+        }
+
+    @Test
+    fun `given api availability url differs from configured url, expected failure without remote request`() =
+        runTest {
+            val actual = runCatching { repository.checkApiAvailability(CUSTOM_BASE_URL) }
+
+            val failure = actual.exceptionOrNull()
+            Assert.assertTrue(failure is AuthorizationStorageFailure)
+            Assert.assertEquals(
+                AuthorizationStorageFailure.Reason.UNAVAILABLE,
+                (failure as AuthorizationStorageFailure).reason,
+            )
+            coVerify(exactly = 0) {
+                stubRemoteDataSource.checkAvailability(any(), any())
+            }
         }
 
     @Test
