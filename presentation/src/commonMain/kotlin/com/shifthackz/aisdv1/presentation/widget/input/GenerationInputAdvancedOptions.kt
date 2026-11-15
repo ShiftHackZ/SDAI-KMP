@@ -21,15 +21,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.math.roundTo
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.model.asString
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.StabilityAiClipGuidance
-import com.shifthackz.aisdv1.domain.entity.StabilityAiSampler
 import com.shifthackz.aisdv1.domain.entity.StabilityAiStylePreset
 import com.shifthackz.aisdv1.presentation.theme.sliderColors
 import com.shifthackz.aisdv1.presentation.theme.textFieldColors
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.CFG_SCALE_RANGE_MAX
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.CFG_SCALE_RANGE_MIN
+import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.RANDOM_SEED_BOUND_EXCLUSIVE
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.SAMPLING_STEPS_LOCAL_DIFFUSION_MAX
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.SAMPLING_STEPS_RANGE_ARLI_AI_MAX
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.SAMPLING_STEPS_RANGE_MAX
@@ -38,17 +39,17 @@ import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConsta
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.SUB_SEED_STRENGTH_MAX
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormConstants.SUB_SEED_STRENGTH_MIN
 import kotlin.math.abs
-import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
- * Renders the `GenerationInputAdvancedOptions` UI for the SDAI presentation layer.
+ * Renders provider-specific generation settings shared by the text and image forms.
+ * Dice actions generate seeds in AUTOMATIC1111's random range for web UI reuse.
  *
- * @param state state rendered or processed by the component.
- * @param isImg2Img is img2 img value consumed by the API.
- * @param onEvent callback invoked by the component.
- * @param afterSlidersSection after sliders section value consumed by the API.
+ * @param state current provider and generation parameters displayed by the form.
+ * @param isImg2Img whether to display controls specific to image-to-image generation.
+ * @param onEvent receives edits for the owning generation screen to apply.
+ * @param afterSlidersSection additional controls rendered after the parameter sliders.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -59,29 +60,14 @@ internal fun GenerationInputAdvancedOptions(
     afterSlidersSection: @Composable () -> Unit,
 ) {
         AnimatedVisibility(
-            visible = state.advancedOptionsVisible && state.mode != ServerSource.OPEN_AI,
+            visible = state.advancedOptionsVisible && state.mode != ServerSource.OPEN_AI && state.mode != ServerSource.OPEN_AI_COMPATIBLE && state.mode != ServerSource.OPEN_AI_OAUTH,
         ) {
             Column {
                 // Sampler selection only supported for A1111, STABILITY AI
                 when (state.mode) {
                     ServerSource.STABILITY_AI,
                     ServerSource.ARLI_AI,
-                    ServerSource.AUTOMATIC1111 -> DropdownTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        label = Localization.string("hint_sampler").asUiText(),
-                        value = state.selectedSampler,
-                        items = state.availableSamplers,
-                        onItemSelected = { onEvent(GenerationInputFormEvent.UpdateSampler(it)) },
-                        displayDelegate = { value ->
-                            if (value == StabilityAiSampler.NONE.toString()) {
-                                Localization.string("hint_autodetect").asUiText()
-                            } else {
-                                value.asUiText()
-                            }
-                        }
-                    )
+                    ServerSource.AUTOMATIC1111 -> GenerationSamplerField(state, onEvent)
 
                     else -> Unit
                 }
@@ -126,9 +112,11 @@ internal fun GenerationInputAdvancedOptions(
                             .padding(top = 8.dp),
                         value = state.seed,
                         onValueChange = { value ->
-                            onEvent(GenerationInputFormEvent.UpdateSeed(value.filter { it.isDigit() }))
+                            onEvent(GenerationInputFormEvent.UpdateSeed(value))
                         },
                         label = { Text(Localization.string("hint_seed")) },
+                        isError = state.seedValidationError != null,
+                        supportingText = state.seedValidationError?.let { error -> { Text(error.asString()) } },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         trailingIcon = {
                             Row {
@@ -145,7 +133,7 @@ internal fun GenerationInputAdvancedOptions(
                                 IconButton(onClick = {
                                     onEvent(
                                         GenerationInputFormEvent.UpdateSeed(
-                                            "${Random.nextLong().absoluteValue}",
+                                            Random.nextLong(RANDOM_SEED_BOUND_EXCLUSIVE).toString(),
                                         ),
                                     )
                                 }) {
@@ -223,11 +211,13 @@ internal fun GenerationInputAdvancedOptions(
                         onValueChange = { value ->
                             onEvent(
                                 GenerationInputFormEvent.UpdateSubSeed(
-                                    value.filter { it.isDigit() },
+                                    value,
                                 ),
                             )
                         },
                         label = { Text(Localization.string("hint_sub_seed")) },
+                        isError = state.subSeedValidationError != null,
+                        supportingText = state.subSeedValidationError?.let { error -> { Text(error.asString()) } },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         trailingIcon = {
                             Row {
@@ -244,7 +234,7 @@ internal fun GenerationInputAdvancedOptions(
                                 IconButton(onClick = {
                                     onEvent(
                                         GenerationInputFormEvent.UpdateSubSeed(
-                                            "${Random.nextLong().absoluteValue}",
+                                            Random.nextLong(RANDOM_SEED_BOUND_EXCLUSIVE).toString(),
                                         ),
                                     )
                                 }) {

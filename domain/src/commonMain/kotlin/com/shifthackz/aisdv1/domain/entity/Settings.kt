@@ -3,11 +3,27 @@ package com.shifthackz.aisdv1.domain.entity
 import com.shifthackz.aisdv1.core.common.schedulers.SchedulersToken
 
 /**
- * Carries `Settings` data through the SDAI domain layer.
+ * Observable application preferences including the selected generation source.
+ * @param providerSelectionRevision Durable source revision used to invalidate earlier queued work.
  *
  * @author Dmitriy Moroz
  */
 data class Settings(
+    /** Durable source-selection identity used to invalidate work even after an away/back switch.
+     * @author Dmitriy Moroz */
+    val providerSelectionRevision: Long = 0L,
+    /**
+     * Deadline for provider setup and metadata requests; defaults to 120 seconds.
+     *
+     * @author Dmitriy Moroz
+     */
+    val connectionTimeout: NetworkTimeout = NetworkTimeout.TWO_MINUTES,
+    /**
+     * Request and socket waiting limit for network image generation.
+     *
+     * @author Dmitriy Moroz
+     */
+    val generationRequestTimeout: NetworkTimeout = NetworkTimeout.TWO_MINUTES,
     /**
      * Exposes the `serverUrl` value used by the SDAI domain layer.
      *

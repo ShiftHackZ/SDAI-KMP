@@ -23,6 +23,13 @@ import com.shifthackz.aisdv1.domain.entity.StabilityAiStylePreset
  * validate dimensions, and handle provider-specific side effects.
  */
 sealed interface GenerationInputFormEvent {
+    /**
+     * Requests another attempt to load an empty AUTOMATIC1111 sampler list.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object RetrySamplers : GenerationInputFormEvent
+
     data class UpdateAdvancedOptionsVisibility(val visible: Boolean) : GenerationInputFormEvent
     data class UpdatePrompt(val value: String) : GenerationInputFormEvent
     data class UpdateNegativePrompt(val value: String) : GenerationInputFormEvent
@@ -57,6 +64,7 @@ sealed interface GenerationInputFormEvent {
     data class UpdateSdxlBackend(val value: SdxlBackend) : GenerationInputFormEvent
     data class UpdateBonsaiBackend(val value: BonsaiBackend) : GenerationInputFormEvent
     data class UpdateFalAiSyncMode(val value: Boolean) : GenerationInputFormEvent
+    data class UpdateOpenAiCompatibleModel(val value: String) : GenerationInputFormEvent
     data class UpdateArliAiModel(val value: String) : GenerationInputFormEvent
     data class UpdateStabilityAiStyle(val value: StabilityAiStylePreset) : GenerationInputFormEvent
     data class UpdateStabilityAiClipGuidance(val value: StabilityAiClipGuidance) : GenerationInputFormEvent

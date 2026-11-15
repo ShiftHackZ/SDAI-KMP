@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.di
 
+import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
 import com.shifthackz.aisdv1.presentation.modal.download.DownloadDialogViewModel
 import com.shifthackz.aisdv1.presentation.modal.embedding.EmbeddingViewModel
 import com.shifthackz.aisdv1.presentation.modal.extras.ExtrasViewModel
@@ -236,6 +237,8 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: TextToImageRouter) ->
         TextToImageViewModel(
+            openAiOAuthGateway = get(),
+            providerSelectionGuard = get(),
             dispatchersProvider = get(),
             getConfigurationUseCase = get(),
             getStableDiffusionSamplersUseCase = get(),
@@ -259,6 +262,8 @@ internal fun Module.registerPresentationViewModelBindings() {
             buildInfoProvider = get(),
             generationFormUpdateEvent = get(),
             dimensionValidator = get(),
+            seedValidator = get(),
+            nativeSeedValidator = get(nativeSeedValidatorQualifier),
             localGenerationBenchmarkGateProvider = { get() },
             imageSaver = get(),
             imageSharer = get(),
@@ -288,6 +293,8 @@ internal fun Module.registerPresentationViewModelBindings() {
             buildInfoProvider = get(),
             generationFormUpdateEvent = get(),
             dimensionValidator = get(),
+            seedValidator = get(),
+            nativeSeedValidator = get(nativeSeedValidatorQualifier),
             localGenerationBenchmarkGateProvider = { get() },
             imageSaver = get(),
             imageSharer = get(),
@@ -358,6 +365,9 @@ internal fun Module.registerPresentationViewModelBindings() {
             connectToCoreMlUseCase = get(),
             connectToBonsaiUseCase = get(),
             connectToOpenAiUseCase = get(),
+            connectToOpenAiCompatibleUseCase = get(),
+            openAiOAuthGateway = get(),
+            setServerConfigurationUseCase = get(),
             connectToStabilityAiUseCase = get(),
             connectToFalAiUseCase = get(),
             connectToArliAiUseCase = get(),

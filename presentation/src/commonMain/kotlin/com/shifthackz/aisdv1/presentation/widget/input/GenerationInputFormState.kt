@@ -23,6 +23,8 @@ import com.shifthackz.aisdv1.domain.entity.StabilityAiStylePreset
  * Txt2img and img2img screens implement this interface so the common form can
  * render provider-specific controls, including local runtime backend selectors,
  * without owning screen-level loading, result, or navigation state.
+ *
+ * @author Dmitriy Moroz
  */
 interface GenerationInputFormState {
     val onBoardingDemo: Boolean
@@ -39,14 +41,42 @@ interface GenerationInputFormState {
     val restoreFaces: Boolean
     val seed: String
     val subSeed: String
+    /**
+     * Inline error computed by the owning screen through its injected seed validator.
+     *
+     * @author Dmitriy Moroz
+     */
+    val seedValidationError: UiText?
+    /**
+     * Inline error for a supported variation seed; unused variation values do not block generation.
+     *
+     * @author Dmitriy Moroz
+     */
+    val subSeedValidationError: UiText?
     val subSeedStrength: Float
     val selectedSampler: String
     val selectedScheduler: Scheduler
     val availableForgeModules: List<ForgeModule>
     val selectedForgeModules: List<ForgeModule>
     val availableSamplers: List<String>
+    /**
+     * Whether the current server sampler request is running.
+     *
+     * @author Dmitriy Moroz
+     */
+    val isLoadingSamplers: Boolean
+        get() = false
+    /**
+     * Whether no usable sampler list could be loaded; the form offers a retry.
+     *
+     * @author Dmitriy Moroz
+     */
+    val hasSamplerLoadFailed: Boolean
+        get() = false
     val selectedStylePreset: StabilityAiStylePreset
     val selectedClipGuidancePreset: StabilityAiClipGuidance
+    val openAiCompatibleModel: String
+        get() = "gpt-image-2"
     val openAiModel: OpenAiModel
     val openAiSize: OpenAiSize
     val openAiQuality: OpenAiQuality

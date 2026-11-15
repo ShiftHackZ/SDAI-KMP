@@ -28,6 +28,7 @@ kotlin {
             isStatic = true
             export(project(":feature:bonsai"))
             export(project(":feature:coreml"))
+            export(project(":feature:openai-oauth"))
         }
     }
 
@@ -45,6 +46,7 @@ kotlin {
             implementation(project(":feature:work"))
             api(project(":feature:bonsai"))
             api(project(":feature:coreml"))
+            api(project(":feature:openai-oauth"))
             implementation(project(":network"))
             implementation(compose.animation)
             implementation(compose.runtime)
@@ -54,6 +56,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.androidx.lifecycle.compose)
             implementation(libs.koin.core)
         }
 
@@ -76,7 +79,6 @@ kotlin {
             implementation(libs.androidx.compose.viewmodel)
             implementation(libs.androidx.compose.navigation)
             implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.compose)
 
             implementation(libs.koin.core)
             implementation(libs.koin.android)

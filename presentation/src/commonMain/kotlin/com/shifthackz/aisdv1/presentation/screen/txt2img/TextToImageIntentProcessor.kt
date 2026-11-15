@@ -140,10 +140,10 @@ internal class TextToImageIntentProcessor(
                 it.copy(restoreFaces = intent.value, message = null)
             }
             is TextToImageIntent.UpdateSeed -> updateState {
-                it.copy(seed = intent.value.filter(Char::isDigit), message = null)
+                it.copy(seed = intent.value, message = null)
             }
             is TextToImageIntent.UpdateSubSeed -> updateState {
-                it.copy(subSeed = intent.value.filter(Char::isDigit), message = null)
+                it.copy(subSeed = intent.value, message = null)
             }
             is TextToImageIntent.UpdateSubSeedStrength -> updateState {
                 it.copy(
@@ -226,6 +226,9 @@ internal class TextToImageIntentProcessor(
             is TextToImageIntent.UpdateFalAiSyncMode -> updateState {
                 it.copy(falAiSyncMode = intent.value, message = null)
             }
+            is TextToImageIntent.UpdateOpenAiCompatibleModel -> updateState {
+                it.copy(openAiCompatibleModel = intent.value, message = null, error = null)
+            }
             is TextToImageIntent.UpdateArliAiModel -> updateState {
                 it.copy(arliAiModel = intent.value, message = null, error = null)
             }
@@ -242,6 +245,7 @@ internal class TextToImageIntentProcessor(
                 it.copy(aDetailer = intent.value, message = null)
             }
             TextToImageIntent.RefreshADetailerAvailability -> Unit
+            TextToImageIntent.RetrySamplers -> Unit
             TextToImageIntent.OpenADetailerInstallInstructions -> Unit
         }
     }

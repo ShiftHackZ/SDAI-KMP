@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.core.common.schedulers.SchedulersToken
 import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.entity.FeatureTag
+import com.shifthackz.aisdv1.domain.entity.NetworkTimeout
 import com.shifthackz.aisdv1.domain.entity.Grid
 import com.shifthackz.aisdv1.domain.entity.HuggingFaceModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
@@ -35,6 +36,64 @@ internal class PreferenceManagerImpl(
      * @author Dmitriy Moroz
      */
     private val preferencesChangedState = MutableStateFlow(Any())
+
+    /**
+     * Retains txt2img sampling steps across process restarts without broadcasting form edits.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var textToImageSamplingSteps: Int
+        get() = keyValueStore.getInt(KEY_TEXT_TO_IMAGE_SAMPLING_STEPS, 20).takeIf { it > 0 } ?: 20
+        set(value) = keyValueStore.putInt(KEY_TEXT_TO_IMAGE_SAMPLING_STEPS, value)
+
+    /**
+     * Stores txt2img CFG as a decimal string supported by both platform preference stores.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var textToImageCfgScale: Float
+        get() = readCfgScale(KEY_TEXT_TO_IMAGE_CFG_SCALE)
+        set(value) = keyValueStore.putString(KEY_TEXT_TO_IMAGE_CFG_SCALE, value.toString())
+
+    /**
+     * Retains img2img sampling steps separately from the txt2img form.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var imageToImageSamplingSteps: Int
+        get() = keyValueStore.getInt(KEY_IMAGE_TO_IMAGE_SAMPLING_STEPS, 20).takeIf { it > 0 } ?: 20
+        set(value) = keyValueStore.putInt(KEY_IMAGE_TO_IMAGE_SAMPLING_STEPS, value)
+
+    /**
+     * Stores img2img CFG as a decimal string without losing fractional precision.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var imageToImageCfgScale: Float
+        get() = readCfgScale(KEY_IMAGE_TO_IMAGE_CFG_SCALE)
+        set(value) = keyValueStore.putString(KEY_IMAGE_TO_IMAGE_CFG_SCALE, value.toString())
+
+    /**
+     * Persists a separate connection limit and notifies settings observers.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var connectionTimeout: NetworkTimeout
+        get() = NetworkTimeout.fromSeconds(
+            keyValueStore.getInt(KEY_CONNECTION_TIMEOUT_SECONDS, NetworkTimeout.TWO_MINUTES.seconds),
+        )
+        set(value) = putInt(KEY_CONNECTION_TIMEOUT_SECONDS, value.seconds)
+
+    /**
+     * Persists the generation waiting limit and notifies Settings observers immediately.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var generationRequestTimeout: NetworkTimeout
+        get() = NetworkTimeout.fromSeconds(
+            keyValueStore.getInt(KEY_GENERATION_REQUEST_TIMEOUT_SECONDS, 120),
+        )
+        set(value) = putInt(KEY_GENERATION_REQUEST_TIMEOUT_SECONDS, value.seconds)
 
     /**
      * Exposes the `automatic1111ServerUrl` value used by the SDAI data layer.
@@ -201,8 +260,14 @@ internal class PreferenceManagerImpl(
      * @author Dmitriy Moroz
      */
     override var source: ServerSource
-        get() = ServerSource.parse(keyValueStore.getString(KEY_SERVER_SOURCE, ServerSource.AUTOMATIC1111.key))
-        set(value) = putString(KEY_SERVER_SOURCE, value.key)
+        get() = keyValueStore.readProviderSelection().first
+        set(value) {
+            keyValueStore.writeProviderSelection(value)
+            onPreferencesChanged()
+        }
+
+    override val providerSelectionRevision: Long
+        get() = keyValueStore.readProviderSelection().second
 
     /**
      * Exposes the `sdModel` value used by the SDAI data layer.
@@ -221,6 +286,30 @@ internal class PreferenceManagerImpl(
     override var hordeApiKey: String
         get() = keyValueStore.getString(KEY_HORDE_API_KEY)
         set(value) = putString(KEY_HORDE_API_KEY, value)
+
+    /**
+     * Complete HTTP(S) API prefix, including any version and reverse-proxy path.
+     * @author Dmitriy Moroz
+     */
+    override var openAiCompatibleUrl: String
+        get() = keyValueStore.getString(KEY_OPEN_AI_COMPATIBLE_URL, "")
+        set(value) = putString(KEY_OPEN_AI_COMPATIBLE_URL, value)
+
+    /**
+     * Optional bearer token for the independent compatible server.
+     * @author Dmitriy Moroz
+     */
+    override var openAiCompatibleApiKey: String
+        get() = keyValueStore.getString(KEY_OPEN_AI_COMPATIBLE_API_KEY, "")
+        set(value) = putString(KEY_OPEN_AI_COMPATIBLE_API_KEY, value)
+
+    /**
+     * Editable image model identifier supplied to the compatible server.
+     * @author Dmitriy Moroz
+     */
+    override var openAiCompatibleModel: String
+        get() = keyValueStore.getString(KEY_OPEN_AI_COMPATIBLE_MODEL, "gpt-image-2")
+        set(value) = keyValueStore.putString(KEY_OPEN_AI_COMPATIBLE_MODEL, value)
 
     /**
      * Exposes the `openAiApiKey` value used by the SDAI data layer.
@@ -477,6 +566,8 @@ internal class PreferenceManagerImpl(
     override fun observe(): Flow<Settings> = preferencesChangedState
         .map {
             Settings(
+                connectionTimeout = connectionTimeout,
+                generationRequestTimeout = generationRequestTimeout,
                 serverUrl = automatic1111ServerUrl,
                 sdModel = sdModel,
                 demoMode = demoMode,
@@ -490,6 +581,7 @@ internal class PreferenceManagerImpl(
                 formAdvancedOptionsAlwaysShow = formAdvancedOptionsAlwaysShow,
                 formPromptTaggedInput = formPromptTaggedInput,
                 source = source,
+                providerSelectionRevision = providerSelectionRevision,
                 hordeApiKey = hordeApiKey,
                 arliAiModel = arliAiModel,
                 localUseNNAPI = localOnnxUseNNAPI,
@@ -511,6 +603,17 @@ internal class PreferenceManagerImpl(
     override suspend fun refresh() {
         preferencesChangedState.value = Any()
     }
+
+    /**
+     * Reads a stored CFG value, retaining the default for absent or invalid data.
+     *
+     * @param key Preference key for the generation form's decimal CFG value.
+     * @author Dmitriy Moroz
+     */
+    private fun readCfgScale(key: String): Float = keyValueStore.getString(key)
+        .toFloatOrNull()
+        ?.takeIf { it.isFinite() && it >= 0f }
+        ?: 7f
 
     /**
      * Executes the `putString` step in the SDAI data layer.
@@ -574,6 +677,48 @@ internal class PreferenceManagerImpl(
      * @author Dmitriy Moroz
      */
     companion object {
+        /**
+         * Txt2img sampling step preference.
+         *
+         * @author Dmitriy Moroz
+         */
+        private const val KEY_TEXT_TO_IMAGE_SAMPLING_STEPS = "key_text_to_image_sampling_steps"
+
+        /**
+         * Txt2img CFG preference, encoded as a decimal string.
+         *
+         * @author Dmitriy Moroz
+         */
+        private const val KEY_TEXT_TO_IMAGE_CFG_SCALE = "key_text_to_image_cfg_scale"
+
+        /**
+         * Img2img sampling step preference.
+         *
+         * @author Dmitriy Moroz
+         */
+        private const val KEY_IMAGE_TO_IMAGE_SAMPLING_STEPS = "key_image_to_image_sampling_steps"
+
+        /**
+         * Img2img CFG preference, encoded as a decimal string.
+         *
+         * @author Dmitriy Moroz
+         */
+        private const val KEY_IMAGE_TO_IMAGE_CFG_SCALE = "key_image_to_image_cfg_scale"
+
+        /**
+         * Independent provider connection timeout in seconds, with zero meaning no limit.
+         *
+         * @author Dmitriy Moroz
+         */
+        const val KEY_CONNECTION_TIMEOUT_SECONDS = "key_connection_timeout_seconds"
+
+        /**
+         * Stores seconds, with zero representing an unlimited generation wait.
+         *
+         * @author Dmitriy Moroz
+         */
+        const val KEY_GENERATION_REQUEST_TIMEOUT_SECONDS = "key_generation_request_timeout_seconds"
+
         /**
          * Exposes the `KEY_SERVER_URL` value used by the SDAI data layer.
          *
@@ -694,6 +839,9 @@ internal class PreferenceManagerImpl(
          * @author Dmitriy Moroz
          */
         const val KEY_HORDE_API_KEY = "key_horde_api_key"
+        const val KEY_OPEN_AI_COMPATIBLE_URL = "key_open_ai_compatible_url"
+        const val KEY_OPEN_AI_COMPATIBLE_API_KEY = "key_open_ai_compatible_api_key"
+        const val KEY_OPEN_AI_COMPATIBLE_MODEL = "key_open_ai_compatible_model"
         /**
          * Exposes the `KEY_OPEN_AI_API_KEY` value used by the SDAI data layer.
          *

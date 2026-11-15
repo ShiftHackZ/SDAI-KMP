@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.domain.preference
 
 import com.shifthackz.aisdv1.core.common.schedulers.SchedulersToken
+import com.shifthackz.aisdv1.domain.entity.NetworkTimeout
 import com.shifthackz.aisdv1.domain.entity.Grid
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.Settings
@@ -12,6 +13,49 @@ import kotlinx.coroutines.flow.Flow
  * @author Dmitriy Moroz
  */
 interface PreferenceManager {
+    /**
+     * Last sampling step count in the txt2img form; defaults to 20 on first launch.
+     *
+     * @author Dmitriy Moroz
+     */
+    var textToImageSamplingSteps: Int
+
+    /**
+     * Last CFG scale in the txt2img form; defaults to 7.0 on first launch.
+     *
+     * @author Dmitriy Moroz
+     */
+    var textToImageCfgScale: Float
+
+    /**
+     * Last sampling step count in the img2img form, stored independently of txt2img.
+     *
+     * @author Dmitriy Moroz
+     */
+    var imageToImageSamplingSteps: Int
+
+    /**
+     * Last CFG scale in the img2img form, stored independently of txt2img.
+     *
+     * @author Dmitriy Moroz
+     */
+    var imageToImageCfgScale: Float
+
+    /**
+     * Deadline for provider setup and metadata requests, independent of generation waiting limits.
+     * Zero disables application deadlines; platform connection policies may still apply.
+     *
+     * @author Dmitriy Moroz
+     */
+    var connectionTimeout: NetworkTimeout
+
+    /**
+     * Waiting limit shared by all network-based AI generation providers.
+     *
+     * @author Dmitriy Moroz
+     */
+    var generationRequestTimeout: NetworkTimeout
+
     /**
      * Exposes the `automatic1111ServerUrl` value used by the SDAI domain layer.
      *
@@ -120,6 +164,9 @@ interface PreferenceManager {
      * @author Dmitriy Moroz
      */
     var source: ServerSource
+    /** Durable revision of the currently selected provider, shared with ConfigurationStore.
+     * @author Dmitriy Moroz */
+    val providerSelectionRevision: Long
     /**
      * Exposes the `sdModel` value used by the SDAI domain layer.
      *
@@ -138,6 +185,21 @@ interface PreferenceManager {
      * @author Dmitriy Moroz
      */
     var openAiApiKey: String
+    /**
+     * Editable image model identifier supplied to the compatible server.
+     * @author Dmitriy Moroz
+     */
+    var openAiCompatibleModel: String
+    /**
+     * Optional bearer token for the independent compatible server.
+     * @author Dmitriy Moroz
+     */
+    var openAiCompatibleApiKey: String
+    /**
+     * Complete HTTP(S) API prefix, including any version and reverse-proxy path.
+     * @author Dmitriy Moroz
+     */
+    var openAiCompatibleUrl: String
     /**
      * Exposes the `huggingFaceApiKey` value used by the SDAI domain layer.
      *

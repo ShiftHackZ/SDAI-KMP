@@ -1,12 +1,13 @@
 package com.shifthackz.aisdv1.domain.usecase.caching
 
 import com.shifthackz.aisdv1.domain.repository.EmbeddingsRepository
-import com.shifthackz.aisdv1.domain.repository.LorasRepository
 import com.shifthackz.aisdv1.domain.repository.ServerConfigurationRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionHyperNetworksRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionModelsRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionSamplersRepository
 import io.mockk.coEvery
+import io.mockk.coVerifyOrder
+import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
@@ -17,7 +18,6 @@ class DataPreLoaderUseCaseImplTest {
     private val stubServerConfigurationRepository = mockk<ServerConfigurationRepository>()
     private val stubStableDiffusionModelsRepository = mockk<StableDiffusionModelsRepository>()
     private val stubStableDiffusionSamplersRepository = mockk<StableDiffusionSamplersRepository>()
-    private val stubLorasRepository = mockk<LorasRepository>()
     private val stubStableDiffusionHyperNetworksRepository = mockk<StableDiffusionHyperNetworksRepository>()
     private val stubEmbeddingsRepository = mockk<EmbeddingsRepository>()
 
@@ -25,7 +25,6 @@ class DataPreLoaderUseCaseImplTest {
         serverConfigurationRepository = stubServerConfigurationRepository,
         sdModelsRepository = stubStableDiffusionModelsRepository,
         sdSamplersRepository = stubStableDiffusionSamplersRepository,
-        sdLorasRepository = stubLorasRepository,
         sdHyperNetworksRepository = stubStableDiffusionHyperNetworksRepository,
         sdEmbeddingsRepository = stubEmbeddingsRepository,
     )
@@ -74,15 +73,25 @@ class DataPreLoaderUseCaseImplTest {
     }
 
     @Test
-    fun `given loras fetch failed, expected error value`() = runTest {
-        val stubException = Throwable("Can not fetch loras.")
+    fun `preload fetches only connection metadata in order`() = runTest {
         stubSuccess()
 
-        coEvery {
-            stubLorasRepository.fetchLoras()
-        } throws stubException
+        useCase()
 
-        assertUseCaseFails(stubException)
+        coVerifyOrder {
+            stubServerConfigurationRepository.fetchConfiguration()
+            stubStableDiffusionModelsRepository.fetchModels()
+            stubStableDiffusionSamplersRepository.fetchSamplers()
+            stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
+            stubEmbeddingsRepository.fetchEmbeddings()
+        }
+        confirmVerified(
+            stubServerConfigurationRepository,
+            stubStableDiffusionModelsRepository,
+            stubStableDiffusionSamplersRepository,
+            stubStableDiffusionHyperNetworksRepository,
+            stubEmbeddingsRepository,
+        )
     }
 
     @Test
@@ -120,10 +129,6 @@ class DataPreLoaderUseCaseImplTest {
 
         coEvery {
             stubStableDiffusionSamplersRepository.fetchSamplers()
-        } returns Unit
-
-        coEvery {
-            stubLorasRepository.fetchLoras()
         } returns Unit
 
         coEvery {

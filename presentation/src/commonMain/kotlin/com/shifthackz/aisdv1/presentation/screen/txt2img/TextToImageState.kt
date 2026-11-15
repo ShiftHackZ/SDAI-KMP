@@ -28,9 +28,18 @@ import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormState
 /**
  * Complete render state for txt2img.
  *
+ * @param isLoadingSamplers Whether an AUTOMATIC1111 sampler request is running.
+ * @param hasSamplerLoadFailed Whether the sampler field should offer an inline retry.
+ * @param seedValidationError Seed feedback published through the injected validator.
+ * @param subSeedValidationError Variation seed feedback for providers that use it.
+ *
  * The state combines screen lifecycle flags, generated results, validation
  * feedback, current platform metadata, and the shared generation form contract
  * used by provider-specific controls such as Android Bonsai backend selection.
+ * @param openAiOAuthAccountId Token-free account identity observed from protected session state.
+ * @param openAiOAuthRevision Login revision captured when generation is submitted.
+ * @param providerSelectionRevision Durable source-selection revision captured with submitted work.
+ * @author Dmitriy Moroz
  */
 @Immutable
 data class TextToImageState(
@@ -65,8 +74,14 @@ data class TextToImageState(
     override val availableForgeModules: List<ForgeModule> = emptyList(),
     override val selectedForgeModules: List<ForgeModule> = emptyList(),
     override val availableSamplers: List<String> = emptyList(),
+    override val isLoadingSamplers: Boolean = false,
+    override val hasSamplerLoadFailed: Boolean = false,
     override val selectedStylePreset: StabilityAiStylePreset = StabilityAiStylePreset.NONE,
     override val selectedClipGuidancePreset: StabilityAiClipGuidance = StabilityAiClipGuidance.NONE,
+    override val openAiCompatibleModel: String = "gpt-image-2",
+    val openAiOAuthAccountId: String? = null,
+    val openAiOAuthRevision: String? = null,
+    val providerSelectionRevision: Long = 0L,
     override val openAiModel: OpenAiModel = OpenAiModel.default,
     override val openAiSize: OpenAiSize = OpenAiSize.W1024_H1024,
     override val openAiQuality: OpenAiQuality = OpenAiQuality.AUTO,
@@ -81,6 +96,8 @@ data class TextToImageState(
     override val arliAiModel: String = "",
     override val widthValidationError: UiText? = null,
     override val heightValidationError: UiText? = null,
+    override val seedValidationError: UiText? = null,
+    override val subSeedValidationError: UiText? = null,
     override val nsfw: Boolean = false,
     override val batchCount: Int = 1,
     override val hires: HiresConfig = HiresConfig.DISABLED,
@@ -100,6 +117,8 @@ data class TextToImageState(
         get() = promptValidationError != null ||
             widthValidationError != null ||
             heightValidationError != null ||
+            seedValidationError != null ||
+            subSeedValidationError != null ||
             error != null
 }
 
@@ -175,6 +194,11 @@ internal fun TextToImageState.mapToPayload(): TextToImagePayload = TextToImagePa
     } ?: BonsaiBackend.AUTO,
     falAiSyncMode = falAiSyncMode,
     arliAiModel = arliAiModel.takeIf { mode == ServerSource.ARLI_AI }.orEmpty(),
+    openAiCompatibleModel = openAiCompatibleModel.trim(),
+    sourceSnapshot = mode,
+    providerSelectionRevision = providerSelectionRevision,
+    openAiOAuthAccountId = openAiOAuthAccountId.takeIf { mode == ServerSource.OPEN_AI_OAUTH },
+    openAiOAuthRevision = openAiOAuthRevision.takeIf { mode == ServerSource.OPEN_AI_OAUTH },
 )
 
 internal const val DEFAULT_SIZE = 512

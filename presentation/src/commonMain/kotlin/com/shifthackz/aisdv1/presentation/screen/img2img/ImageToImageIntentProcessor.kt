@@ -240,10 +240,10 @@ internal class ImageToImageIntentProcessor(
                 it.copy(restoreFaces = intent.value, message = null)
             }
             is ImageToImageIntent.UpdateSeed -> updateState {
-                it.copy(seed = intent.value.filter(Char::isDigit), message = null)
+                it.copy(seed = intent.value, message = null)
             }
             is ImageToImageIntent.UpdateSubSeed -> updateState {
-                it.copy(subSeed = intent.value.filter(Char::isDigit), message = null)
+                it.copy(subSeed = intent.value, message = null)
             }
             is ImageToImageIntent.UpdateSubSeedStrength -> updateState {
                 it.copy(
@@ -328,6 +328,7 @@ internal class ImageToImageIntentProcessor(
                 it.copy(aDetailer = intent.value, message = null)
             }
             ImageToImageIntent.RefreshADetailerAvailability -> Unit
+            ImageToImageIntent.RetrySamplers -> Unit
             ImageToImageIntent.OpenADetailerInstallInstructions -> Unit
             is ImageToImageIntent.UpdateDenoisingStrength -> updateState {
                 it.copy(
