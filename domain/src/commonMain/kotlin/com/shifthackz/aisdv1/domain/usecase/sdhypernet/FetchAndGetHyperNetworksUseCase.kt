@@ -3,15 +3,16 @@ package com.shifthackz.aisdv1.domain.usecase.sdhypernet
 import com.shifthackz.aisdv1.domain.entity.StableDiffusionHyperNetwork
 
 /**
- * Defines the `FetchAndGetHyperNetworksUseCase` contract for the SDAI domain layer.
+ * Refreshes hypernetworks whenever their extras picker is opened.
  *
  * @author Dmitriy Moroz
  */
 interface FetchAndGetHyperNetworksUseCase {
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Attempts remote discovery and returns cached entries if refresh fails.
+     * Cancellation and cache read failures propagate to the caller.
      *
-     * @return Result produced by `invoke`.
+     * @return Refreshed or cached hypernetworks, possibly empty.
      * @author Dmitriy Moroz
      */
     suspend operator fun invoke(): List<StableDiffusionHyperNetwork>

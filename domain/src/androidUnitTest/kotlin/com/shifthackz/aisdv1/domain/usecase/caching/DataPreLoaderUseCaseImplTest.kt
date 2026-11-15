@@ -6,10 +6,14 @@ import com.shifthackz.aisdv1.domain.repository.StableDiffusionHyperNetworksRepos
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionModelsRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionSamplersRepository
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -95,15 +99,80 @@ class DataPreLoaderUseCaseImplTest {
     }
 
     @Test
-    fun `given hypernetworks fetch failed, expected error value`() = runTest {
-        val stubException = Throwable("Can not fetch hypernetworks.")
+    fun `given hypernetworks fetch failed, preload continues to embeddings without retry`() = runTest {
+        val stubException = IllegalStateException("Can not fetch hypernetworks.")
         stubSuccess()
 
         coEvery {
             stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
         } throws stubException
 
-        assertUseCaseFails(stubException)
+        useCase()
+
+        coVerifyOrder {
+            stubServerConfigurationRepository.fetchConfiguration()
+            stubStableDiffusionModelsRepository.fetchModels()
+            stubStableDiffusionSamplersRepository.fetchSamplers()
+            stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
+            stubEmbeddingsRepository.fetchEmbeddings()
+        }
+        coVerify(exactly = 1) {
+            stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
+            stubEmbeddingsRepository.fetchEmbeddings()
+        }
+    }
+
+    @Test
+    fun `given hypernetworks fetch cancelled, cancellation propagates without fetching embeddings`() = runTest {
+        val cancellation = CancellationException("Preload cancelled.")
+        stubSuccess()
+        coEvery {
+            stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
+        } throws cancellation
+
+        assertUseCaseFails(cancellation)
+
+        coVerify(exactly = 0) { stubEmbeddingsRepository.fetchEmbeddings() }
+    }
+
+    @Test
+    fun `given unrecoverable hypernetworks error, preload does not resume`() = runTest {
+        val error = AssertionError("Unrecoverable discovery error.")
+        stubSuccess()
+        coEvery {
+            stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
+        } throws error
+
+        assertUseCaseFails(error)
+
+        coVerify(exactly = 0) { stubEmbeddingsRepository.fetchEmbeddings() }
+    }
+
+    @Test
+    fun `given deadline expires during hypernetworks discovery, preload does not resume`() = runTest {
+        stubSuccess()
+        coEvery {
+            stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
+        } coAnswers { awaitCancellation() }
+
+        val failure = runCatching { withTimeout(100) { useCase() } }.exceptionOrNull()
+
+        assertTrue(failure is CancellationException)
+        coVerify(exactly = 0) { stubEmbeddingsRepository.fetchEmbeddings() }
+    }
+
+    @Test
+    fun `given hypernetworks and embeddings fetch fail, embeddings failure still propagates`() = runTest {
+        val embeddingsFailure = IllegalStateException("Can not fetch embeddings.")
+        stubSuccess()
+        coEvery {
+            stubStableDiffusionHyperNetworksRepository.fetchHyperNetworks()
+        } throws IllegalStateException("Can not fetch hypernetworks.")
+        coEvery {
+            stubEmbeddingsRepository.fetchEmbeddings()
+        } throws embeddingsFailure
+
+        assertUseCaseFails(embeddingsFailure)
     }
 
     @Test

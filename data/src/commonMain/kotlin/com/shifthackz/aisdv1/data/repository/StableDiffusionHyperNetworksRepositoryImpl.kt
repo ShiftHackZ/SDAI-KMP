@@ -8,39 +8,25 @@ import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionHyperNetworksRepository
 
 /**
- * Implements `StableDiffusionHyperNetworksRepository` behavior in the SDAI data layer.
+ * Fetches A1111 hypernetworks and stores successful responses in the local cache.
+ * Fetch and cache failures propagate so each use case can choose its recovery policy.
  *
+ * @param remoteDataSource Discovers hypernetworks exposed by the server.
+ * @param localDataSource Replaces and reads cached hypernetwork entries.
+ * @param preferenceManager Identifies whether the active provider supports A1111 metadata.
+ * @param connections Captures the server URL and credentials for each fetch.
  * @author Dmitriy Moroz
  */
 internal class StableDiffusionHyperNetworksRepositoryImpl(
-    /**
-     * Exposes the `remoteDataSource` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val remoteDataSource: StableDiffusionHyperNetworksDataSource.Remote,
-    /**
-     * Exposes the `localDataSource` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val localDataSource: StableDiffusionHyperNetworksDataSource.Local,
-    /**
-     * Exposes the `preferenceManager` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val preferenceManager: PreferenceManager,
-    /**
-     * Captures consistent connection inputs before starting network work.
-     *
-     * @author Dmitriy Moroz
-     */
     private val connections: AuthenticatedConnectionProvider,
 ) : StableDiffusionHyperNetworksRepository {
 
     /**
-     * Loads SDAI data through `fetchHyperNetworks`.
+     * Replaces cached hypernetworks after a successful fetch from the active A1111 server.
+     * Fetch and storage failures propagate so callers can apply their own recovery policy.
      *
      * @author Dmitriy Moroz
      */
@@ -55,20 +41,9 @@ internal class StableDiffusionHyperNetworksRepositoryImpl(
     }
 
     /**
-     * Loads SDAI data through `fetchAndGetHyperNetworks`.
+     * Reads cached entries without requesting remote discovery.
      *
-     * @return Result produced by `fetchAndGetHyperNetworks`.
-     * @author Dmitriy Moroz
-     */
-    override suspend fun fetchAndGetHyperNetworks(): List<StableDiffusionHyperNetwork> {
-        runCatching { fetchHyperNetworks() }
-        return getHyperNetworks()
-    }
-
-    /**
-     * Loads SDAI data through `getHyperNetworks`.
-     *
-     * @return Result produced by `getHyperNetworks`.
+     * @return Previously stored hypernetworks, or an empty list before the first successful fetch.
      * @author Dmitriy Moroz
      */
     override suspend fun getHyperNetworks(): List<StableDiffusionHyperNetwork> =

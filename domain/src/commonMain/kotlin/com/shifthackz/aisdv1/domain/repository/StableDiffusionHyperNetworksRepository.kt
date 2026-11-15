@@ -3,28 +3,23 @@ package com.shifthackz.aisdv1.domain.repository
 import com.shifthackz.aisdv1.domain.entity.StableDiffusionHyperNetwork
 
 /**
- * Defines the `StableDiffusionHyperNetworksRepository` contract for the SDAI domain layer.
+ * Refreshes remote hypernetworks and reads cached entries, propagating operation failures.
  *
  * @author Dmitriy Moroz
  */
 interface StableDiffusionHyperNetworksRepository {
     /**
-     * Loads SDAI data through `fetchHyperNetworks`.
+     * Refreshes the cache for A1111, propagating fetch, storage and cancellation failures.
+     * Other providers leave the cache unchanged.
      *
      * @author Dmitriy Moroz
      */
     suspend fun fetchHyperNetworks()
+
     /**
-     * Loads SDAI data through `fetchAndGetHyperNetworks`.
+     * Reads cached hypernetworks without contacting the server.
      *
-     * @return Result produced by `fetchAndGetHyperNetworks`.
-     * @author Dmitriy Moroz
-     */
-    suspend fun fetchAndGetHyperNetworks(): List<StableDiffusionHyperNetwork>
-    /**
-     * Loads SDAI data through `getHyperNetworks`.
-     *
-     * @return Result produced by `getHyperNetworks`.
+     * @return Previously stored entries, or an empty list if none were cached.
      * @author Dmitriy Moroz
      */
     suspend fun getHyperNetworks(): List<StableDiffusionHyperNetwork>
