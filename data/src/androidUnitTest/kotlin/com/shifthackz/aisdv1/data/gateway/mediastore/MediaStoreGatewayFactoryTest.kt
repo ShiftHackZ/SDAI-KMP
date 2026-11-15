@@ -46,6 +46,11 @@ class MediaStoreGatewayFactoryTest {
         Assert.assertEquals(true, actual is MediaStoreGatewayImpl)
     }
 
+    @Test
+    fun `given app running on Android SDK 36 (BAKLAVA), expected factory returned instance of type MediaStoreGatewayImpl`() {
+        Assert.assertTrue(factory(Build.VERSION_CODES.BAKLAVA).invoke() is MediaStoreGatewayImpl)
+    }
+
     /**
      * Creates the production factory with inert collaborators and an explicit SDK routing predicate.
      *

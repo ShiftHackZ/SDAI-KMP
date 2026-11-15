@@ -40,6 +40,7 @@ kotlin {
             implementation(libs.test.junit)
             implementation(libs.test.mockito)
             implementation(libs.test.mockk)
+            implementation(libs.test.roboelectric)
             implementation(libs.test.coroutines)
         }
     }
