@@ -71,8 +71,8 @@ enum class ServerSource(
     EASY_DIFFUSION(
         key = "easy_diffusion",
         type = ServerSourceType.SELF_HOSTED,
-        readiness = PlatformValue(ServerSourceReadiness.BETA),
-        version = "2026.11.15",
+        readiness = PlatformValue(ServerSourceReadiness.STABLE),
+        version = "2026.10.16",
         featureTags = setOf(
             FeatureTag.Txt2Img,
             FeatureTag.Img2Img,

@@ -71,7 +71,7 @@
           "id": "easy-diffusion-setup",
           "question": "How do I connect Easy Diffusion?",
           "answer": [
-            "Choose Easy Diffusion (Beta) on Android or iOS. Enable network sharing in Easy Diffusion settings, save and restart, then enter the computer’s LAN URL, for example http://192.168.1.10:9000. The connection is anonymous and has no password field.",
+            "Choose Easy Diffusion (Stable) on Android or iOS. Enable network sharing in Easy Diffusion settings, save and restart, then enter the computer’s LAN URL, for example http://192.168.1.10:9000. The connection is anonymous and has no password field.",
             "Use Easy Diffusion v3 with an SD1.5 checkpoint. Connect, select the checkpoint and generate with txt2img or img2img, negative prompt, dimensions in multiples of eight, steps, CFG and 32-bit seeds. DDIM is fixed. Sequential batches, progress, task-specific cancellation, gallery and saving use the normal app flow. Refresh checkpoints if a model was added or removed.",
             "Easy Diffusion has its own API. Do not select AUTOMATIC1111 for this server. Inpainting, LoRA, ControlNet, hires, administration and other engine/model families are outside this provider’s supported scope."
           ],
