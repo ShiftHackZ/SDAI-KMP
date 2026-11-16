@@ -13,7 +13,8 @@ import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
  */
 internal interface UNet : AutoCloseable {
     /**
-     * Opens the captured model; options are released after session creation.
+     * Opens the captured model using the submitted NNAPI preference.
+     * Session options remain alive until the denoiser session closes.
      *
      * @author Dmitriy Moroz
      */

@@ -48,7 +48,7 @@ import com.shifthackz.aisdv1.presentation.widget.source.BetaBadge
  * @param state Settings state that provides provider, usage summary, and loading values.
  * @param headerModifier Modifier shared by Settings section headers.
  * @param itemModifier Modifier shared by Settings rows.
- * @param warningModifier Modifier used by the background-generation warning copy.
+ * @param warningModifier Modifier used by explanatory warnings below preference rows.
  * @param backgroundGenerationWarningKey Localization key for the current warning copy.
  * @param processIntent Intent sink used to route row actions back to SettingsViewModel.
  *
@@ -153,7 +153,8 @@ internal fun SettingsServerSection(
                 modifier = itemModifier,
                 isLoading = isLoading,
                 startIcon = Icons.Default.AccountTree,
-                text = text("settings_item_local_nnapi"),
+                text = (Localization.string("settings_item_local_nnapi") +
+                        if (state.localUseNNAPI) "*" else "").asUiText(),
                 isChecked = state.localUseNNAPI,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.NNAPI(it)) },
             )

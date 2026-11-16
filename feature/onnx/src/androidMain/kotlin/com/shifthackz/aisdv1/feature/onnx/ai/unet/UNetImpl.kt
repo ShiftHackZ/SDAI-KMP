@@ -3,8 +3,6 @@
 package com.shifthackz.aisdv1.feature.onnx.ai.unet
 
 import ai.onnxruntime.OnnxTensor
-import ai.onnxruntime.OrtSession
-import ai.onnxruntime.providers.NNAPIFlags
 import android.graphics.Bitmap
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
@@ -19,10 +17,10 @@ import com.shifthackz.aisdv1.feature.onnx.ai.vae.VaeDecoder
 import com.shifthackz.aisdv1.feature.onnx.entity.Array3D
 import com.shifthackz.aisdv1.feature.onnx.entity.LocalDiffusionTensor
 import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRunController
-import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRuntimeConfiguration
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxSession
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxSessionFactory
 import com.shifthackz.aisdv1.feature.onnx.environment.OrtEnvironmentProvider
 import java.nio.IntBuffer
-import java.util.EnumSet
 import java.util.Random
 import kotlin.math.cos
 import kotlin.math.ln
@@ -32,7 +30,7 @@ import kotlin.math.sqrt
  * Denoises one image with explicit tensor ownership; callers close only after this owner returns.
  *
  * @param environment Child native environment.
- * @param configuration Immutable model and provider settings.
+ * @param sessionFactory Compatible provider settings and native resource ownership.
  * @param controller Run cancellation without concurrent destruction.
  * @param decoder Job-scoped VAE collaborator.
  * @param scheduler Job-scoped Euler scheduler.
@@ -40,33 +38,26 @@ import kotlin.math.sqrt
  */
 internal class UNetImpl(
     private val environment: OrtEnvironmentProvider,
-    private val configuration: OnnxRuntimeConfiguration,
+    private val sessionFactory: OnnxSessionFactory,
     private val controller: OnnxRunController,
     private val decoder: VaeDecoder,
     private val scheduler: LocalDiffusionScheduler,
 ) : UNet {
 
-    private var session: OrtSession? = null
+    private var session: OnnxSession? = null
 
     /**
-     * Creates the job session, releasing SessionOptions after the session has copied them.
+     * Opens the denoiser with captured provider settings and retains its native session options.
      *
      * @author Dmitriy Moroz
      */
     override fun initialize() {
         controller.checkActive()
         if (session != null) return
-        OrtSession.SessionOptions().use { options ->
-            options.addConfigEntry(
-                LocalDiffusionContract.ORT_KEY_MODEL_FORMAT,
-                LocalDiffusionContract.ORT
-            )
-            if (configuration.isNnapiEnabled) options.addNnapi(EnumSet.of(NNAPIFlags.CPU_DISABLED))
-            session = environment.get().createSession(
-                "${configuration.modelDirectory}/${LocalDiffusionContract.UNET_MODEL}",
-                options
-            )
-        }
+        session = sessionFactory.create(
+            LocalDiffusionContract.UNET_MODEL,
+            isAccelerationAllowed = true,
+        )
     }
 
     /**
@@ -120,7 +111,7 @@ internal class UNetImpl(
                                 LocalDiffusionContract.KEY_SAMPLE to input.tensor,
                                 LocalDiffusionContract.KEY_TIME_STEP to timestep,
                             )
-                            controller.run(checkNotNull(session), map).use { output ->
+                            controller.run(checkNotNull(session).value, map).use { output ->
                                 val dataset = output[0].value as Array3D<FloatArray>
                                 val split = splitTensor(dataset, shape)
                                 val noise = split.first
@@ -145,6 +136,7 @@ internal class UNetImpl(
             }
             controller.checkActive()
             onProgress(LocalDiffusionStatus(steps.size, steps.size))
+            closeDenoiser()
             onStage(NativeGenerationStage.DECODING)
             val array =
                 latents.tensor.floatBuffer.let { b -> FloatArray(b.remaining()).also(b::get) }
@@ -167,9 +159,20 @@ internal class UNetImpl(
      */
     override fun close() {
         try {
-            session?.close()
+            closeDenoiser()
         } finally {
-            session = null; decoder.close()
+            decoder.close()
         }
+    }
+
+    /**
+     * Releases denoiser weights before the decoder loads, retaining only the final latent tensor.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun closeDenoiser() {
+        val ownedSession = session
+        session = null
+        ownedSession?.close()
     }
 }

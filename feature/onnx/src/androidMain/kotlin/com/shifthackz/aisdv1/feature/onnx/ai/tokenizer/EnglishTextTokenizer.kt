@@ -3,22 +3,20 @@
 package com.shifthackz.aisdv1.feature.onnx.ai.tokenizer
 
 import ai.onnxruntime.OnnxTensor
-import ai.onnxruntime.OrtSession
 import android.text.TextUtils
 import android.util.JsonReader
 import android.util.Pair
 import com.shifthackz.aisdv1.core.common.log.debugLog
-import com.shifthackz.aisdv1.core.common.log.errorLog
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.KEY_INPUT_IDS
-import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.ORT
-import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.ORT_KEY_MODEL_FORMAT
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract.TAG
 import com.shifthackz.aisdv1.feature.onnx.ai.extensions.halfCorner
 import com.shifthackz.aisdv1.feature.onnx.ai.extensions.toArrays
 import com.shifthackz.aisdv1.feature.onnx.environment.OrtEnvironmentProvider
 import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRuntimeConfiguration
 import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRunController
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxSession
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxSessionFactory
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -33,71 +31,62 @@ import java.util.regex.Pattern
  * @param ortEnvironmentProvider Child native environment.
  * @param configuration Immutable model location.
  * @param controller Cooperative cancellation without concurrent session close.
+ * @param sessionFactory Owns text-encoder sessions and their native options.
  *
  * @author Dmitriy Moroz
  */
 internal class EnglishTextTokenizer(
-    /**
-     * Exposes the `ortEnvironmentProvider` value used by the SDAI ONNX local diffusion feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val ortEnvironmentProvider: OrtEnvironmentProvider,
     private val configuration: OnnxRuntimeConfiguration,
     private val controller: OnnxRunController,
+    private val sessionFactory: OnnxSessionFactory,
 ) : LocalDiffusionTextTokenizer {
 
     /**
-     * Exposes the `pattern` value used by the SDAI ONNX local diffusion feature layer.
+     * Splits normalized prompt text into CLIP byte-pair token candidates.
      *
      * @author Dmitriy Moroz
      */
     private val pattern = Pattern.compile(TOKENIZER_REGEX)
 
     /**
-     * Exposes the `encoder` value used by the SDAI ONNX local diffusion feature layer.
+     * Maps byte-pair tokens from this model's vocabulary to text-encoder token IDs.
      *
      * @author Dmitriy Moroz
      */
     private val encoder: MutableMap<String, Int> = HashMap()
 
     /**
-     * Exposes the `decoder` value used by the SDAI ONNX local diffusion feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val decoder: MutableMap<Int, String> = HashMap()
-
-    /**
-     * Exposes the `bpeRanks` value used by the SDAI ONNX local diffusion feature layer.
+     * Gives earlier model-defined byte-pair merges priority during prompt tokenization.
      *
      * @author Dmitriy Moroz
      */
     private val bpeRanks: MutableMap<Pair<String, String>, Int?> = HashMap()
 
     /**
-     * Exposes the `isInitMap` value used by the SDAI ONNX local diffusion feature layer.
+     * Prevents reloading the immutable vocabulary when this job reopens its text session.
      *
      * @author Dmitriy Moroz
      */
     private var isInitMap = false
 
     /**
-     * Exposes the `session` value used by the SDAI ONNX local diffusion feature layer.
+     * Owns the CPU text encoder and its options until positive and negative embeddings are copied.
      *
      * @author Dmitriy Moroz
      */
-    private var session: OrtSession? = null
+    private var session: OnnxSession? = null
 
     /**
-     * Exposes the `maxLength` value used by the SDAI ONNX local diffusion feature layer.
+     * Number of CLIP tokens, including beginning/end tokens and padding, in each encoder input.
      *
      * @author Dmitriy Moroz
      */
     override val maxLength = 77
 
     /**
-     * Executes the `initialize` step in the SDAI ONNX local diffusion feature layer.
+     * Opens the CPU text encoder and loads this model's vocabulary and merge ranks.
+     * File parsing and native model failures propagate; partially initialized jobs are closed by the owner.
      *
      * @author Dmitriy Moroz
      */
@@ -107,17 +96,13 @@ internal class EnglishTextTokenizer(
             return
         }
         controller.checkActive()
-        OrtSession.SessionOptions().use { options ->
-            options.addConfigEntry(ORT_KEY_MODEL_FORMAT, ORT)
-            session = ortEnvironmentProvider.get().createSession(
-                "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_MODEL}",
-                options,
-            )
-        }
+        session = sessionFactory.create(
+            LocalDiffusionContract.TOKENIZER_MODEL,
+            isAccelerationAllowed = false,
+        )
         debugLog("{$TAG} {TOKENIZER} {initialize} Session created successfully!")
         if (!isInitMap) {
             encoder.putAll(loadEncoder())
-            decoder.putAll(loadDecoder(encoder))
             bpeRanks.putAll(loadBpeRanks())
         }
         isInitMap = true
@@ -125,45 +110,13 @@ internal class EnglishTextTokenizer(
     }
 
     /**
-     * Executes the `decode` step in the SDAI ONNX local diffusion feature layer.
+     * Normalizes prompt text, applies the model's byte-pair merges, then truncates/pads to 77 IDs.
      *
-     * @param ids ids value consumed by the API.
-     * @return Result produced by `decode`.
-     * @author Dmitriy Moroz
-     */
-    override fun decode(ids: IntArray?): String {
-        debugLog("{$TAG} {TOKENIZER} {decode} Trying to decode ${ids?.size ?: "null"} int array...")
-        if (ids == null) {
-            debugLog("{$TAG} {TOKENIZER} {decode} Input ids array is null, skipping.")
-            return ""
-        }
-        val stringBuilder = StringBuilder()
-        for (value in ids) {
-            if (decoder.containsKey(value)) stringBuilder.append(decoder[value])
-        }
-        val result: MutableList<Int> = ArrayList()
-        for (element in stringBuilder) {
-            val key = element.toString()
-            if (TokenizerByteSet.byteDecoder.containsKey(key)) {
-                TokenizerByteSet.byteDecoder[key]?.let { result.add(it) }
-            }
-        }
-        val ints = IntArray(result.size)
-        for (i in result.indices) ints[i] = result[i]
-        val resultString = String(ints, 0, ints.size)
-        debugLog("{$TAG} {TOKENIZER} {decode} Decode was successful!")
-        return resultString
-    }
-
-    /**
-     * Executes the `encode` step in the SDAI ONNX local diffusion feature layer.
-     *
-     * @param text text value consumed by the API.
-     * @return Result produced by `encode`.
+     * @param text Prompt text; null follows the existing tokenizer normalization behavior.
+     * @return Fixed-length token IDs ending in the CLIP end-of-text token.
      * @author Dmitriy Moroz
      */
     override fun encode(text: String?): IntArray {
-        debugLog("{$TAG} {TOKENIZER} {encode} Trying to encode ${text ?: "null"}...")
         var input = text
         input = input.toString().lowercase(Locale.getDefault()).halfCorner()
         val stringList: MutableList<String> = ArrayList()
@@ -204,10 +157,10 @@ internal class EnglishTextTokenizer(
     }
 
     /**
-     * Executes the `tensor` step in the SDAI ONNX local diffusion feature layer.
+     * Runs the CPU text encoder and copies its output into a caller-owned embedding tensor.
      *
-     * @param ids ids value consumed by the API.
-     * @return Result produced by `tensor`.
+     * @param ids Token IDs kept alive until the native encoder run completes, or null to skip encoding.
+     * @return Independent embedding tensor that must be closed by the caller, or null for null IDs.
      * @author Dmitriy Moroz
      */
     override fun tensor(ids: IntArray?): OnnxTensor? {
@@ -219,37 +172,40 @@ internal class EnglishTextTokenizer(
         return OnnxTensor.createTensor(
             ortEnvironmentProvider.get(), IntBuffer.wrap(ids), longArrayOf(1, ids.size.toLong()),
         ).use { inputIds ->
-            controller.run(checkNotNull(session), mapOf(KEY_INPUT_IDS to inputIds)).use { result ->
-                OnnxTensor.createTensor(ortEnvironmentProvider.get(), result[0].value)
-            }
+            controller.run(checkNotNull(session).value, mapOf(KEY_INPUT_IDS to inputIds))
+                .use { result ->
+                    OnnxTensor.createTensor(ortEnvironmentProvider.get(), result[0].value)
+                }
         }
     }
 
     /**
-     * Creates the SDAI value produced by `createUnconditionalInput`.
+     * Encodes the negative prompt using the same vocabulary and padding as the positive prompt.
      *
-     * @param text text value consumed by the API.
+     * @param text Negative prompt submitted for classifier-free guidance.
+     * @return Fixed-length token IDs for the negative conditioning branch.
      * @author Dmitriy Moroz
      */
     override fun createUnconditionalInput(text: String?): IntArray = encode(text)
 
     /**
-     * Executes the `close` step in the SDAI ONNX local diffusion feature layer.
+     * Releases the text session and then its options after all borrowed encoder results are copied.
      *
      * @author Dmitriy Moroz
      */
     override fun close() {
         debugLog("{$TAG} {TOKENIZER} {close} Closing session...")
-        session?.close()
+        val ownedSession = session
         session = null
+        ownedSession?.close()
         debugLog("{$TAG} {TOKENIZER} {close} Session closed successfully!")
     }
 
     /**
-     * Executes the `bpe` step in the SDAI ONNX local diffusion feature layer.
+     * Repeatedly merges the best-ranked adjacent byte pair until the model vocabulary has no merge.
      *
-     * @param token token value consumed by the API.
-     * @return Result produced by `bpe`.
+     * @param token Single normalized token from the CLIP tokenization pattern.
+     * @return Byte-pair vocabulary entries, with the final entry carrying the end-of-word marker.
      * @author Dmitriy Moroz
      */
     private fun bpe(token: String): List<String> {
@@ -310,10 +266,10 @@ internal class EnglishTextTokenizer(
     }
 
     /**
-     * Loads SDAI data through `getPairs`.
+     * Collects distinct adjacent symbols for byte-pair merge ranking.
      *
-     * @param word word value consumed by the API.
-     * @return Result produced by `getPairs`.
+     * @param word Current symbol sequence after any earlier merges.
+     * @return Adjacent symbol pairs in their first-occurrence order.
      * @author Dmitriy Moroz
      */
     private fun getPairs(word: List<String?>): Set<Pair<String, String>> {
@@ -325,56 +281,35 @@ internal class EnglishTextTokenizer(
     }
 
     /**
-     * Loads SDAI data through `loadEncoder`.
+     * Reads the model's JSON token-to-integer vocabulary; malformed or missing files fail the job.
      *
-     * @return Result produced by `loadEncoder`.
+     * @return Vocabulary keyed by byte-pair token spelling.
      * @author Dmitriy Moroz
      */
     private fun loadEncoder(): Map<String, Int> {
         val map: MutableMap<String, Int> = HashMap()
-        try {
-            val path =
-                "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_VOCABULARY}"
-            val jsonReader = JsonReader(InputStreamReader(FileInputStream(path)))
+        val path = "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_VOCABULARY}"
+        JsonReader(InputStreamReader(FileInputStream(path))).use { jsonReader ->
             jsonReader.beginObject()
             while (jsonReader.hasNext()) {
                 val key = jsonReader.nextName()
                 val value = jsonReader.nextInt()
                 map[key] = value
             }
-            jsonReader.close()
-        } catch (e: Exception) {
-            errorLog(e)
         }
         return map
     }
 
     /**
-     * Loads SDAI data through `loadDecoder`.
+     * Reads merge-pair precedence from the model's line-oriented CLIP merges file.
      *
-     * @param encoder encoder value consumed by the API.
-     * @return Result produced by `loadDecoder`.
-     * @author Dmitriy Moroz
-     */
-    private fun loadDecoder(encoder: Map<String, Int>): Map<Int, String> {
-        val result: MutableMap<Int, String> = HashMap(encoder.size)
-        for (entry in encoder) {
-            result[entry.value] = entry.key
-        }
-        return result
-    }
-
-    /**
-     * Loads SDAI data through `loadBpeRanks`.
-     *
-     * @return Result produced by `loadBpeRanks`.
+     * @return Pair ranks in file order, excluding the version header.
      * @author Dmitriy Moroz
      */
     private fun loadBpeRanks(): Map<Pair<String, String>, Int?> {
         val result: MutableMap<Pair<String, String>, Int?> = HashMap()
-        try {
-            val path = "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_MERGES}"
-            val reader = BufferedReader(InputStreamReader(FileInputStream(path)))
+        val path = "${configuration.modelDirectory}/${LocalDiffusionContract.TOKENIZER_MERGES}"
+        BufferedReader(InputStreamReader(FileInputStream(path))).use { reader ->
             var line: String
             var startLine = 1
             var count = 0
@@ -387,21 +322,18 @@ internal class EnglishTextTokenizer(
                         count++
                 }
             }
-            reader.close()
-        } catch (e: Exception) {
-            errorLog(e)
         }
         return result
     }
 
     /**
-     * Provides the `companion object` singleton used by the SDAI ONNX local diffusion feature layer.
+     * CLIP-compatible token boundary pattern shared by every prompt in this job.
      *
      * @author Dmitriy Moroz
      */
-    companion object {
+    private companion object {
         /**
-         * Exposes the `TOKENIZER_REGEX` value used by the SDAI ONNX local diffusion feature layer.
+         * Recognizes contractions, Unicode letters/numbers, punctuation and whitespace runs.
          *
          * @author Dmitriy Moroz
          */

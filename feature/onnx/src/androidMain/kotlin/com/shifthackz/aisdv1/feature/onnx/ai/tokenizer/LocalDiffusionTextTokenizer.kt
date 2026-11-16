@@ -3,57 +3,54 @@ package com.shifthackz.aisdv1.feature.onnx.ai.tokenizer
 import ai.onnxruntime.OnnxTensor
 
 /**
- * Defines the `LocalDiffusionTextTokenizer` contract for the SDAI ONNX local diffusion feature layer.
+ * Tokenizes model-specific CLIP prompts and owns their CPU text-encoder session for one job.
  *
  * @author Dmitriy Moroz
  */
-interface LocalDiffusionTextTokenizer {
+internal interface LocalDiffusionTextTokenizer {
     /**
-     * Exposes the `maxLength` value used by the SDAI ONNX local diffusion feature layer.
+     * Fixed token count expected by the text encoder, including special tokens and padding.
      *
      * @author Dmitriy Moroz
      */
     val maxLength: Int
+
     /**
-     * Executes the `initialize` step in the SDAI ONNX local diffusion feature layer.
+     * Opens the captured model's text encoder and loads its vocabulary; failures propagate.
      *
      * @author Dmitriy Moroz
      */
     fun initialize()
+
     /**
-     * Executes the `decode` step in the SDAI ONNX local diffusion feature layer.
+     * Produces a padded/truncated token sequence for the model's CLIP text encoder.
      *
-     * @param ids ids value consumed by the API.
-     * @return Result produced by `decode`.
-     * @author Dmitriy Moroz
-     */
-    fun decode(ids: IntArray?): String?
-    /**
-     * Executes the `encode` step in the SDAI ONNX local diffusion feature layer.
-     *
-     * @param text text value consumed by the API.
-     * @return Result produced by `encode`.
+     * @param text Positive or negative prompt to normalize and tokenize.
+     * @return Fixed-length token IDs including beginning/end tokens.
      * @author Dmitriy Moroz
      */
     fun encode(text: String?): IntArray?
+
     /**
-     * Executes the `tensor` step in the SDAI ONNX local diffusion feature layer.
+     * Runs the text encoder and transfers an independent embedding tensor to the caller.
      *
-     * @param ids ids value consumed by the API.
-     * @return Result produced by `tensor`.
+     * @param ids Fixed-length prompt tokens; null skips the native run.
+     * @return Caller-owned embedding tensor, or null when no IDs were supplied.
      * @author Dmitriy Moroz
      */
     fun tensor(ids: IntArray?): OnnxTensor?
+
     /**
-     * Creates the SDAI value produced by `createUnconditionalInput`.
+     * Tokenizes the negative conditioning branch for classifier-free guidance.
      *
-     * @param text text value consumed by the API.
-     * @return Result produced by `createUnconditionalInput`.
+     * @param text Negative prompt in the same format as the positive prompt.
+     * @return Fixed-length token IDs for the negative conditioning branch.
      * @author Dmitriy Moroz
      */
     fun createUnconditionalInput(text: String?): IntArray?
+
     /**
-     * Executes the `close` step in the SDAI ONNX local diffusion feature layer.
+     * Releases the native session and options after all borrowed outputs have been copied.
      *
      * @author Dmitriy Moroz
      */

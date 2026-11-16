@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.app.inference
 
 import android.content.Context
+import com.shifthackz.aisdv1.app.BuildConfig
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.feature.diffusion.NativeInferenceEngine
@@ -29,7 +30,11 @@ internal class NativeInferenceEngineFactoryImpl(private val context: Context) :
         val graph = koinApplication {
             modules(
                 when (request.engine) {
-                    NativeGenerationEngine.ONNX -> onnxInferenceModule(request)
+                    NativeGenerationEngine.ONNX -> onnxInferenceModule(
+                        request,
+                        isDiagnosticsEnabled = BuildConfig.BUILD_TYPE == "dev",
+                    )
+
                     NativeGenerationEngine.MEDIA_PIPE -> mediaPipeInferenceModule(context)
                     NativeGenerationEngine.SDCPP -> sdxlInferenceModule()
                     NativeGenerationEngine.BONSAI -> bonsaiInferenceModule()

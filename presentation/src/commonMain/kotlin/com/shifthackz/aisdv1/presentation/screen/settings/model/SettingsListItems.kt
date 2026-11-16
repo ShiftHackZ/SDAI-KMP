@@ -7,6 +7,8 @@ package com.shifthackz.aisdv1.presentation.screen.settings.model
  * @param state Current preferences and provider capabilities.
  * @param isDark Actual appearance including the system dark-mode selection.
  * @param shouldShowConnectionTimeout Whether this platform supports the connection timeout row.
+ * @param isNnapiAvailable Whether the platform is Android 8.1 or newer; older Android and other
+ * platforms omit the NNAPI switch and warning, regardless of any saved preference.
  * @return Ordered stable row identities matching current provider and appearance visibility.
  * @author Dmitriy Moroz
  */
@@ -14,6 +16,7 @@ internal fun settingsListItems(
     state: SettingsState,
     isDark: Boolean,
     shouldShowConnectionTimeout: Boolean,
+    isNnapiAvailable: Boolean,
 ): List<SettingsListItem> = buildList {
     if (!state.onBoardingDemo) {
         add(SettingsListItem.SERVER_HEADER)
@@ -25,9 +28,9 @@ internal fun settingsListItems(
             add(SettingsListItem.GENERATION_TIMEOUT)
         }
         if (state.showSdModelSelector) add(SettingsListItem.MODEL)
-        if (state.showLocalMicrosoftONNXUseNNAPI) {
+        if (isNnapiAvailable && state.showLocalMicrosoftONNXUseNNAPI) {
             add(SettingsListItem.NNAPI)
-            if (!state.loading) add(SettingsListItem.NNAPI_WARNING)
+            if (!state.loading && state.localUseNNAPI) add(SettingsListItem.NNAPI_WARNING)
         }
         if (state.loading || state.backgroundGenerationAvailable) {
             add(SettingsListItem.BACKGROUND_GENERATION)

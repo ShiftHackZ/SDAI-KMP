@@ -338,8 +338,8 @@
     <string name="settings_item_config">Konfiguration</string>
     <string name="settings_item_sd_model">SD-Modell</string>
     <string name="settings_item_stability_ai_credits">Stability-AI-Guthaben</string>
-    <string name="settings_item_local_nnapi">NNAPI verwenden (Beta)*</string>
-    <string name="settings_item_local_nnapi_warning">*NNAPI funktioniert möglicherweise nicht zuverlässig. Deaktiviere diese Option bei Fehlern, Abstürzen oder schlechter Leistung.</string>
+    <string name="settings_item_local_nnapi">NNAPI verwenden</string>
+    <string name="settings_item_local_nnapi_warning">*NNAPI kann die Berechnungen weiterhin teilweise oder vollständig auf der CPU deines Geräts ausführen. Hardwarebeschleunigung und eine schnellere Bilderzeugung sind nicht garantiert. Deaktiviere NNAPI, wenn die Bilderzeugung langsamer ist oder fehlschlägt.</string>
 
     <string name="settings_item_language">Sprache</string>
     <string name="settings_item_demo">Demomodus</string>

@@ -206,6 +206,8 @@ Sessions use Android Keystore-backed storage and iOS Keychain. Sign out in provi
 
 Use this on Android for on-device txt2img generation. Download or provide a compatible ONNX local diffusion model, select it in setup, and generate without sending prompts to a remote service.
 
+The optional NNAPI setting lets Android 8.1 and newer choose accelerator and CPU devices for the denoiser and VAE decoder. Older Android versions continue using the ONNX Runtime CPU backend. FP16 relaxation is enabled for drivers that support it, so results may differ slightly from CPU generation. Unsupported accelerator operations can use NNAPI's CPU implementation; enabling NNAPI does not guarantee that every operation is accelerated or that generation is faster. Disable it if the model runs better on the ONNX Runtime CPU backend.
+
 ### Local Diffusion with Google AI MediaPipe
 
 Use this on Android for on-device txt2img generation through Google AI MediaPipe. This provider is available only in `playstore` and `full` Android flavors.
