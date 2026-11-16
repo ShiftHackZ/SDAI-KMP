@@ -1,5 +1,13 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.CaptureEasyDiffusionConnectionUseCase
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GenerateEasyDiffusionUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.toEasyDiffusionRequest
+
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
+import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ImageToImagePayload
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
@@ -13,109 +21,92 @@ import com.shifthackz.aisdv1.domain.repository.StableDiffusionGenerationReposito
 import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
 
 /**
- * Implements `ImageToImageUseCase` behavior in the SDAI domain layer.
+ * Routes captured image requests to supported providers, delegating Easy Diffusion batches to one operation with a shared deadline.
  *
- * @throws IllegalStateException when the delegated operation cannot complete.
+ * @param stableDiffusionGenerationRepository Generation and result persistence for AUTOMATIC1111.
+ * @param swarmUiGenerationRepository Generation and result persistence for SwarmUI.
+ * @param hordeGenerationRepository Generation and result persistence for AI Horde.
+ * @param huggingFaceGenerationRepository Generation and result persistence for Hugging Face.
+ * @param stabilityAiGenerationRepository Generation and result persistence for Stability AI.
+ * @param coreMlGenerationRepository Generation and result persistence for Core ML.
+ * @param falAiGenerationRepository Generation and result persistence for Fal.ai.
+ * @param arliAiGenerationRepository Generation and result persistence for ArliAI.
+ * @param preferenceManager Current provider selection and independent generation preferences.
+ * @param captureEasyDiffusionConnectionUseCase Captures endpoint/checkpoint under the provider-selection lock, retaining the submitted revision.
+ * @param generateEasyDiffusionUseCase Owns captured-task batching, stream recovery, cancellation and deadlines.
  * @author Dmitriy Moroz
  */
 internal class ImageToImageUseCaseImpl(
-    /**
-     * Exposes the `stableDiffusionGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val stableDiffusionGenerationRepository: StableDiffusionGenerationRepository,
-    /**
-     * Exposes the `swarmUiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val swarmUiGenerationRepository: SwarmUiGenerationRepository,
-    /**
-     * Exposes the `hordeGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val hordeGenerationRepository: HordeGenerationRepository,
-    /**
-     * Exposes the `huggingFaceGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val huggingFaceGenerationRepository: HuggingFaceGenerationRepository,
-    /**
-     * Exposes the `stabilityAiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val stabilityAiGenerationRepository: StabilityAiGenerationRepository,
-    /**
-     * Exposes the `coreMlGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val coreMlGenerationRepository: CoreMlGenerationRepository,
-    /**
-     * Exposes the `falAiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val falAiGenerationRepository: FalAiGenerationRepository,
-    /**
-     * Exposes the `arliAiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val arliAiGenerationRepository: ArliAiGenerationRepository,
-    /**
-     * Exposes the `preferenceManager` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
+
     private val preferenceManager: PreferenceManager,
+    private val generateEasyDiffusionUseCase: GenerateEasyDiffusionUseCase,
+    private val captureEasyDiffusionConnectionUseCase: CaptureEasyDiffusionConnectionUseCase,
 ) : ImageToImageUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Routes the captured image request and executes a provider batch or sequential single-image calls without changing unrelated settings.
      *
-     * @param payload generation payload used by the operation.
+     * @param payload Immutable supported generation inputs and captured provider identity.
      * @author Dmitriy Moroz
      */
-    override suspend fun invoke(payload: ImageToImagePayload) = when (preferenceManager.source) {
-        ServerSource.AUTOMATIC1111 -> stableDiffusionGenerationRepository.generateFromImage(payload)
-        ServerSource.FAL_AI -> falAiGenerationRepository.generateFromImage(payload)
-        ServerSource.ARLI_AI -> arliAiGenerationRepository.generateFromImage(payload)
-        else -> List(payload.batchCount.coerceAtLeast(1)) {
-            generateSingle(payload)
+    override suspend fun invoke(payload: ImageToImagePayload): List<AiGenerationResult> {
+        coroutineContext.ensureActive()
+        val source = payload.sourceSnapshot ?: preferenceManager.source
+        check(source == preferenceManager.source) { "Generation source changed" }
+        return when (source) {
+            ServerSource.EASY_DIFFUSION -> generateEasyDiffusionUseCase(
+                payload.toEasyDiffusionRequest(captureEasyDiffusionConnectionUseCase(payload.providerSelectionRevision))
+            )
+
+            ServerSource.AUTOMATIC1111 -> stableDiffusionGenerationRepository.generateFromImage(
+                payload
+            )
+
+            ServerSource.FAL_AI -> falAiGenerationRepository.generateFromImage(payload)
+            ServerSource.ARLI_AI -> arliAiGenerationRepository.generateFromImage(payload)
+            else -> List(payload.batchCount.coerceAtLeast(1)) {
+                coroutineContext.ensureActive()
+                check(source == preferenceManager.source) { "Generation source changed" }
+                generateSingle(payload)
+            }
         }
+
     }
 
     /**
-     * Executes the `generateSingle` step in the SDAI domain layer.
+     * Dispatches one image to the captured provider; providers with dedicated batch paths are rejected here.
      *
-     * @param payload generation payload used by the operation.
+     * @param payload Immutable supported generation inputs and captured provider identity.
      * @author Dmitriy Moroz
      */
-    private suspend fun generateSingle(payload: ImageToImagePayload) = when (preferenceManager.source) {
-        ServerSource.OPEN_AI_COMPATIBLE -> error("This image server supports text-to-image only")
-        ServerSource.OPEN_AI_OAUTH -> error("ChatGPT supports text-to-image only")
-        ServerSource.SWARM_UI -> swarmUiGenerationRepository.generateFromImage(payload)
-        ServerSource.HORDE -> hordeGenerationRepository.generateFromImage(payload)
-        ServerSource.HUGGING_FACE -> huggingFaceGenerationRepository.generateFromImage(payload)
-        ServerSource.STABILITY_AI -> stabilityAiGenerationRepository.generateFromImage(payload)
-        ServerSource.LOCAL_APPLE_CORE_ML -> coreMlGenerationRepository.generateFromImage(payload)
-        ServerSource.AUTOMATIC1111 -> error("Automatic1111 batch must be generated through generateFromImage(payload).")
-        ServerSource.FAL_AI -> error("Fal.ai batch must be generated through generateFromImage(payload).")
-        ServerSource.ARLI_AI -> error("ArliAI batch must be generated through generateFromImage(payload).")
-        else -> throw IllegalStateException("Img2Img not yet supported on ${preferenceManager.source}!")
-    }
+    private suspend fun generateSingle(payload: ImageToImagePayload) =
+        when (payload.sourceSnapshot ?: preferenceManager.source) {
+            ServerSource.OPEN_AI_COMPATIBLE -> error("This image server supports text-to-image only")
+            ServerSource.OPEN_AI_OAUTH -> error("ChatGPT supports text-to-image only")
+            ServerSource.SWARM_UI -> swarmUiGenerationRepository.generateFromImage(payload)
+            ServerSource.HORDE -> hordeGenerationRepository.generateFromImage(payload)
+            ServerSource.HUGGING_FACE -> huggingFaceGenerationRepository.generateFromImage(payload)
+            ServerSource.STABILITY_AI -> stabilityAiGenerationRepository.generateFromImage(payload)
+            ServerSource.LOCAL_APPLE_CORE_ML -> coreMlGenerationRepository.generateFromImage(payload)
+            ServerSource.AUTOMATIC1111 -> error("Automatic1111 batch must be generated through generateFromImage(payload).")
+            ServerSource.FAL_AI -> error("Fal.ai batch must be generated through generateFromImage(payload).")
+            ServerSource.ARLI_AI -> error("ArliAI batch must be generated through generateFromImage(payload).")
+            else -> throw IllegalStateException("Img2Img not yet supported on ${preferenceManager.source}!")
+        }
 }

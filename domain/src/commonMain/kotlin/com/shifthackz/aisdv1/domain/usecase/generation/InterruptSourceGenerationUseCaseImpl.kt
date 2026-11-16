@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.repository.BonsaiGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.CoreMlGenerationRepository
@@ -9,7 +10,7 @@ import com.shifthackz.aisdv1.domain.repository.StableDiffusionCppGenerationRepos
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionGenerationRepository
 
 /**
- * Delegates source interruption to the owning repository without consulting preferences.
+ * Delegates legacy source interruption without consulting preferences; Easy Diffusion requires captured job or worker ownership.
  *
  * @param stableDiffusionGenerationRepository Owns interruption of StableDiffusion generation.
  * @param hordeGenerationRepository Owns interruption of Horde generation.
@@ -35,6 +36,7 @@ internal class InterruptSourceGenerationUseCaseImpl(
      */
     override suspend fun invoke(source: ServerSource) {
         when (source) {
+            ServerSource.EASY_DIFFUSION -> Unit // Captured coroutine cancellation or exact worker interruption owns this task.
             ServerSource.AUTOMATIC1111 -> stableDiffusionGenerationRepository.interruptGeneration()
             ServerSource.HORDE -> hordeGenerationRepository.interruptGeneration()
             ServerSource.LOCAL_MICROSOFT_ONNX -> localDiffusionGenerationRepository.interruptGeneration()

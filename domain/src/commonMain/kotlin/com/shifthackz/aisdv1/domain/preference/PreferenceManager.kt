@@ -8,7 +8,7 @@ import com.shifthackz.aisdv1.domain.entity.Settings
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Defines the `PreferenceManager` contract for the SDAI domain layer.
+ * Shared settings and provider preferences. Observers receive fresh settings snapshots after explicitly notifying writes.
  *
  * @author Dmitriy Moroz
  */
@@ -57,281 +57,338 @@ interface PreferenceManager {
     var generationRequestTimeout: NetworkTimeout
 
     /**
-     * Exposes the `automatic1111ServerUrl` value used by the SDAI domain layer.
+     * Persisted AUTOMATIC1111 server root, independent from other providers.
      *
      * @author Dmitriy Moroz
      */
     var automatic1111ServerUrl: String
+
     /**
-     * Exposes the `swarmUiServerUrl` value used by the SDAI domain layer.
+     * Persisted SwarmUI server root; normalized without changing the protocol delimiter.
      *
      * @author Dmitriy Moroz
      */
     var swarmUiServerUrl: String
+
+    /** HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+     * @author Dmitriy Moroz
+     */
+    var easyDiffusionUrl: String
+
+    /** Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+     * @author Dmitriy Moroz
+     */
+    var easyDiffusionModel: String
+
     /**
-     * Exposes the `swarmUiModel` value used by the SDAI domain layer.
+     * Exact selected SwarmUI checkpoint name.
      *
      * @author Dmitriy Moroz
      */
     var swarmUiModel: String
+
     /**
-     * Exposes the `demoMode` value used by the SDAI domain layer.
+     * Whether AUTOMATIC1111 uses the configured demonstration endpoint.
      *
      * @author Dmitriy Moroz
      */
     var demoMode: Boolean
+
     /**
-     * Exposes the `developerMode` value used by the SDAI domain layer.
+     * Whether developer tools are visible in Settings.
      *
      * @author Dmitriy Moroz
      */
     var developerMode: Boolean
+
     /**
-     * Exposes the `localMediaPipeCustomModelPath` value used by the SDAI domain layer.
+     * User-selected custom MediaPipe model filesystem path.
      *
      * @author Dmitriy Moroz
      */
     var localMediaPipeCustomModelPath: String
+
     /**
-     * Exposes the `localCoreMlCustomModelPath` value used by the SDAI domain layer.
+     * User-selected custom Core ML model filesystem path.
      *
      * @author Dmitriy Moroz
      */
     var localCoreMlCustomModelPath: String
+
     /**
-     * Exposes the `localBonsaiCustomModelPath` value used by the SDAI domain layer.
+     * User-selected custom Bonsai model filesystem path.
      *
      * @author Dmitriy Moroz
      */
     var localBonsaiCustomModelPath: String
+
     /**
-     * Exposes the `localOnnxCustomModelPath` value used by the SDAI domain layer.
+     * User-selected custom ONNX model filesystem path.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxCustomModelPath: String
+
     /**
-     * Exposes the `localSdxlCustomModelPath` value used by the SDAI domain layer.
+     * User-selected custom stable-diffusion.cpp model filesystem path.
      *
      * @author Dmitriy Moroz
      */
     var localSdxlCustomModelPath: String
+
     /**
-     * Exposes the `localOnnxAllowCancel` value used by the SDAI domain layer.
+     * Whether legacy ONNX generation exposes cancellation.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxAllowCancel: Boolean
+
     /**
-     * Exposes the `localOnnxSchedulerThread` value used by the SDAI domain layer.
+     * Dispatcher policy for legacy ONNX inference.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxSchedulerThread: SchedulersToken
+
     /**
-     * Exposes the `monitorConnectivity` value used by the SDAI domain layer.
+     * Whether to periodically monitor a supported self-hosted connection.
      *
      * @author Dmitriy Moroz
      */
     var monitorConnectivity: Boolean
+
     /**
-     * Exposes the `autoSaveAiResults` value used by the SDAI domain layer.
+     * Whether completed results are inserted into the gallery automatically.
      *
      * @author Dmitriy Moroz
      */
     var autoSaveAiResults: Boolean
+
     /**
-     * Exposes the `saveToMediaStore` value used by the SDAI domain layer.
+     * Whether saved gallery results are exported to the platform photo store.
      *
      * @author Dmitriy Moroz
      */
     var saveToMediaStore: Boolean
+
     /**
-     * Exposes the `formAdvancedOptionsAlwaysShow` value used by the SDAI domain layer.
+     * Whether generation forms keep advanced controls expanded.
      *
      * @author Dmitriy Moroz
      */
     var formAdvancedOptionsAlwaysShow: Boolean
+
     /**
-     * Exposes the `formPromptTaggedInput` value used by the SDAI domain layer.
+     * Whether prompts use the tag editor instead of plain text input.
      *
      * @author Dmitriy Moroz
      */
     var formPromptTaggedInput: Boolean
+
     /**
-     * Exposes the `source` value used by the SDAI domain layer.
+     * Selected provider; replacement increments the durable selection revision.
      *
      * @author Dmitriy Moroz
      */
     var source: ServerSource
-    /** Durable revision of the currently selected provider, shared with ConfigurationStore.
+
+    /** Durable provider revision, also advanced by selected Easy Diffusion URL/model changes.
      * @author Dmitriy Moroz */
     val providerSelectionRevision: Long
+
     /**
-     * Exposes the `sdModel` value used by the SDAI domain layer.
+     * Selected AUTOMATIC1111 checkpoint identifier.
      *
      * @author Dmitriy Moroz
      */
     var sdModel: String
+
     /**
-     * Exposes the `hordeApiKey` value used by the SDAI domain layer.
+     * AI Horde credential; the anonymous key is supported independently of other services.
      *
      * @author Dmitriy Moroz
      */
     var hordeApiKey: String
+
     /**
-     * Exposes the `openAiApiKey` value used by the SDAI domain layer.
+     * Official OpenAI API key; separate from compatible servers and OAuth sessions.
      *
      * @author Dmitriy Moroz
      */
     var openAiApiKey: String
+
     /**
      * Editable image model identifier supplied to the compatible server.
      * @author Dmitriy Moroz
      */
     var openAiCompatibleModel: String
+
     /**
      * Optional bearer token for the independent compatible server.
      * @author Dmitriy Moroz
      */
     var openAiCompatibleApiKey: String
+
     /**
      * Complete HTTP(S) API prefix, including any version and reverse-proxy path.
      * @author Dmitriy Moroz
      */
     var openAiCompatibleUrl: String
+
     /**
-     * Exposes the `huggingFaceApiKey` value used by the SDAI domain layer.
+     * Hugging Face inference token.
      *
      * @author Dmitriy Moroz
      */
     var huggingFaceApiKey: String
+
     /**
-     * Exposes the `huggingFaceModel` value used by the SDAI domain layer.
+     * Selected supported Hugging Face inference model alias.
      *
      * @author Dmitriy Moroz
      */
     var huggingFaceModel: String
+
     /**
-     * Exposes the `stabilityAiApiKey` value used by the SDAI domain layer.
+     * Stability AI API credential.
      *
      * @author Dmitriy Moroz
      */
     var stabilityAiApiKey: String
+
     /**
-     * Exposes the `falAiApiKey` value used by the SDAI domain layer.
+     * Fal.ai API credential.
      *
      * @author Dmitriy Moroz
      */
     var falAiApiKey: String
+
     /**
-     * Exposes the `arliAiApiKey` value used by the SDAI domain layer.
+     * ArliAI API credential.
      *
      * @author Dmitriy Moroz
      */
     var arliAiApiKey: String
+
     /**
-     * Exposes the `arliAiModel` value used by the SDAI domain layer.
+     * Selected ArliAI checkpoint identifier.
      *
      * @author Dmitriy Moroz
      */
     var arliAiModel: String
+
     /**
-     * Exposes the `stabilityAiEngineId` value used by the SDAI domain layer.
+     * Selected Stability AI engine identifier.
      *
      * @author Dmitriy Moroz
      */
     var stabilityAiEngineId: String
+
     /**
-     * Exposes the `onBoardingComplete` value used by the SDAI domain layer.
+     * Whether onboarding has already completed.
      *
      * @author Dmitriy Moroz
      */
     var onBoardingComplete: Boolean
+
     /**
-     * Exposes the `forceSetupAfterUpdate` value used by the SDAI domain layer.
+     * Whether a version transition requires provider setup again.
      *
      * @author Dmitriy Moroz
      */
     var forceSetupAfterUpdate: Boolean
+
     /**
-     * Exposes the `localOnnxModelId` value used by the SDAI domain layer.
+     * Selected downloaded ONNX model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxModelId: String
+
     /**
-     * Exposes the `localOnnxUseNNAPI` value used by the SDAI domain layer.
+     * Whether legacy ONNX inference requests Android NNAPI acceleration.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxUseNNAPI: Boolean
+
     /**
-     * Exposes the `localMediaPipeModelId` value used by the SDAI domain layer.
+     * Selected downloaded MediaPipe model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localMediaPipeModelId: String
+
     /**
-     * Exposes the `localSdxlModelId` value used by the SDAI domain layer.
+     * Selected stable-diffusion.cpp model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localSdxlModelId: String
+
     /**
-     * Exposes the `localCoreMlModelId` value used by the SDAI domain layer.
+     * Selected downloaded Core ML model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localCoreMlModelId: String
+
     /**
-     * Exposes the `localBonsaiModelId` value used by the SDAI domain layer.
+     * Selected downloaded Bonsai model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localBonsaiModelId: String
+
     /**
-     * Exposes the `designUseSystemColorPalette` value used by the SDAI domain layer.
+     * Whether theme colors follow the system palette.
      *
      * @author Dmitriy Moroz
      */
     var designUseSystemColorPalette: Boolean
+
     /**
-     * Exposes the `designUseSystemDarkTheme` value used by the SDAI domain layer.
+     * Whether appearance follows the system light/dark preference.
      *
      * @author Dmitriy Moroz
      */
     var designUseSystemDarkTheme: Boolean
+
     /**
-     * Exposes the `designDarkTheme` value used by the SDAI domain layer.
+     * Explicit dark appearance when system appearance is disabled.
      *
      * @author Dmitriy Moroz
      */
     var designDarkTheme: Boolean
+
     /**
-     * Exposes the `designColorToken` value used by the SDAI domain layer.
+     * Selected accent palette token, stored by its stable enum name.
      *
      * @author Dmitriy Moroz
      */
     var designColorToken: String
+
     /**
-     * Exposes the `designDarkThemeToken` value used by the SDAI domain layer.
+     * Selected dark background palette token, stored by its stable enum name.
      *
      * @author Dmitriy Moroz
      */
     var designDarkThemeToken: String
+
     /**
-     * Exposes the `backgroundGeneration` value used by the SDAI domain layer.
+     * Whether generation is scheduled through the background task manager.
      *
      * @author Dmitriy Moroz
      */
     var backgroundGeneration: Boolean
+
     /**
-     * Exposes the `backgroundProcessCount` value used by the SDAI domain layer.
+     * Number of background processes tracked by the existing work UI.
      *
      * @author Dmitriy Moroz
      */
     var backgroundProcessCount: Int
+
     /**
      * Tracks whether the first local generation benchmark prompt has already
      * been answered.
@@ -339,6 +396,7 @@ interface PreferenceManager {
      * @author Dmitriy Moroz
      */
     var localGenerationBenchmarkPromptAnswered: Boolean
+
     /**
      * Tracks whether benchmark recommendation warnings are muted until the next
      * benchmark run.
@@ -346,29 +404,30 @@ interface PreferenceManager {
      * @author Dmitriy Moroz
      */
     var benchmarkRecommendationWarningSuppressed: Boolean
+
     /**
-     * Exposes the `galleryGrid` value used by the SDAI domain layer.
+     * Gallery grid density preference.
      *
      * @author Dmitriy Moroz
      */
     var galleryGrid: Grid
+
     /**
-     * Exposes the `languageCode` value used by the SDAI domain layer.
+     * Selected application language code; empty follows the platform default.
      *
      * @author Dmitriy Moroz
      */
     var languageCode: String
 
     /**
-     * Loads SDAI data through `observe`.
+     * Emits the current settings snapshot and rereads persisted values after each invalidation.
      *
-     * @return Result produced by `observe`.
      * @author Dmitriy Moroz
      */
     fun observe(): Flow<Settings>
 
     /**
-     * Executes the `refresh` step in the SDAI domain layer.
+     * Invalidates current settings so observers reload values written through a complete configuration transaction.
      *
      * @author Dmitriy Moroz
      */

@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "network/openai-compatible.openapi.json"
 
 
-def validate(document, compatible_client=True):
-    """Raise ValueError for an incomplete schema or operation anywhere in the document."""
+def validate(document, compatible_client=True, allow_documented_extensions=False):
+    """Check every schema; optionally permit typed maps and explicitly tolerant response objects."""
     errors = []
 
     def require(condition, location, reason):
@@ -73,8 +73,16 @@ def validate(document, compatible_client=True):
             types = value.get("type", [])
             types = [types] if isinstance(types, str) else types
             if "object" in types:
-                require(bool(value.get("properties")), location, "object properties must be enumerated")
-                require(value.get("additionalProperties") is False, location, "free-form object is prohibited")
+                additional = value.get("additionalProperties")
+                has_typed_map = allow_documented_extensions and isinstance(additional, dict)
+                has_documented_extensions = (
+                    allow_documented_extensions
+                    and additional is True
+                    and value.get("x-tolerates-extensions") is True
+                    and bool(value.get("properties"))
+                )
+                require(bool(value.get("properties")) or has_typed_map, location, "object properties or typed dictionary values must be enumerated")
+                require(additional is False or has_typed_map or has_documented_extensions, location, "undocumented free-form object is prohibited")
                 require(set(value.get("required", [])) <= set(value.get("properties", {})), location, "unknown required property")
             if "array" in types:
                 require("items" in value, location, "array items are required")
@@ -90,7 +98,7 @@ def validate(document, compatible_client=True):
                         require(isinstance(media, dict) and "schema" in media, f"{child_location}/{media_type}", "every media type requires a schema")
                 walk(child, child_location, active_refs=active_refs)
             else:
-                walk(child, child_location, key in {"schema", "items", "requestUrl", "allOf", "anyOf", "oneOf", "not", "if", "then", "else", "contains", "prefixItems"}, active_refs)
+                walk(child, child_location, key in {"schema", "items", "requestUrl", "allOf", "anyOf", "oneOf", "not", "if", "then", "else", "contains", "prefixItems"} or (key == "additionalProperties" and isinstance(child, dict)), active_refs)
 
     def linked_schemas(value, location, seen=frozenset()):
         """Find referenced schema definitions reached from a concrete operation media body."""

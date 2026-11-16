@@ -45,7 +45,7 @@ internal fun generationInputAdvancedFields(
     if (mode == ServerSource.AUTOMATIC1111 || mode == ServerSource.SWARM_UI ||
         mode == ServerSource.STABILITY_AI || mode == ServerSource.ARLI_AI ||
         mode == ServerSource.HORDE || mode == ServerSource.LOCAL_APPLE_CORE_ML ||
-        mode == ServerSource.LOCAL_APPLE_BONSAI
+        mode == ServerSource.LOCAL_APPLE_BONSAI || mode == ServerSource.EASY_DIFFUSION
     ) add(GenerationFormField.AFTER_SLIDERS)
     if (mode == ServerSource.AUTOMATIC1111) {
         add(GenerationFormField.SCHEDULER)

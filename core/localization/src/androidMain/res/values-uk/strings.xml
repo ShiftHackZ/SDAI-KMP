@@ -673,4 +673,15 @@
     <string name="native_generation_stage_decoding">Декодування зображення…</string>
     <string name="native_generation_stage_running">Працює рушій зображень…</string>
     <string name="native_generation_stage_writing_result">Збереження результату…</string>
+
+    <string name="srv_type_easy_diffusion">Easy Diffusion</string>
+    <string name="easy_diffusion_subtitle">Генерація на власному сервері Easy Diffusion.</string>
+    <string name="easy_diffusion_setup_hint">Увімкніть мережевий доступ у налаштуваннях Easy Diffusion, збережіть налаштування й перезапустіть сервер. Введіть LAN-адресу комп’ютера, наприклад http://192.168.1.10:9000. Підключення без пароля.</string>
+    <string name="easy_diffusion_sampler">Семплер: DDIM (фіксований)</string>
+    <string name="easy_diffusion_models_failed">Не вдалося завантажити моделі. Перевірте з’єднання й оновіть список.</string>
+    <string name="easy_diffusion_models_empty">Установіть модель SD1.5 на сервері, оновіть список і виберіть її.</string>
+    <string name="easy_diffusion_refresh_models">Оновити моделі</string>
+    <string name="easy_diffusion_failure">Easy Diffusion не вдалося виконати запит. Перевірте сервер, з’єднання й вибрану модель, потім повторіть спробу.</string>
+    <string name="easy_diffusion_timeout">Час очікування Easy Diffusion минув. Перевірте сервер і тайм-аут, потім повторіть спробу. Якщо надсилання не підтверджене, результат на сервері невідомий.</string>
+    <string name="easy_diffusion_submission_unknown">Сервер Easy Diffusion не підтвердив надсилання. Результат виконання невідомий. Перевірте сервер перед повторною спробою.</string>
 </resources>

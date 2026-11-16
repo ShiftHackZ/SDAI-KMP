@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.screen.setup.form.local
 
+import com.shifthackz.aisdv1.presentation.screen.setup.form.remote.EasyDiffusionForm
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -97,7 +99,13 @@ internal fun ConfigurationStep(
                     processIntent = processIntent,
                 )
 
-                ServerSource.OPEN_AI_COMPATIBLE -> OpenAiCompatibleForm(state, strings, processIntent)
+                ServerSource.EASY_DIFFUSION -> EasyDiffusionForm(state, strings, processIntent)
+                ServerSource.OPEN_AI_COMPATIBLE -> OpenAiCompatibleForm(
+                    state,
+                    strings,
+                    processIntent
+                )
+
                 ServerSource.OPEN_AI_OAUTH -> OpenAiOAuthForm(state)
 
                 ServerSource.OPEN_AI -> OpenAiForm(
@@ -129,7 +137,7 @@ internal fun ConfigurationStep(
                 ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
                 ServerSource.LOCAL_APPLE_CORE_ML,
                 ServerSource.LOCAL_APPLE_BONSAI,
-                -> LocalGenerationForm(
+                    -> LocalGenerationForm(
                     state = state,
                     strings = strings,
                     processIntent = processIntent,
@@ -140,6 +148,12 @@ internal fun ConfigurationStep(
 }
 
 @Composable
+
+/** Displays downloaded/custom model selection and provider-specific local runtime controls.
+ * @param state Current provider setup fields, catalogs and validation feedback.
+ * @param strings Localized strings supplied by the setup composition root.
+ * @param processIntent Routes setup interactions to the owning view model.
+ * @author Dmitriy Moroz */
 internal fun LocalGenerationForm(
     state: ServerSetupState,
     strings: ServerSetupStrings,
@@ -196,6 +210,12 @@ private val ServerSetupState.visibleLocalModels: List<ServerSetupState.LocalMode
     }
 
 @Composable
+
+/** Displays the active local provider’s custom model path and validation feedback.
+ * @param state Current provider setup fields, catalogs and validation feedback.
+ * @param strings Localized strings supplied by the setup composition root.
+ * @param processIntent Routes setup interactions to the owning view model.
+ * @author Dmitriy Moroz */
 internal fun LocalCustomModelPathForm(
     state: ServerSetupState,
     strings: ServerSetupStrings,
@@ -240,7 +260,11 @@ internal fun LocalCustomModelPathForm(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        processIntent(ServerSetupIntent.SelectLocalModelPath(LOCAL_DIFFUSION_CUSTOM_PATH))
+                        processIntent(
+                            ServerSetupIntent.SelectLocalModelPath(
+                                LOCAL_DIFFUSION_CUSTOM_PATH
+                            )
+                        )
                     },
                 ) {
                     Icon(

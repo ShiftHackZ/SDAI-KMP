@@ -1,187 +1,221 @@
 package com.shifthackz.aisdv1.domain.entity
 
 /**
- * Carries `ImageToImagePayload` data through the SDAI domain layer.
+ * Immutable superset of image-generation inputs; providers consume only supported controls and queued work retains its captured source revision.
  *
+ * @param sourceSnapshot Provider captured at submission; null preserves legacy queued-work routing.
+ * @param providerSelectionRevision Durable provider/connection revision used to reject stale queued work.
+ * @param base64Image Encoded source image bytes for image-to-image generation.
+ * @param base64MaskImage Encoded inpainting mask; empty for providers without inpainting.
+ * @param denoisingStrength Image-to-image denoising strength in the range zero through one.
+ * @param prompt Positive generation prompt, preserved verbatim.
+ * @param negativePrompt Negative generation prompt; unsupported providers omit it.
+ * @param samplingSteps Requested inference step count.
+ * @param cfgScale Requested classifier-free guidance scale.
+ * @param width Requested output width in pixels.
+ * @param height Requested output height in pixels.
+ * @param restoreFaces Whether a supporting provider applies face restoration.
+ * @param seed Decimal seed or the normal blank/-1 random sentinel.
+ * @param subSeed Variation seed for supporting providers only.
+ * @param subSeedStrength Variation seed blend strength for supporting providers.
+ * @param sampler Provider-specific sampler identifier.
+ * @param scheduler Provider-specific scheduling strategy; AUTOMATIC preserves normal selection.
+ * @param nsfw Provider-specific safety-filter preference.
+ * @param batchCount Number of requested images; providers may execute the batch sequentially.
+ * @param inPaintingMaskInvert Provider-specific mask inversion setting.
+ * @param inPaintFullResPadding Pixel padding around an inpainting crop.
+ * @param inPaintingFill Provider-specific masked-region fill strategy.
+ * @param inPaintFullRes Whether a supporting provider inpaints using a full-resolution crop.
+ * @param maskBlur Inpainting mask blur radius in pixels.
+ * @param stabilityAiClipGuidance Optional Stability AI CLIP guidance preset.
+ * @param stabilityAiStylePreset Optional Stability AI style preset.
+ * @param aDetailer AUTOMATIC1111 ADetailer extension configuration.
+ * @param falAiModel Selected Fal.ai image-generation endpoint.
+ * @param falAiImageSize Fal.ai output-size preset.
+ * @param falAiAcceleration Fal.ai acceleration preset.
+ * @param falAiSyncMode Whether a supporting Fal.ai endpoint requests synchronous output.
+ * @param arliAiModel Selected ArliAI checkpoint identifier.
  * @author Dmitriy Moroz
  */
 data class ImageToImagePayload(
+    val sourceSnapshot: ServerSource? = null,
+    val providerSelectionRevision: Long? = null,
     /**
-     * Exposes the `base64Image` value used by the SDAI domain layer.
+     * Encoded source image bytes for image-to-image generation.
      *
      * @author Dmitriy Moroz
      */
     val base64Image: String,
     /**
-     * Exposes the `base64MaskImage` value used by the SDAI domain layer.
+     * Encoded inpainting mask; empty for providers without inpainting.
      *
      * @author Dmitriy Moroz
      */
     val base64MaskImage: String,
     /**
-     * Exposes the `denoisingStrength` value used by the SDAI domain layer.
+     * Image-to-image denoising strength in the range zero through one.
      *
      * @author Dmitriy Moroz
      */
     val denoisingStrength: Float,
     /**
-     * Exposes the `prompt` value used by the SDAI domain layer.
+     * Positive generation prompt, preserved verbatim.
      *
      * @author Dmitriy Moroz
      */
     val prompt: String,
     /**
-     * Exposes the `negativePrompt` value used by the SDAI domain layer.
+     * Negative generation prompt; unsupported providers omit it.
      *
      * @author Dmitriy Moroz
      */
     val negativePrompt: String,
     /**
-     * Exposes the `samplingSteps` value used by the SDAI domain layer.
+     * Requested inference step count.
      *
      * @author Dmitriy Moroz
      */
     val samplingSteps: Int,
     /**
-     * Exposes the `cfgScale` value used by the SDAI domain layer.
+     * Requested classifier-free guidance scale.
      *
      * @author Dmitriy Moroz
      */
     val cfgScale: Float,
     /**
-     * Exposes the `width` value used by the SDAI domain layer.
+     * Requested output width in pixels.
      *
      * @author Dmitriy Moroz
      */
     val width: Int,
     /**
-     * Exposes the `height` value used by the SDAI domain layer.
+     * Requested output height in pixels.
      *
      * @author Dmitriy Moroz
      */
     val height: Int,
     /**
-     * Exposes the `restoreFaces` value used by the SDAI domain layer.
+     * Whether a supporting provider applies face restoration.
      *
      * @author Dmitriy Moroz
      */
     val restoreFaces: Boolean,
     /**
-     * Exposes the `seed` value used by the SDAI domain layer.
+     * Decimal seed or the normal blank/-1 random sentinel.
      *
      * @author Dmitriy Moroz
      */
     val seed: String,
     /**
-     * Exposes the `subSeed` value used by the SDAI domain layer.
+     * Variation seed for supporting providers only.
      *
      * @author Dmitriy Moroz
      */
     val subSeed: String,
     /**
-     * Exposes the `subSeedStrength` value used by the SDAI domain layer.
+     * Variation seed blend strength for supporting providers.
      *
      * @author Dmitriy Moroz
      */
     val subSeedStrength: Float,
     /**
-     * Exposes the `sampler` value used by the SDAI domain layer.
+     * Provider-specific sampler identifier.
      *
      * @author Dmitriy Moroz
      */
     val sampler: String,
     /**
-     * Exposes the `scheduler` value used by the SDAI domain layer.
+     * Provider-specific scheduling strategy; AUTOMATIC preserves normal selection.
      *
      * @author Dmitriy Moroz
      */
     val scheduler: Scheduler = Scheduler.AUTOMATIC,
     /**
-     * Exposes the `nsfw` value used by the SDAI domain layer.
+     * Provider-specific safety-filter preference.
      *
      * @author Dmitriy Moroz
      */
     val nsfw: Boolean,
     /**
-     * Exposes the `batchCount` value used by the SDAI domain layer.
+     * Number of requested images; providers may execute the batch sequentially.
      *
      * @author Dmitriy Moroz
      */
     val batchCount: Int,
     /**
-     * Exposes the `inPaintingMaskInvert` value used by the SDAI domain layer.
+     * Provider-specific mask inversion setting.
      *
      * @author Dmitriy Moroz
      */
     val inPaintingMaskInvert: Int,
     /**
-     * Exposes the `inPaintFullResPadding` value used by the SDAI domain layer.
+     * Pixel padding around an inpainting crop.
      *
      * @author Dmitriy Moroz
      */
     val inPaintFullResPadding: Int,
     /**
-     * Exposes the `inPaintingFill` value used by the SDAI domain layer.
+     * Provider-specific masked-region fill strategy.
      *
      * @author Dmitriy Moroz
      */
     val inPaintingFill: Int,
     /**
-     * Exposes the `inPaintFullRes` value used by the SDAI domain layer.
+     * Whether a supporting provider inpaints using a full-resolution crop.
      *
      * @author Dmitriy Moroz
      */
     val inPaintFullRes: Boolean,
     /**
-     * Exposes the `maskBlur` value used by the SDAI domain layer.
+     * Inpainting mask blur radius in pixels.
      *
      * @author Dmitriy Moroz
      */
     val maskBlur: Int,
     /**
-     * Exposes the `stabilityAiClipGuidance` value used by the SDAI domain layer.
+     * Optional Stability AI CLIP guidance preset.
      *
      * @author Dmitriy Moroz
      */
     val stabilityAiClipGuidance: StabilityAiClipGuidance?,
     /**
-     * Exposes the `stabilityAiStylePreset` value used by the SDAI domain layer.
+     * Optional Stability AI style preset.
      *
      * @author Dmitriy Moroz
      */
     val stabilityAiStylePreset: StabilityAiStylePreset?,
     /**
-     * Exposes the `aDetailer` value used by the SDAI domain layer.
+     * AUTOMATIC1111 ADetailer extension configuration.
      *
      * @author Dmitriy Moroz
      */
     val aDetailer: ADetailerConfig = ADetailerConfig.DISABLED,
     /**
-     * Exposes the `falAiModel` value used by the SDAI domain layer.
+     * Selected Fal.ai image-generation endpoint.
      *
      * @author Dmitriy Moroz
      */
     val falAiModel: FalAiModel = FalAiModel.defaultImageToImage,
     /**
-     * Exposes the `falAiImageSize` value used by the SDAI domain layer.
+     * Fal.ai output-size preset.
      *
      * @author Dmitriy Moroz
      */
     val falAiImageSize: FalAiImageSize = FalAiImageSize.default,
     /**
-     * Exposes the `falAiAcceleration` value used by the SDAI domain layer.
+     * Fal.ai acceleration preset.
      *
      * @author Dmitriy Moroz
      */
     val falAiAcceleration: FalAiAcceleration = FalAiAcceleration.default,
     /**
-     * Exposes the `falAiSyncMode` value used by the SDAI domain layer.
+     * Whether a supporting Fal.ai endpoint requests synchronous output.
      *
      * @author Dmitriy Moroz
      */
     val falAiSyncMode: Boolean = false,
     /**
-     * Exposes the `arliAiModel` value used by the SDAI domain layer.
+     * Selected ArliAI checkpoint identifier.
      *
      * @author Dmitriy Moroz
      */

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.di
 
+import com.shifthackz.aisdv1.core.validation.di.easyDiffusionSeedValidatorQualifier
+
 import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
 import com.shifthackz.aisdv1.presentation.modal.download.DownloadDialogViewModel
 import com.shifthackz.aisdv1.presentation.modal.embedding.EmbeddingViewModel
@@ -256,6 +258,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: TextToImageRouter) ->
         TextToImageViewModel(
+            observeEasyDiffusionProgressUseCase = get(),
             nativeGenerationGateway = get(),
             diagnostics = get(),
             openAiOAuthGateway = get(),
@@ -269,7 +272,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             textToImageUseCase = get(),
             saveGenerationResultUseCase = get(),
             saveLastResultToCacheUseCase = get(),
-            interruptGenerationUseCase = get(),
+            interruptSourceGenerationUseCase = get(),
             observeHordeProcessStatusUseCase = get(),
             observeLocalDiffusionProcessStatusUseCase = get(),
             observeStableDiffusionCppProcessStatusUseCase = get(),
@@ -285,6 +288,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             dimensionValidator = get(),
             seedValidator = get(),
             nativeSeedValidator = get(nativeSeedValidatorQualifier),
+            easyDiffusionSeedValidator = get(easyDiffusionSeedValidatorQualifier),
             localGenerationBenchmarkGateProvider = { get() },
             imageSaver = get(),
             imageSharer = get(),
@@ -293,6 +297,7 @@ internal fun Module.registerPresentationViewModelBindings() {
     }
     factory { (router: ImageToImageRouter, platformActions: ImageToImagePlatformActions) ->
         ImageToImageViewModel(
+            observeEasyDiffusionProgressUseCase = get(),
             originalImageBudget = get(),
             diagnostics = get(),
             dispatchersProvider = get(),
@@ -305,7 +310,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             imageToImageUseCase = get(),
             saveGenerationResultUseCase = get(),
             saveLastResultToCacheUseCase = get(),
-            interruptGenerationUseCase = get(),
+            interruptSourceGenerationUseCase = get(),
             observeHordeProcessStatusUseCase = get(),
             observeLocalDiffusionProcessStatusUseCase = get(),
             preferenceManager = get(),
@@ -318,6 +323,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             dimensionValidator = get(),
             seedValidator = get(),
             nativeSeedValidator = get(nativeSeedValidatorQualifier),
+            easyDiffusionSeedValidator = get(easyDiffusionSeedValidatorQualifier),
             localGenerationBenchmarkGateProvider = { get() },
             imageSaver = get(),
             imageSharer = get(),
@@ -398,6 +404,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             connectToBonsaiUseCase = get(),
             connectToOpenAiUseCase = get(),
             connectToOpenAiCompatibleUseCase = get(),
+            connectToEasyDiffusionUseCase = get(),
             openAiOAuthGateway = get(),
             setServerConfigurationUseCase = get(),
             connectToStabilityAiUseCase = get(),
@@ -417,6 +424,11 @@ internal fun Module.registerPresentationViewModelBindings() {
             diagnostics = get(),
             dispatchersProvider = get(),
             fetchAndGetSwarmUiModelsUseCase = get(),
+            fetchEasyDiffusionModelsUseCase = get(),
+            getEasyDiffusionModelsUseCase = get(),
+            captureEasyDiffusionConnectionUseCase = get(),
+            selectEasyDiffusionModelUseCase = get(),
+            providerSelectionGuard = get(),
             observeLocalOnnxModelsUseCase = get(),
             observeLocalCoreMlModelsUseCase = get(),
             observeLocalBonsaiModelsUseCase = get(),

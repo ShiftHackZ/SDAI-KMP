@@ -21,6 +21,7 @@ import io.mockk.mockk
  *
  * @param isImg2Img whether to exercise the image-to-image screen's state and intent path.
  * @param seedValidator real seed validation contract resolved by the test composition root.
+ * @param easyDiffusionSeedValidator Real validator configured for the Easy Diffusion unsigned 32-bit seed range.
  * @param nativeSeedValidator real seed validator configured for native providers by the test composition root.
  * @author Dmitriy Moroz
  */
@@ -28,6 +29,7 @@ internal class GenerationSeedFormFixture(
     private val isImg2Img: Boolean,
     private val seedValidator: SeedValidator,
     private val nativeSeedValidator: SeedValidator,
+    private val easyDiffusionSeedValidator: SeedValidator,
 ) {
     private var textState by mutableStateOf(
         TextToImageState(
@@ -47,7 +49,13 @@ internal class GenerationSeedFormFixture(
     )
     private val textProcessor = TextToImageIntentProcessor(
         router = mockk(),
-        updateState = { textState = it(textState).withSeedValidation(seedValidator, nativeSeedValidator) },
+        updateState = {
+            textState = it(textState).withSeedValidation(
+                seedValidator,
+                nativeSeedValidator,
+                easyDiffusionSeedValidator
+            )
+        },
         generate = mockk(),
         cancelGeneration = mockk(),
         saveImage = mockk(),
@@ -59,7 +67,13 @@ internal class GenerationSeedFormFixture(
     )
     private val imageProcessor = ImageToImageIntentProcessor(
         router = mockk(),
-        updateState = { imageState = it(imageState).withSeedValidation(seedValidator, nativeSeedValidator) },
+        updateState = {
+            imageState = it(imageState).withSeedValidation(
+                seedValidator,
+                nativeSeedValidator,
+                easyDiffusionSeedValidator
+            )
+        },
         pickImage = mockk(),
         pickRandomImage = mockk(),
         generate = mockk(),

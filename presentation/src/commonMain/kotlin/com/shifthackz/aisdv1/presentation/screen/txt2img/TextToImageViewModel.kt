@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.presentation.screen.txt2img
 
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
+import com.shifthackz.aisdv1.presentation.model.toGenerationModal
+
 import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
 import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
@@ -20,7 +23,6 @@ import kotlinx.coroutines.flow.combine
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
-import com.shifthackz.aisdv1.domain.entity.OpenAiOAuthFailure
 import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.presentation.model.localizedDescription
 import com.shifthackz.aisdv1.presentation.model.observeOpenAiOAuthIdentity
@@ -34,7 +36,7 @@ import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.arliai.FetchAndGetArliAiModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.caching.SaveLastResultToCacheUseCase
 import com.shifthackz.aisdv1.domain.usecase.forgemodule.GetForgeModulesUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.InterruptGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
@@ -64,9 +66,39 @@ import kotlinx.coroutines.withContext
  * generation work to the action handler.
  *
  * @param openAiOAuthGateway Observes token-free account revisions captured in submitted OAuth work.
+ * @param easyDiffusionSeedValidator Validates Easy Diffusion seeds against its unsigned 32-bit maximum.
  * @param nativeSeedValidator Validates native provider seeds using their full integer precision.
  * @param seedValidator Validates edited, restored and provider-switched seeds before state publication.
  * @param providerSelectionGuard Serializes final UI publication with provider replacement.
+ * @param observeEasyDiffusionProgressUseCase Shared hot queued/sampling progress, reset when its owning operation finishes.
+ * @param dispatchersProvider Application dispatchers for background I/O and immediate UI state updates.
+ * @param getConfigurationUseCase Reads every provider’s independent saved settings and the selected source revision.
+ * @param getStableDiffusionSamplersUseCase Loads the cached AUTOMATIC1111 sampler catalog used to reconcile form selection.
+ * @param getForgeModulesUseCase Reads available Forge modules for the selected AUTOMATIC1111 endpoint.
+ * @param fetchAndGetArliAiModelsUseCase Discovers ArliAI checkpoint identifiers for its provider-specific model field.
+ * @param isADetailerAvailableUseCase Checks extension availability before exposing ADetailer controls.
+ * @param textToImageUseCase Dispatches immutable text-generation inputs through the selected provider.
+ * @param saveGenerationResultUseCase Persists newly generated results lacking a durable gallery identity.
+ * @param saveLastResultToCacheUseCase Caches selected output for normal preview, reporting and sharing workflows.
+ * @param interruptSourceGenerationUseCase Interrupts only the captured legacy provider after its foreground job is cancelled.
+ * @param observeHordeProcessStatusUseCase Observes remote AI Horde queue position and wait estimates.
+ * @param observeLocalDiffusionProcessStatusUseCase Observes legacy ONNX inference progress.
+ * @param observeStableDiffusionCppProcessStatusUseCase Observes stable-diffusion.cpp inference progress.
+ * @param observeCoreMlProcessStatusUseCase Observes Core ML inference progress.
+ * @param observeBonsaiProcessStatusUseCase Observes Bonsai inference progress.
+ * @param preferenceManager Current provider selection and independent generation preferences.
+ * @param backgroundTaskManager Schedules captured requests through the platform background-generation workflow.
+ * @param backgroundWorkObserver Observes active background work and prevents overlapping foreground requests.
+ * @param wakeLockInterActor Acquires and releases the foreground generation wake lock.
+ * @param platformServices Reports platform capabilities and provides generation/export platform actions.
+ * @param buildInfoProvider Supplies platform/build-flavor information for supported controls and reporting.
+ * @param generationFormUpdateEvent Transfers history/metadata inputs to the currently active generation form.
+ * @param dimensionValidator Validates output dimensions before generation.
+ * @param localGenerationBenchmarkGateProvider Obtains the injected benchmark recommendation gate when local generation needs admission.
+ * @param imageSaver Exports encoded output through the normal platform media-store workflow.
+ * @param imageSharer Shares encoded output through the normal platform share workflow.
+ * @param router Navigation destination owner after configuration loading.
+ * @param onError Reports loading failures through the application error sink.
  * @author Dmitriy Moroz
  * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  * @param nativeGenerationGateway Engine-specific progress/stages for the captured generation modal.
@@ -82,7 +114,8 @@ class TextToImageViewModel(
     private val textToImageUseCase: TextToImageUseCase,
     private val saveGenerationResultUseCase: SaveGenerationResultUseCase,
     private val saveLastResultToCacheUseCase: SaveLastResultToCacheUseCase,
-    private val interruptGenerationUseCase: InterruptGenerationUseCase,
+    private val interruptSourceGenerationUseCase: InterruptSourceGenerationUseCase,
+    private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val nativeGenerationGateway: NativeGenerationGateway,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
@@ -99,6 +132,7 @@ class TextToImageViewModel(
     private val dimensionValidator: DimensionValidator,
     private val seedValidator: SeedValidator,
     private val nativeSeedValidator: SeedValidator,
+    private val easyDiffusionSeedValidator: SeedValidator,
     private val localGenerationBenchmarkGateProvider: () -> LocalGenerationBenchmarkGate,
     private val imageSaver: ImageSaver,
     private val imageSharer: ImageSharer,
@@ -127,7 +161,13 @@ class TextToImageViewModel(
      * @author Dmitriy Moroz
      */
     private fun updateFormState(mutation: (TextToImageState) -> TextToImageState) {
-        updateState { mutation(it).withSeedValidation(seedValidator, nativeSeedValidator) }
+        updateState {
+            mutation(it).withSeedValidation(
+                seedValidator,
+                nativeSeedValidator,
+                easyDiffusionSeedValidator
+            )
+        }
     }
 
     /**
@@ -137,7 +177,13 @@ class TextToImageViewModel(
      * @author Dmitriy Moroz
      */
     private fun emitFormState(state: TextToImageState) {
-        emitState(state.withSeedValidation(seedValidator, nativeSeedValidator))
+        emitState(
+            state.withSeedValidation(
+                seedValidator,
+                nativeSeedValidator,
+                easyDiffusionSeedValidator
+            )
+        )
     }
 
     private var stableDiffusionSamplers: List<String>? = null
@@ -191,7 +237,7 @@ class TextToImageViewModel(
         textToImageUseCase = textToImageUseCase,
         saveGenerationResultUseCase = saveGenerationResultUseCase,
         saveLastResultToCacheUseCase = saveLastResultToCacheUseCase,
-        interruptGenerationUseCase = interruptGenerationUseCase,
+        interruptSourceGenerationUseCase = interruptSourceGenerationUseCase,
         preferenceManager = preferenceManager,
         backgroundTaskManager = backgroundTaskManager,
         backgroundWorkObserver = backgroundWorkObserver,
@@ -311,6 +357,9 @@ class TextToImageViewModel(
         }
     }
 
+    /** Consumes incoming history/metadata requests and applies them to this screen’s shared form state.
+     * @author Dmitriy Moroz */
+
     private fun observeGenerationFormUpdate() {
         launch(dispatchersProvider.immediate) {
             generationFormUpdateEvent.observeTxt2ImgForm().collect { payload ->
@@ -321,13 +370,30 @@ class TextToImageViewModel(
         }
     }
 
+    /** Applies a queued history/metadata request once configuration is available, then clears the pending transfer.
+     * @author Dmitriy Moroz */
+
     private fun consumePendingGenerationFormUpdate() {
         generationFormUpdateEvent.consumeTxt2ImgForm()?.let { payload ->
             applyGenerationResult(payload.ai)
         }
     }
 
+    /** Observes provider/native progress and updates only the matching active generation modal.
+     * @author Dmitriy Moroz */
+
     private fun observeGenerationProgress() {
+        launch(dispatchersProvider.immediate) {
+            observeEasyDiffusionProgressUseCase().collect { progress ->
+                updateFormState { state ->
+                    if (state.mode == ServerSource.EASY_DIFFUSION && progress.isRunning &&
+                        (state.screenModal is GenerationModal.Communicating || state.screenModal is GenerationModal.Generating)
+                    ) {
+                        state.copy(screenModal = progress.toGenerationModal())
+                    } else state
+                }
+            }
+        }
         NativeGenerationEngine.entries.forEach { engine ->
             launch(dispatchersProvider.immediate) {
                 combine(
@@ -383,6 +449,10 @@ class TextToImageViewModel(
         }
     }
 
+    /** Updates sampling progress only while a local generation modal is active.
+     * @param status Native sampling step and total for the active local operation.
+     * @author Dmitriy Moroz */
+
     private fun updateLocalGenerationStatus(status: LocalDiffusionStatus) {
         updateFormState { state ->
             val modal = state.screenModal
@@ -393,6 +463,9 @@ class TextToImageViewModel(
             }
         }
     }
+
+    /** Loads saved provider/form controls and starts provider-specific model/extension discovery.
+     * @author Dmitriy Moroz */
 
     private fun loadConfiguration() {
         updateFormState { it.copy(loadingConfiguration = true, error = null) }
@@ -428,6 +501,9 @@ class TextToImageViewModel(
                 }
         }
     }
+
+    /** Reconciles persisted provider/control changes with current form selection and visible validation.
+     * @author Dmitriy Moroz */
 
     private fun observeSettings() {
         launch(dispatchersProvider.immediate) {
@@ -542,6 +618,9 @@ class TextToImageViewModel(
         }
     }
 
+    /** Reads Forge module choices and clears unavailable selection when the catalog cannot be loaded.
+     * @author Dmitriy Moroz */
+
     private fun loadForgeModules() {
         launch(dispatchersProvider.io) {
             runCatching { getForgeModulesUseCase() }
@@ -577,6 +656,10 @@ class TextToImageViewModel(
         }
     }
 
+    /** Updates ADetailer availability for the active AUTOMATIC1111 endpoint, optionally bypassing its cached result.
+     * @param force Whether to refresh extension availability even when a cached value exists.
+     * @author Dmitriy Moroz */
+
     private fun loadADetailerAvailability(force: Boolean = false) {
         if (!force && aDetailerAvailable != null) return
         updateFormState { it.copy(aDetailerRefreshing = true) }
@@ -609,6 +692,10 @@ class TextToImageViewModel(
         }
     }
 
+    /** Refreshes ArliAI model choices only when its active configuration differs from the last loaded key.
+     * @param settings Current persisted provider selection and shared form preferences.
+     * @author Dmitriy Moroz */
+
     private fun refreshArliAiModelsIfNeeded(settings: Settings) {
         if (settings.source != ServerSource.ARLI_AI) {
             arliAiModelsKey = null
@@ -630,6 +717,9 @@ class TextToImageViewModel(
         }
         loadArliAiModels()
     }
+
+    /** Loads supported ArliAI model identifiers and reconciles the selected checkpoint with available choices.
+     * @author Dmitriy Moroz */
 
     private fun loadArliAiModels() {
         launch(dispatchersProvider.io) {

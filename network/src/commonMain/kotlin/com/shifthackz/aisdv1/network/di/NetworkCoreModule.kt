@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.network.di
 
+import com.shifthackz.aisdv1.network.api.easydiffusion.EasyDiffusionApi
+import com.shifthackz.aisdv1.network.api.easydiffusion.KtorEasyDiffusionApi
+
 import com.shifthackz.aisdv1.network.api.openaicompatible.OpenAiCompatibleApi
 import com.shifthackz.aisdv1.network.api.openaicompatible.KtorOpenAiCompatibleApi
 import com.shifthackz.aisdv1.network.api.automatic1111.Automatic1111GenerationApi
@@ -31,18 +34,29 @@ import com.shifthackz.aisdv1.network.api.swarmui.KtorSwarmUiModelsApi
 import com.shifthackz.aisdv1.network.api.swarmui.SwarmUiGenerationApi
 import com.shifthackz.aisdv1.network.api.swarmui.SwarmUiModelsApi
 import com.shifthackz.aisdv1.network.client.createConfiguredHttpClient
+import com.shifthackz.aisdv1.network.client.defaultNetworkJson
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
+import kotlinx.serialization.json.Json
 
 /**
- * Exposes the `coreNetworkModule` value used by the SDAI network layer.
+ * Binds typed provider APIs to independently configured clients with current timeout and traffic-accounting policies.
  *
  * @author Dmitriy Moroz
  */
 val coreNetworkModule = module {
+    single<EasyDiffusionApi> {
+        KtorEasyDiffusionApi(
+            client = createConfiguredHttpClient(connectionTimeoutProvider = get()) {
+                followRedirects = false
+            },
+            generationTimeoutProvider = get(),
+            json = Json(defaultNetworkJson) { isLenient = false },
+        )
+    }
     single<SdaiAppApi> {
         KtorSdaiAppApi(
             appBaseUrl = stableDiffusionAppApiUrlOverride() ?: STABLE_DIFFUSION_APP_API_URL,
@@ -53,7 +67,10 @@ val coreNetworkModule = module {
         KtorImageCdnApi(IMAGE_CDN_API_URL)
     }
     single<StabilityAiEnginesApi> {
-        KtorStabilityAiEnginesApi(httpClient = providerHttpClient(false), baseUrl = STABILITY_AI_API_URL)
+        KtorStabilityAiEnginesApi(
+            httpClient = providerHttpClient(false),
+            baseUrl = STABILITY_AI_API_URL
+        )
     }
     single<StabilityAiGenerationApi> {
         KtorStabilityAiGenerationApi(
@@ -97,7 +114,10 @@ val coreNetworkModule = module {
         )
     }
     single<HuggingFaceModelsApi> {
-        KtorHuggingFaceModelsApi(httpClient = providerHttpClient(), apiBaseUrl = HUGGING_FACE_API_URL)
+        KtorHuggingFaceModelsApi(
+            httpClient = providerHttpClient(),
+            apiBaseUrl = HUGGING_FACE_API_URL
+        )
     }
     single<FalAiGenerationApi> {
         KtorFalAiGenerationApi(
@@ -118,13 +138,19 @@ val coreNetworkModule = module {
         KtorSwarmUiModelsApi(httpClient = providerHttpClient())
     }
     single<SwarmUiGenerationApi> {
-        KtorSwarmUiGenerationApi(httpClient = providerHttpClient(), generationTimeoutProvider = get())
+        KtorSwarmUiGenerationApi(
+            httpClient = providerHttpClient(),
+            generationTimeoutProvider = get()
+        )
     }
     single<Automatic1111MetadataApi> {
         KtorAutomatic1111MetadataApi(httpClient = providerHttpClient())
     }
     single<Automatic1111GenerationApi> {
-        KtorAutomatic1111GenerationApi(httpClient = providerHttpClient(), generationTimeoutProvider = get())
+        KtorAutomatic1111GenerationApi(
+            httpClient = providerHttpClient(),
+            generationTimeoutProvider = get()
+        )
     }
 }
 
@@ -141,67 +167,77 @@ private fun Scope.providerHttpClient(installContentNegotiation: Boolean = true):
     )
 
 /**
- * Exposes the `STABLE_DIFFUSION_APP_API_URL` value used by the SDAI network layer.
+ * Public provider/model configuration service root.
  *
  * @author Dmitriy Moroz
  */
 private const val STABLE_DIFFUSION_APP_API_URL = "https://sdai.moroz.cc"
+
 /**
- * Exposes the `STABLE_DIFFUSION_REPORT_API_URL` value used by the SDAI network layer.
+ * Generation report service root.
  *
  * @author Dmitriy Moroz
  */
 private const val STABLE_DIFFUSION_REPORT_API_URL = "https://sdai-report.moroz.cc"
+
 /**
- * Exposes the `IMAGE_CDN_API_URL` value used by the SDAI network layer.
+ * Random-image endpoint used by the existing demo/gallery UI.
  *
  * @author Dmitriy Moroz
  */
 private const val IMAGE_CDN_API_URL = "https://random.imagecdn.app"
+
 /**
- * Exposes the `STABILITY_AI_API_URL` value used by the SDAI network layer.
+ * Official Stability AI API root.
  *
  * @author Dmitriy Moroz
  */
 private const val STABILITY_AI_API_URL = "https://api.stability.ai"
+
 /**
- * Exposes the `OPEN_AI_API_URL` value used by the SDAI network layer.
+ * Official OpenAI API root.
  *
  * @author Dmitriy Moroz
  */
 private const val OPEN_AI_API_URL = "https://api.openai.com"
+
 /**
- * Exposes the `HORDE_AI_API_URL` value used by the SDAI network layer.
+ * AI Horde API root.
  *
  * @author Dmitriy Moroz
  */
 private const val HORDE_AI_API_URL = "https://stablehorde.net"
+
 /**
- * Exposes the `HUGGING_FACE_API_URL` value used by the SDAI network layer.
+ * Hugging Face model service root.
  *
  * @author Dmitriy Moroz
  */
 private const val HUGGING_FACE_API_URL = "https://huggingface.co"
+
 /**
- * Exposes the `HUGGING_FACE_INFERENCE_API_URL` value used by the SDAI network layer.
+ * Hugging Face hosted inference router prefix.
  *
  * @author Dmitriy Moroz
  */
 private const val HUGGING_FACE_INFERENCE_API_URL = "https://router.huggingface.co/hf-inference"
+
 /**
- * Exposes the `FAL_AI_API_URL` value used by the SDAI network layer.
+ * Fal.ai account/model service root.
  *
  * @author Dmitriy Moroz
  */
 private const val FAL_AI_API_URL = "https://api.fal.ai"
+
 /**
- * Exposes the `FAL_AI_QUEUE_API_URL` value used by the SDAI network layer.
+ * Fal.ai queued inference service root.
  *
  * @author Dmitriy Moroz
  */
 private const val FAL_AI_QUEUE_API_URL = "https://queue.fal.run"
+
 /**
- * Exposes the `ARLI_AI_API_URL` value used by the SDAI network layer.
+ * ArliAI hosted generation service root.
  *
  * @author Dmitriy Moroz
  */

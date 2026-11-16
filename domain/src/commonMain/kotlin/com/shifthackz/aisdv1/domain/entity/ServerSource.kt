@@ -7,12 +7,14 @@ import com.shifthackz.aisdv1.core.common.platform.PlatformValue
 /**
  * Provider catalog entry used by setup, onboarding, and settings screens.
  *
- * @property key persisted configuration id; changing it migrates user-selected provider values.
- * @property type broad hosting model used by provider filters.
- * @property readiness user-facing stability marker for the integration.
- * @property version last meaningful implementation update in `yyyy.M.d` format, optionally suffixed with a tag.
- * @property featureTags searchable capability labels shown in provider selection UI.
- * @property allowedInBuilds app flavors where the provider can be selected.
+ * @param key persisted configuration id; changing it migrates user-selected provider values.
+ * @param type broad hosting model used by provider filters.
+ * @param readiness user-facing stability marker for the integration.
+ * @param version last meaningful implementation update in `yyyy.M.d` format, optionally suffixed with a tag.
+ * @param featureTags searchable capability labels shown in provider selection UI.
+ * @param allowedInBuilds App flavors where the provider can be selected.
+ * @param allowedPlatforms Platforms whose provider catalog may expose this integration.
+ * @author Dmitriy Moroz
  */
 enum class ServerSource(
     val key: String,
@@ -59,7 +61,25 @@ enum class ServerSource(
         type = ServerSourceType.SELF_HOSTED,
         readiness = PlatformValue(ServerSourceReadiness.STABLE),
         version = "2026.11.14",
-        featureTags = setOf(FeatureTag.Txt2Img, FeatureTag.OwnServer, FeatureTag.MultipleModels, FeatureTag.Batch),
+        featureTags = setOf(
+            FeatureTag.Txt2Img,
+            FeatureTag.OwnServer,
+            FeatureTag.MultipleModels,
+            FeatureTag.Batch
+        ),
+    ),
+    EASY_DIFFUSION(
+        key = "easy_diffusion",
+        type = ServerSourceType.SELF_HOSTED,
+        readiness = PlatformValue(ServerSourceReadiness.STABLE),
+        version = "2026.10.16",
+        featureTags = setOf(
+            FeatureTag.Txt2Img,
+            FeatureTag.Img2Img,
+            FeatureTag.OwnServer,
+            FeatureTag.MultipleModels,
+            FeatureTag.Batch
+        ),
     ),
     LOCAL_MICROSOFT_ONNX(
         key = "local",
@@ -163,6 +183,7 @@ enum class ServerSource(
             FeatureTag.Batch,
         ),
     ),
+
     /**
      * Direct ChatGPT OAuth image source, persisted as open_ai_oauth independently from API-key providers.
      * Supports text-to-image and sequential batches; account model access is determined by the service.
@@ -213,12 +234,17 @@ enum class ServerSource(
     );
 
     companion object {
+
+        /** Resolves a stable persisted provider key, using AUTOMATIC1111 when the current catalog does not recognize it.
+         * @param value Stable persisted identifier to resolve against the current provider catalog.
+         * @author Dmitriy Moroz */
         fun parse(value: String) = entries.find { it.key == value } ?: AUTOMATIC1111
     }
 }
 
 /**
  * Broad hosting model used by provider filters and onboarding copy.
+ * @author Dmitriy Moroz
  */
 enum class ServerSourceType {
     SELF_HOSTED,
@@ -228,6 +254,7 @@ enum class ServerSourceType {
 
 /**
  * User-facing stability level for a provider integration.
+ * @author Dmitriy Moroz
  */
 enum class ServerSourceReadiness {
     EXPERIMENTAL,

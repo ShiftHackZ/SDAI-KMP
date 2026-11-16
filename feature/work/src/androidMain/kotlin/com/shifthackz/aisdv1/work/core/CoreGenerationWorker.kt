@@ -2,6 +2,8 @@
 
 package com.shifthackz.aisdv1.work.core
 
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
+
 import android.content.Context
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
@@ -18,7 +20,6 @@ import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -38,11 +39,11 @@ import com.shifthackz.aisdv1.core.localization.R as LocalizationR
  * @param workerParameters WorkManager identity and lifecycle parameters.
  * @param pushNotificationManager Publishes foreground and terminal notifications.
  * @param activityIntentProvider Opens the application from notifications.
- * @param preferenceManager Initial source and legacy local runtime preferences.
+ * @param preferenceManager Supplies the initial source for legacy work without a captured provider.
  * @param nativeGateway Observes and cancels isolated native attempts without loading engines.
  * @param backgroundWorkObserver Publishes state only for the current worker owner.
+ * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote Horde queue progress.
- * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy local runtime progress.
  * @param interruptWorkerGenerationUseCase Cancels the captured source for this exact worker.
  * @author Dmitriy Moroz
  */
@@ -51,11 +52,11 @@ internal abstract class CoreGenerationWorker(
     workerParameters: WorkerParameters,
     pushNotificationManager: PushNotificationManager,
     activityIntentProvider: ActivityIntentProvider,
-    private val preferenceManager: PreferenceManager,
+    preferenceManager: PreferenceManager,
     private val nativeGateway: NativeGenerationGateway,
     private val backgroundWorkObserver: BackgroundWorkObserver,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
-    private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
+    private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
 ) : NotificationWorker(
     context = context,
@@ -89,6 +90,9 @@ internal abstract class CoreGenerationWorker(
         backgroundWorkObserver.publishForOwner(id.toString()) { backgroundWorkObserver.postCancelSignal() }
     }
 
+    /** Cancels worker status subscriptions so late progress cannot update completed work.
+     * @author Dmitriy Moroz */
+
     protected fun clearSubscriptions() {
         coroutineScope.coroutineContext.cancelChildren()
     }
@@ -100,6 +104,7 @@ internal abstract class CoreGenerationWorker(
      */
     protected fun listenSourceStatus() {
         when (source) {
+            ServerSource.EASY_DIFFUSION -> listenEasyDiffusionStatus()
             ServerSource.HORDE -> listenHordeStatus()
             ServerSource.LOCAL_MICROSOFT_ONNX -> listenNativeStatus(NativeGenerationEngine.ONNX)
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> listenNativeStatus(NativeGenerationEngine.SDCPP)
@@ -108,6 +113,32 @@ internal abstract class CoreGenerationWorker(
             else -> Unit
         }
     }
+
+    /** Publishes only this worker’s current remote progress to observer and foreground notification.
+     * @author Dmitriy Moroz */
+    private fun listenEasyDiffusionStatus() {
+        coroutineScope.launch {
+            observeEasyDiffusionProgressUseCase().collect { status ->
+                if (!status.isRunning || status.ownerId != id.toString()) return@collect
+                val title =
+                    applicationContext.getString(LocalizationR.string.notification_running_title)
+                val subtitle = if (status.totalSteps > 0) applicationContext.getString(
+                    LocalizationR.string.communicating_status_steps,
+                    status.step.toString(),
+                    status.totalSteps.toString()
+                ) else applicationContext.getString(LocalizationR.string.srv_type_easy_diffusion)
+                if (backgroundWorkObserver.publishForOwner(id.toString()) {
+                        backgroundWorkObserver.postStatusMessage(title, subtitle)
+                    }) setForegroundNotification(
+                    title, subtitle, silent = true, canCancel = true,
+                    progress = (status.step to status.totalSteps).takeIf { status.totalSteps > 0 })
+            }
+        }
+    }
+
+    /** Observes only this worker’s native engine ownership and publishes stages or sampling progress.
+     * @param engine Native engine whose worker-owned progress should be observed.
+     * @author Dmitriy Moroz */
 
     private fun listenNativeStatus(engine: NativeGenerationEngine) {
         coroutineScope.launch {
@@ -139,6 +170,10 @@ internal abstract class CoreGenerationWorker(
         }
     }
 
+    /** Maps a native lifecycle stage into the localized notification status.
+     * @param stage Native lifecycle stage to localize.
+     * @author Dmitriy Moroz */
+
     private fun stageText(stage: NativeGenerationStage): String = applicationContext.getString(
         when (stage) {
             NativeGenerationStage.PREPARING -> LocalizationR.string.native_generation_stage_preparing
@@ -149,6 +184,9 @@ internal abstract class CoreGenerationWorker(
             NativeGenerationStage.WRITING_RESULT -> LocalizationR.string.native_generation_stage_writing_result
         }
     )
+
+    /** Publishes AI Horde queue position and wait estimates to active work status and notification.
+     * @author Dmitriy Moroz */
 
     protected fun listenHordeStatus() {
         coroutineScope.launch {
@@ -187,34 +225,8 @@ internal abstract class CoreGenerationWorker(
         }
     }
 
-    protected fun listenLocalDiffusionStatus() {
-        coroutineScope.launch {
-            observeLocalDiffusionProcessStatusUseCase()
-                .catch { t -> errorLog(t) }
-                .collect { status ->
-                    val title =
-                        applicationContext.getString(LocalizationR.string.notification_running_title)
-                    val subTitle = applicationContext.getString(
-                        LocalizationR.string.communicating_status_steps,
-                        status.current.toString(),
-                        status.total.toString()
-                    )
-                    backgroundWorkObserver.publishForOwner(id.toString()) {
-                        backgroundWorkObserver.postStatusMessage(
-                            title,
-                            subTitle
-                        )
-                    }
-                    setForegroundNotification(
-                        title = title,
-                        body = subTitle,
-                        silent = true,
-                        progress = status.current to status.total,
-                        canCancel = preferenceManager.localOnnxAllowCancel,
-                    )
-                }
-        }
-    }
+    /** Posts the start notification and initial running status only while this worker owns background state.
+     * @author Dmitriy Moroz */
 
     protected fun handleStart() {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
@@ -254,6 +266,10 @@ internal abstract class CoreGenerationWorker(
         )
     }
 
+    /** Publishes generated results and replaces the running notification with a completion notification.
+     * @param result Successfully generated application results.
+     * @author Dmitriy Moroz */
+
     protected fun handleSuccess(result: List<AiGenerationResult>) {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
         backgroundWorkObserver.refreshStatus()
@@ -267,6 +283,10 @@ internal abstract class CoreGenerationWorker(
             applicationContext.getString(LocalizationR.string.notification_finish_sub_title)
         showGenericNotification(title, subTitle)
     }
+
+    /** Publishes the generation failure and replaces the running notification with its error state.
+     * @param t Underlying generation or download failure.
+     * @author Dmitriy Moroz */
 
     protected fun handleError(t: Throwable) {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return

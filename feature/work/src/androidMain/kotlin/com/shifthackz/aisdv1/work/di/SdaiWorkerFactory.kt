@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.work.di
 
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
+
 import android.content.Context
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanup
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadStore
@@ -8,14 +10,12 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import com.shifthackz.aisdv1.core.common.appbuild.ActivityIntentProvider
-import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.notification.PushNotificationManager
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase
 import com.shifthackz.aisdv1.work.task.ImageToImageTask
 import com.shifthackz.aisdv1.work.task.TextToImageTask
@@ -32,10 +32,9 @@ import com.shifthackz.aisdv1.work.task.TextToImageTask
  * @param preferenceManager Supplies legacy source and cancellation settings.
  * @param textToImageUseCase Executes captured text-to-image requests.
  * @param imageToImageUseCase Executes existing image-to-image requests.
+ * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
- * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy runtime progress.
  * @param interruptWorkerGenerationUseCase Cancels only work owned by the requested worker.
- * @param fileProviderDescriptor Legacy work file location descriptor.
  * @param activityIntentProvider Creates app navigation intents for notifications.
  * @param payloads Reads immutable work files.
  * @param nativeGateway Shared child-process status and cancellation gateway.
@@ -49,9 +48,8 @@ class SdaiWorkerFactory(
     private val textToImageUseCase: TextToImageUseCase,
     private val imageToImageUseCase: ImageToImageUseCase,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
-    private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
+    private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
-    private val fileProviderDescriptor: FileProviderDescriptor,
     private val activityIntentProvider: ActivityIntentProvider,
     private val payloads: GenerationWorkPayloadStore,
     private val nativeGateway: NativeGenerationGateway,
@@ -84,9 +82,8 @@ class SdaiWorkerFactory(
                 preferenceManager = preferenceManager,
                 textToImageUseCase = textToImageUseCase,
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
-                observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
+                observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
                 interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
-                fileProviderDescriptor = fileProviderDescriptor,
             )
 
             ImageToImageTask::class.java.name -> ImageToImageTask(
@@ -101,9 +98,8 @@ class SdaiWorkerFactory(
                 preferenceManager = preferenceManager,
                 imageToImageUseCase = imageToImageUseCase,
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
-                observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
+                observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
                 interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
-                fileProviderDescriptor = fileProviderDescriptor,
             )
 
             else -> null

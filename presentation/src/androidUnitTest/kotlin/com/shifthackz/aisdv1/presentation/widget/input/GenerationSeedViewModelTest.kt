@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.widget.input
 
 import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
+import com.shifthackz.aisdv1.core.validation.di.easyDiffusionSeedValidatorQualifier
 import com.shifthackz.aisdv1.core.validation.di.validatorsModule
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ServerSource
@@ -53,6 +54,9 @@ class GenerationSeedViewModelTest(private val type: AiGenerationResult.Type) {
             getSamplers = getSamplers,
             seedValidator = dependencyGraph.koin.get(),
             nativeSeedValidator = dependencyGraph.koin.get(nativeSeedValidatorQualifier),
+            easyDiffusionSeedValidator = dependencyGraph.koin.get(
+                easyDiffusionSeedValidatorQualifier
+            ),
         )
     }
 
@@ -88,7 +92,8 @@ class GenerationSeedViewModelTest(private val type: AiGenerationResult.Type) {
         assertNotNull(fixture.state.seedValidationError)
         assertNotNull(fixture.state.subSeedValidationError)
 
-        fixture.settings.value = fixture.settings.value.copy(source = ServerSource.LOCAL_MICROSOFT_ONNX)
+        fixture.settings.value =
+            fixture.settings.value.copy(source = ServerSource.LOCAL_MICROSOFT_ONNX)
         advanceUntilIdle()
         assertNull(fixture.state.seedValidationError)
         assertNull(fixture.state.subSeedValidationError)
@@ -98,7 +103,8 @@ class GenerationSeedViewModelTest(private val type: AiGenerationResult.Type) {
         assertNotNull(fixture.state.seedValidationError)
         assertNotNull(fixture.state.subSeedValidationError)
 
-        fixture.settings.value = fixture.settings.value.copy(source = ServerSource.OPEN_AI_COMPATIBLE)
+        fixture.settings.value =
+            fixture.settings.value.copy(source = ServerSource.OPEN_AI_COMPATIBLE)
         advanceUntilIdle()
         assertNull(fixture.state.seedValidationError)
         assertNull(fixture.state.subSeedValidationError)

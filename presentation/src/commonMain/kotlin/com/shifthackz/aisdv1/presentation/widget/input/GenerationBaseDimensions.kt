@@ -60,6 +60,7 @@ internal fun GenerationBaseDimensions(
 
             ServerSource.AUTOMATIC1111,
             ServerSource.SWARM_UI,
+            ServerSource.EASY_DIFFUSION,
             ServerSource.HUGGING_FACE,
             ServerSource.ARLI_AI,
                 -> {

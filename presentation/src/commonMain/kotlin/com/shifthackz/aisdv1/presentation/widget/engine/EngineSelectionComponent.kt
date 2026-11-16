@@ -30,7 +30,7 @@ import com.shifthackz.aisdv1.presentation.di.initKoin
 import com.shifthackz.aisdv1.presentation.theme.textFieldColors
 
 /**
- * Renders the `EngineSelectionComponent` UI for the SDAI presentation layer.
+ * Binds the shared model picker to its injected view model and renders provider-specific choices.
  *
  * @param modifier Compose modifier applied to the rendered UI.
  * @author Dmitriy Moroz
@@ -55,10 +55,10 @@ fun EngineSelectionComponent(
 }
 
 /**
- * Renders the `EngineSelectionContent` UI for the SDAI presentation layer.
+ * Displays checkpoint choices and selection/loading state for the active provider.
  *
- * @param state state rendered or processed by the component.
- * @param processIntent process intent value consumed by the API.
+ * @param state Provider-specific choices, selected identifier and discovery status.
+ * @param processIntent Delivers model selection and explicit refresh actions to the owning view model.
  * @param modifier Compose modifier applied to the rendered UI.
  * @author Dmitriy Moroz
  */
@@ -77,6 +77,8 @@ fun EngineSelectionContent(
             items = state.sdModels,
             onItemSelected = { processIntent(EngineSelectionIntent(it)) },
         )
+
+        ServerSource.EASY_DIFFUSION -> EasyDiffusionEngineContent(state, processIntent, modifier)
 
         ServerSource.SWARM_UI -> DropdownTextField(
             label = Localization.string("hint_sd_model"),
@@ -152,24 +154,24 @@ fun EngineSelectionContent(
         ServerSource.OPEN_AI_OAUTH,
         ServerSource.FAL_AI,
         ServerSource.ARLI_AI,
-        -> Unit
+            -> Unit
     }
 }
 
 /**
- * Renders the `DropdownTextField` UI for the SDAI presentation layer.
+ * Displays a read-only checkpoint selector with a loading placeholder and closes its menu after a choice.
  *
  * @param modifier Compose modifier applied to the rendered UI.
- * @param loading loading value consumed by the API.
- * @param label label value consumed by the API.
- * @param value value value consumed by the API.
- * @param items items value consumed by the API.
- * @param onItemSelected callback invoked by the component.
- * @param displayDelegate display delegate value consumed by the API.
+ * @param loading Whether discovery is in progress and the field should display a shimmer placeholder.
+ * @param label Localized visible label for the provider’s model or engine.
+ * @param value Currently selected item, or null when no available item is selected.
+ * @param items Available choices supplied by the provider-specific catalog.
+ * @param onItemSelected Receives a changed item after the menu closes; persistence belongs to the caller.
+ * @param displayDelegate Maps each item into the visible field and menu label.
  * @author Dmitriy Moroz
  */
 @Composable
-private fun <T : Any> DropdownTextField(
+internal fun <T : Any> DropdownTextField(
     modifier: Modifier = Modifier,
     loading: Boolean = false,
     label: String,

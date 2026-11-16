@@ -710,4 +710,15 @@
     <string name="native_generation_stage_decoding">Decoding image…</string>
     <string name="native_generation_stage_running">Running image engine…</string>
     <string name="native_generation_stage_writing_result">Saving result…</string>
+
+    <string name="srv_type_easy_diffusion">Easy Diffusion</string>
+    <string name="easy_diffusion_subtitle">Generate on your own Easy Diffusion server.</string>
+    <string name="easy_diffusion_setup_hint">Enable network sharing in Easy Diffusion settings, save and restart. Enter the computer’s LAN address, for example http://192.168.1.10:9000. This connection uses no password.</string>
+    <string name="easy_diffusion_sampler">Sampler: DDIM (fixed)</string>
+    <string name="easy_diffusion_models_failed">Could not load checkpoints. Check the connection and refresh.</string>
+    <string name="easy_diffusion_models_empty">Install an SD1.5 checkpoint on the server, refresh and select it.</string>
+    <string name="easy_diffusion_refresh_models">Refresh checkpoints</string>
+    <string name="easy_diffusion_failure">Easy Diffusion could not complete the request. Check the server, connection and selected checkpoint, then retry.</string>
+    <string name="easy_diffusion_timeout">Easy Diffusion timed out. Check the server and timeout setting, then retry. If submission was not acknowledged, remote completion is unknown.</string>
+    <string name="easy_diffusion_submission_unknown">The Easy Diffusion submission was not acknowledged. Remote completion is unknown. Check the server before retrying.</string>
 </resources>

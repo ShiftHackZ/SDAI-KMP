@@ -17,24 +17,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 /**
- * Implements `PreferenceManager` behavior in the SDAI data layer.
+ * Reads shared settings from the platform key/value store and invalidates hot settings snapshots after writes.
  *
+ * @param keyValueStore Platform preference store supporting complete durable configuration batches.
  * @author Dmitriy Moroz
  */
 internal class PreferenceManagerImpl(
-    /**
-     * Exposes the `keyValueStore` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
+
     private val keyValueStore: KeyValueStore,
 ) : PreferenceManager {
 
-    /**
-     * Exposes the `preferencesChangedState` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
+
     private val preferencesChangedState = MutableStateFlow(Any())
 
     /**
@@ -80,7 +73,10 @@ internal class PreferenceManagerImpl(
      */
     override var connectionTimeout: NetworkTimeout
         get() = NetworkTimeout.fromSeconds(
-            keyValueStore.getInt(KEY_CONNECTION_TIMEOUT_SECONDS, NetworkTimeout.TWO_MINUTES.seconds),
+            keyValueStore.getInt(
+                KEY_CONNECTION_TIMEOUT_SECONDS,
+                NetworkTimeout.TWO_MINUTES.seconds
+            ),
         )
         set(value) = putInt(KEY_CONNECTION_TIMEOUT_SECONDS, value.seconds)
 
@@ -96,7 +92,7 @@ internal class PreferenceManagerImpl(
         set(value) = putInt(KEY_GENERATION_REQUEST_TIMEOUT_SECONDS, value.seconds)
 
     /**
-     * Exposes the `automatic1111ServerUrl` value used by the SDAI data layer.
+     * Persisted AUTOMATIC1111 server root, independent from other providers.
      *
      * @author Dmitriy Moroz
      */
@@ -105,7 +101,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_SERVER_URL, value.fixUrlSlashes())
 
     /**
-     * Exposes the `swarmUiServerUrl` value used by the SDAI data layer.
+     * Persisted SwarmUI server root; normalized without changing the protocol delimiter.
      *
      * @author Dmitriy Moroz
      */
@@ -113,8 +109,28 @@ internal class PreferenceManagerImpl(
         get() = keyValueStore.getString(KEY_SWARM_SERVER_URL).fixUrlSlashes()
         set(value) = putString(KEY_SWARM_SERVER_URL, value.fixUrlSlashes())
 
+    /** HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+     * @author Dmitriy Moroz
+     */
+    override var easyDiffusionUrl: String
+        get() = keyValueStore.getString(KEY_EASY_DIFFUSION_URL, "")
+        set(value) {
+            keyValueStore.writeEasyDiffusionSetting(KEY_EASY_DIFFUSION_URL, value)
+            onPreferencesChanged()
+        }
+
+    /** Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+     * @author Dmitriy Moroz
+     */
+    override var easyDiffusionModel: String
+        get() = keyValueStore.getString(KEY_EASY_DIFFUSION_MODEL, "")
+        set(value) {
+            keyValueStore.writeEasyDiffusionSetting(KEY_EASY_DIFFUSION_MODEL, value)
+            onPreferencesChanged()
+        }
+
     /**
-     * Exposes the `swarmUiModel` value used by the SDAI data layer.
+     * Exact selected SwarmUI checkpoint name.
      *
      * @author Dmitriy Moroz
      */
@@ -123,7 +139,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_SWARM_MODEL, value)
 
     /**
-     * Exposes the `demoMode` value used by the SDAI data layer.
+     * Whether AUTOMATIC1111 uses the configured demonstration endpoint.
      *
      * @author Dmitriy Moroz
      */
@@ -132,7 +148,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_DEMO_MODE, value)
 
     /**
-     * Exposes the `developerMode` value used by the SDAI data layer.
+     * Whether developer tools are visible in Settings.
      *
      * @author Dmitriy Moroz
      */
@@ -141,16 +157,19 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_DEVELOPER_MODE, value)
 
     /**
-     * Exposes the `localMediaPipeCustomModelPath` value used by the SDAI data layer.
+     * User-selected custom MediaPipe model filesystem path.
      *
      * @author Dmitriy Moroz
      */
     override var localMediaPipeCustomModelPath: String
-        get() = keyValueStore.getString(KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH, LOCAL_DIFFUSION_CUSTOM_PATH)
+        get() = keyValueStore.getString(
+            KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH,
+            LOCAL_DIFFUSION_CUSTOM_PATH
+        )
         set(value) = keyValueStore.putString(KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH, value)
 
     /**
-     * Exposes the `localCoreMlCustomModelPath` value used by the SDAI data layer.
+     * User-selected custom Core ML model filesystem path.
      *
      * @author Dmitriy Moroz
      */
@@ -159,7 +178,7 @@ internal class PreferenceManagerImpl(
         set(value) = keyValueStore.putString(KEY_CORE_ML_CUSTOM_MODEL_PATH, value)
 
     /**
-     * Exposes the `localBonsaiCustomModelPath` value used by the SDAI data layer.
+     * User-selected custom Bonsai model filesystem path.
      *
      * @author Dmitriy Moroz
      */
@@ -168,16 +187,19 @@ internal class PreferenceManagerImpl(
         set(value) = keyValueStore.putString(KEY_BONSAI_CUSTOM_MODEL_PATH, value)
 
     /**
-     * Exposes the `localOnnxCustomModelPath` value used by the SDAI data layer.
+     * User-selected custom ONNX model filesystem path.
      *
      * @author Dmitriy Moroz
      */
     override var localOnnxCustomModelPath: String
-        get() = keyValueStore.getString(KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH, LOCAL_DIFFUSION_CUSTOM_PATH)
+        get() = keyValueStore.getString(
+            KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH,
+            LOCAL_DIFFUSION_CUSTOM_PATH
+        )
         set(value) = keyValueStore.putString(KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH, value)
 
     /**
-     * Exposes the `localSdxlCustomModelPath` value used by the SDAI data layer.
+     * User-selected custom stable-diffusion.cpp model filesystem path.
      *
      * @author Dmitriy Moroz
      */
@@ -186,7 +208,7 @@ internal class PreferenceManagerImpl(
         set(value) = keyValueStore.putString(KEY_SDXL_CUSTOM_MODEL_PATH, value)
 
     /**
-     * Exposes the `localOnnxAllowCancel` value used by the SDAI data layer.
+     * Whether legacy ONNX generation exposes cancellation.
      *
      * @author Dmitriy Moroz
      */
@@ -195,19 +217,22 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_ALLOW_LOCAL_DIFFUSION_CANCEL, value)
 
     /**
-     * Exposes the `localOnnxSchedulerThread` value used by the SDAI data layer.
+     * Dispatcher policy for legacy ONNX inference.
      *
      * @author Dmitriy Moroz
      */
     override var localOnnxSchedulerThread: SchedulersToken
         get() = enumValueOrDefault(
-            index = keyValueStore.getInt(KEY_LOCAL_DIFFUSION_SCHEDULER_THREAD, SchedulersToken.COMPUTATION.ordinal),
+            index = keyValueStore.getInt(
+                KEY_LOCAL_DIFFUSION_SCHEDULER_THREAD,
+                SchedulersToken.COMPUTATION.ordinal
+            ),
             default = SchedulersToken.COMPUTATION,
         )
         set(value) = putInt(KEY_LOCAL_DIFFUSION_SCHEDULER_THREAD, value.ordinal)
 
     /**
-     * Exposes the `monitorConnectivity` value used by the SDAI data layer.
+     * Whether to periodically monitor a supported self-hosted connection.
      *
      * @author Dmitriy Moroz
      */
@@ -219,7 +244,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_MONITOR_CONNECTIVITY, value)
 
     /**
-     * Exposes the `autoSaveAiResults` value used by the SDAI data layer.
+     * Whether completed results are inserted into the gallery automatically.
      *
      * @author Dmitriy Moroz
      */
@@ -228,7 +253,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_AI_AUTO_SAVE, value)
 
     /**
-     * Exposes the `saveToMediaStore` value used by the SDAI data layer.
+     * Whether saved gallery results are exported to the platform photo store.
      *
      * @author Dmitriy Moroz
      */
@@ -237,7 +262,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_SAVE_TO_MEDIA_STORE, value)
 
     /**
-     * Exposes the `formAdvancedOptionsAlwaysShow` value used by the SDAI data layer.
+     * Whether generation forms keep advanced controls expanded.
      *
      * @author Dmitriy Moroz
      */
@@ -246,7 +271,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_FORM_ALWAYS_SHOW_ADVANCED_OPTIONS, value)
 
     /**
-     * Exposes the `formPromptTaggedInput` value used by the SDAI data layer.
+     * Whether prompts use the tag editor instead of plain text input.
      *
      * @author Dmitriy Moroz
      */
@@ -255,7 +280,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_FORM_PROMPT_TAGGED_INPUT, value)
 
     /**
-     * Exposes the `source` value used by the SDAI data layer.
+     * Selected provider; replacement increments the durable selection revision.
      *
      * @author Dmitriy Moroz
      */
@@ -270,7 +295,7 @@ internal class PreferenceManagerImpl(
         get() = keyValueStore.readProviderSelection().second
 
     /**
-     * Exposes the `sdModel` value used by the SDAI data layer.
+     * Selected AUTOMATIC1111 checkpoint identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -279,7 +304,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_SD_MODEL, value)
 
     /**
-     * Exposes the `hordeApiKey` value used by the SDAI data layer.
+     * AI Horde credential; the anonymous key is supported independently of other services.
      *
      * @author Dmitriy Moroz
      */
@@ -312,7 +337,7 @@ internal class PreferenceManagerImpl(
         set(value) = keyValueStore.putString(KEY_OPEN_AI_COMPATIBLE_MODEL, value)
 
     /**
-     * Exposes the `openAiApiKey` value used by the SDAI data layer.
+     * Official OpenAI API key; separate from compatible servers and OAuth sessions.
      *
      * @author Dmitriy Moroz
      */
@@ -321,7 +346,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_OPEN_AI_API_KEY, value)
 
     /**
-     * Exposes the `huggingFaceApiKey` value used by the SDAI data layer.
+     * Hugging Face inference token.
      *
      * @author Dmitriy Moroz
      */
@@ -330,7 +355,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_HUGGING_FACE_API_KEY, value)
 
     /**
-     * Exposes the `huggingFaceModel` value used by the SDAI data layer.
+     * Selected supported Hugging Face inference model alias.
      *
      * @author Dmitriy Moroz
      */
@@ -339,7 +364,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_HUGGING_FACE_MODEL_KEY, value)
 
     /**
-     * Exposes the `stabilityAiApiKey` value used by the SDAI data layer.
+     * Stability AI API credential.
      *
      * @author Dmitriy Moroz
      */
@@ -348,7 +373,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_STABILITY_AI_API_KEY, value)
 
     /**
-     * Exposes the `falAiApiKey` value used by the SDAI data layer.
+     * Fal.ai API credential.
      *
      * @author Dmitriy Moroz
      */
@@ -357,7 +382,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_FAL_AI_API_KEY, value)
 
     /**
-     * Exposes the `arliAiApiKey` value used by the SDAI data layer.
+     * ArliAI API credential.
      *
      * @author Dmitriy Moroz
      */
@@ -366,7 +391,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_ARLI_AI_API_KEY, value)
 
     /**
-     * Exposes the `arliAiModel` value used by the SDAI data layer.
+     * Selected ArliAI checkpoint identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -375,7 +400,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_ARLI_AI_MODEL_KEY, value)
 
     /**
-     * Exposes the `stabilityAiEngineId` value used by the SDAI data layer.
+     * Selected Stability AI engine identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -384,7 +409,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_STABILITY_AI_ENGINE_ID_KEY, value)
 
     /**
-     * Exposes the `onBoardingComplete` value used by the SDAI data layer.
+     * Whether onboarding has already completed.
      *
      * @author Dmitriy Moroz
      */
@@ -393,7 +418,7 @@ internal class PreferenceManagerImpl(
         set(value) = keyValueStore.putBoolean(KEY_ON_BOARDING_COMPLETE, value)
 
     /**
-     * Exposes the `forceSetupAfterUpdate` value used by the SDAI data layer.
+     * Whether a version transition requires provider setup again.
      *
      * @author Dmitriy Moroz
      */
@@ -402,7 +427,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_FORCE_SETUP_AFTER_UPDATE, value)
 
     /**
-     * Exposes the `localOnnxModelId` value used by the SDAI data layer.
+     * Selected downloaded ONNX model identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -411,7 +436,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_LOCAL_MODEL_ID, value)
 
     /**
-     * Exposes the `localOnnxUseNNAPI` value used by the SDAI data layer.
+     * Whether legacy ONNX inference requests Android NNAPI acceleration.
      *
      * @author Dmitriy Moroz
      */
@@ -420,7 +445,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_LOCAL_NN_API, value)
 
     /**
-     * Exposes the `localMediaPipeModelId` value used by the SDAI data layer.
+     * Selected downloaded MediaPipe model identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -429,7 +454,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_MEDIA_PIPE_MODEL_ID, value)
 
     /**
-     * Exposes the `localSdxlModelId` value used by the SDAI data layer.
+     * Selected stable-diffusion.cpp model identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -438,7 +463,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_SDXL_MODEL_ID, value)
 
     /**
-     * Exposes the `localCoreMlModelId` value used by the SDAI data layer.
+     * Selected downloaded Core ML model identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -447,7 +472,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_CORE_ML_MODEL_ID, value)
 
     /**
-     * Exposes the `localBonsaiModelId` value used by the SDAI data layer.
+     * Selected downloaded Bonsai model identifier.
      *
      * @author Dmitriy Moroz
      */
@@ -456,7 +481,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_BONSAI_MODEL_ID, value)
 
     /**
-     * Exposes the `designUseSystemColorPalette` value used by the SDAI data layer.
+     * Whether theme colors follow the system palette.
      *
      * @author Dmitriy Moroz
      */
@@ -465,7 +490,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_DESIGN_DYNAMIC_COLORS, value)
 
     /**
-     * Exposes the `designUseSystemDarkTheme` value used by the SDAI data layer.
+     * Whether appearance follows the system light/dark preference.
      *
      * @author Dmitriy Moroz
      */
@@ -474,7 +499,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_DESIGN_SYSTEM_DARK_THEME, value)
 
     /**
-     * Exposes the `designDarkTheme` value used by the SDAI data layer.
+     * Explicit dark appearance when system appearance is disabled.
      *
      * @author Dmitriy Moroz
      */
@@ -483,7 +508,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_DESIGN_DARK_THEME, value)
 
     /**
-     * Exposes the `designColorToken` value used by the SDAI data layer.
+     * Selected accent palette token, stored by its stable enum name.
      *
      * @author Dmitriy Moroz
      */
@@ -492,7 +517,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_DESIGN_COLOR_TOKEN, value)
 
     /**
-     * Exposes the `designDarkThemeToken` value used by the SDAI data layer.
+     * Selected dark background palette token, stored by its stable enum name.
      *
      * @author Dmitriy Moroz
      */
@@ -501,7 +526,7 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_DESIGN_DARK_TOKEN, value)
 
     /**
-     * Exposes the `backgroundGeneration` value used by the SDAI data layer.
+     * Whether generation is scheduled through the background task manager.
      *
      * @author Dmitriy Moroz
      */
@@ -510,7 +535,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_BACKGROUND_GENERATION, value)
 
     /**
-     * Exposes the `backgroundProcessCount` value used by the SDAI data layer.
+     * Number of background processes tracked by the existing work UI.
      *
      * @author Dmitriy Moroz
      */
@@ -519,7 +544,7 @@ internal class PreferenceManagerImpl(
         set(value) = keyValueStore.putInt(KEY_BACKGROUND_PROCESS_COUNT, value)
 
     /**
-     * Exposes the `localGenerationBenchmarkPromptAnswered` value used by the SDAI data layer.
+     * Whether the first-local-generation benchmark suggestion was answered.
      *
      * @author Dmitriy Moroz
      */
@@ -528,7 +553,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_LOCAL_GENERATION_BENCHMARK_PROMPT_ANSWERED, value)
 
     /**
-     * Exposes the `benchmarkRecommendationWarningSuppressed` value used by the SDAI data layer.
+     * Whether benchmark recommendation warnings were suppressed.
      *
      * @author Dmitriy Moroz
      */
@@ -537,7 +562,7 @@ internal class PreferenceManagerImpl(
         set(value) = putBoolean(KEY_BENCHMARK_RECOMMENDATION_WARNING_SUPPRESSED, value)
 
     /**
-     * Exposes the `galleryGrid` value used by the SDAI data layer.
+     * Gallery grid density preference.
      *
      * @author Dmitriy Moroz
      */
@@ -549,7 +574,7 @@ internal class PreferenceManagerImpl(
         set(value) = putInt(KEY_GALLERY_GRID, value.ordinal)
 
     /**
-     * Exposes the `languageCode` value used by the SDAI data layer.
+     * Selected application language code; empty follows the platform default.
      *
      * @author Dmitriy Moroz
      */
@@ -558,9 +583,8 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_LANGUAGE_CODE, value)
 
     /**
-     * Loads SDAI data through `observe`.
+     * Emits the current settings snapshot and rereads persisted values after each invalidation.
      *
-     * @return Result produced by `observe`.
      * @author Dmitriy Moroz
      */
     override fun observe(): Flow<Settings> = preferencesChangedState
@@ -596,7 +620,7 @@ internal class PreferenceManagerImpl(
         }
 
     /**
-     * Executes the `refresh` step in the SDAI data layer.
+     * Invalidates current settings so observers reload values written through a complete configuration transaction.
      *
      * @author Dmitriy Moroz
      */
@@ -616,10 +640,10 @@ internal class PreferenceManagerImpl(
         ?: 7f
 
     /**
-     * Executes the `putString` step in the SDAI data layer.
+     * Persists a string preference and notifies settings observers after the write.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Stable preference key for the value being persisted.
+     * @param value Value to persist under the supplied key.
      * @author Dmitriy Moroz
      */
     private fun putString(key: String, value: String) {
@@ -628,10 +652,10 @@ internal class PreferenceManagerImpl(
     }
 
     /**
-     * Executes the `putBoolean` step in the SDAI data layer.
+     * Persists a Boolean preference and notifies settings observers after the write.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Stable preference key for the value being persisted.
+     * @param value Value to persist under the supplied key.
      * @author Dmitriy Moroz
      */
     private fun putBoolean(key: String, value: Boolean) {
@@ -640,10 +664,10 @@ internal class PreferenceManagerImpl(
     }
 
     /**
-     * Executes the `putInt` step in the SDAI data layer.
+     * Persists an integer preference and notifies settings observers after the write.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Stable preference key for the value being persisted.
+     * @param value Value to persist under the supplied key.
      * @author Dmitriy Moroz
      */
     private fun putInt(key: String, value: Int) {
@@ -652,7 +676,7 @@ internal class PreferenceManagerImpl(
     }
 
     /**
-     * Executes the `onPreferencesChanged` step in the SDAI data layer.
+     * Replaces the settings invalidation token so active observers read a fresh snapshot.
      *
      * @author Dmitriy Moroz
      */
@@ -661,18 +685,17 @@ internal class PreferenceManagerImpl(
     }
 
     /**
-     * Executes the `function` step in the SDAI data layer.
+     * Resolves a stored ordinal, using the supplied default for values outside the current enum.
      *
-     * @param index index value consumed by the API.
-     * @param default default value consumed by the API.
-     * @return Result produced by `function`.
+     * @param index Persisted enum ordinal, which may be obsolete or out of range.
+     * @param default Fallback enum entry for an unavailable stored ordinal.
      * @author Dmitriy Moroz
      */
     private inline fun <reified T : Enum<T>> enumValueOrDefault(index: Int, default: T): T =
         enumValues<T>().getOrNull(index) ?: default
 
     /**
-     * Provides the `companion object` singleton used by the SDAI data layer.
+     * Stable preference keys and URL normalization markers used by shared application settings.
      *
      * @author Dmitriy Moroz
      */
@@ -720,121 +743,142 @@ internal class PreferenceManagerImpl(
         const val KEY_GENERATION_REQUEST_TIMEOUT_SECONDS = "key_generation_request_timeout_seconds"
 
         /**
-         * Exposes the `KEY_SERVER_URL` value used by the SDAI data layer.
+         * Stable storage key `key_server_url`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SERVER_URL = "key_server_url"
+
         /**
-         * Exposes the `KEY_SWARM_SERVER_URL` value used by the SDAI data layer.
+         * Stable storage key `key_swarm_server_url`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SWARM_SERVER_URL = "key_swarm_server_url"
+
         /**
-         * Exposes the `KEY_SWARM_MODEL` value used by the SDAI data layer.
+         * Stable storage key `key_easy_diffusion_url`; preserve its value to retain existing user settings.
+         *
+         * @author Dmitriy Moroz
+         */
+        private const val KEY_EASY_DIFFUSION_URL = "key_easy_diffusion_url"
+
+        private const val KEY_EASY_DIFFUSION_MODEL = "key_easy_diffusion_model"
+
+        /**
+         * Stable preference key for the selected SwarmUI checkpoint identifier.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SWARM_MODEL = "key_swarm_model"
+
         /**
-         * Exposes the `KEY_DEMO_MODE` value used by the SDAI data layer.
+         * Stable storage key `key_demo_mode`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DEMO_MODE = "key_demo_mode"
+
         /**
-         * Exposes the `KEY_DEVELOPER_MODE` value used by the SDAI data layer.
+         * Stable storage key `key_developer_mode`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DEVELOPER_MODE = "key_developer_mode"
+
         /**
-         * Exposes the `KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
+         * Stable storage key `key_local_diffusion_custom_model_path`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_LOCAL_DIFFUSION_CUSTOM_MODEL_PATH = "key_local_diffusion_custom_model_path"
+
         /**
-         * Exposes the `KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
+         * Stable storage key `key_mediapipe_custom_model_path`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_MEDIA_PIPE_CUSTOM_MODEL_PATH = "key_mediapipe_custom_model_path"
+
         /**
-         * Exposes the `KEY_CORE_ML_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
+         * Stable storage key `key_core_ml_custom_model_path`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_CORE_ML_CUSTOM_MODEL_PATH = "key_core_ml_custom_model_path"
+
         /**
-         * Exposes the `KEY_BONSAI_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
+         * Stable storage key `key_bonsai_custom_model_path`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_BONSAI_CUSTOM_MODEL_PATH = "key_bonsai_custom_model_path"
+
         /**
-         * Exposes the `KEY_SDXL_CUSTOM_MODEL_PATH` value used by the SDAI data layer.
+         * Stable storage key `key_sdxl_custom_model_path`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SDXL_CUSTOM_MODEL_PATH = "key_sdxl_custom_model_path"
+
         /**
-         * Exposes the `KEY_ALLOW_LOCAL_DIFFUSION_CANCEL` value used by the SDAI data layer.
+         * Stable storage key `key_allow_local_diffusion_cancel`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_ALLOW_LOCAL_DIFFUSION_CANCEL = "key_allow_local_diffusion_cancel"
+
         /**
-         * Exposes the `KEY_LOCAL_DIFFUSION_SCHEDULER_THREAD` value used by the SDAI data layer.
+         * Stable storage key `key_local_diffusion_scheduler_thread`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_LOCAL_DIFFUSION_SCHEDULER_THREAD = "key_local_diffusion_scheduler_thread"
+
         /**
-         * Exposes the `KEY_MONITOR_CONNECTIVITY` value used by the SDAI data layer.
+         * Stable storage key `key_monitor_connection`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_MONITOR_CONNECTIVITY = "key_monitor_connection"
+
         /**
-         * Exposes the `KEY_AI_AUTO_SAVE` value used by the SDAI data layer.
+         * Stable storage key `key_ai_auto_save`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_AI_AUTO_SAVE = "key_ai_auto_save"
+
         /**
-         * Exposes the `KEY_SAVE_TO_MEDIA_STORE` value used by the SDAI data layer.
+         * Stable storage key `key_save_to_media_store`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SAVE_TO_MEDIA_STORE = "key_save_to_media_store"
+
         /**
-         * Exposes the `KEY_FORM_ALWAYS_SHOW_ADVANCED_OPTIONS` value used by the SDAI data layer.
+         * Stable storage key `key_always_show_advanced_options`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_FORM_ALWAYS_SHOW_ADVANCED_OPTIONS = "key_always_show_advanced_options"
+
         /**
-         * Exposes the `KEY_FORM_PROMPT_TAGGED_INPUT` value used by the SDAI data layer.
+         * Stable storage key `key_prompt_tagged_input_kb`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_FORM_PROMPT_TAGGED_INPUT = "key_prompt_tagged_input_kb"
+
         /**
-         * Exposes the `KEY_SERVER_SOURCE` value used by the SDAI data layer.
-         *
-         * @author Dmitriy Moroz
-         */
-        const val KEY_SERVER_SOURCE = "key_server_source"
-        /**
-         * Exposes the `KEY_SD_MODEL` value used by the SDAI data layer.
+         * Stable storage key `key_sd_model`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SD_MODEL = "key_sd_model"
+
         /**
-         * Exposes the `KEY_HORDE_API_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_horde_api_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
@@ -842,164 +886,193 @@ internal class PreferenceManagerImpl(
         const val KEY_OPEN_AI_COMPATIBLE_URL = "key_open_ai_compatible_url"
         const val KEY_OPEN_AI_COMPATIBLE_API_KEY = "key_open_ai_compatible_api_key"
         const val KEY_OPEN_AI_COMPATIBLE_MODEL = "key_open_ai_compatible_model"
+
         /**
-         * Exposes the `KEY_OPEN_AI_API_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_open_ai_api_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_OPEN_AI_API_KEY = "key_open_ai_api_key"
+
         /**
-         * Exposes the `KEY_HUGGING_FACE_API_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_hugging_face_api_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_HUGGING_FACE_API_KEY = "key_hugging_face_api_key"
+
         /**
-         * Exposes the `KEY_HUGGING_FACE_MODEL_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_hugging_face_model_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_HUGGING_FACE_MODEL_KEY = "key_hugging_face_model_key"
+
         /**
-         * Exposes the `KEY_STABILITY_AI_API_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_stability_ai_api_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_STABILITY_AI_API_KEY = "key_stability_ai_api_key"
+
         /**
-         * Exposes the `KEY_FAL_AI_API_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_fal_ai_api_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_FAL_AI_API_KEY = "key_fal_ai_api_key"
+
         /**
-         * Exposes the `KEY_ARLI_AI_API_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_arli_ai_api_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_ARLI_AI_API_KEY = "key_arli_ai_api_key"
+
         /**
-         * Exposes the `KEY_ARLI_AI_MODEL_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_arli_ai_model_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_ARLI_AI_MODEL_KEY = "key_arli_ai_model_key"
+
         /**
-         * Exposes the `KEY_STABILITY_AI_ENGINE_ID_KEY` value used by the SDAI data layer.
+         * Stable storage key `key_stability_ai_engine_id_key`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_STABILITY_AI_ENGINE_ID_KEY = "key_stability_ai_engine_id_key"
+
         /**
-         * Exposes the `KEY_ON_BOARDING_COMPLETE` value used by the SDAI data layer.
+         * Stable storage key `key_on_boarding_complete`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_ON_BOARDING_COMPLETE = "key_on_boarding_complete"
+
         /**
-         * Exposes the `KEY_FORCE_SETUP_AFTER_UPDATE` value used by the SDAI data layer.
+         * Stable storage key `force_upd_setup_v0.x.x-v0.6.2`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_FORCE_SETUP_AFTER_UPDATE = "force_upd_setup_v0.x.x-v0.6.2"
+
         /**
-         * Exposes the `KEY_MEDIA_PIPE_MODEL_ID` value used by the SDAI data layer.
+         * Stable storage key `key_mediapipe_model_id`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_MEDIA_PIPE_MODEL_ID = "key_mediapipe_model_id"
+
         /**
-         * Exposes the `KEY_CORE_ML_MODEL_ID` value used by the SDAI data layer.
+         * Stable storage key `key_core_ml_model_id`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_CORE_ML_MODEL_ID = "key_core_ml_model_id"
+
         /**
-         * Exposes the `KEY_BONSAI_MODEL_ID` value used by the SDAI data layer.
+         * Stable storage key `key_bonsai_model_id`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_BONSAI_MODEL_ID = "key_bonsai_model_id"
+
         /**
-         * Exposes the `KEY_SDXL_MODEL_ID` value used by the SDAI data layer.
+         * Stable storage key `key_sdxl_model_id`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_SDXL_MODEL_ID = "key_sdxl_model_id"
+
         /**
-         * Exposes the `KEY_LOCAL_MODEL_ID` value used by the SDAI data layer.
+         * Stable storage key `key_local_model_id`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_LOCAL_MODEL_ID = "key_local_model_id"
+
         /**
-         * Exposes the `KEY_LOCAL_NN_API` value used by the SDAI data layer.
+         * Stable storage key `key_local_nn_api`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_LOCAL_NN_API = "key_local_nn_api"
+
         /**
-         * Exposes the `KEY_DESIGN_DYNAMIC_COLORS` value used by the SDAI data layer.
+         * Stable storage key `key_design_dynamic_colors`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DESIGN_DYNAMIC_COLORS = "key_design_dynamic_colors"
+
         /**
-         * Exposes the `KEY_DESIGN_SYSTEM_DARK_THEME` value used by the SDAI data layer.
+         * Stable storage key `key_design_system_dark_theme`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DESIGN_SYSTEM_DARK_THEME = "key_design_system_dark_theme"
+
         /**
-         * Exposes the `KEY_DESIGN_DARK_THEME` value used by the SDAI data layer.
+         * Stable storage key `key_design_dark_theme`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DESIGN_DARK_THEME = "key_design_dark_theme"
+
         /**
-         * Exposes the `KEY_DESIGN_COLOR_TOKEN` value used by the SDAI data layer.
+         * Stable storage key `key_design_color_token_theme`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DESIGN_COLOR_TOKEN = "key_design_color_token_theme"
+
         /**
-         * Exposes the `KEY_DESIGN_DARK_TOKEN` value used by the SDAI data layer.
+         * Stable storage key `key_design_dark_color_token_theme`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_DESIGN_DARK_TOKEN = "key_design_dark_color_token_theme"
+
         /**
-         * Exposes the `KEY_BACKGROUND_GENERATION` value used by the SDAI data layer.
+         * Stable storage key `key_background_generation`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_BACKGROUND_GENERATION = "key_background_generation"
+
         /**
-         * Exposes the `KEY_BACKGROUND_PROCESS_COUNT` value used by the SDAI data layer.
+         * Stable storage key `key_background_process_count`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_BACKGROUND_PROCESS_COUNT = "key_background_process_count"
+
         /**
-         * Exposes the `KEY_LOCAL_GENERATION_BENCHMARK_PROMPT_ANSWERED` value used by the SDAI data layer.
+         * Stable storage key `key_local_generation_benchmark_prompt_answered`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
-        const val KEY_LOCAL_GENERATION_BENCHMARK_PROMPT_ANSWERED = "key_local_generation_benchmark_prompt_answered"
+        const val KEY_LOCAL_GENERATION_BENCHMARK_PROMPT_ANSWERED =
+            "key_local_generation_benchmark_prompt_answered"
+
         /**
-         * Exposes the `KEY_BENCHMARK_RECOMMENDATION_WARNING_SUPPRESSED` value used by the SDAI data layer.
+         * Stable storage key `key_benchmark_recommendation_warning_suppressed`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
-        const val KEY_BENCHMARK_RECOMMENDATION_WARNING_SUPPRESSED = "key_benchmark_recommendation_warning_suppressed"
+        const val KEY_BENCHMARK_RECOMMENDATION_WARNING_SUPPRESSED =
+            "key_benchmark_recommendation_warning_suppressed"
+
         /**
-         * Exposes the `KEY_GALLERY_GRID` value used by the SDAI data layer.
+         * Stable storage key `key_gallery_grid`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
         const val KEY_GALLERY_GRID = "key_gallery_grid"
+
         /**
-         * Exposes the `KEY_LANGUAGE_CODE` value used by the SDAI data layer.
+         * Stable storage key `key_language_code`; preserve its value to retain existing user settings.
          *
          * @author Dmitriy Moroz
          */
@@ -1008,9 +1081,8 @@ internal class PreferenceManagerImpl(
 }
 
 /**
- * Executes the `defaultSaveToMediaStore` step in the SDAI data layer.
+ * Returns the platform default for exporting saved results to the system photo store.
  *
- * @return Result produced by `defaultSaveToMediaStore`.
  * @author Dmitriy Moroz
  */
 internal expect fun defaultSaveToMediaStore(): Boolean

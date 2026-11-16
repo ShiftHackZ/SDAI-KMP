@@ -360,6 +360,11 @@ class EngineSelectionViewModelTest {
     }
 
     private fun TestScope.createViewModel() = EngineSelectionViewModel(
+        fetchEasyDiffusionModelsUseCase = mockk(),
+        getEasyDiffusionModelsUseCase = mockk(),
+        captureEasyDiffusionConnectionUseCase = mockk(),
+        selectEasyDiffusionModelUseCase = mockk(),
+        providerSelectionGuard = mockk(),
         diagnostics = mockk(relaxed = true),
         dispatchersProvider = dispatchersProvider,
         preferenceManager = stubPreferenceManager,

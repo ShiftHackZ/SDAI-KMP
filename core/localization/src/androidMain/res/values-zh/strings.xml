@@ -725,4 +725,15 @@
     <string name="native_generation_stage_decoding">正在解码图像…</string>
     <string name="native_generation_stage_running">图像引擎正在运行…</string>
     <string name="native_generation_stage_writing_result">正在保存结果…</string>
+
+    <string name="srv_type_easy_diffusion">Easy Diffusion</string>
+    <string name="easy_diffusion_subtitle">在自己的 Easy Diffusion 服务器上生成图像。</string>
+    <string name="easy_diffusion_setup_hint">在 Easy Diffusion 设置中启用网络共享，保存并重启。输入计算机的局域网地址，例如 http://192.168.1.10:9000。此连接不使用密码。</string>
+    <string name="easy_diffusion_sampler">采样器：DDIM（固定）</string>
+    <string name="easy_diffusion_models_failed">无法加载模型。请检查连接并刷新。</string>
+    <string name="easy_diffusion_models_empty">请在服务器上安装 SD1.5 模型，刷新列表并选择模型。</string>
+    <string name="easy_diffusion_refresh_models">刷新模型</string>
+    <string name="easy_diffusion_failure">Easy Diffusion 无法完成请求。请检查服务器、连接和所选模型，然后重试。</string>
+    <string name="easy_diffusion_timeout">Easy Diffusion 已超时。请检查服务器和超时设置后重试。如果提交未获确认，则服务器上的完成状态未知。</string>
+    <string name="easy_diffusion_submission_unknown">Easy Diffusion 提交未获确认，服务器上的完成状态未知。请先检查服务器再重试。</string>
 </resources>

@@ -1,5 +1,10 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.CaptureEasyDiffusionConnectionUseCase
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GenerateEasyDiffusionUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.toEasyDiffusionRequest
+
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.coroutineContext
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
@@ -23,114 +28,61 @@ import com.shifthackz.aisdv1.domain.repository.StableDiffusionGenerationReposito
 import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
 
 /**
- * Implements `TextToImageUseCase` behavior in the SDAI domain layer.
+ * Routes captured text requests to their provider and preserves native batches or sequential single-image semantics as appropriate.
  *
- * @param openAiCompatibleGenerationRepository Independent compatible image-server repository.
- * @param openAiOAuthGenerationRepository Direct image provider guarded by the submitted account revision.
- * @throws IllegalStateException when the current state is invalid.
+ * @param stableDiffusionGenerationRepository Generation and result persistence for AUTOMATIC1111.
+ * @param hordeGenerationRepository Generation and result persistence for AI Horde.
+ * @param huggingFaceGenerationRepository Generation and result persistence for Hugging Face.
+ * @param openAiGenerationRepository Generation and result persistence for official OpenAI.
+ * @param openAiCompatibleGenerationRepository Generation and result persistence for OpenAI-compatible.
+ * @param openAiOAuthGenerationRepository Generation and result persistence for ChatGPT OAuth.
+ * @param stabilityAiGenerationRepository Generation and result persistence for Stability AI.
+ * @param falAiGenerationRepository Generation and result persistence for Fal.ai.
+ * @param arliAiGenerationRepository Generation and result persistence for ArliAI.
+ * @param swarmUiGenerationRepository Generation and result persistence for SwarmUI.
+ * @param localDiffusionGenerationRepository Generation and result persistence for legacy ONNX.
+ * @param mediaPipeGenerationRepository Generation and result persistence for MediaPipe.
+ * @param stableDiffusionCppGenerationRepository Generation and result persistence for stable-diffusion.cpp.
+ * @param coreMlGenerationRepository Generation and result persistence for Core ML.
+ * @param bonsaiGenerationRepository Generation and result persistence for Bonsai.
+ * @param preferenceManager Current provider selection and independent generation preferences.
+ * @param captureEasyDiffusionConnectionUseCase Captures endpoint/checkpoint under the provider-selection lock, retaining the submitted revision.
+ * @param generateEasyDiffusionUseCase Owns captured-task batching, stream recovery, cancellation and deadlines.
  * @author Dmitriy Moroz
  */
 internal class TextToImageUseCaseImpl(
-    /**
-     * Exposes the `stableDiffusionGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val stableDiffusionGenerationRepository: StableDiffusionGenerationRepository,
-    /**
-     * Exposes the `hordeGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val hordeGenerationRepository: HordeGenerationRepository,
-    /**
-     * Exposes the `huggingFaceGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val huggingFaceGenerationRepository: HuggingFaceGenerationRepository,
-    /**
-     * Exposes the `openAiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val openAiGenerationRepository: OpenAiGenerationRepository,
     private val openAiCompatibleGenerationRepository: OpenAiCompatibleGenerationRepository,
     private val openAiOAuthGenerationRepository: OpenAiOAuthGenerationRepository,
-    /**
-     * Exposes the `stabilityAiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val stabilityAiGenerationRepository: StabilityAiGenerationRepository,
-    /**
-     * Exposes the `falAiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val falAiGenerationRepository: FalAiGenerationRepository,
-    /**
-     * Exposes the `arliAiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val arliAiGenerationRepository: ArliAiGenerationRepository,
-    /**
-     * Exposes the `swarmUiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val swarmUiGenerationRepository: SwarmUiGenerationRepository,
-    /**
-     * Exposes the `localDiffusionGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val localDiffusionGenerationRepository: LocalDiffusionGenerationRepository,
-    /**
-     * Exposes the `mediaPipeGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val mediaPipeGenerationRepository: MediaPipeGenerationRepository,
-    /**
-     * Exposes the `stableDiffusionCppGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val stableDiffusionCppGenerationRepository: StableDiffusionCppGenerationRepository,
-    /**
-     * Exposes the `coreMlGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val coreMlGenerationRepository: CoreMlGenerationRepository,
-    /**
-     * Exposes the `bonsaiGenerationRepository` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val bonsaiGenerationRepository: BonsaiGenerationRepository,
-    /**
-     * Exposes the `preferenceManager` value used by the SDAI domain layer.
-     *
-     * @throws IllegalStateException when the current state is invalid.
-     * @author Dmitriy Moroz
-     */
+
     private val preferenceManager: PreferenceManager,
+    private val generateEasyDiffusionUseCase: GenerateEasyDiffusionUseCase,
+    private val captureEasyDiffusionConnectionUseCase: CaptureEasyDiffusionConnectionUseCase,
 ) : TextToImageUseCase {
 
     /**
@@ -148,37 +100,58 @@ internal class TextToImageUseCaseImpl(
         val source = payload.sourceSnapshot ?: preferenceManager.source
         check(source == preferenceManager.source) { "Generation source changed" }
         return when (source) {
-        ServerSource.AUTOMATIC1111 -> stableDiffusionGenerationRepository.generateFromText(payload)
-        ServerSource.FAL_AI -> falAiGenerationRepository.generateFromText(payload)
-        ServerSource.ARLI_AI -> arliAiGenerationRepository.generateFromText(payload)
-        else -> List(payload.batchCount.coerceAtLeast(1)) {
-            coroutineContext.ensureActive()
-            generateSingle(payload)
+            ServerSource.EASY_DIFFUSION -> generateEasyDiffusionUseCase(
+                payload.toEasyDiffusionRequest(captureEasyDiffusionConnectionUseCase(payload.providerSelectionRevision))
+            )
+
+            ServerSource.AUTOMATIC1111 -> stableDiffusionGenerationRepository.generateFromText(
+                payload
+            )
+
+            ServerSource.FAL_AI -> falAiGenerationRepository.generateFromText(payload)
+            ServerSource.ARLI_AI -> arliAiGenerationRepository.generateFromText(payload)
+            else -> List(payload.batchCount.coerceAtLeast(1)) {
+                coroutineContext.ensureActive()
+                generateSingle(payload)
+            }
         }
-    }
     }
 
     /**
-     * Executes the `generateSingle` step in the SDAI domain layer.
+     * Dispatches one image to the captured provider; providers with dedicated batch paths are rejected here.
      *
-     * @param payload generation payload used by the operation.
+     * @param payload Immutable supported generation inputs and captured provider identity.
      * @author Dmitriy Moroz
      */
-    private suspend fun generateSingle(payload: TextToImagePayload) = when (payload.sourceSnapshot ?: preferenceManager.source) {
-        ServerSource.HORDE -> hordeGenerationRepository.generateFromText(payload)
-        ServerSource.LOCAL_MICROSOFT_ONNX -> localDiffusionGenerationRepository.generateFromText(payload)
-        ServerSource.HUGGING_FACE -> huggingFaceGenerationRepository.generateFromText(payload)
-        ServerSource.OPEN_AI -> openAiGenerationRepository.generateFromText(payload)
-        ServerSource.OPEN_AI_COMPATIBLE -> openAiCompatibleGenerationRepository.generateFromText(payload)
-        ServerSource.OPEN_AI_OAUTH -> openAiOAuthGenerationRepository.generateFromText(payload)
-        ServerSource.STABILITY_AI -> stabilityAiGenerationRepository.generateFromText(payload)
-        ServerSource.SWARM_UI -> swarmUiGenerationRepository.generateFromText(payload)
-        ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> mediaPipeGenerationRepository.generateFromText(payload)
-        ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> stableDiffusionCppGenerationRepository.generateFromText(payload)
-        ServerSource.LOCAL_APPLE_CORE_ML -> coreMlGenerationRepository.generateFromText(payload)
-        ServerSource.LOCAL_APPLE_BONSAI -> bonsaiGenerationRepository.generateFromText(payload)
-        ServerSource.AUTOMATIC1111 -> error("Automatic1111 batch must be generated through generateFromText(payload).")
-        ServerSource.FAL_AI -> error("Fal.ai batch must be generated through generateFromText(payload).")
-        ServerSource.ARLI_AI -> error("ArliAI batch must be generated through generateFromText(payload).")
-    }
+    private suspend fun generateSingle(payload: TextToImagePayload) =
+        when (payload.sourceSnapshot ?: preferenceManager.source) {
+            ServerSource.EASY_DIFFUSION -> error("Easy Diffusion batch must use its captured operation")
+            ServerSource.HORDE -> hordeGenerationRepository.generateFromText(payload)
+            ServerSource.LOCAL_MICROSOFT_ONNX -> localDiffusionGenerationRepository.generateFromText(
+                payload
+            )
+
+            ServerSource.HUGGING_FACE -> huggingFaceGenerationRepository.generateFromText(payload)
+            ServerSource.OPEN_AI -> openAiGenerationRepository.generateFromText(payload)
+            ServerSource.OPEN_AI_COMPATIBLE -> openAiCompatibleGenerationRepository.generateFromText(
+                payload
+            )
+
+            ServerSource.OPEN_AI_OAUTH -> openAiOAuthGenerationRepository.generateFromText(payload)
+            ServerSource.STABILITY_AI -> stabilityAiGenerationRepository.generateFromText(payload)
+            ServerSource.SWARM_UI -> swarmUiGenerationRepository.generateFromText(payload)
+            ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> mediaPipeGenerationRepository.generateFromText(
+                payload
+            )
+
+            ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> stableDiffusionCppGenerationRepository.generateFromText(
+                payload
+            )
+
+            ServerSource.LOCAL_APPLE_CORE_ML -> coreMlGenerationRepository.generateFromText(payload)
+            ServerSource.LOCAL_APPLE_BONSAI -> bonsaiGenerationRepository.generateFromText(payload)
+            ServerSource.AUTOMATIC1111 -> error("Automatic1111 batch must be generated through generateFromText(payload).")
+            ServerSource.FAL_AI -> error("Fal.ai batch must be generated through generateFromText(payload).")
+            ServerSource.ARLI_AI -> error("ArliAI batch must be generated through generateFromText(payload).")
+        }
 }

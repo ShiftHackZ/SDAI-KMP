@@ -1,5 +1,13 @@
 package com.shifthackz.aisdv1.data.di
 
+import com.shifthackz.aisdv1.domain.datasource.EasyDiffusionRemoteDataSource
+import com.shifthackz.aisdv1.data.remote.KtorEasyDiffusionRemoteDataSource
+
+import com.shifthackz.aisdv1.domain.repository.EasyDiffusionRepository
+import com.shifthackz.aisdv1.domain.gateway.EasyDiffusionTaskRegistry
+import com.shifthackz.aisdv1.data.repository.EasyDiffusionRepositoryImpl
+import com.shifthackz.aisdv1.data.repository.InMemoryEasyDiffusionTaskRegistry
+
 import com.shifthackz.aisdv1.data.gateway.GalleryReadGatewayImpl
 import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
 
@@ -333,6 +341,19 @@ val coreDataModule = module {
             backgroundWorkObserver = get(),
             sessions = get(),
             selectionGuard = get(),
+        )
+    }
+    single<EasyDiffusionRemoteDataSource> { KtorEasyDiffusionRemoteDataSource(api = get()) }
+    single<EasyDiffusionTaskRegistry> { InMemoryEasyDiffusionTaskRegistry() }
+    single<EasyDiffusionRepository> {
+        EasyDiffusionRepositoryImpl(
+            remote = get(),
+            preferences = get(),
+            registry = get(),
+            selectionGuard = get(),
+            mediaStoreGateway = get(),
+            localDataSource = get(),
+            backgroundWorkObserver = get()
         )
     }
     single<OpenAiCompatibleGenerationDataSource.Remote> {

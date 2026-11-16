@@ -3,9 +3,11 @@ package com.shifthackz.aisdv1.presentation.widget.engine
 import com.shifthackz.aisdv1.core.mvi.MviIntent
 
 /**
- * Carries `EngineSelectionIntent` data through the SDAI presentation layer.
+ * Selects a checkpoint or explicitly refreshes the Easy Diffusion catalog.
  *
- * @param value value value consumed by the API.
+ * @param value Exact selected checkpoint ID; ignored for an explicit refresh.
+ * @param shouldRefresh Whether to refresh the Easy Diffusion catalog instead of changing selection.
  * @author Dmitriy Moroz
  */
-data class EngineSelectionIntent(val value: String) : MviIntent
+data class EngineSelectionIntent(val value: String = "", val shouldRefresh: Boolean = false) :
+    MviIntent

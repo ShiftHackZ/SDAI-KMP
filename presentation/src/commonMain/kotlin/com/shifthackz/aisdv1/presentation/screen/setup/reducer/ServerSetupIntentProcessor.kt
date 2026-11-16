@@ -13,6 +13,18 @@ import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupState
 import com.shifthackz.aisdv1.presentation.screen.setup.viewmodel.url
 
+/** Routes setup UI intents into candidate state changes and injected navigation/download/connection actions.
+ * @param router Navigates back or completes the provider setup flow.
+ * @param linksProvider Resolves supported setup/help/demo URLs.
+ * @param currentState Reads current candidate configuration and provider discovery state.
+ * @param updateState Atomically applies presentation-only setup edits.
+ * @param emitEffect Delivers platform permission and external-navigation effects.
+ * @param localModelDownloadClickReducer Chooses download-source or deletion confirmation for a clicked model.
+ * @param deleteLocalModel Removes the confirmed downloaded model through its owning view model.
+ * @param download Starts the confirmed model archive download with its stable identifier and chosen URL.
+ * @param validateAndConnectToServer Validates active candidate fields before publishing provider configuration.
+ * @param connectToServer Connects after an explicit confirmation has already satisfied setup validation.
+ * @author Dmitriy Moroz */
 internal class ServerSetupIntentProcessor(
     private val router: ServerSetupRouter,
     private val linksProvider: LinksProvider,
@@ -25,6 +37,10 @@ internal class ServerSetupIntentProcessor(
     private val validateAndConnectToServer: () -> Unit,
     private val connectToServer: () -> Unit,
 ) {
+
+    /** Applies a setup intent to its field, discovery-filter, navigation or local-model action.
+     * @param intent User event emitted by this screen’s production controls.
+     * @author Dmitriy Moroz */
 
     fun process(intent: ServerSetupIntent) {
         when (intent) {
@@ -161,6 +177,10 @@ internal class ServerSetupIntentProcessor(
                 it.copy(serverUrl = intent.url, serverUrlValidationError = null)
             }
 
+            is ServerSetupIntent.UpdateEasyDiffusionUrl -> updateState {
+                it.copy(easyDiffusionUrl = intent.url, easyDiffusionUrlValidationError = null)
+            }
+
             is ServerSetupIntent.UpdateSwarmUiUrl -> updateState {
                 it.copy(swarmUiUrl = intent.url, swarmUiUrlValidationError = null)
             }
@@ -263,6 +283,13 @@ internal class ServerSetupIntentProcessor(
     }
 }
 
+/** Checks whether candidate discovery filters leave at least one allowed provider visible.
+ * @param state Current provider setup fields, catalogs and validation feedback.
+ * @param type Optional hosting type required by the candidate filter.
+ * @param readinessFilters Readiness markers permitted by the candidate filters.
+ * @param tags Capability tags required by the candidate filters.
+ * @author Dmitriy Moroz */
+
 private fun List<ServerSource>.hasSourceFilterMatch(
     state: ServerSetupState,
     type: ServerSourceType?,
@@ -274,6 +301,9 @@ private fun List<ServerSource>.hasSourceFilterMatch(
             (readinessFilters.isEmpty() || sourceReadiness in readinessFilters) &&
             source.featureTags.containsAll(tags)
 }
+
+/** Retains a matching selected provider or chooses the first provider satisfying current discovery filters.
+ * @author Dmitriy Moroz */
 
 private fun ServerSetupState.withMatchingFilterSource(): ServerSetupState {
     if (
