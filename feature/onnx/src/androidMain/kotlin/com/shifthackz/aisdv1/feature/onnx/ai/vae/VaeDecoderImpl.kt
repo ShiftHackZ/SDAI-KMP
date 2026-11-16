@@ -3,32 +3,27 @@
 package com.shifthackz.aisdv1.feature.onnx.ai.vae
 
 import ai.onnxruntime.OnnxTensor
-import ai.onnxruntime.OrtSession
-import ai.onnxruntime.providers.NNAPIFlags
 import android.graphics.Bitmap
 import android.graphics.Color
 import com.shifthackz.aisdv1.feature.onnx.LocalDiffusionContract
 import com.shifthackz.aisdv1.feature.onnx.entity.Array3D
 import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRunController
-import com.shifthackz.aisdv1.feature.onnx.environment.OnnxRuntimeConfiguration
-import com.shifthackz.aisdv1.feature.onnx.environment.OrtEnvironmentProvider
-import java.util.EnumSet
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxSession
+import com.shifthackz.aisdv1.feature.onnx.environment.OnnxSessionFactory
 import kotlin.math.roundToInt
 
 /**
  * VAE session whose options, outputs and bitmap remain owned until decode completes.
  *
- * @param environment Child native environment.
- * @param configuration Submitted model/provider snapshot.
+ * @param sessionFactory Compatible decoder provider settings and ownership of session options.
  * @param controller Cooperative run cancellation.
  * @author Dmitriy Moroz
  */
 internal class VaeDecoderImpl(
-    private val environment: OrtEnvironmentProvider,
-    private val configuration: OnnxRuntimeConfiguration,
+    private val sessionFactory: OnnxSessionFactory,
     private val controller: OnnxRunController,
 ) : VaeDecoder {
-    private var session: OrtSession? = null
+    private var session: OnnxSession? = null
 
     /**
      * Decodes borrowed latent tensors into a caller-owned bitmap on the session owner thread.
@@ -42,18 +37,11 @@ internal class VaeDecoderImpl(
      */
     override fun decode(input: Map<String, OnnxTensor>, width: Int, height: Int): Bitmap {
         controller.checkActive()
-        OrtSession.SessionOptions().use { options ->
-            options.addConfigEntry(
-                LocalDiffusionContract.ORT_KEY_MODEL_FORMAT,
-                LocalDiffusionContract.ORT
-            )
-            if (configuration.isNnapiEnabled) options.addNnapi(EnumSet.of(NNAPIFlags.CPU_DISABLED))
-            session = environment.get().createSession(
-                "${configuration.modelDirectory}/${LocalDiffusionContract.VAE_MODEL}",
-                options
-            )
-        }
-        controller.run(checkNotNull(session), input).use { result ->
+        session = sessionFactory.create(
+            LocalDiffusionContract.VAE_MODEL,
+            isAccelerationAllowed = true,
+        )
+        controller.run(checkNotNull(session).value, input).use { result ->
             val output = result[0].value as Array3D<FloatArray>
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
             try {

@@ -37,6 +37,11 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
+/**
+ * Composes the application host or an isolated native inference process according to its process name.
+ *
+ * @author Dmitriy Moroz
+ */
 class AiStableDiffusionClientApp : Application() {
 
     /**
@@ -48,11 +53,20 @@ class AiStableDiffusionClientApp : Application() {
         private set
 
 
+    /**
+     * Creates only child inference dependencies in the native process; host startup owns UI, workers,
+     * storage and file logging. Development child processes also emit common logger diagnostics.
+     *
+     * @author Dmitriy Moroz
+     */
     override fun onCreate() {
         super.onCreate()
         val processName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) getProcessName()
         else getSystemService(ActivityManager::class.java).runningAppProcesses?.firstOrNull { it.pid == Process.myPid() }?.processName
         if (processName == "${packageName}:inference") {
+            if (BuildConfig.BUILD_TYPE == "dev") {
+                Timber.plant(Timber.DebugTree())
+            }
             val graph = startKoin {
                 androidContext(this@AiStableDiffusionClientApp)
                 modules(inferenceChildModule)

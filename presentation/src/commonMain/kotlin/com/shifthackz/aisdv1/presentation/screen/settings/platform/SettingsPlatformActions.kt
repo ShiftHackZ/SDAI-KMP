@@ -18,18 +18,29 @@ interface SettingsPlatformActions : StorageUsageByteMapper {
      * @author Dmitriy Moroz
      */
     val requiresStoragePermissionForMediaStore: Boolean
+
     /**
      * True when this target can continue generation work after the app leaves foreground.
      *
      * @author Dmitriy Moroz
      */
     val supportsBackgroundGeneration: Boolean
+
     /**
      * True when this platform enforces application setup and metadata request deadlines.
      *
      * @author Dmitriy Moroz
      */
     val supportsConnectionTimeout: Boolean
+
+    /**
+     * Whether Settings can offer NNAPI: Android 8.1 (API 27) and newer only.
+     * Availability does not guarantee that the device or model supports hardware acceleration.
+     *
+     * @author Dmitriy Moroz
+     */
+    val isNnapiAvailable: Boolean
+
     /**
      * Localization key for the warning shown under the background generation toggle.
      *
@@ -124,6 +135,7 @@ object NoOpSettingsPlatformActions : SettingsPlatformActions {
     override val requiresStoragePermissionForMediaStore = false
     override val supportsBackgroundGeneration = false
     override val supportsConnectionTimeout = false
+    override val isNnapiAvailable = false
     override val backgroundGenerationWarningKey = "settings_item_background_generation_warning"
 
     override suspend fun requestStoragePermission(): Boolean = true

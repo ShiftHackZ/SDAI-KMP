@@ -85,7 +85,7 @@ enum class ServerSource(
         key = "local",
         type = ServerSourceType.LOCAL,
         readiness = PlatformValue(ServerSourceReadiness.BETA),
-        version = "2024.9.23",
+        version = "2026.11.16",
         featureTags = setOf(
             FeatureTag.Offline,
             FeatureTag.Txt2Img,

@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.data.repository
 
+import android.os.Build
 import com.shifthackz.aisdv1.data.core.CoreGenerationRepository
 import com.shifthackz.aisdv1.data.local.DownloadableModelFileStore
 import com.shifthackz.aisdv1.data.mappers.mapLocalDiffusionToAiGenResult
@@ -60,6 +61,8 @@ internal class LocalDiffusionGenerationRepositoryImpl(
 
     /**
      * Captures model configuration once, then preserves the existing result and persistence mapping.
+     * Android below 8.1 (API 27) always submits NNAPI as disabled, even if a saved preference is true;
+     * those devices generate through the ONNX Runtime CPU backend.
      *
      * @param payload Immutable generation parameters.
      * @author Dmitriy Moroz
@@ -67,7 +70,8 @@ internal class LocalDiffusionGenerationRepositoryImpl(
     override suspend fun generateFromText(payload: TextToImagePayload) = run {
         val id = preferenceManager.localOnnxModelId
         val customPath = preferenceManager.localOnnxCustomModelPath
-        val isNnapiEnabled = preferenceManager.localOnnxUseNNAPI
+        val isNnapiEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 &&
+                preferenceManager.localOnnxUseNNAPI
         val model = downloadableLocalDataSource.getById(id)
         check(model.downloaded) { "Model not downloaded." }
         val modelPath =

@@ -305,8 +305,8 @@
     <string name="settings_item_config">Конфігурація</string>
     <string name="settings_item_sd_model">SD Модель</string>
     <string name="settings_item_stability_ai_credits">Stability AI Кредити</string>
-    <string name="settings_item_local_nnapi">NNAPI (Beta)*</string>
-    <string name="settings_item_local_nnapi_warning">*NNAPI може працювати нестабільно, якщо у вас виникають помилки, збої або погана продуктивність, вимкніть це.</string>
+    <string name="settings_item_local_nnapi">NNAPI</string>
+    <string name="settings_item_local_nnapi_warning">*NNAPI може й надалі виконувати частину або всі обчислення на процесорі телефона. Апаратне прискорення та швидша генерація не гарантовані. Вимкніть NNAPI, якщо генерація сповільнюється або завершується помилкою.</string>
 
     <string name="settings_item_language">Мова</string>
     <string name="settings_item_demo">Демо режим</string>

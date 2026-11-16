@@ -50,7 +50,12 @@ internal fun ContentSettingsState(
         state.darkTheme
     }
     val listState = rememberLazyListState()
-    val rows = settingsListItems(state, isDark, platformActions.supportsConnectionTimeout)
+    val rows = settingsListItems(
+        state,
+        isDark,
+        platformActions.supportsConnectionTimeout,
+        platformActions.isNnapiAvailable,
+    )
     LazyColumn(
         modifier = modifier.verticalScrollbar(listState).padding(horizontal = 16.dp),
         state = listState,

@@ -305,8 +305,8 @@
     <string name="settings_item_config">Ayarlar</string>
     <string name="settings_item_sd_model">SD Modeli</string>
     <string name="settings_item_stability_ai_credits">Stability AI Kredi</string>
-    <string name="settings_item_local_nnapi">NNAPI (Beta)*</string>
-    <string name="settings_item_local_nnapi_warning">*NNAPI kararlı çalışmayabilir, hata, çökme veya kötü performansla karşılaşırsanız bunu devre dışı bırakın.</string>
+    <string name="settings_item_local_nnapi">NNAPI</string>
+    <string name="settings_item_local_nnapi_warning">*NNAPI, işlemlerin bir kısmı veya tamamı için telefonunuzun CPU’sunu kullanmaya devam edebilir. Donanım hızlandırması ve daha hızlı görüntü oluşturma garanti edilmez. Görüntü oluşturma yavaşlarsa veya başarısız olursa NNAPI’yi kapatın.</string>
 
     <string name="settings_item_language">Dil</string>
     <string name="settings_item_demo">Demo modu</string>

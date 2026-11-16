@@ -337,8 +337,8 @@
     <string name="settings_item_config">配置</string>
     <string name="settings_item_sd_model">SD 模型</string>
     <string name="settings_item_stability_ai_credits">Stability AI 积分</string>
-    <string name="settings_item_local_nnapi">使用 NNAPI（测试版）*</string>
-    <string name="settings_item_local_nnapi_warning">*NNAPI 可能不稳定，如果遇到错误、崩溃或性能问题，请禁用此功能。</string>
+    <string name="settings_item_local_nnapi">使用 NNAPI</string>
+    <string name="settings_item_local_nnapi_warning">*NNAPI 仍可能使用手机的 CPU 完成部分或全部计算，无法保证使用硬件加速或更快地生成图像。如果生成速度变慢或失败，请关闭 NNAPI。</string>
 
     <!-- 语言设置 -->
     <string name="settings_item_language">语言</string>

@@ -1,23 +1,17 @@
 package com.shifthackz.aisdv1.feature.onnx.ai.tokenizer
 
 /**
- * Provides the `TokenizerByteSet` singleton used by the SDAI ONNX local diffusion feature layer.
+ * Maps each UTF-8 byte to the reversible Unicode spelling used by the CLIP byte-pair vocabulary.
  *
  * @author Dmitriy Moroz
  */
-object TokenizerByteSet {
+internal object TokenizerByteSet {
     /**
-     * Exposes the `byteEncoder` value used by the SDAI ONNX local diffusion feature layer.
+     * Vocabulary spelling for each unsigned byte in the range 0 through 255.
      *
      * @author Dmitriy Moroz
      */
     val byteEncoder: MutableMap<Int, String> = HashMap()
-    /**
-     * Exposes the `byteDecoder` value used by the SDAI ONNX local diffusion feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    val byteDecoder: MutableMap<String, Int> = HashMap()
 
     init {
         put(33, "!")
@@ -276,28 +270,16 @@ object TokenizerByteSet {
         put(159, "\u0141")
         put(160, "\u0142")
         put(173, "\u0143")
-        reversal()
     }
 
     /**
-     * Executes the `put` step in the SDAI ONNX local diffusion feature layer.
+     * Registers one byte's CLIP vocabulary spelling during immutable table initialization.
      *
-     * @param key key value consumed by the API.
-     * @param value value value consumed by the API.
+     * @param key Unsigned UTF-8 byte value.
+     * @param value Single Unicode symbol representing the byte in the CLIP vocabulary.
      * @author Dmitriy Moroz
      */
     private fun put(key: Int, value: String) {
         byteEncoder[key] = value
-    }
-
-    /**
-     * Executes the `reversal` step in the SDAI ONNX local diffusion feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private fun reversal() {
-        for (entry in byteEncoder.entries) {
-            byteDecoder[entry.value] = entry.key
-        }
     }
 }
