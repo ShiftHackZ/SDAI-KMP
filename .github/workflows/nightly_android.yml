@@ -86,7 +86,7 @@ jobs:
 
           git diff --name-only "${NIGHTLY_TAG}..HEAD" > "${RUNNER_TEMP}/nightly-changed-files.txt"
 
-          functional_pattern='^(app/|core/|data/|demo/|domain/|feature/|network/|presentation/|storage/|build-logic/|gradle/|build\.gradle\.kts$|settings\.gradle\.kts$|gradle\.properties$|gradlew$|gradlew\.bat$)'
+          functional_pattern='^(app/|core/|data/|demo/|domain/|feature/|network/|presentation/|storage/|build-logic/|gradle/|build\.gradle\.kts$|settings\.gradle\.kts$|gradle\.properties$|gradlew$|gradlew\.bat$|\.github/workflows/nightly_android\.yml$)'
           if grep -Eq "${functional_pattern}" "${RUNNER_TEMP}/nightly-changed-files.txt"; then
             echo "should_build=true" >> "${GITHUB_OUTPUT}"
             echo "reason=Functional files changed since the previous nightly." >> "${GITHUB_OUTPUT}"
@@ -104,6 +104,8 @@ jobs:
             echo
             echo "Changed files since \`${NIGHTLY_TAG}\`:"
             echo
+            # Backticks in Markdown are literal.
+            # shellcheck disable=SC2016
             sed -n '1,100{s/^/- `/;s/$/`/;p;}' "${RUNNER_TEMP}/nightly-changed-files.txt"
             changed_count="$(wc -l < "${RUNNER_TEMP}/nightly-changed-files.txt")"
             if (( changed_count > 100 )); then
@@ -123,14 +125,39 @@ jobs:
         if: steps.plan.outputs.should_build == 'true'
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build unsigned full release APK
+      - name: Prepare nightly version
         if: steps.plan.outputs.should_build == 'true'
+        id: version
         shell: bash
         run: |
           set -euo pipefail
 
-          ./gradlew :app:assembleFullRelease \
+          build_date="$(date -u +%Y%m%d)"
+          short_sha="$(git rev-parse --short=8 HEAD)"
+          version_suffix="-dev.${build_date}.${short_sha}"
+          version_name="$(awk -F '"' '/^versionName = / { print $2; exit }' gradle/libs.versions.toml)${version_suffix}"
+          # Seconds since 2020; reruns receive newer codes without changing source files.
+          version_code="$(( $(date -u +%s) - 1577836800 ))"
+          {
+            echo "build_date=${build_date}"
+            echo "version_suffix=${version_suffix}"
+            echo "version_name=${version_name}"
+            echo "version_code=${version_code}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Build unsigned full dev APK
+        if: steps.plan.outputs.should_build == 'true'
+        shell: bash
+        env:
+          NIGHTLY_VERSION_SUFFIX: ${{ steps.version.outputs.version_suffix }}
+          NIGHTLY_VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          set -euo pipefail
+
+          ./gradlew :app:assembleFullDev \
             --no-daemon \
+            -PsdaiDevVersionSuffix="${NIGHTLY_VERSION_SUFFIX}" \
+            -PsdaiDevVersionCode="${NIGHTLY_VERSION_CODE}" \
             -Dkotlin.native.ignoreDisabledTargets=true \
             -Pkotlin.native.ignoreDisabledTargets=true
 
@@ -144,6 +171,8 @@ jobs:
           ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
           ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
           ANDROID_RELEASE_CERT_SHA256: ${{ vars.ANDROID_RELEASE_CERT_SHA256 }}
+          NIGHTLY_VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          NIGHTLY_VERSION_CODE: ${{ steps.version.outputs.version_code }}
         run: |
           set -euo pipefail
 
@@ -153,10 +182,10 @@ jobs:
           : "${ANDROID_RELEASE_CERT_SHA256:?Missing ANDROID_RELEASE_CERT_SHA256 variable.}"
           export ANDROID_RELEASE_KEY_PASSWORD="${ANDROID_RELEASE_KEY_PASSWORD:-${ANDROID_RELEASE_STORE_PASSWORD}}"
 
-          unsigned_apk="$(find app/android/build/outputs/apk/full/release -type f -name '*-unsigned.apk' -print -quit)"
+          unsigned_apk="$(find app/android/build/outputs/apk/full/dev -type f -name '*-unsigned.apk' -print -quit)"
           if [[ -z "${unsigned_apk}" ]]; then
-            echo "Could not find unsigned full release APK." >&2
-            find app/android/build/outputs/apk/full/release -type f -print >&2 || true
+            echo "Could not find unsigned full dev APK." >&2
+            find app/android/build/outputs/apk/full/dev -type f -print >&2 || true
             exit 1
           fi
 
@@ -166,6 +195,15 @@ jobs:
           zipalign="${build_tools}/zipalign"
           if [[ ! -x "${apksigner}" || ! -x "${zipalign}" ]]; then
             echo "Android Build Tools 35.0.0 are required for nightly signing." >&2
+            exit 1
+          fi
+
+          # Refuse to publish a stable-package APK or mismatched build metadata.
+          apk_metadata="$("${build_tools}/aapt" dump badging "${unsigned_apk}" | sed -n '1p')"
+          if [[ "${apk_metadata}" != *"name='com.shifthackz.aisdv1.app.full.dev'"* ||
+                "${apk_metadata}" != *"versionCode='${NIGHTLY_VERSION_CODE}'"* ||
+                "${apk_metadata}" != *"versionName='${NIGHTLY_VERSION_NAME}'"* ]]; then
+            echo "Nightly APK package or version does not match the requested build." >&2
             exit 1
           fi
 
@@ -197,9 +235,11 @@ jobs:
           fi
 
           sha256sum "${signed_apk}" > "${output_dir}/${APK_NAME}.sha256"
-          echo "signed_apk=${signed_apk}" >> "${GITHUB_OUTPUT}"
-          echo "sha256_file=${output_dir}/${APK_NAME}.sha256" >> "${GITHUB_OUTPUT}"
-          echo "apksigner_report=${output_dir}/apksigner.txt" >> "${GITHUB_OUTPUT}"
+          {
+            echo "signed_apk=${signed_apk}"
+            echo "sha256_file=${output_dir}/${APK_NAME}.sha256"
+            echo "apksigner_report=${output_dir}/apksigner.txt"
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Prepare nightly release notes
         if: steps.plan.outputs.should_build == 'true'
@@ -211,11 +251,17 @@ jobs:
           output_dir="${RUNNER_TEMP}/nightly-output"
           release_notes="${output_dir}/release-notes.md"
           target_sha="${{ steps.plan.outputs.target_sha }}"
-          version_name="$(awk -F '"' '/^versionName = / { print $2; exit }' gradle/libs.versions.toml)"
-          version_code="$(awk -F '"' '/^versionCode = / { print $2; exit }' gradle/libs.versions.toml)"
+          version_name="${{ steps.version.outputs.version_name }}"
+          version_code="${{ steps.version.outputs.version_code }}"
           apk_sha256="$(cut -d ' ' -f 1 "${{ steps.sign.outputs.sha256_file }}")"
           cert_sha256="$(awk -F': ' '/Signer #1 certificate SHA-256 digest:/ { print $2; exit }' "${{ steps.sign.outputs.apksigner_report }}")"
           download_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${NIGHTLY_TAG}/${APK_NAME}"
+
+          if git rev-parse --verify "${NIGHTLY_TAG}^{commit}" >/dev/null 2>&1; then
+            git log --no-merges --format='- %s' -n 5 "${NIGHTLY_TAG}..HEAD" | cut -c 1-200 > "${output_dir}/changes.txt"
+          else
+            git log --format='- %s' -n 1 HEAD | cut -c 1-200 > "${output_dir}/changes.txt"
+          fi
 
           cat > "${release_notes}" <<EOF
           Automated Android full nightly build.
@@ -223,11 +269,20 @@ jobs:
           - Target ref: \`${TARGET_REF}\`
           - Commit: \`${target_sha}\`
           - Version: \`${version_name} (${version_code})\`
+          - Application ID: \`com.shifthackz.aisdv1.app.full.dev\`
           - APK SHA-256: \`${apk_sha256}\`
           - Signing certificate SHA-256: \`${cert_sha256}\`
 
           This is a prerelease build from the moving \`${NIGHTLY_TAG}\` tag. It is not a Play Store, F-Droid, or stable project release.
+          It installs as SDAI Dev alongside stable SDAI, with separate settings and history.
           EOF
+
+          {
+            echo
+            echo "Recent changes:"
+            echo
+            cat "${output_dir}/changes.txt"
+          } >> "${release_notes}"
 
           echo "release_notes=${release_notes}" >> "${GITHUB_OUTPUT}"
           {
@@ -277,3 +332,51 @@ jobs:
               --prerelease \
               --verify-tag
           fi
+
+      - name: Announce nightly on Discord
+        if: steps.plan.outputs.should_build == 'true' && env.PUBLISH_NIGHTLY == 'true'
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK_URL }}
+          NIGHTLY_VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          NIGHTLY_BUILD_DATE: ${{ steps.version.outputs.build_date }}
+          NIGHTLY_COMMIT: ${{ steps.plan.outputs.target_sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${DISCORD_WEBHOOK_URL}" ]]; then
+            echo "::notice::Discord notification skipped: DISCORD_NIGHTLY_WEBHOOK_URL is not configured."
+            exit 0
+          fi
+
+          output_dir="${RUNNER_TEMP}/nightly-output"
+          release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${NIGHTLY_TAG}"
+          download_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${NIGHTLY_TAG}/${APK_NAME}"
+          jq -n \
+            --arg version "${NIGHTLY_VERSION_NAME}" \
+            --arg date "${NIGHTLY_BUILD_DATE}" \
+            --arg commit "${NIGHTLY_COMMIT}" \
+            --arg release_url "${release_url}" \
+            --arg download_url "${download_url}" \
+            --arg commit_url "https://github.com/${GITHUB_REPOSITORY}/commit/${NIGHTLY_COMMIT}" \
+            --arg run_url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            --arg feedback_url "https://github.com/${GITHUB_REPOSITORY}/issues" \
+            --rawfile changes "${output_dir}/changes.txt" \
+            '{allowed_mentions: {parse: []}, embeds: [{
+              title: ("SDAI Dev · Nightly · " + $date),
+              url: $release_url,
+              color: 7684269,
+              description: ("**" + $version + "**\nInstalls alongside stable SDAI with separate app data.\n\n" +
+                $changes[:1000] + "\n[Download latest APK](" + $download_url + ") · [Release details](" + $release_url +
+                ")\n[Commit " + $commit[:8] + "](" + $commit_url + ") · [Build](" + $run_url +
+                ") · [Report an issue](" + $feedback_url + ")"),
+              footer: {text: "Preview build for testing. The download link always serves the latest nightly."}
+            }]}' > "${output_dir}/discord.json"
+
+          # Do not retry POST automatically: a lost response could duplicate the announcement.
+          curl --fail --silent --show-error --connect-timeout 15 --max-time 60 \
+            --header 'Content-Type: application/json' \
+            --data-binary "@${output_dir}/discord.json" \
+            --output "${output_dir}/discord-response.json" \
+            --url-query 'wait=true' \
+            "${DISCORD_WEBHOOK_URL}"

@@ -30,11 +30,11 @@ function write(relative, content) {
   fs.writeFileSync(file, content);
 }
 
-async function png(input, size, relative, opaque = false) {
+async function png(input, size, relative, isOpaque = false) {
   const file = path.join(root, relative);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   let output = sharp(input).resize(size, size);
-  if (opaque) output = output.flatten({ background }).removeAlpha();
+  if (isOpaque) output = output.flatten({ background }).removeAlpha();
   await output.png().toFile(file);
 }
 
@@ -56,23 +56,29 @@ function ribbon(label, color = "#007BFE", textColor = "#FFFFFF") {
       fill="${textColor}">${label}</text>`;
 }
 
-function launcher(label, adaptive = false, themed = false) {
+function launcher(
+  label,
+  isAdaptive = false,
+  isThemed = false,
+  color = "#007BFE"
+) {
   let body;
-  if (themed) {
+  if (isThemed) {
     // A cut-out label distinguishes flavors even when Android applies one theme color.
     body = `<defs><mask id="symbol"><rect width="1024" height="1024" fill="black"/>
       ${mark(monochrome)}${ribbon(label, "#FFFFFF", "#000000")}</mask></defs>
       <rect width="1024" height="1024" fill="white" mask="url(#symbol)"/>`;
-  } else if (adaptive) {
-    body = mark() + ribbon(label);
+  } else if (isAdaptive) {
+    body = mark() + ribbon(label, color);
   } else {
     body = `<image href="${sourceImage}" width="1024" height="1024"/>${ribbon(
-      label
+      label,
+      color
     )}`;
   }
   // The 1024px art fits inside 72dp of Android's 108dp adaptive layer.
   // The colored silhouette stays within the central 66dp safe region.
-  if (adaptive)
+  if (isAdaptive)
     body = `<g transform="translate(170.6667 170.6667) scale(0.6666667)">${body}</g>`;
   return Buffer.from(svg(body));
 }
@@ -85,6 +91,12 @@ function adaptiveXml(foreground, monochromeName) {
     <monochrome android:drawable="@drawable/${monochromeName}" />
 </adaptive-icon>
 `;
+}
+
+// Regenerate just the dev launchers without touching store or stable assets.
+if (process.argv.includes("--dev-only")) {
+  await androidLauncher("dev", "DEV", "#7540AD");
+  process.exit(0);
 }
 
 // Use the full-color artwork for opaque store, website and iOS icons.
@@ -133,10 +145,19 @@ for (const [flavor, label] of [
   ["main", ""],
   ["foss", "FOSS"],
   ["full", "FULL"],
+  ["dev", "DEV"],
 ]) {
+  await androidLauncher(
+    flavor,
+    label,
+    flavor === "dev" ? "#7540AD" : "#007BFE"
+  );
+}
+
+async function androidLauncher(flavor, label, color) {
   const res = `app/android/src/${flavor}/res`;
   for (const [density, size] of Object.entries(densities)) {
-    const icon = launcher(label);
+    const icon = launcher(label, false, false, color);
     await png(icon, size, `${res}/mipmap-${density}/ic_launcher.png`, true);
     const round = await sharp(icon)
       .resize(size, size)
@@ -154,7 +175,7 @@ for (const [flavor, label] of [
       .toBuffer();
     write(`${res}/mipmap-${density}/ic_launcher_round.png`, round);
     await png(
-      launcher(label, true),
+      launcher(label, true, false, color),
       size * 2.25,
       `${res}/drawable-${density}/ic_launcher_foreground.png`
     );
@@ -226,5 +247,5 @@ ${notificationPaths}
 );
 
 console.log(
-  "Generated SDAI icons; ribbons are limited to Android FOSS/FULL launchers."
+  "Generated SDAI icons; ribbons are limited to Android FOSS/FULL/DEV launchers."
 );

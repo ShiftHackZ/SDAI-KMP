@@ -1,4 +1,5 @@
 import java.io.FileInputStream
+import java.time.Instant
 import java.util.Properties
 
 plugins {
@@ -6,6 +7,13 @@ plugins {
     alias(libs.plugins.generic.baseline.profm)
     alias(libs.plugins.compose.compiler)
 }
+
+// Seconds since 2020 keep nightly updates ordered independently of stable versions.
+val devVersionCode = providers.gradleProperty("sdaiDevVersionCode")
+    .map(String::toInt)
+    .getOrElse((Instant.now().epochSecond - 1_577_836_800L).toInt())
+val devVersionSuffix = providers.gradleProperty("sdaiDevVersionSuffix")
+    .getOrElse("-dev.local")
 
 android {
     namespace = "com.shifthackz.aisdv1.app"
@@ -34,11 +42,21 @@ android {
                 "true"
             )
         }
+        create("dev") {
+            initWith(getByName("release"))
+            matchingFallbacks += "release"
+            isDebuggable = false
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = devVersionSuffix
+            resValue("string", "app_name", "SDAI Dev")
+        }
     }
 
     // Startup providers are disabled; select an explicit optional tracer at the composition root.
     sourceSets {
-        getByName("release").java.srcDir("src/tracingDisabled/java")
+        listOf("release", "dev").forEach { variant ->
+            getByName(variant).java.srcDir("src/tracingDisabled/java")
+        }
         listOf("debug", "profile").forEach { variant ->
             getByName(variant).java.srcDir(
                 if (providers.gradleProperty("sdaiComposeTracing").orNull == "true") {
@@ -138,6 +156,21 @@ android {
         }
         println("[Signature] -> Build will be signed with signature: $alias")
         buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
+        buildTypes.getByName("dev").signingConfig = signingConfigs.getByName("release")
+    }
+}
+
+androidComponents {
+    beforeVariants(selector().withBuildType("dev")) { variant ->
+        variant.enable = variant.productFlavors.any { (_, flavor) -> flavor == "full" }
+    }
+    onVariants(selector().withBuildType("dev")) { variant ->
+        require(devVersionCode in 1..2_100_000_000) {
+            "sdaiDevVersionCode must be between 1 and 2100000000."
+        }
+        variant.outputs.forEach { output ->
+            output.versionCode.set(devVersionCode)
+        }
     }
 }
 
