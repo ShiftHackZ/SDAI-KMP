@@ -148,24 +148,24 @@
   <div class="breadcrumbs"><a href="../../index.html">feature/onnx</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.feature.onnx</a><span class="delimiter">/</span><span class="current">LocalDiffusionImpl</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Local</span><wbr><span>Diffusion</span><wbr><span><span>Impl</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">LocalDiffusionImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>uNet<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.unet/-u-net/index.html">UNet</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>tokenizer<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-local-diffusion-text-tokenizer/index.html">LocalDiffusionTextTokenizer</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>ortEnvironmentProvider<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-ort-environment-provider/index.html">OrtEnvironmentProvider</a></span></span><span class="token punctuation">)</span> : <a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.diffusion/-local-diffusion/index.html">LocalDiffusion</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/onnx/src/androidMain/kotlin/com/shifthackz/aisdv1/feature/onnx/LocalDiffusionImpl.kt#L25">source</a>)</span></span></div><p class="paragraph">Implements <code class="lang-kotlin">LocalDiffusion</code> behavior in the SDAI ONNX local diffusion feature layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">LocalDiffusionImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>uNet<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.unet/-u-net/index.html">UNet</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>tokenizer<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-local-diffusion-text-tokenizer/index.html">LocalDiffusionTextTokenizer</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>environment<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-ort-environment-provider/index.html">OrtEnvironmentProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>controller<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-onnx-run-controller/index.html">OnnxRunController</a></span></span><span class="token punctuation">)</span> : <a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.diffusion/-native-inference-engine/index.html">NativeInferenceEngine</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/onnx/src/androidMain/kotlin/com/shifthackz/aisdv1/feature/onnx/LocalDiffusionImpl.kt#L24">source</a>)</span></span></div><p class="paragraph">One job's synchronous ONNX owner, executed entirely on the child inference executor.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>u</span><wbr><span><span>Net</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Denoiser and decoder owned by this job.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>tokenizer</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Job-scoped text session.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>environment</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Native environment created only in the inference process.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>controller</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Cooperative termination and run-options lifetime.</p></div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="1907367420%2FConstructors%2F-1660992350" anchor-label="LocalDiffusionImpl" id="1907367420%2FConstructors%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
+        <div class="table"><a data-name="2046459869%2FConstructors%2F-1660992350" anchor-label="LocalDiffusionImpl" id="2046459869%2FConstructors%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-local-diffusion-impl.html"><span>Local</span><wbr><span>Diffusion</span><wbr><span><span>Impl</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1907367420%2FConstructors%2F-1660992350"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2046459869%2FConstructors%2F-1660992350"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uNet<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.unet/-u-net/index.html">UNet</a><span class="token punctuation">, </span></span><span class="parameter ">tokenizer<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-local-diffusion-text-tokenizer/index.html">LocalDiffusionTextTokenizer</a><span class="token punctuation">, </span></span><span class="parameter ">ortEnvironmentProvider<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-ort-environment-provider/index.html">OrtEnvironmentProvider</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uNet<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.unet/-u-net/index.html">UNet</a><span class="token punctuation">, </span></span><span class="parameter ">tokenizer<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-local-diffusion-text-tokenizer/index.html">LocalDiffusionTextTokenizer</a><span class="token punctuation">, </span></span><span class="parameter ">environment<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-ort-environment-provider/index.html">OrtEnvironmentProvider</a><span class="token punctuation">, </span></span><span class="parameter ">controller<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-onnx-run-controller/index.html">OnnxRunController</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -174,32 +174,32 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="-1757250893%2FProperties%2F-1660992350" anchor-label="ortEnvironmentProvider" id="-1757250893%2FProperties%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
+        <div class="table"><a data-name="732532522%2FProperties%2F-1660992350" anchor-label="controller" id="732532522%2FProperties%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="ort-environment-provider.html"><span>ort</span><wbr><span>Environment</span><wbr><span><span>Provider</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1757250893%2FProperties%2F-1660992350"></span>
+                  <div><a href="controller.html"><span><span>controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="732532522%2FProperties%2F-1660992350"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="ort-environment-provider.html">ortEnvironmentProvider</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-ort-environment-provider/index.html">OrtEnvironmentProvider</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">ortEnvironmentProvider</code> value used by the SDAI ONNX local diffusion feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="controller.html">controller</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-onnx-run-controller/index.html">OnnxRunController</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-858114298%2FProperties%2F-1660992350" anchor-label="statusFlow" id="-858114298%2FProperties%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
+<a data-name="-260012383%2FProperties%2F-1660992350" anchor-label="environment" id="-260012383%2FProperties%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="status-flow.html"><span>status</span><wbr><span><span>Flow</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-858114298%2FProperties%2F-1660992350"></span>
+                  <div><a href="environment.html"><span><span>environment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-260012383%2FProperties%2F-1660992350"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="status-flow.html">statusFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/MutableSharedFlow///PointingToDeclaration/">MutableSharedFlow</span><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-local-diffusion-status/index.html">LocalDiffusionStatus</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">statusFlow</code> value used by the SDAI ONNX local diffusion feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="environment.html">environment</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.environment/-ort-environment-provider/index.html">OrtEnvironmentProvider</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -214,7 +214,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="tokenizer.html">tokenizer</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-local-diffusion-text-tokenizer/index.html">LocalDiffusionTextTokenizer</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">tokenizer</code> value used by the SDAI ONNX local diffusion feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="tokenizer.html">tokenizer</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-local-diffusion-text-tokenizer/index.html">LocalDiffusionTextTokenizer</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -229,7 +229,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="u-net.html">uNet</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.unet/-u-net/index.html">UNet</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">uNet</code> value used by the SDAI ONNX local diffusion feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="u-net.html">uNet</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.onnx.ai.unet/-u-net/index.html">UNet</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -238,7 +238,37 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="1321172497%2FFunctions%2F-1660992350" anchor-label="interrupt" id="1321172497%2FFunctions%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
+        <div class="table"><a data-name="1727157148%2FFunctions%2F-1660992350" anchor-label="close" id="1727157148%2FFunctions%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1727157148%2FFunctions%2F-1660992350"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Idempotent owner-thread cleanup after inference returns.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1662552939%2FFunctions%2F-1660992350" anchor-label="generate" id="1662552939%2FFunctions%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generate.html"><span><span>generate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1662552939%2FFunctions%2F-1660992350"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="generate.html"><span class="token function">generate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">request<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-native-generation-request/index.html">NativeGenerationRequest</a><span class="token punctuation">, </span></span><span class="parameter ">onProgress<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-local-diffusion-status/index.html">LocalDiffusionStatus</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onStage<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-native-generation-stage/index.html">NativeGenerationStage</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></div><div class="brief "><p class="paragraph">Runs captured ONNX inputs on the inference owner and returns PNG bytes. Native resources are released after execution returns, including failure and cancellation paths.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1321172497%2FFunctions%2F-1660992350" anchor-label="interrupt" id="1321172497%2FFunctions%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -248,52 +278,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="interrupt.html"><span class="token function">interrupt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Performs the SDAI side effect handled by <code class="lang-kotlin">interrupt</code>.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1529933529%2FFunctions%2F-1660992350" anchor-label="interruptGeneration" id="1529933529%2FFunctions%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="interrupt-generation.html"><span>interrupt</span><wbr><span><span>Generation</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1529933529%2FFunctions%2F-1660992350"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="interrupt-generation.html"><span class="token function">interruptGeneration</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Performs the SDAI side effect handled by <code class="lang-kotlin">interruptGeneration</code>.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1381690150%2FFunctions%2F-1660992350" anchor-label="observeStatus" id="1381690150%2FFunctions%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="observe-status.html"><span>observe</span><wbr><span><span>Status</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1381690150%2FFunctions%2F-1660992350"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="observe-status.html"><span class="token function">observeStatus</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/SharedFlow///PointingToDeclaration/">SharedFlow</span><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-local-diffusion-status/index.html">LocalDiffusionStatus</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Loads SDAI data through <code class="lang-kotlin">observeStatus</code>.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="823364153%2FFunctions%2F-1660992350" anchor-label="process" id="823364153%2FFunctions%2F-1660992350" data-filterable-set=":feature:onnx/androidMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="process.html"><span><span>process</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="823364153%2FFunctions%2F-1660992350"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="process.html"><span class="token function">process</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">payload<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-text-to-image-payload/index.html">TextToImagePayload</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/Bitmap.html">Bitmap</a></div><div class="brief "><p class="paragraph">Executes the <code class="lang-kotlin">process</code> step in the SDAI ONNX local diffusion feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="interrupt.html"><span class="token function">interrupt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Signals only; resource release stays in generate's owner-thread finally.</p></div></div></div>
                 </div>
               </div>
             </div>

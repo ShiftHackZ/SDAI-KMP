@@ -148,7 +148,7 @@
   <div class="breadcrumbs"><a href="../../index.html">domain</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.domain.preference</a><span class="delimiter">/</span><span class="current">ConfigurationStore</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Configuration</span><wbr><span><span>Store</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">ConfigurationStore</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/domain/src/commonMain/kotlin/com/shifthackz/aisdv1/domain/preference/ConfigurationStore.kt#L12">source</a>)</span></span></div><p class="paragraph">Defines the <code class="lang-kotlin">ConfigurationStore</code> contract for the SDAI domain layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">ConfigurationStore</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/domain/src/commonMain/kotlin/com/shifthackz/aisdv1/domain/preference/ConfigurationStore.kt#L12">source</a>)</span></span></div><p class="paragraph">Independent provider preference contract plus complete checked configuration replacement; credentials are supplied separately.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -165,7 +165,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="arli-ai-api-key.html">arliAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">arliAiApiKey</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="arli-ai-api-key.html">arliAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">ArliAI API credential.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -180,7 +180,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="automatic1111-server-url.html">automatic1111ServerUrl</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">automatic1111ServerUrl</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="automatic1111-server-url.html">automatic1111ServerUrl</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Persisted AUTOMATIC1111 server root, independent from other providers.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -195,7 +195,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="demo-mode.html">demoMode</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">demoMode</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="demo-mode.html">demoMode</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether AUTOMATIC1111 uses the configured demonstration endpoint.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-750512403%2FProperties%2F-911324849" anchor-label="easyDiffusionModel" id="-750512403%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="easy-diffusion-model.html"><span>easy</span><wbr><span>Diffusion</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-750512403%2FProperties%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="easy-diffusion-model.html">easyDiffusionModel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="850821543%2FProperties%2F-911324849" anchor-label="easyDiffusionUrl" id="850821543%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="easy-diffusion-url.html"><span>easy</span><wbr><span>Diffusion</span><wbr><span><span>Url</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="850821543%2FProperties%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="easy-diffusion-url.html">easyDiffusionUrl</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -210,7 +240,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="fal-ai-api-key.html">falAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">falAiApiKey</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="fal-ai-api-key.html">falAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Fal.ai API credential.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -225,7 +255,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="horde-api-key.html">hordeApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">hordeApiKey</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="horde-api-key.html">hordeApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">AI Horde credential; the anonymous key is supported independently of other services.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -240,7 +270,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="hugging-face-api-key.html">huggingFaceApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">huggingFaceApiKey</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="hugging-face-api-key.html">huggingFaceApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Hugging Face inference token.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -255,7 +285,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="hugging-face-model.html">huggingFaceModel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">huggingFaceModel</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="hugging-face-model.html">huggingFaceModel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Selected supported Hugging Face inference model alias.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -270,7 +300,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-bonsai-model-id.html">localBonsaiModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localBonsaiModelId</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-bonsai-model-id.html">localBonsaiModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Selected downloaded Bonsai model identifier.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -285,7 +315,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-bonsai-model-path.html">localBonsaiModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localBonsaiModelPath</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-bonsai-model-path.html">localBonsaiModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Filesystem path to the selected custom Bonsai model.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -300,7 +330,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-core-ml-model-id.html">localCoreMlModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localCoreMlModelId</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-core-ml-model-id.html">localCoreMlModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Selected downloaded Core ML model identifier.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -315,7 +345,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-core-ml-model-path.html">localCoreMlModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localCoreMlModelPath</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-core-ml-model-path.html">localCoreMlModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Filesystem path to the selected custom Core ML model.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -330,7 +360,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-media-pipe-model-id.html">localMediaPipeModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localMediaPipeModelId</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-media-pipe-model-id.html">localMediaPipeModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Selected downloaded MediaPipe model identifier.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -345,7 +375,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-media-pipe-model-path.html">localMediaPipeModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localMediaPipeModelPath</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-media-pipe-model-path.html">localMediaPipeModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Filesystem path to the selected custom MediaPipe model.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -360,7 +390,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-onnx-model-id.html">localOnnxModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localOnnxModelId</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-onnx-model-id.html">localOnnxModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Selected downloaded ONNX model identifier.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -375,7 +405,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-onnx-model-path.html">localOnnxModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localOnnxModelPath</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-onnx-model-path.html">localOnnxModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Filesystem path to the selected custom ONNX model.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -390,7 +420,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-sdxl-model-id.html">localSdxlModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localSdxlModelId</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-sdxl-model-id.html">localSdxlModelId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Selected stable-diffusion.cpp model identifier.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -405,7 +435,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-sdxl-model-path.html">localSdxlModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">localSdxlModelPath</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="local-sdxl-model-path.html">localSdxlModelPath</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Filesystem path to the selected custom stable-diffusion.cpp model.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -420,7 +450,67 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="open-ai-api-key.html">openAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">openAiApiKey</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="open-ai-api-key.html">openAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Official OpenAI API key; separate from compatible servers and OAuth sessions.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1268742008%2FProperties%2F-911324849" anchor-label="openAiCompatibleApiKey" id="-1268742008%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-ai-compatible-api-key.html"><span>open</span><wbr><span>Ai</span><wbr><span>Compatible</span><wbr><span>Api</span><wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1268742008%2FProperties%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="open-ai-compatible-api-key.html">openAiCompatibleApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Optional bearer token for the independent compatible server.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="345313188%2FProperties%2F-911324849" anchor-label="openAiCompatibleModel" id="345313188%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-ai-compatible-model.html"><span>open</span><wbr><span>Ai</span><wbr><span>Compatible</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="345313188%2FProperties%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="open-ai-compatible-model.html">openAiCompatibleModel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Editable image model identifier supplied to the compatible server.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="311180318%2FProperties%2F-911324849" anchor-label="openAiCompatibleUrl" id="311180318%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-ai-compatible-url.html"><span>open</span><wbr><span>Ai</span><wbr><span>Compatible</span><wbr><span><span>Url</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="311180318%2FProperties%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="open-ai-compatible-url.html">openAiCompatibleUrl</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Complete HTTP(S) API prefix, including any version and reverse-proxy path.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="920884401%2FProperties%2F-911324849" anchor-label="providerSelectionRevision" id="920884401%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="provider-selection-revision.html"><span>provider</span><wbr><span>Selection</span><wbr><span><span>Revision</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="920884401%2FProperties%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="provider-selection-revision.html">providerSelectionRevision</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Durable selection revision; source replacement or selected Easy Diffusion URL/model changes advance it.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -435,7 +525,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="source.html">source</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">source</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="source.html">source</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a></div><div class="brief "><p class="paragraph">Selected provider; replacement increments the durable selection revision.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -450,7 +540,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="stability-ai-api-key.html">stabilityAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">stabilityAiApiKey</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="stability-ai-api-key.html">stabilityAiApiKey</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Stability AI API credential.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -465,7 +555,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="stability-ai-engine-id.html">stabilityAiEngineId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">stabilityAiEngineId</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="stability-ai-engine-id.html">stabilityAiEngineId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Selected Stability AI engine identifier.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -480,7 +570,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="swarm-ui-model.html">swarmUiModel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">swarmUiModel</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="swarm-ui-model.html">swarmUiModel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exact selected SwarmUI checkpoint name.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -495,7 +585,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="swarm-ui-server-url.html">swarmUiServerUrl</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">swarmUiServerUrl</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">var </span><a href="swarm-ui-server-url.html">swarmUiServerUrl</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Persisted SwarmUI server root; normalized without changing the protocol delimiter.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -504,7 +594,37 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="-1847114116%2FFunctions%2F-911324849" anchor-label="getConfiguration" id="-1847114116%2FFunctions%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+        <div class="table"><a data-name="1312624762%2FFunctions%2F-911324849" anchor-label="commitConfiguration" id="1312624762%2FFunctions%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="commit-configuration.html"><span>commit</span><wbr><span><span>Configuration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1312624762%2FFunctions%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="commit-configuration.html"><span class="token function">commitConfiguration</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">configuration<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.entity/-configuration/index.html">Configuration</a><span class="token punctuation">, </span></span><span class="parameter ">commitId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists all existing configuration keys and the association in one checked atomic batch. Called on IO by the serialized configuration transition owner.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-146899522%2FFunctions%2F-911324849" anchor-label="getAuthorizationCommitId" id="-146899522%2FFunctions%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-authorization-commit-id.html"><span>get</span><wbr><span>Authorization</span><wbr><span>Commit</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-146899522%2FFunctions%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-authorization-commit-id.html"><span class="token function">getAuthorizationCommitId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns a trusted persisted credential/configuration association, empty for legacy data. Fails while a previous configuration write has an untrusted memory snapshot.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1847114116%2FFunctions%2F-911324849" anchor-label="getConfiguration" id="-1847114116%2FFunctions%2F-911324849" data-filterable-set=":domain/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -514,7 +634,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-configuration.html"><span class="token function">getConfiguration</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">authCredentials<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.entity/-configuration/index.html">Configuration</a></div><div class="brief "><p class="paragraph">Loads SDAI data through <code class="lang-kotlin">getConfiguration</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-configuration.html"><span class="token function">getConfiguration</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">authCredentials<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.entity/-configuration/index.html">Configuration</a></div><div class="brief "><p class="paragraph">Combines independent provider preferences with the supplied protected authorization snapshot.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-654102016%2FFunctions%2F-911324849" anchor-label="retryPendingConfiguration" id="-654102016%2FFunctions%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="retry-pending-configuration.html"><span>retry</span><wbr><span>Pending</span><wbr><span><span>Configuration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-654102016%2FFunctions%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="retry-pending-configuration.html"><span class="token function">retryPendingConfiguration</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Retries an exact failed configuration batch on IO before its association can be trusted. Returns false when there was no pending write; failures remain quarantined.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -529,7 +664,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-configuration.html"><span class="token function">setConfiguration</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">configuration<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.entity/-configuration/index.html">Configuration</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Executes the <code class="lang-kotlin">setConfiguration</code> step in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-configuration.html"><span class="token function">setConfiguration</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">configuration<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.entity/-configuration/index.html">Configuration</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes all provider fields while retaining independent settings for inactive sources; production checked publication uses commitConfiguration.</p></div></div></div>
                 </div>
               </div>
             </div>

@@ -148,24 +148,24 @@
   <div class="breadcrumbs"><a href="../../index.html">feature/auth</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.feature.auth</a><span class="delimiter">/</span><span class="current">AuthorizationStoreImpl</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Authorization</span><wbr><span>Store</span><wbr><span><span>Impl</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">AuthorizationStoreImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>store<span class="token operator">: </span><a href="../-authorization-key-value-store/index.html">AuthorizationKeyValueStore</a></span></span><span class="token punctuation">)</span> : <a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-store/index.html">AuthorizationStore</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/auth/src/commonMain/kotlin/com/shifthackz/aisdv1/feature/auth/AuthorizationStoreImpl.kt#L11">source</a>)</span></span></div><p class="paragraph">Implements <code class="lang-kotlin">AuthorizationStore</code> behavior in the SDAI authentication feature layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">AuthorizationStoreImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>provider<span class="token operator">: </span><a href="../-authorization-key-value-store-provider/index.html">AuthorizationKeyValueStoreProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dispatchers<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>configurationStore<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.preference/-configuration-store/index.html">ConfigurationStore</a></span></span><span class="token punctuation">)</span> : <a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-store/index.html">AuthorizationStore</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/auth/src/commonMain/kotlin/com/shifthackz/aisdv1/feature/auth/AuthorizationStoreImpl.kt#L27">source</a>)</span></span></div><p class="paragraph">Serializes lazy protected-store initialization and complete credential transactions on IO. Invalid records are preserved and never become anonymous access.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>provider</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Opens storage without doing work during dependency construction.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>configuration</span><wbr><span><span>Store</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Supplies trusted atomic configuration-commit proof for recovery.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>dispatchers</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Supplies the IO context for disk and crypto operations.</p></div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="-1998025247%2FConstructors%2F-1433611913" anchor-label="AuthorizationStoreImpl" id="-1998025247%2FConstructors%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+        <div class="table"><a data-name="-1711173961%2FConstructors%2F-1433611913" anchor-label="AuthorizationStoreImpl" id="-1711173961%2FConstructors%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-authorization-store-impl.html"><span>Authorization</span><wbr><span>Store</span><wbr><span><span>Impl</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1998025247%2FConstructors%2F-1433611913"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1711173961%2FConstructors%2F-1433611913"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">store<span class="token operator">: </span><a href="../-authorization-key-value-store/index.html">AuthorizationKeyValueStore</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">provider<span class="token operator">: </span><a href="../-authorization-key-value-store-provider/index.html">AuthorizationKeyValueStoreProvider</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter ">configurationStore<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.preference/-configuration-store/index.html">ConfigurationStore</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -184,7 +184,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div><div class="brief "><p class="paragraph">Provides the <code class="lang-kotlin">companion object</code> singleton used by the SDAI authentication feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -193,7 +193,67 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="-102834620%2FProperties%2F-1433611913" anchor-label="store" id="-102834620%2FProperties%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+        <div class="table"><a data-name="-2039269046%2FProperties%2F-1433611913" anchor-label="configurationStore" id="-2039269046%2FProperties%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="configuration-store.html"><span>configuration</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2039269046%2FProperties%2F-1433611913"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="configuration-store.html">configurationStore</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.preference/-configuration-store/index.html">ConfigurationStore</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="644239577%2FProperties%2F-1433611913" anchor-label="dispatchers" id="644239577%2FProperties%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dispatchers.html"><span><span>dispatchers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="644239577%2FProperties%2F-1433611913"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="dispatchers.html">dispatchers</a><span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="221983590%2FProperties%2F-1433611913" anchor-label="mutex" id="221983590%2FProperties%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mutex.html"><span><span>mutex</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="221983590%2FProperties%2F-1433611913"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="mutex.html">mutex</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.sync/Mutex///PointingToDeclaration/">Mutex</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1300261468%2FProperties%2F-1433611913" anchor-label="provider" id="-1300261468%2FProperties%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="provider.html"><span><span>provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1300261468%2FProperties%2F-1433611913"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="provider.html">provider</a><span class="token operator">: </span><a href="../-authorization-key-value-store-provider/index.html">AuthorizationKeyValueStoreProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-102834620%2FProperties%2F-1433611913" anchor-label="store" id="-102834620%2FProperties%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -203,7 +263,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="store.html">store</a><span class="token operator">: </span><a href="../-authorization-key-value-store/index.html">AuthorizationKeyValueStore</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">store</code> value used by the SDAI authentication feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="store.html">store</a><span class="token operator">: </span><a href="../-authorization-key-value-store/index.html">AuthorizationKeyValueStore</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -222,82 +282,82 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-authorization-credentials.html"><span class="token function">getAuthorizationCredentials</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a></div><div class="brief "><p class="paragraph">Loads SDAI data through <code class="lang-kotlin">getAuthorizationCredentials</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-authorization-credentials.html"><span class="token function">getAuthorizationCredentials</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a></div><div class="brief "><p class="paragraph">Reads a complete legacy record; unavailable or unreadable storage fails explicitly.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1112855673%2FFunctions%2F-1433611913" anchor-label="getCredentials" id="-1112855673%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+<a data-name="-1656385746%2FFunctions%2F-1433611913" anchor-label="openStore" id="-1656385746%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="get-credentials.html"><span>get</span><wbr><span><span>Credentials</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1112855673%2FFunctions%2F-1433611913"></span>
+                  <div><a href="open-store.html"><span>open</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1656385746%2FFunctions%2F-1433611913"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="get-credentials.html"><span class="token function">getCredentials</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/-key/index.html">AuthorizationCredentials.Key</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a></div><div class="brief "><p class="paragraph">Loads SDAI data through <code class="lang-kotlin">getCredentials</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="open-store.html"><span class="token function">openStore</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-authorization-key-value-store/index.html">AuthorizationKeyValueStore</a></div><div class="brief "><p class="paragraph">Opens only on IO under the mutex; initialization failures remain retryable.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="495120582%2FFunctions%2F-1433611913" anchor-label="getCredentialsTypeKey" id="495120582%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+<a data-name="548099027%2FFunctions%2F-1433611913" anchor-label="promote" id="548099027%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="get-credentials-type-key.html"><span>get</span><wbr><span>Credentials</span><wbr><span>Type</span><wbr><span><span>Key</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="495120582%2FFunctions%2F-1433611913"></span>
+                  <div><a href="promote.html"><span><span>promote</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="548099027%2FFunctions%2F-1433611913"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="get-credentials-type-key.html"><span class="token function">getCredentialsTypeKey</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/-key/index.html">AuthorizationCredentials.Key</a></div><div class="brief "><p class="paragraph">Loads SDAI data through <code class="lang-kotlin">getCredentialsTypeKey</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="promote.html"><span class="token function">promote</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">current<span class="token operator">: </span><a href="../-authorization-key-value-store/index.html">AuthorizationKeyValueStore</a><span class="token punctuation">, </span></span><span class="parameter ">pending<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.auth.transaction/-pending-authorization-update/index.html">PendingAuthorizationUpdate</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Atomically promotes a committed candidate and removes only its staging envelope.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="114307055%2FFunctions%2F-1433611913" anchor-label="saveCredentials" id="114307055%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+<a data-name="1795097922%2FFunctions%2F-1433611913" anchor-label="reconcilePending" id="1795097922%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="save-credentials.html"><span>save</span><wbr><span><span>Credentials</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="114307055%2FFunctions%2F-1433611913"></span>
+                  <div><a href="reconcile-pending.html"><span>reconcile</span><wbr><span><span>Pending</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1795097922%2FFunctions%2F-1433611913"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="save-credentials.html"><span class="token function">saveCredentials</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">credentials<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Performs the SDAI side effect handled by <code class="lang-kotlin">saveCredentials</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="reconcile-pending.html"><span class="token function">reconcilePending</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">current<span class="token operator">: </span><a href="../-authorization-key-value-store/index.html">AuthorizationKeyValueStore</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Resolves a durable staging record only from trusted complete configuration persistence.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1865623865%2FFunctions%2F-1433611913" anchor-label="saveCredentialsTypeKey" id="-1865623865%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+<a data-name="-1533955309%2FFunctions%2F-1433611913" anchor-label="resetAuthorizationCredentials" id="-1533955309%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="save-credentials-type-key.html"><span>save</span><wbr><span>Credentials</span><wbr><span>Type</span><wbr><span><span>Key</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1865623865%2FFunctions%2F-1433611913"></span>
+                  <div><a href="reset-authorization-credentials.html"><span>reset</span><wbr><span>Authorization</span><wbr><span><span>Credentials</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1533955309%2FFunctions%2F-1433611913"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="save-credentials-type-key.html"><span class="token function">saveCredentialsTypeKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/-key/index.html">AuthorizationCredentials.Key</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Performs the SDAI side effect handled by <code class="lang-kotlin">saveCredentialsTypeKey</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="reset-authorization-credentials.html"><span class="token function">resetAuthorizationCredentials</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Resets only the legacy credential store after the recovery use case confirms user intent.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1294288566%2FFunctions%2F-1433611913" anchor-label="storeAuthorizationCredentials" id="-1294288566%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
+<a data-name="-1157386213%2FFunctions%2F-1433611913" anchor-label="storeAuthorizationCredentials" id="-1157386213%2FFunctions%2F-1433611913" data-filterable-set=":feature:auth/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:auth/commonMain" data-filterable-set=":feature:auth/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="store-authorization-credentials.html"><span>store</span><wbr><span>Authorization</span><wbr><span><span>Credentials</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1294288566%2FFunctions%2F-1433611913"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1157386213%2FFunctions%2F-1433611913"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="store-authorization-credentials.html"><span class="token function">storeAuthorizationCredentials</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">credentials<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Executes the <code class="lang-kotlin">storeAuthorizationCredentials</code> step in the SDAI authentication feature layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:auth/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="store-authorization-credentials.html"><span class="token function">storeAuthorizationCredentials</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">credentials<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-credentials/index.html">AuthorizationCredentials</a><span class="token punctuation">, </span></span><span class="parameter ">commitConfiguration<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Stages candidates without replacing installed credentials, commits configuration and promotes. An interrupted update is resolved from its durable configuration association before any read.</p></div></div></div>
                 </div>
               </div>
             </div>

@@ -148,24 +148,24 @@
   <div class="breadcrumbs"><a href="../../index.html">presentation</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.presentation.widget.connectivity</a><span class="delimiter">/</span><span class="current">ConnectivityViewModel</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Connectivity</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ConnectivityViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>dispatchersProvider<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>observeServerConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-sever-connectivity-use-case/index.html">ObserveSeverConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>getMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-get-monitor-connectivity-use-case/index.html">GetMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>observeMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-monitor-connectivity-use-case/index.html">ObserveMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onError<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span> : <a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-base-mvi-view-model/index.html">BaseMviViewModel</a><span class="token operator">&lt;</span><a href="../-connectivity-state/index.html">ConnectivityState</a><span class="token punctuation">, </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-empty-intent/index.html">EmptyIntent</a><span class="token punctuation">, </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-empty-effect/index.html">EmptyEffect</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/presentation/src/commonMain/kotlin/com/shifthackz/aisdv1/presentation/widget/connectivity/ConnectivityViewModel.kt#L21">source</a>)</span></span></div><p class="paragraph">Coordinates <code class="lang-kotlin">ConnectivityViewModel</code> behavior in the SDAI presentation layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ConnectivityViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">diagnostics<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dispatchersProvider<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>observeServerConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-sever-connectivity-use-case/index.html">ObserveSeverConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>getMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-get-monitor-connectivity-use-case/index.html">GetMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>observeMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-monitor-connectivity-use-case/index.html">ObserveMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onError<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span> : <a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-base-mvi-view-model/index.html">BaseMviViewModel</a><span class="token operator">&lt;</span><a href="../-connectivity-state/index.html">ConnectivityState</a><span class="token punctuation">, </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-empty-intent/index.html">EmptyIntent</a><span class="token punctuation">, </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-empty-effect/index.html">EmptyEffect</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/presentation/src/commonMain/kotlin/com/shifthackz/aisdv1/presentation/widget/connectivity/ConnectivityViewModel.kt#L24">source</a>)</span></span></div><p class="paragraph">Coordinates <code class="lang-kotlin">ConnectivityViewModel</code> behavior in the SDAI presentation layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>diagnostics</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Injected fixed-capacity opt-in state/composition observer.</p></div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="-1562913218%2FConstructors%2F-1625832475" anchor-label="ConnectivityViewModel" id="-1562913218%2FConstructors%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+        <div class="table"><a data-name="-475604354%2FConstructors%2F-1625832475" anchor-label="ConnectivityViewModel" id="-475604354%2FConstructors%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-connectivity-view-model.html"><span>Connectivity</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1562913218%2FConstructors%2F-1625832475"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-475604354%2FConstructors%2F-1625832475"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dispatchersProvider<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter ">observeServerConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-sever-connectivity-use-case/index.html">ObserveSeverConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">getMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-get-monitor-connectivity-use-case/index.html">GetMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">observeMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-monitor-connectivity-use-case/index.html">ObserveMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">onError<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">diagnostics<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchersProvider<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter ">observeServerConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-sever-connectivity-use-case/index.html">ObserveSeverConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">getMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-get-monitor-connectivity-use-case/index.html">GetMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">observeMonitorConnectivityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-observe-monitor-connectivity-use-case/index.html">ObserveMonitorConnectivityUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">onError<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -215,6 +215,66 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">val </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#629721241%2FProperties%2F-1625832475">currentState</a><span class="token operator">: </span><a href="../-connectivity-state/index.html">ConnectivityState</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-967097248%2FProperties%2F-1625832475" anchor-label="diagnosticAttachments" id="-967097248%2FProperties%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-967097248%2FProperties%2F-1625832475"><span>diagnostic</span><wbr><span><span>Attachments</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-967097248%2FProperties%2F-1625832475"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-967097248%2FProperties%2F-1625832475">diagnosticAttachments</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1197402391%2FProperties%2F-1625832475" anchor-label="diagnosticObserverJob" id="-1197402391%2FProperties%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1197402391%2FProperties%2F-1625832475"><span>diagnostic</span><wbr><span>Observer</span><wbr><span><span>Job</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1197402391%2FProperties%2F-1625832475"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1197402391%2FProperties%2F-1625832475">diagnosticObserverJob</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1650782461%2FProperties%2F-1625832475" anchor-label="diagnosticOwner" id="1650782461%2FProperties%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#1650782461%2FProperties%2F-1625832475"><span>diagnostic</span><wbr><span><span>Owner</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1650782461%2FProperties%2F-1625832475"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#1650782461%2FProperties%2F-1625832475">diagnosticOwner</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="401571997%2FProperties%2F-1625832475" anchor-label="diagnostics" id="401571997%2FProperties%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#401571997%2FProperties%2F-1625832475"><span><span>diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="401571997%2FProperties%2F-1625832475"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#401571997%2FProperties%2F-1625832475">diagnostics</a><span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -275,6 +335,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="get-monitor-connectivity-use-case.html">getMonitorConnectivityUseCase</a><span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.connectivity/-get-monitor-connectivity-use-case/index.html">GetMonitorConnectivityUseCase</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">getMonitorConnectivityUseCase</code> value used by the SDAI presentation layer.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-688096501%2FProperties%2F-1625832475" anchor-label="hasBeenCleared" id="-688096501%2FProperties%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-688096501%2FProperties%2F-1625832475"><span>has</span><wbr><span>Been</span><wbr><span><span>Cleared</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-688096501%2FProperties%2F-1625832475"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-688096501%2FProperties%2F-1625832475">hasBeenCleared</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -358,6 +433,21 @@
               </div>
             </div>
           </div>
+<a data-name="-1967297662%2FFunctions%2F-1625832475" anchor-label="attachDiagnostics" id="-1967297662%2FFunctions%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1967297662%2FFunctions%2F-1625832475"><span>attach</span><wbr><span><span>Diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1967297662%2FFunctions%2F-1625832475"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1967297662%2FFunctions%2F-1625832475"><span class="token function">attachDiagnostics</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-1936886459%2FFunctions%2F-1625832475" anchor-label="clear" id="-1936886459%2FFunctions%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
             <div class="main-subrow keyValue ">
@@ -433,17 +523,32 @@
               </div>
             </div>
           </div>
-<a data-name="-1930136507%2FFunctions%2F-1625832475" anchor-label="onCleared" id="-1930136507%2FFunctions%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+<a data-name="-1831297124%2FFunctions%2F-1625832475" anchor-label="onCleared" id="-1831297124%2FFunctions%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1930136507%2FFunctions%2F-1625832475"><span>on</span><wbr><span><span>Cleared</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1930136507%2FFunctions%2F-1625832475"></span>
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1831297124%2FFunctions%2F-1625832475"><span>on</span><wbr><span><span>Cleared</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1831297124%2FFunctions%2F-1625832475"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1930136507%2FFunctions%2F-1625832475"><span class="token function">onCleared</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#-1831297124%2FFunctions%2F-1625832475"><span class="token function">onCleared</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="557057826%2FFunctions%2F-1625832475" anchor-label="onDiagnosticCaptureChanged" id="557057826%2FFunctions%2F-1625832475" data-filterable-set=":presentation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation/commonMain" data-filterable-set=":presentation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#557057826%2FFunctions%2F-1625832475"><span>on</span><wbr><span>Diagnostic</span><wbr><span>Capture</span><wbr><span><span>Changed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="557057826%2FFunctions%2F-1625832475"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../com.shifthackz.aisdv1.presentation.widget.engine/-engine-selection-view-model/index.html#557057826%2FFunctions%2F-1625832475"><span class="token function">onDiagnosticCaptureChanged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isCapturing<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>

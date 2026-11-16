@@ -1,0 +1,602 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>com.shifthackz.aisdv1.core.mvi.diagnostics</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:ui/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ui/commonMain">common</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":core:ui/iosMain">ios</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:ui/androidMain" data-filter=":core:ui/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:ui/commonMain" data-filter=":core:ui/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:ui/iosMain" data-filter=":core:ui/iosMain">
+                                <span class="checkbox--icon"></span>
+                                ios
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core/ui::com.shifthackz.aisdv1.core.mvi.diagnostics////PointingToDeclaration//890663502">
+  <div class="breadcrumbs"><a href="../index.html">core/ui</a><span class="delimiter">/</span><span class="current">com.shifthackz.aisdv1.core.mvi.diagnostics</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1778151814%2FClasslikes%2F1920980242" anchor-label="AndroidUiDiagnosticTrace" id="1778151814%2FClasslikes%2F1920980242" data-filterable-set=":core:ui/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/androidMain" data-filterable-set=":core:ui/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-android-ui-diagnostic-trace/index.html"><span>Android</span><wbr><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1778151814%2FClasslikes%2F1920980242"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ui/androidMain" data-filterable-set=":core:ui/androidMain" data-active="" data-toggle=":core:ui/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-android-ui-diagnostic-trace/index.html">AndroidUiDiagnosticTrace</a> : <a href="-ui-diagnostic-trace/index.html">UiDiagnosticTrace</a></div><div class="brief "><p class="paragraph">Synchronous platform bridge; the observer admits calls only during explicit capture.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1870731868%2FClasslikes%2F573302660" anchor-label="IosUiDiagnosticTrace" id="-1870731868%2FClasslikes%2F573302660" data-filterable-set=":core:ui/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/iosMain" data-filterable-set=":core:ui/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ios-ui-diagnostic-trace/index.html"><span>Ios</span><wbr><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1870731868%2FClasslikes%2F573302660"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ui/iosMain" data-filterable-set=":core:ui/iosMain" data-active="" data-toggle=":core:ui/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-ios-ui-diagnostic-trace/index.html">IosUiDiagnosticTrace</a> : <a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostic-trace/index.html">UiDiagnosticTrace</a></div><div class="brief "><p class="paragraph">Synchronous platform bridge; the observer admits calls only during explicit capture.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1601528794%2FClasslikes%2F-920980536" anchor-label="NavigationDiagnosticScreen" id="1601528794%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-navigation-diagnostic-screen/index.html"><span>Navigation</span><wbr><span>Diagnostic</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1601528794%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-navigation-diagnostic-screen/index.html">NavigationDiagnosticScreen</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>destination<span class="token operator">: </span><a href="../../../core/navigation/com.shifthackz.aisdv1.core.navigation/-navigation-destination/index.html">NavigationDestination</a></span></span><span class="token punctuation">)</span> : <a href="-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a></div><div class="brief "><p class="paragraph">Fixed destination wrapper cached once per enum value; route arguments never enter diagnostics.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1102921195%2FClasslikes%2F-920980536" anchor-label="NoOpUiDiagnostics" id="1102921195%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-no-op-ui-diagnostics/index.html"><span>No</span><wbr><span>Op</span><wbr><span>Ui</span><wbr><span><span>Diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1102921195%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">object </span><a href="-no-op-ui-diagnostics/index.html">NoOpUiDiagnostics</a> : <a href="-ui-diagnostics/index.html">UiDiagnostics</a></div><div class="brief "><p class="paragraph">Unsupported-platform/release observer; records, exports and screen registration remain inactive.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="569982202%2FClasslikes%2F-920980536" anchor-label="RecordingUiDiagnostics" id="569982202%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-recording-ui-diagnostics/index.html"><span>Recording</span><wbr><span>Ui</span><wbr><span><span>Diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="569982202%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-recording-ui-diagnostics/index.html">RecordingUiDiagnostics</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventCapacity<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">ownerCapacity<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>trace<span class="token operator">: </span><a href="-ui-diagnostic-trace/index.html">UiDiagnosticTrace</a></span></span><span class="token punctuation">)</span> : <a href="-ui-diagnostics/index.html">UiDiagnostics</a></div><div class="brief "><p class="paragraph">Fixed owner-by-subtree counters and an overwrite ring, containing no application object references. Spans correlate synchronous work with observed state revisions, not runtime skips or frame outcomes.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="350860191%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticComponent" id="350860191%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-component/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Component</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="350860191%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-ui-diagnostic-component/index.html">UiDiagnosticComponent</a> : <a href="-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a>, <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-ui-diagnostic-component/index.html">UiDiagnosticComponent</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Non-route owners such as modal dialogs, theme and background-work observers. These labels do not represent navigation destinations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-74392083%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticContext" id="-74392083%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-context/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-74392083%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-ui-diagnostic-context/index.html">UiDiagnosticContext</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>diagnostics<span class="token operator">: </span><a href="-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subtree<span class="token operator">: </span><a href="-ui-diagnostic-subtree/index.html">UiDiagnosticSubtree</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Data-only correlation passed from a composed screen to bounded synchronous decode work.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-537739712%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticCounter" id="-537739712%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-counter/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Counter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-537739712%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ui-diagnostic-counter/index.html">UiDiagnosticCounter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>screen<span class="token operator">: </span><a href="-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>mutationRequests<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>observedEmissions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>compositionCommits<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subtree<span class="token operator">: </span><a href="-ui-diagnostic-subtree/index.html">UiDiagnosticSubtree</a><span class="token operator"> = </span>UiDiagnosticSubtree.SCREEN<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>executions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span><span class="token constant">0</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Aggregated observations for an instrumented screen or subtree wrapper. Commits include its initial composition; independent descendant recompositions are not counted. Emissions exclude the collector's initial state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-982280670%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticEvent" id="-982280670%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-event/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-982280670%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ui-diagnostic-event/index.html">UiDiagnosticEvent</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>elapsedMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>screen<span class="token operator">: </span><a href="-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="-ui-diagnostic-event-type/index.html">UiDiagnosticEventType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>revision<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subtree<span class="token operator">: </span><a href="-ui-diagnostic-subtree/index.html">UiDiagnosticSubtree</a><span class="token operator"> = </span>UiDiagnosticSubtree.SCREEN<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>operation<span class="token operator">: </span><a href="-ui-diagnostic-operation/index.html">UiDiagnosticOperation</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>durationNanos<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">One bounded event without state, intent values or exception details.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1925657720%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticEventType" id="-1925657720%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-event-type/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span>Event</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1925657720%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-ui-diagnostic-event-type/index.html">UiDiagnosticEventType</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-ui-diagnostic-event-type/index.html">UiDiagnosticEventType</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Distinct diagnostic signals; observed emissions may be conflated by StateFlow.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="947480181%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticOperation" id="947480181%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-operation/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Operation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="947480181%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-ui-diagnostic-operation/index.html">UiDiagnosticOperation</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-ui-diagnostic-operation/index.html">UiDiagnosticOperation</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Synchronous operations measured independently from emitted values and completed commits.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-286335031%2FClasslikes%2F-920980536" anchor-label="UiDiagnostics" id="-286335031%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostics/index.html"><span>Ui</span><wbr><span><span>Diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-286335031%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-ui-diagnostics/index.html">UiDiagnostics</a></div><div class="brief "><p class="paragraph">Opt-in non-observable event accumulation, injected through the application composition root. No state values, prompts, credentials or arbitrary labels may enter this boundary.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="952786778%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticScreen" id="952786778%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-screen/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="952786778%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a></div><div class="brief "><p class="paragraph">A bounded diagnostic owner identity. Route identities wrap the shared navigation destination; helper identities never accept arbitrary strings.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-26635042%2FClasslikes%2F890663502" anchor-label="UiDiagnosticsLock" id="-26635042%2FClasslikes%2F890663502" data-filterable-set=":core:ui/commonMain,:core:ui/androidMain,:core:ui/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain,:core:ui/androidMain,:core:ui/iosMain" data-filterable-set=":core:ui/commonMain,:core:ui/androidMain,:core:ui/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostics-lock/index.html"><span>Ui</span><wbr><span>Diagnostics</span><wbr><span><span>Lock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-26635042%2FClasslikes%2F890663502"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ui/androidMain" data-filterable-set=":core:ui/androidMain" data-active="" data-toggle=":core:ui/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain" data-toggle=":core:ui/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:ui/iosMain" data-filterable-set=":core:ui/iosMain" data-toggle=":core:ui/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:ui/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">class </span><a href="-ui-diagnostics-lock/index.html">UiDiagnosticsLock</a></div><div class="brief "><p class="paragraph">Platform lock for short bounded diagnostic memory operations.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">expect </span><span class="token keyword">class </span><a href="-ui-diagnostics-lock/index.html">UiDiagnosticsLock</a></div><div class="brief "><p class="paragraph">Small in-memory critical section; no IO or application callbacks execute while held.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:ui/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">class </span><a href="-ui-diagnostics-lock/index.html">UiDiagnosticsLock</a></div><div class="brief "><p class="paragraph">Platform lock for short bounded diagnostic memory operations.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="427949948%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticSpan" id="427949948%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-span/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="427949948%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-ui-diagnostic-span/index.html">UiDiagnosticSpan</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>screen<span class="token operator">: </span><a href="-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subtree<span class="token operator">: </span><a href="-ui-diagnostic-subtree/index.html">UiDiagnosticSubtree</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>operation<span class="token operator">: </span><a href="-ui-diagnostic-operation/index.html">UiDiagnosticOperation</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>revision<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>epoch<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>elapsedMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>mark<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-time-mark/index.html">TimeMark</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opaque synchronous span containing only code-owned metadata and monotonic timing. Never survives a suspension or retains a ViewModel, state, image, model path or user label.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-254626203%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticsSnapshot" id="-254626203%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostics-snapshot/index.html"><span>Ui</span><wbr><span>Diagnostics</span><wbr><span><span>Snapshot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-254626203%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ui-diagnostics-snapshot/index.html">UiDiagnosticsSnapshot</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>elapsedMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>counters<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-ui-diagnostic-counter/index.html">UiDiagnosticCounter</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>events<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-ui-diagnostic-event/index.html">UiDiagnosticEvent</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>discardedOwners<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>droppedEvents<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span><span class="token constant">0</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Detached bounded capture, suitable for explicit export away from the main thread.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-774978402%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticSubtree" id="-774978402%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-subtree/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Subtree</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-774978402%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-ui-diagnostic-subtree/index.html">UiDiagnosticSubtree</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-ui-diagnostic-subtree/index.html">UiDiagnosticSubtree</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Fixed aggregate subtree labels. Gallery cells share a label and never allocate diagnostic owners.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-724148777%2FClasslikes%2F-920980536" anchor-label="UiDiagnosticTrace" id="-724148777%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-trace/index.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-724148777%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-ui-diagnostic-trace/index.html">UiDiagnosticTrace</a></div><div class="brief "><p class="paragraph">Platform trace bridge used only during explicitly enabled local capture. Sections must begin/end on the same thread without suspension; labels contain fixed enums/numbers.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1660463794%2FProperties%2F-920980536" anchor-label="diagnosticDestinations" id="1660463794%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="diagnostic-destinations.html"><span>diagnostic</span><wbr><span><span>Destinations</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1660463794%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="diagnostic-destinations.html">diagnosticDestinations</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="../../../core/navigation/com.shifthackz.aisdv1.core.navigation/-navigation-destination/index.html">NavigationDestination</a><span class="token punctuation">, </span><a href="-navigation-diagnostic-screen/index.html">NavigationDiagnosticScreen</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-708009483%2FProperties%2F-920980536" anchor-label="LocalUiDiagnosticContext" id="-708009483%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-local-ui-diagnostic-context.html"><span>Local</span><wbr><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-708009483%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-local-ui-diagnostic-context.html">LocalUiDiagnosticContext</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/ProvidableCompositionLocal.html">ProvidableCompositionLocal</a><span class="token operator">&lt;</span><a href="-ui-diagnostic-context/index.html">UiDiagnosticContext</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Optional data context supplied by MVI composition; unsupported platforms and release builds keep the null default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1881228354%2FFunctions%2F-920980536" anchor-label="asDiagnosticScreen" id="1881228354%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="as-diagnostic-screen.html"><span>as</span><wbr><span>Diagnostic</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1881228354%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../../core/navigation/com.shifthackz.aisdv1.core.navigation/-navigation-destination/index.html">NavigationDestination</a><span class="token punctuation">.</span><a href="as-diagnostic-screen.html"><span class="token function">asDiagnosticScreen</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a></div><div class="brief "><p class="paragraph">Returns the cached diagnostic owner for a shared destination without allocating per observation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-121426002%2FFunctions%2F890663502" anchor-label="createUiDiagnosticTrace" id="-121426002%2FFunctions%2F890663502" data-filterable-set=":core:ui/commonMain,:core:ui/androidMain,:core:ui/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain,:core:ui/androidMain,:core:ui/iosMain" data-filterable-set=":core:ui/commonMain,:core:ui/androidMain,:core:ui/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-ui-diagnostic-trace.html"><span>create</span><wbr><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-121426002%2FFunctions%2F890663502"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ui/androidMain" data-filterable-set=":core:ui/androidMain" data-active="" data-toggle=":core:ui/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain" data-toggle=":core:ui/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:ui/iosMain" data-filterable-set=":core:ui/iosMain" data-toggle=":core:ui/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:ui/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-ui-diagnostic-trace.html"><span class="token function">createUiDiagnosticTrace</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ui-diagnostic-trace/index.html">UiDiagnosticTrace</a></div><div class="brief "><p class="paragraph">Supplies the platform bridge through the diagnostics composition root.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="create-ui-diagnostic-trace.html"><span class="token function">createUiDiagnosticTrace</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ui-diagnostic-trace/index.html">UiDiagnosticTrace</a></div><div class="brief "><p class="paragraph">Creates the platform bridge only from the enabled diagnostics DI module.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:ui/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-ui-diagnostic-trace.html"><span class="token function">createUiDiagnosticTrace</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostic-trace/index.html">UiDiagnosticTrace</a></div><div class="brief "><p class="paragraph">Supplies the platform bridge through the diagnostics composition root.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-684677841%2FFunctions%2F-920980536" anchor-label="toExportText" id="-684677841%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-export-text.html"><span>to</span><wbr><span>Export</span><wbr><span><span>Text</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-684677841%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-ui-diagnostics-snapshot/index.html">UiDiagnosticsSnapshot</a><span class="token punctuation">.</span><a href="to-export-text.html"><span class="token function">toExportText</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Formats a bounded detached snapshot without application values or exception messages. Emissions are collector observations, commits include initial compositions; neither is frame time.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1702420773%2FFunctions%2F-920980536" anchor-label="UiDiagnosticSection" id="1702420773%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-diagnostic-section.html"><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Section</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1702420773%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-ui-diagnostic-section.html"><span class="token function">UiDiagnosticSection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">subtree<span class="token operator">: </span><a href="-ui-diagnostic-subtree/index.html">UiDiagnosticSubtree</a><span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Traces this instrumented wrapper's executions and records its applied SideEffects. Descendant restart scopes can recompose independently and are not counted by this wrapper. Counts do not measure skips or frame timing. Inactive normal builds invoke content directly.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1192513853%2FFunctions%2F-920980536" anchor-label="uiDiagnosticsModule" id="1192513853%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ui-diagnostics-module.html"><span>ui</span><wbr><span>Diagnostics</span><wbr><span><span>Module</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1192513853%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="ui-diagnostics-module.html"><span class="token function">uiDiagnosticsModule</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.koin.core.module/Module///PointingToDeclaration/">Module</span></div><div class="brief "><p class="paragraph">Registers the owning module's observer implementation; release builds use the no-op. Supported builds remain idle until capture is selected.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-521700628%2FFunctions%2F-920980536" anchor-label="withUiDiagnosticTrace" id="-521700628%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with-ui-diagnostic-trace.html"><span>with</span><wbr><span>Ui</span><wbr><span>Diagnostic</span><wbr><span><span>Trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-521700628%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="with-ui-diagnostic-trace.html">T</a><span class="token operator">&gt; </span><a href="with-ui-diagnostic-trace.html"><span class="token function">withUiDiagnosticTrace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="-ui-diagnostic-context/index.html">UiDiagnosticContext</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">operation<span class="token operator">: </span><a href="-ui-diagnostic-operation/index.html">UiDiagnosticOperation</a><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="with-ui-diagnostic-trace.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="with-ui-diagnostic-trace.html">T</a></div><div class="brief "><p class="paragraph">Balances a synchronous span without introducing a lambda allocation at the call site. The inline boundary also allows composable content under the pinned Compose compiler.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
