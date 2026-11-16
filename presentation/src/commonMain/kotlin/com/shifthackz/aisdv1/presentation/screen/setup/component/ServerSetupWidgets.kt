@@ -36,6 +36,12 @@ import com.shifthackz.aisdv1.presentation.widget.dialog.ProgressDialog
 import com.shifthackz.aisdv1.presentation.widget.item.SettingsItem
 
 @Composable
+
+/** Displays a setup action row whose tap invokes the supplied action.
+ * @param text Localized visible label for the setup control.
+ * @param icon Icon rendered alongside the action or switch label.
+ * @param onClick Invoked when the user taps the action row.
+ * @author Dmitriy Moroz */
 internal fun SettingsAction(
     text: String,
     icon: ImageVector,
@@ -52,6 +58,13 @@ internal fun SettingsAction(
 }
 
 @Composable
+
+/** Displays a setup toggle and reports the requested checked state to its owner.
+ * @param text Localized visible label for the setup control.
+ * @param icon Icon rendered alongside the action or switch label.
+ * @param checked Current toggle value owned by the setup state.
+ * @param onCheckedChange Receives the requested toggle state; persistence remains with its owner.
+ * @author Dmitriy Moroz */
 internal fun SwitchRow(
     text: String,
     icon: ImageVector,
@@ -77,6 +90,12 @@ internal fun SwitchRow(
 }
 
 @Composable
+
+/** Renders the active setup confirmation/error dialog and maps its buttons to setup intents.
+ * @param modal Active confirmation, source choice or error state.
+ * @param strings Localized strings supplied by the setup composition root.
+ * @param processIntent Routes setup interactions to the owning view model.
+ * @author Dmitriy Moroz */
 internal fun ServerSetupModal(
     modal: ServerSetupState.Modal,
     strings: ServerSetupStrings,
@@ -183,9 +202,14 @@ internal fun ServerSetupModal(
     }
 }
 
+/** Chooses the setup icon for this provider on the supplied platform.
+ * @param platform Platform whose provider availability and readiness apply.
+ * @author Dmitriy Moroz */
+
 internal fun ServerSource.icon(platform: Platform): ImageVector = when (this) {
     ServerSource.AUTOMATIC1111,
     ServerSource.SWARM_UI,
+    ServerSource.EASY_DIFFUSION,
     ServerSource.OPEN_AI_COMPATIBLE,
         -> Icons.Default.Computer
 
@@ -212,9 +236,15 @@ internal fun ServerSource.icon(platform: Platform): ImageVector = when (this) {
     }
 }
 
+/** Returns the localized provider title used by setup.
+ * @param strings Localized strings supplied by the setup composition root.
+ * @param platform Platform whose provider availability and readiness apply.
+ * @author Dmitriy Moroz */
+
 internal fun ServerSource.title(strings: ServerSetupStrings, platform: Platform): String =
     when (this) {
         ServerSource.AUTOMATIC1111 -> strings.automaticTitle
+        ServerSource.EASY_DIFFUSION -> Localization.string("srv_type_easy_diffusion")
         ServerSource.SWARM_UI -> strings.swarmTitle
         ServerSource.HORDE -> strings.hordeTitle
         ServerSource.HUGGING_FACE -> strings.huggingFaceTitle
@@ -234,9 +264,15 @@ internal fun ServerSource.title(strings: ServerSetupStrings, platform: Platform)
         }
     }
 
+/** Returns the localized provider description used by setup.
+ * @param strings Localized strings supplied by the setup composition root.
+ * @param platform Platform whose provider availability and readiness apply.
+ * @author Dmitriy Moroz */
+
 internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platform): String =
     when (this) {
         ServerSource.AUTOMATIC1111 -> strings.automaticSubtitle
+        ServerSource.EASY_DIFFUSION -> Localization.string("easy_diffusion_subtitle")
         ServerSource.SWARM_UI -> strings.swarmSubtitle
         ServerSource.HORDE -> strings.hordeSubtitle
         ServerSource.HUGGING_FACE -> strings.huggingFaceSubtitle
@@ -255,6 +291,10 @@ internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platfo
             Platform.IOS -> strings.bonsaiSubtitle
         }
     }
+
+/** Returns localized inline feedback for this setup validation failure.
+ * @param strings Localized strings supplied by the setup composition root.
+ * @author Dmitriy Moroz */
 
 internal fun ServerSetupState.ValidationError.message(
     strings: ServerSetupStrings,

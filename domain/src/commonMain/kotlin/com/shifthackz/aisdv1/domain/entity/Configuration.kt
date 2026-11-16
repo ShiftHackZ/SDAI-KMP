@@ -8,6 +8,35 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
  * @param authorizationStorageFailure Non-persisted credential error; authCredentials is unavailable when set.
  * @param providerSelectionRevision Durable revision of the selected source; changes on source replacement.
  *
+ * @param serverUrl AUTOMATIC1111 server root used for metadata and generation.
+ * @param easyDiffusionUrl HTTP(S) root or reverse-proxy prefix of the anonymous Easy Diffusion instance.
+ * @param easyDiffusionModel Complete Easy Diffusion checkpoint identifier, including folder separators.
+ * @param swarmUiUrl SwarmUI server root, independent from other self-hosted connections.
+ * @param swarmUiModel Exact selected SwarmUI checkpoint name.
+ * @param demoMode Whether AUTOMATIC1111 uses the configured demonstration endpoint.
+ * @param source Selected provider; replacement increments the durable selection revision.
+ * @param hordeApiKey AI Horde credential; the anonymous key is supported independently of other services.
+ * @param openAiApiKey Official OpenAI API key; separate from compatible servers and OAuth sessions.
+ * @param openAiCompatibleModel Editable image model identifier supplied to the compatible server.
+ * @param openAiCompatibleApiKey Optional bearer token for the independent compatible server.
+ * @param openAiCompatibleUrl Complete HTTP(S) API prefix, including any version and reverse-proxy path.
+ * @param huggingFaceApiKey Hugging Face inference token.
+ * @param huggingFaceModel Selected supported Hugging Face inference model alias.
+ * @param stabilityAiApiKey Stability AI API credential.
+ * @param stabilityAiEngineId Selected Stability AI engine identifier.
+ * @param falAiApiKey Fal.ai API credential.
+ * @param arliAiApiKey ArliAI API credential.
+ * @param authCredentials Shared self-hosted HTTP credentials; anonymous providers publish None.
+ * @param localOnnxModelId Selected downloaded ONNX model identifier.
+ * @param localOnnxModelPath Filesystem path to the selected custom ONNX model.
+ * @param localMediaPipeModelId Selected downloaded MediaPipe model identifier.
+ * @param localMediaPipeModelPath Filesystem path to the selected custom MediaPipe model.
+ * @param localSdxlModelId Selected stable-diffusion.cpp model identifier.
+ * @param localSdxlModelPath Filesystem path to the selected custom stable-diffusion.cpp model.
+ * @param localCoreMlModelId Selected downloaded Core ML model identifier.
+ * @param localCoreMlModelPath Filesystem path to the selected custom Core ML model.
+ * @param localBonsaiModelId Selected downloaded Bonsai model identifier.
+ * @param localBonsaiModelPath Filesystem path to the selected custom Bonsai model.
  * @author Dmitriy Moroz
  */
 data class Configuration(
@@ -19,43 +48,51 @@ data class Configuration(
      */
     val providerSelectionRevision: Long = 0L,
     /**
-     * Exposes the `serverUrl` value used by the SDAI domain layer.
+     * AUTOMATIC1111 server root used for metadata and generation.
      *
      * @author Dmitriy Moroz
      */
     val serverUrl: String = "",
+    /** HTTP(S) root or reverse-proxy prefix of the anonymous Easy Diffusion instance.
+     * @author Dmitriy Moroz
+     */
+    val easyDiffusionUrl: String = "",
+    /** Complete checkpoint identifier from the Easy Diffusion stable-diffusion catalog.
+     * @author Dmitriy Moroz
+     */
+    val easyDiffusionModel: String = "",
     /**
-     * Exposes the `swarmUiUrl` value used by the SDAI domain layer.
+     * SwarmUI server root, independent from other self-hosted connections.
      *
      * @author Dmitriy Moroz
      */
     val swarmUiUrl: String = "",
     /**
-     * Exposes the `swarmUiModel` value used by the SDAI domain layer.
+     * Exact selected SwarmUI checkpoint name.
      *
      * @author Dmitriy Moroz
      */
     val swarmUiModel: String = "",
     /**
-     * Exposes the `demoMode` value used by the SDAI domain layer.
+     * Whether AUTOMATIC1111 uses the configured demonstration endpoint.
      *
      * @author Dmitriy Moroz
      */
     val demoMode: Boolean = false,
     /**
-     * Exposes the `source` value used by the SDAI domain layer.
+     * Selected provider; replacement increments the durable selection revision.
      *
      * @author Dmitriy Moroz
      */
     val source: ServerSource = ServerSource.AUTOMATIC1111,
     /**
-     * Exposes the `hordeApiKey` value used by the SDAI domain layer.
+     * AI Horde credential; the anonymous key is supported independently of other services.
      *
      * @author Dmitriy Moroz
      */
     val hordeApiKey: String = "",
     /**
-     * Exposes the `openAiApiKey` value used by the SDAI domain layer.
+     * Official OpenAI API key; separate from compatible servers and OAuth sessions.
      *
      * @author Dmitriy Moroz
      */
@@ -79,103 +116,103 @@ data class Configuration(
      */
     val openAiCompatibleUrl: String = "",
     /**
-     * Exposes the `huggingFaceApiKey` value used by the SDAI domain layer.
+     * Hugging Face inference token.
      *
      * @author Dmitriy Moroz
      */
     val huggingFaceApiKey: String = "",
     /**
-     * Exposes the `huggingFaceModel` value used by the SDAI domain layer.
+     * Selected supported Hugging Face inference model alias.
      *
      * @author Dmitriy Moroz
      */
     val huggingFaceModel: String = "",
     /**
-     * Exposes the `stabilityAiApiKey` value used by the SDAI domain layer.
+     * Stability AI API credential.
      *
      * @author Dmitriy Moroz
      */
     val stabilityAiApiKey: String = "",
     /**
-     * Exposes the `stabilityAiEngineId` value used by the SDAI domain layer.
+     * Selected Stability AI engine identifier.
      *
      * @author Dmitriy Moroz
      */
     val stabilityAiEngineId: String = "",
     /**
-     * Exposes the `falAiApiKey` value used by the SDAI domain layer.
+     * Fal.ai API credential.
      *
      * @author Dmitriy Moroz
      */
     val falAiApiKey: String = "",
     /**
-     * Exposes the `arliAiApiKey` value used by the SDAI domain layer.
+     * ArliAI API credential.
      *
      * @author Dmitriy Moroz
      */
     val arliAiApiKey: String = "",
     /**
-     * Exposes the `authCredentials` value used by the SDAI domain layer.
+     * Shared self-hosted HTTP credentials; anonymous providers publish None.
      *
      * @author Dmitriy Moroz
      */
     val authCredentials: AuthorizationCredentials = AuthorizationCredentials.None,
     /**
-     * Exposes the `localOnnxModelId` value used by the SDAI domain layer.
+     * Selected downloaded ONNX model identifier.
      *
      * @author Dmitriy Moroz
      */
     val localOnnxModelId: String = "",
     /**
-     * Exposes the `localOnnxModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom ONNX model.
      *
      * @author Dmitriy Moroz
      */
     val localOnnxModelPath: String = "",
     /**
-     * Exposes the `localMediaPipeModelId` value used by the SDAI domain layer.
+     * Selected downloaded MediaPipe model identifier.
      *
      * @author Dmitriy Moroz
      */
     val localMediaPipeModelId: String = "",
     /**
-     * Exposes the `localMediaPipeModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom MediaPipe model.
      *
      * @author Dmitriy Moroz
      */
     val localMediaPipeModelPath: String = "",
     /**
-     * Exposes the `localSdxlModelId` value used by the SDAI domain layer.
+     * Selected stable-diffusion.cpp model identifier.
      *
      * @author Dmitriy Moroz
      */
     val localSdxlModelId: String = "",
     /**
-     * Exposes the `localSdxlModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom stable-diffusion.cpp model.
      *
      * @author Dmitriy Moroz
      */
     val localSdxlModelPath: String = "",
     /**
-     * Exposes the `localCoreMlModelId` value used by the SDAI domain layer.
+     * Selected downloaded Core ML model identifier.
      *
      * @author Dmitriy Moroz
      */
     val localCoreMlModelId: String = "",
     /**
-     * Exposes the `localCoreMlModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom Core ML model.
      *
      * @author Dmitriy Moroz
      */
     val localCoreMlModelPath: String = "",
     /**
-     * Exposes the `localBonsaiModelId` value used by the SDAI domain layer.
+     * Selected downloaded Bonsai model identifier.
      *
      * @author Dmitriy Moroz
      */
     val localBonsaiModelId: String = "",
     /**
-     * Exposes the `localBonsaiModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom Bonsai model.
      *
      * @author Dmitriy Moroz
      */

@@ -1,26 +1,31 @@
 package com.shifthackz.aisdv1.work.task
 
+import com.shifthackz.aisdv1.domain.entity.ServerSource
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
+
+import kotlinx.coroutines.withContext
+
+import com.shifthackz.aisdv1.domain.entity.EasyDiffusionWorkOwner
+
 import android.content.Context
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanup
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadStore
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import androidx.work.WorkerParameters
 import com.shifthackz.aisdv1.core.common.appbuild.ActivityIntentProvider
-import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.notification.PushNotificationManager
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.work.Constants
 import com.shifthackz.aisdv1.work.Constants.NOTIFICATION_IMAGE_TO_IMAGE_FOREGROUND
 import com.shifthackz.aisdv1.work.Constants.NOTIFICATION_IMAGE_TO_IMAGE_GENERIC
 import com.shifthackz.aisdv1.work.core.CoreGenerationWorker
 import com.shifthackz.aisdv1.work.mappers.toImageToImagePayload
 import kotlinx.coroutines.CancellationException
-import java.io.File
 
 /**
  * Background img2img worker.
@@ -35,12 +40,11 @@ import java.io.File
  * @param pushNotificationManager Publishes foreground and terminal notifications.
  * @param activityIntentProvider Opens the app from notifications.
  * @param preferenceManager Supplies the source for legacy work.
+ * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
- * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy runtime progress.
  * @param interruptWorkerGenerationUseCase Cancels captured source work for this worker.
  * @param backgroundWorkObserver Owns background presentation state.
  * @param imageToImageUseCase Routes the existing image-to-image request.
- * @param fileProviderDescriptor Legacy work file location descriptor.
  * @param payloads Reads immutable work input.
  * @param payloadCleanup Cleans up terminal request files and retains retry input.
  * @param nativeGateway Shared native lifecycle dependency of the worker base.
@@ -53,11 +57,10 @@ internal class ImageToImageTask(
     activityIntentProvider: ActivityIntentProvider,
     preferenceManager: PreferenceManager,
     observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
-    observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
+    observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val backgroundWorkObserver: BackgroundWorkObserver,
     private val imageToImageUseCase: ImageToImageUseCase,
-    private val fileProviderDescriptor: FileProviderDescriptor,
     private val payloads: GenerationWorkPayloadStore,
     private val payloadCleanup: GenerationWorkPayloadCleanup,
     nativeGateway: NativeGenerationGateway,
@@ -70,13 +73,16 @@ internal class ImageToImageTask(
     preferenceManager = preferenceManager,
     backgroundWorkObserver = backgroundWorkObserver,
     observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
-    observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
+    observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
 ) {
 
     override val notificationId = NOTIFICATION_IMAGE_TO_IMAGE_FOREGROUND
 
     override val genericNotificationId = NOTIFICATION_IMAGE_TO_IMAGE_GENERIC
+
+    /** Decodes the durable image payload, dispatches it with this exact worker UUID and reports completion or failure.
+     * @author Dmitriy Moroz */
 
     override suspend fun doWork(): Result {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {
@@ -98,10 +104,18 @@ internal class ImageToImageTask(
                 return Result.failure()
             }
 
+            source = payload.sourceSnapshot ?: source
+            check(runAttemptCount == 0 || source != ServerSource.EASY_DIFFUSION) { "Interrupted Easy Diffusion work requires an explicit retry" }
             listenSourceStatus()
 
             handleProcess()
-            runCatching { imageToImageUseCase(payload) }
+            runCatching {
+                withContext(EasyDiffusionWorkOwner(id.toString())) {
+                    imageToImageUseCase(
+                        payload
+                    )
+                }
+            }
                 .fold(
                     onSuccess = { result ->
                         handleSuccess(result)

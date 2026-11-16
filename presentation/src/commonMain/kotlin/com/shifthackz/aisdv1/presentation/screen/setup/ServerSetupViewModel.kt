@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.presentation.screen.setup
 
+import com.shifthackz.aisdv1.domain.entity.EasyDiffusionTimeoutFailure
+import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToEasyDiffusionUseCase
+
 import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
 import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
@@ -114,6 +117,10 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param setServerConfigurationUseCase Commits the selected source after a completed login.
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
+ * @param connectToEasyDiffusionUseCase Validates candidate readiness/catalog before atomically publishing an anonymous connection.
+ * @param getLocalBonsaiModelsUseCase Reads downloaded and custom Bonsai models available to provider setup.
+ * @param connectToBonsaiUseCase Publishes the selected Bonsai model and independent local runtime configuration.
+ * @param connectToArliAiUseCase Validates ArliAI credentials and publishes the selected remote source.
  * @author Dmitriy Moroz
  * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
@@ -142,6 +149,7 @@ class ServerSetupViewModel(
     private val connectToCoreMlUseCase: ConnectToCoreMlUseCase,
     private val connectToBonsaiUseCase: ConnectToBonsaiUseCase,
     private val connectToOpenAiCompatibleUseCase: ConnectToOpenAiCompatibleUseCase,
+    private val connectToEasyDiffusionUseCase: ConnectToEasyDiffusionUseCase,
     private val connectToOpenAiUseCase: ConnectToOpenAiUseCase,
     private val connectToStabilityAiUseCase: ConnectToStabilityAiUseCase,
     private val connectToFalAiUseCase: ConnectToFalAiUseCase,
@@ -285,6 +293,10 @@ class ServerSetupViewModel(
         connectToServer = ::connectToServer,
     )
 
+    /** Routes a user intent to its state transition or authorized side-effect handler.
+     * @param intent User event emitted by this screen’s production controls.
+     * @author Dmitriy Moroz */
+
     override fun processIntent(intent: ServerSetupIntent) {
         when (intent) {
             ServerSetupIntent.RetryAuthorizationStorage -> {
@@ -361,6 +373,9 @@ class ServerSetupViewModel(
         cancelOAuthLogin()
         viewModelScope.cancel()
     }
+
+    /** Validates active provider inputs and starts connection only when the form has no blocking errors.
+     * @author Dmitriy Moroz */
 
     private fun validateAndConnectToServer() {
         if (currentState.isAuthorizationStorageBusy) return
@@ -461,6 +476,9 @@ class ServerSetupViewModel(
         }
     }
 
+    /** Publishes current provider validation feedback and returns whether connection may proceed.
+     * @author Dmitriy Moroz */
+
     private fun validate(): Boolean {
         val result = currentState.validateServerSetup(
             urlValidator = urlValidator,
@@ -471,6 +489,9 @@ class ServerSetupViewModel(
         return result.isValid
     }
 
+    /** Dispatches the selected provider’s connection operation and reports loading or failure through setup state.
+     * @author Dmitriy Moroz */
+
     private fun connectToServer() {
         emitEffect(ServerSetupEffect.HideKeyboard)
         updateState { it.copy(modal = ServerSetupState.Modal.Communicating) }
@@ -480,6 +501,7 @@ class ServerSetupViewModel(
                 when (currentState.mode) {
                     ServerSource.AUTOMATIC1111 -> connectToAutomaticInstance()
                     ServerSource.SWARM_UI -> connectToSwarmUi()
+                    ServerSource.EASY_DIFFUSION -> connectToEasyDiffusionUseCase(currentState.easyDiffusionUrl)
                     ServerSource.HORDE -> connectToHorde()
                     ServerSource.HUGGING_FACE -> connectToHuggingFace()
                     ServerSource.OPEN_AI_COMPATIBLE -> connectToOpenAiCompatibleUseCase(
@@ -528,7 +550,8 @@ class ServerSetupViewModel(
                         updateState { state ->
                             state.copy(
                                 modal = ServerSetupState.Modal.Error(
-                                    (t as? AuthorizationStorageFailure)?.localizedDescription()
+                                    (if (t is EasyDiffusionTimeoutFailure) Localization.string("easy_diffusion_timeout") else null)
+                                        ?: (t as? AuthorizationStorageFailure)?.localizedDescription()
                                         ?: (t as? OpenAiOAuthFailure)?.localizedDescription()
                                         ?: (t as? OpenAiCompatibleHttpFailure)?.localizedDescription()
                                         ?: t.message ?: Localization.string("error_invalid"),
@@ -542,11 +565,17 @@ class ServerSetupViewModel(
         }
     }
 
+    /** Clears the forced-setup flag, closes progress and navigates through post-setup configuration loading.
+     * @author Dmitriy Moroz */
+
     private fun finishConnection() {
         preferenceManager.forceSetupAfterUpdate = false
         updateState { it.copy(modal = ServerSetupState.Modal.None) }
         router.navigateToPostSetupConfigLoader()
     }
+
+    /** Applies the candidate AUTOMATIC1111 endpoint, demonstration option and HTTP authorization.
+     * @author Dmitriy Moroz */
 
     private suspend fun connectToAutomaticInstance(): Result<Unit> {
         val isDemo = currentState.demoMode
@@ -558,10 +587,16 @@ class ServerSetupViewModel(
         )
     }
 
+    /** Applies the candidate SwarmUI endpoint and supported HTTP authorization.
+     * @author Dmitriy Moroz */
+
     private suspend fun connectToSwarmUi(): Result<Unit> = connectToSwarmUiUseCase(
         url = currentState.swarmUiUrl,
         credentials = currentState.credentialsDomain(),
     )
+
+    /** Applies the candidate AI Horde key or its explicitly selected anonymous default.
+     * @author Dmitriy Moroz */
 
     private suspend fun connectToHorde(): Result<Unit> = connectToHordeUseCase(
         apiKey = if (currentState.hordeDefaultApiKey) {
@@ -571,46 +606,76 @@ class ServerSetupViewModel(
         },
     )
 
+    /** Applies the Hugging Face token and supported inference model.
+     * @author Dmitriy Moroz */
+
     private suspend fun connectToHuggingFace(): Result<Unit> = connectToHuggingFaceUseCase(
         apiKey = currentState.huggingFaceApiKey,
         model = currentState.huggingFaceModel,
     )
 
+    /** Applies the official OpenAI API key independently of compatible servers and OAuth sessions.
+     * @author Dmitriy Moroz */
+
     private suspend fun connectToOpenAi(): Result<Unit> = connectToOpenAiUseCase(
         apiKey = currentState.openAiApiKey,
     )
+
+    /** Applies the candidate Stability AI API key and completes provider setup.
+     * @author Dmitriy Moroz */
 
     private suspend fun connectToStabilityAi(): Result<Unit> = connectToStabilityAiUseCase(
         apiKey = currentState.stabilityAiApiKey,
     )
 
+    /** Applies the candidate Fal.ai API key and completes provider setup.
+     * @author Dmitriy Moroz */
+
     private suspend fun connectToFalAi(): Result<Unit> = connectToFalAiUseCase(
         apiKey = currentState.falAiApiKey,
     )
 
+    /** Applies the candidate ArliAI API key and completes provider setup.
+     * @author Dmitriy Moroz */
+
     private suspend fun connectToArliAi(): Result<Unit> = connectToArliAiUseCase(
         apiKey = currentState.arliAiApiKey,
     )
+
+    /** Applies the selected downloaded or custom ONNX model to local generation.
+     * @author Dmitriy Moroz */
 
     private suspend fun connectToLocalDiffusion(): Result<Unit> = connectToLocalDiffusionUseCase(
         modelId = currentState.localOnnxModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localOnnxCustomModelPath,
     )
 
+    /** Applies the selected downloaded or custom MediaPipe model to local generation.
+     * @author Dmitriy Moroz */
+
     private suspend fun connectToMediaPipe(): Result<Unit> = connectToMediaPipeUseCase(
         modelId = currentState.localMediaPipeModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localMediaPipeCustomModelPath,
     )
+
+    /** Applies the selected downloaded or custom stable-diffusion.cpp model.
+     * @author Dmitriy Moroz */
 
     private suspend fun connectToSdxl(): Result<Unit> = connectToSdxlUseCase(
         modelId = currentState.localSdxlModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localSdxlCustomModelPath,
     )
 
+    /** Applies the selected downloaded or custom Core ML model.
+     * @author Dmitriy Moroz */
+
     private suspend fun connectToCoreMl(): Result<Unit> = connectToCoreMlUseCase(
         modelId = currentState.localCoreMlModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localCoreMlCustomModelPath,
     )
+
+    /** Applies the selected downloaded or custom Bonsai model.
+     * @author Dmitriy Moroz */
 
     private suspend fun connectToBonsai(): Result<Unit> {
         return connectToBonsaiUseCase(
@@ -619,7 +684,14 @@ class ServerSetupViewModel(
         )
     }
 
+    /** Opens the appropriate download-source, deletion or unsupported-model confirmation for a local catalog item.
+     * @param value Clicked model and its current downloaded/source state.
+     * @author Dmitriy Moroz */
+
     private fun localModelDownloadClickReducer(value: ServerSetupState.LocalModel) {
+
+        /** Finds the active provider’s selected local model or fails when the selection is unavailable.
+         * @author Dmitriy Moroz */
         fun localModel(): ServerSetupState.LocalModel =
             currentState.localModels.firstOrNull { it.id == value.id }
                 ?.let { value.copy(selected = it.selected) }
@@ -646,6 +718,11 @@ class ServerSetupViewModel(
         }
     }
 
+    /** Checks platform download prerequisites before launching the selected model archive download.
+     * @param modelId Stable local model identifier associated with the chosen download.
+     * @param url Chosen local model archive source.
+     * @author Dmitriy Moroz */
+
     private fun download(modelId: String, url: String) {
         val localModel = currentState.localModels.firstOrNull { it.id == modelId } ?: return
 
@@ -661,6 +738,11 @@ class ServerSetupViewModel(
         downloadJobs[localModel.id] = job
         job.start()
     }
+
+    /** Downloads the chosen archive in the view-model scope and publishes model/storage state changes.
+     * @param localModel Local catalog item whose download state is being changed.
+     * @param url Chosen local model archive source.
+     * @author Dmitriy Moroz */
 
     private fun scopeLaunchDownload(
         localModel: ServerSetupState.LocalModel,
@@ -694,6 +776,11 @@ class ServerSetupViewModel(
             }
         }
 
+    /** Updates the failed local download state and forwards the underlying failure to the application error sink.
+     * @param localModel Local catalog item whose download state is being changed.
+     * @param t Underlying generation or download failure.
+     * @author Dmitriy Moroz */
+
     private fun onDownloadFailure(localModel: ServerSetupState.LocalModel, t: Throwable) {
         updateState { state ->
             state
@@ -708,6 +795,10 @@ class ServerSetupViewModel(
         }
         onError(t)
     }
+
+    /** Deletes a downloaded model and invalidates model/storage state for the active setup screen.
+     * @param id Stable local model or custom-model identifier to select or delete.
+     * @author Dmitriy Moroz */
 
     private fun deleteLocalModel(id: String) {
         launch(dispatchersProvider.io) {

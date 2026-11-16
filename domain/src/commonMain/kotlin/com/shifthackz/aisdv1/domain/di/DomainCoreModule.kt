@@ -1,5 +1,32 @@
 package com.shifthackz.aisdv1.domain.di
 
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.SelectEasyDiffusionModelUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.SelectEasyDiffusionModelUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.CaptureEasyDiffusionConnectionUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.CaptureEasyDiffusionConnectionUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.connectivity.TestEasyDiffusionConnectivityUseCase
+import com.shifthackz.aisdv1.domain.usecase.connectivity.TestEasyDiffusionConnectivityUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToEasyDiffusionUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToEasyDiffusionUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GenerateEasyDiffusionUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GenerateEasyDiffusionUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.InterruptEasyDiffusionUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.InterruptEasyDiffusionUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GetEasyDiffusionModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GetEasyDiffusionModelsUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.FetchEasyDiffusionModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.FetchEasyDiffusionModelsUseCaseImpl
+
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.domain.gateway.NoOpNativeGenerationGateway
 import com.shifthackz.aisdv1.domain.usecase.arliai.FetchAndGetArliAiModelsUseCase
@@ -121,8 +148,6 @@ import com.shifthackz.aisdv1.domain.usecase.generation.GetRandomImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.GetRandomImageUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCaseImpl
-import com.shifthackz.aisdv1.domain.usecase.generation.InterruptGenerationUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.InterruptGenerationUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
@@ -386,6 +411,8 @@ val coreDomainModule = module {
     }
     factory<TextToImageUseCase> {
         TextToImageUseCaseImpl(
+            generateEasyDiffusionUseCase = get(),
+            captureEasyDiffusionConnectionUseCase = get(),
             stableDiffusionGenerationRepository = get(),
             hordeGenerationRepository = get(),
             huggingFaceGenerationRepository = get(),
@@ -406,6 +433,8 @@ val coreDomainModule = module {
     }
     factory<ImageToImageUseCase> {
         ImageToImageUseCaseImpl(
+            generateEasyDiffusionUseCase = get(),
+            captureEasyDiffusionConnectionUseCase = get(),
             stableDiffusionGenerationRepository = get(),
             swarmUiGenerationRepository = get(),
             hordeGenerationRepository = get(),
@@ -437,15 +466,9 @@ val coreDomainModule = module {
             stableDiffusionCppGenerationRepository = get(),
         )
     }
-    factory<InterruptGenerationUseCase> {
-        InterruptGenerationUseCaseImpl(
-            preferenceManager = get(),
-            nativeGenerationGateway = get(),
-            interruptSourceGenerationUseCase = get(),
-        )
-    }
     factory<InterruptWorkerGenerationUseCase> {
         InterruptWorkerGenerationUseCaseImpl(
+            interruptEasyDiffusionUseCase = get(),
             nativeGenerationGateway = get(),
             interruptSourceGenerationUseCase = get(),
             buildInfoProvider = get(),
@@ -611,6 +634,34 @@ val coreDomainModule = module {
             setServerConfigurationUseCase = get(),
         )
     }
+    factory<TestEasyDiffusionConnectivityUseCase> { TestEasyDiffusionConnectivityUseCaseImpl(get()) }
+    factory<ConnectToEasyDiffusionUseCase> {
+        ConnectToEasyDiffusionUseCaseImpl(
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    factory<CaptureEasyDiffusionConnectionUseCase> {
+        CaptureEasyDiffusionConnectionUseCaseImpl(
+            get(),
+            get()
+        )
+    }
+    factory<SelectEasyDiffusionModelUseCase> {
+        SelectEasyDiffusionModelUseCaseImpl(
+            get(),
+            get(),
+            get()
+        )
+    }
+    factory<FetchEasyDiffusionModelsUseCase> { FetchEasyDiffusionModelsUseCaseImpl(get()) }
+    factory<GetEasyDiffusionModelsUseCase> { GetEasyDiffusionModelsUseCaseImpl(get()) }
+    factory<ObserveEasyDiffusionProgressUseCase> { ObserveEasyDiffusionProgressUseCaseImpl(get()) }
+    factory<InterruptEasyDiffusionUseCase> { InterruptEasyDiffusionUseCaseImpl(get()) }
+    factory<GenerateEasyDiffusionUseCase> { GenerateEasyDiffusionUseCaseImpl(get(), get(), get()) }
     factory<ConnectToOpenAiCompatibleUseCase> {
         DefaultConnectToOpenAiCompatibleUseCaseImpl(
             repository = get(),

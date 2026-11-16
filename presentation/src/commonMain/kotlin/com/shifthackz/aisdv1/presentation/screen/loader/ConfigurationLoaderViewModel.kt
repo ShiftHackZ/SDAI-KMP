@@ -17,42 +17,27 @@ import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Coordinates `ConfigurationLoaderViewModel` behavior in the SDAI presentation layer.
+ * Loads only metadata required by the selected provider before navigating home; unsupported preload paths never invoke AUTOMATIC1111 metadata.
  *
+ * @param dispatchersProvider Application dispatchers for background I/O and immediate UI state updates.
+ * @param dataPreLoaderUseCase Existing AUTOMATIC1111/Swarm metadata preload; bypassed for independent providers.
+ * @param getConfigurationUseCase Reads every provider’s independent saved settings and the selected source revision.
+ * @param router Navigation destination owner after configuration loading.
+ * @param onError Reports loading failures through the application error sink.
+ * @param diagnostics Application UI diagnostics sink used by the normal view-model lifecycle.
  * @author Dmitriy Moroz
- * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class ConfigurationLoaderViewModel(
     diagnostics: UiDiagnostics,
-    /**
-     * Exposes the `dispatchersProvider` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
+
     private val dispatchersProvider: DispatchersProvider,
-    /**
-     * Exposes the `dataPreLoaderUseCase` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
+
     private val dataPreLoaderUseCase: DataPreLoaderUseCase,
-    /**
-     * Exposes the `getConfigurationUseCase` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
+
     private val getConfigurationUseCase: GetConfigurationUseCase,
-    /**
-     * Exposes the `router` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
+
     private val router: ConfigurationLoaderRouter,
-    /**
-     * Exposes the `onError` value used by the SDAI presentation layer.
-     *
-     * @author Dmitriy Moroz
-     */
+
     private val onError: (Throwable) -> Unit = {},
 ) : BaseMviViewModel<ConfigurationLoaderState, EmptyIntent, EmptyEffect>(
     diagnostics = diagnostics,
@@ -88,24 +73,29 @@ class ConfigurationLoaderViewModel(
         }
     }
 
+    /** Ignores empty intents because initialization alone drives preload and home navigation.
+     * @param intent Empty event accepted by the shared MVI contract; it does not restart loading.
+     * @author Dmitriy Moroz */
+
     override fun processIntent(intent: EmptyIntent) = Unit
 }
 
 /**
- * Exposes the `STARTUP_PRELOAD_TIMEOUT_MILLIS` value used by the SDAI presentation layer.
+ * Maximum time startup waits for legacy remote metadata before allowing home navigation.
  *
  * @author Dmitriy Moroz
  */
 private const val STARTUP_PRELOAD_TIMEOUT_MILLIS = 3_000L
 
 /**
- * Executes the `requiresRemotePreload` step in the SDAI presentation layer.
+ * Restricts legacy metadata preloading to configured AUTOMATIC1111 and SwarmUI instances.
  *
  * @author Dmitriy Moroz
  */
 private fun Configuration.requiresRemotePreload(): Boolean = when (source) {
     ServerSource.AUTOMATIC1111 -> serverUrl.isMobileRemoteEndpoint()
     ServerSource.SWARM_UI -> swarmUiUrl.isMobileRemoteEndpoint()
+    ServerSource.EASY_DIFFUSION,
     ServerSource.HORDE,
     ServerSource.HUGGING_FACE,
     ServerSource.OPEN_AI,
@@ -123,9 +113,8 @@ private fun Configuration.requiresRemotePreload(): Boolean = when (source) {
 }
 
 /**
- * Executes the `isMobileRemoteEndpoint` step in the SDAI presentation layer.
+ * Checks that a saved endpoint is nonempty and does not point at the mobile device’s loopback interface.
  *
- * @return Result produced by `isMobileRemoteEndpoint`.
  * @author Dmitriy Moroz
  */
 private fun String.isMobileRemoteEndpoint(): Boolean {

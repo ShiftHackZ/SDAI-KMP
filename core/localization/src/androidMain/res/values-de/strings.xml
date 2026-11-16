@@ -710,4 +710,15 @@
     <string name="native_generation_stage_decoding">Bild wird dekodiert…</string>
     <string name="native_generation_stage_running">Bildgenerator wird ausgeführt…</string>
     <string name="native_generation_stage_writing_result">Ergebnis wird gespeichert…</string>
+
+    <string name="srv_type_easy_diffusion">Easy Diffusion</string>
+    <string name="easy_diffusion_subtitle">Bilder auf deinem eigenen Easy-Diffusion-Server erstellen.</string>
+    <string name="easy_diffusion_setup_hint">Aktiviere die Netzwerkfreigabe in den Easy-Diffusion-Einstellungen, speichere und starte neu. Gib die LAN-Adresse des Computers ein, z. B. http://192.168.1.10:9000. Diese Verbindung verwendet kein Passwort.</string>
+    <string name="easy_diffusion_sampler">Sampler: DDIM (fest)</string>
+    <string name="easy_diffusion_models_failed">Checkpoints konnten nicht geladen werden. Prüfe die Verbindung und aktualisiere die Liste.</string>
+    <string name="easy_diffusion_models_empty">Installiere einen SD1.5-Checkpoint auf dem Server, aktualisiere die Liste und wähle ihn aus.</string>
+    <string name="easy_diffusion_refresh_models">Checkpoints aktualisieren</string>
+    <string name="easy_diffusion_failure">Easy Diffusion konnte die Anfrage nicht abschließen. Prüfe Server, Verbindung und ausgewählten Checkpoint und versuche es erneut.</string>
+    <string name="easy_diffusion_timeout">Easy Diffusion hat das Zeitlimit überschritten. Prüfe Server und Zeitlimit und versuche es erneut. Ohne Empfangsbestätigung ist der Abschluss auf dem Server unbekannt.</string>
+    <string name="easy_diffusion_submission_unknown">Die Easy-Diffusion-Anfrage wurde nicht bestätigt. Der Abschluss auf dem Server ist unbekannt. Prüfe den Server vor einem erneuten Versuch.</string>
 </resources>

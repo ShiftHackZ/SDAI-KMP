@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.widget.input
 
 import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
+import com.shifthackz.aisdv1.core.validation.di.easyDiffusionSeedValidatorQualifier
 import com.shifthackz.aisdv1.core.validation.di.validatorsModule
 import com.shifthackz.aisdv1.core.validation.seed.SeedValidator
 import com.shifthackz.aisdv1.domain.entity.ServerSource
@@ -23,7 +24,10 @@ import org.koin.dsl.koinApplication
 class GenerationSeedValidationTest {
     private val dependencyGraph = koinApplication { modules(validatorsModule) }
     private val validator = dependencyGraph.koin.get<SeedValidator>()
-    private val nativeValidator = dependencyGraph.koin.get<SeedValidator>(nativeSeedValidatorQualifier)
+    private val easyDiffusionValidator =
+        dependencyGraph.koin.get<SeedValidator>(easyDiffusionSeedValidatorQualifier)
+    private val nativeValidator =
+        dependencyGraph.koin.get<SeedValidator>(nativeSeedValidatorQualifier)
 
     @After
     fun closeDependencies() {
@@ -33,11 +37,14 @@ class GenerationSeedValidationTest {
     @Test
     fun `either unsafe web seed blocks both generation screen states`() {
         listOf(ServerSource.AUTOMATIC1111, ServerSource.SWARM_UI).forEach { mode ->
-            listOf("6687881544318117707" to "", "" to "9007199254740992").forEach { (seed, subSeed) ->
+            listOf(
+                "6687881544318117707" to "",
+                "" to "9007199254740992"
+            ).forEach { (seed, subSeed) ->
                 val textState = TextToImageState(mode = mode, seed = seed, subSeed = subSeed)
-                    .withSeedValidation(validator, nativeValidator)
+                    .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
                 val imageState = ImageToImageState(mode = mode, seed = seed, subSeed = subSeed)
-                    .withSeedValidation(validator, nativeValidator)
+                    .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
                 assertTrue(textState.hasValidationErrors)
                 assertFalse(textState.canGenerate())
                 assertTrue(imageState.hasValidationErrors)
@@ -48,11 +55,15 @@ class GenerationSeedValidationTest {
 
     @Test
     fun `hidden seed fields cannot block providers without seed controls`() {
-        listOf(ServerSource.OPEN_AI, ServerSource.OPEN_AI_COMPATIBLE, ServerSource.OPEN_AI_OAUTH).forEach { mode ->
+        listOf(
+            ServerSource.OPEN_AI,
+            ServerSource.OPEN_AI_COMPATIBLE,
+            ServerSource.OPEN_AI_OAUTH
+        ).forEach { mode ->
             val textState = TextToImageState(mode = mode, seed = "invalid", subSeed = "invalid")
-                .withSeedValidation(validator, nativeValidator)
+                .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
             val imageState = ImageToImageState(mode = mode, seed = "invalid", subSeed = "invalid")
-                .withSeedValidation(validator, nativeValidator)
+                .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
             assertNull(textState.seedValidationError)
             assertNull(textState.subSeedValidationError)
             assertFalse(textState.hasValidationErrors)
@@ -68,35 +79,53 @@ class GenerationSeedValidationTest {
             mode = ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
             seed = Long.MAX_VALUE.toString(),
             subSeed = "invalid hidden variation",
-        ).withSeedValidation(validator, nativeValidator)
+        ).withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
         assertFalse(textState.hasValidationErrors)
         val webTextState = textState.copy(mode = ServerSource.AUTOMATIC1111)
-            .withSeedValidation(validator, nativeValidator)
+            .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
         assertNotNull(webTextState.seedValidationError)
         assertNotNull(webTextState.subSeedValidationError)
-        assertFalse(webTextState.copy(mode = textState.mode).withSeedValidation(validator, nativeValidator).hasValidationErrors)
+        assertFalse(
+            webTextState.copy(mode = textState.mode).withSeedValidation(
+                validator,
+                nativeValidator,
+                easyDiffusionValidator
+            ).hasValidationErrors
+        )
 
         val imageState = ImageToImageState(
             mode = ServerSource.LOCAL_APPLE_CORE_ML,
             seed = Long.MAX_VALUE.toString(),
             subSeed = "invalid hidden variation",
-        ).withSeedValidation(validator, nativeValidator)
+        ).withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
         assertFalse(imageState.hasValidationErrors)
         val webImageState = imageState.copy(mode = ServerSource.SWARM_UI)
-            .withSeedValidation(validator, nativeValidator)
+            .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
         assertNotNull(webImageState.seedValidationError)
         assertNotNull(webImageState.subSeedValidationError)
-        assertFalse(webImageState.copy(mode = imageState.mode).withSeedValidation(validator, nativeValidator).hasValidationErrors)
+        assertFalse(
+            webImageState.copy(mode = imageState.mode).withSeedValidation(
+                validator,
+                nativeValidator,
+                easyDiffusionValidator
+            ).hasValidationErrors
+        )
     }
 
     @Test
     fun `server randomness and exact web maximum do not block submission validation`() {
         listOf("", "-1", "0", "9007199254740991").forEach { seed ->
             val textState = TextToImageState(seed = seed, subSeed = seed)
-                .withSeedValidation(validator, nativeValidator)
+                .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
             assertFalse(textState.hasValidationErrors)
             assertTrue(textState.canGenerate())
-            assertFalse(ImageToImageState(seed = seed, subSeed = seed).withSeedValidation(validator, nativeValidator).hasValidationErrors)
+            assertFalse(
+                ImageToImageState(seed = seed, subSeed = seed).withSeedValidation(
+                    validator,
+                    nativeValidator,
+                    easyDiffusionValidator
+                ).hasValidationErrors
+            )
         }
     }
 }

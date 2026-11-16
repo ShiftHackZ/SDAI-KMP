@@ -5,62 +5,72 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 
 /**
- * Defines the `ConfigurationStore` contract for the SDAI domain layer.
+ * Independent provider preference contract plus complete checked configuration replacement; credentials are supplied separately.
  *
  * @author Dmitriy Moroz
  */
 interface ConfigurationStore {
     /**
-     * Exposes the `automatic1111ServerUrl` value used by the SDAI domain layer.
+     * Persisted AUTOMATIC1111 server root, independent from other providers.
      *
      * @author Dmitriy Moroz
      */
     var automatic1111ServerUrl: String
 
     /**
-     * Exposes the `swarmUiServerUrl` value used by the SDAI domain layer.
+     * Persisted SwarmUI server root; normalized without changing the protocol delimiter.
      *
      * @author Dmitriy Moroz
      */
     var swarmUiServerUrl: String
 
+    /** HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+     * @author Dmitriy Moroz
+     */
+    var easyDiffusionUrl: String
+
+    /** Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+     * @author Dmitriy Moroz
+     */
+    var easyDiffusionModel: String
+
     /**
-     * Exposes the `swarmUiModel` value used by the SDAI domain layer.
+     * Exact selected SwarmUI checkpoint name.
      *
      * @author Dmitriy Moroz
      */
     var swarmUiModel: String
 
     /**
-     * Exposes the `demoMode` value used by the SDAI domain layer.
+     * Whether AUTOMATIC1111 uses the configured demonstration endpoint.
      *
      * @author Dmitriy Moroz
      */
     var demoMode: Boolean
 
     /**
-     * Exposes the `source` value used by the SDAI domain layer.
+     * Selected provider; replacement increments the durable selection revision.
      *
      * @author Dmitriy Moroz
      */
     var source: ServerSource
 
     /**
-     * Durable source-selection revision; a source changed away and back has a newer revision.
+     * Durable selection revision; source replacement or selected Easy Diffusion URL/model changes advance it.
      *
      * @author Dmitriy Moroz
      */
     val providerSelectionRevision: Long
 
     /**
-     * Exposes the `hordeApiKey` value used by the SDAI domain layer.
+     * AI Horde credential; the anonymous key is supported independently of other services.
      *
      * @author Dmitriy Moroz
      */
     var hordeApiKey: String
 
     /**
-     * Exposes the `openAiApiKey` value used by the SDAI domain layer.
+     * Official OpenAI API key; separate from compatible servers and OAuth sessions.
      *
      * @author Dmitriy Moroz
      */
@@ -88,112 +98,112 @@ interface ConfigurationStore {
     var openAiCompatibleUrl: String
 
     /**
-     * Exposes the `huggingFaceApiKey` value used by the SDAI domain layer.
+     * Hugging Face inference token.
      *
      * @author Dmitriy Moroz
      */
     var huggingFaceApiKey: String
 
     /**
-     * Exposes the `huggingFaceModel` value used by the SDAI domain layer.
+     * Selected supported Hugging Face inference model alias.
      *
      * @author Dmitriy Moroz
      */
     var huggingFaceModel: String
 
     /**
-     * Exposes the `stabilityAiApiKey` value used by the SDAI domain layer.
+     * Stability AI API credential.
      *
      * @author Dmitriy Moroz
      */
     var stabilityAiApiKey: String
 
     /**
-     * Exposes the `stabilityAiEngineId` value used by the SDAI domain layer.
+     * Selected Stability AI engine identifier.
      *
      * @author Dmitriy Moroz
      */
     var stabilityAiEngineId: String
 
     /**
-     * Exposes the `falAiApiKey` value used by the SDAI domain layer.
+     * Fal.ai API credential.
      *
      * @author Dmitriy Moroz
      */
     var falAiApiKey: String
 
     /**
-     * Exposes the `arliAiApiKey` value used by the SDAI domain layer.
+     * ArliAI API credential.
      *
      * @author Dmitriy Moroz
      */
     var arliAiApiKey: String
 
     /**
-     * Exposes the `localOnnxModelId` value used by the SDAI domain layer.
+     * Selected downloaded ONNX model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxModelId: String
 
     /**
-     * Exposes the `localOnnxModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom ONNX model.
      *
      * @author Dmitriy Moroz
      */
     var localOnnxModelPath: String
 
     /**
-     * Exposes the `localMediaPipeModelId` value used by the SDAI domain layer.
+     * Selected downloaded MediaPipe model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localMediaPipeModelId: String
 
     /**
-     * Exposes the `localMediaPipeModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom MediaPipe model.
      *
      * @author Dmitriy Moroz
      */
     var localMediaPipeModelPath: String
 
     /**
-     * Exposes the `localSdxlModelId` value used by the SDAI domain layer.
+     * Selected stable-diffusion.cpp model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localSdxlModelId: String
 
     /**
-     * Exposes the `localSdxlModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom stable-diffusion.cpp model.
      *
      * @author Dmitriy Moroz
      */
     var localSdxlModelPath: String
 
     /**
-     * Exposes the `localCoreMlModelId` value used by the SDAI domain layer.
+     * Selected downloaded Core ML model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localCoreMlModelId: String
 
     /**
-     * Exposes the `localCoreMlModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom Core ML model.
      *
      * @author Dmitriy Moroz
      */
     var localCoreMlModelPath: String
 
     /**
-     * Exposes the `localBonsaiModelId` value used by the SDAI domain layer.
+     * Selected downloaded Bonsai model identifier.
      *
      * @author Dmitriy Moroz
      */
     var localBonsaiModelId: String
 
     /**
-     * Exposes the `localBonsaiModelPath` value used by the SDAI domain layer.
+     * Filesystem path to the selected custom Bonsai model.
      *
      * @author Dmitriy Moroz
      */
@@ -226,9 +236,9 @@ interface ConfigurationStore {
     fun retryPendingConfiguration(): Boolean
 
     /**
-     * Loads SDAI data through `getConfiguration`.
+     * Combines independent provider preferences with the supplied protected authorization snapshot.
      *
-     * @param authCredentials auth credentials value consumed by the API.
+     * @param authCredentials Protected credential snapshot associated with this configuration read.
      * @author Dmitriy Moroz
      */
     fun getConfiguration(
@@ -236,6 +246,8 @@ interface ConfigurationStore {
     ): Configuration = Configuration(
         serverUrl = automatic1111ServerUrl,
         swarmUiUrl = swarmUiServerUrl,
+        easyDiffusionUrl = easyDiffusionUrl,
+        easyDiffusionModel = easyDiffusionModel,
         swarmUiModel = swarmUiModel,
         demoMode = demoMode,
         source = source,
@@ -265,15 +277,17 @@ interface ConfigurationStore {
     )
 
     /**
-     * Executes the `setConfiguration` step in the SDAI domain layer.
+     * Writes all provider fields while retaining independent settings for inactive sources; production checked publication uses commitConfiguration.
      *
-     * @param configuration configuration value consumed by the API.
+     * @param configuration Complete replacement containing independent settings for every provider.
      * @author Dmitriy Moroz
      */
     fun setConfiguration(configuration: Configuration) {
         source = configuration.source
         automatic1111ServerUrl = configuration.serverUrl
         swarmUiServerUrl = configuration.swarmUiUrl
+        easyDiffusionUrl = configuration.easyDiffusionUrl
+        easyDiffusionModel = configuration.easyDiffusionModel
         swarmUiModel = configuration.swarmUiModel
         demoMode = configuration.demoMode
         hordeApiKey = configuration.hordeApiKey

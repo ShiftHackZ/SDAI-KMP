@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14",
+  "updated": "2026-11-15",
   "title": "Frequently Asked Questions",
   "intro": "Short answers for the setup and capability questions that come up most often around SDAI.",
   "categories": [
@@ -68,6 +68,16 @@
           "tags": ["automatic1111", "setup", "server-url"]
         },
         {
+          "id": "easy-diffusion-setup",
+          "question": "How do I connect Easy Diffusion?",
+          "answer": [
+            "Choose Easy Diffusion (Beta) on Android or iOS. Enable network sharing in Easy Diffusion settings, save and restart, then enter the computer’s LAN URL, for example http://192.168.1.10:9000. The connection is anonymous and has no password field.",
+            "Use Easy Diffusion v3 with an SD1.5 checkpoint. Connect, select the checkpoint and generate with txt2img or img2img, negative prompt, dimensions in multiples of eight, steps, CFG and 32-bit seeds. DDIM is fixed. Sequential batches, progress, task-specific cancellation, gallery and saving use the normal app flow. Refresh checkpoints if a model was added or removed.",
+            "Easy Diffusion has its own API. Do not select AUTOMATIC1111 for this server. Inpainting, LoRA, ControlNet, hires, administration and other engine/model families are outside this provider’s supported scope."
+          ],
+          "tags": ["easy-diffusion", "setup", "server-url", "models"]
+        },
+        {
           "id": "openai-compatible-setup",
           "question": "How do I connect an OpenAI-compatible image server or proxy?",
           "answer": [
@@ -102,9 +112,9 @@
         },
         {
           "id": "a1111-forks",
-          "question": "Do A1111 forks such as SDNext, Forge, or Easy Diffusion work?",
+          "question": "Do A1111 forks such as SDNext or Forge work?",
           "answer": [
-            "A1111-compatible APIs may work when they keep the endpoints SDAI expects, but forks are not all identical. SDAI has dedicated support for SwarmUI; other forks can require separate compatibility work.",
+            "A1111-compatible APIs may work when they keep the endpoints SDAI expects, but forks are not all identical. SDAI has dedicated providers for SwarmUI and Easy Diffusion; choose Easy Diffusion for its separate v3 API.",
             "If a fork removes or changes an endpoint, connection or discovery can fail even when the browser UI works."
           ],
           "tags": ["automatic1111", "sdnext", "compatibility"]

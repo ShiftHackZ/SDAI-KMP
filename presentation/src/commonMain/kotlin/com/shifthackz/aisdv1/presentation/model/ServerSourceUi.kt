@@ -7,12 +7,16 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceReadiness
 
 /**
  * Returns whether the provider should be selectable on the current platform.
+ * @param platform Platform whose provider availability and readiness apply.
+ * @author Dmitriy Moroz
  */
 internal fun ServerSource.isAvailableOn(platform: Platform): Boolean =
     platform in allowedPlatforms
 
 /**
  * Picks the user-facing readiness badge for the current platform.
+ * @param platform Platform whose provider availability and readiness apply.
+ * @author Dmitriy Moroz
  */
 internal fun ServerSource.readinessFor(platform: Platform): ServerSourceReadiness =
     readiness[platform]
@@ -23,10 +27,13 @@ internal fun ServerSource.readinessFor(platform: Platform): ServerSourceReadines
  * Bonsai keeps one domain source id for persistence, but the label is platform
  * aware: iOS shows the Silicon Diffusion wording and Android shows Local
  * Diffusion while preserving the same underlying provider configuration.
+ * @param platform Platform whose local-provider naming applies.
+ * @author Dmitriy Moroz
  */
 internal fun ServerSource.displayName(platform: Platform): String = when (this) {
     ServerSource.AUTOMATIC1111 -> Localization.string("srv_type_own")
     ServerSource.SWARM_UI -> Localization.string("srv_type_swarm_ui")
+    ServerSource.EASY_DIFFUSION -> Localization.string("srv_type_easy_diffusion")
     ServerSource.HORDE -> Localization.string("srv_type_horde")
     ServerSource.HUGGING_FACE -> Localization.string("srv_type_hugging_face")
     ServerSource.OPEN_AI_COMPATIBLE -> Localization.string("srv_type_open_ai_compatible")
@@ -49,10 +56,12 @@ internal fun ServerSource.displayName(platform: Platform): String = when (this) 
 
 /**
  * Short provider label used where the full setup name would be too long.
+ * @author Dmitriy Moroz
  */
 internal fun ServerSource.shortDisplayName(): String = when (this) {
     ServerSource.AUTOMATIC1111 -> Localization.string("srv_type_own_short")
     ServerSource.SWARM_UI -> Localization.string("srv_type_swarm_ui")
+    ServerSource.EASY_DIFFUSION -> Localization.string("srv_type_easy_diffusion")
     ServerSource.HORDE -> Localization.string("srv_type_horde_short")
     ServerSource.HUGGING_FACE -> Localization.string("srv_type_hugging_face_short")
     ServerSource.OPEN_AI_COMPATIBLE -> Localization.string("srv_type_open_ai_compatible")
@@ -70,13 +79,15 @@ internal fun ServerSource.shortDisplayName(): String = when (this) {
 
 /**
  * Compact label for chips and small controls.
+ * @param platform Platform whose local-provider naming applies.
+ * @author Dmitriy Moroz
  */
 internal fun ServerSource.compactDisplayName(platform: Platform): String = when (this) {
     ServerSource.LOCAL_MICROSOFT_ONNX,
     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
     ServerSource.LOCAL_APPLE_CORE_ML,
-    -> shortDisplayName()
+        -> shortDisplayName()
 
     else -> displayName(platform)
 }

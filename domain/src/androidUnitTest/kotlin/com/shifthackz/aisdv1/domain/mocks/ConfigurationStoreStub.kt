@@ -17,6 +17,8 @@ class ConfigurationStoreStub(
 
     override var automatic1111ServerUrl: String = configuration.serverUrl
     override var swarmUiServerUrl: String = configuration.swarmUiUrl
+    override var easyDiffusionUrl: String = configuration.easyDiffusionUrl
+    override var easyDiffusionModel: String = configuration.easyDiffusionModel
     override var swarmUiModel: String = configuration.swarmUiModel
     override var demoMode: Boolean = configuration.demoMode
     override var source: ServerSource = configuration.source

@@ -673,4 +673,15 @@
     <string name="native_generation_stage_decoding">Görsel çözümleniyor…</string>
     <string name="native_generation_stage_running">Görsel motoru çalışıyor…</string>
     <string name="native_generation_stage_writing_result">Sonuç kaydediliyor…</string>
+
+    <string name="srv_type_easy_diffusion">Easy Diffusion</string>
+    <string name="easy_diffusion_subtitle">Kendi Easy Diffusion sunucunuzda görüntü oluşturun.</string>
+    <string name="easy_diffusion_setup_hint">Easy Diffusion ayarlarında ağ paylaşımını etkinleştirin, kaydedip yeniden başlatın. Bilgisayarın LAN adresini girin, örneğin http://192.168.1.10:9000. Bu bağlantı parola kullanmaz.</string>
+    <string name="easy_diffusion_sampler">Örnekleyici: DDIM (sabit)</string>
+    <string name="easy_diffusion_models_failed">Modeller yüklenemedi. Bağlantıyı kontrol edip listeyi yenileyin.</string>
+    <string name="easy_diffusion_models_empty">Sunucuya bir SD1.5 modeli yükleyin, listeyi yenileyip modeli seçin.</string>
+    <string name="easy_diffusion_refresh_models">Modelleri yenile</string>
+    <string name="easy_diffusion_failure">Easy Diffusion isteği tamamlayamadı. Sunucuyu, bağlantıyı ve seçili modeli kontrol edip yeniden deneyin.</string>
+    <string name="easy_diffusion_timeout">Easy Diffusion zaman aşımına uğradı. Sunucuyu ve zaman aşımı ayarını kontrol edip yeniden deneyin. Gönderim onaylanmadıysa sunucudaki sonuç bilinmiyor.</string>
+    <string name="easy_diffusion_submission_unknown">Easy Diffusion gönderimi onaylanmadı. Sunucudaki tamamlanma durumu bilinmiyor. Yeniden denemeden önce sunucuyu kontrol edin.</string>
 </resources>

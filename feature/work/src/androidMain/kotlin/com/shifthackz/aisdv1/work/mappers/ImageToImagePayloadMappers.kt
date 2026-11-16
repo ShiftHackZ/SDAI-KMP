@@ -4,15 +4,15 @@ import com.shifthackz.aisdv1.domain.entity.FalAiAcceleration
 import com.shifthackz.aisdv1.domain.entity.FalAiImageSize
 import com.shifthackz.aisdv1.domain.entity.FalAiModel
 import com.shifthackz.aisdv1.domain.entity.ImageToImagePayload
+import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.Scheduler
 import com.shifthackz.aisdv1.domain.entity.StabilityAiClipGuidance
 import com.shifthackz.aisdv1.domain.entity.StabilityAiStylePreset
 import kotlinx.serialization.Serializable
 
 /**
- * Converts SDAI data with `toByteArray`.
+ * Serializes a complete image-generation snapshot, including captured source identity, for durable background work.
  *
- * @return Result produced by `toByteArray`.
  * @author Dmitriy Moroz
  */
 internal fun ImageToImagePayload.toByteArray(): ByteArray {
@@ -22,9 +22,8 @@ internal fun ImageToImagePayload.toByteArray(): ByteArray {
 }
 
 /**
- * Converts SDAI data with `toImageToImagePayload`.
+ * Decodes current or legacy work bytes; invalid or unknown source identifiers reject the payload by returning null.
  *
- * @return Result produced by `toImageToImagePayload`.
  * @author Dmitriy Moroz
  */
 internal fun ByteArray.toImageToImagePayload(): ImageToImagePayload? {
@@ -36,193 +35,223 @@ internal fun ByteArray.toImageToImagePayload(): ImageToImagePayload? {
 }
 
 /**
- * Carries `ImageToImagePayloadDto` data through the SDAI background work feature layer.
+ * Serializable background-work snapshot. Optional added identity fields preserve decoding of older queued jobs.
  *
+ * @param sourceSnapshot Provider captured at submission; null preserves legacy queued-work routing.
+ * @param providerSelectionRevision Durable source-selection revision used to reject stale queued work.
+ * @param base64Image Encoded source image bytes for image-to-image generation.
+ * @param base64MaskImage Encoded inpainting mask; empty for providers without inpainting.
+ * @param denoisingStrength Image-to-image denoising strength in the range zero through one.
+ * @param prompt Positive generation prompt, preserved verbatim.
+ * @param negativePrompt Negative generation prompt; unsupported providers omit it.
+ * @param samplingSteps Requested inference step count.
+ * @param cfgScale Requested classifier-free guidance scale.
+ * @param width Requested output width in pixels.
+ * @param height Requested output height in pixels.
+ * @param restoreFaces Whether a supporting provider applies face restoration.
+ * @param seed Decimal seed or the normal blank/-1 random sentinel.
+ * @param subSeed Variation seed for supporting providers only.
+ * @param subSeedStrength Variation seed blend strength for supporting providers.
+ * @param sampler Provider-specific sampler identifier.
+ * @param scheduler Provider-specific scheduling strategy; AUTOMATIC preserves normal selection.
+ * @param nsfw Provider-specific safety-filter preference.
+ * @param batchCount Number of requested images; providers may execute the batch sequentially.
+ * @param inPaintingMaskInvert Provider-specific mask inversion setting.
+ * @param inPaintFullResPadding Pixel padding around an inpainting crop.
+ * @param inPaintingFill Provider-specific masked-region fill strategy.
+ * @param inPaintFullRes Whether a supporting provider inpaints using a full-resolution crop.
+ * @param maskBlur Inpainting mask blur radius in pixels.
+ * @param stabilityAiClipGuidance Optional Stability AI CLIP guidance preset.
+ * @param stabilityAiStylePreset Optional Stability AI style preset.
+ * @param aDetailer AUTOMATIC1111 ADetailer extension configuration.
+ * @param falAiModel Selected Fal.ai image-generation endpoint.
+ * @param falAiImageSize Fal.ai output-size preset.
+ * @param falAiAcceleration Fal.ai acceleration preset.
+ * @param falAiSyncMode Whether a supporting Fal.ai endpoint requests synchronous output.
  * @author Dmitriy Moroz
  */
 @Serializable
 private data class ImageToImagePayloadDto(
+    val sourceSnapshot: String? = null,
+    val providerSelectionRevision: Long? = null,
     /**
-     * Exposes the `base64Image` value used by the SDAI background work feature layer.
+     * Encoded source image bytes for image-to-image generation.
      *
      * @author Dmitriy Moroz
      */
     val base64Image: String,
     /**
-     * Exposes the `base64MaskImage` value used by the SDAI background work feature layer.
+     * Encoded inpainting mask; empty for providers without inpainting.
      *
      * @author Dmitriy Moroz
      */
     val base64MaskImage: String,
     /**
-     * Exposes the `denoisingStrength` value used by the SDAI background work feature layer.
+     * Image-to-image denoising strength in the range zero through one.
      *
      * @author Dmitriy Moroz
      */
     val denoisingStrength: Float,
     /**
-     * Exposes the `prompt` value used by the SDAI background work feature layer.
+     * Positive generation prompt, preserved verbatim.
      *
      * @author Dmitriy Moroz
      */
     val prompt: String,
     /**
-     * Exposes the `negativePrompt` value used by the SDAI background work feature layer.
+     * Negative generation prompt; unsupported providers omit it.
      *
      * @author Dmitriy Moroz
      */
     val negativePrompt: String,
     /**
-     * Exposes the `samplingSteps` value used by the SDAI background work feature layer.
+     * Requested inference step count.
      *
      * @author Dmitriy Moroz
      */
     val samplingSteps: Int,
     /**
-     * Exposes the `cfgScale` value used by the SDAI background work feature layer.
+     * Requested classifier-free guidance scale.
      *
      * @author Dmitriy Moroz
      */
     val cfgScale: Float,
     /**
-     * Exposes the `width` value used by the SDAI background work feature layer.
+     * Requested output width in pixels.
      *
      * @author Dmitriy Moroz
      */
     val width: Int,
     /**
-     * Exposes the `height` value used by the SDAI background work feature layer.
+     * Requested output height in pixels.
      *
      * @author Dmitriy Moroz
      */
     val height: Int,
     /**
-     * Exposes the `restoreFaces` value used by the SDAI background work feature layer.
+     * Whether a supporting provider applies face restoration.
      *
      * @author Dmitriy Moroz
      */
     val restoreFaces: Boolean,
     /**
-     * Exposes the `seed` value used by the SDAI background work feature layer.
+     * Decimal seed or the normal blank/-1 random sentinel.
      *
      * @author Dmitriy Moroz
      */
     val seed: String,
     /**
-     * Exposes the `subSeed` value used by the SDAI background work feature layer.
+     * Variation seed for supporting providers only.
      *
      * @author Dmitriy Moroz
      */
     val subSeed: String,
     /**
-     * Exposes the `subSeedStrength` value used by the SDAI background work feature layer.
+     * Variation seed blend strength for supporting providers.
      *
      * @author Dmitriy Moroz
      */
     val subSeedStrength: Float,
     /**
-     * Exposes the `sampler` value used by the SDAI background work feature layer.
+     * Provider-specific sampler identifier.
      *
      * @author Dmitriy Moroz
      */
     val sampler: String,
     /**
-     * Exposes the `scheduler` value used by the SDAI background work feature layer.
+     * Provider-specific scheduling strategy; AUTOMATIC preserves normal selection.
      *
      * @author Dmitriy Moroz
      */
     val scheduler: String? = null,
     /**
-     * Exposes the `nsfw` value used by the SDAI background work feature layer.
+     * Provider-specific safety-filter preference.
      *
      * @author Dmitriy Moroz
      */
     val nsfw: Boolean,
     /**
-     * Exposes the `batchCount` value used by the SDAI background work feature layer.
+     * Number of requested images; providers may execute the batch sequentially.
      *
      * @author Dmitriy Moroz
      */
     val batchCount: Int,
     /**
-     * Exposes the `inPaintingMaskInvert` value used by the SDAI background work feature layer.
+     * Provider-specific mask inversion setting.
      *
      * @author Dmitriy Moroz
      */
     val inPaintingMaskInvert: Int,
     /**
-     * Exposes the `inPaintFullResPadding` value used by the SDAI background work feature layer.
+     * Pixel padding around an inpainting crop.
      *
      * @author Dmitriy Moroz
      */
     val inPaintFullResPadding: Int,
     /**
-     * Exposes the `inPaintingFill` value used by the SDAI background work feature layer.
+     * Provider-specific masked-region fill strategy.
      *
      * @author Dmitriy Moroz
      */
     val inPaintingFill: Int,
-    /**
-     * Exposes the `inPaintFullRes` value used by the SDAI background work feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val inPaintFullRes: Boolean,
     /**
-     * Exposes the `maskBlur` value used by the SDAI background work feature layer.
+     * Inpainting mask blur radius in pixels.
      *
      * @author Dmitriy Moroz
      */
     val maskBlur: Int,
     /**
-     * Exposes the `stabilityAiClipGuidance` value used by the SDAI background work feature layer.
+     * Optional Stability AI CLIP guidance preset.
      *
      * @author Dmitriy Moroz
      */
     val stabilityAiClipGuidance: String?,
     /**
-     * Exposes the `stabilityAiStylePreset` value used by the SDAI background work feature layer.
+     * Optional Stability AI style preset.
      *
      * @author Dmitriy Moroz
      */
     val stabilityAiStylePreset: String?,
     /**
-     * Exposes the `aDetailer` value used by the SDAI background work feature layer.
+     * AUTOMATIC1111 ADetailer extension configuration.
      *
      * @author Dmitriy Moroz
      */
     val aDetailer: ADetailerConfigDto = ADetailerConfigDto(),
     /**
-     * Exposes the `falAiModel` value used by the SDAI background work feature layer.
+     * Selected Fal.ai image-generation endpoint.
      *
      * @author Dmitriy Moroz
      */
     val falAiModel: String? = null,
     /**
-     * Exposes the `falAiImageSize` value used by the SDAI background work feature layer.
+     * Fal.ai output-size preset.
      *
      * @author Dmitriy Moroz
      */
     val falAiImageSize: String? = null,
     /**
-     * Exposes the `falAiAcceleration` value used by the SDAI background work feature layer.
+     * Fal.ai acceleration preset.
      *
      * @author Dmitriy Moroz
      */
     val falAiAcceleration: String? = null,
     /**
-     * Exposes the `falAiSyncMode` value used by the SDAI background work feature layer.
+     * Whether a supporting Fal.ai endpoint requests synchronous output.
      *
      * @author Dmitriy Moroz
      */
     val falAiSyncMode: Boolean = false,
 ) {
     /**
-     * Converts SDAI data with `toPayload`.
+     * Rebuilds domain inputs while validating any persisted source key against the current provider catalog.
      *
      * @author Dmitriy Moroz
      */
     fun toPayload(): ImageToImagePayload = ImageToImagePayload(
+        sourceSnapshot = sourceSnapshot?.let { key -> requireNotNull(ServerSource.entries.firstOrNull { it.key == key }) },
+        providerSelectionRevision = providerSelectionRevision,
         base64Image = base64Image,
         base64MaskImage = base64MaskImage,
         denoisingStrength = denoisingStrength,
@@ -255,18 +284,20 @@ private data class ImageToImagePayloadDto(
     )
 
     /**
-     * Provides the `companion object` singleton used by the SDAI background work feature layer.
+     * Constructs durable image-work DTOs from domain requests while preserving captured provider ownership.
      *
      * @author Dmitriy Moroz
      */
     companion object {
         /**
-         * Executes the `from` step in the SDAI background work feature layer.
+         * Copies domain inputs into the durable background-work representation without losing source ownership.
          *
-         * @param payload generation payload used by the operation.
+         * @param payload Immutable supported generation inputs and captured provider identity.
          * @author Dmitriy Moroz
          */
         fun from(payload: ImageToImagePayload): ImageToImagePayloadDto = ImageToImagePayloadDto(
+            sourceSnapshot = payload.sourceSnapshot?.key,
+            providerSelectionRevision = payload.providerSelectionRevision,
             base64Image = payload.base64Image,
             base64MaskImage = payload.base64MaskImage,
             denoisingStrength = payload.denoisingStrength,

@@ -1,0 +1,1270 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SDAI Easy Diffusion v3 protocol",
+    "version": "3.0.16",
+    "description": "Anonymous URL-only integration pinned to Easy Diffusion v3.0.16. Requests describe the supported SDAI subset; response schemas enumerate known upstream fields and tolerate future extension fields. Streaming consists of adjacent JSON objects, not SSE or newline-delimited JSON."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9000",
+      "description": "Example only; mobile callers use the computer’s reachable LAN URL or reverse-proxy prefix."
+    }
+  ],
+  "paths": {
+    "/ping": {
+      "get": {
+        "operationId": "pingEasyDiffusion",
+        "summary": "Check readiness and optionally renew this operation session TTL.",
+        "description": "Check readiness and optionally renew this operation session TTL.",
+        "responses": {
+          "200": {
+            "description": "Successful protocol response; readiness and terminal status must still be validated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ping"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "HTTP failure. 425 is pending only on stream; 404/410 expired task and 503 busy remain explicit errors. Stop 404/409 remain failures for domain cleanup policy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "description": "Optional unique generation session; absent during setup.",
+            "schema": {
+              "type": "string",
+              "description": "Optional unique generation session; absent during setup."
+            }
+          }
+        ]
+      }
+    },
+    "/get/models": {
+      "get": {
+        "operationId": "getEasyDiffusionModels",
+        "summary": "Fetch the current flat checkpoint and auxiliary-model catalog.",
+        "description": "Fetch the current flat checkpoint and auxiliary-model catalog.",
+        "responses": {
+          "200": {
+            "description": "Successful protocol response; readiness and terminal status must still be validated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Models"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "HTTP failure. 425 is pending only on stream; 404/410 expired task and 503 busy remain explicit errors. Stop 404/409 remain failures for domain cleanup policy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/render": {
+      "post": {
+        "operationId": "renderEasyDiffusion",
+        "summary": "Submit exactly one image task, with explicit DDIM/PNG and no filters.",
+        "description": "Submit exactly one image task, with explicit DDIM/PNG and no filters.",
+        "responses": {
+          "200": {
+            "description": "Successful protocol response; readiness and terminal status must still be validated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Submission"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "HTTP failure. 425 is pending only on stream; 404/410 expired task and 503 busy remain explicit errors. Stop 404/409 remain failures for domain cleanup policy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "description": "One captured image request; never automatically replayed after ambiguous acceptance.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenderRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/image/stream/{task}": {
+      "get": {
+        "operationId": "streamEasyDiffusion",
+        "summary": "Read concatenated JSON objects; reconnect the same task after HTTP425 or empty EOF within the overall generation deadline.",
+        "description": "Read concatenated JSON objects; reconnect the same task after HTTP425 or empty EOF within the overall generation deadline.",
+        "responses": {
+          "200": {
+            "description": "Successful protocol response; readiness and terminal status must still be validated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Frame"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "HTTP failure. 425 is pending only on stream; 404/410 expired task and 503 busy remain explicit errors. Stop 404/409 remain failures for domain cleanup policy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "Positive captured Python task identity.",
+            "schema": {
+              "type": "integer",
+              "description": "Positive captured Python task identity.",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/image/stop": {
+      "get": {
+        "operationId": "stopEasyDiffusion",
+        "summary": "Stop only the positive captured task ID. Omitting or zeroing task is forbidden because upstream may stop global work.",
+        "description": "Stop only the positive captured task ID. Omitting or zeroing task is forbidden because upstream may stop global work.",
+        "responses": {
+          "200": {
+            "description": "Successful protocol response; readiness and terminal status must still be validated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stop"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "HTTP failure. 425 is pending only on stream; 404/410 expired task and 503 busy remain explicit errors. Stop 404/409 remain failures for domain cleanup policy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "task",
+            "in": "query",
+            "required": true,
+            "description": "Positive captured task identity; mandatory for every request.",
+            "schema": {
+              "type": "integer",
+              "description": "Positive captured task identity; mandatory for every request.",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RenderRequest": {
+        "type": "object",
+        "description": "Supported Easy Diffusion v3 render fields. Explicit defaults disable preview images, filters and server-save paths; one output per sequential batch item.",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Positive generation prompt."
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "Negative generation prompt."
+          },
+          "width": {
+            "type": "integer",
+            "description": "Requested pixel width, validated before submission.",
+            "minimum": 8,
+            "multipleOf": 8
+          },
+          "height": {
+            "type": "integer",
+            "description": "Requested pixel height, validated before submission.",
+            "minimum": 8,
+            "multipleOf": 8
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Resolved unsigned 32-bit seed; random UI sentinels are resolved before HTTP.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "num_inference_steps": {
+            "type": "integer",
+            "description": "Sampling step count.",
+            "minimum": 1
+          },
+          "guidance_scale": {
+            "type": "number",
+            "description": "Classifier-free guidance scale.",
+            "minimum": 0
+          },
+          "use_stable_diffusion_model": {
+            "type": "string",
+            "description": "Exact checkpoint ID from /get/models, including folder separators."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Fresh operation UUID, shared only by this sequential batch."
+          },
+          "init_image": {
+            "type": ["string", "null"],
+            "description": "Optional data:image/...;base64 encoded img2img input; omitted for txt2img when null."
+          },
+          "prompt_strength": {
+            "type": "number",
+            "description": "Img2img denoising strength; zero for txt2img.",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "num_outputs": {
+            "type": "integer",
+            "description": "One output per task; batching is sequential in SDAI.",
+            "enum": [1]
+          },
+          "sampler_name": {
+            "type": "string",
+            "description": "Explicit fixed sampler; no upstream sampler discovery is assumed.",
+            "enum": ["ddim"]
+          },
+          "output_format": {
+            "type": "string",
+            "description": "Lossless encoded output format stored without reencoding.",
+            "enum": ["png"]
+          },
+          "stream_image_progress": {
+            "type": "boolean",
+            "description": "Preview images are disabled; only progress step objects are consumed.",
+            "enum": [false]
+          },
+          "show_only_filtered_image": {
+            "type": "boolean",
+            "description": "Avoid duplicate original-plus-filtered output arrays; no filters are requested.",
+            "enum": [true]
+          },
+          "save_to_disk_path": {
+            "type": ["string", "null"],
+            "description": "Server saving is disabled by omitting this null value; SDAI owns normal save/export. A server administrator can independently force saving.",
+            "enum": [null]
+          },
+          "filters": {
+            "type": "array",
+            "description": "Empty postprocessing list; face correction/upscaling/NSFW filters are not requested.",
+            "items": {
+              "type": "string",
+              "description": "Filter name, never present in the supported empty list."
+            }
+          }
+        },
+        "required": [
+          "prompt",
+          "negative_prompt",
+          "width",
+          "height",
+          "seed",
+          "num_inference_steps",
+          "guidance_scale",
+          "use_stable_diffusion_model",
+          "session_id",
+          "prompt_strength",
+          "num_outputs",
+          "sampler_name",
+          "output_format",
+          "stream_image_progress",
+          "show_only_filtered_image",
+          "filters"
+        ],
+        "additionalProperties": false
+      },
+      "Ping": {
+        "type": "object",
+        "description": "Server readiness, optional session task states and runtime diagnostics. SDAI consumes status and ignores diagnostics.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Server lifecycle state. Online, Rendering and LoadingModel are reachable; Init and Unavailable require retry. Success does not prove generation.",
+            "examples": ["Online", "Rendering", "LoadingModel"]
+          },
+          "tasks": {
+            "$ref": "#/components/schemas/TaskStatuses",
+            "description": "Present when session_id was supplied; keys are decimal Python task IDs."
+          },
+          "devices": {
+            "$ref": "#/components/schemas/Devices",
+            "description": "Available and active rendering devices."
+          },
+          "packages_installed": {
+            "type": "object",
+            "description": "Installed optional package name to version. The pinned manifest currently defines tensorrt.",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Installed package version."
+            }
+          },
+          "packages_installing": {
+            "type": "array",
+            "description": "Optional package names currently being installed.",
+            "items": {
+              "type": "string",
+              "description": "Package name."
+            }
+          },
+          "cloudflare": {
+            "type": "string",
+            "description": "Public tunnel address when configured by the server."
+          }
+        },
+        "required": [
+          "status",
+          "devices",
+          "packages_installed",
+          "packages_installing"
+        ],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "Models": {
+        "type": "object",
+        "description": "Flat v3 checkpoint catalog response.",
+        "properties": {
+          "models": {
+            "type": "array",
+            "description": "Model entries; SDAI retains only entries tagged stable-diffusion.",
+            "items": {
+              "$ref": "#/components/schemas/Model"
+            }
+          }
+        },
+        "required": ["models"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "Model": {
+        "type": "object",
+        "description": "Server-defined model entry. Folder IDs remain unchanged.",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Complete model identifier supplied back to /render."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display label; the exact ID is also visible in SDAI."
+          },
+          "tags": {
+            "type": "array",
+            "description": "Model classifications including stable-diffusion for checkpoints.",
+            "items": {
+              "type": "string",
+              "description": "Model classification tag."
+            }
+          }
+        },
+        "required": ["model", "name", "tags"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "Submission": {
+        "type": "object",
+        "description": "Accepted task identity and current queue diagnostics. A lost response never permits a second render POST.",
+        "properties": {
+          "task": {
+            "type": "integer",
+            "description": "Positive Python task identity used by stream and stop.",
+            "format": "int64",
+            "minimum": 1
+          },
+          "stream": {
+            "type": "string",
+            "description": "Task-relative route /image/stream/{task}. SDAI reconstructs and validates the known route beneath the captured prefix."
+          },
+          "status": {
+            "type": "string",
+            "description": "Server lifecycle status when the task was accepted."
+          },
+          "queue": {
+            "type": "integer",
+            "description": "Number of tasks queued at acceptance.",
+            "minimum": 0
+          }
+        },
+        "required": ["task", "stream", "status", "queue"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "Image": {
+        "type": "object",
+        "description": "Final image returned only with status=succeeded.",
+        "properties": {
+          "data": {
+            "type": "string",
+            "description": "Original Base64 bytes, optionally with a data:image/...;base64 prefix. Must decode to a valid image."
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Actual output seed supplied by the engine.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "path_abs": {
+            "type": ["string", "null"],
+            "description": "Absolute server save path when saving is enabled; null when not saved."
+          }
+        },
+        "required": ["data", "seed", "path_abs"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "TaskMetadata": {
+        "type": "object",
+        "description": "Terminal metadata emitted from RenderTaskData, OutputFormatData and SaveToDiskData. Unsupported auxiliary settings are documented for response accuracy and are not enabled by SDAI.",
+        "properties": {
+          "request_id": {
+            "description": "Accepted Python task identity assigned by RenderTask.",
+            "oneOf": [
+              {
+                "type": "integer",
+                "description": "Positive task identity.",
+                "format": "int64",
+                "minimum": 1
+              },
+              {
+                "type": ["string", "null"],
+                "description": "Legacy task identifier."
+              }
+            ]
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Generation session identifier."
+          },
+          "vram_usage_level": {
+            "type": "string",
+            "description": "Server memory preset used for generation."
+          },
+          "use_face_correction": {
+            "description": "Face-correction model selection, normally null for SDAI.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "use_upscale": {
+            "description": "Upscaling model selection, normally null for SDAI.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "upscale_amount": {
+            "type": "integer",
+            "description": "Upscaler scale factor."
+          },
+          "latent_upscaler_steps": {
+            "type": "integer",
+            "description": "Step count for a latent upscaler, unused by SDAI."
+          },
+          "use_stable_diffusion_model": {
+            "description": "Checkpoint identifier or model list reported by the server.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "use_vae_model": {
+            "description": "Optional VAE model selection.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "use_text_encoder_model": {
+            "description": "Optional text encoder model selection.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "use_hypernetwork_model": {
+            "description": "Optional hypernetwork model selection.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "use_lora_model": {
+            "description": "Optional LoRA model selection.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "use_controlnet_model": {
+            "description": "Optional ControlNet model selection.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "use_embeddings_model": {
+            "description": "Optional embedding model selection.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "filters": {
+            "type": "array",
+            "description": "Applied postprocessing filters; SDAI requests none, but server policy may add a filter.",
+            "items": {
+              "type": "string",
+              "description": "Filter identifier."
+            }
+          },
+          "filter_params": {
+            "$ref": "#/components/schemas/FilterParametersByName",
+            "description": "Filter-specific parameters supplied by server policy."
+          },
+          "control_filter_to_apply": {
+            "description": "Optional control preprocessing filter selection.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "One model identifier."
+              },
+              {
+                "type": "array",
+                "description": "Multiple model identifiers reported by the server.",
+                "items": {
+                  "type": "string",
+                  "description": "Model identifier."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No auxiliary model selected."
+              }
+            ]
+          },
+          "enable_vae_tiling": {
+            "type": "boolean",
+            "description": "Whether server VAE tiling is enabled."
+          },
+          "show_only_filtered_image": {
+            "type": "boolean",
+            "description": "Whether only the filtered result is returned."
+          },
+          "block_nsfw": {
+            "type": "boolean",
+            "description": "Whether server policy enables NSFW filtering."
+          },
+          "stream_image_progress": {
+            "type": "boolean",
+            "description": "Whether preview images were requested; false for SDAI."
+          },
+          "stream_image_progress_interval": {
+            "type": "integer",
+            "description": "Number of sampling steps between preview images."
+          },
+          "clip_skip": {
+            "type": "boolean",
+            "description": "Legacy clip-skip toggle; not enabled by SDAI."
+          },
+          "codeformer_upscale_faces": {
+            "type": "boolean",
+            "description": "Legacy CodeFormer face upscaling toggle."
+          },
+          "codeformer_fidelity": {
+            "type": "number",
+            "description": "Legacy CodeFormer fidelity setting."
+          },
+          "output_format": {
+            "type": "string",
+            "description": "Encoded output format selected for this task."
+          },
+          "output_quality": {
+            "type": "integer",
+            "description": "Lossy encoder quality setting."
+          },
+          "output_lossless": {
+            "type": "boolean",
+            "description": "Whether a lossless encoder mode is enabled."
+          },
+          "save_to_disk_path": {
+            "type": ["string", "null"],
+            "description": "Optional server output directory, including any administrator override."
+          },
+          "metadata_output_format": {
+            "type": "string",
+            "description": "Server metadata sidecar format."
+          }
+        },
+        "required": [],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "Frame": {
+        "type": "object",
+        "description": "One object in an adjacent-JSON response body. Progress has step/step_time/total_steps and no status; succeeded has output/render_request/task_data; failures have status/detail. EOF never establishes completion. SDAI disables preview frames.",
+        "properties": {
+          "status": {
+            "type": ["string", "null"],
+            "description": "succeeded is terminal success; failed/stopped/cancelled or unknown terminal states are failures.",
+            "examples": ["succeeded", "failed"]
+          },
+          "step": {
+            "type": "integer",
+            "description": "Current completed sampling step; unavailable while queued/loading.",
+            "minimum": 0
+          },
+          "total_steps": {
+            "type": "integer",
+            "description": "Sampling total; zero or invalid totals produce indeterminate progress."
+          },
+          "output": {
+            "type": "array",
+            "description": "Only succeeded outputs are accepted; exactly one decoded image is required.",
+            "items": {
+              "description": "A final encoded image on success, or a preview route on progress when previews are enabled.",
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Image"
+                },
+                {
+                  "$ref": "#/components/schemas/PreviewImage"
+                }
+              ]
+            }
+          },
+          "detail": {
+            "type": ["string", "null"],
+            "description": "Backend failure detail. SDAI surfaces a safe actionable message rather than arbitrary server text."
+          },
+          "task_data": {
+            "description": "Optional terminal task metadata including the actual selected checkpoint.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TaskMetadata"
+              },
+              {
+                "type": "null",
+                "description": "Metadata absent on progress frames."
+              }
+            ]
+          },
+          "step_time": {
+            "type": "number",
+            "description": "Elapsed seconds since the previous sampling callback; -1 for the first callback."
+          },
+          "render_request": {
+            "$ref": "#/components/schemas/RenderMetadata",
+            "description": "Actual terminal generation parameters after upstream removes large image inputs."
+          }
+        },
+        "required": [],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true,
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ProgressFrame"
+          },
+          {
+            "$ref": "#/components/schemas/SuccessFrame"
+          },
+          {
+            "$ref": "#/components/schemas/FailureFrame"
+          }
+        ]
+      },
+      "Stop": {
+        "type": "array",
+        "description": "Upstream success is the JSON collection [\"OK\"], not a free-form object.",
+        "items": {
+          "type": "string",
+          "description": "Task-specific stop acknowledgement.",
+          "enum": ["OK"]
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "FastAPI error response for a failed protocol operation.",
+        "properties": {
+          "detail": {
+            "description": "HTTP exception text or FastAPI request-validation issues.",
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Server failure detail."
+              },
+              {
+                "type": "array",
+                "description": "Input validation issues.",
+                "items": {
+                  "$ref": "#/components/schemas/ValidationIssue"
+                }
+              }
+            ]
+          }
+        },
+        "required": ["detail"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "TaskStatuses": {
+        "type": "object",
+        "description": "Decimal task identity to lifecycle status for the requested session.",
+        "additionalProperties": {
+          "type": "string",
+          "description": "Upstream task lifecycle state.",
+          "enum": [
+            "running",
+            "stopped",
+            "error",
+            "buffer",
+            "completed",
+            "pending"
+          ]
+        }
+      },
+      "DeviceInfo": {
+        "type": "object",
+        "description": "Rendering device diagnostics. CPU entries contain only name; accelerator entries also include memory information.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable device name."
+          },
+          "mem_free": {
+            "type": "number",
+            "description": "Free accelerator memory in decimal gigabytes."
+          },
+          "mem_total": {
+            "type": "number",
+            "description": "Total accelerator memory in decimal gigabytes."
+          },
+          "max_vram_usage_level": {
+            "type": "string",
+            "description": "Highest supported VRAM usage preset for this device."
+          }
+        },
+        "required": ["name"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "DeviceMap": {
+        "type": "object",
+        "description": "Device identifier to diagnostics; keys may be cpu, mps, cuda or indexed accelerator identifiers.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/DeviceInfo"
+        }
+      },
+      "Devices": {
+        "type": "object",
+        "description": "Device catalog and currently active rendering devices.",
+        "properties": {
+          "all": {
+            "$ref": "#/components/schemas/DeviceMap",
+            "description": "All compatible devices."
+          },
+          "active": {
+            "$ref": "#/components/schemas/DeviceMap",
+            "description": "Devices with a live render worker."
+          },
+          "enable_trt": {
+            "type": "boolean",
+            "description": "Whether the server's TensorRT installation directory exists."
+          }
+        },
+        "required": ["all", "active", "enable_trt"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "FilterParameters": {
+        "type": "object",
+        "description": "Known filter parameters. Future plugin parameters are ignored by the client.",
+        "properties": {
+          "upscaler": {
+            "type": "string",
+            "description": "Upscaler model identifier."
+          },
+          "scale": {
+            "type": "number",
+            "description": "Upscaling scale factor."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Latent upscaler positive prompt."
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "Latent upscaler negative prompt."
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Latent upscaler seed."
+          },
+          "num_inference_steps": {
+            "type": "integer",
+            "description": "Latent upscaler sampling steps."
+          },
+          "guidance_scale": {
+            "type": "number",
+            "description": "Latent upscaler classifier-free guidance."
+          },
+          "upscale_faces": {
+            "type": "boolean",
+            "description": "Whether CodeFormer also upscales restored faces."
+          },
+          "codeformer_fidelity": {
+            "type": "number",
+            "description": "CodeFormer fidelity coefficient."
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Filter classification threshold when provided."
+          }
+        },
+        "required": [],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "FilterParametersByName": {
+        "type": "object",
+        "description": "Filter identifier to typed known parameters; names depend on the enabled postprocessing plugins.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/FilterParameters"
+        }
+      },
+      "RenderMetadata": {
+        "type": "object",
+        "description": "Actual GenerateImageRequest returned in a terminal success. Large input, mask, reference and control images are removed by upstream before serialization.",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Positive prompt used by the engine."
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "Negative prompt used by the engine."
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Resolved starting seed."
+          },
+          "width": {
+            "type": "integer",
+            "description": "Engine generation width in pixels."
+          },
+          "height": {
+            "type": "integer",
+            "description": "Engine generation height in pixels."
+          },
+          "num_outputs": {
+            "type": "integer",
+            "description": "Requested number of output images."
+          },
+          "num_inference_steps": {
+            "type": "integer",
+            "description": "Requested sampling steps."
+          },
+          "guidance_scale": {
+            "type": "number",
+            "description": "Classifier-free guidance scale."
+          },
+          "distilled_guidance_scale": {
+            "type": "number",
+            "description": "Distilled-model guidance scale; unused by SDAI's SD1.5 path."
+          },
+          "control_alpha": {
+            "description": "Optional control conditioning strength.",
+            "oneOf": [
+              {
+                "type": "number",
+                "description": "Single control weight."
+              },
+              {
+                "type": "array",
+                "description": "Weights for multiple controls.",
+                "items": {
+                  "type": "number",
+                  "description": "Control weight."
+                }
+              },
+              {
+                "type": "null",
+                "description": "No control conditioning."
+              }
+            ]
+          },
+          "controlnet_filter": {
+            "type": ["string", "null"],
+            "description": "Optional control preprocessing filter."
+          },
+          "prompt_strength": {
+            "type": "number",
+            "description": "Img2img denoising strength."
+          },
+          "preserve_init_image_color_profile": {
+            "type": "boolean",
+            "description": "Whether the input image color profile is preserved."
+          },
+          "strict_mask_border": {
+            "type": "boolean",
+            "description": "Whether a strict inpaint mask border is used."
+          },
+          "sampler_name": {
+            "type": ["string", "null"],
+            "description": "Engine sampler identifier."
+          },
+          "scheduler_name": {
+            "type": ["string", "null"],
+            "description": "Optional engine scheduler identifier."
+          },
+          "hypernetwork_strength": {
+            "type": "number",
+            "description": "Hypernetwork conditioning strength."
+          },
+          "lora_alpha": {
+            "description": "LoRA conditioning strength.",
+            "oneOf": [
+              {
+                "type": "number",
+                "description": "Single LoRA weight."
+              },
+              {
+                "type": "array",
+                "description": "Multiple LoRA weights.",
+                "items": {
+                  "type": "number",
+                  "description": "LoRA weight."
+                }
+              }
+            ]
+          },
+          "tiling": {
+            "type": ["string", "null"],
+            "description": "Optional seamless tiling axes."
+          }
+        },
+        "required": [],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "PreviewImage": {
+        "type": "object",
+        "description": "Optional server progress preview; disabled in requests sent by SDAI.",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Relative /image/tmp/{task}/{index} preview route."
+          }
+        },
+        "required": ["path"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "ValidationIssue": {
+        "type": "object",
+        "description": "FastAPI/Pydantic request-validation issue.",
+        "properties": {
+          "loc": {
+            "type": "array",
+            "description": "Request parameter location, including array indexes.",
+            "items": {
+              "description": "A field name or numeric index.",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "description": "Location field name."
+                },
+                {
+                  "type": "integer",
+                  "description": "Location array index."
+                }
+              ]
+            }
+          },
+          "msg": {
+            "type": "string",
+            "description": "Human-readable validation failure."
+          },
+          "type": {
+            "type": "string",
+            "description": "Pydantic validation error code."
+          }
+        },
+        "required": ["loc", "msg", "type"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "ProgressFrame": {
+        "type": "object",
+        "description": "Sampling callback; preview output is optional and disabled by SDAI.",
+        "properties": {
+          "status": {
+            "type": "null",
+            "description": "No terminal status is set on sampling progress."
+          },
+          "step": {
+            "type": "integer",
+            "description": "Current completed sampling step; unavailable while queued/loading.",
+            "minimum": 0
+          },
+          "step_time": {
+            "type": "number",
+            "description": "Elapsed seconds since the previous sampling callback; -1 for the first callback."
+          },
+          "total_steps": {
+            "type": "integer",
+            "description": "Sampling total; zero or invalid totals produce indeterminate progress."
+          },
+          "output": {
+            "type": "array",
+            "description": "Preview routes only when preview streaming was enabled.",
+            "items": {
+              "$ref": "#/components/schemas/PreviewImage"
+            }
+          }
+        },
+        "required": ["step", "step_time", "total_steps"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "SuccessFrame": {
+        "type": "object",
+        "description": "Completed generation with original encoded images and returned parameter metadata.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Terminal successful generation status.",
+            "enum": ["succeeded"]
+          },
+          "output": {
+            "type": "array",
+            "description": "Final encoded images returned by the engine.",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          },
+          "render_request": {
+            "$ref": "#/components/schemas/RenderMetadata",
+            "description": "Actual terminal generation parameters after upstream removes large image inputs."
+          },
+          "task_data": {
+            "description": "Optional terminal task metadata including the actual selected checkpoint.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TaskMetadata"
+              },
+              {
+                "type": "null",
+                "description": "Metadata absent on progress frames."
+              }
+            ]
+          }
+        },
+        "required": ["status", "output", "render_request", "task_data"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      },
+      "FailureFrame": {
+        "type": "object",
+        "description": "A task that failed or was stopped; no image is accepted from this object.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Terminal unsuccessful task status.",
+            "enum": ["failed", "stopped", "cancelled"]
+          },
+          "detail": {
+            "type": ["string", "null"],
+            "description": "Backend failure detail. SDAI surfaces a safe actionable message rather than arbitrary server text."
+          }
+        },
+        "required": ["status"],
+        "additionalProperties": true,
+        "x-tolerates-extensions": true
+      }
+    }
+  }
+}

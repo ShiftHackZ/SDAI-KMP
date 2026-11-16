@@ -15,6 +15,9 @@ import com.shifthackz.aisdv1.presentation.screen.setup.viewmodel.mapUrlToValidat
  *
  * `state` may contain newly assigned validation errors or a modal requesting localhost
  * confirmation, so callers must use it even when `isValid` is false.
+ * @param isValid Whether all active-provider inputs pass validation and connection may proceed.
+ * @param state Form snapshot retained while a benchmark or validation decision is pending.
+ * @author Dmitriy Moroz
  */
 internal data class ServerSetupValidationResult(
     val isValid: Boolean,
@@ -26,6 +29,10 @@ internal data class ServerSetupValidationResult(
  *
  * Remote providers validate URL/auth/API key inputs. Local providers validate that either a
  * downloaded model is selected or, when custom models are enabled, that the custom path is usable.
+ * @param urlValidator Injected URL validation contract.
+ * @param stringValidator Injected nonempty credential/key validator.
+ * @param filePathValidator Injected local filesystem path validation contract.
+ * @author Dmitriy Moroz
  */
 internal fun ServerSetupState.validateServerSetup(
     urlValidator: UrlValidator,
@@ -37,7 +44,12 @@ internal fun ServerSetupState.validateServerSetup(
         else validateServerUrlAndCredentials(serverUrl, urlValidator, stringValidator)
     }
 
-    ServerSource.SWARM_UI -> validateServerUrlAndCredentials(swarmUiUrl, urlValidator, stringValidator)
+    ServerSource.SWARM_UI -> validateServerUrlAndCredentials(
+        swarmUiUrl,
+        urlValidator,
+        stringValidator
+    )
+
     ServerSource.HORDE -> validateApiKey(
         key = hordeApiKey,
         stringValidator = stringValidator,
@@ -51,14 +63,29 @@ internal fun ServerSetupState.validateServerSetup(
         update = { error -> copy(huggingFaceApiKeyValidationError = error) },
     )
 
-    ServerSource.OPEN_AI_COMPATIBLE -> {
-        val valid = isOpenAiCompatibleEndpoint(openAiCompatibleUrl.trim())
-        ServerSetupValidationResult(valid, copy(
-            openAiCompatibleUrlValidationError = if (valid) null else ServerSetupState.ValidationError.InvalidUrl,
-        ))
+    ServerSource.EASY_DIFFUSION -> {
+        val isValid = isOpenAiCompatibleEndpoint(easyDiffusionUrl.trim())
+        ServerSetupValidationResult(
+            isValid, copy(
+                easyDiffusionUrlValidationError = if (isValid) null else ServerSetupState.ValidationError.InvalidUrl,
+            )
+        )
     }
 
-    ServerSource.OPEN_AI_OAUTH -> ServerSetupValidationResult(openAiOAuthAccount != null && !openAiOAuthBusy, this)
+    ServerSource.OPEN_AI_COMPATIBLE -> {
+        val valid = isOpenAiCompatibleEndpoint(openAiCompatibleUrl.trim())
+        ServerSetupValidationResult(
+            valid, copy(
+                openAiCompatibleUrlValidationError = if (valid) null else ServerSetupState.ValidationError.InvalidUrl,
+            )
+        )
+    }
+
+    ServerSource.OPEN_AI_OAUTH -> ServerSetupValidationResult(
+        openAiOAuthAccount != null && !openAiOAuthBusy,
+        this
+    )
+
     ServerSource.OPEN_AI -> validateApiKey(
         key = openAiApiKey,
         stringValidator = stringValidator,
@@ -118,6 +145,13 @@ internal fun ServerSetupState.validateServerSetup(
     )
 }
 
+/** Validates the active service key unless its anonymous default was explicitly selected.
+ * @param key Candidate service API key.
+ * @param stringValidator Injected nonempty credential/key validator.
+ * @param useDefault Whether the user explicitly selected the provider’s supported anonymous default.
+ * @param update Updates the active field’s validation feedback in setup state.
+ * @author Dmitriy Moroz */
+
 private fun ServerSetupState.validateApiKey(
     key: String,
     stringValidator: CommonStringValidator,
@@ -129,6 +163,14 @@ private fun ServerSetupState.validateApiKey(
     val error = validation.mapStringToValidationError()
     return ServerSetupValidationResult(validation.isValid, update(error))
 }
+
+/** Requires either a valid custom path or a downloaded model selection for the active local runtime.
+ * @param customModel Whether the active provider is configured to use a custom filesystem path.
+ * @param customModelPath Candidate filesystem path for the custom local model.
+ * @param hasDownloadedSelection Whether a downloaded model is selected for the active local provider.
+ * @param filePathValidator Injected local filesystem path validation contract.
+ * @param update Updates the active field’s validation feedback in setup state.
+ * @author Dmitriy Moroz */
 
 private fun ServerSetupState.validateLocalModel(
     customModel: Boolean,
@@ -142,6 +184,12 @@ private fun ServerSetupState.validateLocalModel(
     val error = validation.mapFilePathToValidationError()
     return ServerSetupValidationResult(validation.isValid, update(error))
 }
+
+/** Validates the self-hosted endpoint and any selected Basic Auth fields without publishing configuration.
+ * @param url Candidate self-hosted endpoint, including any reverse-proxy prefix.
+ * @param urlValidator Injected URL validation contract.
+ * @param stringValidator Injected nonempty credential/key validator.
+ * @author Dmitriy Moroz */
 
 private fun ServerSetupState.validateServerUrlAndCredentials(
     url: String,

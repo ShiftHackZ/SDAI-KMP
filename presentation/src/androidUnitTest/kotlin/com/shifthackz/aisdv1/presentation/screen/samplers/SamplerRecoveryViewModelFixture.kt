@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.emptyFlow
  * @param getSamplers Configurable sampler boundary for failed, delayed, empty and successful attempts.
  * @param immediateDispatcher Entry dispatcher, optionally eager to model Main.immediate initialization.
  * @param seedValidator Seed validator supplied to both production view models; unrelated sampler tests accept all seeds.
+ * @param easyDiffusionSeedValidator Validator configured for the Easy Diffusion unsigned 32-bit seed range.
  * @param nativeSeedValidator Validator configured for native providers, independently supplied by seed tests.
  * @author Dmitriy Moroz
  */
@@ -56,6 +57,7 @@ internal class SamplerRecoveryViewModelFixture(
         every { this@mockk.invoke(any()) } returns ValidationResult(isValid = true)
     },
     nativeSeedValidator: SeedValidator = seedValidator,
+    easyDiffusionSeedValidator: SeedValidator = seedValidator,
 ) {
     val settings = MutableStateFlow(Settings(serverUrl = "http://server-a:7860"))
     val errors = mutableListOf<Throwable>()
@@ -91,6 +93,7 @@ internal class SamplerRecoveryViewModelFixture(
     init {
         if (type == AiGenerationResult.Type.TEXT_TO_IMAGE) {
             textToImage = TextToImageViewModel(
+                observeEasyDiffusionProgressUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 nativeGenerationGateway = mockk {
                     every { observeStage(any()) } returns emptyFlow()
                     every { observeStatus(any()) } returns emptyFlow()
@@ -105,7 +108,7 @@ internal class SamplerRecoveryViewModelFixture(
                 textToImageUseCase = mockk(),
                 saveGenerationResultUseCase = mockk(),
                 saveLastResultToCacheUseCase = mockk(),
-                interruptGenerationUseCase = mockk(),
+                interruptSourceGenerationUseCase = mockk(),
                 observeHordeProcessStatusUseCase = hordeStatus,
                 observeLocalDiffusionProcessStatusUseCase = localStatus,
                 observeStableDiffusionCppProcessStatusUseCase = mockk<ObserveStableDiffusionCppProcessStatusUseCase> {
@@ -127,6 +130,7 @@ internal class SamplerRecoveryViewModelFixture(
                 dimensionValidator = mockk(),
                 seedValidator = seedValidator,
                 nativeSeedValidator = nativeSeedValidator,
+                easyDiffusionSeedValidator = easyDiffusionSeedValidator,
                 localGenerationBenchmarkGateProvider = { mockk() },
                 imageSaver = mockk(),
                 imageSharer = mockk(),
@@ -142,6 +146,7 @@ internal class SamplerRecoveryViewModelFixture(
         } else {
             textToImage = null
             imageToImage = ImageToImageViewModel(
+                observeEasyDiffusionProgressUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 originalImageBudget = OriginalImageBudget(32 * 1024 * 1024, 16_777_216L),
                 diagnostics = mockk(relaxed = true),
                 dispatchersProvider = dispatchers,
@@ -154,7 +159,7 @@ internal class SamplerRecoveryViewModelFixture(
                 imageToImageUseCase = mockk(),
                 saveGenerationResultUseCase = mockk(),
                 saveLastResultToCacheUseCase = mockk(),
-                interruptGenerationUseCase = mockk(),
+                interruptSourceGenerationUseCase = mockk(),
                 observeHordeProcessStatusUseCase = hordeStatus,
                 observeLocalDiffusionProcessStatusUseCase = localStatus,
                 preferenceManager = preferences,
@@ -167,6 +172,7 @@ internal class SamplerRecoveryViewModelFixture(
                 dimensionValidator = mockk(),
                 seedValidator = seedValidator,
                 nativeSeedValidator = nativeSeedValidator,
+                easyDiffusionSeedValidator = easyDiffusionSeedValidator,
                 localGenerationBenchmarkGateProvider = { mockk() },
                 imageSaver = mockk(),
                 imageSharer = mockk(),

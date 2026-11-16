@@ -37,6 +37,7 @@ internal fun GenerationBaseProviderOption(
 
             ServerSource.AUTOMATIC1111,
             ServerSource.SWARM_UI,
+            ServerSource.EASY_DIFFUSION,
             ServerSource.STABILITY_AI,
             ServerSource.HUGGING_FACE,
             ServerSource.LOCAL_MICROSOFT_ONNX,

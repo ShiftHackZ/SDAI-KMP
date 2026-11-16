@@ -29,7 +29,8 @@ import org.junit.Test
 class TextToImageUseCaseImplTest {
 
     private val stubException = RuntimeException("Unable to generate image.")
-    private val stubStableDiffusionGenerationRepository = mockk<StableDiffusionGenerationRepository>()
+    private val stubStableDiffusionGenerationRepository =
+        mockk<StableDiffusionGenerationRepository>()
     private val stubHordeGenerationRepository = mockk<HordeGenerationRepository>()
     private val stubHuggingFaceGenerationRepository = mockk<HuggingFaceGenerationRepository>()
     private val stubOpenAiGenerationRepository = mockk<OpenAiGenerationRepository>()
@@ -39,12 +40,15 @@ class TextToImageUseCaseImplTest {
     private val stubSwarmUiGenerationRepository = mockk<SwarmUiGenerationRepository>()
     private val stubLocalDiffusionGenerationRepository = mockk<LocalDiffusionGenerationRepository>()
     private val stubMediaPipeGenerationRepository = mockk<MediaPipeGenerationRepository>()
-    private val stubStableDiffusionCppGenerationRepository = mockk<StableDiffusionCppGenerationRepository>()
+    private val stubStableDiffusionCppGenerationRepository =
+        mockk<StableDiffusionCppGenerationRepository>()
     private val stubCoreMlGenerationRepository = mockk<CoreMlGenerationRepository>()
     private val stubBonsaiGenerationRepository = mockk<BonsaiGenerationRepository>()
     private val stubPreferenceManager = mockk<PreferenceManager>()
 
     private val useCase = TextToImageUseCaseImpl(
+        generateEasyDiffusionUseCase = mockk(),
+        captureEasyDiffusionConnectionUseCase = mockk(),
         stableDiffusionGenerationRepository = stubStableDiffusionGenerationRepository,
         hordeGenerationRepository = stubHordeGenerationRepository,
         huggingFaceGenerationRepository = stubHuggingFaceGenerationRepository,
@@ -66,7 +70,9 @@ class TextToImageUseCaseImplTest {
     @Test
     fun `given source is AUTOMATIC1111, expected stable diffusion generation`() = runTest {
         every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
-        coEvery { stubStableDiffusionGenerationRepository.generateFromText(any()) } returns listOf(mockAiGenerationResult)
+        coEvery { stubStableDiffusionGenerationRepository.generateFromText(any()) } returns listOf(
+            mockAiGenerationResult
+        )
 
         val actual = useCase(mockTextToImagePayload.copy(batchCount = 1))
 
@@ -121,7 +127,9 @@ class TextToImageUseCaseImplTest {
     @Test
     fun `given source is FAL_AI, expected fal ai generation`() = runTest {
         every { stubPreferenceManager.source } returns ServerSource.FAL_AI
-        coEvery { stubFalAiGenerationRepository.generateFromText(any()) } returns listOf(mockAiGenerationResult)
+        coEvery { stubFalAiGenerationRepository.generateFromText(any()) } returns listOf(
+            mockAiGenerationResult
+        )
 
         val actual = useCase(mockTextToImagePayload.copy(batchCount = 1))
 
@@ -132,7 +140,9 @@ class TextToImageUseCaseImplTest {
     @Test
     fun `given source is ARLI_AI, expected arli ai generation`() = runTest {
         every { stubPreferenceManager.source } returns ServerSource.ARLI_AI
-        coEvery { stubArliAiGenerationRepository.generateFromText(any()) } returns listOf(mockAiGenerationResult)
+        coEvery { stubArliAiGenerationRepository.generateFromText(any()) } returns listOf(
+            mockAiGenerationResult
+        )
 
         val actual = useCase(mockTextToImagePayload.copy(batchCount = 1))
 
@@ -174,15 +184,16 @@ class TextToImageUseCaseImplTest {
     }
 
     @Test
-    fun `given source is LOCAL_STABLE_DIFFUSION_CPP, expected stable diffusion cpp generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.LOCAL_STABLE_DIFFUSION_CPP
-        coEvery { stubStableDiffusionCppGenerationRepository.generateFromText(any()) } returns mockAiGenerationResult
+    fun `given source is LOCAL_STABLE_DIFFUSION_CPP, expected stable diffusion cpp generation`() =
+        runTest {
+            every { stubPreferenceManager.source } returns ServerSource.LOCAL_STABLE_DIFFUSION_CPP
+            coEvery { stubStableDiffusionCppGenerationRepository.generateFromText(any()) } returns mockAiGenerationResult
 
-        val actual = useCase(mockTextToImagePayload.copy(batchCount = 1))
+            val actual = useCase(mockTextToImagePayload.copy(batchCount = 1))
 
-        assertEquals(listOf(mockAiGenerationResult), actual)
-        coVerify(exactly = 1) { stubStableDiffusionCppGenerationRepository.generateFromText(any()) }
-    }
+            assertEquals(listOf(mockAiGenerationResult), actual)
+            coVerify(exactly = 1) { stubStableDiffusionCppGenerationRepository.generateFromText(any()) }
+        }
 
     @Test
     fun `given source is LOCAL_APPLE_CORE_ML, expected core ml generation`() = runTest {
@@ -207,26 +218,30 @@ class TextToImageUseCaseImplTest {
     }
 
     @Test
-    fun `given automatic1111 batch count is 10, expected batch generated by repository`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
-        coEvery { stubStableDiffusionGenerationRepository.generateFromText(any()) } returns List(10) { mockAiGenerationResult }
+    fun `given automatic1111 batch count is 10, expected batch generated by repository`() =
+        runTest {
+            every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
+            coEvery { stubStableDiffusionGenerationRepository.generateFromText(any()) } returns List(
+                10
+            ) { mockAiGenerationResult }
 
-        val actual = useCase(mockTextToImagePayload.copy(batchCount = 10))
+            val actual = useCase(mockTextToImagePayload.copy(batchCount = 10))
 
-        assertEquals(List(10) { mockAiGenerationResult }, actual)
-        coVerify(exactly = 1) { stubStableDiffusionGenerationRepository.generateFromText(any()) }
-    }
+            assertEquals(List(10) { mockAiGenerationResult }, actual)
+            coVerify(exactly = 1) { stubStableDiffusionGenerationRepository.generateFromText(any()) }
+        }
 
     @Test
-    fun `given non batch source batch count is 10, expected generation repeated 10 times`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.HORDE
-        coEvery { stubHordeGenerationRepository.generateFromText(any()) } returns mockAiGenerationResult
+    fun `given non batch source batch count is 10, expected generation repeated 10 times`() =
+        runTest {
+            every { stubPreferenceManager.source } returns ServerSource.HORDE
+            coEvery { stubHordeGenerationRepository.generateFromText(any()) } returns mockAiGenerationResult
 
-        val actual = useCase(mockTextToImagePayload.copy(batchCount = 10))
+            val actual = useCase(mockTextToImagePayload.copy(batchCount = 10))
 
-        assertEquals(List(10) { mockAiGenerationResult }, actual)
-        coVerify(exactly = 10) { stubHordeGenerationRepository.generateFromText(any()) }
-    }
+            assertEquals(List(10) { mockAiGenerationResult }, actual)
+            coVerify(exactly = 10) { stubHordeGenerationRepository.generateFromText(any()) }
+        }
 
     @Test
     fun `given fal ai batch count is 4, expected batch generated by repository`() = runTest {

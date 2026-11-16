@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
+import com.shifthackz.aisdv1.core.validation.di.easyDiffusionSeedValidatorQualifier
 import com.shifthackz.aisdv1.core.validation.di.validatorsModule
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -56,6 +57,7 @@ class GenerationSeedFieldTest(
             isImg2Img,
             dependencyGraph.koin.get(),
             dependencyGraph.koin.get(nativeSeedValidatorQualifier),
+            dependencyGraph.koin.get(easyDiffusionSeedValidatorQualifier),
         )
         compose.setContent {
             MaterialTheme {

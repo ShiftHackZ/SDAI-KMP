@@ -31,4 +31,28 @@ internal fun KeyValueStore.writeProviderSelection(source: ServerSource) {
     putStringDurably(PROVIDER_SELECTION_KEY, "${source.key}|${previous.second + 1}")
 }
 
+/**
+ * Persists an Easy Diffusion connection field and invalidates captured work atomically when selected.
+ * Callers serialize connection/model replacement with ProviderSelectionGuard. Unchanged values and
+ * settings for an inactive provider retain the current selection revision.
+ * @param key Easy Diffusion endpoint or checkpoint preference key.
+ * @param value Replacement endpoint or complete checkpoint identifier.
+ * @author Dmitriy Moroz
+ */
+internal fun KeyValueStore.writeEasyDiffusionSetting(key: String, value: String) {
+    val previous = readProviderSelection()
+    if (previous.first != ServerSource.EASY_DIFFUSION || getString(key) == value) {
+        putString(key, value)
+        return
+    }
+    check(previous.second < Long.MAX_VALUE) { "Provider selection revision exhausted" }
+    putConfigurationDurably(
+        strings = mapOf(
+            key to value,
+            PROVIDER_SELECTION_KEY to "${previous.first.key}|${previous.second + 1}",
+        ),
+        booleans = emptyMap(),
+    )
+}
+
 private const val PROVIDER_SELECTION_KEY = "key_provider_selection_state"

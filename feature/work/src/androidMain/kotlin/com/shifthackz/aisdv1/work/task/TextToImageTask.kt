@@ -1,15 +1,17 @@
 package com.shifthackz.aisdv1.work.task
 
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
+
 import android.content.Context
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanup
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadStore
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationOwner
+import com.shifthackz.aisdv1.domain.entity.EasyDiffusionWorkOwner
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import kotlinx.coroutines.withContext
 import androidx.work.WorkerParameters
 import com.shifthackz.aisdv1.core.common.appbuild.ActivityIntentProvider
-import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.common.log.debugLog
 import com.shifthackz.aisdv1.core.common.log.errorLog
 import com.shifthackz.aisdv1.core.notification.PushNotificationManager
@@ -17,7 +19,6 @@ import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptWorkerGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase
 import com.shifthackz.aisdv1.work.Constants
 import com.shifthackz.aisdv1.work.Constants.NOTIFICATION_TEXT_TO_IMAGE_FOREGROUND
@@ -25,7 +26,6 @@ import com.shifthackz.aisdv1.work.Constants.NOTIFICATION_TEXT_TO_IMAGE_GENERIC
 import com.shifthackz.aisdv1.work.core.CoreGenerationWorker
 import com.shifthackz.aisdv1.work.mappers.toTextToImagePayload
 import kotlinx.coroutines.CancellationException
-import java.io.File
 
 /**
  * Background txt2img worker.
@@ -39,13 +39,12 @@ import java.io.File
  * @param workerParameters Durable task identity and retry count.
  * @param pushNotificationManager Publishes foreground and terminal notifications.
  * @param activityIntentProvider Opens the app from notifications.
+ * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
- * @param observeLocalDiffusionProcessStatusUseCase Supplies legacy runtime progress.
  * @param interruptWorkerGenerationUseCase Cancels only native work owned by this UUID.
  * @param preferenceManager Supplies the source for legacy payloads without a snapshot.
  * @param backgroundWorkObserver Owns current background presentation state.
  * @param textToImageUseCase Routes immutable inputs and sequential batches.
- * @param fileProviderDescriptor Legacy work file location descriptor.
  * @param payloads Reads the immutable work request.
  * @param payloadCleanup Retains retry input and cleans up terminal request files.
  * @param nativeGateway Observes the child and preserves per-attempt ownership.
@@ -57,12 +56,11 @@ internal class TextToImageTask(
     pushNotificationManager: PushNotificationManager,
     activityIntentProvider: ActivityIntentProvider,
     observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
-    observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
+    observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val preferenceManager: PreferenceManager,
     private val backgroundWorkObserver: BackgroundWorkObserver,
     private val textToImageUseCase: TextToImageUseCase,
-    private val fileProviderDescriptor: FileProviderDescriptor,
     private val payloads: GenerationWorkPayloadStore,
     private val payloadCleanup: GenerationWorkPayloadCleanup,
     nativeGateway: NativeGenerationGateway,
@@ -75,7 +73,7 @@ internal class TextToImageTask(
     preferenceManager = preferenceManager,
     backgroundWorkObserver = backgroundWorkObserver,
     observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
-    observeLocalDiffusionProcessStatusUseCase = observeLocalDiffusionProcessStatusUseCase,
+    observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
 ) {
 
@@ -115,6 +113,7 @@ internal class TextToImageTask(
 
             source = payload.sourceSnapshot ?: source
             if (runAttemptCount > 0 && source in setOf(
+                    ServerSource.EASY_DIFFUSION,
                     ServerSource.LOCAL_MICROSOFT_ONNX,
                     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
                     ServerSource.LOCAL_APPLE_BONSAI,
@@ -127,7 +126,7 @@ internal class TextToImageTask(
 
             handleProcess()
             runCatching {
-                withContext(NativeGenerationOwner(id.toString())) {
+                withContext(NativeGenerationOwner(id.toString()) + EasyDiffusionWorkOwner(id.toString())) {
                     textToImageUseCase(
                         payload
                     )

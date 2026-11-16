@@ -37,6 +37,64 @@ import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormState
  * result handling fields while keeping platform-aware local provider controls
  * consistent with the txt2img screen.
  *
+ * @param providerSelectionRevision Durable source revision captured with queued image requests.
+ * @param loadingConfiguration Whether saved provider controls are still being loaded.
+ * @param imageBase64 Original encoded source image; empty until an input image is chosen.
+ * @param denoisingStrength Image-to-image denoising strength in the range zero through one.
+ * @param pickingImage Whether the platform picker or random input download is active.
+ * @param generating Whether this form has dispatched generation and awaits completion.
+ * @param savingImage Whether media-store export is in progress.
+ * @param sharingImage Whether platform sharing is being prepared.
+ * @param inPaint Current user mask strokes and paint controls; only supported providers consume them.
+ * @param promptValidationError Blocking prompt feedback, or null when the visible prompt is valid.
+ * @param error Current user-facing operation error, or null when no error is shown.
+ * @param message Current nonblocking user-facing completion message.
+ * @param screenModal Active progress, result, benchmark or background-work dialog.
+ * @param results Completed results retained by the current form/result workflow.
+ * @param editTag Pending prompt-tag edit request, or null outside the tag editor.
+ * @param onBoardingDemo Whether this form is a nonpersistent onboarding demonstration.
+ * @param platform Platform whose provider controls and local capabilities apply.
+ * @param mode Selected provider whose visible controls and generation dispatch apply.
+ * @param advancedToggleButtonVisible Whether the form exposes the advanced-control expansion action.
+ * @param advancedOptionsVisible Whether advanced generation controls are currently expanded.
+ * @param formPromptTaggedInput Whether prompts use the tag editor instead of plain text input.
+ * @param prompt Positive generation prompt, preserved verbatim.
+ * @param negativePrompt Negative generation prompt; unsupported providers omit it.
+ * @param width Requested output width in pixels.
+ * @param height Requested output height in pixels.
+ * @param samplingSteps Requested inference step count.
+ * @param cfgScale Requested classifier-free guidance scale.
+ * @param restoreFaces Whether a supporting provider applies face restoration.
+ * @param seed Decimal seed or the normal blank/-1 random sentinel.
+ * @param subSeed Variation seed for supporting providers only.
+ * @param subSeedStrength Variation seed blend strength for supporting providers.
+ * @param selectedSampler Exact selected sampler identifier, reconciled with the active provider catalog.
+ * @param selectedScheduler Selected AUTOMATIC1111 scheduler; automatic preserves normal server scheduling.
+ * @param availableForgeModules Forge modules advertised by the active AUTOMATIC1111 endpoint.
+ * @param selectedForgeModules Forge modules included in requests for supporting endpoints.
+ * @param availableSamplers Sampler labels currently available for the active provider.
+ * @param selectedStylePreset Selected Stability AI style preset, or NONE when disabled.
+ * @param selectedClipGuidancePreset Selected Stability AI CLIP guidance preset, or NONE when disabled.
+ * @param openAiModel Official OpenAI image-model selection.
+ * @param openAiSize Official OpenAI image-size preset.
+ * @param openAiQuality Official OpenAI output-quality selection.
+ * @param falAiModel Selected Fal.ai image-generation endpoint.
+ * @param falAiImageSize Fal.ai output-size preset.
+ * @param falAiAcceleration Fal.ai acceleration preset.
+ * @param falAiSyncMode Whether a supporting Fal.ai endpoint requests synchronous output.
+ * @param sdxlBackend Selected stable-diffusion.cpp execution backend.
+ * @param bonsaiBackend Selected Bonsai execution backend.
+ * @param bonsaiBackendSelectionVisible Whether the current platform exposes Bonsai backend selection.
+ * @param arliAiModels Checkpoint identifiers advertised by the active ArliAI service.
+ * @param arliAiModel Selected ArliAI checkpoint identifier.
+ * @param widthValidationError Localized width feedback, or null when the dimension is valid.
+ * @param heightValidationError Localized height feedback, or null when the dimension is valid.
+ * @param nsfw Provider-specific safety-filter preference.
+ * @param batchCount Number of requested images; providers may execute the batch sequentially.
+ * @param hires AUTOMATIC1111 high-resolution second-pass controls.
+ * @param aDetailer AUTOMATIC1111 ADetailer extension configuration.
+ * @param aDetailerAvailable Whether the active AUTOMATIC1111 endpoint advertises ADetailer.
+ * @param aDetailerRefreshing Whether ADetailer availability is being refreshed.
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -58,6 +116,7 @@ data class ImageToImageState(
     override val onBoardingDemo: Boolean = false,
     val platform: Platform = Platform.ANDROID,
     override val mode: ServerSource = ServerSource.AUTOMATIC1111,
+    val providerSelectionRevision: Long = 0L,
     override val advancedToggleButtonVisible: Boolean = true,
     override val advancedOptionsVisible: Boolean = false,
     override val formPromptTaggedInput: Boolean = false,
@@ -109,39 +168,44 @@ data class ImageToImageState(
 
     val sourceSupportsImageToImage: Boolean
         get() = mode == ServerSource.AUTOMATIC1111 ||
-            mode == ServerSource.SWARM_UI ||
-            mode == ServerSource.HORDE ||
-            mode == ServerSource.HUGGING_FACE ||
-            mode == ServerSource.STABILITY_AI ||
-            mode == ServerSource.LOCAL_APPLE_CORE_ML ||
-            mode == ServerSource.FAL_AI ||
-            mode == ServerSource.ARLI_AI
+                mode == ServerSource.SWARM_UI ||
+                mode == ServerSource.EASY_DIFFUSION ||
+                mode == ServerSource.HORDE ||
+                mode == ServerSource.HUGGING_FACE ||
+                mode == ServerSource.STABILITY_AI ||
+                mode == ServerSource.LOCAL_APPLE_CORE_ML ||
+                mode == ServerSource.FAL_AI ||
+                mode == ServerSource.ARLI_AI
 
     val sourceSupportsInPaint: Boolean
-        get() = mode != ServerSource.LOCAL_APPLE_CORE_ML
+        get() = mode != ServerSource.LOCAL_APPLE_CORE_ML && mode != ServerSource.EASY_DIFFUSION
 
     val hasValidationErrors: Boolean
         get() = promptValidationError != null ||
-            widthValidationError != null ||
-            heightValidationError != null ||
-            seedValidationError != null ||
-            subSeedValidationError != null ||
-            error != null
+                widthValidationError != null ||
+                heightValidationError != null ||
+                seedValidationError != null ||
+                subSeedValidationError != null ||
+                error != null
 
     val canGenerate: Boolean
         get() = hasInputImage &&
-            sourceSupportsImageToImage &&
-            !hasValidationErrors &&
-            !pickingImage &&
-            !generating
+                sourceSupportsImageToImage &&
+                !hasValidationErrors &&
+                !pickingImage &&
+                !generating
 }
 
 /**
  * Converts the current img2img state into the domain generation request.
+ * @param maskBase64 Optional encoded inpainting mask; null preserves the current empty-mask default.
+ * @author Dmitriy Moroz
  */
 internal fun ImageToImageState.mapToPayload(
     maskBase64: String? = null,
 ): ImageToImagePayload = ImageToImagePayload(
+    sourceSnapshot = mode,
+    providerSelectionRevision = providerSelectionRevision,
     base64Image = imageBase64,
     base64MaskImage = maskBase64.orEmpty(),
     denoisingStrength = denoisingStrength,

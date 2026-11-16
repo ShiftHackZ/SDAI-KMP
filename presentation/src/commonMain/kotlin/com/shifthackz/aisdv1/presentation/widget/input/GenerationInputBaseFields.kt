@@ -18,6 +18,7 @@ internal fun generationInputBaseFields(
         when (mode) {
             ServerSource.AUTOMATIC1111,
             ServerSource.SWARM_UI,
+            ServerSource.EASY_DIFFUSION,
             ServerSource.STABILITY_AI,
             ServerSource.HUGGING_FACE,
             ServerSource.LOCAL_MICROSOFT_ONNX,
@@ -46,6 +47,7 @@ internal fun generationInputBaseFields(
     when (mode) {
         ServerSource.AUTOMATIC1111,
         ServerSource.SWARM_UI,
+        ServerSource.EASY_DIFFUSION,
         ServerSource.HUGGING_FACE,
         ServerSource.STABILITY_AI,
         ServerSource.ARLI_AI,

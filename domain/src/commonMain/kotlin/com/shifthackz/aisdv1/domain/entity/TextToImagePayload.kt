@@ -8,7 +8,7 @@ package com.shifthackz.aisdv1.domain.entity
  * their provider, including Android local runtime backend choices such as SDXL
  * and Bonsai.
  * @param sourceSnapshot Source selected at submission; null preserves legacy queued-work routing.
- * @param providerSelectionRevision Durable source-selection revision; mandatory for native OAuth work.
+ * @param providerSelectionRevision Durable provider/connection revision used to reject stale queued work.
  * @param openAiOAuthAccountId Token-free ChatGPT account identifier captured at submission.
  * @param openAiOAuthRevision Stable protected-session revision; replacement logins invalidate earlier work.
  * @author Dmitriy Moroz

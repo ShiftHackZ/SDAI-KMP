@@ -22,8 +22,12 @@ import org.koin.dsl.module
  */
 val nativeSeedValidatorQualifier = named("native_seed_validator")
 
+/** Identifies the unsigned 32-bit seed contract accepted by Easy Diffusion.
+ * @author Dmitriy Moroz */
+val easyDiffusionSeedValidatorQualifier = named("easy_diffusion_seed_validator")
+
 /**
- * Exposes the `validatorsModule` value used by the SDAI validation layer.
+ * Binds validators with provider-specific integer limits through explicit constructor configuration.
  *
  * @author Dmitriy Moroz
  */
@@ -35,5 +39,6 @@ val validatorsModule = module {
     factoryOf(::CommonStringValidatorImpl) bind CommonStringValidator::class
     factoryOf(::FilePathValidatorImpl) bind FilePathValidator::class
     factory<SeedValidator> { SeedValidatorImpl() }
+    factory<SeedValidator>(easyDiffusionSeedValidatorQualifier) { SeedValidatorImpl(4294967295L) }
     factory<SeedValidator>(nativeSeedValidatorQualifier) { SeedValidatorImpl(Long.MAX_VALUE) }
 }

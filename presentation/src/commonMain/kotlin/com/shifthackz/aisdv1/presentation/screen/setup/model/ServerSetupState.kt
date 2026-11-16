@@ -28,6 +28,69 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
  * @param openAiOAuthCode Transient device code displayed only during the current login attempt.
  * @param openAiOAuthBusy Whether device authorization is pending; disables conflicting actions.
  * @param openAiOAuthStorageError Whether protected storage requires recovery or an explicit local reset.
+ * @param showBackNavArrow Whether this setup flow may return to its opening screen.
+ * @param step Current provider-selection or provider-configuration stage.
+ * @param mode Selected provider whose visible controls and generation dispatch apply.
+ * @param platform Platform whose provider controls and local capabilities apply.
+ * @param allowedModes Provider catalog permitted by the active build and setup launch flow.
+ * @param sourceSearchQuery User-entered provider search text.
+ * @param sourceTypeFilter Optional hosting-type restriction for provider discovery.
+ * @param sourceReadinessFilters Readiness markers included by provider discovery filters.
+ * @param sourceTagFilters Capability tags required by provider discovery filters.
+ * @param sourceSortOrder Ordering applied to the filtered provider catalog.
+ * @param allowLocalCustomModels Whether this setup flow permits selecting local filesystem paths.
+ * @param modal Current setup progress, confirmation, filter or error dialog.
+ * @param loadingConfiguration Whether saved provider controls are still being loaded.
+ * @param serverUrl AUTOMATIC1111 server root used for metadata and generation.
+ * @param swarmUiUrl SwarmUI server root, independent from other self-hosted connections.
+ * @param easyDiffusionUrl Candidate or committed HTTP(S) Easy Diffusion instance root/prefix, according to its owning state.
+ * @param easyDiffusionUrlValidationError Inline candidate Easy Diffusion URL feedback; null when valid.
+ * @param hordeApiKey AI Horde credential; the anonymous key is supported independently of other services.
+ * @param huggingFaceApiKey Hugging Face inference token.
+ * @param openAiApiKey Official OpenAI API key; separate from compatible servers and OAuth sessions.
+ * @param openAiCompatibleUrl Complete compatible-server API prefix, including any version and reverse-proxy path.
+ * @param openAiCompatibleApiKey Optional bearer key for the independent compatible server.
+ * @param openAiCompatibleUrlValidationError Inline compatible-server URL feedback; null when valid.
+ * @param stabilityAiApiKey Stability AI API credential.
+ * @param falAiApiKey Fal.ai API credential.
+ * @param arliAiApiKey ArliAI API credential.
+ * @param hordeDefaultApiKey Whether AI Horde uses its supported anonymous default key.
+ * @param demoMode Whether AUTOMATIC1111 uses the configured demonstration endpoint.
+ * @param demoModeUrl Configured AUTOMATIC1111 demonstration endpoint.
+ * @param authType Selected anonymous or Basic Auth mode for supporting self-hosted providers.
+ * @param login User-entered Basic Auth login.
+ * @param password User-entered Basic Auth password.
+ * @param huggingFaceModels Supported Hugging Face inference model choices.
+ * @param huggingFaceModel Selected supported Hugging Face inference model alias.
+ * @param localOnnxModels Current ONNX download/selection catalog for setup.
+ * @param localOnnxCustomModel Whether setup currently selects a custom ONNX model path.
+ * @param localOnnxCustomModelPath User-entered custom ONNX model filesystem path.
+ * @param localMediaPipeModels Current MediaPipe download/selection catalog for setup.
+ * @param localMediaPipeCustomModel Whether setup currently selects a custom MediaPipe model path.
+ * @param localMediaPipeCustomModelPath User-entered custom MediaPipe model filesystem path.
+ * @param localSdxlModels Current stable-diffusion.cpp download/selection catalog for setup.
+ * @param localSdxlCustomModel Whether setup currently selects a custom stable-diffusion.cpp model path.
+ * @param localSdxlCustomModelPath User-entered custom stable-diffusion.cpp model filesystem path.
+ * @param localCoreMlModels Current Core ML download/selection catalog for setup.
+ * @param localCoreMlCustomModelPath User-entered custom Core ML model filesystem path.
+ * @param localBonsaiModels Current Bonsai download/selection catalog for setup.
+ * @param localBonsaiCustomModel Whether setup currently selects a custom Bonsai model path.
+ * @param localBonsaiCustomModelPath User-entered custom Bonsai model filesystem path.
+ * @param passwordVisible Whether the setup password field reveals its entered text.
+ * @param serverUrlValidationError Inline AUTOMATIC1111 endpoint feedback; null when valid.
+ * @param swarmUiUrlValidationError Inline SwarmUI endpoint feedback; null when valid.
+ * @param loginValidationError Inline Basic Auth login feedback; null when valid.
+ * @param passwordValidationError Inline Basic Auth password feedback; null when valid.
+ * @param hordeApiKeyValidationError Inline AI Horde key feedback; null when valid.
+ * @param huggingFaceApiKeyValidationError Inline Hugging Face token feedback; null when valid.
+ * @param openAiApiKeyValidationError Inline official OpenAI key feedback; null when valid.
+ * @param stabilityAiApiKeyValidationError Inline Stability AI key feedback; null when valid.
+ * @param falAiApiKeyValidationError Inline Fal.ai key feedback; null when valid.
+ * @param arliAiApiKeyValidationError Inline ArliAI key feedback; null when valid.
+ * @param localCustomOnnxPathValidationError Inline custom ONNX path feedback; null when valid.
+ * @param localCustomMediaPipePathValidationError Inline custom MediaPipe path feedback; null when valid.
+ * @param localCustomSdxlPathValidationError Inline custom stable-diffusion.cpp path feedback; null when valid.
+ * @param localCustomBonsaiPathValidationError Inline custom Bonsai path feedback; null when valid.
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -47,6 +110,8 @@ data class ServerSetupState(
     val loadingConfiguration: Boolean = true,
     val serverUrl: String = "",
     val swarmUiUrl: String = "",
+    val easyDiffusionUrl: String = "",
+    val easyDiffusionUrlValidationError: ValidationError? = null,
     val hordeApiKey: String = "",
     val huggingFaceApiKey: String = "",
     val openAiApiKey: String = "",
@@ -137,6 +202,10 @@ data class ServerSetupState(
             else -> null
         }
 
+    /** Applies a protected authorization snapshot to setup fields without persisting it.
+     * @param value Protected authorization snapshot applied to presentation inputs.
+     * @author Dmitriy Moroz */
+
     fun withCredentials(value: AuthorizationCredentials): ServerSetupState = when (value) {
         is AuthorizationCredentials.HttpBasic -> copy(
             authType = AuthType.HTTP_BASIC,
@@ -147,10 +216,17 @@ data class ServerSetupState(
         AuthorizationCredentials.None -> copy(authType = AuthType.ANONYMOUS)
     }
 
+    /** Builds the current anonymous or Basic Auth value for a subsequent checked configuration publication.
+     * @author Dmitriy Moroz */
+
     fun credentialsDomain(): AuthorizationCredentials = when (authType) {
         AuthType.ANONYMOUS -> AuthorizationCredentials.None
         AuthType.HTTP_BASIC -> AuthorizationCredentials.HttpBasic(login, password)
     }
+
+    /** Updates only the active local provider’s custom path and clears its stale path-validation error.
+     * @param value User-entered path for the active local runtime.
+     * @author Dmitriy Moroz */
 
     fun withLocalCustomModelPath(value: String): ServerSetupState = when (mode) {
         ServerSource.LOCAL_MICROSOFT_ONNX -> copy(
@@ -172,6 +248,10 @@ data class ServerSetupState(
 
         else -> this
     }
+
+    /** Replaces the matching catalog item only in the active local provider’s list.
+     * @param value Updated download/selection metadata for one local catalog item.
+     * @author Dmitriy Moroz */
 
     fun withUpdatedLocalModel(value: LocalModel): ServerSetupState = when (mode) {
         ServerSource.LOCAL_MICROSOFT_ONNX -> copy(
@@ -196,6 +276,10 @@ data class ServerSetupState(
 
         else -> this
     }
+
+    /** Marks the deleted item unavailable, clears its download state and dismisses the confirmation.
+     * @param value Catalog item whose downloaded files have been removed.
+     * @author Dmitriy Moroz */
 
     fun withDeletedLocalModel(value: LocalModel): ServerSetupState = when (mode) {
         ServerSource.LOCAL_MICROSOFT_ONNX -> copy(
@@ -251,6 +335,10 @@ data class ServerSetupState(
         else -> copy(modal = Modal.None)
     }
 
+    /** Selects the chosen model in the active local provider’s catalog.
+     * @param value Catalog item selected for the active local runtime.
+     * @author Dmitriy Moroz */
+
     fun withSelectedLocalModel(value: LocalModel): ServerSetupState = when (mode) {
         ServerSource.LOCAL_MICROSOFT_ONNX -> copy(
             localOnnxModels = localOnnxModels.withCommonNewState(value.copy(selected = true)),
@@ -275,7 +363,15 @@ data class ServerSetupState(
         else -> this
     }
 
+    /** Toggles custom local selection and reconciles selected downloaded/custom catalog items.
+     * @param value Whether custom local model paths may be selected.
+     * @author Dmitriy Moroz */
+
     fun withAllowCustomModel(value: Boolean): ServerSetupState {
+
+        /** Marks only the requested custom-model identity selected within this model list.
+         * @param id Stable local model or custom-model identifier to select or delete.
+         * @author Dmitriy Moroz */
         fun List<LocalModel>.updateCustomModelSelection(id: String) = withCommonNewState(
             find { model -> model.id == id }?.copy(selected = value),
         )
@@ -336,11 +432,32 @@ data class ServerSetupState(
         data object SourceFilters : Modal
         data object SourceSort : Modal
         data object ConnectLocalHost : Modal
+
+        /** Requests selection of a download mirror for a stable local model.
+         * @param modelId Stable local model identifier whose advertised sources are displayed.
+         * @author Dmitriy Moroz */
         data class SelectDownloadSource(val modelId: String) : Modal
+
+        /** Retains the exact downloaded item awaiting deletion confirmation.
+         * @param model Downloaded catalog item to remove after confirmation.
+         * @author Dmitriy Moroz */
         data class DeleteLocalModelConfirm(val model: LocalModel) : Modal
+
+        /** Displays a safe user-facing setup failure.
+         * @param message User-facing error message; credentials and protocol payloads are not included.
+         * @author Dmitriy Moroz */
         data class Error(val message: String) : Modal
     }
 
+    /** Presentation model combining stable identity, available archives and current local selection/download state.
+     * @param id Stable model identifier shared with the domain catalog.
+     * @param name Human-readable model label.
+     * @param size Display-ready archive or installed size.
+     * @param sources Advertised archive download URLs in provider order.
+     * @param downloaded Whether the model files are available locally.
+     * @param downloadState Current progress, completion or failure of a model download.
+     * @param selected Whether this model is selected for the active local runtime.
+     * @author Dmitriy Moroz */
     data class LocalModel(
         val id: String,
         val name: String,
@@ -356,6 +473,7 @@ data class ServerSetupState(
             ServerSource.AUTOMATIC1111,
             ServerSource.SWARM_UI,
             ServerSource.OPEN_AI_COMPATIBLE,
+            ServerSource.EASY_DIFFUSION,
             ServerSource.HORDE,
             ServerSource.HUGGING_FACE,
             ServerSource.OPEN_AI,
@@ -366,6 +484,20 @@ data class ServerSetupState(
         )
     }
 }
+
+/** Builds setup inputs from independent provider settings and current platform/local model catalogs.
+ * @param allowedModes Provider catalog allowed by the current build and launch flow.
+ * @param platform Platform whose provider availability and readiness apply.
+ * @param huggingFaceModels Supported inference models available to remote setup.
+ * @param localOnnxModels Current ONNX download/selection catalog.
+ * @param localMediaPipeModels Current MediaPipe download/selection catalog.
+ * @param localSdxlModels Current stable-diffusion.cpp download/selection catalog.
+ * @param localCoreMlModels Current Core ML download/selection catalog.
+ * @param localBonsaiModels Current Bonsai download/selection catalog.
+ * @param allowLocalCustomModels Whether this setup flow permits custom local model paths.
+ * @param demoModeUrl Configured AUTOMATIC1111 demonstration endpoint.
+ * @param showBackNavArrow Whether setup may navigate back to the screen that opened it.
+ * @author Dmitriy Moroz */
 
 fun Configuration.toServerSetupState(
     allowedModes: List<ServerSource>,
@@ -406,6 +538,7 @@ fun Configuration.toServerSetupState(
         allowLocalCustomModels = allowLocalCustomModels,
         serverUrl = serverUrl,
         swarmUiUrl = swarmUiUrl,
+        easyDiffusionUrl = easyDiffusionUrl,
         hordeApiKey = hordeApiKey,
         hordeDefaultApiKey = hordeApiKey == HORDE_DEFAULT_API_KEY,
         huggingFaceApiKey = huggingFaceApiKey,
@@ -439,6 +572,9 @@ fun Configuration.toServerSetupState(
 
 const val HORDE_DEFAULT_API_KEY = "0000000000"
 
+/** Converts domain local-model metadata into setup selection/download items.
+ * @author Dmitriy Moroz */
+
 private fun List<LocalAiModel>.mapToCommonSetupModels(): List<ServerSetupState.LocalModel> =
     map { model ->
         ServerSetupState.LocalModel(
@@ -451,8 +587,16 @@ private fun List<LocalAiModel>.mapToCommonSetupModels(): List<ServerSetupState.L
         )
     }
 
+/** Checks whether the saved selected model points to the provider’s custom model identity.
+ * @param id Stable local model or custom-model identifier to select or delete.
+ * @author Dmitriy Moroz */
+
 private fun List<LocalAiModel>.hasCommonSelectedCustomModel(id: String): Boolean =
     any { model -> model.selected && model.id == id }
+
+/** Replaces the matching setup item while retaining unrelated catalog entries.
+ * @param model Updated catalog item to merge without changing unrelated models.
+ * @author Dmitriy Moroz */
 
 private fun List<ServerSetupState.LocalModel>.withCommonNewState(
     model: ServerSetupState.LocalModel?,
