@@ -1,6 +1,11 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.EasyDiffusionConnection
+import com.shifthackz.aisdv1.domain.entity.EasyDiffusionRequest
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GenerateEasyDiffusionUseCase
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.CaptureEasyDiffusionConnectionUseCase
+import io.mockk.slot
 import com.shifthackz.aisdv1.domain.mocks.mockAiGenerationResult
 import com.shifthackz.aisdv1.domain.mocks.mockTextToImagePayload
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
@@ -26,6 +31,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
 
+/**
+ * Verifies provider dispatch using application payloads, including captured Easy Diffusion batches.
+ * @author Dmitriy Moroz
+ */
 class TextToImageUseCaseImplTest {
 
     private val stubException = RuntimeException("Unable to generate image.")
@@ -46,9 +55,11 @@ class TextToImageUseCaseImplTest {
     private val stubBonsaiGenerationRepository = mockk<BonsaiGenerationRepository>()
     private val stubPreferenceManager = mockk<PreferenceManager>()
 
+    private val generateEasyDiffusion = mockk<GenerateEasyDiffusionUseCase>()
+    private val captureEasyDiffusion = mockk<CaptureEasyDiffusionConnectionUseCase>()
     private val useCase = TextToImageUseCaseImpl(
-        generateEasyDiffusionUseCase = mockk(),
-        captureEasyDiffusionConnectionUseCase = mockk(),
+        generateEasyDiffusionUseCase = generateEasyDiffusion,
+        captureEasyDiffusionConnectionUseCase = captureEasyDiffusion,
         stableDiffusionGenerationRepository = stubStableDiffusionGenerationRepository,
         hordeGenerationRepository = stubHordeGenerationRepository,
         huggingFaceGenerationRepository = stubHuggingFaceGenerationRepository,
@@ -66,6 +77,43 @@ class TextToImageUseCaseImplTest {
         bonsaiGenerationRepository = stubBonsaiGenerationRepository,
         preferenceManager = stubPreferenceManager,
     )
+
+    @Test
+    fun `Easy Diffusion captures one immutable connection and delegates the complete batch once`() =
+        runTest {
+            every { stubPreferenceManager.source } returns ServerSource.EASY_DIFFUSION
+            val connection = EasyDiffusionConnection("https://server.example", "folder/model", 7)
+            coEvery { captureEasyDiffusion(7, null) } returns connection
+            val request = slot<EasyDiffusionRequest>()
+            val results = List(3) { mockAiGenerationResult }
+            coEvery { generateEasyDiffusion(capture(request)) } returns results
+            val payload = mockTextToImagePayload.copy(
+                sourceSnapshot = ServerSource.EASY_DIFFUSION, providerSelectionRevision = 7,
+                batchCount = 3, seed = "4294967295"
+            )
+            assertSame(results, useCase(payload))
+            assertEquals(connection.url, request.captured.url)
+            assertEquals(connection.model, request.captured.model)
+            assertEquals(7L, request.captured.selectionRevision)
+            assertEquals(3, request.captured.batchCount)
+            coVerify(exactly = 1) { captureEasyDiffusion(7, null) }
+            coVerify(exactly = 1) { generateEasyDiffusion(any()) }
+        }
+
+    @Test
+    fun `stale Easy Diffusion capture stops dispatch before any generation`() = runTest {
+        every { stubPreferenceManager.source } returns ServerSource.EASY_DIFFUSION
+        coEvery { captureEasyDiffusion(6, null) } throws stubException
+        assertSame(stubException, runCatching {
+            useCase(
+                mockTextToImagePayload.copy(
+                    sourceSnapshot = ServerSource.EASY_DIFFUSION,
+                    providerSelectionRevision = 6
+                )
+            )
+        }.exceptionOrNull())
+        coVerify(exactly = 0) { generateEasyDiffusion(any()) }
+    }
 
     @Test
     fun `given source is AUTOMATIC1111, expected stable diffusion generation`() = runTest {

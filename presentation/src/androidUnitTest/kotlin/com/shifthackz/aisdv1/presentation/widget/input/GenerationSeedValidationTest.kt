@@ -35,6 +35,49 @@ class GenerationSeedValidationTest {
     }
 
     @Test
+    fun `Easy Diffusion uint32 limits apply to both forms and hidden variation stays irrelevant`() {
+        listOf("", "-1", "0", "4294967295").forEach { seed ->
+            val text = TextToImageState(
+                mode = ServerSource.EASY_DIFFUSION,
+                prompt = "lake",
+                seed = seed,
+                subSeed = "invalid hidden"
+            )
+                .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
+            val image = ImageToImageState(
+                mode = ServerSource.EASY_DIFFUSION,
+                prompt = "lake",
+                imageBase64 = "input",
+                seed = seed,
+                subSeed = "invalid hidden"
+            )
+                .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
+            assertNull(text.seedValidationError)
+            assertNull(image.seedValidationError)
+            assertNull(text.subSeedValidationError)
+            assertNull(image.subSeedValidationError)
+            assertTrue(text.canGenerate())
+            assertTrue(image.canGenerate)
+        }
+        listOf("4294967296", "-2", "1.5", "bad").forEach { seed ->
+            val text =
+                TextToImageState(mode = ServerSource.EASY_DIFFUSION, prompt = "lake", seed = seed)
+                    .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
+            val image = ImageToImageState(
+                mode = ServerSource.EASY_DIFFUSION,
+                prompt = "lake",
+                imageBase64 = "input",
+                seed = seed
+            )
+                .withSeedValidation(validator, nativeValidator, easyDiffusionValidator)
+            assertNotNull(text.seedValidationError)
+            assertNotNull(image.seedValidationError)
+            assertFalse(text.canGenerate())
+            assertFalse(image.canGenerate)
+        }
+    }
+
+    @Test
     fun `either unsafe web seed blocks both generation screen states`() {
         listOf(ServerSource.AUTOMATIC1111, ServerSource.SWARM_UI).forEach { mode ->
             listOf(
