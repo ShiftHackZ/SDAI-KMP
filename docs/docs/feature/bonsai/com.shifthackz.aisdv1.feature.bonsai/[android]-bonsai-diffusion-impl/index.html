@@ -150,26 +150,26 @@
     <h1 class="cover"><span>Bonsai</span><wbr><span>Diffusion</span><wbr><span><span>Impl</span></span></h1>
     <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
       <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">BonsaiDiffusionImpl</a> : <a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.bonsai/-bonsai-diffusion/index.html">BonsaiDiffusion</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/bonsai/src/androidMain/kotlin/com/shifthackz/aisdv1/feature/bonsai/BonsaiDiffusionImpl.kt#L25">source</a>)</span></span></div><p class="paragraph">Android Bonsai runtime entry point backed by the NDK bridge.</p><p class="paragraph">The implementation keeps native execution off the caller thread, serializes generation requests, and relays step progress through the shared local diffusion status contract.</p></div>    </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">BonsaiDiffusionImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>gateway<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-native-generation-gateway/index.html">NativeGenerationGateway</a></span></span><span class="token punctuation">)</span> : <a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.bonsai/-bonsai-diffusion/index.html">BonsaiDiffusion</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/bonsai/src/androidMain/kotlin/com/shifthackz/aisdv1/feature/bonsai/BonsaiDiffusionImpl.kt#L16">source</a>)</span></span></div><p class="paragraph">Android host facade that submits Bonsai work without loading its native library. Native execution, progress and cancellation belong to the shared inference gateway.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>gateway</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Owns serialized attempts and their child-process lifetime.</p></div></div></div></div></div></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="314050755%2FConstructors%2F1595618481" anchor-label="BonsaiDiffusionImpl" id="314050755%2FConstructors%2F1595618481" data-filterable-set=":feature:bonsai/androidMain"></a>
+        <div class="table"><a data-name="2120726546%2FConstructors%2F1595618481" anchor-label="BonsaiDiffusionImpl" id="2120726546%2FConstructors%2F1595618481" data-filterable-set=":feature:bonsai/androidMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-bonsai-diffusion-impl.html"><span>Bonsai</span><wbr><span>Diffusion</span><wbr><span><span>Impl</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="314050755%2FConstructors%2F1595618481"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2120726546%2FConstructors%2F1595618481"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">gateway<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-native-generation-gateway/index.html">NativeGenerationGateway</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -178,36 +178,19 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="2136540815%2FProperties%2F1595618481" anchor-label="mutex" id="2136540815%2FProperties%2F1595618481" data-filterable-set=":feature:bonsai/androidMain"></a>
+        <div class="table"><a data-name="-136769238%2FProperties%2F1595618481" anchor-label="gateway" id="-136769238%2FProperties%2F1595618481" data-filterable-set=":feature:bonsai/androidMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="mutex.html"><span><span>mutex</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2136540815%2FProperties%2F1595618481"></span>
+                  <div><a href="gateway.html"><span><span>gateway</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-136769238%2FProperties%2F1595618481"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="mutex.html">mutex</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.sync/Mutex///PointingToDeclaration/">Mutex</span></div></div>                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1492322644%2FProperties%2F1595618481" anchor-label="statusFlow" id="-1492322644%2FProperties%2F1595618481" data-filterable-set=":feature:bonsai/androidMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="status-flow.html"><span>status</span><wbr><span><span>Flow</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1492322644%2FProperties%2F1595618481"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="status-flow.html">statusFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/MutableSharedFlow///PointingToDeclaration/">MutableSharedFlow</span><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-local-diffusion-status/index.html">LocalDiffusionStatus</a><span class="token operator">&gt;</span></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="gateway.html">gateway</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-native-generation-gateway/index.html">NativeGenerationGateway</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -228,7 +211,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="interrupt.html"><span class="token function">interrupt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="interrupt.html"><span class="token function">interrupt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancels the current owned native attempt without initializing Bonsai JNI in the host.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -245,7 +228,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="observe-status.html"><span class="token function">observeStatus</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-local-diffusion-status/index.html">LocalDiffusionStatus</a><span class="token operator">&gt;</span></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="observe-status.html"><span class="token function">observeStatus</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-local-diffusion-status/index.html">LocalDiffusionStatus</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Observes child progress without constructing a native runtime.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -262,24 +245,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="process.html"><span class="token function">process</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">payload<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-text-to-image-payload/index.html">TextToImagePayload</a><span class="token punctuation">, </span></span><span class="parameter ">modelPath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div>                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-578478865%2FFunctions%2F1595618481" anchor-label="withBackgroundThreadPriority" id="-578478865%2FFunctions%2F1595618481" data-filterable-set=":feature:bonsai/androidMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="with-background-thread-priority.html"><span>with</span><wbr><span>Background</span><wbr><span>Thread</span><wbr><span><span>Priority</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-578478865%2FFunctions%2F1595618481"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:bonsai/androidMain" data-filterable-set=":feature:bonsai/androidMain" data-active="" data-toggle=":feature:bonsai/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="with-background-thread-priority.html">T</a><span class="token operator">&gt; </span><a href="with-background-thread-priority.html"><span class="token function">withBackgroundThreadPriority</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="with-background-thread-priority.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="with-background-thread-priority.html">T</a></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:bonsai/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="process.html"><span class="token function">process</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">payload<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-text-to-image-payload/index.html">TextToImagePayload</a><span class="token punctuation">, </span></span><span class="parameter ">modelPath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Captures one image request; the shared use case owns sequential batching.</p></div></div>                  </div>
                 </div>
               </div>
             </div>

@@ -148,24 +148,24 @@
   <div class="breadcrumbs"><a href="../../index.html">core/ui</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.core.mvi</a><span class="delimiter">/</span><span class="current">BaseMviViewModel</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Base</span><wbr><span>Mvi</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">BaseMviViewModel</a><span class="token operator">&lt;</span><a href="index.html">S</a><span class="token operator"> : </span><a href="../-mvi-state/index.html">MviState</a><span class="token punctuation">, </span><a href="index.html">I</a><span class="token operator"> : </span><a href="../-mvi-intent/index.html">MviIntent</a><span class="token punctuation">, </span><a href="index.html">E</a><span class="token operator"> : </span><a href="../-mvi-effect/index.html">MviEffect</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">initialState<span class="token operator">: </span><a href="index.html">S</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>effectDispatcher<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a>, <a href="../-mvi-view-model/index.html">MviViewModel</a><span class="token operator">&lt;</span><a href="index.html">S</a><span class="token punctuation">, </span><a href="index.html">I</a><span class="token punctuation">, </span><a href="index.html">E</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/core/ui/src/commonMain/kotlin/com/shifthackz/aisdv1/core/mvi/BaseMviViewModel.kt#L22">source</a>)</span></span></div><p class="paragraph">Coordinates <code class="lang-kotlin">BaseMviViewModel</code> behavior in the SDAI core UI layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">BaseMviViewModel</a><span class="token operator">&lt;</span><a href="index.html">S</a><span class="token operator"> : </span><a href="../-mvi-state/index.html">MviState</a><span class="token punctuation">, </span><a href="index.html">I</a><span class="token operator"> : </span><a href="../-mvi-intent/index.html">MviIntent</a><span class="token punctuation">, </span><a href="index.html">E</a><span class="token operator"> : </span><a href="../-mvi-effect/index.html">MviEffect</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>diagnostics<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter ">diagnosticScreen<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a><span class="token punctuation">, </span></span><span class="parameter ">initialState<span class="token operator">: </span><a href="index.html">S</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>effectDispatcher<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a>, <a href="../-mvi-view-model/index.html">MviViewModel</a><span class="token operator">&lt;</span><a href="index.html">S</a><span class="token punctuation">, </span><a href="index.html">I</a><span class="token punctuation">, </span><a href="index.html">E</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/core/ui/src/commonMain/kotlin/com/shifthackz/aisdv1/core/mvi/BaseMviViewModel.kt#L34">source</a>)</span></span></div><p class="paragraph">Owns screen state and one-shot effects independently of the screen's current visibility. Optional diagnostics use a bounded owner identity released when the ViewModel is cleared; attaching a UI consumer observes state without controlling business-job lifetime.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>diagnostics</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Injected bounded observer; no-op in normal builds.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>diagnostic</span><wbr><span><span>Screen</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Fixed label for this ViewModel type.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>initial</span><wbr><span><span>State</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Initial application state.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>effect</span><wbr><span><span>Dispatcher</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Dispatcher retaining existing effect delivery semantics.</p></div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="463049880%2FConstructors%2F-920980536" anchor-label="BaseMviViewModel" id="463049880%2FConstructors%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+        <div class="table"><a data-name="-295001509%2FConstructors%2F-920980536" anchor-label="BaseMviViewModel" id="-295001509%2FConstructors%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-base-mvi-view-model.html"><span>Base</span><wbr><span>Mvi</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="463049880%2FConstructors%2F-920980536"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-295001509%2FConstructors%2F-920980536"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">initialState<span class="token operator">: </span><a href="index.html">S</a><span class="token punctuation">, </span></span><span class="parameter ">effectDispatcher<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">diagnostics<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter ">diagnosticScreen<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostic-screen/index.html">UiDiagnosticScreen</a><span class="token punctuation">, </span></span><span class="parameter ">initialState<span class="token operator">: </span><a href="index.html">S</a><span class="token punctuation">, </span></span><span class="parameter ">effectDispatcher<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -219,6 +219,66 @@
               </div>
             </div>
           </div>
+<a data-name="-967097248%2FProperties%2F-920980536" anchor-label="diagnosticAttachments" id="-967097248%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="diagnostic-attachments.html"><span>diagnostic</span><wbr><span><span>Attachments</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-967097248%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="diagnostic-attachments.html">diagnosticAttachments</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1197402391%2FProperties%2F-920980536" anchor-label="diagnosticObserverJob" id="-1197402391%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="diagnostic-observer-job.html"><span>diagnostic</span><wbr><span>Observer</span><wbr><span><span>Job</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1197402391%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="diagnostic-observer-job.html">diagnosticObserverJob</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1650782461%2FProperties%2F-920980536" anchor-label="diagnosticOwner" id="1650782461%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="diagnostic-owner.html"><span>diagnostic</span><wbr><span><span>Owner</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1650782461%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="diagnostic-owner.html">diagnosticOwner</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Process-local fixed-label diagnostic owner.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="401571997%2FProperties%2F-920980536" anchor-label="diagnostics" id="401571997%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="diagnostics.html"><span><span>diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="401571997%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="diagnostics.html">diagnostics</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-1155028288%2FProperties%2F-920980536" anchor-label="effect" id="-1155028288%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
             <div class="main-subrow keyValue ">
@@ -245,6 +305,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="effect-dispatcher.html">effectDispatcher</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">effectDispatcher</code> value used by the SDAI core UI layer.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-688096501%2FProperties%2F-920980536" anchor-label="hasBeenCleared" id="-688096501%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="has-been-cleared.html"><span>has</span><wbr><span>Been</span><wbr><span><span>Cleared</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-688096501%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="has-been-cleared.html">hasBeenCleared</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -279,6 +354,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2068605057%2FFunctions%2F-920980536"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="index.html#2093014716%2FFunctions%2F-920980536"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1967297662%2FFunctions%2F-920980536" anchor-label="attachDiagnostics" id="-1967297662%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="attach-diagnostics.html"><span>attach</span><wbr><span><span>Diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1967297662%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="attach-diagnostics.html"><span class="token function">attachDiagnostics</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div><div class="brief "><p class="paragraph">Starts one capture observer for the first composed consumer; business jobs remain independent. Attach and the returned detach action run on the UI thread, as Compose lifecycle effects do.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -358,17 +448,32 @@
               </div>
             </div>
           </div>
-<a data-name="-1930136507%2FFunctions%2F-920980536" anchor-label="onCleared" id="-1930136507%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+<a data-name="-1831297124%2FFunctions%2F-920980536" anchor-label="onCleared" id="-1831297124%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-1930136507%2FFunctions%2F-920980536"><span>on</span><wbr><span><span>Cleared</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1930136507%2FFunctions%2F-920980536"></span>
+                  <div><a href="on-cleared.html"><span>on</span><wbr><span><span>Cleared</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1831297124%2FFunctions%2F-920980536"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1930136507%2FFunctions%2F-920980536"><span class="token function">onCleared</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-cleared.html"><span class="token function">onCleared</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Releases diagnostic ownership when the ViewModel lifecycle ends.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="557057826%2FFunctions%2F-920980536" anchor-label="onDiagnosticCaptureChanged" id="557057826%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-diagnostic-capture-changed.html"><span>on</span><wbr><span>Diagnostic</span><wbr><span>Capture</span><wbr><span><span>Changed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="557057826%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="on-diagnostic-capture-changed.html"><span class="token function">onDiagnosticCaptureChanged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isCapturing<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Allows diagnostic controls to reflect explicit capture changes while their screen is attached. This hook must not start a second long-lived capture observer.</p></div></div></div>
                 </div>
               </div>
             </div>
