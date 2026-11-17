@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>decoder</title>
+    <title>closeFailedOptions</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -30,10 +30,10 @@
 <script type="text/javascript" src="../../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../../scripts/prism.js" async></script>
 <script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
-<link rel="canonical" href="https://sdai.moroz.cc/docs/feature/onnx/com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-english-text-tokenizer/decoder.html">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/feature/onnx/com.shifthackz.aisdv1.feature.onnx.environment/-onnx-session-factory-impl/close-failed-options.html">
 <meta property="og:title" content="SDAI Documentation">
 <meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
-<meta property="og:url" content="https://sdai.moroz.cc/docs/feature/onnx/com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/-english-text-tokenizer/decoder.html">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/feature/onnx/com.shifthackz.aisdv1.feature.onnx.environment/-onnx-session-factory-impl/close-failed-options.html">
 <meta property="og:site_name" content="SDAI">
 <meta property="og:type" content="website">
 <style id="sdai-docs-branding">
@@ -144,12 +144,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature/onnx::com.shifthackz.aisdv1.feature.onnx.ai.tokenizer/EnglishTextTokenizer/decoder/#/PointingToDeclaration//-1660992350">
-  <div class="breadcrumbs"><a href="../../index.html">feature/onnx</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.feature.onnx.ai.tokenizer</a><span class="delimiter">/</span><a href="index.html">EnglishTextTokenizer</a><span class="delimiter">/</span><span class="current">decoder</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="feature/onnx::com.shifthackz.aisdv1.feature.onnx.environment/OnnxSessionFactoryImpl/closeFailedOptions/#ai.onnxruntime.OrtSession.SessionOptions#kotlin.Throwable/PointingToDeclaration//-1660992350">
+  <div class="breadcrumbs"><a href="../../index.html">feature/onnx</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.feature.onnx.environment</a><span class="delimiter">/</span><a href="index.html">OnnxSessionFactoryImpl</a><span class="delimiter">/</span><span class="current">closeFailedOptions</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>decoder</span></span></h1>
+    <h1 class="cover"><span>close</span><wbr><span>Failed</span><wbr><span><span>Options</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="decoder.html">decoder</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-mutable-map/index.html">MutableMap</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/onnx/src/androidMain/kotlin/com/shifthackz/aisdv1/feature/onnx/ai/tokenizer/EnglishTextTokenizer.kt#L69">source</a>)</span></span></div><p class="paragraph">Exposes the <code class="lang-kotlin">decoder</code> value used by the SDAI ONNX local diffusion feature layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:onnx/androidMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="close-failed-options.html"><span class="token function">closeFailedOptions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">options<span class="token operator">: </span><span data-unresolved-link="ai.onnxruntime/OrtSession.SessionOptions///PointingToDeclaration/">OrtSession.SessionOptions</span><span class="token punctuation">, </span></span><span class="parameter ">failure<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/onnx/src/androidMain/kotlin/com/shifthackz/aisdv1/feature/onnx/environment/OnnxSessionFactoryImpl.kt#L98">source</a>)</span></span></div><p class="paragraph">Retains the original initialization failure if native option disposal also fails.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>options</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Untransferred options to release.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:onnx/androidMain" data-filterable-set=":feature:onnx/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>failure</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Original model/provider/configuration failure to preserve.</p></div></div></div></div></div></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

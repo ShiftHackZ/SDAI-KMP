@@ -243,7 +243,6 @@ com.shifthackz.aisdv1.feature.onnx.ai.vae
 com.shifthackz.aisdv1.feature.onnx.di
 com.shifthackz.aisdv1.feature.onnx.entity
 com.shifthackz.aisdv1.feature.onnx.environment
-com.shifthackz.aisdv1.feature.onnx.extensions
 module:feature/openai-oauth
 com.shifthackz.aisdv1.feature.openaioauth.api
 com.shifthackz.aisdv1.feature.openaioauth.auth
