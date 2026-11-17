@@ -58,19 +58,19 @@ git push --force-with-lease origin feature/my-feature
 
 ## Release Flow: develop to master
 
-Before moving `develop` to `master`, regenerate Dokka in a separate docs-only PR that targets `develop`.
+Before moving `develop` to `master`, let Update Dokka refresh `develop`, or run
+the workflow manually for `develop` to check immediately.
 
 Expected release preparation:
 
 1. Merge the planned feature PRs into `develop`.
-2. Create a docs-only branch from `develop`.
-3. Regenerate Dokka.
-4. Open and merge a docs-only PR back into `develop`.
-5. Run release validation from `develop`.
-6. Fast-forward `master` from `develop`.
-7. Tag the release from `master`.
+2. Wait for the automated Dokka commit, or run Update Dokka manually for `develop`.
+3. Run release validation from `develop`.
+4. Fast-forward `master` from `develop`.
+5. Tag the release from `master`.
 
-This keeps feature PR diffs reviewable and moves generated documentation conflicts into one predictable release step.
+The generated input marker moves with the release, so unchanged inputs on
+`master` do not cause another generation job.
 
 The release merge from `develop` to `master` must preserve commit object IDs. Do not use GitHub's PR merge buttons for `develop -> master`.
 
@@ -154,7 +154,7 @@ Allowed workflow trigger shape:
 ```yaml
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 ```
 
 If manual deployment is added, the job must still guard against `develop`:
@@ -163,13 +163,17 @@ If manual deployment is added, the job must still guard against `develop`:
 if: github.ref == 'refs/heads/master'
 ```
 
-It is fine to run Dokka generation locally or in CI on feature branches and `develop`; committed generated output is reserved for release docs PRs, and publishing is restricted to `master`.
+Update Dokka commits generated output on `master` and `develop`. A manual run
+can also commit it to a selected feature branch. Publishing is restricted to
+`master`.
 
 ## Generated Dokka Documentation
 
 Generated Dokka output lives under `docs/docs`.
 
-Feature branches must not include generated Dokka output. Do not commit `docs/docs` changes from feature work.
+Ordinary feature work should leave `docs/docs` generation to the automated
+workflow after merge. Manual Update Dokka runs on feature branches are available
+when a committed preview is needed.
 
 Preferred feature shape:
 
@@ -179,28 +183,12 @@ Preferred feature shape:
 
 Feature PR CI may run Dokka as a validation step, but the generated output should stay as a CI artifact or temporary local output, not as committed source.
 
-Preferred release documentation shape:
-
-1. Create a release docs branch from updated `develop`:
-
-```bash
-git fetch origin
-git switch develop
-git pull --ff-only origin develop
-git switch -c docs/release-dokka
-```
-
-2. Regenerate and commit Dokka:
-
-```bash
-./gradlew dokkaGeneratePublicationHtml --no-daemon
-git add docs/docs
-git commit -m "Regenerate Dokka for release"
-```
-
-3. Open the docs-only PR against `develop`.
-
-When two feature PRs both change public APIs, merge them without Dokka. After both are in `develop`, the single release Dokka PR regenerates the final API documentation once.
+After merges, Update Dokka checks both integration branches every 15 minutes
+and waits for a 10-minute quiet period. It generates only when source or build
+inputs differ from the last successful documentation build, then commits to the
+same branch. Manual runs on any branch check immediately. See
+[Documentation Workflow](DOCUMENTATION.md#automatic-and-manual-updates) for
+credentials, controls and local generation.
 
 If an old feature branch already contains a generated Dokka commit, drop or skip that commit while rebasing onto `develop`:
 
@@ -246,6 +234,6 @@ Recommended order:
 2. Remove generated Dokka changes from the feature branches.
 3. Open both PRs against `develop`.
 4. Merge both PRs into `develop`.
-5. Create one docs-only Dokka PR from the final `develop`.
+5. Let Update Dokka refresh the final `develop`, or trigger it manually.
 6. Run the normal smoke tests.
 7. Fast-forward `master` from `develop` for the next release.

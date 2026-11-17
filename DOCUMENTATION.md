@@ -203,9 +203,56 @@ When changing a signature or class shape:
 3. Remove documentation for deleted parameters or obsolete behavior.
 4. Add platform notes when an `expect` or shared API gains different Android or
    iOS semantics.
-5. Regenerate Dokka before publishing or merging release work.
+5. Let the documentation workflow regenerate Dokka after merging, or run it
+   manually before publishing release work.
 
 ## Generating API Documentation
+
+### Automatic and manual updates
+
+[Update Dokka](.github/workflows/dokka.yml) checks `master` and `develop` every
+15 minutes. A branch must have been quiet for 10 minutes before generation
+starts. Closely spaced merges are therefore included in one update. GitHub may
+delay scheduled runs, so these intervals are not a delivery guarantee.
+
+The lightweight check fingerprints Kotlin/Java sources (including KDoc), source
+Markdown and Gradle configuration. Additions, changes and deletions all count;
+generated HTML and vendored sources do not. Unchanged inputs skip the expensive
+generation job. Each successful build records its input fingerprint in
+`docs/docs/.dokka-inputs.sha256`; the first run establishes this marker.
+
+To update **any branch immediately**, open **Actions → Update Dokka → Run
+workflow**. Set `target_branch` to the branch name, or leave it empty to use the
+branch selected in the workflow menu. Manual runs skip the quiet period and
+check for changed inputs immediately. Enable `force` only to regenerate even
+when the input fingerprint matches. For example:
+
+```sh
+gh workflow run dokka.yml --ref master -f target_branch=feature/my-feature
+```
+
+The workflow uses macOS so iOS source sets are available. It regenerates the full
+API reference, removes obsolete pages and commits only `docs/docs/` to the target
+branch. One generation job runs per branch at a time. If a branch advances during
+generation, that result is discarded; rerun manually, or let the next scheduled
+check pick up `master`/`develop`. Pushes never overwrite branch history.
+
+### Automation setup
+
+Merge the workflow and its helper into the default branch to enable scheduled
+runs. Configure the repository secret `DOKKA_PUSH_TOKEN` with a dedicated
+maintenance account's token, scoped to this repository with **Contents: read and
+write**. The account must be authorized to push directly to the target branches
+under their existing protection rules. The workflow does not change protections.
+
+The built-in `GITHUB_TOKEN` does not bypass required PR reviews and its commits
+do not trigger branch-based GitHub Pages builds. The dedicated writer allows
+`master` documentation commits to trigger the existing `master` / `docs` Pages
+publication. `develop` and manually selected feature branches are not published.
+Generated-only pushes skip Project Tests. No documentation commit triggers
+another Dokka run; the next scheduled check sees the matching fingerprint.
+
+### Local generation
 
 Run Dokka from the repository root:
 
