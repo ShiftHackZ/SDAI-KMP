@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.domain.preference
 
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+
 import com.shifthackz.aisdv1.core.common.schedulers.SchedulersToken
 import com.shifthackz.aisdv1.domain.entity.NetworkTimeout
 import com.shifthackz.aisdv1.domain.entity.Grid
@@ -70,12 +72,16 @@ interface PreferenceManager {
      */
     var swarmUiServerUrl: String
 
-    /** HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+    /**
+     * HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+     *
      * @author Dmitriy Moroz
      */
     var easyDiffusionUrl: String
 
-    /** Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+    /**
+     * Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+     *
      * @author Dmitriy Moroz
      */
     var easyDiffusionModel: String
@@ -192,8 +198,11 @@ interface PreferenceManager {
      */
     var source: ServerSource
 
-    /** Durable provider revision, also advanced by selected Easy Diffusion URL/model changes.
-     * @author Dmitriy Moroz */
+    /**
+     * Durable provider revision, also advanced by selected Easy Diffusion URL/model changes.
+     *
+     * @author Dmitriy Moroz
+     */
     val providerSelectionRevision: Long
 
     /**
@@ -219,18 +228,21 @@ interface PreferenceManager {
 
     /**
      * Editable image model identifier supplied to the compatible server.
+     *
      * @author Dmitriy Moroz
      */
     var openAiCompatibleModel: String
 
     /**
      * Optional bearer token for the independent compatible server.
+     *
      * @author Dmitriy Moroz
      */
     var openAiCompatibleApiKey: String
 
     /**
      * Complete HTTP(S) API prefix, including any version and reverse-proxy path.
+     *
      * @author Dmitriy Moroz
      */
     var openAiCompatibleUrl: String
@@ -332,6 +344,41 @@ interface PreferenceManager {
      * @author Dmitriy Moroz
      */
     var localCoreMlModelId: String
+
+    /**
+     * Last committed immutable custom manifest identity, retained across catalog selections.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnCustomActivationId: String
+
+    /**
+     * Manifest SHA256 captured with the selected model and queued generation inputs.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnActivationId: String
+
+    /**
+     * Selected catalog or custom UI identity; generation also requires the captured manifest SHA256.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnModelId: String
+
+    /**
+     * External custom bundle source shown by setup; execution uses its validated owned copy.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnModelPath: String
+
+    /**
+     * Requested MNN backend, checked again by the inference child.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnBackend: MnnBackend
 
     /**
      * Selected downloaded Bonsai model identifier.

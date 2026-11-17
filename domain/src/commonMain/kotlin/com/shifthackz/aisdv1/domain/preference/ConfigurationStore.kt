@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.domain.preference
 
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+
 import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
@@ -24,12 +26,16 @@ interface ConfigurationStore {
      */
     var swarmUiServerUrl: String
 
-    /** HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+    /**
+     * HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+     *
      * @author Dmitriy Moroz
      */
     var easyDiffusionUrl: String
 
-    /** Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+    /**
+     * Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+     *
      * @author Dmitriy Moroz
      */
     var easyDiffusionModel: String
@@ -196,6 +202,41 @@ interface ConfigurationStore {
     var localCoreMlModelPath: String
 
     /**
+     * Last committed immutable custom manifest identity, retained across catalog selections.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnCustomActivationId: String
+
+    /**
+     * Manifest SHA256 captured with the selected model and queued generation inputs.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnActivationId: String
+
+    /**
+     * Selected catalog or custom UI identity; generation also requires the captured manifest SHA256.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnModelId: String
+
+    /**
+     * External custom bundle source shown by setup; execution uses its validated owned copy.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnModelPath: String
+
+    /**
+     * Requested MNN backend, checked again by the inference child.
+     *
+     * @author Dmitriy Moroz
+     */
+    var localMnnBackend: MnnBackend
+
+    /**
      * Selected downloaded Bonsai model identifier.
      *
      * @author Dmitriy Moroz
@@ -223,6 +264,7 @@ interface ConfigurationStore {
      *
      * @param configuration Complete candidate configuration.
      * @param commitId Opaque association supplied by protected credential staging.
+     *
      * @author Dmitriy Moroz
      */
     fun commitConfiguration(configuration: Configuration, commitId: String)
@@ -239,6 +281,7 @@ interface ConfigurationStore {
      * Combines independent provider preferences with the supplied protected authorization snapshot.
      *
      * @param authCredentials Protected credential snapshot associated with this configuration read.
+     *
      * @author Dmitriy Moroz
      */
     fun getConfiguration(
@@ -273,6 +316,11 @@ interface ConfigurationStore {
         localCoreMlModelId = localCoreMlModelId,
         localCoreMlModelPath = localCoreMlModelPath,
         localBonsaiModelId = localBonsaiModelId,
+        localMnnCustomActivationId = localMnnCustomActivationId,
+        localMnnActivationId = localMnnActivationId,
+        localMnnModelId = localMnnModelId,
+        localMnnModelPath = localMnnModelPath,
+        localMnnBackend = localMnnBackend,
         localBonsaiModelPath = localBonsaiModelPath,
     )
 
@@ -280,6 +328,7 @@ interface ConfigurationStore {
      * Writes all provider fields while retaining independent settings for inactive sources; production checked publication uses commitConfiguration.
      *
      * @param configuration Complete replacement containing independent settings for every provider.
+     *
      * @author Dmitriy Moroz
      */
     fun setConfiguration(configuration: Configuration) {
@@ -310,6 +359,11 @@ interface ConfigurationStore {
         localCoreMlModelId = configuration.localCoreMlModelId
         localCoreMlModelPath = configuration.localCoreMlModelPath
         localBonsaiModelId = configuration.localBonsaiModelId
+        localMnnCustomActivationId = configuration.localMnnCustomActivationId
+        localMnnActivationId = configuration.localMnnActivationId
+        localMnnModelId = configuration.localMnnModelId
+        localMnnModelPath = configuration.localMnnModelPath
+        localMnnBackend = configuration.localMnnBackend
         localBonsaiModelPath = configuration.localBonsaiModelPath
     }
 }

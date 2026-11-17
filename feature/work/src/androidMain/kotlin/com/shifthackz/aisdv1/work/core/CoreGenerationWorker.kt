@@ -42,9 +42,10 @@ import com.shifthackz.aisdv1.core.localization.R as LocalizationR
  * @param preferenceManager Supplies the initial source for legacy work without a captured provider.
  * @param nativeGateway Observes and cancels isolated native attempts without loading engines.
  * @param backgroundWorkObserver Publishes state only for the current worker owner.
- * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote Horde queue progress.
+ * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param interruptWorkerGenerationUseCase Cancels the captured source for this exact worker.
+ *
  * @author Dmitriy Moroz
  */
 internal abstract class CoreGenerationWorker(
@@ -78,6 +79,7 @@ internal abstract class CoreGenerationWorker(
         clearSubscriptions()
         runCatching {
             if (source in setOf(
+                    ServerSource.LOCAL_MNN,
                     ServerSource.LOCAL_MICROSOFT_ONNX,
                     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
                     ServerSource.LOCAL_APPLE_BONSAI,
@@ -90,8 +92,11 @@ internal abstract class CoreGenerationWorker(
         backgroundWorkObserver.publishForOwner(id.toString()) { backgroundWorkObserver.postCancelSignal() }
     }
 
-    /** Cancels worker status subscriptions so late progress cannot update completed work.
-     * @author Dmitriy Moroz */
+    /**
+     * Cancels worker status subscriptions so late progress cannot update completed work.
+     *
+     * @author Dmitriy Moroz
+     */
 
     protected fun clearSubscriptions() {
         coroutineScope.coroutineContext.cancelChildren()
@@ -106,6 +111,7 @@ internal abstract class CoreGenerationWorker(
         when (source) {
             ServerSource.EASY_DIFFUSION -> listenEasyDiffusionStatus()
             ServerSource.HORDE -> listenHordeStatus()
+            ServerSource.LOCAL_MNN -> listenNativeStatus(NativeGenerationEngine.MNN)
             ServerSource.LOCAL_MICROSOFT_ONNX -> listenNativeStatus(NativeGenerationEngine.ONNX)
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> listenNativeStatus(NativeGenerationEngine.SDCPP)
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> listenNativeStatus(NativeGenerationEngine.MEDIA_PIPE)
@@ -114,8 +120,11 @@ internal abstract class CoreGenerationWorker(
         }
     }
 
-    /** Publishes only this worker’s current remote progress to observer and foreground notification.
-     * @author Dmitriy Moroz */
+    /**
+     * Publishes only this worker’s current remote progress to observer and foreground notification.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun listenEasyDiffusionStatus() {
         coroutineScope.launch {
             observeEasyDiffusionProgressUseCase().collect { status ->
@@ -136,9 +145,13 @@ internal abstract class CoreGenerationWorker(
         }
     }
 
-    /** Observes only this worker’s native engine ownership and publishes stages or sampling progress.
+    /**
+     * Observes only this worker’s native engine ownership and publishes stages or sampling progress.
+     *
      * @param engine Native engine whose worker-owned progress should be observed.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun listenNativeStatus(engine: NativeGenerationEngine) {
         coroutineScope.launch {
@@ -170,9 +183,13 @@ internal abstract class CoreGenerationWorker(
         }
     }
 
-    /** Maps a native lifecycle stage into the localized notification status.
+    /**
+     * Maps a native lifecycle stage into the localized notification status.
+     *
      * @param stage Native lifecycle stage to localize.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun stageText(stage: NativeGenerationStage): String = applicationContext.getString(
         when (stage) {
@@ -185,8 +202,11 @@ internal abstract class CoreGenerationWorker(
         }
     )
 
-    /** Publishes AI Horde queue position and wait estimates to active work status and notification.
-     * @author Dmitriy Moroz */
+    /**
+     * Publishes AI Horde queue position and wait estimates to active work status and notification.
+     *
+     * @author Dmitriy Moroz
+     */
 
     protected fun listenHordeStatus() {
         coroutineScope.launch {
@@ -225,8 +245,11 @@ internal abstract class CoreGenerationWorker(
         }
     }
 
-    /** Posts the start notification and initial running status only while this worker owns background state.
-     * @author Dmitriy Moroz */
+    /**
+     * Posts the start notification and initial running status only while this worker owns background state.
+     *
+     * @author Dmitriy Moroz
+     */
 
     protected fun handleStart() {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
@@ -266,9 +289,13 @@ internal abstract class CoreGenerationWorker(
         )
     }
 
-    /** Publishes generated results and replaces the running notification with a completion notification.
+    /**
+     * Publishes generated results and replaces the running notification with a completion notification.
+     *
      * @param result Successfully generated application results.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     protected fun handleSuccess(result: List<AiGenerationResult>) {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
@@ -284,9 +311,13 @@ internal abstract class CoreGenerationWorker(
         showGenericNotification(title, subTitle)
     }
 
-    /** Publishes the generation failure and replaces the running notification with its error state.
+    /**
+     * Publishes the generation failure and replaces the running notification with its error state.
+     *
      * @param t Underlying generation or download failure.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     protected fun handleError(t: Throwable) {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return

@@ -1,0 +1,91 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SDAI MNN model catalog",
+    "version": "1.0.0",
+    "description": "Static catalog metadata for complete MNN model bundles. Bundle integrity is validated separately against manifest schema version1."
+  },
+  "servers": [
+    {
+      "url": "https://sdai.moroz.cc",
+      "description": "Published SDAI metadata site."
+    }
+  ],
+  "paths": {
+    "/mnn.json": {
+      "get": {
+        "operationId": "fetchMnnModels",
+        "summary": "List downloadable MNN models",
+        "description": "Returns only published complete compatible MNN bundles. An empty list means that no bundles are currently distributed. HTTP or decoding errors remain failures.",
+        "responses": {
+          "200": {
+            "description": "Complete current model catalog, possibly empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MnnCatalog"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Static host or transport error. The client does not decode an error response as a catalog.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "Error document from the static hosting provider; retained as an HTTP failure."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MnnCatalog": {
+        "type": "array",
+        "description": "Available complete model archive entries; empty before initial distribution.",
+        "items": {
+          "$ref": "#/components/schemas/MnnCatalogEntry"
+        }
+      },
+      "MnnCatalogEntry": {
+        "type": "object",
+        "description": "One downloadable MNN SD 1.5 bundle supported by the Android provider.",
+        "additionalProperties": false,
+        "required": ["id", "name", "size", "sources"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable catalog identity and app-private directory name; never a filesystem path.",
+            "pattern": "^mnn_[A-Za-z0-9_-]+$"
+          },
+          "name": {
+            "type": "string",
+            "description": "User-visible model name.",
+            "minLength": 1
+          },
+          "size": {
+            "type": "string",
+            "description": "Human-readable archive download size.",
+            "minLength": 1
+          },
+          "sources": {
+            "type": "array",
+            "description": "Verified immutable HTTPS URLs returning the complete root-layout ZIP bundle.",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "description": "Complete model archive download URL.",
+              "format": "uri",
+              "pattern": "^https://"
+            }
+          }
+        }
+      }
+    }
+  }
+}

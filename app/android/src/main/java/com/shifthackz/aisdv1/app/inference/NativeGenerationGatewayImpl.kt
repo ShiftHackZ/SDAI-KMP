@@ -33,6 +33,7 @@ import kotlinx.coroutines.withContext
  * @param journal Durable no-replay worker attempt history.
  * @param exits Best-effort exit diagnostics.
  * @param diagnosticScope Host-owned IO scope for bounded stage journal updates.
+ *
  * @author Dmitriy Moroz
  */
 internal class NativeGenerationGatewayImpl(
@@ -82,6 +83,7 @@ internal class NativeGenerationGatewayImpl(
      * Concurrent admission, child failure and cancellation propagate after owned cleanup; requests are not replayed automatically.
      *
      * @param request Captured native generation inputs.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun generate(request: NativeGenerationRequest): String {
@@ -90,7 +92,8 @@ internal class NativeGenerationGatewayImpl(
             NativeGenerationFailure.Category.BUSY,
             request.engine,
             request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
-            request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI })
+            request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI },
+            request.payload.mnnBackend.takeIf { request.engine == NativeGenerationEngine.MNN })
         val job = UUID.randomUUID().toString()
         val start = System.currentTimeMillis()
         val owner = currentCoroutineContext()[NativeGenerationOwner]?.nextKey()
@@ -141,13 +144,15 @@ internal class NativeGenerationGatewayImpl(
                 failure.category,
                 request.engine,
                 request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
-                request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI })
+                request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI },
+                request.payload.mnnBackend.takeIf { request.engine == NativeGenerationEngine.MNN })
         } catch (_: Exception) {
             throw NativeGenerationFailure(
                 NativeGenerationFailure.Category.INVALID_RESULT,
                 request.engine,
                 request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
-                request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI })
+                request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI },
+                request.payload.mnnBackend.takeIf { request.engine == NativeGenerationEngine.MNN })
         } finally {
             hasCommittedTerminal = !hasBegun
             try {
@@ -186,6 +191,7 @@ internal class NativeGenerationGatewayImpl(
             NativeGenerationFailure.Category.INVALID_RESULT, request.engine,
             request.payload.sdxlBackend.takeIf { request.engine == NativeGenerationEngine.SDCPP },
             request.payload.bonsaiBackend.takeIf { request.engine == NativeGenerationEngine.BONSAI },
+            request.payload.mnnBackend.takeIf { request.engine == NativeGenerationEngine.MNN },
         )
         return output
     }
@@ -194,6 +200,7 @@ internal class NativeGenerationGatewayImpl(
      * Cancellation follows the owned binding, not mutable provider preferences.
      *
      * @param ownerId Optional worker UUID; replaced workers cannot cancel a newer request.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun cancelActive(ownerId: String?): Boolean {
@@ -207,6 +214,7 @@ internal class NativeGenerationGatewayImpl(
      * Observes the selected engine's latest sanitized progress, including its initial value.
      *
      * @param engine Runtime whose latest progress is requested.
+     *
      * @author Dmitriy Moroz
      */
     override fun observeStatus(engine: NativeGenerationEngine): Flow<LocalDiffusionStatus> =
@@ -216,6 +224,7 @@ internal class NativeGenerationGatewayImpl(
      * Observes the selected engine's latest sanitized lifecycle stage, including its initial value.
      *
      * @param engine Runtime whose lifecycle stage is requested.
+     *
      * @author Dmitriy Moroz
      */
     override fun observeStage(engine: NativeGenerationEngine): Flow<NativeGenerationStage> =

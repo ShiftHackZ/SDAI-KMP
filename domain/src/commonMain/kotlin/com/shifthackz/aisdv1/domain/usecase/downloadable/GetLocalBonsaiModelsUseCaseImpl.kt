@@ -1,25 +1,21 @@
 package com.shifthackz.aisdv1.domain.usecase.downloadable
 
-import com.shifthackz.aisdv1.domain.repository.DownloadableModelRepository
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 
 /**
- * Implements `GetLocalBonsaiModelsUseCase` behavior in the SDAI domain layer.
+ * Keeps the existing Bonsai model-list operation while shared catalog recovery owns offline policy.
+ *
+ * @param refreshCatalog Refreshes one provider and reads usable cached model states.
  *
  * @author Dmitriy Moroz
  */
-internal class GetLocalBonsaiModelsUseCaseImpl(
+internal class GetLocalBonsaiModelsUseCaseImpl(private val refreshCatalog: RefreshLocalModelCatalogUseCase) :
+    GetLocalBonsaiModelsUseCase {
     /**
-     * Exposes the `downloadableModelRepository` value used by the SDAI domain layer.
+     * Returns current Bonsai choices after an independent refresh; cancellation and cache failures propagate.
      *
      * @author Dmitriy Moroz
      */
-    private val downloadableModelRepository: DownloadableModelRepository,
-) : GetLocalBonsaiModelsUseCase {
-
-    /**
-     * Executes the `invoke` step in the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    override suspend fun invoke() = downloadableModelRepository.getAllBonsai()
+    override suspend fun invoke() =
+        refreshCatalog(LocalAiModel.Type.Bonsai).let { result -> result.models }
 }

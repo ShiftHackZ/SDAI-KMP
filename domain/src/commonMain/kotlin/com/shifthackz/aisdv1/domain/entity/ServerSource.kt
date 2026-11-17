@@ -14,6 +14,7 @@ import com.shifthackz.aisdv1.core.common.platform.PlatformValue
  * @param featureTags searchable capability labels shown in provider selection UI.
  * @param allowedInBuilds App flavors where the provider can be selected.
  * @param allowedPlatforms Platforms whose provider catalog may expose this integration.
+ *
  * @author Dmitriy Moroz
  */
 enum class ServerSource(
@@ -118,6 +119,14 @@ enum class ServerSource(
         ),
         allowedPlatforms = setOf(Platform.ANDROID),
     ),
+    LOCAL_MNN(
+        key = "local_mnn",
+        type = ServerSourceType.LOCAL,
+        readiness = PlatformValue(ServerSourceReadiness.ALPHA),
+        version = "2026.11.17",
+        featureTags = setOf(FeatureTag.Offline, FeatureTag.Txt2Img, FeatureTag.MultipleModels),
+        allowedPlatforms = setOf(Platform.ANDROID),
+    ),
     LOCAL_APPLE_CORE_ML(
         key = "local_apple_core_ml",
         type = ServerSourceType.LOCAL,
@@ -187,6 +196,7 @@ enum class ServerSource(
     /**
      * Direct ChatGPT OAuth image source, persisted as open_ai_oauth independently from API-key providers.
      * Supports text-to-image and sequential batches; account model access is determined by the service.
+     *
      * @author Dmitriy Moroz
      */
     OPEN_AI_OAUTH(
@@ -235,15 +245,20 @@ enum class ServerSource(
 
     companion object {
 
-        /** Resolves a stable persisted provider key, using AUTOMATIC1111 when the current catalog does not recognize it.
+        /**
+         * Resolves a stable persisted provider key, using AUTOMATIC1111 when the current catalog does not recognize it.
+         *
          * @param value Stable persisted identifier to resolve against the current provider catalog.
-         * @author Dmitriy Moroz */
+         *
+         * @author Dmitriy Moroz
+         */
         fun parse(value: String) = entries.find { it.key == value } ?: AUTOMATIC1111
     }
 }
 
 /**
  * Broad hosting model used by provider filters and onboarding copy.
+ *
  * @author Dmitriy Moroz
  */
 enum class ServerSourceType {
@@ -254,6 +269,7 @@ enum class ServerSourceType {
 
 /**
  * User-facing stability level for a provider integration.
+ *
  * @author Dmitriy Moroz
  */
 enum class ServerSourceReadiness {

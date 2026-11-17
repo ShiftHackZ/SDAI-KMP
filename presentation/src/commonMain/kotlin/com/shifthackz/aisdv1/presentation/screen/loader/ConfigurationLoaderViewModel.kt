@@ -19,12 +19,13 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Loads only metadata required by the selected provider before navigating home; unsupported preload paths never invoke AUTOMATIC1111 metadata.
  *
+ * @param diagnostics Application UI diagnostics sink used by the normal view-model lifecycle.
  * @param dispatchersProvider Application dispatchers for background I/O and immediate UI state updates.
  * @param dataPreLoaderUseCase Existing AUTOMATIC1111/Swarm metadata preload; bypassed for independent providers.
  * @param getConfigurationUseCase Reads every provider’s independent saved settings and the selected source revision.
  * @param router Navigation destination owner after configuration loading.
  * @param onError Reports loading failures through the application error sink.
- * @param diagnostics Application UI diagnostics sink used by the normal view-model lifecycle.
+ *
  * @author Dmitriy Moroz
  */
 class ConfigurationLoaderViewModel(
@@ -73,9 +74,13 @@ class ConfigurationLoaderViewModel(
         }
     }
 
-    /** Ignores empty intents because initialization alone drives preload and home navigation.
+    /**
+     * Ignores empty intents because initialization alone drives preload and home navigation.
+     *
      * @param intent Empty event accepted by the shared MVI contract; it does not restart loading.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     override fun processIntent(intent: EmptyIntent) = Unit
 }
@@ -104,6 +109,7 @@ private fun Configuration.requiresRemotePreload(): Boolean = when (source) {
     ServerSource.STABILITY_AI,
     ServerSource.FAL_AI,
     ServerSource.ARLI_AI,
+    ServerSource.LOCAL_MNN,
     ServerSource.LOCAL_MICROSOFT_ONNX,
     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP,

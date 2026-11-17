@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.presentation.widget.input
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -23,6 +24,7 @@ import com.shifthackz.aisdv1.presentation.widget.engine.EngineSelectionComponent
  * @param state Current model, available models and backend selections.
  * @param isImg2Img Selects image-to-image Fal endpoints.
  * @param onEvent Receives provider model and backend changes.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -40,6 +42,7 @@ internal fun GenerationBaseProviderOption(
             ServerSource.EASY_DIFFUSION,
             ServerSource.STABILITY_AI,
             ServerSource.HUGGING_FACE,
+            ServerSource.LOCAL_MNN,
             ServerSource.LOCAL_MICROSOFT_ONNX,
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
             ServerSource.LOCAL_APPLE_CORE_ML,
@@ -84,6 +87,13 @@ internal fun GenerationBaseProviderOption(
             else -> Unit
 
         }
+
+        GenerationBaseFormField.MNN_BACKEND -> DropdownTextField(
+            modifier = Modifier.padding(top = 8.dp),
+            label = Localization.string("hint_mnn_backend").asUiText(),
+            value = state.mnnBackend, items = MnnBackend.entries,
+            onItemSelected = { onEvent(GenerationInputFormEvent.UpdateMnnBackend(it)) },
+            displayDelegate = { (if (it == MnnBackend.CPU) "CPU" else "OpenCL").asUiText() })
 
         GenerationBaseFormField.SDXL_BACKEND -> {
 

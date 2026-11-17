@@ -722,4 +722,15 @@
     <string name="easy_diffusion_failure">Easy Diffusion could not complete the request. Check the server, connection and selected checkpoint, then retry.</string>
     <string name="easy_diffusion_timeout">Easy Diffusion timed out. Check the server and timeout setting, then retry. If submission was not acknowledged, remote completion is unknown.</string>
     <string name="easy_diffusion_submission_unknown">The Easy Diffusion submission was not acknowledged. Remote completion is unknown. Check the server before retrying.</string>
+
+    <!-- MNN SD 1.5 -->
+    <string name="srv_type_mnn">MNN SD 1.5</string>
+    <string name="hint_mnn_profile">One 512×512 image, PNDM, CFG 7.5, 1–50 steps. CPU or OpenCL.</string>
+    <string name="hint_mnn_backend">MNN backend</string>
+    <string name="settings_usage_summary_models_mnn">MNN models</string>
+    <string name="local_catalog_loading">Loading model catalog</string>
+    <string name="local_catalog_error_title">Unable to load models</string>
+    <string name="local_catalog_error_body">Check your connection and try again. Your local models remain available.</string>
+    <string name="local_catalog_empty_title">No models available</string>
+    <string name="local_catalog_empty_body">Try refreshing the catalog again later.</string>
 </resources>

@@ -9,6 +9,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
  * @param state Current provider capabilities and expanded option selections.
  * @param isImg2Img Whether text-only Forge and Hires controls are unavailable.
  * @return Ordered fields for the selected provider; empty when advanced options are hidden.
+ *
  * @author Dmitriy Moroz
  */
 internal fun generationInputAdvancedFields(
@@ -41,7 +42,9 @@ internal fun generationInputAdvancedFields(
         mode == ServerSource.HORDE
     ) add(GenerationFormField.VARIATION_STRENGTH)
     add(GenerationFormField.SAMPLING_STEPS)
-    if (mode != ServerSource.LOCAL_GOOGLE_MEDIA_PIPE) add(GenerationFormField.GUIDANCE_SCALE)
+    if (mode != ServerSource.LOCAL_MNN && mode != ServerSource.LOCAL_GOOGLE_MEDIA_PIPE) add(
+        GenerationFormField.GUIDANCE_SCALE
+    )
     if (mode == ServerSource.AUTOMATIC1111 || mode == ServerSource.SWARM_UI ||
         mode == ServerSource.STABILITY_AI || mode == ServerSource.ARLI_AI ||
         mode == ServerSource.HORDE || mode == ServerSource.LOCAL_APPLE_CORE_ML ||
@@ -70,7 +73,7 @@ internal fun generationInputAdvancedFields(
             } else add(GenerationFormField.ADETAILER_MISSING)
         }
     }
-    if (mode != ServerSource.LOCAL_GOOGLE_MEDIA_PIPE &&
+    if (mode != ServerSource.LOCAL_MNN && mode != ServerSource.LOCAL_GOOGLE_MEDIA_PIPE &&
         mode != ServerSource.LOCAL_MICROSOFT_ONNX &&
         mode != ServerSource.LOCAL_STABLE_DIFFUSION_CPP &&
         mode != ServerSource.LOCAL_APPLE_BONSAI

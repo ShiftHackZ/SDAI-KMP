@@ -28,6 +28,8 @@ import com.shifthackz.aisdv1.domain.feature.coreml.CoreMlModelSupport
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.downloadable.ObserveLocalBonsaiModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.ObserveLocalCoreMlModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.ObserveLocalMnnModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.SelectMnnModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.ObserveLocalOnnxModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.ObserveLocalSdxlModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.huggingface.FetchHuggingFaceModelsUseCase
@@ -47,8 +49,11 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Loads and persists provider-specific checkpoint choices; Easy Diffusion refresh failures remain visible with an explicit retry.
  *
+ * @param diagnostics Application UI diagnostics sink used by the normal view-model lifecycle.
  * @param dispatchersProvider Application dispatchers for background I/O and immediate UI state updates.
  * @param fetchAndGetSwarmUiModelsUseCase Existing SwarmUI checkpoint discovery operation.
+ * @param observeLocalMnnModelsUseCase Observes complete MNN model identities and their independent selection.
+ * @param selectMnnModelUseCase Validates a MNN picker choice before publishing the model selection.
  * @param observeLocalOnnxModelsUseCase Hot ONNX download and selection catalog.
  * @param observeLocalCoreMlModelsUseCase Hot Core ML download and selection catalog.
  * @param observeLocalBonsaiModelsUseCase Hot Bonsai download and selection catalog.
@@ -65,7 +70,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param selectStableDiffusionModelUseCase Updates the active AUTOMATIC1111 checkpoint on the server.
  * @param getStableDiffusionModelsUseCase Reads cached AUTOMATIC1111 checkpoints and selection.
  * @param onError Reports loading failures through the application error sink.
- * @param diagnostics Application UI diagnostics sink used by the normal view-model lifecycle.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -76,6 +81,8 @@ class EngineSelectionViewModel(
 
     private val fetchAndGetSwarmUiModelsUseCase: FetchAndGetSwarmUiModelsUseCase,
 
+    private val observeLocalMnnModelsUseCase: ObserveLocalMnnModelsUseCase,
+    private val selectMnnModelUseCase: SelectMnnModelUseCase,
     private val observeLocalOnnxModelsUseCase: ObserveLocalOnnxModelsUseCase,
 
     private val observeLocalCoreMlModelsUseCase: ObserveLocalCoreMlModelsUseCase,
@@ -123,6 +130,8 @@ class EngineSelectionViewModel(
                 emit(Configuration())
             }
 
+        val localMnnModels =
+            observeLocalMnnModelsUseCase().map { models -> models.filter(LocalAiModel::downloaded) }
         val localAiModels = observeLocalOnnxModelsUseCase()
             .map { models ->
                 models.filter { it.downloaded || it.id == LocalAiModel.CustomOnnx.id }
@@ -179,6 +188,9 @@ class EngineSelectionViewModel(
                     }
                     config to visibleLocalModels
                 }
+                .combine(localMnnModels) { (config, localModels), mnnModels ->
+                    config to if (config.source == ServerSource.LOCAL_MNN) mnnModels else localModels
+                }
                 .catch { onError(it) }
                 .collectLatest { (config, localModels) ->
                     updateState {
@@ -226,9 +238,13 @@ class EngineSelectionViewModel(
         }
     }
 
-    /** Routes a user intent to its state transition or authorized side-effect handler.
+    /**
+     * Routes a user intent to its state transition or authorized side-effect handler.
+     *
      * @param intent User event emitted by this screen’s production controls.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     override fun processIntent(intent: EngineSelectionIntent) {
         if (currentState.mode == ServerSource.EASY_DIFFUSION) {
@@ -278,6 +294,13 @@ class EngineSelectionViewModel(
                 intent.value.safeHuggingFaceModelAlias()
 
             ServerSource.STABILITY_AI -> preferenceManager.stabilityAiEngineId = intent.value
+            ServerSource.LOCAL_MNN -> launch(dispatchersProvider.io) {
+                selectMnnModelUseCase(
+                    intent.value
+                )
+                    .onFailure(onError)
+            }
+
             ServerSource.LOCAL_MICROSOFT_ONNX -> preferenceManager.localOnnxModelId = intent.value
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> preferenceManager.localSdxlModelId =
                 intent.value
@@ -288,9 +311,13 @@ class EngineSelectionViewModel(
         }
     }
 
-    /** Loads catalogs appropriate to one captured configuration without invoking unrelated providers.
+    /**
+     * Loads catalogs appropriate to one captured configuration without invoking unrelated providers.
+     *
      * @param config Captured provider configuration associated with these model choices.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun loadOptions(config: Configuration): RemoteOptions {
         val remoteOptions = RemoteOptions(config = config)
@@ -326,6 +353,7 @@ class EngineSelectionViewModel(
                 },
             )
 
+            ServerSource.LOCAL_MNN,
             ServerSource.LOCAL_MICROSOFT_ONNX,
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
@@ -341,9 +369,13 @@ class EngineSelectionViewModel(
         }
     }
 
-    /** Refreshes strict catalog operations and records failure for the explicit retry UI.
+    /**
+     * Refreshes strict catalog operations and records failure for the explicit retry UI.
+     *
      * @param options Current provider snapshot and initially empty catalog.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
     private suspend fun loadEasyDiffusionOptions(options: RemoteOptions): RemoteOptions = try {
         val connection = captureEasyDiffusionConnectionUseCase(
             options.config.providerSelectionRevision,
@@ -365,10 +397,14 @@ class EngineSelectionViewModel(
         options.copy(hasEasyDiffusionModelLoadFailed = true)
     }
 
-    /** Publishes endpoint-scoped results only while the displayed connection still owns the picker.
+    /**
+     * Publishes endpoint-scoped results only while the displayed connection still owns the picker.
+     *
      * @param options Captured configuration associated with the fetched choices or refresh state.
      * @param publish Immediate state update performed while provider replacement is excluded.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
     private suspend fun publishCurrentOptions(options: RemoteOptions, publish: () -> Unit) {
         if (options.config.source != ServerSource.EASY_DIFFUSION) {
             publish(); return
@@ -381,9 +417,13 @@ class EngineSelectionViewModel(
         }
     }
 
-    /** Publishes checkpoint-switch loading state, changes the server model and reloads the selected catalog.
+    /**
+     * Publishes checkpoint-switch loading state, changes the server model and reloads the selected catalog.
+     *
      * @param value Exact AUTOMATIC1111 checkpoint title selected by the picker.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun selectA1111Model(value: String) {
         updateState {
@@ -418,9 +458,13 @@ class EngineSelectionViewModel(
         }
     }
 
-    /** Bounds legacy remote discovery, reporting failures and returning an empty choice list for the picker.
+    /**
+     * Bounds legacy remote discovery, reporting failures and returning an empty choice list for the picker.
+     *
      * @param block Legacy provider catalog request subject to the model picker's discovery timeout.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun <T> loadList(block: suspend () -> List<T>): List<T> = runCatching {
         withTimeoutOrNull(REMOTE_OPTIONS_TIMEOUT_MILLIS.milliseconds) {
@@ -444,18 +488,23 @@ private const val REMOTE_OPTIONS_TIMEOUT_MILLIS = 5_000L
  * @author Dmitriy Moroz
  */
 private fun Configuration.selectedLocalModelId(): String = when (source) {
+    ServerSource.LOCAL_MNN -> localMnnModelId
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> localSdxlModelId
     ServerSource.LOCAL_APPLE_CORE_ML -> localCoreMlModelId
     ServerSource.LOCAL_APPLE_BONSAI -> localBonsaiModelId
     else -> localOnnxModelId
 }
 
-/** Local catalogs combined with one configuration snapshot before provider-specific choice loading.
+/**
+ * Local catalogs combined with one configuration snapshot before provider-specific choice loading.
+ *
  * @param config Captured provider configuration associated with these local or remote model choices.
  * @param onnxModels Current ONNX model download/selection catalog.
  * @param sdxlModels Current stable-diffusion.cpp model download/selection catalog.
  * @param coreMlModels Current Core ML model download/selection catalog.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 private data class LocalModelOptions(
     val config: Configuration,
     val onnxModels: List<LocalAiModel>,
@@ -512,6 +561,7 @@ private fun String.safeHuggingFaceModelAlias(): String =
  * @param hasEasyDiffusionModelLoadFailed Whether the latest strict checkpoint refresh failed; the UI offers an explicit retry.
  * @param hfModels Supported Hugging Face model choices.
  * @param stEngines Available Stability AI engines.
+ *
  * @author Dmitriy Moroz
  */
 private data class RemoteOptions(

@@ -27,7 +27,7 @@ with the implementation.
 
 ## Android native inference ownership
 
-ONNX, MediaPipe, stable-diffusion.cpp and experimental PrismML Bonsai execute in
+ONNX, MediaPipe, MNN, stable-diffusion.cpp and experimental PrismML Bonsai execute in
 the private `:inference` process. Foreground generation and WorkManager use the
 same host gateway; WorkManager owns scheduling and notifications while the child
 owns native loading and execution. Feature host bindings must remain gateway
@@ -41,6 +41,28 @@ runtime does not cooperate. Interrupted native work requires explicit retry and
 is never replayed automatically. Isolation contains process-local failures; it
 does not prevent device-wide memory pressure or GPU driver failures. iOS keeps
 its existing Core ML and Bonsai MLX execution paths.
+
+## MNN model bundles
+
+The Alpha Android arm64 MNN provider runs one SD 1.5 image at 512×512,
+with PNDM, CFG 7.5, 1–50 steps and CPU/OpenCL selection. It has no negative prompt,
+img2img, batch, LoRA, NPU or iOS execution. Backend selection does not guarantee
+that all operators execute on a GPU. Requested unavailable OpenCL fails explicitly.
+
+Catalog downloads use `docs/mnn.json`, the existing typed model response and
+[the documented catalog contract](network/mnn-catalog.openapi.json). No bundles
+are distributed until their exact artifacts have been hosted and verified.
+Full/FOSS custom selection reuses the existing folder picker and storage
+permission flow. Setup validates the complete external bundle and creates an
+app-owned immutable snapshot, preserving the external source. Model deletion
+waits for active native leases; queued removed/replaced identities fail explicitly.
+
+[The packaging guide](scripts/mnn/README.md) describes pinned prebuilt graphs,
+matching tokenizer preparation, licensing and the versioned integrity manifest.
+Generated weights and archives remain outside Git. The runtime source is fetched
+by exact revision and SHA256, with a narrow build-local SD 1.5 patch. Its common
+`MnnRuntime` API has Android execution and an iOS NoOp binding. Android installs
+its feature bindings only in the inference child graph.
 
 ## UI performance diagnostics
 

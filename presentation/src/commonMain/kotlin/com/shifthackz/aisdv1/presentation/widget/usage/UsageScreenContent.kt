@@ -135,6 +135,7 @@ fun UsageScreenContent(
                             "settings_usage_clear_all_storage",
                             usage.totalBytes.formatBytes(),
                         )
+
                         UsageScreenKind.NETWORK -> Localization.string("settings_usage_reset_network")
                     },
                     maxLines = 1,
@@ -393,9 +394,9 @@ private fun UsageDonutChart(
             val visibleAngle = 360f * progress
             segments.forEach { segment ->
                 val sweep = (
-                    minOf(segment.startAngle + segment.sweepAngle, visibleAngle) -
-                        segment.startAngle
-                    ).coerceIn(0f, segment.sweepAngle)
+                        minOf(segment.startAngle + segment.sweepAngle, visibleAngle) -
+                                segment.startAngle
+                        ).coerceIn(0f, segment.sweepAngle)
                 if (sweep <= 0f) return@forEach
                 val item = segment.item
                 val isSelected = item.category == usage.selectedCategory
@@ -639,8 +640,8 @@ private data class UsageChartSegment(
  * Very small non-empty categories get a minimum visual sweep so users can still tap them, while the
  * largest segment absorbs floating-point correction to avoid gray gaps between arcs.
  *
- * @receiver Ordered usage rows rendered by the current dashboard.
  * @param totalBytes Sum of enabled category bytes used as the raw sweep denominator.
+ * @receiver Ordered usage rows rendered by the current dashboard.
  *
  * @author Dmitriy Moroz
  */
@@ -708,8 +709,8 @@ private fun List<UsageItem>.chartSegments(
  * Labels are calculated in tenths to keep tiny non-empty categories visible as at least 0.1% without
  * losing the leftover percent to rounding.
  *
- * @receiver Ordered usage rows rendered by the current dashboard.
  * @param totalBytes Sum of enabled category bytes used as the raw percentage denominator.
+ * @receiver Ordered usage rows rendered by the current dashboard.
  *
  * @author Dmitriy Moroz
  */
@@ -801,12 +802,12 @@ private fun List<String>.joinLocalized(): String = when (size) {
     0 -> ""
     1 -> first()
     2 -> first() +
-        Localization.string("settings_usage_list_last_separator") +
-        last()
+            Localization.string("settings_usage_list_last_separator") +
+            last()
 
     else -> dropLast(1).joinToString(Localization.string("settings_usage_list_separator")) +
-        Localization.string("settings_usage_list_last_separator") +
-        last()
+            Localization.string("settings_usage_list_last_separator") +
+            last()
 }
 
 private fun UsageScreenKind.noteKey(): String = when (this) {
@@ -827,6 +828,7 @@ fun UsageCategory.title(): String = Localization.string(
         UsageCategory.MODELS_MEDIAPIPE -> "settings_usage_category_models_mediapipe"
         UsageCategory.MODELS_SDXL -> "settings_usage_category_models_sdxl"
         UsageCategory.MODELS_CORE_ML -> "settings_usage_category_models_core_ml"
+        UsageCategory.MODELS_MNN -> "srv_type_mnn"
         UsageCategory.MODELS_BONSAI -> "settings_usage_category_models_bonsai"
         UsageCategory.TRAFFIC_MODELS -> "settings_usage_category_traffic_models"
         UsageCategory.TRAFFIC_CONFIGS -> "settings_usage_category_traffic_configs"
@@ -847,6 +849,7 @@ fun UsageCategory.summaryTitle(): String = Localization.string(
         UsageCategory.MODELS_MEDIAPIPE -> "settings_usage_summary_models_mediapipe"
         UsageCategory.MODELS_SDXL -> "settings_usage_summary_models_sdxl"
         UsageCategory.MODELS_CORE_ML -> "settings_usage_summary_models_core_ml"
+        UsageCategory.MODELS_MNN -> "settings_usage_summary_models_mnn"
         UsageCategory.MODELS_BONSAI -> "settings_usage_summary_models_bonsai"
         UsageCategory.TRAFFIC_MODELS -> "settings_usage_category_traffic_models"
         UsageCategory.TRAFFIC_CONFIGS -> "settings_usage_category_traffic_configs"
@@ -861,6 +864,7 @@ private fun UsageCategory.color(): Color = when (this) {
     UsageCategory.MODELS_MEDIAPIPE -> Color(0xFFF04462)
     UsageCategory.MODELS_SDXL -> Color(0xFF59C96B)
     UsageCategory.MODELS_CORE_ML -> Color(0xFF7E66E8)
+    UsageCategory.MODELS_MNN -> Color(0xFF577CAD)
     UsageCategory.MODELS_BONSAI -> Color(0xFF2DB7A3)
     UsageCategory.TRAFFIC_MODELS -> Color(0xFF3D8BFF)
     UsageCategory.TRAFFIC_CONFIGS -> Color(0xFF65C96F)

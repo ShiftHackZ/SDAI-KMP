@@ -1,7 +1,8 @@
 package com.shifthackz.aisdv1.domain.usecase.downloadable
 
 import com.shifthackz.aisdv1.domain.mocks.mockLocalBonsaiModels
-import com.shifthackz.aisdv1.domain.repository.DownloadableModelRepository
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
+import com.shifthackz.aisdv1.domain.entity.LocalModelCatalogResult
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -12,15 +13,15 @@ import org.junit.Test
 
 class GetLocalBonsaiModelsUseCaseImplTest {
 
-    private val stubRepository = mockk<DownloadableModelRepository>()
+    private val stubRepository = mockk<RefreshLocalModelCatalogUseCase>()
 
     private val useCase = GetLocalBonsaiModelsUseCaseImpl(stubRepository)
 
     @Test
     fun `given repository returned models list, expected valid models list value`() = runTest {
         coEvery {
-            stubRepository.getAllBonsai()
-        } returns mockLocalBonsaiModels
+            stubRepository(LocalAiModel.Type.Bonsai)
+        } returns LocalModelCatalogResult(mockLocalBonsaiModels)
 
         val actual = useCase()
 
@@ -28,21 +29,22 @@ class GetLocalBonsaiModelsUseCaseImplTest {
     }
 
     @Test
-    fun `given repository returned empty models list, expected empty models list value`() = runTest {
-        coEvery {
-            stubRepository.getAllBonsai()
-        } returns emptyList()
+    fun `given repository returned empty models list, expected empty models list value`() =
+        runTest {
+            coEvery {
+                stubRepository(LocalAiModel.Type.Bonsai)
+            } returns LocalModelCatalogResult(emptyList())
 
-        val actual = useCase()
+            val actual = useCase()
 
-        assertTrue(actual.isEmpty())
-    }
+            assertTrue(actual.isEmpty())
+        }
 
     @Test
     fun `given repository thrown exception, expected error value`() = runTest {
         val stubException = Throwable("Unable to collect Bonsai models.")
         coEvery {
-            stubRepository.getAllBonsai()
+            stubRepository(LocalAiModel.Type.Bonsai)
         } throws stubException
 
         val actual = runCatching { useCase() }.exceptionOrNull()

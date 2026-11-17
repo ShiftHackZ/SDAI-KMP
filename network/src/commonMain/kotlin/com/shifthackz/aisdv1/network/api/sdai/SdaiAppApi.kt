@@ -5,63 +5,66 @@ import com.shifthackz.aisdv1.network.request.ReportRequest
 import com.shifthackz.aisdv1.network.response.DownloadableModelResponse
 
 /**
- * Defines the `SdaiAppApi` contract for the SDAI network layer.
+ * Typed HTTP access to application metadata, model catalogs and user problem reports.
  *
  * @author Dmitriy Moroz
  */
 interface SdaiAppApi {
 
     /**
-     * Loads SDAI data through `fetchSupporters`.
+     * Fetches the current supporter list from the metadata service; HTTP and decoding failures propagate.
      *
-     * @return Result produced by `fetchSupporters`.
      * @author Dmitriy Moroz
      */
     suspend fun fetchSupporters(): List<SupporterRaw>
 
     /**
-     * Loads SDAI data through `fetchOnnxModels`.
+     * Fetches ONNX download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchOnnxModels`.
      * @author Dmitriy Moroz
      */
     suspend fun fetchOnnxModels(): List<DownloadableModelResponse>
 
     /**
-     * Loads SDAI data through `fetchMediaPipeModels`.
+     * Fetches the typed MNN catalog without interpreting an HTTP failure as an empty catalog.
      *
-     * @return Result produced by `fetchMediaPipeModels`.
+     * @author Dmitriy Moroz
+     */
+    suspend fun fetchMnnModels(): List<DownloadableModelResponse>
+
+    /**
+     * Fetches MediaPipe download metadata and accounts its response bytes as configuration traffic.
+     *
      * @author Dmitriy Moroz
      */
     suspend fun fetchMediaPipeModels(): List<DownloadableModelResponse>
 
     /**
-     * Loads SDAI data through `fetchSdxlModels`.
+     * Fetches stable-diffusion.cpp download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchSdxlModels`.
      * @author Dmitriy Moroz
      */
     suspend fun fetchSdxlModels(): List<DownloadableModelResponse>
 
     /**
-     * Loads SDAI data through `fetchCoreMlModels`.
+     * Fetches Core ML download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchCoreMlModels`.
      * @author Dmitriy Moroz
      */
     suspend fun fetchCoreMlModels(): List<DownloadableModelResponse>
+
     /**
-     * Loads SDAI data through `fetchBonsaiModels`.
+     * Fetches Bonsai download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchBonsaiModels`.
      * @author Dmitriy Moroz
      */
     suspend fun fetchBonsaiModels(): List<DownloadableModelResponse>
 
     /**
-     * Executes the `postReport` step in the SDAI network layer.
+     * Submits the typed user problem report; unsuccessful HTTP responses remain failures.
      *
-     * @param request request value consumed by the API.
+     * @param request Typed user-submitted problem report body sent to the report service.
+     *
      * @author Dmitriy Moroz
      */
     suspend fun postReport(request: ReportRequest)

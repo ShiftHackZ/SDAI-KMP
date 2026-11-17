@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.app.inference
 
 import android.content.Context
 import android.util.AtomicFile
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
@@ -17,6 +18,7 @@ import org.json.JSONObject
  *
  * @param context Application context used only to locate app-private files.
  * @param validator Complete PNG and decoded-size validation.
+ *
  * @author Dmitriy Moroz
  */
 internal class FileGenerationFileStore(context: Context, private val validator: PngImageValidator) :
@@ -24,36 +26,40 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
     private val root = File(context.filesDir, "inference/jobs")
 
     /**
-     * Atomically commits a version-2 request JSON file within the 4 MiB request limit.
+     * Atomically commits a version-4 request JSON file within the 4 MiB request limit.
      * Captures both engine backend selections and NSFW; each child attempt generates one image.
      *
      * @param job Attempt UUID.
      * @param request Captured generation inputs.
+     *
      * @author Dmitriy Moroz
      */
     override fun writeRequest(job: String, request: NativeGenerationRequest) {
         val p = request.payload
-        val json = JSONObject().put("version", 2).put("engine", request.engine.name)
+        val json = JSONObject().put("version", 4).put("engine", request.engine.name)
             .put("model", request.modelPath).put("nnapi", request.isNnapiEnabled)
             .put("prompt", p.prompt).put("negative", p.negativePrompt)
             .put("steps", p.samplingSteps).put("cfg", p.cfgScale.toDouble())
             .put("width", p.width).put("height", p.height).put("seed", p.seed)
             .put("sampler", p.sampler).put("backend", p.sdxlBackend.name)
             .put("bonsaiBackend", p.bonsaiBackend.name).put("nsfw", p.nsfw)
+            .put("mnnBackend", p.mnnBackend.name).put("mnnModelId", p.mnnModelId ?: "")
+            .put("mnnProfile", p.mnnProfile ?: "").put("mnnActivationId", p.mnnActivationId ?: "")
         write(job, "request.json", json.toString().toByteArray(), MAX_REQUEST_BYTES)
     }
 
     /**
      * Reads and validates the captured request, including model readability and parameter limits.
      * Missing, malformed or unsupported request data fails instead of supplying defaults.
-     * Version-1 files are abandoned transient attempts, never migrated or replayed.
+     * Version-1 and version-2 files are abandoned transient attempts, never migrated or replayed.
      *
      * @param job Validated attempt UUID.
+     *
      * @author Dmitriy Moroz
      */
     override fun readRequest(job: String): NativeGenerationRequest {
         val json = JSONObject(read(job, "request.json", MAX_REQUEST_BYTES).toString(Charsets.UTF_8))
-        require(json.getInt("version") == 2)
+        require(json.getInt("version") == 4)
         require(json.get("nsfw") is Boolean)
         val path = json.getString("model")
         require(path.isNotBlank() && '\u0000' !in path && File(path).canRead())
@@ -78,6 +84,10 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
                 sampler = json.getString("sampler"),
                 sdxlBackend = SdxlBackend.valueOf(json.getString("backend")),
                 bonsaiBackend = BonsaiBackend.valueOf(json.getString("bonsaiBackend")),
+                mnnBackend = MnnBackend.valueOf(json.getString("mnnBackend")),
+                mnnModelId = json.getString("mnnModelId").ifEmpty { null },
+                mnnProfile = json.getString("mnnProfile").ifEmpty { null },
+                mnnActivationId = json.getString("mnnActivationId").ifEmpty { null },
                 restoreFaces = false,
                 subSeed = "",
                 subSeedStrength = 0f,
@@ -97,6 +107,7 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
      *
      * @param job Attempt UUID.
      * @param image Complete PNG.
+     *
      * @author Dmitriy Moroz
      */
     override fun writeResult(job: String, image: ByteArray) {
@@ -108,6 +119,7 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
      * Returns the completed PNG only after bounded reading and validation against the captured request.
      *
      * @param job Attempt UUID.
+     *
      * @author Dmitriy Moroz
      */
     override fun readResult(job: String): ByteArray =
@@ -119,6 +131,7 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
      * Removes only the UUID job directory and its exchange files; model and gallery files are unaffected.
      *
      * @param job Attempt UUID.
+     *
      * @author Dmitriy Moroz
      */
     override fun delete(job: String) {

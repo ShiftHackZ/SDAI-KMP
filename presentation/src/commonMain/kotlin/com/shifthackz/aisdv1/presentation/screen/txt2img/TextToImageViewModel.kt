@@ -65,12 +65,7 @@ import kotlinx.coroutines.withContext
  * gates local providers through benchmark recommendations, and delegates actual
  * generation work to the action handler.
  *
- * @param openAiOAuthGateway Observes token-free account revisions captured in submitted OAuth work.
- * @param easyDiffusionSeedValidator Validates Easy Diffusion seeds against its unsigned 32-bit maximum.
- * @param nativeSeedValidator Validates native provider seeds using their full integer precision.
- * @param seedValidator Validates edited, restored and provider-switched seeds before state publication.
- * @param providerSelectionGuard Serializes final UI publication with provider replacement.
- * @param observeEasyDiffusionProgressUseCase Shared hot queued/sampling progress, reset when its owning operation finishes.
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  * @param dispatchersProvider Application dispatchers for background I/O and immediate UI state updates.
  * @param getConfigurationUseCase Reads every provider’s independent saved settings and the selected source revision.
  * @param getStableDiffusionSamplersUseCase Loads the cached AUTOMATIC1111 sampler catalog used to reconcile form selection.
@@ -81,6 +76,8 @@ import kotlinx.coroutines.withContext
  * @param saveGenerationResultUseCase Persists newly generated results lacking a durable gallery identity.
  * @param saveLastResultToCacheUseCase Caches selected output for normal preview, reporting and sharing workflows.
  * @param interruptSourceGenerationUseCase Interrupts only the captured legacy provider after its foreground job is cancelled.
+ * @param observeEasyDiffusionProgressUseCase Shared hot queued/sampling progress, reset when its owning operation finishes.
+ * @param nativeGenerationGateway Engine-specific progress/stages for the captured generation modal.
  * @param observeHordeProcessStatusUseCase Observes remote AI Horde queue position and wait estimates.
  * @param observeLocalDiffusionProcessStatusUseCase Observes legacy ONNX inference progress.
  * @param observeStableDiffusionCppProcessStatusUseCase Observes stable-diffusion.cpp inference progress.
@@ -94,14 +91,19 @@ import kotlinx.coroutines.withContext
  * @param buildInfoProvider Supplies platform/build-flavor information for supported controls and reporting.
  * @param generationFormUpdateEvent Transfers history/metadata inputs to the currently active generation form.
  * @param dimensionValidator Validates output dimensions before generation.
+ * @param seedValidator Validates edited, restored and provider-switched seeds before state publication.
+ * @param nativeSeedValidator Validates native provider seeds using their full integer precision.
+ * @param mnnSeedValidator Validates MNN seeds against its nonnegative signed-32-bit limit.
+ * @param easyDiffusionSeedValidator Validates Easy Diffusion seeds against its unsigned 32-bit maximum.
  * @param localGenerationBenchmarkGateProvider Obtains the injected benchmark recommendation gate when local generation needs admission.
  * @param imageSaver Exports encoded output through the normal platform media-store workflow.
  * @param imageSharer Shares encoded output through the normal platform share workflow.
  * @param router Navigation destination owner after configuration loading.
+ * @param openAiOAuthGateway Observes token-free account revisions captured in submitted OAuth work.
+ * @param providerSelectionGuard Serializes final UI publication with provider replacement.
  * @param onError Reports loading failures through the application error sink.
+ *
  * @author Dmitriy Moroz
- * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
- * @param nativeGenerationGateway Engine-specific progress/stages for the captured generation modal.
  */
 class TextToImageViewModel(
     diagnostics: UiDiagnostics,
@@ -132,6 +134,7 @@ class TextToImageViewModel(
     private val dimensionValidator: DimensionValidator,
     private val seedValidator: SeedValidator,
     private val nativeSeedValidator: SeedValidator,
+    private val mnnSeedValidator: SeedValidator,
     private val easyDiffusionSeedValidator: SeedValidator,
     private val localGenerationBenchmarkGateProvider: () -> LocalGenerationBenchmarkGate,
     private val imageSaver: ImageSaver,
@@ -158,13 +161,15 @@ class TextToImageViewModel(
      * This also revalidates provider switches and metadata restored from history.
      *
      * @param mutation transformation of the current generation state.
+     *
      * @author Dmitriy Moroz
      */
     private fun updateFormState(mutation: (TextToImageState) -> TextToImageState) {
         updateState {
-            mutation(it).withSeedValidation(
+            val updated = mutation(it).withMnnProfile()
+            updated.withSeedValidation(
                 seedValidator,
-                nativeSeedValidator,
+                if (updated.mode == ServerSource.LOCAL_MNN) mnnSeedValidator else nativeSeedValidator,
                 easyDiffusionSeedValidator
             )
         }
@@ -174,13 +179,14 @@ class TextToImageViewModel(
      * Validates seed fields before publishing a complete state supplied by the action handler.
      *
      * @param state replacement generation state, including current provider and seed text.
+     *
      * @author Dmitriy Moroz
      */
     private fun emitFormState(state: TextToImageState) {
         emitState(
-            state.withSeedValidation(
+            state.withMnnProfile().withSeedValidation(
                 seedValidator,
-                nativeSeedValidator,
+                if (state.mode == ServerSource.LOCAL_MNN) mnnSeedValidator else nativeSeedValidator,
                 easyDiffusionSeedValidator
             )
         )
@@ -273,6 +279,7 @@ class TextToImageViewModel(
      * Routes form actions and retries missing samplers without duplicating an active request.
      *
      * @param intent User action or foreground recovery action for this generation screen.
+     *
      * @author Dmitriy Moroz
      */
     override fun processIntent(intent: TextToImageIntent) {
@@ -312,6 +319,7 @@ class TextToImageViewModel(
      * A zero step count marks results from providers that do not expose diffusion parameters.
      *
      * @param ai Gallery image whose available parameters are applied to the form.
+     *
      * @author Dmitriy Moroz
      */
     private fun applyGenerationResult(ai: AiGenerationResult) {
@@ -346,6 +354,11 @@ class TextToImageViewModel(
      */
     private fun persistGenerationParameters() {
         val state = currentState
+        if (state.mode == ServerSource.LOCAL_MNN) {
+            if (preferenceManager.localMnnBackend != state.mnnBackend) preferenceManager.localMnnBackend =
+                state.mnnBackend
+            return
+        }
         if (state.mode == ServerSource.OPEN_AI_COMPATIBLE && preferenceManager.openAiCompatibleModel != state.openAiCompatibleModel) {
             preferenceManager.openAiCompatibleModel = state.openAiCompatibleModel
         }
@@ -357,8 +370,11 @@ class TextToImageViewModel(
         }
     }
 
-    /** Consumes incoming history/metadata requests and applies them to this screen’s shared form state.
-     * @author Dmitriy Moroz */
+    /**
+     * Consumes incoming history/metadata requests and applies them to this screen’s shared form state.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun observeGenerationFormUpdate() {
         launch(dispatchersProvider.immediate) {
@@ -370,8 +386,11 @@ class TextToImageViewModel(
         }
     }
 
-    /** Applies a queued history/metadata request once configuration is available, then clears the pending transfer.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies a queued history/metadata request once configuration is available, then clears the pending transfer.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun consumePendingGenerationFormUpdate() {
         generationFormUpdateEvent.consumeTxt2ImgForm()?.let { payload ->
@@ -379,8 +398,11 @@ class TextToImageViewModel(
         }
     }
 
-    /** Observes provider/native progress and updates only the matching active generation modal.
-     * @author Dmitriy Moroz */
+    /**
+     * Observes provider/native progress and updates only the matching active generation modal.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun observeGenerationProgress() {
         launch(dispatchersProvider.immediate) {
@@ -449,9 +471,13 @@ class TextToImageViewModel(
         }
     }
 
-    /** Updates sampling progress only while a local generation modal is active.
+    /**
+     * Updates sampling progress only while a local generation modal is active.
+     *
      * @param status Native sampling step and total for the active local operation.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun updateLocalGenerationStatus(status: LocalDiffusionStatus) {
         updateFormState { state ->
@@ -464,8 +490,11 @@ class TextToImageViewModel(
         }
     }
 
-    /** Loads saved provider/form controls and starts provider-specific model/extension discovery.
-     * @author Dmitriy Moroz */
+    /**
+     * Loads saved provider/form controls and starts provider-specific model/extension discovery.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun loadConfiguration() {
         updateFormState { it.copy(loadingConfiguration = true, error = null) }
@@ -477,6 +506,9 @@ class TextToImageViewModel(
                             it.copy(
                                 loadingConfiguration = false,
                                 openAiCompatibleModel = configuration.openAiCompatibleModel,
+                                mnnBackend = configuration.localMnnBackend,
+                                mnnActivationId = configuration.localMnnActivationId,
+                                mnnModelId = configuration.localMnnModelId,
                                 providerSelectionRevision = configuration.providerSelectionRevision,
                             ).withSource(
                                 source = configuration.source,
@@ -502,8 +534,11 @@ class TextToImageViewModel(
         }
     }
 
-    /** Reconciles persisted provider/control changes with current form selection and visible validation.
-     * @author Dmitriy Moroz */
+    /**
+     * Reconciles persisted provider/control changes with current form selection and visible validation.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun observeSettings() {
         launch(dispatchersProvider.immediate) {
@@ -517,7 +552,13 @@ class TextToImageViewModel(
                     refreshStableDiffusionMetadataIfNeeded(settings)
                     refreshArliAiModelsIfNeeded(settings)
                     updateFormState { state ->
-                        state.withSettings(
+                        state.copy(
+                            mnnActivationId = preferenceManager.localMnnActivationId,
+                            mnnModelId = preferenceManager.localMnnModelId,
+                            mnnBackend = if (state.providerSelectionRevision != settings.providerSelectionRevision) preferenceManager.localMnnBackend else state.mnnBackend,
+                            cfgScale = if (state.mode == ServerSource.LOCAL_MNN && settings.source != ServerSource.LOCAL_MNN) preferenceManager.textToImageCfgScale else state.cfgScale,
+                            samplingSteps = if (state.mode == ServerSource.LOCAL_MNN && settings.source != ServerSource.LOCAL_MNN) preferenceManager.textToImageSamplingSteps else state.samplingSteps
+                        ).withSettings(
                             settings = settings,
                             stableDiffusionSamplers = stableDiffusionSamplers,
                             forgeModules = forgeModules,
@@ -533,6 +574,7 @@ class TextToImageViewModel(
      * Invalidates metadata on provider or server changes and cancels the previous sampler attempt.
      *
      * @param settings Current provider selection and server address used to identify metadata.
+     *
      * @author Dmitriy Moroz
      */
     private fun refreshStableDiffusionMetadataIfNeeded(settings: Settings) {
@@ -618,8 +660,11 @@ class TextToImageViewModel(
         }
     }
 
-    /** Reads Forge module choices and clears unavailable selection when the catalog cannot be loaded.
-     * @author Dmitriy Moroz */
+    /**
+     * Reads Forge module choices and clears unavailable selection when the catalog cannot be loaded.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun loadForgeModules() {
         launch(dispatchersProvider.io) {
@@ -656,9 +701,13 @@ class TextToImageViewModel(
         }
     }
 
-    /** Updates ADetailer availability for the active AUTOMATIC1111 endpoint, optionally bypassing its cached result.
+    /**
+     * Updates ADetailer availability for the active AUTOMATIC1111 endpoint, optionally bypassing its cached result.
+     *
      * @param force Whether to refresh extension availability even when a cached value exists.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun loadADetailerAvailability(force: Boolean = false) {
         if (!force && aDetailerAvailable != null) return
@@ -692,9 +741,13 @@ class TextToImageViewModel(
         }
     }
 
-    /** Refreshes ArliAI model choices only when its active configuration differs from the last loaded key.
+    /**
+     * Refreshes ArliAI model choices only when its active configuration differs from the last loaded key.
+     *
      * @param settings Current persisted provider selection and shared form preferences.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun refreshArliAiModelsIfNeeded(settings: Settings) {
         if (settings.source != ServerSource.ARLI_AI) {
@@ -718,8 +771,11 @@ class TextToImageViewModel(
         loadArliAiModels()
     }
 
-    /** Loads supported ArliAI model identifiers and reconciles the selected checkpoint with available choices.
-     * @author Dmitriy Moroz */
+    /**
+     * Loads supported ArliAI model identifiers and reconciles the selected checkpoint with available choices.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun loadArliAiModels() {
         launch(dispatchersProvider.io) {

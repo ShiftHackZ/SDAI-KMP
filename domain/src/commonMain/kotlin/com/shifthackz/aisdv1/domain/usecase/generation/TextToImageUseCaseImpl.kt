@@ -12,6 +12,8 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.repository.ArliAiGenerationRepository
+import kotlin.random.Random
+import com.shifthackz.aisdv1.domain.repository.MnnGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.BonsaiGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.CoreMlGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.FalAiGenerationRepository
@@ -45,9 +47,11 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
  * @param stableDiffusionCppGenerationRepository Generation and result persistence for stable-diffusion.cpp.
  * @param coreMlGenerationRepository Generation and result persistence for Core ML.
  * @param bonsaiGenerationRepository Generation and result persistence for Bonsai.
+ * @param mnnGenerationRepository Isolated MNN request execution after fixed-profile and seed admission.
  * @param preferenceManager Current provider selection and independent generation preferences.
- * @param captureEasyDiffusionConnectionUseCase Captures endpoint/checkpoint under the provider-selection lock, retaining the submitted revision.
  * @param generateEasyDiffusionUseCase Owns captured-task batching, stream recovery, cancellation and deadlines.
+ * @param captureEasyDiffusionConnectionUseCase Captures endpoint/checkpoint under the provider-selection lock, retaining the submitted revision.
+ *
  * @author Dmitriy Moroz
  */
 internal class TextToImageUseCaseImpl(
@@ -79,6 +83,7 @@ internal class TextToImageUseCaseImpl(
     private val coreMlGenerationRepository: CoreMlGenerationRepository,
 
     private val bonsaiGenerationRepository: BonsaiGenerationRepository,
+    private val mnnGenerationRepository: MnnGenerationRepository,
 
     private val preferenceManager: PreferenceManager,
     private val generateEasyDiffusionUseCase: GenerateEasyDiffusionUseCase,
@@ -89,9 +94,11 @@ internal class TextToImageUseCaseImpl(
      * Routes work to its captured provider and executes sequential single-image batches when needed.
      * Rejects a source mismatch before dispatch; OAuth repositories additionally enforce captured
      * account/session and durable selection revisions before HTTP and result persistence.
+     *
      * @param payload Immutable generation inputs and token-free submission identity.
      * @return Successful images in batch order; a failure or cancellation stops remaining requests.
      * @throws IllegalStateException When the submitted source no longer matches the selected provider.
+     *
      * @author Dmitriy Moroz
      */
     override suspend operator fun invoke(
@@ -99,6 +106,17 @@ internal class TextToImageUseCaseImpl(
     ): List<AiGenerationResult> {
         val source = payload.sourceSnapshot ?: preferenceManager.source
         check(source == preferenceManager.source) { "Generation source changed" }
+        if (source == ServerSource.LOCAL_MNN) {
+            require(payload.batchCount == 1 && payload.negativePrompt.isEmpty())
+            require(payload.width == 512 && payload.height == 512 && payload.cfgScale == 7.5f)
+            require(payload.samplingSteps in 1..50 && payload.sampler == "PNDM")
+            require(payload.mnnProfile == "sd15-512-general-int8-v1" && !payload.mnnModelId.isNullOrBlank() && !payload.mnnActivationId.isNullOrBlank())
+            val seed =
+                if (payload.seed.isBlank() || payload.seed == "-1") Random.nextInt(Int.MAX_VALUE)
+                    .toString()
+                else payload.seed.also { require(it.toLongOrNull() in 0..Int.MAX_VALUE.toLong()) }
+            return listOf(mnnGenerationRepository.generateFromText(payload.copy(seed = seed)))
+        }
         return when (source) {
             ServerSource.EASY_DIFFUSION -> generateEasyDiffusionUseCase(
                 payload.toEasyDiffusionRequest(captureEasyDiffusionConnectionUseCase(payload.providerSelectionRevision))
@@ -121,6 +139,7 @@ internal class TextToImageUseCaseImpl(
      * Dispatches one image to the captured provider; providers with dedicated batch paths are rejected here.
      *
      * @param payload Immutable supported generation inputs and captured provider identity.
+     *
      * @author Dmitriy Moroz
      */
     private suspend fun generateSingle(payload: TextToImagePayload) =
@@ -149,6 +168,7 @@ internal class TextToImageUseCaseImpl(
             )
 
             ServerSource.LOCAL_APPLE_CORE_ML -> coreMlGenerationRepository.generateFromText(payload)
+            ServerSource.LOCAL_MNN -> mnnGenerationRepository.generateFromText(payload)
             ServerSource.LOCAL_APPLE_BONSAI -> bonsaiGenerationRepository.generateFromText(payload)
             ServerSource.AUTOMATIC1111 -> error("Automatic1111 batch must be generated through generateFromText(payload).")
             ServerSource.FAL_AI -> error("Fal.ai batch must be generated through generateFromText(payload).")

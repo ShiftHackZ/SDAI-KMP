@@ -8,6 +8,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
  *
  * @param state Current provider capabilities and basic field visibility.
  * @return Ordered logical controls, excluding headers, advanced fields and status content.
+ *
  * @author Dmitriy Moroz
  */
 internal fun generationInputBaseFields(
@@ -21,6 +22,7 @@ internal fun generationInputBaseFields(
             ServerSource.EASY_DIFFUSION,
             ServerSource.STABILITY_AI,
             ServerSource.HUGGING_FACE,
+            ServerSource.LOCAL_MNN,
             ServerSource.LOCAL_MICROSOFT_ONNX,
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
             ServerSource.LOCAL_APPLE_CORE_ML,
@@ -31,6 +33,7 @@ internal fun generationInputBaseFields(
 
             else -> Unit
         }
+        if (mode == ServerSource.LOCAL_MNN) add(GenerationBaseFormField.MNN_BACKEND)
         if (mode == ServerSource.LOCAL_STABLE_DIFFUSION_CPP) add(GenerationBaseFormField.SDXL_BACKEND)
         if (mode == ServerSource.LOCAL_APPLE_BONSAI && state.bonsaiBackendSelectionVisible) {
             add(GenerationBaseFormField.BONSAI_BACKEND)
@@ -59,7 +62,7 @@ internal fun generationInputBaseFields(
         else -> Unit
     }
     // Preserve the existing empty dimension row's top padding for providers without size controls.
-    if (!isCompatibleProvider && (mode != ServerSource.FAL_AI || state.falAiModel.supportsImageSize)) {
+    if (mode != ServerSource.LOCAL_MNN && !isCompatibleProvider && (mode != ServerSource.FAL_AI || state.falAiModel.supportsImageSize)) {
         add(GenerationBaseFormField.DIMENSIONS)
     }
     if (mode == ServerSource.OPEN_AI) {
@@ -78,10 +81,12 @@ internal fun generationInputBaseFields(
  *
  * @receiver Basic field selected by the provider's visibility rules.
  * @return Structural category used for lazy-slot recycling and prefetch cost estimates.
+ *
  * @author Dmitriy Moroz
  */
 internal fun GenerationBaseFormField.contentType(): GenerationFormContentType = when (this) {
     GenerationBaseFormField.PROVIDER -> GenerationFormContentType.PROVIDER
+    GenerationBaseFormField.MNN_BACKEND,
     GenerationBaseFormField.SDXL_BACKEND,
     GenerationBaseFormField.BONSAI_BACKEND,
     GenerationBaseFormField.OPENAI_QUALITY -> GenerationFormContentType.DROPDOWN

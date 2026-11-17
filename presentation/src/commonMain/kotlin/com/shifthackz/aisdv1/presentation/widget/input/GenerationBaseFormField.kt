@@ -8,6 +8,7 @@ package com.shifthackz.aisdv1.presentation.widget.input
  */
 internal enum class GenerationBaseFormField {
     PROVIDER,
+    MNN_BACKEND,
     SDXL_BACKEND,
     BONSAI_BACKEND,
     COMPATIBLE_MODEL,

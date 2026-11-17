@@ -45,8 +45,6 @@ private class IosSettingsPlatformActions(
         fileSystem.clearAppCache()
     }
 
-    override suspend fun getAllDownloadedModelsBytes(): Long =
-        fileSystem.getAllDownloadedModelsBytes()
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long =
         fileSystem.getDownloadedModelsBytes(modelIds)

@@ -57,7 +57,7 @@ class FileGenerationFileStoreTest {
             store.writeRequest(job, request)
 
             assertEquals(request, store.readRequest(job))
-            assertEquals(2, JSONObject(requestFile().readText()).getInt("version"))
+            assertEquals(4, JSONObject(requestFile().readText()).getInt("version"))
         }
     }
 

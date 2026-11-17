@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.core.mvi.MviState
 import com.shifthackz.aisdv1.domain.entity.ADetailerConfig
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.FalAiAcceleration
 import com.shifthackz.aisdv1.domain.entity.FalAiImageSize
@@ -28,17 +29,75 @@ import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormState
 /**
  * Complete render state for txt2img.
  *
- * @param isLoadingSamplers Whether an AUTOMATIC1111 sampler request is running.
- * @param hasSamplerLoadFailed Whether the sampler field should offer an inline retry.
- * @param seedValidationError Seed feedback published through the injected validator.
- * @param subSeedValidationError Variation seed feedback for providers that use it.
- *
  * The state combines screen lifecycle flags, generated results, validation
  * feedback, current platform metadata, and the shared generation form contract
  * used by provider-specific controls such as Android Bonsai backend selection.
+ *
+ * @param loadingConfiguration Whether provider configuration is still being loaded into the screen.
+ * @param generating Whether a generation request is currently in progress.
+ * @param savingImage Whether an image export is running.
+ * @param sharingImage Whether an image is being prepared for the platform share flow.
+ * @param promptValidationError Inline prompt validation feedback, or null when the prompt is accepted.
+ * @param error Current blocking generation error, or null when no error is displayed.
+ * @param message Transient user-facing generation message, or null when absent.
+ * @param screenModal Currently displayed generation dialog or sheet.
+ * @param results Generated images available to the result pager and gallery actions.
+ * @param editTag Prompt tag currently being edited, or null when the tag editor is closed.
+ * @param onBoardingDemo Whether generation controls are being displayed as an onboarding demonstration.
+ * @param platform Native platform used to choose supported controls and navigation behavior.
+ * @param mode Currently selected image-generation provider.
+ * @param advancedToggleButtonVisible Whether the user can expand the provider's advanced controls.
+ * @param advancedOptionsVisible Whether advanced generation controls are currently expanded.
+ * @param formPromptTaggedInput Whether prompts are edited as tags instead of plain text.
+ * @param prompt Positive prompt describing the requested image.
+ * @param negativePrompt Prompt describing content the selected provider should avoid.
+ * @param width Width editor text in pixels; invalid values remain visible with inline feedback.
+ * @param height Height editor text in pixels; invalid values remain visible with inline feedback.
+ * @param samplingSteps Requested denoising iteration count, subject to the provider profile.
+ * @param cfgScale Classifier-free guidance strength requested from compatible providers.
+ * @param restoreFaces Whether providers supporting face restoration should apply it after generation.
+ * @param seed Seed editor value; providers resolve blank or random-seed conventions before execution.
+ * @param subSeed Variation seed editor value for providers supporting seed interpolation.
+ * @param subSeedStrength Interpolation strength between the primary seed and variation seed.
+ * @param selectedSampler Current provider sampler selection shown in the form.
+ * @param selectedScheduler Current noise scheduling strategy shown in compatible provider controls.
+ * @param availableForgeModules Forge modules advertised by the configured server.
+ * @param selectedForgeModules Forge modules enabled for the next generation request.
+ * @param availableSamplers Sampler identifiers advertised by the configured provider.
+ * @param isLoadingSamplers Whether an AUTOMATIC1111 sampler request is running.
+ * @param hasSamplerLoadFailed Whether the sampler field should offer an inline retry.
+ * @param selectedStylePreset Stability AI style preset selected for the next request.
+ * @param selectedClipGuidancePreset Stability AI CLIP guidance preset selected for the next request.
+ * @param openAiCompatibleModel Arbitrary compatible-server image model identifier, independent of the built-in OpenAI catalog.
  * @param openAiOAuthAccountId Token-free account identity observed from protected session state.
  * @param openAiOAuthRevision Login revision captured when generation is submitted.
  * @param providerSelectionRevision Durable source-selection revision captured with submitted work.
+ * @param openAiModel OpenAI image model selected for providers using the built-in OpenAI catalog.
+ * @param openAiSize OpenAI output-size preset selected for compatible image models.
+ * @param openAiQuality OpenAI output-quality preset selected for compatible image models.
+ * @param falAiModel Fal AI endpoint defining the generation model and supported controls.
+ * @param falAiImageSize Fal AI image-size preset sent to the selected endpoint.
+ * @param falAiAcceleration Fal AI acceleration policy supported by the endpoint.
+ * @param falAiSyncMode Whether Fal AI should return the image synchronously instead of using queued delivery.
+ * @param mnnBackend Explicit CPU or OpenCL choice captured when MNN generation is submitted.
+ * @param mnnActivationId Exact validated MNN manifest SHA256 captured with the submitted model.
+ * @param mnnModelId Catalog or custom model identity paired with the validated MNN artifact.
+ * @param sdxlBackend Requested stable-diffusion.cpp execution backend, including automatic selection.
+ * @param bonsaiBackend Requested Bonsai execution backend on supported platforms.
+ * @param bonsaiBackendSelectionVisible Whether the current platform exposes the Bonsai backend selector.
+ * @param arliAiModels Arli AI model identifiers available for selection.
+ * @param arliAiModel Arli AI model identifier selected for image generation.
+ * @param widthValidationError Inline width validation feedback, or null when the editor value is valid.
+ * @param heightValidationError Inline height validation feedback, or null when the editor value is valid.
+ * @param seedValidationError Seed feedback published through the injected validator.
+ * @param subSeedValidationError Variation seed feedback for providers that use it.
+ * @param nsfw Whether the selected provider permits adult-content generation.
+ * @param batchCount Number of images requested, subject to provider batching capabilities.
+ * @param hires AUTOMATIC1111 high-resolution second-pass configuration.
+ * @param aDetailer AUTOMATIC1111 detail-refinement configuration; disabled for providers without this extension.
+ * @param aDetailerAvailable Whether the configured server advertises ADetailer support.
+ * @param aDetailerRefreshing Whether ADetailer extension availability is being refreshed.
+ *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -89,6 +148,9 @@ data class TextToImageState(
     override val falAiImageSize: FalAiImageSize = FalAiImageSize.default,
     override val falAiAcceleration: FalAiAcceleration = FalAiAcceleration.default,
     override val falAiSyncMode: Boolean = false,
+    override val mnnBackend: MnnBackend = MnnBackend.CPU,
+    val mnnActivationId: String? = null,
+    val mnnModelId: String? = null,
     override val sdxlBackend: SdxlBackend = SdxlBackend.AUTO,
     override val bonsaiBackend: BonsaiBackend = BonsaiBackend.AUTO,
     override val bonsaiBackendSelectionVisible: Boolean = false,
@@ -107,23 +169,25 @@ data class TextToImageState(
 ) : MviState, GenerationInputFormState {
 
     val localSourceSelected: Boolean
-        get() = mode == ServerSource.LOCAL_MICROSOFT_ONNX ||
-            mode == ServerSource.LOCAL_GOOGLE_MEDIA_PIPE ||
-            mode == ServerSource.LOCAL_STABLE_DIFFUSION_CPP ||
-            mode == ServerSource.LOCAL_APPLE_CORE_ML ||
-            mode == ServerSource.LOCAL_APPLE_BONSAI
+        get() = mode == ServerSource.LOCAL_MNN || mode == ServerSource.LOCAL_MICROSOFT_ONNX ||
+                mode == ServerSource.LOCAL_GOOGLE_MEDIA_PIPE ||
+                mode == ServerSource.LOCAL_STABLE_DIFFUSION_CPP ||
+                mode == ServerSource.LOCAL_APPLE_CORE_ML ||
+                mode == ServerSource.LOCAL_APPLE_BONSAI
 
     val hasValidationErrors: Boolean
         get() = promptValidationError != null ||
-            widthValidationError != null ||
-            heightValidationError != null ||
-            seedValidationError != null ||
-            subSeedValidationError != null ||
-            error != null
+                widthValidationError != null ||
+                heightValidationError != null ||
+                seedValidationError != null ||
+                subSeedValidationError != null ||
+                error != null
 }
 
 /**
  * Converts the current txt2img state into the domain generation request.
+ *
+ * @author Dmitriy Moroz
  */
 internal fun TextToImageState.mapToPayload(): TextToImagePayload = TextToImagePayload(
     prompt = prompt.trim(),
@@ -189,6 +253,10 @@ internal fun TextToImageState.mapToPayload(): TextToImagePayload = TextToImagePa
     sdxlBackend = sdxlBackend.takeIf {
         mode == ServerSource.LOCAL_STABLE_DIFFUSION_CPP
     } ?: SdxlBackend.AUTO,
+    mnnBackend = mnnBackend,
+    mnnActivationId = mnnActivationId.takeIf { mode == ServerSource.LOCAL_MNN },
+    mnnModelId = mnnModelId.takeIf { mode == ServerSource.LOCAL_MNN },
+    mnnProfile = "sd15-512-general-int8-v1".takeIf { mode == ServerSource.LOCAL_MNN },
     bonsaiBackend = bonsaiBackend.takeIf {
         mode == ServerSource.LOCAL_APPLE_BONSAI
     } ?: BonsaiBackend.AUTO,

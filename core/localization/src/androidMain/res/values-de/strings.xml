@@ -722,4 +722,15 @@
     <string name="easy_diffusion_failure">Easy Diffusion konnte die Anfrage nicht abschließen. Prüfe Server, Verbindung und ausgewählten Checkpoint und versuche es erneut.</string>
     <string name="easy_diffusion_timeout">Easy Diffusion hat das Zeitlimit überschritten. Prüfe Server und Zeitlimit und versuche es erneut. Ohne Empfangsbestätigung ist der Abschluss auf dem Server unbekannt.</string>
     <string name="easy_diffusion_submission_unknown">Die Easy-Diffusion-Anfrage wurde nicht bestätigt. Der Abschluss auf dem Server ist unbekannt. Prüfe den Server vor einem erneuten Versuch.</string>
+
+    <!-- MNN SD 1.5 -->
+    <string name="srv_type_mnn">MNN SD 1.5</string>
+    <string name="hint_mnn_profile">Ein Bild mit 512×512, PNDM, CFG 7.5, 1–50 Schritte. CPU oder OpenCL.</string>
+    <string name="hint_mnn_backend">MNN-Backend</string>
+    <string name="settings_usage_summary_models_mnn">MNN-Modelle</string>
+    <string name="local_catalog_loading">Modellkatalog wird geladen</string>
+    <string name="local_catalog_error_title">Modelle konnten nicht geladen werden</string>
+    <string name="local_catalog_error_body">Prüfe die Verbindung und versuche es erneut. Deine lokalen Modelle bleiben verfügbar.</string>
+    <string name="local_catalog_empty_title">Keine Modelle verfügbar</string>
+    <string name="local_catalog_empty_body">Versuche später, den Katalog erneut zu laden.</string>
 </resources>

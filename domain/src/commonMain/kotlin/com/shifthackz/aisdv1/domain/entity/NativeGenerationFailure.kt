@@ -8,6 +8,8 @@ package com.shifthackz.aisdv1.domain.entity
  * @param engine Runtime actually attempted, independent of current provider selection.
  * @param backend Captured SDCPP backend, absent for other runtimes.
  * @param bonsaiBackend Captured Bonsai backend, absent for other runtimes.
+ * @param mnnBackend Captured MNN backend, absent for other runtimes.
+ *
  * @author Dmitriy Moroz
  */
 class NativeGenerationFailure(
@@ -15,6 +17,7 @@ class NativeGenerationFailure(
     val engine: NativeGenerationEngine? = null,
     val backend: SdxlBackend? = null,
     val bonsaiBackend: BonsaiBackend? = null,
+    val mnnBackend: MnnBackend? = null,
 ) : IllegalStateException(
     "Local generation failed (${category.name.lowercase()}). Please retry or select another backend.",
 ) {

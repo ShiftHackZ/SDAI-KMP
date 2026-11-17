@@ -1,0 +1,535 @@
+--- a/transformers/diffusion/engine/src/stable_diffusion.cpp
++++ b/transformers/diffusion/engine/src/stable_diffusion.cpp
+@@ -1,4 +1,8 @@
+ #include <random>
++#include "sdai_unet_graph.hpp"
++#include <stdexcept>
++#include <cmath>
++#include <cstdlib>
+ #include <fstream>
+ #include <chrono>
+ #include "diffusion/stable_diffusion.hpp"
+@@ -25,6 +29,72 @@
+ 
+ namespace MNN {
+ namespace DIFFUSION {
++namespace {
++// Session outputs can alias reusable backend buffers. Copy their materialized values
++// into independent host inputs before another forward or module destruction.
++VARP ownedFloatCopy(VARP source, const std::vector<int>& expected) {
++    if (!source.get()) throw std::runtime_error("Missing MNN tensor");
++    auto converted = _Convert(source, NCHW);
++    auto info = converted->getInfo();
++    if (!info || info->dim != expected || info->type.code != halide_type_float ||
++        info->type.bits != 32 || info->type.lanes != 1) {
++        throw std::runtime_error("Unexpected MNN tensor shape or type");
++    }
++    const auto values = converted->readMap<float>();
++    if (!values) throw std::runtime_error("MNN tensor unavailable");
++    auto copy = _Input(expected, NCHW, halide_type_of<float>());
++    auto destination = copy->writeMap<float>();
++    if (!destination) throw std::runtime_error("MNN tensor copy allocation failed");
++    for (int i = 0; i < info->size; ++i) {
++        if (!std::isfinite(values[i])) throw std::runtime_error("Nonfinite MNN tensor");
++        destination[i] = values[i];
++    }
++    // This only changes the type of an already independently allocated input.
++    if (!copy.fix(VARP::CONSTANT)) throw std::runtime_error("MNN tensor copy failed");
++    return copy;
++}
++
++std::shared_ptr<Module> loadStage(const std::string& root, int index,
++        const std::shared_ptr<Executor::RuntimeManager>& manager) {
++    static const std::vector<std::string> names = {"text_encoder", "unet", "vae_decoder"};
++    static const std::vector<std::vector<std::string>> inputs = {
++        {"input_ids"}, {"sample", "timestep", "encoder_hidden_states"}, {"latent_sample"}
++    };
++    static const std::vector<std::vector<std::string>> outputs = {
++        {"last_hidden_state", "pooler_output"}, {"out_sample"}, {"sample"}
++    };
++    if (index < 0 || index >= names.size()) throw std::runtime_error("Invalid MNN stage");
++    Module::Config config;
++    config.shapeMutable = false;
++    MNN_PRINT("SDAI MNN stage=%s; stageLoading=true; unetBatch=1\n", names[index].c_str());
++    std::shared_ptr<Module> module;
++    const auto path = root + "/" + names[index] + ".mnn";
++    if (index == 1) {
++        std::ifstream stream(path, std::ios::binary | std::ios::ate);
++        if (!stream || stream.tellg() != 1353144) throw std::runtime_error("Pinned UNet graph unavailable");
++        std::vector<uint8_t> original(1353144);
++        stream.seekg(0);
++        if (!stream.read(reinterpret_cast<char*>(original.data()), original.size())) {
++            throw std::runtime_error("Pinned UNet graph read failed");
++        }
++        auto optimized = sdai::scalarizePinnedUnetBiases(original);
++        manager->setExternalFile(path + ".weight");
++        try {
++            module.reset(Module::load(inputs[index], outputs[index], optimized.data(), optimized.size(), manager, &config));
++        } catch (...) {
++            manager->setExternalFile("");
++            throw;
++        }
++        manager->setExternalFile("");
++        MNN_PRINT("SDAI MNN stage=unet; scalarZeroBiases=32; originalWeights=true\n");
++    } else {
++        module.reset(Module::load(inputs[index], outputs[index], path.c_str(), manager, &config));
++    }
++    if (!module) throw std::runtime_error("MNN stage loading failed");
++    MNN_PRINT("SDAI MNN stage=%s; stageLoaded=true\n", names[index].c_str());
++    return module;
++}
++}
+ 
+ StableDiffusion::StableDiffusion(std::string modelPath, DiffusionModelType modelType, MNNForwardType backendType, int memoryMode)
+     : Diffusion(modelPath, modelType, backendType, memoryMode) {
+@@ -63,13 +133,12 @@
+     exe->lazyEval = false;
+     exe->setGlobalExecutorConfig(config.type, backendConfig, config.numThread);
+     
+-    Module::Config module_config;
+-    module_config.shapeMutable = false;
+-    // module_config.rearrange = true;
+     runtime_manager_.reset(Executor::RuntimeManager::createRuntimeManager(config));
++    if (!runtime_manager_) throw std::runtime_error("MNN runtime creation failed");
+     
+     if (config.type == MNN_FORWARD_OPENCL) {
+-        const char* cacheFileName = ".tempcache";
++        const char* cacheFileName = std::getenv("SDAI_MNN_CACHE");
++        if (!cacheFileName) throw std::runtime_error("Missing private OpenCL cache");
+         runtime_manager_->setCache(cacheFileName);
+     }
+     // need to consider memory
+@@ -84,40 +153,14 @@
+     mLatentVar = _Input({1, 4, 64, 64}, NCHW, halide_type_of<float>());
+     mPromptVar = _Input({2, mMaxTextLen}, NCHW, halide_type_of<int>());
+     mTimestepVar = _Input({1}, NCHW, halide_type_of<int>());
+-    mLatentVar->writeMap<int8_t>();
+-    mPromptVar->writeMap<int8_t>();
+-    mTimestepVar->writeMap<int8_t>();
+-    mSampleVar = _Concat({mLatentVar, mLatentVar}, 0);
+-    
+-    if(mMemoryMode > 0) {
+-        MNN_PRINT("First time initilizing may cost a few seconds to create cachefile, please wait ...\n");
+-    }
+-    
+-    VARP text_embeddings;
++    std::fill_n(mLatentVar->writeMap<float>(), 16384, 0.0f);
++    std::fill_n(mPromptVar->writeMap<int>(), 2 * mMaxTextLen, 0);
++    mTimestepVar->writeMap<int>()[0] = 0;
++    
++    // Only one stage owns model weights and workspaces at a time.
+     mModules.resize(3);
+-    mResizeCachePrepared.assign(3, false);
+-    // load text_encoder model
+-    {
+-        std::string model_path = mModelPath + "/text_encoder.mnn";
+-        // MNN_PRINT("Load %s\n", model_path.c_str());
+-        mModules[0].reset(Module::load(
+-                                       {"input_ids"}, {"last_hidden_state", "pooler_output"}, model_path.c_str(), runtime_manager_, &module_config));
+-    }
+-    // load unet model
+-    {
+-        std::string model_path = mModelPath + "/unet.mnn";
+-        // MNN_PRINT("Load %s\n", model_path.c_str());
+-        mModules[1].reset(Module::load(
+-                                       {"sample", "timestep", "encoder_hidden_states"}, {"out_sample"}, model_path.c_str(), runtime_manager_, &module_config));
+-    }
+-    // load vae_decoder model
+-    {
+-        std::string model_path = mModelPath + "/vae_decoder.mnn";
+-        // MNN_PRINT("Load %s\n", model_path.c_str());
+-        mModules[2].reset(Module::load(
+-                                       {"latent_sample"}, {"sample"}, model_path.c_str(), runtime_manager_, &module_config));
+-    }
+-    
++    mModules[0] = loadStage(mModelPath, 0, runtime_manager_);
++
+     // tokenizer loading
+     if (mModelType == STABLE_DIFFUSION_1_5) {
+         mTokenizer.reset(new MtokTokenizer(MtokTokenizer::Style::kPair, 49406, 49407));
+@@ -132,66 +175,43 @@
+         return false;
+     }
+ 
+-    // text encoder
+-    {
+-        auto outputs = forwardWithResizeCache(0, {mPromptVar});
+-        text_embeddings = _Convert(outputs[0], NCHW);
+-        text_embeddings.fix(VARP::CONSTANT);
+-    }
+-
+-    if(mMemoryMode > 0) {
+-        // unet
+-        {
+-            auto outputs = forwardWithResizeCache(1, {mSampleVar, mTimestepVar, text_embeddings});
+-            auto output = _Convert(outputs[0], NCHW);
+-            output->readMap<float>();
+-        }
+-    }
+-    if(mMemoryMode == 1) {
+-        // vae decoder
+-        {
+-            auto outputs = forwardWithResizeCache(2, {mLatentVar});
+-            auto output = _Convert(outputs[0], NCHW);
+-            output->readMap<float>();
+-        }
+-    }
+-    
+     return true;
+ }
+ 
+-std::vector<VARP> StableDiffusion::forwardWithResizeCache(int index, const std::vector<VARP>& inputs) {
++std::vector<VARP> StableDiffusion::forwardValidated(int index, const std::vector<VARP>& inputs) {
+     if (index < 0 || index >= mModules.size() || !mModules[index]) {
+-        MNN_ERROR("Invalid diffusion module index: %d\n", index);
+-        return {};
+-    }
+-    if (mResizeCachePrepared.size() != mModules.size()) {
+-        mResizeCachePrepared.assign(mModules.size(), false);
+-    }
+-    if (!mResizeCachePrepared[index]) {
+-        auto code = mModules[index]->traceOrOptimize(MNN::Interpreter::Session_Resize_Check);
+-        if (code != 0) {
+-            MNN_PRINT("Resize check is not supported for diffusion module %d, code = %d\n", index, code);
+-        } else {
+-            mModules[index]->onForward(inputs);
+-            code = mModules[index]->traceOrOptimize(MNN::Interpreter::Session_Resize_Fix);
+-            if (code != 0) {
+-                MNN_PRINT("Resize fix is not supported for diffusion module %d, code = %d\n", index, code);
+-            }
+-        }
+-        mResizeCachePrepared[index] = true;
+-    }
+-    return mModules[index]->onForward(inputs);
++        throw std::runtime_error("Missing MNN module");
++    }
++    // Fixed profile shapes reuse this session directly. Resize-fix warmup would
++    // run an extra UNet pass and retain another dynamic allocator cache.
++    static const char* names[] = {"text_encoder", "unet", "vae_decoder"};
++    MNN_PRINT("SDAI MNN stage=%s; forwardStart=true\n", names[index]);
++    auto outputs = mModules[index]->onForward(inputs);
++    if (outputs.empty() || !outputs[0].get()) throw std::runtime_error("MNN forward failed");
++    auto output = _Convert(outputs[0], NCHW);
++    auto info = output->getInfo();
++    const std::vector<std::vector<int>> expected = {{2, 77, 768}, {1, 4, 64, 64}, {1, 3, 512, 512}};
++    if (!info || info->dim != expected[index] || info->type.code != halide_type_float ||
++        info->type.bits != 32 || info->type.lanes != 1) {
++        throw std::runtime_error("Unexpected MNN output shape or type");
++    }
++    auto values = output->readMap<float>();
++    if (!values) throw std::runtime_error("MNN output unavailable");
++    for (int i = 0; i < info->size; ++i) {
++        if (!std::isfinite(values[i])) throw std::runtime_error("Nonfinite MNN output");
++    }
++    MNN_PRINT("SDAI MNN stage=%s; forwardDone=true\n", names[index]);
++    return outputs;
+ }
+ 
+ VARP StableDiffusion::text_encoder(const std::vector<int>& ids) {
+     AUTOTIME;
+ 
++    if (ids.size() != 2 * mMaxTextLen) throw std::runtime_error("Invalid tokenizer output");
+     memcpy((void *)mPromptVar->writeMap<int8_t>(), ids.data(), 2*mMaxTextLen*sizeof(int));
+ 
+-    auto outputs = forwardWithResizeCache(0, {mPromptVar});
+-    auto output = _Convert(outputs[0], NCHW);
+-    output.fix(VARP::CONSTANT);
+-    return output;
++    auto outputs = forwardValidated(0, {mPromptVar});
++    return ownedFloatCopy(outputs[0], {2, mMaxTextLen, 768});
+ }
+ 
+ VARP StableDiffusion::step_plms(VARP sample, VARP model_output, int index) {
+@@ -233,9 +253,31 @@
+ }
+ 
+ VARP StableDiffusion::unet(VARP text_embeddings, int iterNum, int randomSeed, std::function<void(int)> progressCallback) {
+-    if(mMemoryMode != 1) {
+-        mModules[0].reset();
+-    }
++    auto embeddingRows = _Split(text_embeddings, {2}, 0);
++    auto unconditionalEmbedding = ownedFloatCopy(embeddingRows[0], {1, mMaxTextLen, 768});
++    auto conditionalEmbedding = ownedFloatCopy(embeddingRows[1], {1, mMaxTextLen, 768});
++    embeddingRows.clear();
++    text_embeddings = nullptr;
++    mPromptVar = nullptr;
++    mModules[0].reset();
++    ExecutorScope::Current()->gc(Executor::FULL);
++    if (mBackendType == MNN_FORWARD_CPU) {
++        const char* cache = std::getenv("SDAI_MNN_CACHE");
++        if (!cache) throw std::runtime_error("Missing private CPU mmap cache");
++        const std::string cachePath(cache);
++        const auto separator = cachePath.find_last_of('/');
++        if (separator == std::string::npos) throw std::runtime_error("Invalid CPU mmap cache path");
++        const auto directory = cachePath.substr(0, separator);
++        // Enable backing only after the text session has released its resources.
++        // The private allocator keeps this auto-removed pool active through resize.
++        runtime_manager_->setExternalPath(directory + "/cpu-weights", Interpreter::EXTERNAL_WEIGHT_DIR);
++        runtime_manager_->setExternalPath(directory + "/cpu-workspace", Interpreter::EXTERNAL_FEATUREMAP_DIR);
++        runtime_manager_->setHint(Interpreter::MEM_ALLOCATOR_TYPE, 0);
++        runtime_manager_->setHint(Interpreter::MMAP_FILE_SIZE, 64); // This runtime multiplies by 1024*1024.
++        runtime_manager_->setHint(Interpreter::USE_CACHED_MMAP, 0);
++        MNN_PRINT("SDAI MNN stage=unet; cpuMmap=true; chunkMiB=64; reuseCache=false\n");
++    }
++    mModules[1] = loadStage(mModelPath, 1, runtime_manager_);
+     if(mInitNoise.size() != 16384) {
+         mInitNoise.resize(16384);
+     }
+@@ -263,48 +305,49 @@
+     auto scaleptr = scalevar->writeMap<float>();
+     scaleptr[0] = 7.5;
+ 
+-    auto floatVar = _Input({1}, NCHW, halide_type_of<float>());
+-    auto ptr = floatVar->writeMap<float>();
+-    auto plms = mLatentVar;
++    auto plms = ownedFloatCopy(mLatentVar, {1, 4, 64, 64});
+ 
+     for (int i = 0; i < mTimeSteps.size(); i++) {
+         AUTOTIME;
+-
+-        int timestep = mTimeSteps[i];
+-        ptr[0] = timestep;
+-        auto temp = _Cast(floatVar, halide_type_of<int>());
+-        mTimestepVar->input(temp);
+-
+-        mSampleVar = _Concat({plms, plms}, 0);
+-        auto outputs = forwardWithResizeCache(1, {mSampleVar, mTimestepVar, text_embeddings});
+-        auto output = _Convert(outputs[0], NCHW);
+-
+-        auto noise_pred = output;
+-
+-        auto splitvar = _Split(noise_pred, {2}, 0);
+-        auto noise_pred_uncond = splitvar[0];
+-        auto noise_pred_text = splitvar[1];
+-
+-        noise_pred = scalevar * (noise_pred_text - noise_pred_uncond) + noise_pred_uncond;
+-
+-        plms = step_plms(plms, noise_pred, i);
+-
++        mTimestepVar->writeMap<int>()[0] = mTimeSteps[i];
++
++        auto unconditionalOutputs = forwardValidated(1, {plms, mTimestepVar, unconditionalEmbedding});
++        auto noise_pred_uncond = ownedFloatCopy(unconditionalOutputs[0], {1, 4, 64, 64});
++        unconditionalOutputs.clear();
++        // Preserve cancellation between branch forwards without claiming a new sampling step.
++        if (progressCallback) progressCallback((1 + i) * 100 / (iterNum + 3));
++
++        auto conditionalOutputs = forwardValidated(1, {plms, mTimestepVar, conditionalEmbedding});
++        auto noise_pred_text = ownedFloatCopy(conditionalOutputs[0], {1, 4, 64, 64});
++        conditionalOutputs.clear();
++        auto noise_pred = ownedFloatCopy(
++            scalevar * (noise_pred_text - noise_pred_uncond) + noise_pred_uncond, {1, 4, 64, 64});
++
++        // Scheduler history retains only detached predictions, and the next latent
++        // cannot keep prior expression graphs or mutable session outputs alive.
++        plms = ownedFloatCopy(step_plms(plms, noise_pred, i), {1, 4, 64, 64});
+         if (progressCallback) {
+             progressCallback((2 + i) * 100 / (iterNum + 3)); // percent
+         }
+     }
+-    plms.fix(VARP::CONSTANT);
++    unconditionalEmbedding = nullptr;
++    conditionalEmbedding = nullptr;
++    mEts.clear();
++    mSample = nullptr;
++    mLatentVar = nullptr;
++    mTimestepVar = nullptr;
++    mInitNoise.clear();
++    mModules[1].reset();
++    ExecutorScope::Current()->gc(Executor::FULL);
+     return plms;
+ }
+ 
+ VARP StableDiffusion::vae_decoder(VARP latent) {
+-    if(mMemoryMode != 1) {
+-        mModules[1].reset();
+-    }
++    mModules[2] = loadStage(mModelPath, 2, runtime_manager_);
+     latent = latent * _Const(1 / 0.18215);
+     
+     AUTOTIME;
+-    auto outputs = forwardWithResizeCache(2, {latent});
++    auto outputs = forwardValidated(2, {latent});
+     auto output = _Convert(outputs[0], NCHW);
+ 
+     auto image = output;
+@@ -342,6 +385,7 @@
+         progressCallback(1 * 100 / (iterNum + 3)); // percent
+     }
+     auto latent = unet(text_embeddings, iterNum, randomSeed, progressCallback);
++    text_embeddings = nullptr;
+ 
+     auto image = vae_decoder(latent);
+     bool res = imwrite(imagePath, image);
+@@ -349,14 +393,15 @@
+         MNN_PRINT("SUCCESS! write generated image to %s\n", imagePath.c_str());
+     }
+ 
+-    if(mMemoryMode != 1) {
+-        mModules[2].reset();
+-    }
+-    
++    image = nullptr;
++    latent = nullptr;
++    mModules[2].reset();
++    ExecutorScope::Current()->gc(Executor::FULL);
++
+     if (progressCallback) {
+         progressCallback(100); // percent
+     }
+-    return true;
++    return res;
+ }
+ 
+ 
+--- a/transformers/diffusion/engine/include/diffusion/stable_diffusion.hpp
++++ b/transformers/diffusion/engine/include/diffusion/stable_diffusion.hpp
+@@ -40,7 +40,7 @@
+ 
+ private:
+     VARP step_plms(VARP sample, VARP model_output, int index);
+-    std::vector<VARP> forwardWithResizeCache(int index, const std::vector<VARP>& inputs);
++    std::vector<VARP> forwardValidated(int index, const std::vector<VARP>& inputs);
+     VARP text_encoder(const std::vector<int>& ids);
+     VARP unet(VARP text_embeddings, int iterNum, int randomSeed, std::function<void(int)> progressCallback);
+     VARP vae_decoder(VARP latent);
+@@ -50,9 +50,8 @@
+     std::vector<float> mAlphas;
+     std::vector<VARP> mEts;
+     VARP mSample;
+-    VARP mLatentVar, mPromptVar, mTimestepVar, mSampleVar;
++    VARP mLatentVar, mPromptVar, mTimestepVar;
+     std::vector<float> mInitNoise;
+-    std::vector<bool> mResizeCachePrepared;
+     int mMaxTextLen = 77;
+     std::unique_ptr<Tokenizer> mTokenizer;
+ };
+--- a/source/core/BufferAllocator.cpp
++++ b/source/core/BufferAllocator.cpp
+@@ -7,6 +7,9 @@
+ //
+ 
+ #include <string>
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++#include <stdexcept>
++#endif
+ #include "core/BufferAllocator.hpp"
+ #include "core/Macro.h"
+ #include "MNNFileUtils.h"
+@@ -119,6 +122,12 @@
+                 if (NO_ERROR != code) {
+                     MNN_ERROR("Grow mmap cache file size %lu error= %d\n", size, code);
+                     MNNCloseFile(file);
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++                    if (mRemove) {
++                        MNNRemoveFile(fileName.c_str());
++                        throw std::runtime_error("MNN private mmap backing resize failed");
++                    }
++#endif
+                     return MemChunk(nullptr, 0);
+                 }
+             }
+@@ -128,14 +137,38 @@
+             if (NO_ERROR != code) {
+                 MNN_ERROR("Set File size %lu error= %d\n", size, code);
+                 MNNCloseFile(file);
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++                if (mRemove) {
++                    MNNRemoveFile(fileName.c_str());
++                    throw std::runtime_error("MNN private mmap backing creation failed");
++                }
++#endif
+                 return MemChunk(nullptr, 0);
+             }
+             mNewMmap = true;
+         }
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++        // Reserve real backing before any mapped write: ftruncate alone leaves
++        // holes whose later ENOSPC would terminate the child with SIGBUS.
++        const int reserveError = mRemove ? posix_fallocate(file, 0, static_cast<off_t>(size)) : 0;
++        if (reserveError != 0) {
++            MNN_ERROR("SDAI MNN mmap reservation failed; bytes=%zu; error=%d\n", size, reserveError);
++            MNNCloseFile(file);
++            MNNRemoveFile(fileName.c_str());
++            throw std::runtime_error("MNN private mmap disk reservation failed (error " + std::to_string(reserveError) + ")");
++        }
++        if (mRemove) MNN_PRINT("SDAI MNN mmap reserved; kind=%s; bytes=%zu\n", mPosfix.c_str(), size);
++#endif
+         void* ptr = MNNMmapFile(file, size);
+         if (ptr == nullptr) {
+             MNN_ERROR("MNNMmapFile failed for %s, size=%lu\n", fileName.c_str(), size);
+             MNNCloseFile(file);
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++            if (mRemove) {
++                MNNRemoveFile(fileName.c_str());
++                throw std::runtime_error("MNN private mmap mapping failed");
++            }
++#endif
+             return MemChunk(nullptr, 0);
+         }
+         mCache.insert(std::make_pair(ptr, std::make_tuple(file, size, fileName)));
+@@ -156,7 +189,11 @@
+             MNNRemoveFile(std::get<2>(iter->second).c_str());
+         }
+         mCache.erase(iter);
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++        if (!mRemove) mAllocTimes = 0;
++#else
+         mAllocTimes = 0;
++#endif
+     }
+     virtual void sync() override {
+         if (mSynced) {
+@@ -467,6 +504,10 @@
+         if (nullptr != current.first) {
+             root->onRelease(current);
+         }
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++        current = MemChunk(nullptr, 0);
++        currentSize = 0;
++#endif
+         current = root->onAlloc(size, align);
+         if (current.first == nullptr) {
+             return OUT_OF_MEMORY;
+--- a/source/backend/cpu/CPUBackend.cpp
++++ b/source/backend/cpu/CPUBackend.cpp
+@@ -392,6 +392,11 @@
+         for (auto& buf : mDynamic) {
+             buf.release();
+         }
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++        for (auto& buf : mDynamicMmap) {
++            buf.release();
++        }
++#endif
+     }
+ }
+ 
+@@ -626,7 +631,11 @@
+     switch (storageType) {
+         case STATIC: {
+             chunk = mRuntime->mStaticAllocator->alloc(size, false);
+-            if (chunk.invalid() && nullptr != mRuntime->mStaticAllocatorRaw.get()) {
++            if (chunk.invalid() && nullptr != mRuntime->mStaticAllocatorRaw.get()
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++                && mRuntime->hint().weightMemoryPath.empty()
++#endif
++            ) {
+                 chunk = mRuntime->mStaticAllocatorRaw->alloc(size, false);
+                 staticAllocator = mRuntime->mStaticAllocatorRaw.get();
+             }
+@@ -823,7 +832,13 @@
+ }
+ 
+ bool CPUBackend::onClearBuffer() {
+-    if (nullptr != mRuntime->mStaticAllocatorRaw.get()) {
++    if (nullptr != mRuntime->mStaticAllocatorRaw.get()
++#if defined(SDAI_MNN_PRIVATE_MMAP)
++        // Geometry calls this before packing weights. Keep this attempt's
++        // auto-removed mmap pool active through resize and subsequent stages.
++        && (mRuntime->hint().weightMemoryPath.empty() || mRuntime->hint().useCachedMmap != 0)
++#endif
++    ) {
+         mRuntime->mStaticAllocator->sync();
+         mRuntime->mStaticAllocator = mRuntime->mStaticAllocatorRaw;
+         mRuntime->mStaticAllocatorRaw = nullptr;

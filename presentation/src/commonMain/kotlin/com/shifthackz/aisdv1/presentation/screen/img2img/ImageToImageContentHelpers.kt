@@ -15,6 +15,7 @@ import kotlin.math.roundToInt
  * Maps shared generation form events into img2img intents.
  *
  * @return The corresponding screen action, or null for controls unsupported by img2img.
+ *
  * @author Dmitriy Moroz
  */
 internal fun GenerationInputFormEvent.toImageToImageIntent(): ImageToImageIntent? = when (this) {
@@ -25,10 +26,15 @@ internal fun GenerationInputFormEvent.toImageToImageIntent(): ImageToImageIntent
         tag = tag,
         isNegative = isNegative,
     )
+
     is GenerationInputFormEvent.UpdateAdvancedOptionsVisibility ->
         ImageToImageIntent.UpdateAdvancedOptionsVisibility(visible)
+
     is GenerationInputFormEvent.UpdatePrompt -> ImageToImageIntent.UpdatePrompt(value)
-    is GenerationInputFormEvent.UpdateNegativePrompt -> ImageToImageIntent.UpdateNegativePrompt(value)
+    is GenerationInputFormEvent.UpdateNegativePrompt -> ImageToImageIntent.UpdateNegativePrompt(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateWidth -> ImageToImageIntent.UpdateWidth(value)
     GenerationInputFormEvent.SwapDimensions -> ImageToImageIntent.SwapDimensions
     is GenerationInputFormEvent.ApplyAspectRatio -> ImageToImageIntent.ApplyAspectRatio(ratio)
@@ -38,7 +44,10 @@ internal fun GenerationInputFormEvent.toImageToImageIntent(): ImageToImageIntent
     is GenerationInputFormEvent.UpdateRestoreFaces -> ImageToImageIntent.UpdateRestoreFaces(value)
     is GenerationInputFormEvent.UpdateSeed -> ImageToImageIntent.UpdateSeed(value)
     is GenerationInputFormEvent.UpdateSubSeed -> ImageToImageIntent.UpdateSubSeed(value)
-    is GenerationInputFormEvent.UpdateSubSeedStrength -> ImageToImageIntent.UpdateSubSeedStrength(value)
+    is GenerationInputFormEvent.UpdateSubSeedStrength -> ImageToImageIntent.UpdateSubSeedStrength(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateSampler -> ImageToImageIntent.UpdateSampler(value)
     is GenerationInputFormEvent.UpdateScheduler -> ImageToImageIntent.UpdateScheduler(value)
     is GenerationInputFormEvent.UpdateForgeModules -> null
@@ -48,18 +57,32 @@ internal fun GenerationInputFormEvent.toImageToImageIntent(): ImageToImageIntent
     is GenerationInputFormEvent.UpdateOpenAiSize -> ImageToImageIntent.UpdateOpenAiSize(value)
     is GenerationInputFormEvent.UpdateOpenAiQuality -> ImageToImageIntent.UpdateOpenAiQuality(value)
     is GenerationInputFormEvent.UpdateFalAiModel -> ImageToImageIntent.UpdateFalAiModel(value)
-    is GenerationInputFormEvent.UpdateFalAiImageSize -> ImageToImageIntent.UpdateFalAiImageSize(value)
-    is GenerationInputFormEvent.UpdateFalAiAcceleration -> ImageToImageIntent.UpdateFalAiAcceleration(value)
+    is GenerationInputFormEvent.UpdateFalAiImageSize -> ImageToImageIntent.UpdateFalAiImageSize(
+        value
+    )
+
+    is GenerationInputFormEvent.UpdateFalAiAcceleration -> ImageToImageIntent.UpdateFalAiAcceleration(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateSdxlBackend -> null
+    is GenerationInputFormEvent.UpdateMnnBackend -> null
     is GenerationInputFormEvent.UpdateBonsaiBackend -> null
     is GenerationInputFormEvent.UpdateFalAiSyncMode -> ImageToImageIntent.UpdateFalAiSyncMode(value)
     is GenerationInputFormEvent.UpdateOpenAiCompatibleModel -> null
     is GenerationInputFormEvent.UpdateArliAiModel -> ImageToImageIntent.UpdateArliAiModel(value)
-    is GenerationInputFormEvent.UpdateStabilityAiStyle -> ImageToImageIntent.UpdateStabilityAiStyle(value)
+    is GenerationInputFormEvent.UpdateStabilityAiStyle -> ImageToImageIntent.UpdateStabilityAiStyle(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateStabilityAiClipGuidance ->
         ImageToImageIntent.UpdateStabilityAiClipGuidance(value)
+
     is GenerationInputFormEvent.UpdateHiresConfig -> null
-    is GenerationInputFormEvent.UpdateADetailerConfig -> ImageToImageIntent.UpdateADetailerConfig(value)
+    is GenerationInputFormEvent.UpdateADetailerConfig -> ImageToImageIntent.UpdateADetailerConfig(
+        value
+    )
+
     GenerationInputFormEvent.RefreshADetailerAvailability -> ImageToImageIntent.RefreshADetailerAvailability
     GenerationInputFormEvent.OpenADetailerInstallInstructions -> ImageToImageIntent.OpenADetailerInstallInstructions
 }

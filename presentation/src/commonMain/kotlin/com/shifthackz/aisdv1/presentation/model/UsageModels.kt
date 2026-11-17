@@ -1,7 +1,6 @@
 package com.shifthackz.aisdv1.presentation.model
 
 import androidx.compose.runtime.Immutable
-import com.shifthackz.aisdv1.domain.entity.ServerSource
 
 /**
  * Identifies the concrete standalone usage screen rendered by the shared usage UI.
@@ -39,6 +38,7 @@ enum class UsageCategory {
     MODELS_MEDIAPIPE,
     MODELS_SDXL,
     MODELS_CORE_ML,
+    MODELS_MNN,
     MODELS_BONSAI,
     TRAFFIC_MODELS,
     TRAFFIC_CONFIGS,
@@ -48,12 +48,12 @@ enum class UsageCategory {
 /**
  * Shared immutable state consumed by the donut chart and category list.
  *
- * @property loading True while the screen should show shimmer placeholders instead of stale data.
- * @property items Ordered categories visible on the current usage screen.
- * @property selectedCategory Category currently highlighted in the donut, or null to show total.
  * @param loading True while the screen should show shimmer placeholders instead of stale data.
  * @param items Ordered categories visible on the current usage screen.
  * @param selectedCategory Category currently highlighted in the donut, or null to show total.
+ * @property loading True while the screen should show shimmer placeholders instead of stale data.
+ * @property items Ordered categories visible on the current usage screen.
+ * @property selectedCategory Category currently highlighted in the donut, or null to show total.
  *
  * @author Dmitriy Moroz
  */
@@ -108,8 +108,8 @@ data class UsageItem(
 /**
  * Keeps selection only while the category is still present and non-empty.
  *
- * @receiver Ordered usage rows currently rendered by a storage or network screen.
  * @param preferred Previously selected category, or null when the donut should show total.
+ * @receiver Ordered usage rows currently rendered by a storage or network screen.
  *
  * @author Dmitriy Moroz
  */
@@ -132,13 +132,14 @@ fun UsageCategory.isStorageCategory(): Boolean = when (this) {
     UsageCategory.MODELS_MEDIAPIPE,
     UsageCategory.MODELS_SDXL,
     UsageCategory.MODELS_CORE_ML,
+    UsageCategory.MODELS_MNN,
     UsageCategory.MODELS_BONSAI,
-    -> true
+        -> true
 
     UsageCategory.TRAFFIC_MODELS,
     UsageCategory.TRAFFIC_CONFIGS,
     UsageCategory.TRAFFIC_INFERENCE,
-    -> false
+        -> false
 }
 
 /**
@@ -151,35 +152,14 @@ fun UsageCategory.isModelCategory(): Boolean = when (this) {
     UsageCategory.MODELS_MEDIAPIPE,
     UsageCategory.MODELS_SDXL,
     UsageCategory.MODELS_CORE_ML,
+    UsageCategory.MODELS_MNN,
     UsageCategory.MODELS_BONSAI,
-    -> true
+        -> true
 
     UsageCategory.CACHE,
     UsageCategory.GALLERY,
     UsageCategory.TRAFFIC_MODELS,
     UsageCategory.TRAFFIC_CONFIGS,
     UsageCategory.TRAFFIC_INFERENCE,
-    -> false
+        -> false
 }
-
-/**
- * Returns true when all visible app-private model bytes belong to the Core ML provider.
- *
- * @receiver Providers available on the current platform after platform capability filtering.
- * @return True when Core ML is available and every other local model runtime is unavailable.
- * @author Dmitriy Moroz
- */
-fun List<ServerSource>.shouldUseCoreMlModelStoreFallback(): Boolean =
-    ServerSource.LOCAL_APPLE_CORE_ML in this &&
-        ServerSource.LOCAL_MICROSOFT_ONNX !in this &&
-        ServerSource.LOCAL_GOOGLE_MEDIA_PIPE !in this &&
-        ServerSource.LOCAL_STABLE_DIFFUSION_CPP !in this &&
-        ServerSource.LOCAL_APPLE_BONSAI !in this
-
-/**
- * Estimates persisted text payload size for gallery records stored as strings.
- *
- * @author Dmitriy Moroz
- */
-fun String.storageTextByteSize(): Long =
-    encodeToByteArray().size.toLong().coerceAtLeast(0L)

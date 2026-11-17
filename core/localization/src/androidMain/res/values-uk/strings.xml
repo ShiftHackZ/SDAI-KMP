@@ -685,4 +685,15 @@
     <string name="easy_diffusion_failure">Easy Diffusion не вдалося виконати запит. Перевірте сервер, з’єднання й вибрану модель, потім повторіть спробу.</string>
     <string name="easy_diffusion_timeout">Час очікування Easy Diffusion минув. Перевірте сервер і тайм-аут, потім повторіть спробу. Якщо надсилання не підтверджене, результат на сервері невідомий.</string>
     <string name="easy_diffusion_submission_unknown">Сервер Easy Diffusion не підтвердив надсилання. Результат виконання невідомий. Перевірте сервер перед повторною спробою.</string>
+
+    <!-- MNN SD 1.5 -->
+    <string name="srv_type_mnn">MNN SD 1.5</string>
+    <string name="hint_mnn_profile">Одне зображення 512×512, PNDM, CFG 7.5, 1–50 кроків. CPU або OpenCL.</string>
+    <string name="hint_mnn_backend">Рушій MNN</string>
+    <string name="settings_usage_summary_models_mnn">Моделі MNN</string>
+    <string name="local_catalog_loading">Завантаження каталогу моделей</string>
+    <string name="local_catalog_error_title">Не вдалося завантажити моделі</string>
+    <string name="local_catalog_error_body">Перевірте з’єднання та спробуйте знову. Локальні моделі залишаються доступними.</string>
+    <string name="local_catalog_empty_title">Немає доступних моделей</string>
+    <string name="local_catalog_empty_body">Спробуйте оновити каталог пізніше.</string>
 </resources>

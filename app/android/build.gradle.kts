@@ -191,6 +191,7 @@ dependencies {
     implementation(project(":feature:onnx"))
     implementation(project(":feature:mediapipe"))
     implementation(project(":feature:sdxl"))
+    implementation(project(":feature:mnn"))
     implementation(project(":feature:work"))
     implementation(project(":data"))
     implementation(project(":demo"))

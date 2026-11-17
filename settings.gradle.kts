@@ -41,6 +41,7 @@ val modules = listOf(
     ":feature:coreml",
     ":feature:onnx",
     ":feature:mediapipe",
+    ":feature:mnn",
     ":feature:sdxl",
     ":feature:work",
     ":network",

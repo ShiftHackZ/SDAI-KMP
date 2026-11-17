@@ -9,6 +9,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
+import io.mockk.mockk
 
 class AndroidDownloadableModelFileStoreTest {
 
@@ -17,6 +18,7 @@ class AndroidDownloadableModelFileStoreTest {
 
     private val fileStore by lazy {
         AndroidDownloadableModelFileStore(
+            mnnModels = mockk(relaxed = true),
             fileProviderDescriptor = TestFileProviderDescriptor(
                 localModelDirPath = temporaryFolder.root.path,
             ),

@@ -33,6 +33,7 @@ import org.junit.Test
 
 /**
  * Verifies provider dispatch using application payloads, including captured Easy Diffusion batches.
+ *
  * @author Dmitriy Moroz
  */
 class TextToImageUseCaseImplTest {
@@ -75,6 +76,7 @@ class TextToImageUseCaseImplTest {
         stableDiffusionCppGenerationRepository = stubStableDiffusionCppGenerationRepository,
         coreMlGenerationRepository = stubCoreMlGenerationRepository,
         bonsaiGenerationRepository = stubBonsaiGenerationRepository,
+        mnnGenerationRepository = mockk(),
         preferenceManager = stubPreferenceManager,
     )
 

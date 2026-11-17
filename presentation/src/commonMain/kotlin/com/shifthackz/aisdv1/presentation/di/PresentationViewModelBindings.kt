@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.di
 
 import com.shifthackz.aisdv1.core.validation.di.easyDiffusionSeedValidatorQualifier
 
+import com.shifthackz.aisdv1.core.validation.di.mnnSeedValidatorQualifier
 import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
 import com.shifthackz.aisdv1.presentation.modal.download.DownloadDialogViewModel
 import com.shifthackz.aisdv1.presentation.modal.embedding.EmbeddingViewModel
@@ -159,6 +160,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             getLocalSdxlModelsUseCase = get(),
             getLocalCoreMlModelsUseCase = get(),
             getLocalBonsaiModelsUseCase = get(),
+            getLocalMnnModelsUseCase = get(),
             observeNetworkUsageUseCase = get(),
             storageUsageObserver = get(),
             preferenceManager = get(),
@@ -179,6 +181,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             getLocalMediaPipeModelsUseCase = get(),
             getLocalSdxlModelsUseCase = get(),
             getLocalCoreMlModelsUseCase = get(),
+            getLocalMnnModelsUseCase = get(),
             getLocalBonsaiModelsUseCase = get(),
             deleteModelUseCase = get(),
             storageUsageObserver = get(),
@@ -288,6 +291,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             dimensionValidator = get(),
             seedValidator = get(),
             nativeSeedValidator = get(nativeSeedValidatorQualifier),
+            mnnSeedValidator = get(mnnSeedValidatorQualifier),
             easyDiffusionSeedValidator = get(easyDiffusionSeedValidatorQualifier),
             localGenerationBenchmarkGateProvider = { get() },
             imageSaver = get(),
@@ -382,13 +386,10 @@ internal fun Module.registerPresentationViewModelBindings() {
             dispatchersProvider = get(),
             buildInfoProvider = get(),
             getConfigurationUseCase = get(),
+            getCachedLocalModelCatalogUseCase = get(),
+            refreshLocalModelCatalogUseCase = get(),
             retryAuthorizationStorageUseCase = get(),
             resetAuthorizationCredentialsUseCase = get(),
-            getLocalOnnxModelsUseCase = get(),
-            getLocalMediaPipeModelsUseCase = get(),
-            getLocalSdxlModelsUseCase = get(),
-            getLocalCoreMlModelsUseCase = get(),
-            getLocalBonsaiModelsUseCase = get(),
             fetchHuggingFaceModelsUseCase = get(),
             urlValidator = get(),
             stringValidator = get(),
@@ -402,6 +403,7 @@ internal fun Module.registerPresentationViewModelBindings() {
             connectToSdxlUseCase = get(),
             connectToCoreMlUseCase = get(),
             connectToBonsaiUseCase = get(),
+            connectToMnnUseCase = get(),
             connectToOpenAiUseCase = get(),
             connectToOpenAiCompatibleUseCase = get(),
             connectToEasyDiffusionUseCase = get(),
@@ -432,6 +434,8 @@ internal fun Module.registerPresentationViewModelBindings() {
             observeLocalOnnxModelsUseCase = get(),
             observeLocalCoreMlModelsUseCase = get(),
             observeLocalBonsaiModelsUseCase = get(),
+            observeLocalMnnModelsUseCase = get(),
+            selectMnnModelUseCase = get(),
             observeLocalSdxlModelsUseCase = get(),
             fetchAndGetStabilityAiEnginesUseCase = get(),
             getHuggingFaceModelsUseCase = get(),

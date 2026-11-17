@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.presentation.screen.txt2img
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.OpenAiSize
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.presentation.model.GenerationModal
 import com.shifthackz.aisdv1.presentation.model.PromptTagEditRequest
 import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
 import com.shifthackz.aisdv1.presentation.widget.input.GenerationAspectRatio
@@ -16,6 +17,19 @@ import kotlin.math.roundToInt
  * Navigation, form mutations, and result actions are handled here so the
  * view-model can keep asynchronous generation and configuration loading logic
  * separate from simple state transitions.
+ *
+ * @param router Navigates to provider configuration, gallery details and other generation destinations.
+ * @param updateState Atomically applies synchronous form and result-state changes.
+ * @param generate Submits the current validated generation request through the owning view model.
+ * @param cancelGeneration Requests cancellation of the active generation operation.
+ * @param saveImage Exports an image identified by its encoded image payload.
+ * @param shareImage Shares an image identified by its encoded image payload.
+ * @param saveGenerationResults Persists generated result records through the owning view model.
+ * @param viewGenerationResult Opens the selected generated image in the gallery viewer.
+ * @param reportGenerationResult Starts reporting the selected generated image.
+ * @param applyGenerationResult Restores generation controls from a previously generated result.
+ *
+ * @author Dmitriy Moroz
  */
 internal class TextToImageIntentProcessor(
     private val router: TextToImageRouter,
@@ -40,7 +54,7 @@ internal class TextToImageIntentProcessor(
             TextToImageIntent.SkipBenchmarkPrompt -> Unit
             TextToImageIntent.ContinueAfterBenchmarkWarning -> Unit
             TextToImageIntent.SuppressBenchmarkWarningAndContinue -> Unit
-            TextToImageIntent.DismissModal -> updateState { it.copy(screenModal = com.shifthackz.aisdv1.presentation.model.GenerationModal.None) }
+            TextToImageIntent.DismissModal -> updateState { it.copy(screenModal = GenerationModal.None) }
             TextToImageIntent.CancelGeneration -> cancelGeneration()
             TextToImageIntent.DismissError -> updateState { it.copy(error = null) }
             TextToImageIntent.DismissMessage -> updateState { it.copy(message = null) }
@@ -136,7 +150,9 @@ internal class TextToImageIntentProcessor(
                 val maxSteps = when (it.mode) {
                     ServerSource.FAL_AI -> it.falAiModel.maxInferenceSteps
                     ServerSource.ARLI_AI -> MAX_ARLI_AI_STEPS
+                    ServerSource.LOCAL_MNN,
                     ServerSource.LOCAL_APPLE_BONSAI -> GenerationInputFormConstants.SAMPLING_STEPS_LOCAL_DIFFUSION_MAX
+
                     else -> MAX_STEPS
                 }
                 it.copy(samplingSteps = intent.value.coerceIn(minSteps, maxSteps), message = null)
@@ -257,6 +273,13 @@ internal class TextToImageIntentProcessor(
 
             is TextToImageIntent.UpdateSdxlBackend -> updateState {
                 it.copy(sdxlBackend = intent.value, message = null)
+            }
+
+            is TextToImageIntent.UpdateMnnBackend -> updateState {
+                it.copy(
+                    mnnBackend = intent.value,
+                    message = null
+                )
             }
 
             is TextToImageIntent.UpdateBonsaiBackend -> updateState {

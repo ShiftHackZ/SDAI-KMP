@@ -6,6 +6,8 @@ import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.feature.diffusion.NativeInferenceEngine
 import com.shifthackz.aisdv1.feature.bonsai.di.bonsaiInferenceModule
+import com.shifthackz.aisdv1.feature.mnn.di.mnnModule
+import org.koin.dsl.module
 import com.shifthackz.aisdv1.feature.mediapipe.di.mediaPipeInferenceModule
 import com.shifthackz.aisdv1.feature.onnx.di.onnxInferenceModule
 import com.shifthackz.aisdv1.feature.sdxl.di.sdxlInferenceModule
@@ -15,6 +17,7 @@ import org.koin.dsl.koinApplication
  * The only place that resolves per-job feature dependencies; never installed in the host graph.
  *
  * @param context Child application context.
+ *
  * @author Dmitriy Moroz
  */
 internal class NativeInferenceEngineFactoryImpl(private val context: Context) :
@@ -24,12 +27,15 @@ internal class NativeInferenceEngineFactoryImpl(private val context: Context) :
      * The caller owns the returned engine and must close it after native execution returns.
      *
      * @param request Immutable job inputs.
+     *
      * @author Dmitriy Moroz
      */
     override fun create(request: NativeGenerationRequest): NativeInferenceEngine {
         val graph = koinApplication {
             modules(
+                module { single<Context> { context } },
                 when (request.engine) {
+                    NativeGenerationEngine.MNN -> mnnModule
                     NativeGenerationEngine.ONNX -> onnxInferenceModule(
                         request,
                         isDiagnosticsEnabled = BuildConfig.BUILD_TYPE == "dev",

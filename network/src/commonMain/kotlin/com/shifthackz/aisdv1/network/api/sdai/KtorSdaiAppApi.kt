@@ -27,31 +27,17 @@ import io.ktor.http.takeFrom
  * @author Dmitriy Moroz
  */
 class KtorSdaiAppApi(
-    /**
-     * Exposes the `httpClient` value used by the SDAI network layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val httpClient: HttpClient,
-    /**
-     * Exposes the `appBaseUrl` value used by the SDAI network layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val appBaseUrl: String,
-    /**
-     * Exposes the `reportBaseUrl` value used by the SDAI network layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val reportBaseUrl: String,
 ) : SdaiAppApi {
 
     /**
-     * Creates a new SDAI component instance.
+     * Creates a typed metadata client with the standard application HTTP policies.
      *
-     * @param appBaseUrl app base url value consumed by the API.
-     * @param reportBaseUrl report base url value consumed by the API.
+     * @param appBaseUrl Root URL of application metadata and model catalog endpoints.
+     * @param reportBaseUrl Root URL used to submit user problem reports.
+     *
      * @author Dmitriy Moroz
      */
     constructor(
@@ -64,9 +50,8 @@ class KtorSdaiAppApi(
     )
 
     /**
-     * Loads SDAI data through `fetchSupporters`.
+     * Fetches the current supporter list from the metadata service; HTTP and decoding failures propagate.
      *
-     * @return Result produced by `fetchSupporters`.
      * @author Dmitriy Moroz
      */
     override suspend fun fetchSupporters(): List<SupporterRaw> = httpClient
@@ -77,9 +62,19 @@ class KtorSdaiAppApi(
         .body()
 
     /**
-     * Loads SDAI data through `fetchOnnxModels`.
+     * Fetches the typed MNN catalog without interpreting an HTTP failure as an empty catalog.
      *
-     * @return Result produced by `fetchOnnxModels`.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun fetchMnnModels(): List<DownloadableModelResponse> = httpClient.boundedGet {
+        url.takeFrom(appBaseUrl)
+        url.appendPathSegments("mnn.json")
+        trackUsage(NetworkUsageCategory.CONFIGS)
+    }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
+
+    /**
+     * Fetches ONNX catalog metadata and accounts response bytes as configuration traffic.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun fetchOnnxModels(): List<DownloadableModelResponse> = httpClient
@@ -91,9 +86,8 @@ class KtorSdaiAppApi(
         .trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
     /**
-     * Loads SDAI data through `fetchMediaPipeModels`.
+     * Fetches MediaPipe download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchMediaPipeModels`.
      * @author Dmitriy Moroz
      */
     override suspend fun fetchMediaPipeModels(): List<DownloadableModelResponse> = httpClient
@@ -105,9 +99,8 @@ class KtorSdaiAppApi(
         .trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
     /**
-     * Loads SDAI data through `fetchSdxlModels`.
+     * Fetches stable-diffusion.cpp download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchSdxlModels`.
      * @author Dmitriy Moroz
      */
     override suspend fun fetchSdxlModels(): List<DownloadableModelResponse> = httpClient
@@ -119,9 +112,8 @@ class KtorSdaiAppApi(
         .trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
     /**
-     * Loads SDAI data through `fetchCoreMlModels`.
+     * Fetches Core ML download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchCoreMlModels`.
      * @author Dmitriy Moroz
      */
     override suspend fun fetchCoreMlModels(): List<DownloadableModelResponse> = httpClient
@@ -133,9 +125,8 @@ class KtorSdaiAppApi(
         .trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
     /**
-     * Loads SDAI data through `fetchBonsaiModels`.
+     * Fetches Bonsai download metadata and accounts its response bytes as configuration traffic.
      *
-     * @return Result produced by `fetchBonsaiModels`.
      * @author Dmitriy Moroz
      */
     override suspend fun fetchBonsaiModels(): List<DownloadableModelResponse> = httpClient
@@ -147,9 +138,10 @@ class KtorSdaiAppApi(
         .trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
     /**
-     * Executes the `postReport` step in the SDAI network layer.
+     * Submits the typed user problem report; unsuccessful HTTP responses remain failures.
      *
-     * @param request request value consumed by the API.
+     * @param request Typed user-submitted problem report body sent to the report service.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun postReport(request: ReportRequest) {
@@ -162,58 +154,17 @@ class KtorSdaiAppApi(
     }
 
     /**
-     * Provides the `companion object` singleton used by the SDAI network layer.
+     * Stable metadata endpoint filenames shared by these typed HTTP operations.
      *
      * @author Dmitriy Moroz
      */
     private companion object {
-        /**
-         * Exposes the `PATH_SUPPORTERS` value used by the SDAI network layer.
-         *
-         * @author Dmitriy Moroz
-         */
         const val PATH_SUPPORTERS = "supporters.json"
-
-        /**
-         * Exposes the `PATH_MODELS` value used by the SDAI network layer.
-         *
-         * @author Dmitriy Moroz
-         */
         const val PATH_MODELS = "models.json"
-
-        /**
-         * Exposes the `PATH_MEDIA_PIPE` value used by the SDAI network layer.
-         *
-         * @author Dmitriy Moroz
-         */
         const val PATH_MEDIA_PIPE = "mediapipe.json"
-
-        /**
-         * Exposes the `PATH_SDXL` value used by the SDAI network layer.
-         *
-         * @author Dmitriy Moroz
-         */
         const val PATH_SDXL = "sdxl.json"
-
-        /**
-         * Exposes the `PATH_CORE_ML` value used by the SDAI network layer.
-         *
-         * @author Dmitriy Moroz
-         */
         const val PATH_CORE_ML = "coreml.json"
-
-        /**
-         * Exposes the `PATH_BONSAI` value used by the SDAI network layer.
-         *
-         * @author Dmitriy Moroz
-         */
         const val PATH_BONSAI = "bonsai.json"
-
-        /**
-         * Exposes the `PATH_REPORT` value used by the SDAI network layer.
-         *
-         * @author Dmitriy Moroz
-         */
         const val PATH_REPORT = "report"
     }
 }

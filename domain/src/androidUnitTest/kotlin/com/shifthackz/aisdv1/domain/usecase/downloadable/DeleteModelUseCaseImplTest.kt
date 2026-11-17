@@ -11,7 +11,7 @@ class DeleteModelUseCaseImplTest {
 
     private val stubRepository = mockk<DownloadableModelRepository>()
 
-    private val useCase = DeleteModelUseCaseImpl(stubRepository)
+    private val useCase = DeleteModelUseCaseImpl(stubRepository, mockk(relaxed = true))
 
     @Test
     fun `given model deleted successfully, expected completion`() = runTest {

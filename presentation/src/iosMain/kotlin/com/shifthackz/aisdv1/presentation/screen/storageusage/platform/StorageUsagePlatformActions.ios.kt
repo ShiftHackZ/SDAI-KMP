@@ -34,12 +34,6 @@ private class IosStorageUsagePlatformActions(
         fileSystem.clearAppCache()
     }
 
-    override suspend fun getAllDownloadedModelsBytes(): Long =
-        fileSystem.getAllDownloadedModelsBytes()
-
-    override suspend fun clearAllDownloadedModels() {
-        fileSystem.clearAllDownloadedModels()
-    }
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long =
         fileSystem.getDownloadedModelsBytes(modelIds)

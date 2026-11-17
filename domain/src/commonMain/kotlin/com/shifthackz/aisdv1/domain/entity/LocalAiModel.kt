@@ -1,55 +1,36 @@
 package com.shifthackz.aisdv1.domain.entity
 
 /**
- * Carries `LocalAiModel` data through the SDAI domain layer.
+ * Catalog model metadata with current platform download and selection state.
+ *
+ * @param id Stable catalog identity or a supported synthetic custom-model identity.
+ * @param type Runtime family used to parse persisted metadata and validate model layout.
+ * @param name Display name shown in setup and gallery metadata.
+ * @param size Human-readable download size; custom entries use NaN because their source is external.
+ * @param sources Complete archive download URLs; custom entries have no remote sources.
+ * @param downloaded Whether the provider's local payload is complete, or a custom selection is available.
+ * @param selected Whether this identity is the independently saved model for its runtime family.
  *
  * @author Dmitriy Moroz
  */
 data class LocalAiModel(
-    /**
-     * Exposes the `id` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val id: String,
-    /**
-     * Exposes the `type` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val type: Type,
-    /**
-     * Exposes the `name` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val name: String,
-    /**
-     * Exposes the `size` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val size: String,
-    /**
-     * Exposes the `sources` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val sources: List<String>,
-    /**
-     * Exposes the `downloaded` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val downloaded: Boolean = false,
-    /**
-     * Exposes the `selected` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val selected: Boolean = false,
 ) {
+    /**
+     * Runtime family persisted as a stable string rather than an ordinal.
+     *
+     * @param key Persistent model type identifier.
+     *
+     * @author Dmitriy Moroz
+     */
     enum class Type(val key: String) {
+        Mnn("mnn"),
         ONNX("onnx"),
         MediaPipe("mediapipe"),
         Sdxl("sdxl"),
@@ -57,11 +38,25 @@ data class LocalAiModel(
         Bonsai("bonsai");
 
         companion object {
+            /**
+             * Resolves stored model families, preserving the historical ONNX fallback for unknown legacy values.
+             *
+             * @param value Stored model type key.
+             *
+             * @author Dmitriy Moroz
+             */
             fun parse(value: String?) = entries.find { it.key == value } ?: ONNX
         }
     }
 
     companion object {
+        /**
+         * Standard custom-folder selection; MNN setup validates and snapshots its complete source bundle.
+         *
+         * @author Dmitriy Moroz
+         */
+        val CustomMnn = LocalAiModel("CUSTOM_MNN", Type.Mnn, "Custom", "NaN", emptyList())
+
         val CustomOnnx = LocalAiModel(
             id = "CUSTOM",
             type = Type.ONNX,

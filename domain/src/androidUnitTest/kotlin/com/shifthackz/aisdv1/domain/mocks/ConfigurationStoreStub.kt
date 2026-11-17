@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.mocks
 
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.preference.ConfigurationStore
@@ -15,6 +16,11 @@ class ConfigurationStoreStub(
         authorizationCommitId = commitId
     }
 
+    override var localMnnActivationId = configuration.localMnnActivationId
+    override var localMnnCustomActivationId = configuration.localMnnCustomActivationId
+    override var localMnnModelId = configuration.localMnnModelId
+    override var localMnnModelPath = configuration.localMnnModelPath
+    override var localMnnBackend: MnnBackend = configuration.localMnnBackend
     override var automatic1111ServerUrl: String = configuration.serverUrl
     override var swarmUiServerUrl: String = configuration.swarmUiUrl
     override var easyDiffusionUrl: String = configuration.easyDiffusionUrl

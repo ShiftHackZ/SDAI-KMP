@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.preference
 
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+
 import com.shifthackz.aisdv1.core.common.extensions.fixUrlSlashes
 import com.shifthackz.aisdv1.core.common.file.LOCAL_DIFFUSION_CUSTOM_PATH
 import com.shifthackz.aisdv1.core.common.schedulers.SchedulersToken
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.map
  * Reads shared settings from the platform key/value store and invalidates hot settings snapshots after writes.
  *
  * @param keyValueStore Platform preference store supporting complete durable configuration batches.
+ *
  * @author Dmitriy Moroz
  */
 internal class PreferenceManagerImpl(
@@ -109,7 +112,9 @@ internal class PreferenceManagerImpl(
         get() = keyValueStore.getString(KEY_SWARM_SERVER_URL).fixUrlSlashes()
         set(value) = putString(KEY_SWARM_SERVER_URL, value.fixUrlSlashes())
 
-    /** HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+    /**
+     * HTTP(S) root or reverse-proxy prefix; changing the selected instance advances its revision atomically.
+     *
      * @author Dmitriy Moroz
      */
     override var easyDiffusionUrl: String
@@ -119,7 +124,9 @@ internal class PreferenceManagerImpl(
             onPreferencesChanged()
         }
 
-    /** Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+    /**
+     * Complete checkpoint identifier; changing the selected Easy Diffusion model invalidates captured work.
+     *
      * @author Dmitriy Moroz
      */
     override var easyDiffusionModel: String
@@ -314,6 +321,7 @@ internal class PreferenceManagerImpl(
 
     /**
      * Complete HTTP(S) API prefix, including any version and reverse-proxy path.
+     *
      * @author Dmitriy Moroz
      */
     override var openAiCompatibleUrl: String
@@ -322,6 +330,7 @@ internal class PreferenceManagerImpl(
 
     /**
      * Optional bearer token for the independent compatible server.
+     *
      * @author Dmitriy Moroz
      */
     override var openAiCompatibleApiKey: String
@@ -330,6 +339,7 @@ internal class PreferenceManagerImpl(
 
     /**
      * Editable image model identifier supplied to the compatible server.
+     *
      * @author Dmitriy Moroz
      */
     override var openAiCompatibleModel: String
@@ -470,6 +480,51 @@ internal class PreferenceManagerImpl(
     override var localCoreMlModelId: String
         get() = keyValueStore.getString(KEY_CORE_ML_MODEL_ID)
         set(value) = putString(KEY_CORE_ML_MODEL_ID, value)
+
+    /**
+     * External custom bundle source shown in setup; generation reads its immutable private snapshot.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var localMnnModelPath: String
+        get() = keyValueStore.getString(KEY_MNN_MODEL_PATH)
+        set(value) = putString(KEY_MNN_MODEL_PATH, value)
+
+    /**
+     * Last committed immutable custom manifest identity, retained across catalog selections.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var localMnnCustomActivationId: String
+        get() = keyValueStore.getString(KEY_MNN_CUSTOM_ACTIVATION_ID)
+        set(value) = putString(KEY_MNN_CUSTOM_ACTIVATION_ID, value)
+
+    /**
+     * Manifest SHA256 captured with the selected model and queued generation inputs.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var localMnnActivationId: String
+        get() = keyValueStore.getString(KEY_MNN_ACTIVATION_ID)
+        set(value) = putString(KEY_MNN_ACTIVATION_ID, value)
+
+    /**
+     * Selected catalog or custom UI identity; generation also requires the captured manifest SHA256.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var localMnnModelId: String
+        get() = keyValueStore.getString(KEY_MNN_MODEL_ID)
+        set(value) = putString(KEY_MNN_MODEL_ID, value)
+
+    /**
+     * Captures the requested execution backend independently of other providers.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var localMnnBackend: MnnBackend
+        get() = MnnBackend.parse(keyValueStore.getString(KEY_MNN_BACKEND))
+        set(value) = putString(KEY_MNN_BACKEND, value.key)
 
     /**
      * Selected downloaded Bonsai model identifier.
@@ -632,6 +687,7 @@ internal class PreferenceManagerImpl(
      * Reads a stored CFG value, retaining the default for absent or invalid data.
      *
      * @param key Preference key for the generation form's decimal CFG value.
+     *
      * @author Dmitriy Moroz
      */
     private fun readCfgScale(key: String): Float = keyValueStore.getString(key)
@@ -644,6 +700,7 @@ internal class PreferenceManagerImpl(
      *
      * @param key Stable preference key for the value being persisted.
      * @param value Value to persist under the supplied key.
+     *
      * @author Dmitriy Moroz
      */
     private fun putString(key: String, value: String) {
@@ -656,6 +713,7 @@ internal class PreferenceManagerImpl(
      *
      * @param key Stable preference key for the value being persisted.
      * @param value Value to persist under the supplied key.
+     *
      * @author Dmitriy Moroz
      */
     private fun putBoolean(key: String, value: Boolean) {
@@ -668,6 +726,7 @@ internal class PreferenceManagerImpl(
      *
      * @param key Stable preference key for the value being persisted.
      * @param value Value to persist under the supplied key.
+     *
      * @author Dmitriy Moroz
      */
     private fun putInt(key: String, value: Int) {
@@ -689,6 +748,7 @@ internal class PreferenceManagerImpl(
      *
      * @param index Persisted enum ordinal, which may be obsolete or out of range.
      * @param default Fallback enum entry for an unavailable stored ordinal.
+     *
      * @author Dmitriy Moroz
      */
     private inline fun <reified T : Enum<T>> enumValueOrDefault(index: Int, default: T): T =
@@ -977,6 +1037,11 @@ internal class PreferenceManagerImpl(
          * @author Dmitriy Moroz
          */
         const val KEY_BONSAI_MODEL_ID = "key_bonsai_model_id"
+        const val KEY_MNN_MODEL_PATH = "key_mnn_model_path"
+        const val KEY_MNN_CUSTOM_ACTIVATION_ID = "key_mnn_custom_activation_id"
+        const val KEY_MNN_ACTIVATION_ID = "key_mnn_activation_id"
+        const val KEY_MNN_MODEL_ID = "key_mnn_model_id"
+        const val KEY_MNN_BACKEND = "key_mnn_backend"
 
         /**
          * Stable storage key `key_sdxl_model_id`; preserve its value to retain existing user settings.

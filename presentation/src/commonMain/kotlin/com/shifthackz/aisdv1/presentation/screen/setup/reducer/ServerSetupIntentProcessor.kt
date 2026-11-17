@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.screen.setup.reducer
 
 import com.shifthackz.aisdv1.core.common.links.LinksProvider
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.FeatureTag
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.ServerSourceReadiness
@@ -13,7 +14,9 @@ import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.screen.setup.model.ServerSetupState
 import com.shifthackz.aisdv1.presentation.screen.setup.viewmodel.url
 
-/** Routes setup UI intents into candidate state changes and injected navigation/download/connection actions.
+/**
+ * Routes setup UI intents into candidate state changes and injected navigation/download/connection actions.
+ *
  * @param router Navigates back or completes the provider setup flow.
  * @param linksProvider Resolves supported setup/help/demo URLs.
  * @param currentState Reads current candidate configuration and provider discovery state.
@@ -24,7 +27,9 @@ import com.shifthackz.aisdv1.presentation.screen.setup.viewmodel.url
  * @param download Starts the confirmed model archive download with its stable identifier and chosen URL.
  * @param validateAndConnectToServer Validates active candidate fields before publishing provider configuration.
  * @param connectToServer Connects after an explicit confirmation has already satisfied setup validation.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal class ServerSetupIntentProcessor(
     private val router: ServerSetupRouter,
     private val linksProvider: LinksProvider,
@@ -32,18 +37,23 @@ internal class ServerSetupIntentProcessor(
     private val updateState: (((ServerSetupState) -> ServerSetupState) -> Unit),
     private val emitEffect: (ServerSetupEffect) -> Unit,
     private val localModelDownloadClickReducer: (ServerSetupState.LocalModel) -> Unit,
-    private val deleteLocalModel: (String) -> Unit,
-    private val download: (String, String) -> Unit,
+    private val deleteLocalModel: (String, LocalAiModel.Type) -> Unit,
+    private val download: (String, String, LocalAiModel.Type) -> Unit,
     private val validateAndConnectToServer: () -> Unit,
     private val connectToServer: () -> Unit,
 ) {
 
-    /** Applies a setup intent to its field, discovery-filter, navigation or local-model action.
+    /**
+     * Applies a setup intent to its field, discovery-filter, navigation or local-model action.
+     *
      * @param intent User event emitted by this screen’s production controls.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     fun process(intent: ServerSetupIntent) {
         when (intent) {
+            is ServerSetupIntent.RetryLocalCatalog,
             ServerSetupIntent.RetryAuthorizationStorage,
             ServerSetupIntent.RequestAuthorizationReset,
             ServerSetupIntent.CancelAuthorizationReset,
@@ -68,13 +78,13 @@ internal class ServerSetupIntentProcessor(
 
             is ServerSetupIntent.LocalModel.ClickReduce -> localModelDownloadClickReducer(intent.model)
 
-            is ServerSetupIntent.LocalModel.DeleteConfirm -> updateState {
-                deleteLocalModel(intent.model.id)
-                it.withDeletedLocalModel(intent.model)
-            }
+            is ServerSetupIntent.LocalModel.DeleteConfirm -> deleteLocalModel(
+                intent.model.id,
+                intent.type
+            )
 
             is ServerSetupIntent.LocalModel.DownloadConfirm -> with(intent) {
-                download(modelId, url)
+                download(modelId, url, type)
             }
 
             is ServerSetupIntent.UpdateServerMode -> updateState {
@@ -283,12 +293,16 @@ internal class ServerSetupIntentProcessor(
     }
 }
 
-/** Checks whether candidate discovery filters leave at least one allowed provider visible.
+/**
+ * Checks whether candidate discovery filters leave at least one allowed provider visible.
+ *
  * @param state Current provider setup fields, catalogs and validation feedback.
  * @param type Optional hosting type required by the candidate filter.
  * @param readinessFilters Readiness markers permitted by the candidate filters.
  * @param tags Capability tags required by the candidate filters.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 private fun List<ServerSource>.hasSourceFilterMatch(
     state: ServerSetupState,
@@ -302,8 +316,11 @@ private fun List<ServerSource>.hasSourceFilterMatch(
             source.featureTags.containsAll(tags)
 }
 
-/** Retains a matching selected provider or chooses the first provider satisfying current discovery filters.
- * @author Dmitriy Moroz */
+/**
+ * Retains a matching selected provider or chooses the first provider satisfying current discovery filters.
+ *
+ * @author Dmitriy Moroz
+ */
 
 private fun ServerSetupState.withMatchingFilterSource(): ServerSetupState {
     if (

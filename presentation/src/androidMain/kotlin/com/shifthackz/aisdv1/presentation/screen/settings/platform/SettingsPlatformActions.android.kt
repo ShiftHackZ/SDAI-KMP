@@ -141,8 +141,6 @@ private class AndroidSettingsPlatformActions(
         }
     }
 
-    override suspend fun getAllDownloadedModelsBytes(): Long =
-        File(context.filesDir, LOCAL_MODEL_DIRECTORY).directorySize()
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long {
         val modelDir = File(context.filesDir, LOCAL_MODEL_DIRECTORY)
