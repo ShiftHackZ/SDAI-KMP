@@ -50,8 +50,11 @@ img2img, batch, LoRA, NPU or iOS execution. Backend selection does not guarantee
 that all operators execute on a GPU. Requested unavailable OpenCL fails explicitly.
 
 Catalog downloads use `docs/mnn.json`, the existing typed model response and
-[the documented catalog contract](network/mnn-catalog.openapi.json). No bundles
-are distributed until their exact artifacts have been hosted and verified.
+[the documented catalog contract](network/mnn-catalog.openapi.json). The catalog
+includes the SD 1.5 General bundle with eight-bit weights, hosted on
+[Hugging Face](https://huggingface.co/moroz-ellmsha/sdai-mnn-model-archives).
+Its download URL pins the exact artifact revision; the host also provides the
+integrity manifest, archive SHA256, license and attribution.
 Full/FOSS custom selection reuses the existing folder picker and storage
 permission flow. Setup validates the complete external bundle and creates an
 app-owned immutable snapshot, preserving the external source. Model deletion

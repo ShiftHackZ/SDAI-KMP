@@ -53,7 +53,9 @@ Packaging success establishes artifact integrity. Validate real CPU/OpenCL image
 generation through SDAI before distributing a bundle. Publish the exact reviewed
 ZIP on the chosen artifact host, verify its bytes, then add its immutable working
 URL to `docs/mnn.json` using id `mnn_sd15_general_int8_v1`, name, size and sources.
-The catalog remains empty until an artifact has been hosted and verified.
+The catalog pins the published SD 1.5 General bundle from
+[the MNN archive repository](https://huggingface.co/moroz-ellmsha/sdai-mnn-model-archives),
+which also provides the manifest, archive SHA256, license and attribution.
 
 Model weights/tokenizer retain CreativeML OpenRAIL-M restrictions and attribution.
 MNN runtime code is separately Apache-2.0. Eight-bit weights do not imply INT8
