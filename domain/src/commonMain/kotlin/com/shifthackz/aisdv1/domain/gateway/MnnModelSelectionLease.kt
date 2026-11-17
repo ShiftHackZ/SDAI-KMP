@@ -7,7 +7,7 @@ package com.shifthackz.aisdv1.domain.gateway
  *
  * @author Dmitriy Moroz
  */
-interface MnnModelSelectionLease {
+interface MnnModelSelectionLease : AutoCloseable {
     /**
      * SHA256 of the exact validated manifest whose root remains protected by this lease.
      *
@@ -20,5 +20,5 @@ interface MnnModelSelectionLease {
      *
      * @author Dmitriy Moroz
      */
-    fun close()
+    override fun close()
 }

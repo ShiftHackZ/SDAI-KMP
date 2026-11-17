@@ -185,43 +185,55 @@ class SettingsViewModelTest {
         }
 
     @Test
-    fun `full Settings counts MNN catalog downloads without custom snapshots`() = runTest {
-        val catalog = LocalAiModel.CustomMnn.copy(id = "mnn-catalog", downloaded = true)
-        coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(
-            listOf(catalog, LocalAiModel.CustomMnn.copy(downloaded = true)),
-        )
-        platformActions.modelBytes.putAll(
-            mapOf(catalog.id to 4096L, LocalAiModel.CustomMnn.id to 8192L, "mnn_custom" to 16384L),
-        )
-        val viewModel = createViewModel(object : BuildInfoProvider by TestBuildInfoProvider {
-            override val type = BuildType.FULL
-        })
-        advanceUntilIdle()
+    fun `given Settings storage summary, MNN catalog and custom snapshots exist, expected only catalog bytes`() =
+        runTest {
+            // Given
+            val catalog = LocalAiModel.CustomMnn.copy(id = "mnn-catalog", downloaded = true)
+            coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(
+                listOf(catalog, LocalAiModel.CustomMnn.copy(downloaded = true)),
+            )
+            platformActions.modelBytes.putAll(
+                mapOf(
+                    catalog.id to 4096L,
+                    LocalAiModel.CustomMnn.id to 8192L,
+                    "mnn_custom" to 16384L
+                ),
+            )
+            // When
+            val viewModel = createViewModel(object : BuildInfoProvider by TestBuildInfoProvider {
+                override val type = BuildType.FULL
+            })
+            advanceUntilIdle()
 
-        assertEquals(4096L, viewModel.state.value.storageUsageBytes)
-    }
+            // Then
+            assertEquals(4096L, viewModel.state.value.storageUsageBytes)
+        }
 
     @Test
-    fun `iOS Settings excludes Core ML custom and unknown model directories`() = runTest {
-        val catalog = LocalAiModel.CustomCoreMl.copy(id = "coreml-catalog", downloaded = true)
-        coEvery { getLocalCoreMlModelsUseCase() } returns listOf(
-            catalog, LocalAiModel.CustomCoreMl.copy(downloaded = true),
-        )
-        platformActions.modelBytes.putAll(
-            mapOf(
-                catalog.id to 4096L,
-                LocalAiModel.CustomCoreMl.id to 8192L,
-                "unknown-custom" to 16384L
-            ),
-        )
-        val viewModel = createViewModel(object : BuildInfoProvider by TestBuildInfoProvider {
-            override val type = BuildType.FULL
-            override val platform = Platform.IOS
-        })
-        advanceUntilIdle()
+    fun `given Settings storage summary, Core ML custom and unknown directories exist, expected only catalog bytes`() =
+        runTest {
+            // Given
+            val catalog = LocalAiModel.CustomCoreMl.copy(id = "coreml-catalog", downloaded = true)
+            coEvery { getLocalCoreMlModelsUseCase() } returns listOf(
+                catalog, LocalAiModel.CustomCoreMl.copy(downloaded = true),
+            )
+            platformActions.modelBytes.putAll(
+                mapOf(
+                    catalog.id to 4096L,
+                    LocalAiModel.CustomCoreMl.id to 8192L,
+                    "unknown-custom" to 16384L
+                ),
+            )
+            // When
+            val viewModel = createViewModel(object : BuildInfoProvider by TestBuildInfoProvider {
+                override val type = BuildType.FULL
+                override val platform = Platform.IOS
+            })
+            advanceUntilIdle()
 
-        assertEquals(4096L, viewModel.state.value.storageUsageBytes)
-    }
+            // Then
+            assertEquals(4096L, viewModel.state.value.storageUsageBytes)
+        }
 
     @Test
     fun `given launch url intents, expected platform opens configured urls`() = runTest {

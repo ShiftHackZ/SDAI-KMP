@@ -4,6 +4,20 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384")
 
+# Keep source locations and debug/build-id inputs independent of checkout paths.
+# Apply before adding MNN so its static dependencies receive the same mapping.
+get_filename_component(SDAI_MNN_REAL_SOURCE_DIR "${CMAKE_SOURCE_DIR}" REALPATH)
+get_filename_component(SDAI_MNN_REAL_BINARY_DIR "${CMAKE_BINARY_DIR}" REALPATH)
+get_filename_component(SDAI_MNN_REAL_NDK_DIR "${CMAKE_ANDROID_NDK}" REALPATH)
+add_compile_options(
+    "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
+    "-ffile-prefix-map=${CMAKE_BINARY_DIR}=."
+    "-ffile-prefix-map=${CMAKE_ANDROID_NDK}=/android-ndk"
+    "-ffile-prefix-map=${SDAI_MNN_REAL_SOURCE_DIR}=."
+    "-ffile-prefix-map=${SDAI_MNN_REAL_BINARY_DIR}=."
+    "-ffile-prefix-map=${SDAI_MNN_REAL_NDK_DIR}=/android-ndk"
+)
+
 include(FetchContent)
 FetchContent_Declare(mnn
     URL https://github.com/alibaba/MNN/archive/7e3c6fb5225d3ccf22807ee641332669df34650d.tar.gz

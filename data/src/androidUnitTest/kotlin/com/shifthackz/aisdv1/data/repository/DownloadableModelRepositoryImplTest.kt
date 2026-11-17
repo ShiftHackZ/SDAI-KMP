@@ -17,6 +17,11 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Verifies strict catalog persistence and faithful transport state propagation.
+ *
+ * @author Dmitriy Moroz
+ */
 class DownloadableModelRepositoryImplTest {
 
     private val stubException = Throwable("Something went wrong.")
@@ -45,72 +50,98 @@ class DownloadableModelRepositoryImplTest {
     }
 
     @Test
-    fun `given attempt to delete model, local data source completes, expected complete value`() =
+    fun `given model deletion, local storage completes, expected successful result`() =
         runTest {
+            // Given
             coEvery {
                 stubLocalDataSource.delete(any())
             } returns Unit
 
+            // When
             val actual = runCatching { repository.delete("5598") }
 
+            // Then
             Assert.assertTrue(actual.isSuccess)
         }
 
     @Test
-    fun `given attempt to delete model, local data source throws exception, expected error value`() =
+    fun `given model deletion, local storage fails, expected original error`() =
         runTest {
+            // Given
             coEvery {
                 stubLocalDataSource.delete(any())
             } throws stubException
 
+            // When
             val actual = runCatching { repository.delete("5598") }
 
+            // Then
             Assert.assertSame(stubException, actual.exceptionOrNull())
         }
 
     @Test
-    fun `cached read never fetches remote metadata`() = runTest {
-        coEvery { stubLocalDataSource.getAllOnnx() } returns mockLocalAiModels
-        Assert.assertEquals(mockLocalAiModels, repository.readCachedCatalog(LocalAiModel.Type.ONNX))
-        coVerify(exactly = 0) { stubRemoteDataSource.fetchCatalog(any()) }
+    fun `given cached catalog read, local metadata exists, expected result without remote fetch`() =
+        runTest {
+            // Given
+            coEvery { stubLocalDataSource.getAllOnnx() } returns mockLocalAiModels
+            // When
+            val actual = repository.readCachedCatalog(LocalAiModel.Type.ONNX)
+            // Then
+            Assert.assertEquals(mockLocalAiModels, actual)
+            coVerify(exactly = 0) { stubRemoteDataSource.fetchCatalog(any()) }
+        }
+
+    @Test
+    fun `given catalog fetch, network fails, expected original transfer failure`() = runTest {
+        // Given
+        coEvery { stubRemoteDataSource.fetchCatalog(LocalAiModel.Type.CoreMl) } throws stubException
+        // When
+        val actual =
+            runCatching { repository.fetchCatalog(LocalAiModel.Type.CoreMl) }.exceptionOrNull()
+        // Then
+        Assert.assertSame(stubException, actual)
+        coVerify(exactly = 0) { stubLocalDataSource.save(any()) }
     }
 
     @Test
-    fun `provider fetch preserves transfer and save failures`() = runTest {
-        coEvery { stubRemoteDataSource.fetchCatalog(LocalAiModel.Type.CoreMl) } throws stubException
-        Assert.assertSame(
-            stubException,
-            runCatching { repository.fetchCatalog(LocalAiModel.Type.CoreMl) }.exceptionOrNull()
-        )
+    fun `given catalog fetch, local save fails, expected original storage failure`() = runTest {
+        // Given
         coEvery { stubRemoteDataSource.fetchCatalog(LocalAiModel.Type.CoreMl) } returns mockLocalAiModels
         coEvery { stubLocalDataSource.save(mockLocalAiModels) } throws stubException
-        Assert.assertSame(
-            stubException,
+        // When
+        val actual =
             runCatching { repository.fetchCatalog(LocalAiModel.Type.CoreMl) }.exceptionOrNull()
-        )
+        // Then
+        Assert.assertSame(stubException, actual)
     }
 
     @Test
-    fun `given observe all models, local data source emits empty list, then another list, expected empty value, then valid domain models list value`() =
+    fun `given ONNX catalog observation, empty cache becomes populated, expected both snapshots in order`() =
         runTest {
+            // Given
             every {
                 stubLocalDataSource.observeAllOnnx()
             } returns flowOf(emptyList(), mockLocalAiModels)
 
+            // When
             val actual = repository.observeAllOnnx().toList()
 
+            // Then
             Assert.assertEquals(listOf(emptyList(), mockLocalAiModels), actual)
         }
 
     @Test
-    fun `given observe all models, local data source emits list, then changed list, expected valid domain models list value, then changed value`() =
+    fun `given ONNX catalog observation, cached models change, expected both model snapshots`() =
         runTest {
+            // Given
             every {
                 stubLocalDataSource.observeAllOnnx()
             } returns flowOf(mockLocalAiModels, mockLocalAiModels.map { it.copy(id = "1") })
 
+            // When
             val actual = repository.observeAllOnnx().toList()
 
+            // Then
             Assert.assertEquals(
                 listOf(mockLocalAiModels, listOf(mockLocalAiModel.copy(id = "1"))),
                 actual
@@ -118,32 +149,39 @@ class DownloadableModelRepositoryImplTest {
         }
 
     @Test
-    fun `given observe all models, local data source throws exception, expected error value`() =
+    fun `given ONNX catalog observation, storage flow fails, expected original error`() =
         runTest {
+            // Given
             every {
                 stubLocalDataSource.observeAllOnnx()
             } returns flow { throw stubException }
 
+            // When
             val actual = runCatching { repository.observeAllOnnx().toList() }
 
+            // Then
             Assert.assertSame(stubException, actual.exceptionOrNull())
         }
 
     @Test
-    fun `given observe all sdxl models, local data source emits list, expected valid domain models list value`() =
+    fun `given SDXL catalog observation, storage emits models, expected unchanged model list`() =
         runTest {
+            // Given
             every {
                 stubLocalDataSource.observeAllSdxl()
             } returns flowOf(mockLocalAiModels)
 
+            // When
             val actual = repository.observeAllSdxl().toList()
 
+            // Then
             Assert.assertEquals(listOf(mockLocalAiModels), actual)
         }
 
     @Test
-    fun `given attempt to download model, download succeeds, expected unknown, downloading, complete values`() =
+    fun `given model download, transfer completes, expected ordered progress and completion`() =
         runTest {
+            // Given
             every {
                 stubRemoteDataSource.download(any(), any())
             } returns flowOf(
@@ -153,8 +191,10 @@ class DownloadableModelRepositoryImplTest {
                 DownloadState.Complete(stubFilePath),
             )
 
+            // When
             val actual = repository.download("5598", "https://moroz.cc/stub.zip").toList()
 
+            // Then
             Assert.assertEquals(
                 listOf(
                     DownloadState.Unknown,
@@ -167,8 +207,9 @@ class DownloadableModelRepositoryImplTest {
         }
 
     @Test
-    fun `given attempt to download model, download fails, expected unknown, downloading, error values`() =
+    fun `given model download, transfer reports error, expected ordered progress and original error state`() =
         runTest {
+            // Given
             every {
                 stubRemoteDataSource.download(any(), any())
             } returns flowOf(
@@ -177,8 +218,10 @@ class DownloadableModelRepositoryImplTest {
                 DownloadState.Error(stubException),
             )
 
+            // When
             val actual = repository.download("5598", "https://moroz.cc/stub.zip").toList()
 
+            // Then
             Assert.assertEquals(
                 listOf(
                     DownloadState.Unknown,
@@ -190,16 +233,19 @@ class DownloadableModelRepositoryImplTest {
         }
 
     @Test
-    fun `given attempt to download model, remote data source throws exception, expected error value`() =
+    fun `given model download, remote flow fails, expected original exception`() =
         runTest {
+            // Given
             every {
                 stubRemoteDataSource.download(any(), any())
             } returns flow { throw stubException }
 
+            // When
             val actual = runCatching {
                 repository.download("5598", "https://moroz.cc/stub.zip").toList()
             }
 
+            // Then
             Assert.assertSame(stubException, actual.exceptionOrNull())
         }
 }

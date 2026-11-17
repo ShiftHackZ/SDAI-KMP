@@ -73,6 +73,7 @@ internal class MnnGenerationRepositoryImpl(
 
     /**
      * Validates and leases an immutable root through configuration commit without reading the external custom folder.
+     * Failed validation retains its primary failure or cancellation if ownership cleanup also fails.
      *
      * @param modelId Catalog or custom UI identity.
      * @param activationId Captured custom manifest identity; catalog validation discovers its current identity.
@@ -95,11 +96,19 @@ internal class MnnGenerationRepositoryImpl(
                 if (activationId.isNotEmpty()) check(activationId == manifest.activationId) { "MNN artifact changed" }
                 return MnnModelSelectionLeaseImpl(manifest.activationId, payload, selection)
             } catch (failure: Throwable) {
-                payload.close()
+                try {
+                    payload.close()
+                } catch (cleanup: Throwable) {
+                    failure.addSuppressed(cleanup)
+                }
                 throw failure
             }
         } catch (failure: Throwable) {
-            selection.close()
+            try {
+                selection.close()
+            } catch (cleanup: Throwable) {
+                failure.addSuppressed(cleanup)
+            }
             throw failure
         }
     }

@@ -5,134 +5,141 @@ import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
 /**
- * Checks shared catalog completion against pending selection and downloads for every runtime family.
+ * Applies pending choice and transfer race contracts independently to every local provider.
+ *
+ * @param type Local family owning the cached response and its in-flight operations.
  *
  * @author Dmitriy Moroz
  */
-class ServerSetupCatalogStateTest {
+@RunWith(Parameterized::class)
+class ServerSetupCatalogStateTest(private val type: LocalAiModel.Type) {
+    private val model = LocalAiModel("catalog", type, "Model", "1 GB", emptyList(), selected = true)
+
     @Test
-    fun `all catalog completions retain pending selection and download progress without changing mode`() {
-        LocalAiModel.Type.entries.forEach { type ->
-            val domain = LocalAiModel(
-                "catalog",
-                type,
-                "Model",
-                "1 GB",
-                listOf("https://example.com/model.zip"),
-                selected = true
-            )
-            val state = ServerSetupState(mode = ServerSource.AUTOMATIC1111)
-                .withCatalogResult(type, listOf(domain), LocalCatalogStatus.READY)
-            val current = state.catalogModels(type).single()
-                .copy(downloadState = DownloadState.Downloading(35))
-            val downloading = when (type) {
-                LocalAiModel.Type.ONNX -> state.copy(localOnnxModels = listOf(current))
-                LocalAiModel.Type.MediaPipe -> state.copy(localMediaPipeModels = listOf(current))
-                LocalAiModel.Type.Sdxl -> state.copy(localSdxlModels = listOf(current))
-                LocalAiModel.Type.CoreMl -> state.copy(localCoreMlModels = listOf(current))
-                LocalAiModel.Type.Bonsai -> state.copy(localBonsaiModels = listOf(current))
-                LocalAiModel.Type.Mnn -> state.copy(localMnnModels = listOf(current))
-            }
-            val refreshed = downloading.withCatalogResult(
-                type,
-                listOf(domain.copy(selected = false)),
-                LocalCatalogStatus.READY
-            )
-            assertEquals(true, refreshed.catalogModels(type).single().selected)
-            assertEquals(
-                DownloadState.Downloading(35),
-                refreshed.catalogModels(type).single().downloadState
-            )
-            assertEquals(ServerSource.AUTOMATIC1111, refreshed.mode)
-            val failed = refreshed.withCatalogResult(type, emptyList(), LocalCatalogStatus.ERROR)
-            assertEquals(refreshed.catalogModels(type), failed.catalogModels(type))
-            assertEquals(LocalCatalogStatus.ERROR, failed.localCatalogStatuses[type])
-            val deleted =
-                refreshed.withDeletedLocalModel(refreshed.catalogModels(type).single(), type)
-                    .withCatalogResult(
-                        type,
-                        listOf(domain.copy(downloaded = true)),
-                        LocalCatalogStatus.READY
-                    )
-            assertEquals(false, deleted.catalogModels(type).single().selected)
-            assertEquals(false, deleted.catalogModels(type).single().downloaded)
-        }
+    fun `given catalog completion, user has pending selection, expected choice retained without mode change`() {
+        // Given
+        val initial = ServerSetupState(mode = ServerSource.AUTOMATIC1111).withCatalogResult(
+            type,
+            listOf(model),
+            LocalCatalogStatus.READY
+        )
+        val selected = initial.copy(localCatalogSelectionOverrides = mapOf(type to model.id))
+
+        // When
+        val refreshed = selected.withCatalogResult(
+            type,
+            listOf(model.copy(selected = false)),
+            LocalCatalogStatus.READY
+        )
+
+        // Then
+        assertEquals(true, refreshed.catalogModels(type).single().selected)
+        assertEquals(ServerSource.AUTOMATIC1111, refreshed.mode)
     }
 
     @Test
-    fun `explicit custom toggle in both directions wins over saved catalog selection`() {
-        listOf(
-            ServerSource.LOCAL_MNN to LocalAiModel.CustomMnn,
-            ServerSource.LOCAL_MICROSOFT_ONNX to LocalAiModel.CustomOnnx,
-            ServerSource.LOCAL_GOOGLE_MEDIA_PIPE to LocalAiModel.CustomMediaPipe,
-            ServerSource.LOCAL_STABLE_DIFFUSION_CPP to LocalAiModel.CustomSdxl,
-        ).forEach { (source, custom) ->
-            val saved = custom.copy(selected = true)
-            val state = ServerSetupState(mode = source).withCatalogResult(
-                custom.type,
-                listOf(saved),
-                LocalCatalogStatus.READY
-            )
-            val disabled = state.withAllowCustomModel(false)
-                .withCatalogResult(custom.type, listOf(saved), LocalCatalogStatus.READY)
-            assertEquals(false, disabled.catalogModels(custom.type).single().selected)
-            val enabled = disabled.withAllowCustomModel(true)
-                .withCatalogResult(custom.type, listOf(custom), LocalCatalogStatus.READY)
-            assertEquals(true, enabled.catalogModels(custom.type).single().selected)
-        }
-    }
-
-    @Test
-    fun `active downloads cannot become available from partial directory cache observations`() {
-        LocalAiModel.Type.entries.forEach { type ->
-            val model = LocalAiModel("active-${type.key}", type, "Model", "1 GB", emptyList())
-            val state =
-                ServerSetupState().withCatalogResult(type, listOf(model), LocalCatalogStatus.READY)
-            val active = state.withUpdatedLocalModel(
-                state.catalogModels(type).single()
-                    .copy(downloadState = DownloadState.Downloading(45)), type
-            )
-            val refreshed = active.withCatalogResult(
-                type,
-                listOf(model.copy(downloaded = true)),
-                LocalCatalogStatus.READY
-            )
-            assertEquals(false, refreshed.catalogModels(type).single().downloaded)
-            assertEquals(
-                DownloadState.Downloading(45),
-                refreshed.catalogModels(type).single().downloadState
-            )
-            val removed =
-                refreshed.withDeletedLocalModel(refreshed.catalogModels(type).single(), type)
-                    .withCatalogResult(
-                        type,
-                        listOf(model.copy(downloaded = true)),
-                        LocalCatalogStatus.READY
-                    )
-            assertEquals(false, removed.catalogModels(type).single().downloaded)
-            assertEquals(DownloadState.Unknown, removed.catalogModels(type).single().downloadState)
-        }
-    }
-
-    @Test
-    fun `verified post join install clears earlier deletion and active transfer markers`() {
-        val type = LocalAiModel.Type.Mnn
-        val model = LocalAiModel.CustomMnn.copy(id = "mnn-reinstalled", downloaded = true)
-        val state =
+    fun `given catalog completion, download remains active, expected partial cache never connectable`() {
+        // Given
+        val initial =
             ServerSetupState().withCatalogResult(type, listOf(model), LocalCatalogStatus.READY)
-        val deleted = state.withDeletedLocalModel(state.catalogModels(type).single(), type)
+        val active = initial.withUpdatedLocalModel(
+            initial.catalogModels(type).single()
+                .copy(downloadState = DownloadState.Downloading(45)), type
+        )
+
+        // When
+        val refreshed = active.withCatalogResult(
+            type,
+            listOf(model.copy(downloaded = true)),
+            LocalCatalogStatus.READY
+        )
+
+        // Then
+        assertEquals(false, refreshed.catalogModels(type).single().downloaded)
+        assertEquals(
+            DownloadState.Downloading(45),
+            refreshed.catalogModels(type).single().downloadState
+        )
+    }
+
+    @Test
+    fun `given catalog completion, model was explicitly deleted, expected stale downloaded result suppressed`() {
+        // Given
+        val initial = ServerSetupState().withCatalogResult(
+            type,
+            listOf(model.copy(downloaded = true)),
+            LocalCatalogStatus.READY
+        )
+        val deleted = initial.withDeletedLocalModel(initial.catalogModels(type).single(), type)
+
+        // When
+        val refreshed = deleted.withCatalogResult(
+            type,
+            listOf(model.copy(downloaded = true)),
+            LocalCatalogStatus.READY
+        )
+
+        // Then
+        assertEquals(false, refreshed.catalogModels(type).single().downloaded)
+        assertEquals(false, refreshed.catalogModels(type).single().selected)
+        assertEquals(DownloadState.Unknown, refreshed.catalogModels(type).single().downloadState)
+    }
+
+    @Test
+    fun `given catalog refresh, remote catalog fails, expected existing usable rows retained with error`() {
+        // Given
+        val initial = ServerSetupState().withCatalogResult(
+            type,
+            listOf(model.copy(downloaded = true)),
+            LocalCatalogStatus.READY
+        )
+
+        // When
+        val failed = initial.withCatalogResult(type, emptyList(), LocalCatalogStatus.ERROR)
+
+        // Then
+        assertEquals(initial.catalogModels(type), failed.catalogModels(type))
+        assertEquals(LocalCatalogStatus.ERROR, failed.localCatalogStatuses[type])
+    }
+
+    @Test
+    fun `given cancelled download recovery, verified install exists after earlier delete, expected tombstones and active markers cleared`() {
+        // Given
+        val initial =
+            ServerSetupState().withCatalogResult(type, listOf(model), LocalCatalogStatus.READY)
+        val deleted = initial.withDeletedLocalModel(initial.catalogModels(type).single(), type)
         val active = deleted.withUpdatedLocalModel(
             deleted.catalogModels(type).single()
                 .copy(downloadState = DownloadState.Downloading(99)), type
         )
-        val recovered = active.withVerifiedOwnedModel(model.id, type)
-            .withCatalogResult(type, listOf(model), LocalCatalogStatus.READY)
+
+        // When
+        val recovered = active.withVerifiedOwnedModel(model.id, type).withCatalogResult(
+            type,
+            listOf(model.copy(downloaded = true)),
+            LocalCatalogStatus.READY
+        )
+
+        // Then
         assertEquals(true, recovered.catalogModels(type).single().downloaded)
         assertEquals(DownloadState.Unknown, recovered.catalogModels(type).single().downloadState)
         assertEquals(emptySet<String>(), recovered.localCatalogDeletedModelIds[type])
         assertEquals(emptySet<String>(), recovered.localCatalogActiveDownloads[type])
     }
 
+    companion object {
+        /**
+         * Keeps the shared state contract exercised for every runtime family.
+         *
+         * @author Dmitriy Moroz
+         */
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun catalogs(): List<Array<LocalAiModel.Type>> =
+            LocalAiModel.Type.entries.map { arrayOf(it) }
+    }
 }

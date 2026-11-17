@@ -17,6 +17,7 @@ import org.json.JSONObject
 internal class MnnBundleValidatorImpl : MnnBundleValidator {
     /**
      * Validates the root layout and pinned source metadata before any model bytes reach MNN.
+     * Rejections identify the failed contract so metadata errors cannot be confused with later missing payloads.
      *
      * @param path App-owned staging or immutable model directory.
      *
@@ -25,41 +26,56 @@ internal class MnnBundleValidatorImpl : MnnBundleValidator {
     override suspend fun invoke(path: String): MnnBundleManifest {
         val root = File(path).canonicalFile
         val manifest = File(root, "manifest.json")
-        require(manifest.canonicalFile == manifest.absoluteFile)
-        require(manifest.isFile && manifest.length() in 1..65_536)
+        require(manifest.canonicalFile == manifest.absoluteFile) { "MNN manifest must not be a symbolic link" }
+        require(manifest.isFile && manifest.length() in 1..65_536) { "MNN manifest is missing or exceeds the size limit" }
         val json = JSONObject(manifest.readText())
-        require(json.keys().asSequence().toSet() == MANIFEST_FIELDS)
-        require(json.get("schemaVersion") is Int && json.get("width") is Int && json.get("height") is Int)
-        require(json.getInt("schemaVersion") == 1)
-        require(json.getString("profile") == PROFILE)
-        require(json.getString("runtimeVersion") == "3.6.2")
-        require(json.getString("runtimeRevision") == RUNTIME_REVISION)
-        require(json.getString("prebuiltRepository") == "taobao-mnn/stable-diffusion-v1-5-mnn-general")
-        require(json.getString("prebuiltRevision") == "56c93a62ac9d6b5d18605632b85e25f87281f317")
-        require(json.getString("sourceRepository") == "stable-diffusion-v1-5/stable-diffusion-v1-5")
-        require(json.getString("sourceRevision") == SOURCE_REVISION)
-        require(json.getString("tokenizerSourceRevision") == SOURCE_REVISION)
-        require(json.getString("tokenizerToolRevision") == RUNTIME_REVISION)
-        require(json.getString("packagingLockSha256").matches(SHA256))
-        require(json.getInt("width") == 512 && json.getInt("height") == 512)
-        require(json.getDouble("guidance") == 7.5 && json.getString("scheduler") == "PNDM")
+        require(
+            json.keys().asSequence().toSet() == MANIFEST_FIELDS
+        ) { "MNN manifest fields do not match schema version 1" }
+        require(json.get("schemaVersion") is Int && json.get("width") is Int && json.get("height") is Int) { "MNN schema version and dimensions must be integers" }
+        require(json.getInt("schemaVersion") == 1) { "Unsupported MNN manifest schema version" }
+        require(json.getString("profile") == PROFILE) { "Unsupported MNN generation profile" }
+        require(json.getString("runtimeVersion") == "3.6.2") { "Unsupported MNN runtime version" }
+        require(json.getString("runtimeRevision") == RUNTIME_REVISION) { "Unsupported MNN runtime revision" }
+        require(json.getString("prebuiltRepository") == "taobao-mnn/stable-diffusion-v1-5-mnn-general") { "Unsupported MNN prebuilt repository" }
+        require(json.getString("prebuiltRevision") == "56c93a62ac9d6b5d18605632b85e25f87281f317") { "Unsupported MNN prebuilt revision" }
+        require(json.getString("sourceRepository") == "stable-diffusion-v1-5/stable-diffusion-v1-5") { "Unsupported MNN source repository" }
+        require(json.getString("sourceRevision") == SOURCE_REVISION) { "Unsupported MNN source revision" }
+        require(json.getString("tokenizerSourceRevision") == SOURCE_REVISION) { "Unsupported MNN tokenizer source revision" }
+        require(json.getString("tokenizerToolRevision") == RUNTIME_REVISION) { "Unsupported MNN tokenizer tool revision" }
+        require(
+            json.getString("packagingLockSha256").matches(SHA256)
+        ) { "Invalid MNN packaging lock digest" }
+        require(json.getInt("width") == 512 && json.getInt("height") == 512) { "Unsupported MNN image dimensions" }
+        require(json.getDouble("guidance") == 7.5) { "Unsupported MNN guidance scale" }
+        require(json.getString("scheduler") == "PNDM") { "Unsupported MNN scheduler" }
         val entries = json.getJSONArray("files")
-        require(entries.length() == REQUIRED_FILES.size)
+        require(entries.length() == REQUIRED_FILES.size) { "MNN bundle must contain exactly nine payload entries" }
         val files = List(entries.length()) { index ->
             val entry = entries.getJSONObject(index)
-            require(entry.keys().asSequence().toSet() == setOf("path", "size", "sha256"))
-            require(entry.get("size") is Int || entry.get("size") is Long)
+            require(
+                entry.keys().asSequence().toSet() == setOf(
+                    "path",
+                    "size",
+                    "sha256"
+                )
+            ) { "MNN payload entry fields are invalid" }
+            require(entry.get("size") is Int || entry.get("size") is Long) { "MNN payload size must be an integer" }
             MnnBundleFile(entry.getString("path"), entry.getLong("size"), entry.getString("sha256"))
         }
-        require(files.map(MnnBundleFile::path).toSet() == REQUIRED_FILES)
+        require(
+            files.map(MnnBundleFile::path).toSet() == REQUIRED_FILES
+        ) { "MNN payload inventory has missing duplicate or unsupported names" }
         files.forEach { item ->
-            require(item.size in 1..2_000_000_000 && item.sha256.matches(SHA256))
+            require(item.size in 1..2_000_000_000) { "MNN payload size is outside supported limits: ${item.path}" }
+            require(item.sha256.matches(SHA256)) { "MNN payload digest is invalid: ${item.path}" }
             PINNED_PAYLOADS[item.path]?.let { expected ->
                 require(item.size == expected.first && item.sha256 == expected.second) { "Unsupported MNN payload: ${item.path}" }
             }
             val file = File(root, item.path)
-            require(file.canonicalFile == file.absoluteFile && file.canonicalFile.parentFile == root)
-            require(file.isFile && file.length() == item.size)
+            require(file.canonicalFile == file.absoluteFile && file.canonicalFile.parentFile == root) { "MNN payload must be an owned regular path: ${item.path}" }
+            require(file.isFile) { "MNN payload is missing: ${item.path}" }
+            require(file.length() == item.size) { "MNN payload length mismatch: ${item.path}" }
             val hash = MessageDigest.getInstance("SHA-256")
             file.inputStream().buffered().use { input ->
                 val buffer = ByteArray(65_536)
@@ -70,7 +86,9 @@ internal class MnnBundleValidatorImpl : MnnBundleValidator {
                     hash.update(buffer, 0, count)
                 }
             }
-            require(hash.digest().joinToString("") { "%02x".format(it) } == item.sha256)
+            require(
+                hash.digest()
+                    .joinToString("") { "%02x".format(it) } == item.sha256) { "MNN payload hash mismatch: ${item.path}" }
         }
         val activationId = MessageDigest.getInstance("SHA-256").digest(manifest.readBytes())
             .joinToString("") { "%02x".format(it) }

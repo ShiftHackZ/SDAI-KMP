@@ -21,6 +21,7 @@ internal class SelectMnnModelUseCaseImpl(
 ) : SelectMnnModelUseCase {
     /**
      * Selects existing owned bytes without reading or copying the original custom folder.
+     * Cleanup failures cannot replace a primary configuration failure or cancellation.
      *
      * @param modelId Catalog or custom UI identity.
      *
@@ -29,11 +30,10 @@ internal class SelectMnnModelUseCaseImpl(
     override suspend fun invoke(modelId: String): Result<Unit> = try {
         val configuration = getConfigurationUseCase()
         check(configuration.source == ServerSource.LOCAL_MNN) { "MNN provider selection changed" }
-        val selection = repository.validateOwnedModel(
+        repository.validateOwnedModel(
             modelId,
             if (modelId == LocalAiModel.CustomMnn.id) configuration.localMnnCustomActivationId else ""
-        )
-        try {
+        ).use { selection ->
             val current = getConfigurationUseCase()
             check(current == configuration) { "MNN configuration changed during selection" }
             setServerConfigurationUseCase(
@@ -43,8 +43,6 @@ internal class SelectMnnModelUseCaseImpl(
                 )
             )
             Result.success(Unit)
-        } finally {
-            selection.close()
         }
     } catch (cancelled: CancellationException) {
         throw cancelled

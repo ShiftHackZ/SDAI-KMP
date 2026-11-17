@@ -21,7 +21,7 @@ internal class ConnectToMnnUseCaseImpl(
     private val setServerConfigurationUseCase: SetServerConfigurationUseCase
 ) : ConnectToMnnUseCase {
     /**
-     * Validates before persistence; cancellation always remains cancellation.
+     * Validates before persistence; cleanup failures are suppressed behind a primary failure or cancellation.
      *
      * @param modelId Catalog bundle identity.
      * @param modelPath External folder used only for the standard custom-model identity.
@@ -34,8 +34,7 @@ internal class ConnectToMnnUseCaseImpl(
         modelPath: String,
         backend: MnnBackend
     ): Result<Unit> = try {
-        val selection = repository.validateModel(modelId, modelPath)
-        try {
+        repository.validateModel(modelId, modelPath).use { selection ->
             val configuration = getConfigurationUseCase()
             setServerConfigurationUseCase(
                 configuration.copy(
@@ -48,8 +47,6 @@ internal class ConnectToMnnUseCaseImpl(
                 )
             )
             Result.success(Unit)
-        } finally {
-            selection.close()
         }
     } catch (cancelled: CancellationException) {
         throw cancelled

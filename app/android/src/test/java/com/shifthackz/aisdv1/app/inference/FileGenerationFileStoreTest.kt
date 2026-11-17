@@ -48,166 +48,241 @@ class FileGenerationFileStoreTest {
     }
 
     @Test
-    fun `given Bonsai backends and NSFW values, exchange preserves captured inputs`() {
+    fun `given generation IPC storage, Bonsai backends and NSFW values vary, expected captured inputs and version preserved`() {
         for (backend in BonsaiBackend.entries) for (isNsfw in listOf(false, true)) {
+            // Given
             val request = bonsaiRequest(model.path).let {
                 it.copy(payload = it.payload.copy(bonsaiBackend = backend, nsfw = isNsfw))
             }
 
+            // When
             store.writeRequest(job, request)
+            val restored = store.readRequest(job)
 
-            assertEquals(request, store.readRequest(job))
+            // Then
+            assertEquals(request, restored)
             assertEquals(4, JSONObject(requestFile().readText()).getInt("version"))
         }
     }
 
     @Test
-    fun `given batch request, child exchange admits only one image`() {
+    fun `given generation IPC storage, batch contains multiple images, expected one child image`() {
+        // Given
         val request = bonsaiRequest(model.path)
+
+        // When
         store.writeRequest(job, request.copy(payload = request.payload.copy(batchCount = 3)))
+        val restored = store.readRequest(job)
 
-        assertEquals(1, store.readRequest(job).payload.batchCount)
+        // Then
+        assertEquals(1, restored.payload.batchCount)
     }
 
     @Test
-    fun `given readable model path with parent segment, child receives canonical path`() {
-        store.writeRequest(job, bonsaiRequest(File(model, "../model").path))
+    fun `given generation IPC storage, model path contains parent segment, expected canonical child path`() {
+        // Given
+        val request = bonsaiRequest(File(model, "../model").path)
 
-        assertEquals(model.canonicalPath, store.readRequest(job).modelPath)
+        // When
+        store.writeRequest(job, request)
+        val restored = store.readRequest(job)
+
+        // Then
+        assertEquals(model.canonicalPath, restored.modelPath)
     }
 
     @Test
-    fun `given old request version, attempt is rejected without migration`() {
+    fun `given generation IPC storage, old request version is read, expected rejection without migration`() {
+        // Given
         writeModifiedRequest { put("version", 1) }
 
-        assertThrows(IllegalArgumentException::class.java) { store.readRequest(job) }
+        // When
+        val actual = runCatching { store.readRequest(job) }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given unknown Bonsai backend, request is rejected instead of selecting AUTO`() {
+    fun `given generation IPC storage, Bonsai backend is unknown, expected rejection without automatic fallback`() {
+        // Given
         writeModifiedRequest { put("bonsaiBackend", "missing-backend") }
 
-        assertThrows(IllegalArgumentException::class.java) { store.readRequest(job) }
+        // When
+        val actual = runCatching { store.readRequest(job) }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given missing backend, request does not supply a default`() {
+    fun `given generation IPC storage, Bonsai backend is absent, expected strict missing field rejection`() {
+        // Given
         writeModifiedRequest { remove("bonsaiBackend") }
 
-        assertThrows(Exception::class.java) { store.readRequest(job) }
+        // When
+        val actual = runCatching { store.readRequest(job) }
+
+        // Then
+        assertThrows(Exception::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given string NSFW value, request is rejected instead of coercing Boolean`() {
+    fun `given generation IPC storage, NSFW field is a string, expected rejection without Boolean coercion`() {
+        // Given
         writeModifiedRequest { put("nsfw", "true") }
 
-        assertThrows(IllegalArgumentException::class.java) { store.readRequest(job) }
+        // When
+        val actual = runCatching { store.readRequest(job) }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given missing NSFW field, request is rejected`() {
+    fun `given generation IPC storage, NSFW field is absent, expected strict missing field rejection`() {
+        // Given
         writeModifiedRequest { remove("nsfw") }
 
-        assertThrows(Exception::class.java) { store.readRequest(job) }
+        // When
+        val actual = runCatching { store.readRequest(job) }
+
+        // Then
+        assertThrows(Exception::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given unknown engine, request is rejected`() {
+    fun `given generation IPC storage, engine name is unknown, expected request rejection`() {
+        // Given
         writeModifiedRequest { put("engine", "UNKNOWN") }
 
-        assertThrows(IllegalArgumentException::class.java) { store.readRequest(job) }
+        // When
+        val actual = runCatching { store.readRequest(job) }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given unreadable model path, no generation request is admitted`() {
+    fun `given generation IPC storage, model path is unreadable, expected no request admission`() {
+        // Given
         writeModifiedRequest { put("model", File(temporary.root, "absent").path) }
 
-        assertThrows(IllegalArgumentException::class.java) { store.readRequest(job) }
+        // When
+        val actual = runCatching { store.readRequest(job) }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given oversized dimensions or invalid steps, request is rejected`() {
+    fun `given generation IPC storage, dimensions or step counts exceed limits, expected request rejection`() {
         for ((field, value) in listOf(
             "width" to 4097,
             "height" to 0,
             "steps" to 0,
             "steps" to 1001
         )) {
+            // Given
             writeModifiedRequest { put(field, value) }
 
-            assertThrows(IllegalArgumentException::class.java) { store.readRequest(job) }
+            // When
+            val actual = runCatching { store.readRequest(job) }
+
+            // Then
+            assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
         }
     }
 
     @Test
-    fun `given excessive prompt size, no request file is committed`() {
+    fun `given generation IPC storage, prompt exceeds request byte limit, expected no committed request`() {
+        // Given
         val request = bonsaiRequest(model.path)
 
-        assertThrows(IllegalArgumentException::class.java) {
+        // When
+        val actual = runCatching {
             store.writeRequest(
                 job,
                 request.copy(payload = request.payload.copy(prompt = "x".repeat(4 * 1024 * 1024)))
             )
         }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
         assertFalse(requestFile().exists())
     }
 
     @Test
-    fun `given result fails validation, no result file is published`() {
+    fun `given generation IPC storage, result fails image validation, expected no published output`() {
+        // Given
         store.writeRequest(job, bonsaiRequest(model.path))
         every { validator.validate(any(), any()) } throws IllegalArgumentException("invalid image")
 
-        assertThrows(IllegalArgumentException::class.java) {
-            store.writeResult(
-                job,
-                byteArrayOf(1)
-            )
-        }
+        // When
+        val actual = runCatching { store.writeResult(job, byteArrayOf(1)) }
 
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
         assertFalse(File(requestFile().parentFile, "result.png").exists())
     }
 
     @Test
-    fun `given completed output, both write and read validate against captured request`() {
+    fun `given generation IPC storage, completed output is read back, expected write and read validate captured request`() {
+        // Given
         val request = bonsaiRequest(model.path)
         val output = byteArrayOf(1, 2, 3)
         store.writeRequest(job, request)
 
+        // When
         store.writeResult(job, output)
-        assertArrayEquals(output, store.readResult(job))
+        val actual = store.readResult(job)
 
+        // Then
+        assertArrayEquals(output, actual)
         verify(exactly = 2) { validator.validate(output, request) }
     }
 
     @Test
-    fun `given result validation fails on later read, bytes cannot reach host publication`() {
+    fun `given generation IPC storage, previously written result fails later validation, expected no host publication`() {
+        // Given
         store.writeRequest(job, bonsaiRequest(model.path))
         store.writeResult(job, byteArrayOf(1))
         every { validator.validate(any(), any()) } throws IllegalArgumentException("changed image")
 
-        assertThrows(IllegalArgumentException::class.java) { store.readResult(job) }
+        // When
+        val actual = runCatching { store.readResult(job) }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { actual.getOrThrow() }
     }
 
     @Test
-    fun `given path traversal job, storage cannot leave job root`() {
-        assertThrows(IllegalArgumentException::class.java) {
-            store.writeRequest(
-                "../model",
-                bonsaiRequest(model.path)
-            )
-        }
-        assertThrows(IllegalArgumentException::class.java) { store.delete("../model") }
+    fun `given generation IPC storage, job identity contains traversal, expected read boundaries preserve model root`() {
+        // Given
+        val request = bonsaiRequest(model.path)
+
+        // When
+        val write = runCatching { store.writeRequest("../model", request) }
+        val delete = runCatching { store.delete("../model") }
+
+        // Then
+        assertThrows(IllegalArgumentException::class.java) { write.getOrThrow() }
+        assertThrows(IllegalArgumentException::class.java) { delete.getOrThrow() }
         assertTrue(model.exists())
     }
 
     @Test
-    fun `given cleanup, only owned UUID exchange files are removed`() {
+    fun `given generation IPC storage, abandoned attempts are cleared, expected only owned UUID exchange files removed`() {
+        // Given
         store.writeRequest(job, bonsaiRequest(model.path))
         val foreign = File(temporary.root, "inference/jobs/keep").apply { mkdirs() }
+        val owned = requireNotNull(requestFile().parentFile)
 
+        // When
         store.clearAbandoned()
 
-        assertFalse(requestFile().parentFile.exists())
+        // Then
+        assertFalse(owned.exists())
         assertTrue(model.exists())
         assertTrue(foreign.exists())
     }

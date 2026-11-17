@@ -21,15 +21,14 @@ internal class MnnModelSelectionLeaseImpl(
 
     /**
      * Releases payload protection before allowing deletion to enter its critical section.
+     * A second release failure is suppressed behind the payload release failure.
      *
      * @author Dmitriy Moroz
      */
     override fun close() {
         if (isClosed.compareAndSet(false, true)) {
-            try {
+            selectionOwner.use {
                 payloadOwner.close()
-            } finally {
-                selectionOwner.close()
             }
         }
     }

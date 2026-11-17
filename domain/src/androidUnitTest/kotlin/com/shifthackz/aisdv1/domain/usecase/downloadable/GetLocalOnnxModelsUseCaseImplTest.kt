@@ -11,6 +11,11 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Verifies Onnx list compatibility delegates strict refresh results without inventing cached success.
+ *
+ * @author Dmitriy Moroz
+ */
 class GetLocalOnnxModelsUseCaseImplTest {
 
     private val stubRepository = mockk<RefreshLocalModelCatalogUseCase>()
@@ -18,38 +23,49 @@ class GetLocalOnnxModelsUseCaseImplTest {
     private val useCase = GetLocalOnnxModelsUseCaseImpl(stubRepository)
 
     @Test
-    fun `given repository returned models list, expected valid models list value`() = runTest {
-        coEvery {
-            stubRepository(LocalAiModel.Type.ONNX)
-        } returns LocalModelCatalogResult(mockLocalAiModels)
+    fun `given Onnx local model lookup, shared refresh returns models, expected unchanged model list`() =
+        runTest {
+            // Given
+            coEvery {
+                stubRepository(LocalAiModel.Type.ONNX)
+            } returns LocalModelCatalogResult(mockLocalAiModels)
 
-        val actual = useCase()
+            // When
+            val actual = useCase()
 
-        assertEquals(mockLocalAiModels, actual)
-    }
+            // Then
+            assertEquals(mockLocalAiModels, actual)
+        }
 
     @Test
-    fun `given repository returned empty models list, expected empty models list value`() =
+    fun `given Onnx local model lookup, shared refresh returns no models, expected empty list`() =
         runTest {
+            // Given
             coEvery {
                 stubRepository(LocalAiModel.Type.ONNX)
             } returns LocalModelCatalogResult(emptyList())
 
+            // When
             val actual = useCase()
 
+            // Then
             assertTrue(actual.isEmpty())
         }
 
     @Test
-    fun `given repository thrown exception, expected error value`() = runTest {
-        val stubException = Throwable("Unable to collect local models.")
+    fun `given Onnx local model lookup, shared refresh fails, expected original failure`() =
+        runTest {
+            // Given
+            val stubException = Throwable("Unable to collect local models.")
 
-        coEvery {
-            stubRepository(LocalAiModel.Type.ONNX)
-        } throws stubException
+            coEvery {
+                stubRepository(LocalAiModel.Type.ONNX)
+            } throws stubException
 
-        val actual = runCatching { useCase() }.exceptionOrNull()
+            // When
+            val actual = runCatching { useCase() }.exceptionOrNull()
 
-        assertSame(stubException, actual)
-    }
+            // Then
+            assertSame(stubException, actual)
+        }
 }

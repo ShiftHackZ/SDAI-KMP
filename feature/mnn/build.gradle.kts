@@ -5,6 +5,7 @@ plugins {
 
 android {
     namespace = "com.shifthackz.aisdv1.feature.mnn"
+    testOptions.unitTests.isReturnDefaultValues = true
     defaultConfig {
         ndk { abiFilters += "arm64-v8a" }
         externalNativeBuild {
@@ -29,6 +30,12 @@ kotlin {
             implementation(project(":core:common"))
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
+        }
+        androidUnitTest.dependencies {
+            implementation(libs.test.junit)
+            implementation(libs.test.mockk)
+            implementation(libs.test.coroutines)
+            implementation(libs.test.roboelectric)
         }
     }
 }
