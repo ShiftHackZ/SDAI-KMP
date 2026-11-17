@@ -1,0 +1,175 @@
+name: Update Dokka
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Regenerate even when Dokka inputs are unchanged.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: Check documentation inputs
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      source_sha: ${{ steps.plan.outputs.source_sha }}
+      input_digest: ${{ steps.plan.outputs.input_digest }}
+      should_generate: ${{ steps.plan.outputs.should_generate }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+
+      - name: Inspect documentation inputs
+        id: plan
+        env:
+          SHOULD_FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+          IS_MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+          quiet_minutes=10
+          if [[ "${IS_MANUAL}" == "true" ]]; then
+            quiet_minutes=0
+          fi
+          git fetch --no-tags --depth=1 origin \
+            +refs/heads/master:refs/remotes/origin/master
+          args=(--quiet-minutes "${quiet_minutes}")
+          if [[ "${SHOULD_FORCE}" == "true" ]]; then
+            args+=(--force)
+          fi
+          python3 scripts/dokka.py plan "${args[@]}"
+
+  generate:
+    name: Update master documentation
+    needs: plan
+    if: needs.plan.outputs.should_generate == 'true'
+    # macOS keeps iOS source sets available, matching local documentation builds.
+    runs-on: macos-15
+    timeout-minutes: 45
+    concurrency:
+      group: dokka-master
+      cancel-in-progress: false
+    env:
+      SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+      INPUT_DIGEST: ${{ needs.plan.outputs.input_digest }}
+    steps:
+      - name: Require an authorized documentation writer
+        env:
+          DOKKA_PUSH_TOKEN: ${{ secrets.DOKKA_PUSH_TOKEN }}
+        run: |
+          if [[ -z "${DOKKA_PUSH_TOKEN}" ]]; then
+            echo "::error::Configure DOKKA_PUSH_TOKEN with Contents write access and permission to push to master/develop. See DOCUMENTATION.md."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.source_sha }}
+          token: ${{ secrets.DOKKA_PUSH_TOKEN }}
+
+      # Use the same planner version even if master advanced while the job queued.
+      - name: Checkout workflow tooling
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .dokka-automation
+          sparse-checkout: scripts
+          persist-credentials: false
+
+      - name: Check whether the planned source is still current
+        id: current
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/master
+          if [[ "$(git rev-parse FETCH_HEAD)" == "${SOURCE_SHA}" ]]; then
+            echo "should_generate=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "::notice::Master advanced; the next scheduled check will inspect its latest inputs."
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.current.outputs.should_generate == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        if: steps.current.outputs.should_generate == 'true'
+
+      - name: Install the configured Android platform
+        if: steps.current.outputs.should_generate == 'true'
+        run: |
+          set -euo pipefail
+          compile_sdk="$(sed -n 's/^compileSdk = "\([0-9]*\)"/\1/p' gradle/libs.versions.toml)"
+          [[ "${compile_sdk}" =~ ^[0-9]+$ ]]
+          sdkmanager "platforms;android-${compile_sdk}"
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.current.outputs.should_generate == 'true'
+
+      - name: Regenerate the complete API reference
+        if: steps.current.outputs.should_generate == 'true'
+        run: |
+          set -euo pipefail
+          # Remove obsolete pages for deleted/renamed declarations.
+          rm -rf docs/docs
+          ./gradlew dokkaGeneratePublicationHtml --no-daemon
+          python3 .dokka-automation/scripts/dokka.py record "${INPUT_DIGEST}"
+
+      - name: Commit documentation and preserve aligned branches
+        if: steps.current.outputs.should_generate == 'true'
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/master
+          master_sha="$(git rev-parse FETCH_HEAD)"
+          if [[ "${master_sha}" != "${SOURCE_SHA}" ]]; then
+            echo "::notice::Master advanced during generation; leaving it for the next scheduled check."
+            exit 0
+          fi
+          refspecs=(HEAD:refs/heads/master)
+          if git fetch --no-tags --depth=1 origin refs/heads/develop; then
+            develop_sha="$(git rev-parse FETCH_HEAD)"
+            if [[ "${develop_sha}" == "${master_sha}" ]]; then
+              # Equal tips share the entire history, even in a shallow checkout.
+              read -r master_only develop_only < <(git rev-list --left-right --count \
+                "${master_sha}...${develop_sha}")
+              if [[ "${master_only}" == "0" && "${develop_only}" == "0" ]]; then
+                refspecs+=(HEAD:refs/heads/develop)
+                echo "Branches have identical SHAs and 0/0 divergence; sharing one Dokka commit."
+              fi
+            else
+              echo "Develop differs from master; updating only master."
+            fi
+          else
+            echo "::warning::Could not inspect develop; updating only master."
+          fi
+          git add --all -- docs/docs
+          if git diff --cached --quiet; then
+            echo "Generated documentation is unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: regenerate Dokka"
+          if (( ${#refspecs[@]} == 2 )); then
+            # Publish one commit to both refs, or neither if either ref raced.
+            if git push --atomic origin "${refspecs[@]}"; then
+              exit 0
+            fi
+            echo "::warning::Optional develop update failed; rechecking master before publishing it alone."
+            git fetch --no-tags --depth=1 origin refs/heads/master
+            if [[ "$(git rev-parse FETCH_HEAD)" != "${SOURCE_SHA}" ]]; then
+              echo "::notice::Master changed; the next scheduled check will inspect its latest inputs."
+              exit 0
+            fi
+          fi
+          # An optional develop update must not prevent publishing valid master docs.
+          git push origin HEAD:refs/heads/master

@@ -5,6 +5,8 @@ on:
     branches: [develop]
   push:
     branches: [master, develop]
+    paths-ignore:
+      - "docs/docs/**"
 
 jobs:
   test-feature:
