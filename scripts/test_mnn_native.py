@@ -150,7 +150,7 @@ def main():
     if platform.system() == "Linux":
         allocator_binary = work / "allocator_test"
         sources = [tests / "allocator_test.cpp"] + [adapted / "source/core" / name for name in ("BufferAllocator.cpp", "MNNMemoryUtils.cpp", "MNNFileUtils.cpp")]
-        subprocess.run(compiler + ["-DSDAI_MNN_PRIVATE_MMAP=1"] + list(map(str, sources)) + ["-Wl,--gc-sections", "-Wl,--wrap=posix_fallocate", "-Wl,--wrap=ftruncate", "-Wl,--wrap=mmap", "-o", str(allocator_binary)], check=True)
+        subprocess.run(compiler + ["-I", str(native), "-DSDAI_MNN_PRIVATE_MMAP=1"] + list(map(str, sources)) + ["-Wl,--gc-sections", "-Wl,--wrap=posix_fallocate", "-Wl,--wrap=ftruncate", "-Wl,--wrap=mmap", "-o", str(allocator_binary)], check=True)
         subprocess.run([str(allocator_binary)], check=True)
     elif platform.system() == "Darwin":
         reservation_binary = work / "darwin_reservation_test"
