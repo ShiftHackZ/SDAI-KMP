@@ -2,7 +2,6 @@
 
 import argparse
 import hashlib
-import json
 import os
 import subprocess
 import time
@@ -49,31 +48,29 @@ def fingerprint(ref):
     return hashlib.sha256(b"\0".join(inputs)).hexdigest()
 
 
-def plan(branches, quiet_minutes, should_force):
-    """Select quiet branches whose committed inputs differ from the last build."""
-    updates = []
-    for branch in branches:
-        ref = f"refs/remotes/origin/{branch}"
-        sha = git("rev-parse", ref).decode().strip()
-        digest = fingerprint(sha)
-        # A missing marker is expected on the first automated build. Other Git
-        # failures must fail the check rather than silently schedule a build.
-        has_state = bool(git("ls-tree", sha, "--", STATE_PATH).strip())
-        previous = (
-            git("show", f"{sha}:{STATE_PATH}").decode().strip() if has_state else None
-        )
-        age = time.time() - int(git("show", "-s", "--format=%ct", sha))
-        if not should_force and previous == digest:
-            print(f"{branch}: Dokka inputs are unchanged.")
-        elif not should_force and quiet_minutes > 0 and age < quiet_minutes * 60:
-            print(f"{branch}: waiting for {quiet_minutes} quiet minutes.")
-        else:
-            updates.append({"branch": branch, "sha": sha, "digest": digest})
-            print(f"{branch}: regenerate Dokka for {sha}.")
+def plan(quiet_minutes, should_force):
+    """Regenerate released documentation only when master has changed and is quiet."""
+    sha = git("rev-parse", "refs/remotes/origin/master").decode().strip()
+    digest = fingerprint(sha)
+    # A missing marker is expected on the first automated build. Other Git
+    # failures must fail the check rather than silently schedule a build.
+    has_state = bool(git("ls-tree", sha, "--", STATE_PATH).strip())
+    previous = git("show", f"{sha}:{STATE_PATH}").decode().strip() if has_state else None
+    age = time.time() - int(git("show", "-s", "--format=%ct", sha))
+    has_input_changed = previous != digest
+    has_quiet_period_elapsed = quiet_minutes == 0 or age >= quiet_minutes * 60
+    should_generate = should_force or (has_input_changed and has_quiet_period_elapsed)
+    if should_generate:
+        print(f"master: regenerate Dokka for {sha}.")
+    elif not has_input_changed:
+        print("master: Dokka inputs are unchanged.")
+    else:
+        print(f"master: waiting for {quiet_minutes} quiet minutes.")
     if output := os.environ.get("GITHUB_OUTPUT"):
         with open(output, "a") as stream:
-            stream.write(f"matrix={json.dumps({'include': updates})}\n")
-            stream.write(f"has_updates={str(bool(updates)).lower()}\n")
+            stream.write(f"source_sha={sha}\n")
+            stream.write(f"input_digest={digest}\n")
+            stream.write(f"should_generate={str(should_generate).lower()}\n")
 
 
 def record(digest):
@@ -89,14 +86,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     planner = commands.add_parser("plan")
-    planner.add_argument("branches", nargs="+")
     planner.add_argument("--quiet-minutes", type=int, default=10)
     planner.add_argument("--force", action="store_true")
     recorder = commands.add_parser("record")
     recorder.add_argument("digest")
     args = parser.parse_args()
     if args.command == "plan":
-        plan(args.branches, args.quiet_minutes, args.force)
+        plan(args.quiet_minutes, args.force)
     else:
         record(args.digest)
 

@@ -58,19 +58,21 @@ git push --force-with-lease origin feature/my-feature
 
 ## Release Flow: develop to master
 
-Before moving `develop` to `master`, let Update Dokka refresh `develop`, or run
-the workflow manually for `develop` to check immediately.
+After moving `develop` to `master`, Update Dokka refreshes the released API
+reference. Documentation generation does not run automatically on `develop`.
 
 Expected release preparation:
 
 1. Merge the planned feature PRs into `develop`.
-2. Wait for the automated Dokka commit, or run Update Dokka manually for `develop`.
-3. Run release validation from `develop`.
-4. Fast-forward `master` from `develop`.
-5. Tag the release from `master`.
+2. Run release validation from `develop`.
+3. Fast-forward `master` from `develop`.
+4. Tag the release from `master`.
+5. Let Update Dokka refresh `master`, or run it manually on `master` to check immediately.
 
-The generated input marker moves with the release, so unchanged inputs on
-`master` do not cause another generation job.
+When `master` and `develop` still have the same full commit SHA and 0/0 divergence,
+Update Dokka advances both to one shared documentation commit. If they differ,
+only `master` receives the update. The optional `develop` update never blocks
+publication on an unchanged `master` source commit.
 
 The release merge from `develop` to `master` must preserve commit object IDs. Do not use GitHub's PR merge buttons for `develop -> master`.
 
@@ -163,17 +165,16 @@ If manual deployment is added, the job must still guard against `develop`:
 if: github.ref == 'refs/heads/master'
 ```
 
-Update Dokka commits generated output on `master` and `develop`. A manual run
-can also commit it to a selected feature branch. Publishing is restricted to
-`master`.
+Update Dokka generates and publishes from `master` only. It also fast-forwards
+`develop` to the same documentation commit when both branches are exactly aligned.
 
 ## Generated Dokka Documentation
 
 Generated Dokka output lives under `docs/docs`.
 
-Ordinary feature work should leave `docs/docs` generation to the automated
-workflow after merge. Manual Update Dokka runs on feature branches are available
-when a committed preview is needed.
+Feature work should leave `docs/docs` generation to the automated workflow after
+the release fast-forward to `master`. Manual Update Dokka runs are restricted
+to `master`.
 
 Preferred feature shape:
 
@@ -183,10 +184,11 @@ Preferred feature shape:
 
 Feature PR CI may run Dokka as a validation step, but the generated output should stay as a CI artifact or temporary local output, not as committed source.
 
-After merges, Update Dokka checks both integration branches every 15 minutes
-and waits for a 10-minute quiet period. It generates only when source or build
-inputs differ from the last successful documentation build, then commits to the
-same branch. Manual runs on any branch check immediately. See
+Update Dokka checks `master` every 15 minutes and waits for a 10-minute quiet
+period. It generates only when source or build inputs differ from the last
+successful documentation build, then commits to `master`. Exactly aligned
+`develop` receives the same commit through an atomic fast-forward; otherwise it
+is left untouched. Manual runs on `master` check immediately. See
 [Documentation Workflow](DOCUMENTATION.md#automatic-and-manual-updates) for
 credentials, controls and local generation.
 
@@ -234,6 +236,6 @@ Recommended order:
 2. Remove generated Dokka changes from the feature branches.
 3. Open both PRs against `develop`.
 4. Merge both PRs into `develop`.
-5. Let Update Dokka refresh the final `develop`, or trigger it manually.
-6. Run the normal smoke tests.
-7. Fast-forward `master` from `develop` for the next release.
+5. Run the normal smoke tests.
+6. Fast-forward `master` from `develop` for the next release.
+7. Let Update Dokka refresh `master` and share the commit with aligned `develop`.
