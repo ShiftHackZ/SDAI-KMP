@@ -1,0 +1,36 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        informational: true
+    patch:
+      default:
+        target: auto
+        informational: true
+
+comment:
+  layout: "reach,diff,flags,components,files"
+  behavior: default
+  require_changes: false
+
+component_management:
+  individual_components:
+    - component_id: domain
+      paths: ["domain/**"]
+    - component_id: data
+      paths: ["data/**"]
+    - component_id: network
+      paths: ["network/**"]
+    - component_id: storage
+      paths: ["storage/**"]
+    - component_id: presentation
+      paths: ["presentation/**"]
+    - component_id: core
+      paths: ["core/**"]
+    - component_id: features
+      paths: ["feature/**"]
+    - component_id: app
+      paths: ["app/android/**"]
+    - component_id: demo
+      paths: ["demo/**"]

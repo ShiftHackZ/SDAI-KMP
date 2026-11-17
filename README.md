@@ -3,6 +3,7 @@
 <img src="artwork/icon/sdai.png" alt="SDAI Logo" height="148" width="148">
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21442838.svg)](https://doi.org/10.5281/zenodo.21442838)
+[![Android/JVM coverage](https://codecov.io/gh/ShiftHackZ/SDAI-KMP/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ShiftHackZ/SDAI-KMP)
 
 ![Google Play](https://img.shields.io/endpoint?color=blue&logo=google-play&logoColor=white&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.shifthackz.aisdv1.app%26l%3DGoogle%2520Play%26m%3D%24version)
 ![F-Droid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Ff-droid.org%2Fapi%2Fv1%2Fpackages%2Fcom.shifthackz.aisdv1.app.foss&query=%24.packages%5B0%5D.versionName&label=F-Droid&logo=fdroid&link=https%3A%2F%2Ff-droid.org%2Fpackages%2Fcom.shifthackz.aisdv1.app.foss%2F)
@@ -31,6 +32,7 @@ Root-level Markdown documents:
 - [Nightly Android builds](NIGHTLY_BUILDS.md)
 - [Git workflow](GIT_WORKFLOW.md)
 - [Kotlin lint](KOTLIN_LINT.md)
+- [Unit tests and coverage](TESTING.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)
 
 ## Why SDAI

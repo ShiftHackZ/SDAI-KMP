@@ -1,101 +1,67 @@
-@file:Suppress("UNUSED_VARIABLE")
-
 package com.shifthackz.aisdv1.buildlogic
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.artifact.ScopedArtifact
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.HasUnitTest
+import com.android.build.api.variant.ScopedArtifacts
 import org.gradle.api.Project
-import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.gradle.kotlin.dsl.register
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-private val jacocoExclusions = listOf(
-    "**/R.class",
-    "**/R\$*.class",
-    "**/BuildConfig.*",
-    "**/Manifest*.*",
-    "**/*Test*.*",
-)
+/**
+ * Registers coverage for enabled debug variants using their production class artifacts.
+ * CI selects debug for plain modules and fullDebug for modules with product flavors.
+ * Shared Kotlin sources come from the Android compilation, including dependsOn source sets.
+ *
+ * @author Dmitriy Moroz
+ */
+internal fun Project.jacocoCodeCoverageReporting() {
+    val androidComponents =
+        extensions.getByName("androidComponents") as AndroidComponentsExtension<*, *, *>
+    androidComponents.onVariants(androidComponents.selector().withBuildType("debug")) { variant ->
+        if ((variant as? HasUnitTest)?.unitTest == null) return@onVariants
 
-internal fun Project.jacocoCodeCoverageReporting(
-    commonExtension: BaseExtension,
-) {
-    val buildTypes = commonExtension.buildTypes.map { it.name }
-    val productFlavors = commonExtension
-        .productFlavors
-        .map { it.name }
-        .takeIf(List<String>::isNotEmpty) ?: listOf("")
+        val capitalizedVariant = variant.name.replaceFirstChar(Char::titlecase)
+        val testTaskName = "test${capitalizedVariant}UnitTest"
+        val report = tasks.register<VariantCoverageReport>("jacoco${capitalizedVariant}Report") {
+            group = "verification"
+            description = "Runs $testTaskName and reports Android/JVM coverage for ${variant.name}."
+            dependsOn(testTaskName)
 
-    productFlavors.forEach { productFlavorName ->
-        buildTypes.forEach { buildTypeName ->
-            val (sourceName, sourcePath) = if (productFlavorName.isEmpty()) {
-                buildTypeName to buildTypeName
-            } else {
-                val type = buildTypeName.replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase() else "$it"
-                }
-                Pair(
-                    "${productFlavorName}${type}",
-                    "${productFlavorName}/${buildTypeName}"
-                )
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+                csv.required.set(false)
             }
 
-            val testTaskName = buildString {
-                append("test")
-                append(
-                    sourceName.replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase() else "$it"
-                    }
-                )
-                append("UnitTest")
-            }
-            val jacocoTaskName = buildString {
-                append("jacoco")
-                append(
-                    testTaskName.replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase() else "$it"
-                    }
-                )
-                append("Coverage")
-            }
-            println("[Jacoco] Task -> ${project.displayName.replace("\'", "")}:${jacocoTaskName}")
+            sourceDirectories.from(variant.sources.java?.all, variant.sources.kotlin?.all)
+            sourceDirectories.from(provider {
+                this@jacocoCodeCoverageReporting.extensions
+                    .findByType(KotlinMultiplatformExtension::class.java)
+                    ?.targets?.getByName("android")?.compilations?.getByName(variant.name)
+                    ?.allKotlinSourceSets?.flatMap { it.kotlin.srcDirs }.orEmpty()
+            })
 
-            tasks.register(jacocoTaskName, JacocoReport::class.java) {
-                dependsOn(testTaskName)
-                group = "Reporting"
-                description = buildString {
-                    append("Generate Jacoco coverage reports on the ")
-                    append(
-                        sourceName.replaceFirstChar {
-                            if (it.isLowerCase()) it.titlecase() else "$it"
-                        }
+            // AGP stores only this variant's unit-test execution data here.
+            executionData.from(
+                fileTree(
+                    layout.buildDirectory.dir(
+                        "outputs/unit_test_code_coverage/${variant.name}UnitTest"
                     )
-                    append(" build")
-                }
+                ) { include("*.exec") })
+        }
 
-                reports {
-                    xml.required.set(false)
-                    csv.required.set(false)
-                    html.required.set(true)
-                }
+        variant.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).use(report).toGet(
+            ScopedArtifact.CLASSES,
+            VariantCoverageReport::classJars,
+            VariantCoverageReport::classFolders,
+        )
 
-                sourceDirectories.setFrom(layout.projectDirectory.dir("src/main"))
-
-                classDirectories.setFrom(
-                    files(
-                        fileTree(layout.buildDirectory.dir("intermediates/javac/")) {
-                            exclude(jacocoExclusions)
-                        },
-                        fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/")) {
-                            exclude(jacocoExclusions)
-                        },
-                    )
-                )
-
-                executionData.setFrom(
-                    files(
-                        fileTree(layout.buildDirectory) {
-                            include("**/*.exec", "**/*.ec")
-                        }
-                    )
-                )
+        if (variant.name == "debug" || variant.name == "fullDebug") {
+            tasks.register("ciCoverage") {
+                group = "verification"
+                description = "Runs the selected Android/JVM unit tests and generates coverage."
+                dependsOn(report)
             }
         }
     }
