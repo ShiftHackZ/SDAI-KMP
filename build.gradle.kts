@@ -16,31 +16,8 @@ plugins {
 
 apply(from = "gradle/kotlin-lint.gradle.kts")
 
-val documentedProjects = listOf(
-    ":app",
-    ":core:common",
-    ":core:imageprocessing",
-    ":core:localization",
-    ":core:notification",
-    ":core:navigation",
-    ":core:ui",
-    ":core:validation",
-    ":data",
-    ":demo",
-    ":domain",
-    ":feature:auth",
-    ":feature:openai-oauth",
-    ":feature:benchmark",
-    ":feature:bonsai",
-    ":feature:coreml",
-    ":feature:onnx",
-    ":feature:mediapipe",
-    ":feature:sdxl",
-    ":feature:work",
-    ":network",
-    ":presentation",
-    ":storage",
-)
+// Grouping projects such as :core and :feature have no build script or sources.
+val documentedProjects = subprojects.filter { it.buildFile.isFile }
 
 dokka {
     moduleName.set("SDAI")
@@ -50,36 +27,34 @@ dokka {
 }
 
 dependencies {
-    documentedProjects.forEach { dokka(project(it)) }
+    documentedProjects.forEach { dokka(project(it.path)) }
 }
 
-subprojects {
-    if (path in documentedProjects) {
-        pluginManager.apply("org.jetbrains.dokka")
+configure(documentedProjects) {
+    pluginManager.apply("org.jetbrains.dokka")
 
-        dokka {
-            moduleName.set(path.removePrefix(":").replace(':', '/'))
-            modulePath.set(path.removePrefix(":").replace(':', '/'))
-            dokkaSourceSets.configureEach {
-                documentedVisibilities.set(
-                    setOf(
-                        VisibilityModifier.Public,
-                        VisibilityModifier.Protected,
-                        VisibilityModifier.Internal,
-                        VisibilityModifier.Private,
+    dokka {
+        moduleName.set(path.removePrefix(":").replace(':', '/'))
+        modulePath.set(path.removePrefix(":").replace(':', '/'))
+        dokkaSourceSets.configureEach {
+            documentedVisibilities.set(
+                setOf(
+                    VisibilityModifier.Public,
+                    VisibilityModifier.Protected,
+                    VisibilityModifier.Internal,
+                    VisibilityModifier.Private,
+                )
+            )
+            sourceLink {
+                localDirectory.set(projectDir.resolve("src"))
+                remoteUrl.set(
+                    URI(
+                        "https://github.com/ShiftHackZ/SDAI-KMP/tree/master/" +
+                                projectDir.relativeTo(rootProject.projectDir).path +
+                                "/src"
                     )
                 )
-                sourceLink {
-                    localDirectory.set(projectDir.resolve("src"))
-                    remoteUrl.set(
-                        URI(
-                            "https://github.com/ShiftHackZ/SDAI-KMP/tree/master/" +
-                                    projectDir.relativeTo(rootProject.projectDir).path +
-                                    "/src"
-                        )
-                    )
-                    remoteLineSuffix.set("#L")
-                }
+                remoteLineSuffix.set("#L")
             }
         }
     }

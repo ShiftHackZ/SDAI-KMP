@@ -1,8 +1,10 @@
 name: Update Dokka
 
 on:
-  schedule:
-    - cron: "7,22,37,52 * * * *"
+  push:
+    branches: [master]
+    paths-ignore:
+      - "docs/**"
   workflow_dispatch:
     inputs:
       force:
@@ -18,7 +20,10 @@ jobs:
     name: Check documentation inputs
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
+    concurrency:
+      group: dokka-plan-${{ github.event_name == 'push' && 'master-push' || github.run_id }}
+      cancel-in-progress: true
     outputs:
       source_sha: ${{ steps.plan.outputs.source_sha }}
       input_digest: ${{ steps.plan.outputs.input_digest }}
@@ -29,19 +34,39 @@ jobs:
           sparse-checkout: scripts
 
       - name: Inspect documentation inputs
-        id: plan
+        id: inspect
         env:
           SHOULD_FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
-          IS_MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           set -euo pipefail
-          quiet_minutes=10
-          if [[ "${IS_MANUAL}" == "true" ]]; then
-            quiet_minutes=0
-          fi
           git fetch --no-tags --depth=1 origin \
             +refs/heads/master:refs/remotes/origin/master
-          args=(--quiet-minutes "${quiet_minutes}")
+          args=()
+          if [[ "${SHOULD_FORCE}" == "true" ]]; then
+            args+=(--force)
+          fi
+          python3 scripts/dokka.py plan "${args[@]}"
+
+      - name: Wait for the merge batch to settle
+        if: github.event_name == 'push' && steps.inspect.outputs.should_generate == 'true'
+        run: |
+          echo "Waiting 5 minutes before generation; a newer push replaces this pending check."
+          sleep 300
+
+      - name: Plan generation from current master
+        id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EXPECTED_DIGEST: ${{ steps.inspect.outputs.input_digest }}
+          SHOULD_FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin \
+            +refs/heads/master:refs/remotes/origin/master
+          args=()
+          if [[ "${EVENT_NAME}" == "push" ]]; then
+            args+=(--expected-digest "${EXPECTED_DIGEST}")
+          fi
           if [[ "${SHOULD_FORCE}" == "true" ]]; then
             args+=(--force)
           fi
@@ -92,7 +117,7 @@ jobs:
           if [[ "$(git rev-parse FETCH_HEAD)" == "${SOURCE_SHA}" ]]; then
             echo "should_generate=true" >> "${GITHUB_OUTPUT}"
           else
-            echo "::notice::Master advanced; the next scheduled check will inspect its latest inputs."
+            echo "::notice::Master advanced; the next check will inspect its latest inputs."
           fi
 
       - uses: actions/setup-java@v4
@@ -131,7 +156,7 @@ jobs:
           git fetch --no-tags --depth=1 origin refs/heads/master
           master_sha="$(git rev-parse FETCH_HEAD)"
           if [[ "${master_sha}" != "${SOURCE_SHA}" ]]; then
-            echo "::notice::Master advanced during generation; leaving it for the next scheduled check."
+            echo "::notice::Master advanced during generation; leaving it for the next check."
             exit 0
           fi
           refspecs=(HEAD:refs/heads/master)
@@ -167,7 +192,7 @@ jobs:
             echo "::warning::Optional develop update failed; rechecking master before publishing it alone."
             git fetch --no-tags --depth=1 origin refs/heads/master
             if [[ "$(git rev-parse FETCH_HEAD)" != "${SOURCE_SHA}" ]]; then
-              echo "::notice::Master changed; the next scheduled check will inspect its latest inputs."
+              echo "::notice::Master changed; the next check will inspect its latest inputs."
               exit 0
             fi
           fi

@@ -210,10 +210,11 @@ When changing a signature or class shape:
 
 ### Automatic and manual updates
 
-[Update Dokka](.github/workflows/dokka.yml) checks `master` every
-15 minutes. It must have been quiet for 10 minutes before generation
-starts. Closely spaced merges are therefore included in one update. GitHub may
-delay scheduled runs, so these intervals are not a delivery guarantee.
+[Update Dokka](.github/workflows/dokka.yml) checks `master` after pushes and
+waits for a 5-minute quiet period before generation. A newer push replaces the
+pending check, batching closely spaced merges into one update. Only the lightweight
+Ubuntu check waits; the macOS generation job starts afterward. Pushes that change
+only `docs/` are ignored, preventing generated documentation from triggering itself.
 
 The lightweight check fingerprints Kotlin/Java sources (including KDoc), source
 Markdown and Gradle configuration. Additions, changes and deletions all count;
@@ -247,7 +248,7 @@ through the normal hotfix workflow when the branches have already diverged.
 
 ### Automation setup
 
-Merge the workflow and its helper into the default branch to enable scheduled
+Merge the workflow and its helper into `master` to enable automatic push-triggered
 runs. Configure the repository secret `DOKKA_PUSH_TOKEN` with a dedicated
 maintenance account's token, scoped to this repository with **Contents: read and
 write**. The account must be authorized to push directly to the target branches
@@ -257,8 +258,7 @@ The built-in `GITHUB_TOKEN` does not bypass required PR reviews and its commits
 do not trigger branch-based GitHub Pages builds. The dedicated writer allows
 `master` documentation commits to trigger the existing `master` / `docs` Pages
 publication. `develop` does not generate or publish documentation independently.
-Generated-only pushes skip Project Tests. No documentation commit triggers
-another Dokka run; the next scheduled check sees the matching fingerprint.
+Generated-only pushes skip Project Tests and do not trigger another Dokka run.
 
 ### Local generation
 
@@ -268,26 +268,10 @@ Run Dokka from the repository root:
 ./gradlew dokkaGeneratePublicationHtml
 ```
 
-The root Gradle build aggregates these documented modules:
-
-- `:app`
-- `:core:common`
-- `:core:imageprocessing`
-- `:core:localization`
-- `:core:notification`
-- `:core:ui`
-- `:core:validation`
-- `:data`
-- `:demo`
-- `:domain`
-- `:feature:auth`
-- `:feature:benchmark`
-- `:feature:onnx`
-- `:feature:mediapipe`
-- `:feature:work`
-- `:network`
-- `:presentation`
-- `:storage`
+The root Gradle build discovers all subprojects with their own build script,
+applies Dokka to them, and aggregates their API documentation. Grouping projects
+such as `:core` and `:feature` have no build script and are excluded. The separate
+`build-logic` included build is not part of the application's API reference.
 
 The generated HTML is written to:
 
@@ -318,8 +302,8 @@ Do not hand-edit generated files under `docs/docs/` for API text changes. Update
 KDoc in source code and regenerate Dokka instead. Hand edits in generated HTML
 will be overwritten by the next Dokka run.
 
-When adding a new Gradle module that should appear in the API reference, add it
-to `documentedProjects` in the root `build.gradle.kts`.
+New modules included in `settings.gradle.kts` are documented automatically when
+they have their own build script; no separate Dokka module list is maintained.
 
 ## Pre-Release Checklist
 
