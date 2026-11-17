@@ -16,12 +16,14 @@ interface MnnRuntime {
      *
      * @author Dmitriy Moroz
      */
-    fun generate(request: NativeGenerationRequest, onProgress: (Int) -> Unit): ByteArray
+    suspend fun generate(request: NativeGenerationRequest, onProgress: (Int) -> Unit): ByteArray
 
     /**
      * Requests cancellation without concurrently destroying the executing runtime.
      *
+     * @param ownerId Optional exact Apple operation identity; Android uses its host gateway for named cancellation.
+     *
      * @author Dmitriy Moroz
      */
-    fun interrupt()
+    fun interrupt(ownerId: String? = null)
 }

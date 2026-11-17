@@ -2,6 +2,7 @@
 #include "MNN_generated.h"
 #include <algorithm>
 #include <cstring>
+#include <cmath>
 #include <map>
 #include <limits>
 #include <set>
@@ -78,12 +79,12 @@ public:
         }
     }
 
-    ShapeValue shapeValue(int tensor, int query, int key, int depth = 0) const {
+    ShapeValue shapeValue(int tensor, int query, int key, int depth = 0, int arithmeticBound = 4) const {
         require(depth < 128);
         const auto& op = producer(tensor);
         auto input = [&](size_t index) {
             require(index < op.inputIndexes.size());
-            return shapeValue(op.inputIndexes[index], query, key, depth + 1);
+            return shapeValue(op.inputIndexes[index], query, key, depth + 1, arithmeticBound);
         };
         auto scalar = [&](size_t index) {
             auto value = input(index);
@@ -140,7 +141,7 @@ public:
                 auto left = input(0);
                 auto right = input(1);
                 require(left.values.size() == 1 && right.values.size() == 1 &&
-                    left.values[0] >= -4 && left.values[0] <= 4 && right.values[0] >= -4 && right.values[0] <= 4);
+                    left.values[0] >= -arithmeticBound && left.values[0] <= arithmeticBound && right.values[0] >= -arithmeticBound && right.values[0] <= arithmeticBound);
                 int64_t value;
                 if (param->opType == MNN::BinaryOpOperation_ADD) value = left.values[0] + right.values[0];
                 else if (param->opType == MNN::BinaryOpOperation_MOD) {
@@ -150,7 +151,7 @@ public:
                     require(param->opType == MNN::BinaryOpOperation_SUB);
                     value = left.values[0] - right.values[0];
                 }
-                require(value >= -4 && value <= 4);
+                require(value >= -arithmeticBound && value <= arithmeticBound);
                 return {{value}, left.isScalar && right.isScalar};
             }
             case MNN::OpType_StridedSlice: {
@@ -259,4 +260,159 @@ std::vector<uint8_t> scalarizePinnedUnetBiases(const std::vector<uint8_t>& origi
     builder.Finish(MNN::Net::Pack(builder, net.get()));
     return {builder.GetBufferPointer(), builder.GetBufferPointer() + builder.GetSize()};
 }
+
+std::vector<uint8_t> boundPinnedMetalAttention(const std::vector<uint8_t>& original) {
+    const auto scalarized = scalarizePinnedUnetBiases(original);
+    std::unique_ptr<NetT> net(MNN::GetNet(scalarized.data())->UnPack());
+    Graph graph(*net);
+    auto literal = [&](int tensor, int expected) {
+        const auto value = graph.shapeValue(tensor, -1, -1);
+        require(value.values == std::vector<int64_t>{expected});
+    };
+    auto unsqueezed = [&](int tensor) {
+        const auto& op = graph.producer(tensor);
+        require(op.type == MNN::OpType_Unsqueeze && !op.inputIndexes.empty());
+        if (op.inputIndexes.size() == 2) literal(op.inputIndexes[1], 0);
+        else {
+            const auto* param = op.main.AsSqueezeParam();
+            require(param && param->squeezeDims == std::vector<int>{0});
+        }
+        return op.inputIndexes[0];
+    };
+    // The pinned export flattens batch*8 heads before attention. A singleton
+    // head axis preserves that layout exactly, without touching head permutations.
+    auto depth = [&](int tensor) {
+        graph.requireRankThreeReshape(tensor);
+        const auto& reshape3 = graph.producer(tensor);
+        const auto& permutation = graph.producer(reshape3.inputIndexes[0]);
+        require(permutation.type == MNN::OpType_Permute && permutation.inputIndexes.size() == 1 &&
+            permutation.main.AsPermute() && permutation.main.AsPermute()->dims == std::vector<int>({0, 2, 1, 3}));
+        const auto& reshape4 = graph.producer(permutation.inputIndexes[0]);
+        require(reshape4.type == MNN::OpType_Reshape && reshape4.inputIndexes.size() == 2);
+        const int base = reshape4.inputIndexes[0];
+        const auto& baseOp = graph.producer(base);
+        require(baseOp.type == MNN::OpType_Reshape && baseOp.inputIndexes.size() == 2);
+        const auto& baseShape = graph.producer(baseOp.inputIndexes[1]);
+        require(baseShape.type == MNN::OpType_Concat && baseShape.main.AsAxis() && baseShape.main.AsAxis()->axis == 0 &&
+            baseShape.inputIndexes.size() == 3);
+        const auto channels = graph.shapeValue(baseShape.inputIndexes[2], -1, -1).values;
+        require(channels.size() == 1 && (channels[0] == 320 || channels[0] == 640 || channels[0] == 1280));
+        const auto& shape3 = graph.producer(reshape3.inputIndexes[1]);
+        const auto& shape4 = graph.producer(reshape4.inputIndexes[1]);
+        require(shape3.main.AsAxis() && shape3.main.AsAxis()->axis == 0 && shape3.inputIndexes.size() == 3 &&
+            shape4.type == MNN::OpType_Concat && shape4.main.AsAxis() && shape4.main.AsAxis()->axis == 0 &&
+            shape4.inputIndexes.size() == 4);
+        const int batchHeads = unsqueezed(shape3.inputIndexes[0]);
+        const int sequence = unsqueezed(shape3.inputIndexes[1]);
+        const int headDepth = unsqueezed(shape3.inputIndexes[2]);
+        const auto& multiply = graph.producer(batchHeads);
+        const auto& divide = graph.producer(headDepth);
+        require(multiply.type == MNN::OpType_BinaryOp && multiply.main.AsBinaryOp() &&
+            multiply.main.AsBinaryOp()->opType == MNN::BinaryOpOperation_MUL && multiply.inputIndexes.size() == 2);
+        require(divide.type == MNN::OpType_BinaryOp && divide.main.AsBinaryOp() &&
+            divide.main.AsBinaryOp()->opType == MNN::BinaryOpOperation_REALDIV && divide.inputIndexes.size() == 2);
+        literal(multiply.inputIndexes[1], 8);
+        literal(divide.inputIndexes[1], 8);
+        literal(shape4.inputIndexes[2], 8);
+        auto gather = [&](int value, int index) {
+            const auto& op = graph.producer(value);
+            require(op.type == MNN::OpType_GatherV2 && op.inputIndexes.size() == 3);
+            const auto& shape = graph.producer(op.inputIndexes[0]);
+            require(shape.type == MNN::OpType_Shape && shape.inputIndexes == std::vector<int>{base});
+            require(graph.shapeValue(op.inputIndexes[2], base, -1, 0, 8).values == std::vector<int64_t>{0});
+            const auto selected = graph.shapeValue(op.inputIndexes[1], base, -1, 0, 8);
+            require(selected.values == std::vector<int64_t>{index});
+        };
+        gather(multiply.inputIndexes[0], 0);
+        gather(sequence, 1);
+        gather(divide.inputIndexes[0], 2);
+        require(unsqueezed(shape4.inputIndexes[0]) == multiply.inputIndexes[0] &&
+            unsqueezed(shape4.inputIndexes[1]) == sequence && unsqueezed(shape4.inputIndexes[3]) == headDepth);
+        return static_cast<int>(channels[0] / 8);
+    };
+    struct Fusion { int query, key, value; };
+    std::map<OpT*, Fusion> fusions;
+    for (const auto& op : net->oplists) {
+        if (op->type != MNN::OpType_Softmax) continue;
+        require(op->main.AsAxis() && op->main.AsAxis()->axis == -1 && op->outputIndexes.size() == 1 &&
+            graph.consumers.at(op->outputIndexes[0]) == 1);
+        const auto& add = graph.producer(op->inputIndexes[0]);
+        graph.requireBinary(add, MNN::BinaryOpOperation_ADD);
+        require(graph.isPositiveZero(add.inputIndexes[1]));
+        const auto& scale = graph.producer(add.inputIndexes[0]);
+        graph.requireBinary(scale, MNN::BinaryOpOperation_MUL);
+        require(graph.consumers.at(add.outputIndexes[0]) == 1 &&
+            graph.consumers.at(scale.outputIndexes[0]) == 1);
+        const auto& qk = graph.producer(scale.inputIndexes[0]);
+        const auto* qkParam = qk.main.AsMatMul();
+        require(qk.type == MNN::OpType_MatMul && qk.inputIndexes.size() == 2 && qkParam &&
+            qkParam->T == MNN::DataType_DT_FLOAT && !qkParam->transposeA && !qkParam->transposeB);
+        require(qk.outputIndexes.size() == 1 && graph.consumers.at(qk.outputIndexes[0]) == 1);
+        const auto& transpose = graph.producer(qk.inputIndexes[1]);
+        require(transpose.type == MNN::OpType_Permute && transpose.main.AsPermute() &&
+            transpose.main.AsPermute()->dims == std::vector<int>({0, 2, 1}) && transpose.inputIndexes.size() == 1);
+        OpT* av = nullptr;
+        for (const auto& candidate : net->oplists) {
+            if (!candidate->inputIndexes.empty() && candidate->inputIndexes[0] == op->outputIndexes[0]) av = candidate.get();
+        }
+        require(av && av->type == MNN::OpType_MatMul && av->inputIndexes.size() == 2 && av->outputIndexes.size() == 1);
+        const auto* avParam = av->main.AsMatMul();
+        require(avParam && avParam->T == MNN::DataType_DT_FLOAT && !avParam->transposeA && !avParam->transposeB);
+        const int query = qk.inputIndexes[0], key = transpose.inputIndexes[0], value = av->inputIndexes[1];
+        const int headDepth = depth(query);
+        require(depth(key) == headDepth && depth(value) == headDepth);
+        const auto& scaleOp = graph.producer(scale.inputIndexes[1]);
+        const auto* scalar = scaleOp.main.AsBlob();
+        require(scaleOp.type == MNN::OpType_Const && scalar && scalar->external.empty() &&
+            scalar->dataType == MNN::DataType_DT_FLOAT && scalar->float32s.size() == 1 &&
+            std::abs(scalar->float32s[0] - 1.0f / std::sqrt(static_cast<float>(headDepth))) < 1.0e-7f);
+        fusions.emplace(av, Fusion{query, key, value});
+    }
+    require(fusions.size() == 32);
+    std::vector<std::unique_ptr<OpT>> rewritten;
+    for (auto& op : net->oplists) {
+        const auto fusion = fusions.find(op.get());
+        if (fusion != fusions.end()) {
+            std::vector<int> inputs;
+            for (int originalTensor : {fusion->second.query, fusion->second.key, fusion->second.value}) {
+                auto expand = std::make_unique<OpT>();
+                expand->name = "sdai_metal_attention_axis_" + std::to_string(net->tensorName.size());
+                expand->type = MNN::OpType_Unsqueeze;
+                MNN::SqueezeParamT param;
+                param.squeezeDims = {2};
+                expand->main.Set(std::move(param));
+                expand->inputIndexes = {originalTensor};
+                expand->outputIndexes = {static_cast<int>(net->tensorName.size())};
+                net->tensorName.push_back(expand->name);
+                inputs.push_back(expand->outputIndexes[0]);
+                rewritten.push_back(std::move(expand));
+            }
+            op->type = MNN::OpType_Attention;
+            MNN::AttentionParamT param;
+            param.kv_cache = false;
+            param.output_c4 = false;
+            op->main.Set(std::move(param));
+            op->inputIndexes = std::move(inputs);
+        }
+        rewritten.push_back(std::move(op));
+    }
+    net->oplists = std::move(rewritten);
+    Graph updated(*net);
+    std::set<OpT*> live;
+    const auto output = std::find(net->tensorName.begin(), net->tensorName.end(), "out_sample");
+    require(output != net->tensorName.end());
+    std::vector<int> pending{static_cast<int>(output - net->tensorName.begin())};
+    while (!pending.empty()) {
+        const int tensor = pending.back(); pending.pop_back();
+        auto& producer = updated.producer(tensor);
+        if (!live.insert(&producer).second) continue;
+        pending.insert(pending.end(), producer.inputIndexes.begin(), producer.inputIndexes.end());
+    }
+    net->oplists.erase(std::remove_if(net->oplists.begin(), net->oplists.end(),
+        [&](const auto& op) { return live.count(op.get()) == 0; }), net->oplists.end());
+    flatbuffers::FlatBufferBuilder builder;
+    builder.Finish(MNN::Net::Pack(builder, net.get()));
+    return {builder.GetBufferPointer(), builder.GetBufferPointer() + builder.GetSize()};
+}
+
 }

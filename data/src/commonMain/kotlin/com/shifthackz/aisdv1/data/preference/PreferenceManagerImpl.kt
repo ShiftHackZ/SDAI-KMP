@@ -523,7 +523,12 @@ internal class PreferenceManagerImpl(
      * @author Dmitriy Moroz
      */
     override var localMnnBackend: MnnBackend
-        get() = MnnBackend.parse(keyValueStore.getString(KEY_MNN_BACKEND))
+        get() {
+            val raw = keyValueStore.getString(KEY_MNN_BACKEND)
+            val backend = MnnBackend.parse(raw)
+            if (raw != backend.key) keyValueStore.putString(KEY_MNN_BACKEND, backend.key)
+            return backend
+        }
         set(value) = putString(KEY_MNN_BACKEND, value.key)
 
     /**

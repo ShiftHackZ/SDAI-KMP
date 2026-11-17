@@ -741,6 +741,7 @@
     <!-- MNN SD 1.5 -->
     <string name="srv_type_mnn">MNN SD 1.5</string>
     <string name="hint_mnn_profile">单张 512×512 图像，PNDM，CFG 7.5，1–50 步。支持 CPU 或 OpenCL。</string>
+    <string name="hint_mnn_profile_ios">单张512×512图像，PNDM，CFG 7.5，1–50步。CPU或Metal。</string>
     <string name="hint_mnn_backend">MNN 后端</string>
     <string name="settings_usage_summary_models_mnn">MNN 模型</string>
     <string name="local_catalog_loading">正在加载模型目录</string>

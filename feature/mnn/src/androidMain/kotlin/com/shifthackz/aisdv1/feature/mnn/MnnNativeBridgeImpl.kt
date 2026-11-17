@@ -29,7 +29,11 @@ internal class MnnNativeBridgeImpl(
      *
      * @author Dmitriy Moroz
      */
-    override fun generate(request: NativeGenerationRequest, onProgress: (Int) -> Unit): ByteArray {
+    override suspend fun generate(
+        request: NativeGenerationRequest,
+        onProgress: (Int) -> Unit
+    ): ByteArray {
+        require(request.payload.mnnBackend != MnnBackend.METAL) { "Metal is unavailable on Android" }
         return modelOwner.acquire(
             request.modelPath,
             requireNotNull(request.payload.mnnActivationId)
@@ -61,9 +65,12 @@ internal class MnnNativeBridgeImpl(
     /**
      * Signals a native atomic flag; gateway termination bounds an unresponsive driver.
      *
+     * @param ownerId Must be absent; exact Android worker ownership belongs to the host gateway.
+     *
      * @author Dmitriy Moroz
      */
-    override fun interrupt() {
+    override fun interrupt(ownerId: String?) {
+        require(ownerId == null) { "Android owner interruption belongs to the host gateway" }
         if (isLoaded) interruptNative()
     }
 

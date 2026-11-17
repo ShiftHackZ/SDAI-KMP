@@ -263,6 +263,8 @@ internal fun Module.registerPresentationViewModelBindings() {
         TextToImageViewModel(
             observeEasyDiffusionProgressUseCase = get(),
             nativeGenerationGateway = get(),
+            mnnBackendPolicy = get(),
+            observeMnnProcessStatusUseCase = get(),
             diagnostics = get(),
             openAiOAuthGateway = get(),
             providerSelectionGuard = get(),

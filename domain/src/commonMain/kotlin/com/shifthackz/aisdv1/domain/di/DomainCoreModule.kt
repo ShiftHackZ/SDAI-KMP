@@ -1,5 +1,13 @@
 package com.shifthackz.aisdv1.domain.di
 
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
+
+import com.shifthackz.aisdv1.domain.gateway.MnnBackendPolicyImpl
+
+import com.shifthackz.aisdv1.domain.gateway.MnnBackendPolicy
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.SelectEasyDiffusionModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.SelectEasyDiffusionModelUseCaseImpl
 
@@ -271,6 +279,8 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDomainModule = module {
+    single<MnnBackendPolicy> { MnnBackendPolicyImpl(get()) }
+    factory<ObserveMnnProcessStatusUseCase> { ObserveMnnProcessStatusUseCaseImpl(get()) }
     single<NativeGenerationGateway> { NoOpNativeGenerationGateway }
     single { ProviderSelectionGuard() }
     single<ServerConnectivityGateway> { NoOpServerConnectivityGateway }
@@ -495,6 +505,7 @@ val coreDomainModule = module {
     }
     factory<InterruptWorkerGenerationUseCase> {
         InterruptWorkerGenerationUseCaseImpl(
+            mnnRepository = get(),
             interruptEasyDiffusionUseCase = get(),
             nativeGenerationGateway = get(),
             interruptSourceGenerationUseCase = get(),
@@ -584,6 +595,7 @@ val coreDomainModule = module {
         DefaultGetConfigurationUseCaseImpl(
             configurationStore = get(),
             authorizationStore = get(),
+            mnnBackendPolicy = get(),
         )
     }
     factory<SetServerConfigurationUseCase> {

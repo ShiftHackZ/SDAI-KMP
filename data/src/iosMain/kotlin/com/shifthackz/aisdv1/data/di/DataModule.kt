@@ -4,23 +4,33 @@ import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.data.gateway.mediastore.IosMediaStoreGateway
 import com.shifthackz.aisdv1.data.local.DownloadableModelFileStore
 import com.shifthackz.aisdv1.data.local.IosDownloadableModelFileStore
+import com.shifthackz.aisdv1.data.local.IosMnnModelFileStore
+import com.shifthackz.aisdv1.data.repository.MnnGenerationRepositoryImpl
+import com.shifthackz.aisdv1.data.validator.MnnBundleValidatorImpl
+import com.shifthackz.aisdv1.domain.validator.MnnBundleValidator
+import com.shifthackz.aisdv1.domain.repository.MnnGenerationRepository
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
 import com.shifthackz.aisdv1.data.remote.DownloadableModelFileDownloader
 import com.shifthackz.aisdv1.data.remote.IosDownloadableModelFileDownloader
 import com.shifthackz.aisdv1.data.repository.IosWakeLockRepository
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 import com.shifthackz.aisdv1.domain.repository.WakeLockRepository
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import platform.Foundation.NSBundle
 import platform.Foundation.NSHomeDirectory
 
 /**
- * Exposes the `iosDataOverridesModule` value used by the SDAI data layer.
+ * Replaces unsupported defaults with iOS storage, export and injected MNN generation.
  *
  * @author Dmitriy Moroz
  */
 private val iosDataOverridesModule = module {
+    singleOf(::MnnBundleValidatorImpl) bind MnnBundleValidator::class
+    singleOf(::IosMnnModelFileStore) bind MnnModelStore::class
+    singleOf(::MnnGenerationRepositoryImpl) bind MnnGenerationRepository::class
     single<FileProviderDescriptor> {
         IosFileProviderDescriptor()
     }
@@ -35,7 +45,7 @@ private val iosDataOverridesModule = module {
 }
 
 /**
- * Exposes the `dataModule` value used by the SDAI data layer.
+ * Installs iOS repositories after the common data graph.
  *
  * @author Dmitriy Moroz
  */

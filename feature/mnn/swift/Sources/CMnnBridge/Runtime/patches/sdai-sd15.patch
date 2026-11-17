@@ -1,15 +1,16 @@
 --- a/transformers/diffusion/engine/src/stable_diffusion.cpp
 +++ b/transformers/diffusion/engine/src/stable_diffusion.cpp
-@@ -1,4 +1,8 @@
+@@ -1,4 +1,9 @@
  #include <random>
 +#include "sdai_unet_graph.hpp"
++#include "sdai_pndm_timesteps.hpp"
 +#include <stdexcept>
 +#include <cmath>
-+#include <cstdlib>
++#include "sdai_attempt.hpp"
  #include <fstream>
  #include <chrono>
  #include "diffusion/stable_diffusion.hpp"
-@@ -25,6 +29,72 @@
+@@ -25,6 +30,73 @@
  
  namespace MNN {
  namespace DIFFUSION {
@@ -39,7 +40,7 @@
 +}
 +
 +std::shared_ptr<Module> loadStage(const std::string& root, int index,
-+        const std::shared_ptr<Executor::RuntimeManager>& manager) {
++        const std::shared_ptr<Executor::RuntimeManager>& manager, bool useMetalAttention = false) {
 +    static const std::vector<std::string> names = {"text_encoder", "unet", "vae_decoder"};
 +    static const std::vector<std::vector<std::string>> inputs = {
 +        {"input_ids"}, {"sample", "timestep", "encoder_hidden_states"}, {"latent_sample"}
@@ -61,7 +62,8 @@
 +        if (!stream.read(reinterpret_cast<char*>(original.data()), original.size())) {
 +            throw std::runtime_error("Pinned UNet graph read failed");
 +        }
-+        auto optimized = sdai::scalarizePinnedUnetBiases(original);
++        auto optimized = useMetalAttention ? sdai::boundPinnedMetalAttention(original)
++            : sdai::scalarizePinnedUnetBiases(original);
 +        manager->setExternalFile(path + ".weight");
 +        try {
 +            module.reset(Module::load(inputs[index], outputs[index], optimized.data(), optimized.size(), manager, &config));
@@ -70,7 +72,7 @@
 +            throw;
 +        }
 +        manager->setExternalFile("");
-+        MNN_PRINT("SDAI MNN stage=unet; scalarZeroBiases=32; originalWeights=true\n");
++        MNN_PRINT("SDAI MNN stage=unet; scalarZeroBiases=32; metalBoundedAttention=%d; originalWeights=true\n", useMetalAttention ? 32 : 0);
 +    } else {
 +        module.reset(Module::load(inputs[index], outputs[index], path.c_str(), manager, &config));
 +    }
@@ -82,7 +84,7 @@
  
  StableDiffusion::StableDiffusion(std::string modelPath, DiffusionModelType modelType, MNNForwardType backendType, int memoryMode)
      : Diffusion(modelPath, modelType, backendType, memoryMode) {
-@@ -63,13 +133,12 @@
+@@ -63,13 +135,12 @@
      exe->lazyEval = false;
      exe->setGlobalExecutorConfig(config.type, backendConfig, config.numThread);
      
@@ -94,12 +96,12 @@
      
      if (config.type == MNN_FORWARD_OPENCL) {
 -        const char* cacheFileName = ".tempcache";
-+        const char* cacheFileName = std::getenv("SDAI_MNN_CACHE");
++        const char* cacheFileName = sdai::attemptCachePath();
 +        if (!cacheFileName) throw std::runtime_error("Missing private OpenCL cache");
          runtime_manager_->setCache(cacheFileName);
      }
      // need to consider memory
-@@ -84,40 +153,14 @@
+@@ -84,40 +155,14 @@
      mLatentVar = _Input({1, 4, 64, 64}, NCHW, halide_type_of<float>());
      mPromptVar = _Input({2, mMaxTextLen}, NCHW, halide_type_of<int>());
      mTimestepVar = _Input({1}, NCHW, halide_type_of<int>());
@@ -147,7 +149,7 @@
      // tokenizer loading
      if (mModelType == STABLE_DIFFUSION_1_5) {
          mTokenizer.reset(new MtokTokenizer(MtokTokenizer::Style::kPair, 49406, 49407));
-@@ -132,66 +175,43 @@
+@@ -132,66 +177,43 @@
          return false;
      }
  
@@ -240,7 +242,7 @@
  }
  
  VARP StableDiffusion::step_plms(VARP sample, VARP model_output, int index) {
-@@ -233,9 +253,31 @@
+@@ -233,9 +255,31 @@
  }
  
  VARP StableDiffusion::unet(VARP text_embeddings, int iterNum, int randomSeed, std::function<void(int)> progressCallback) {
@@ -256,7 +258,7 @@
 +    mModules[0].reset();
 +    ExecutorScope::Current()->gc(Executor::FULL);
 +    if (mBackendType == MNN_FORWARD_CPU) {
-+        const char* cache = std::getenv("SDAI_MNN_CACHE");
++        const char* cache = sdai::attemptCachePath();
 +        if (!cache) throw std::runtime_error("Missing private CPU mmap cache");
 +        const std::string cachePath(cache);
 +        const auto separator = cachePath.find_last_of('/');
@@ -271,11 +273,11 @@
 +        runtime_manager_->setHint(Interpreter::USE_CACHED_MMAP, 0);
 +        MNN_PRINT("SDAI MNN stage=unet; cpuMmap=true; chunkMiB=64; reuseCache=false\n");
 +    }
-+    mModules[1] = loadStage(mModelPath, 1, runtime_manager_);
++    mModules[1] = loadStage(mModelPath, 1, runtime_manager_, mBackendType == MNN_FORWARD_METAL);
      if(mInitNoise.size() != 16384) {
          mInitNoise.resize(16384);
      }
-@@ -263,48 +305,49 @@
+@@ -263,48 +307,49 @@
      auto scaleptr = scalevar->writeMap<float>();
      scaleptr[0] = 7.5;
  
@@ -312,7 +314,7 @@
 +        auto noise_pred_uncond = ownedFloatCopy(unconditionalOutputs[0], {1, 4, 64, 64});
 +        unconditionalOutputs.clear();
 +        // Preserve cancellation between branch forwards without claiming a new sampling step.
-+        if (progressCallback) progressCallback((1 + i) * 100 / (iterNum + 3));
++        if (progressCallback) progressCallback(sdai::pndmProgress(1 + i, iterNum));
 +
 +        auto conditionalOutputs = forwardValidated(1, {plms, mTimestepVar, conditionalEmbedding});
 +        auto noise_pred_text = ownedFloatCopy(conditionalOutputs[0], {1, 4, 64, 64});
@@ -324,7 +326,8 @@
 +        // cannot keep prior expression graphs or mutable session outputs alive.
 +        plms = ownedFloatCopy(step_plms(plms, noise_pred, i), {1, 4, 64, 64});
          if (progressCallback) {
-             progressCallback((2 + i) * 100 / (iterNum + 3)); // percent
+-            progressCallback((2 + i) * 100 / (iterNum + 3)); // percent
++            progressCallback(sdai::pndmProgress(2 + i, iterNum)); // percent
          }
      }
 -    plms.fix(VARP::CONSTANT);
@@ -353,15 +356,33 @@
      auto output = _Convert(outputs[0], NCHW);
  
      auto image = output;
-@@ -342,6 +385,7 @@
-         progressCallback(1 * 100 / (iterNum + 3)); // percent
+@@ -328,20 +373,17 @@
+         iterNum = 10;
+         MNN_PRINT("illegal number of iterations, iterations will be set to 10.\n");
      }
-     auto latent = unet(text_embeddings, iterNum, randomSeed, progressCallback);
+-    mTimeSteps.resize(iterNum);
+-    int step = 1000 / iterNum;
+-    for(int i = iterNum - 1; i >= 0; i--) {
+-        mTimeSteps[i] = 1 + (iterNum - 1 - i) * step;
+-    }
++    mTimeSteps = sdai::pndmTimesteps(iterNum);
+ 
+     auto ids = mTokenizer->encode(prompt, mMaxTextLen);
+ 
+     auto text_embeddings = text_encoder(ids);
+ 
+     if (progressCallback) {
+-        progressCallback(1 * 100 / (iterNum + 3)); // percent
+-    }
+-    auto latent = unet(text_embeddings, iterNum, randomSeed, progressCallback);
++        progressCallback(sdai::pndmProgress(1, static_cast<int>(mTimeSteps.size()))); // percent
++    }
++    auto latent = unet(text_embeddings, static_cast<int>(mTimeSteps.size()), randomSeed, progressCallback);
 +    text_embeddings = nullptr;
  
      auto image = vae_decoder(latent);
      bool res = imwrite(imagePath, image);
-@@ -349,14 +393,15 @@
+@@ -349,14 +391,15 @@
          MNN_PRINT("SUCCESS! write generated image to %s\n", imagePath.c_str());
      }
  
@@ -406,12 +427,13 @@
  };
 --- a/source/core/BufferAllocator.cpp
 +++ b/source/core/BufferAllocator.cpp
-@@ -7,6 +7,9 @@
+@@ -7,6 +7,10 @@
  //
  
  #include <string>
 +#if defined(SDAI_MNN_PRIVATE_MMAP)
 +#include <stdexcept>
++#include "sdai_mmap_reservation.hpp"
 +#endif
  #include "core/BufferAllocator.hpp"
  #include "core/Macro.h"
@@ -446,7 +468,7 @@
 +#if defined(SDAI_MNN_PRIVATE_MMAP)
 +        // Reserve real backing before any mapped write: ftruncate alone leaves
 +        // holes whose later ENOSPC would terminate the child with SIGBUS.
-+        const int reserveError = mRemove ? posix_fallocate(file, 0, static_cast<off_t>(size)) : 0;
++        const int reserveError = mRemove ? sdai::reserveBacking(file, size) : 0;
 +        if (reserveError != 0) {
 +            MNN_ERROR("SDAI MNN mmap reservation failed; bytes=%zu; error=%d\n", size, reserveError);
 +            MNNCloseFile(file);
@@ -533,3 +555,147 @@
          mRuntime->mStaticAllocator->sync();
          mRuntime->mStaticAllocator = mRuntime->mStaticAllocatorRaw;
          mRuntime->mStaticAllocatorRaw = nullptr;
+--- a/transformers/llm/engine/src/tokenizer/tokenizer.hpp
++++ b/transformers/llm/engine/src/tokenizer/tokenizer.hpp
+@@ -154,6 +154,8 @@
+     bool is_special(int token);
+     std::vector<int> encode(const std::string& str, bool with_post_processor = true);
+     PostProcessorInfo post_process(std::vector<int>& ids) const { return apply_post_processor(ids); }
++    // Explicit CLIP policy; other tokenizer types retain their original encoding.
++    virtual bool configureClipBpe() { return false; }
+     virtual std::string decode(int id) = 0;
+     virtual std::string decode(const std::vector<int>& ids);
+     // chat template
+@@ -311,6 +313,7 @@
+     virtual std::vector<int> tokenize(const std::string& text) const = 0;
+     virtual std::string id_to_token(int id) const = 0;
+     virtual size_t vocab_size() const = 0;
++    virtual bool configureClipBpe() { return false; }
+ };
+ 
+ class TokenDecoder {
+@@ -326,6 +329,7 @@
+     virtual std::string decode(int id) override;
+     virtual std::string decode(const std::vector<int>& ids) override;
+     bool load_vocab_binary(std::ifstream& file);
++    bool configureClipBpe() override { return model_ && model_->configureClipBpe(); }
+ protected:
+     virtual bool load_vocab(std::ifstream& file) override;
+     virtual void encode(const std::string& str, std::vector<int>& ids) override;
+--- a/transformers/llm/engine/src/tokenizer/tokenizer.cpp
++++ b/transformers/llm/engine/src/tokenizer/tokenizer.cpp
+@@ -24,6 +24,7 @@
+ #include <climits>
+ #include <cctype>
+ #include <cstring>
++#include <stdexcept>
+ namespace MNN {
+ namespace Transformer {
+ 
+@@ -1538,6 +1539,14 @@
+ 
+ class BPEModel : public TokenizerModel {
+ public:
++    std::string end_of_word_suffix_;
++    bool configureClipBpe() override {
++        if (vocab_size() != 49408 || id_to_token(49406) != "<|startoftext|>" ||
++            id_to_token(49407) != "<|endoftext|>" || token_to_id("cat</w>") != 2368) return false;
++        end_of_word_suffix_ = "</w>";
++        cache_.clear();
++        return true;
++    }
+     bool use_byte_level_;
+     std::vector<StringRef> id_to_token_;
+     std::vector<VocabEntry> sorted_vocab_;
+@@ -1605,6 +1614,13 @@
+                 }
+                 off += ret;
+             }
++        }
++        // CLIP marks the last symbol before pair merging; adding the suffix after
++        // merging selects different vocabulary entries and changes every text embedding.
++        if (!end_of_word_suffix_.empty() && !out.empty()) {
++            const int last = token_to_id(id_to_token(out.back()) + end_of_word_suffix_);
++            if (last < 0) throw std::runtime_error("CLIP word-ending symbol unavailable");
++            out.back() = last;
+         }
+         while (out.size() > 1) {
+             int best = -1, min_r = (int)1e9;
+--- a/transformers/diffusion/engine/src/tokenizer.cpp
++++ b/transformers/diffusion/engine/src/tokenizer.cpp
+@@ -32,6 +32,11 @@
+     if (mTokenizer == nullptr) {
+         MNN_ERROR("Failed to create tokenizer from %s\n", mtokPath.c_str());
+     }
++    if (mTokenizer && mStyle == Style::kPair && mBosId == 49406 && mEosId == 49407 &&
++        !mTokenizer->configureClipBpe()) {
++        delete mTokenizer;
++        mTokenizer = nullptr;
++    }
+     return mTokenizer != nullptr;
+ #else
+     (void)filePath;
+@@ -60,7 +65,7 @@
+             }
+         } else {
+             while ((int)ids.size() < maxlen) {
+-                ids.push_back(0);
++                ids.push_back(mStyle == Style::kPair && mBosId == 49406 && mEosId == 49407 ? mEosId : 0);
+             }
+         }
+     }
+--- a/source/backend/metal/MetalBackend.mm
++++ b/source/backend/metal/MetalBackend.mm
+@@ -21,6 +21,7 @@
+ #if MNN_METAL_ENABLED
+ #include <mutex>
+ #include <chrono>
++#include <stdexcept>
+ #include <sched.h>
+ #import "backend/metal/MNNMetalContext.h"
+ #import "core/Macro.h"
+@@ -641,7 +641,31 @@
+     }
+     //MNN_PRINT("support type [%s]\n", EnumNameOpType(op->type()));
+ 
+-    auto exe = iter->second->onCreate(inputs, op, this, outputs);
++    Execution* exe = nullptr;
++    if (mMemoryMode == BackendConfig::Memory_Low) {
++        @autoreleasepool {
++            {
++                // A completed autoreleased command buffer can retain the F32
++                // upload alongside the packed weight until its pool drains.
++                // Bound these temporaries to one construction, including throws.
++                struct WeightUploadDrain {
++                    const MetalBackend* backend;
++                    ~WeightUploadDrain() {
++                        backend->commit();
++                        backend->waitOwnInflight();
++                        backend->wait();
++                    }
++                } drain{this};
++                exe = iter->second->onCreate(inputs, op, this, outputs);
++            }
++            if (mRuntime->mCommandBufferFailed) {
++                delete exe;
++                throw std::runtime_error("Metal weight upload failed");
++            }
++        }
++    } else {
++        exe = iter->second->onCreate(inputs, op, this, outputs);
++    }
+     if (NULL == exe) {
+         MNN_PRINT("The Creator Don't support type [%s], %s\n", MNN::EnumNameOpType(op->type()), op->name() ? op->name()->c_str() : "");
+         return NULL;
+@@ -1515,6 +1540,11 @@
+ #ifdef CHECK_IOS_UI_STATUS
+ #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+     if (!mGPUEnabledSwitch) {
++        // Dropped low-memory uploads invalidate their packed weights even if
++        // a later foreground commit resets the transient execution status.
++        if (mMemoryMode == BackendConfig::Memory_Low) {
++            mRuntime->mCommandBufferFailed = true;
++        }
+         mRuntime->pExecutionStatus = NO_EXECUTION;
+         _commandBuffer = nil;
+         return;

@@ -3,40 +3,43 @@ package com.shifthackz.aisdv1.data.local
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.data.hasZipArchiveSignature
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSFileSize
 import platform.Foundation.NSNumber
 
 /**
- * Coordinates `IosDownloadableModelFileStore` behavior in the SDAI data layer.
+ * Resolves legacy downloaded archives and strict MNN activation markers.
+ *
+ * @param fileProviderDescriptor Durable application model directory.
+ * @param mnnModels Validated MNN roots and deletion leases.
  *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalForeignApi::class)
 internal class IosDownloadableModelFileStore(
-    /**
-     * Exposes the `fileProviderDescriptor` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val fileProviderDescriptor: FileProviderDescriptor,
+    private val mnnModels: MnnModelStore,
 ) : DownloadableModelFileStore {
 
-    override fun isDownloaded(model: LocalAiModel): Boolean = try {
-        when (model.id) {
-            LocalAiModel.CustomOnnx.id,
-            LocalAiModel.CustomMediaPipe.id,
-            LocalAiModel.CustomSdxl.id,
-            LocalAiModel.CustomCoreMl.id,
-            LocalAiModel.CustomBonsai.id -> true
+    override fun isDownloaded(model: LocalAiModel): Boolean {
+        if (model.type == LocalAiModel.Type.Mnn) return mnnModels.isDownloaded(model.id)
+        return try {
+            when (model.id) {
+                LocalAiModel.CustomOnnx.id,
+                LocalAiModel.CustomMediaPipe.id,
+                LocalAiModel.CustomSdxl.id,
+                LocalAiModel.CustomCoreMl.id,
+                LocalAiModel.CustomBonsai.id -> true
 
-            else -> model.hasDownloadedArchive(
-                archivePath = "${fileProviderDescriptor.localModelDirPath}/${model.id}/$MODEL_ARCHIVE_NAME",
-            )
+                else -> model.hasDownloadedArchive(
+                    archivePath = "${fileProviderDescriptor.localModelDirPath}/${model.id}/$MODEL_ARCHIVE_NAME",
+                )
+            }
+        } catch (_: Exception) {
+            false
         }
-    } catch (_: Exception) {
-        false
     }
 
     override fun resolvePath(model: LocalAiModel): String =
@@ -45,6 +48,7 @@ internal class IosDownloadableModelFileStore(
     override fun resolveSingleFilePath(path: String): String = path
 
     override fun delete(id: String) {
+        if (id.startsWith("mnn_")) return mnnModels.delete(id)
         NSFileManager.defaultManager.removeItemAtPath(
             path = "${fileProviderDescriptor.localModelDirPath}/$id",
             error = null,

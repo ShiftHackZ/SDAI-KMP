@@ -1,13 +1,11 @@
-package com.shifthackz.aisdv1.data.local
-
-import java.io.File
+package com.shifthackz.aisdv1.domain.gateway
 
 /**
  * Owns MNN archive activation and leases independently of the native process.
  *
  * @author Dmitriy Moroz
  */
-internal interface MnnModelFileStore {
+interface MnnModelStore {
     /**
      * Returns only an app-owned catalog model directory.
      *
@@ -16,7 +14,7 @@ internal interface MnnModelFileStore {
      *
      * @author Dmitriy Moroz
      */
-    fun directory(id: String, activationId: String = ""): File
+    fun path(id: String, activationId: String = ""): String
 
     /**
      * Copies a validated custom bundle into a content-addressed root and returns its manifest SHA256.
@@ -69,9 +67,9 @@ internal interface MnnModelFileStore {
      * Verifies and atomically publishes a safe root-layout ZIP from its private staging file.
      *
      * @param id Catalog identity.
-     * @param archive Completed downloaded ZIP.
+     * @param archivePath Completed private ZIP path.
      *
      * @author Dmitriy Moroz
      */
-    suspend fun activate(id: String, archive: File)
+    suspend fun activate(id: String, archivePath: String)
 }

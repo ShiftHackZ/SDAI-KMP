@@ -14,6 +14,12 @@ import com.shifthackz.aisdv1.feature.mnn.MnnModelLeaseOwnerImpl
 import org.koin.dsl.module
 import java.io.File
 
+/** Keeps Android host composition free of child native dependencies.
+ *
+ * @author Dmitriy Moroz
+ */
+internal actual fun platformMnnHostModule() = module {}
+
 /**
  * Creates the child-only bindings for one fresh MNN attempt.
  *

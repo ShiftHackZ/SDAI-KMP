@@ -3,6 +3,8 @@ package com.shifthackz.aisdv1.feature.mnn
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+import kotlinx.coroutines.test.runTest
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -20,22 +22,26 @@ class MnnNativeBridgeImplTest {
     private val models = mockk<MnnModelLeaseOwner>()
 
     @Test
-    fun `given MNN bridge, child model ownership fails, expected same failure before workspace or native loading`() {
-        // Given
-        val payload = mockk<TextToImagePayload> { every { mnnActivationId } returns "a".repeat(64) }
-        val request =
-            NativeGenerationRequest(NativeGenerationEngine.MNN, payload, "/owned/mnn_model")
-        val failure = IllegalStateException("model is busy")
-        every { models.acquire("/owned/mnn_model", "a".repeat(64)) } throws failure
-        val bridge = MnnNativeBridgeImpl(cache, models)
+    fun `given MNN bridge, child model ownership fails, expected same failure before workspace or native loading`() =
+        runTest {
+            // Given
+            val payload = mockk<TextToImagePayload> {
+                every { mnnActivationId } returns "a".repeat(64)
+                every { mnnBackend } returns MnnBackend.CPU
+            }
+            val request =
+                NativeGenerationRequest(NativeGenerationEngine.MNN, payload, "/owned/mnn_model")
+            val failure = IllegalStateException("model is busy")
+            every { models.acquire("/owned/mnn_model", "a".repeat(64)) } throws failure
+            val bridge = MnnNativeBridgeImpl(cache, models)
 
-        // When
-        val actual = runCatching { bridge.generate(request) {} }.exceptionOrNull()
+            // When
+            val actual = runCatching { bridge.generate(request) {} }.exceptionOrNull()
 
-        // Then
-        assertSame(failure, actual)
-        verify(exactly = 0) { cache.acquire() }
-    }
+            // Then
+            assertSame(failure, actual)
+            verify(exactly = 0) { cache.acquire() }
+        }
 
     @Test
     fun `given MNN bridge, interruption precedes first request, expected no model or workspace acquisition`() {

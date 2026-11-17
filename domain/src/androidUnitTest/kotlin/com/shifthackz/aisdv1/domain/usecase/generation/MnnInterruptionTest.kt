@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
+import com.shifthackz.aisdv1.core.common.platform.Platform
+import io.mockk.every
+
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.domain.repository.MnnGenerationRepository
@@ -16,6 +20,31 @@ import org.junit.Test
  * @author Dmitriy Moroz
  */
 class MnnInterruptionTest {
+    @Test
+    fun `given iOS MNN worker interruption, stale owner is supplied, expected exact repository cancellation without foreground fallback`() =
+        runTest {
+            // Given
+            val repository = mockk<MnnGenerationRepository>()
+            val gateway = mockk<NativeGenerationGateway>()
+            val foreground = mockk<InterruptSourceGenerationUseCase>()
+            val build = mockk<BuildInfoProvider> { every { platform } returns Platform.IOS }
+            coEvery { repository.interruptOwnedGeneration("stale-worker") } returns Unit
+            val useCase = InterruptWorkerGenerationUseCaseImpl(
+                gateway,
+                foreground,
+                build,
+                mockk(),
+                repository
+            )
+
+            // When
+            useCase(ServerSource.LOCAL_MNN, "stale-worker")
+
+            // Then
+            coVerify(exactly = 1) { repository.interruptOwnedGeneration("stale-worker") }
+            coVerify(exactly = 0) { gateway.cancelActive(any()); foreground(any()); repository.interruptGeneration() }
+        }
+
     @Test
     fun `given MNN foreground interruption, source is captured, expected MNN repository cancellation`() =
         runTest {
@@ -46,7 +75,13 @@ class MnnInterruptionTest {
             val gateway = mockk<NativeGenerationGateway>()
             val source = mockk<InterruptSourceGenerationUseCase>()
             coEvery { gateway.cancelActive("stale-worker") } returns false
-            val useCase = InterruptWorkerGenerationUseCaseImpl(gateway, source, mockk(), mockk())
+            val useCase = InterruptWorkerGenerationUseCaseImpl(
+                gateway,
+                source,
+                BuildInfoProvider.stub,
+                mockk(),
+                mockk()
+            )
 
             // When
             useCase(ServerSource.LOCAL_MNN, "stale-worker")
@@ -63,7 +98,13 @@ class MnnInterruptionTest {
             val gateway = mockk<NativeGenerationGateway>()
             val failure = IllegalStateException("transport")
             coEvery { gateway.cancelActive("worker") } throws failure
-            val useCase = InterruptWorkerGenerationUseCaseImpl(gateway, mockk(), mockk(), mockk())
+            val useCase = InterruptWorkerGenerationUseCaseImpl(
+                gateway,
+                mockk(),
+                BuildInfoProvider.stub,
+                mockk(),
+                mockk()
+            )
 
             // When
             val actual = runCatching { useCase(ServerSource.LOCAL_MNN, "worker") }.exceptionOrNull()

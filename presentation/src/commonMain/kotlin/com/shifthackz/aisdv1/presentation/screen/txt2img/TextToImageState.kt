@@ -79,7 +79,8 @@ import com.shifthackz.aisdv1.presentation.widget.input.GenerationInputFormState
  * @param falAiImageSize Fal AI image-size preset sent to the selected endpoint.
  * @param falAiAcceleration Fal AI acceleration policy supported by the endpoint.
  * @param falAiSyncMode Whether Fal AI should return the image synchronously instead of using queued delivery.
- * @param mnnBackend Explicit CPU or OpenCL choice captured when MNN generation is submitted.
+ * @param mnnBackend Explicit platform-supported choice captured when MNN generation is submitted.
+ * @param supportedMnnBackends Injected requested-backend vocabulary for the current platform.
  * @param mnnActivationId Exact validated MNN manifest SHA256 captured with the submitted model.
  * @param mnnModelId Catalog or custom model identity paired with the validated MNN artifact.
  * @param sdxlBackend Requested stable-diffusion.cpp execution backend, including automatic selection.
@@ -149,6 +150,7 @@ data class TextToImageState(
     override val falAiAcceleration: FalAiAcceleration = FalAiAcceleration.default,
     override val falAiSyncMode: Boolean = false,
     override val mnnBackend: MnnBackend = MnnBackend.CPU,
+    override val supportedMnnBackends: List<MnnBackend> = listOf(MnnBackend.CPU, MnnBackend.OPENCL),
     val mnnActivationId: String? = null,
     val mnnModelId: String? = null,
     override val sdxlBackend: SdxlBackend = SdxlBackend.AUTO,

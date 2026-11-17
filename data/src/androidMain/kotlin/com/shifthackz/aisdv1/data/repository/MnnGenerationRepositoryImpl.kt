@@ -2,7 +2,7 @@ package com.shifthackz.aisdv1.data.repository
 
 import android.os.Build
 import com.shifthackz.aisdv1.data.core.CoreGenerationRepository
-import com.shifthackz.aisdv1.data.local.MnnModelFileStore
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
 import com.shifthackz.aisdv1.data.mappers.mapLocalDiffusionToAiGenResult
 import com.shifthackz.aisdv1.data.mappers.withModelName
 import com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource
@@ -40,7 +40,7 @@ internal class MnnGenerationRepositoryImpl(
     private val preferenceManager: PreferenceManager,
     private val nativeGateway: NativeGenerationGateway,
     private val models: DownloadableModelDataSource.Local,
-    private val modelFiles: MnnModelFileStore,
+    private val modelFiles: MnnModelStore,
     private val validator: MnnBundleValidator
 ) : CoreGenerationRepository(
     mediaStoreGateway,
@@ -92,7 +92,7 @@ internal class MnnGenerationRepositoryImpl(
         try {
             val payload = modelFiles.acquire(modelId, activationId)
             try {
-                val manifest = validator(modelFiles.directory(modelId, activationId).path)
+                val manifest = validator(modelFiles.path(modelId, activationId))
                 if (activationId.isNotEmpty()) check(activationId == manifest.activationId) { "MNN artifact changed" }
                 return MnnModelSelectionLeaseImpl(manifest.activationId, payload, selection)
             } catch (failure: Throwable) {
@@ -131,17 +131,17 @@ internal class MnnGenerationRepositoryImpl(
         modelFiles.acquire(id, activationId).use {
             check(
                 validator(
-                    modelFiles.directory(
+                    modelFiles.path(
                         id,
                         activationId
-                    ).path
+                    )
                 ).activationId == activationId
             ) { "MNN artifact changed" }
             check(id == preferenceManager.localMnnModelId && activationId == preferenceManager.localMnnActivationId) { "MNN artifact selection changed" }
             val encoded = nativeGateway.generate(
                 NativeGenerationRequest(
                     NativeGenerationEngine.MNN,
-                    payload, modelFiles.directory(id, activationId).path
+                    payload, modelFiles.path(id, activationId)
                 )
             )
             insertGenerationResult(
@@ -158,6 +158,10 @@ internal class MnnGenerationRepositoryImpl(
      */
     override suspend fun interruptGeneration() {
         nativeGateway.cancelActive()
+    }
+
+    override suspend fun interruptOwnedGeneration(ownerId: String) {
+        nativeGateway.cancelActive(ownerId)
     }
 
     private fun requireArm64() {

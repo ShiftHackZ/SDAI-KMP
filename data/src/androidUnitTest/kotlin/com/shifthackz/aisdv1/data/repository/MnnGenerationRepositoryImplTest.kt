@@ -1,7 +1,7 @@
 package com.shifthackz.aisdv1.data.repository
 
 import android.os.Build
-import com.shifthackz.aisdv1.data.local.MnnModelFileStore
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
 import com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
@@ -50,7 +50,7 @@ class MnnGenerationRepositoryImplTest {
     private val preferences = mockk<PreferenceManager>()
     private val gateway = mockk<NativeGenerationGateway>()
     private val models = mockk<DownloadableModelDataSource.Local>()
-    private val files = mockk<MnnModelFileStore>()
+    private val files = mockk<MnnModelStore>()
     private val validator = mockk<MnnBundleValidator>()
     private val payload = TextToImagePayload(
         prompt = "cat 😀",
@@ -113,7 +113,7 @@ class MnnGenerationRepositoryImplTest {
         every { preferences.saveToMediaStore } returns false
         every { background.hasActiveTasks() } returns false
         coEvery { models.getById(any()) } returns model
-        every { files.directory(any(), any()) } returns root
+        every { files.path(any(), any()) } returns root.path
         every { files.acquire(any(), any()) } answers { AutoCloseable { isPayloadReleased = true } }
         every {
             files.acquireSelection(

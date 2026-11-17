@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.generic.kmp.library)
-    alias(libs.plugins.generic.flavors)
 }
 
 android {
@@ -25,6 +24,10 @@ android {
 
 kotlin {
     sourceSets {
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.test.coroutines)
+        }
         commonMain.dependencies {
             implementation(project(":domain"))
             implementation(project(":core:common"))

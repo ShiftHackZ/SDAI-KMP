@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.screen.samplers
 
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+
 import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
 import androidx.lifecycle.viewModelScope
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
@@ -94,6 +96,13 @@ internal class SamplerRecoveryViewModelFixture(
     init {
         if (type == AiGenerationResult.Type.TEXT_TO_IMAGE) {
             textToImage = TextToImageViewModel(
+                mnnBackendPolicy = mockk {
+                    every { supportedBackends } returns listOf(
+                        MnnBackend.CPU,
+                        MnnBackend.OPENCL
+                    )
+                },
+                observeMnnProcessStatusUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 observeEasyDiffusionProgressUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 nativeGenerationGateway = mockk {
                     every { observeStage(any()) } returns emptyFlow()

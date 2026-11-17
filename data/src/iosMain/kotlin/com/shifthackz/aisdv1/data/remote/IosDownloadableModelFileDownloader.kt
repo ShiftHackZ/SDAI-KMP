@@ -6,6 +6,11 @@ import com.shifthackz.aisdv1.domain.entity.DownloadState
 import com.shifthackz.aisdv1.domain.entity.NetworkUsageBucket
 import com.shifthackz.aisdv1.domain.repository.NetworkUsageRepository
 import kotlinx.cinterop.ExperimentalForeignApi
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.CancellationException
+import platform.Foundation.NSUUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -28,23 +33,15 @@ import platform.darwin.NSObject
  *
  * @param fileProviderDescriptor Provides the app-private local model directory path.
  * @param networkUsageRepository Persists downloaded byte deltas for network usage statistics.
+ * @param mnnModels Strict extraction and validated atomic activation for MNN downloads.
  *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalForeignApi::class)
 internal class IosDownloadableModelFileDownloader(
-    /**
-     * Provides the app-private local model directory path.
-     *
-     * @author Dmitriy Moroz
-     */
     private val fileProviderDescriptor: FileProviderDescriptor,
-    /**
-     * Persists downloaded byte deltas for network usage statistics.
-     *
-     * @author Dmitriy Moroz
-     */
     private val networkUsageRepository: NetworkUsageRepository,
+    private val mnnModels: MnnModelStore,
 ) : DownloadableModelFileDownloader {
 
     /**
@@ -61,7 +58,9 @@ internal class IosDownloadableModelFileDownloader(
         url: String,
     ): Flow<DownloadState> = callbackFlow {
         trySend(DownloadState.Downloading(0))
-        val modelDir = "${fileProviderDescriptor.localModelDirPath}/$id"
+        val isMnn = id.startsWith("mnn_")
+        val modelDir =
+            if (isMnn) "${fileProviderDescriptor.localModelDirPath}/.mnn-download-${NSUUID().UUIDString}" else "${fileProviderDescriptor.localModelDirPath}/$id"
         val destinationPath = "$modelDir/$MODEL_ARCHIVE_NAME"
         val temporaryPath = "$destinationPath$DOWNLOAD_FILE_SUFFIX"
         val fileManager = NSFileManager.defaultManager
@@ -82,7 +81,7 @@ internal class IosDownloadableModelFileDownloader(
         }
 
         lateinit var session: NSURLSession
-        var finished = false
+        var isFinished = false
         val delegate = IosModelDownloadDelegate(
             destinationPath = temporaryPath,
             onProgress = { progress -> trySend(DownloadState.Downloading(progress)) },
@@ -90,9 +89,36 @@ internal class IosDownloadableModelFileDownloader(
                 networkUsageRepository.enqueueIncrement(NetworkUsageBucket.MODEL_DOWNLOADS, bytes)
             },
             onComplete = { result ->
-                finished = true
+                isFinished = true
                 result.fold(
                     onSuccess = {
+                        if (isMnn) {
+                            launch(start = CoroutineStart.UNDISPATCHED) {
+                                try {
+                                    val installedPath = activateMnnDownload(
+                                        activate = {
+                                            mnnModels.activate(id, temporaryPath)
+                                            mnnModels.path(id)
+                                        },
+                                        removeArchive = {
+                                            check(fileManager.removeItemAtPath(modelDir, null)) {
+                                                "MNN download archive cleanup failed"
+                                            }
+                                        },
+                                        closeSession = { session.finishTasksAndInvalidate() },
+                                    )
+                                    trySend(DownloadState.Downloading(100))
+                                    trySend(DownloadState.Complete(installedPath))
+                                } catch (failure: CancellationException) {
+                                    throw failure
+                                } catch (failure: Exception) {
+                                    trySend(DownloadState.Error(failure))
+                                } finally {
+                                    close()
+                                }
+                            }
+                            return@IosModelDownloadDelegate
+                        }
                         if (fileManager.moveItemAtPath(
                                 srcPath = temporaryPath,
                                 toPath = destinationPath,
@@ -139,7 +165,7 @@ internal class IosDownloadableModelFileDownloader(
         task.resume()
 
         awaitClose {
-            if (!finished) {
+            if (!isFinished) {
                 task.cancel()
                 session.invalidateAndCancel()
                 fileManager.deleteDownloadFiles(destinationPath, temporaryPath)
@@ -190,7 +216,7 @@ private class IosModelDownloadDelegate(
 ) : NSObject(), NSURLSessionDownloadDelegateProtocol {
 
     private var lastPercent = 0
-    private var completed = false
+    private var isCompleted = false
 
     override fun URLSession(
         session: NSURLSession,
@@ -218,7 +244,7 @@ private class IosModelDownloadDelegate(
         downloadTask: NSURLSessionDownloadTask,
         didFinishDownloadingToURL: NSURL,
     ) {
-        if (completed) return
+        if (isCompleted) return
 
         val httpError = downloadTask.response.httpError()
         if (httpError != null) {
@@ -254,7 +280,7 @@ private class IosModelDownloadDelegate(
         task: NSURLSessionTask,
         didCompleteWithError: NSError?,
     ) {
-        if (completed || didCompleteWithError == null) return
+        if (isCompleted || didCompleteWithError == null) return
 
         complete(Result.failure(IllegalStateException(didCompleteWithError.localizedDescription)))
     }
@@ -267,8 +293,8 @@ private class IosModelDownloadDelegate(
      * @author Dmitriy Moroz
      */
     private fun complete(result: Result<Unit>) {
-        if (completed) return
-        completed = true
+        if (isCompleted) return
+        isCompleted = true
         onComplete(result)
     }
 }

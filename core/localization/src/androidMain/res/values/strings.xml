@@ -726,6 +726,7 @@
     <!-- MNN SD 1.5 -->
     <string name="srv_type_mnn">MNN SD 1.5</string>
     <string name="hint_mnn_profile">One 512×512 image, PNDM, CFG 7.5, 1–50 steps. CPU or OpenCL.</string>
+    <string name="hint_mnn_profile_ios">One 512×512 image, PNDM, CFG 7.5, 1–50 steps. CPU or Metal.</string>
     <string name="hint_mnn_backend">MNN backend</string>
     <string name="settings_usage_summary_models_mnn">MNN models</string>
     <string name="local_catalog_loading">Loading model catalog</string>

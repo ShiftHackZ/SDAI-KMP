@@ -71,10 +71,10 @@ class AndroidMnnModelFileStoreTest {
             val archive = archive()
 
             // When
-            store.activate("mnn_catalog", archive)
+            store.activate("mnn_catalog", archive.path)
 
             // Then
-            val root = store.directory("mnn_catalog", "")
+            val root = File(store.path("mnn_catalog", ""))
             assertTrue(store.isDownloaded("mnn_catalog"))
             assertEquals(identity, File(root, ".complete").readText())
             assertEquals((names + "manifest.json" + ".complete").toSet(), root.list()!!.toSet())
@@ -90,7 +90,8 @@ class AndroidMnnModelFileStoreTest {
             coEvery { validator(any()) } throws failure
 
             // When
-            val actual = runCatching { store.activate("mnn_catalog", archive()) }.exceptionOrNull()
+            val actual =
+                runCatching { store.activate("mnn_catalog", archive().path) }.exceptionOrNull()
 
             // Then
             assertSame(failure, actual)
@@ -106,7 +107,8 @@ class AndroidMnnModelFileStoreTest {
             coEvery { validator(any()) } throws cancellation
 
             // When
-            val failure = runCatching { store.activate("mnn_catalog", archive()) }.exceptionOrNull()
+            val failure =
+                runCatching { store.activate("mnn_catalog", archive().path) }.exceptionOrNull()
 
             // Then
             assertSame(cancellation, failure)
@@ -121,7 +123,8 @@ class AndroidMnnModelFileStoreTest {
             val archive = archive(names.dropLast(1) + "../outside")
 
             // When
-            val failure = runCatching { store.activate("mnn_catalog", archive) }.exceptionOrNull()
+            val failure =
+                runCatching { store.activate("mnn_catalog", archive.path) }.exceptionOrNull()
 
             // Then
             assertTrue(failure is IllegalArgumentException)
@@ -141,7 +144,8 @@ class AndroidMnnModelFileStoreTest {
             archive.writeBytes(bytes)
 
             // When
-            val failure = runCatching { store.activate("mnn_catalog", archive) }.exceptionOrNull()
+            val failure =
+                runCatching { store.activate("mnn_catalog", archive.path) }.exceptionOrNull()
 
             // Then
             assertTrue(failure is IllegalArgumentException)
@@ -154,7 +158,7 @@ class AndroidMnnModelFileStoreTest {
         val archive = archive(names.dropLast(1))
 
         // When
-        val failure = runCatching { store.activate("mnn_catalog", archive) }.exceptionOrNull()
+        val failure = runCatching { store.activate("mnn_catalog", archive.path) }.exceptionOrNull()
 
         // Then
         assertTrue(failure is IllegalArgumentException)
@@ -165,12 +169,13 @@ class AndroidMnnModelFileStoreTest {
     fun `given MNN activation, existing complete root exists, expected immutable previous bytes preserved`() =
         runTest {
             // Given
-            store.activate("mnn_catalog", archive())
-            val root = store.directory("mnn_catalog", "")
+            store.activate("mnn_catalog", archive().path)
+            val root = File(store.path("mnn_catalog", ""))
             File(root, "LICENSE").writeText("retained")
 
             // When
-            val failure = runCatching { store.activate("mnn_catalog", archive()) }.exceptionOrNull()
+            val failure =
+                runCatching { store.activate("mnn_catalog", archive().path) }.exceptionOrNull()
 
             // Then
             assertTrue(failure is IllegalStateException)
@@ -182,8 +187,8 @@ class AndroidMnnModelFileStoreTest {
     fun `given MNN file ownership, host lease is active during delete, expected deferred removal until close`() =
         runTest {
             // Given
-            store.activate("mnn_catalog", archive())
-            val root = store.directory("mnn_catalog", "")
+            store.activate("mnn_catalog", archive().path)
+            val root = File(store.path("mnn_catalog", ""))
             val lease = store.acquire("mnn_catalog", "")
 
             // When
@@ -201,8 +206,8 @@ class AndroidMnnModelFileStoreTest {
     fun `given MNN file ownership, child lease survives host close, expected bytes retained until later cleanup`() =
         runTest {
             // Given
-            store.activate("mnn_catalog", archive())
-            val root = store.directory("mnn_catalog", "")
+            store.activate("mnn_catalog", archive().path)
+            val root = File(store.path("mnn_catalog", ""))
             val host = store.acquire("mnn_catalog", "")
             val childFile =
                 RandomAccessFile(File(owned, ".mnn_catalog$MNN_INFERENCE_LOCK_SUFFIX"), "rw")
@@ -224,8 +229,8 @@ class AndroidMnnModelFileStoreTest {
     fun `given MNN file ownership, selection lease is active, expected delete rejected before marker mutation`() =
         runTest {
             // Given
-            store.activate("mnn_catalog", archive())
-            val root = store.directory("mnn_catalog", "")
+            store.activate("mnn_catalog", archive().path)
+            val root = File(store.path("mnn_catalog", ""))
             val lease = store.acquireSelection("mnn_catalog", "")
 
             // When
@@ -281,7 +286,7 @@ class AndroidMnnModelFileStoreTest {
             assertEquals(before, source.listFiles()!!.associate { it.name to it.readText() })
             assertTrue(
                 File(
-                    store.directory(LocalAiModel.CustomMnn.id, identity),
+                    File(store.path(LocalAiModel.CustomMnn.id, identity)),
                     ".complete"
                 ).isFile
             )
@@ -296,7 +301,7 @@ class AndroidMnnModelFileStoreTest {
             val source = temporary.newFolder("Downloads")
             (names + "manifest.json").forEach { File(source, it).writeText("payload") }
             store.importCustom(source.path)
-            val root = store.directory(LocalAiModel.CustomMnn.id, identity)
+            val root = File(store.path(LocalAiModel.CustomMnn.id, identity))
             File(root, "LICENSE").writeText("existing")
 
             // When
@@ -311,7 +316,7 @@ class AndroidMnnModelFileStoreTest {
     @Test
     fun `given MNN file ownership, partial directory lacks marker, expected unavailable acquisition`() {
         // Given
-        val root = store.directory("mnn_partial", "").apply { mkdir() }
+        val root = File(store.path("mnn_partial", "")).apply { mkdir() }
         File(root, "unet.mnn").writeText("partial")
 
         // When
@@ -328,14 +333,16 @@ class AndroidMnnModelFileStoreTest {
         val invalid = "mnn_../external"
 
         // When
-        val failure = runCatching { store.directory(invalid, "") }.exceptionOrNull()
+        val failure = runCatching { File(store.path(invalid, "")) }.exceptionOrNull()
 
         // Then
         assertTrue(failure is IllegalArgumentException)
         assertThrows(IllegalArgumentException::class.java) {
-            store.directory(
-                LocalAiModel.CustomMnn.id,
-                "../identity"
+            File(
+                store.path(
+                    LocalAiModel.CustomMnn.id,
+                    "../identity"
+                )
             )
         }
     }

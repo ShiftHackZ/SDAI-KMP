@@ -31,18 +31,19 @@ import com.shifthackz.aisdv1.presentation.widget.dialog.ProgressDialog
 import com.shifthackz.aisdv1.presentation.widget.dialog.ProgressDialogCancelButton
 
 /**
- * Renders the `GenerationModalRenderer` UI for the SDAI presentation layer.
+ * Renders the active generation decision, progress or result dialog and forwards its actions.
  *
- * @param screenModal screen modal value consumed by the API.
- * @param onDismissRequest callback invoked by the component.
- * @param onCancelGeneration callback invoked by the component.
- * @param onSaveRequest callback invoked by the component.
- * @param onReportRequest callback invoked by the component.
- * @param onViewDetailRequest callback invoked by the component.
+ * @param screenModal Captured dialog state, including provider progress units.
+ * @param onDismissRequest Closes a dismissible dialog.
+ * @param onCancelGeneration Requests cancellation of the active generation owner.
+ * @param onSaveRequest Exports selected successful results.
+ * @param onReportRequest Opens reporting for the selected result.
+ * @param onViewDetailRequest Opens the selected result's details.
  * @param onBenchmarkRequest callback invoked when the user wants to open benchmark.
  * @param onSkipBenchmarkRequest callback invoked when the user skips first-run benchmark.
  * @param onBenchmarkContinueRequest callback invoked when the user accepts recommendation risk.
  * @param onBenchmarkDoNotAskRequest callback invoked when the user suppresses future recommendation warnings.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -77,6 +78,7 @@ fun GenerationModalRenderer(
                 .asUiText(),
             canDismiss = false,
             step = screenModal.pair,
+            overallPercentage = screenModal.overallPercentage,
             subTitle = (screenModal.nativeStage?.localizedText()
                 ?: Localization.string("communicating_progress_sub_title")).asUiText(),
             content = screenModal.canCancel.takeIf { it }?.let {

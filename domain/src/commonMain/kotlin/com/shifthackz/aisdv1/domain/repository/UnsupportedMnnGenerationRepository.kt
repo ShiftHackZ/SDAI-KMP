@@ -62,4 +62,6 @@ internal object UnsupportedMnnGenerationRepository : MnnGenerationRepository {
      * @author Dmitriy Moroz
      */
     override suspend fun interruptGeneration() = Unit
+
+    override suspend fun interruptOwnedGeneration(ownerId: String) = Unit
 }

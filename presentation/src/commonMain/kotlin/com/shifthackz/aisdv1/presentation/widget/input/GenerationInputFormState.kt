@@ -91,11 +91,18 @@ interface GenerationInputFormState {
     val falAiSyncMode: Boolean
 
     /**
-     * MNN backend used only by Android txt2img.
+     * Captured MNN backend for the current platform's txt2img request.
      *
      * @author Dmitriy Moroz
      */
     val mnnBackend: MnnBackend get() = MnnBackend.CPU
+
+    /**
+     * Backends offered by the current platform; an empty list hides unsupported controls.
+     *
+     * @author Dmitriy Moroz
+     */
+    val supportedMnnBackends: List<MnnBackend> get() = emptyList()
     val sdxlBackend: SdxlBackend
     val bonsaiBackend: BonsaiBackend
     val bonsaiBackendSelectionVisible: Boolean

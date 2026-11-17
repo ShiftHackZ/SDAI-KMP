@@ -6,18 +6,19 @@
     <title>MNN SD 1.5 — SDAI</title>
     <meta
       name="description"
-      content="Alpha Android MNN SD 1.5 model setup and supported generation options in SDAI."
+      content="Alpha Android and iOS MNN SD 1.5 model setup and supported generation options in SDAI."
     />
   </head>
   <body>
     <main>
       <h1>MNN SD 1.5</h1>
       <p>
-        Alpha local text-to-image generation on Android arm64 with MNN 3.6.2.
-        Each request creates one 512×512 image using PNDM, fixed CFG 7.5 and
-        1–50 sampling steps. Select CPU or OpenCL in the generation form. An
-        unavailable OpenCL backend fails explicitly; selecting OpenCL does not
-        guarantee that every operation runs on the GPU.
+        Alpha local text-to-image generation on Android arm64 and physical iOS
+        17+ devices with MNN 3.6.2. Each request creates one 512×512 image using
+        PNDM, fixed CFG 7.5 and 1–50 sampling steps. Select Android CPU or
+        OpenCL; iOS CPU or Metal in the generation form. An unavailable GPU
+        backend fails explicitly; selecting OpenCL or Metal does not guarantee
+        that every operation runs on the GPU.
       </p>
       <h2>Models and setup</h2>
       <p>
@@ -30,13 +31,14 @@
         >.
       </p>
       <p>
-        Full and FOSS builds also support the existing custom model folder
-        picker. Extract a complete compatible bundle into a folder accessible to
-        the application, enable the custom model option, choose the folder and
-        connect. Keep all root files, including manifest.json, tokenizer.mtok
-        and the three .mnn.weight sidecars. Setup checks the complete bundle and
-        creates a private immutable copy for generation; deleting that copy
-        through app storage leaves the original folder untouched.
+        Android Full and FOSS builds also support the existing custom model
+        folder picker. Extract a complete compatible bundle into a folder
+        accessible to the application, enable the custom model option, choose
+        the folder and connect. Keep all root files, including manifest.json,
+        tokenizer.mtok and the three .mnn.weight sidecars. Setup checks the
+        complete bundle and creates a private immutable copy for generation;
+        deleting that copy through app storage leaves the original folder
+        untouched.
       </p>
       <p>
         Allow several GB of free storage for the approximately 1.15 GB model,
@@ -46,10 +48,12 @@
       </p>
       <h2>Supported controls</h2>
       <p>
-        Positive prompt, sampling steps, seed and CPU/OpenCL selection are
+        Positive prompt, sampling steps, seed and platform backend selection are
         supported. Negative prompts, image-to-image, batches, LoRA, arbitrary
-        checkpoints, fused graphs and NPU execution are unavailable. iOS does
-        not expose the MNN provider.
+        checkpoints, fused graphs and NPU execution are unavailable. The iOS
+        simulator does not run inference. iOS supports catalog models only;
+        finite background execution expires cooperatively, retaining model and
+        workspace ownership until native return.
       </p>
       <h2>Maintainers</h2>
       <p>

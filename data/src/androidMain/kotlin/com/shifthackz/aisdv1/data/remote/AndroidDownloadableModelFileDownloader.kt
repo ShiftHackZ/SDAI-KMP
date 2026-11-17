@@ -17,7 +17,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.util.UUID
-import com.shifthackz.aisdv1.data.local.MnnModelFileStore
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
 import java.util.concurrent.TimeUnit
 
 /**
@@ -43,7 +43,7 @@ internal class AndroidDownloadableModelFileDownloader(
      * @author Dmitriy Moroz
      */
     private val networkUsageRepository: NetworkUsageRepository,
-    private val mnnModels: MnnModelFileStore,
+    private val mnnModels: MnnModelStore,
 ) : DownloadableModelFileDownloader {
 
     /**
@@ -74,8 +74,8 @@ internal class AndroidDownloadableModelFileDownloader(
             try {
                 val archive = File(staging, "model.zip")
                 downloadToFile(url, archive) { emit(DownloadState.Downloading(it)) }
-                mnnModels.activate(id, archive)
-                emit(DownloadState.Complete(mnnModels.directory(id).path))
+                mnnModels.activate(id, archive.path)
+                emit(DownloadState.Complete(mnnModels.path(id)))
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {

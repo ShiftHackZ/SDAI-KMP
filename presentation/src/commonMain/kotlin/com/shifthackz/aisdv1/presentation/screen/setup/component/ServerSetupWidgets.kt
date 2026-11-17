@@ -226,7 +226,7 @@ internal fun ServerSetupModal(
 }
 
 /**
- * Chooses the setup icon for this provider on the supplied platform.
+ * Chooses the setup icon, branding local providers with the current platform.
  *
  * @param platform Platform whose provider availability and readiness apply.
  *
@@ -253,11 +253,7 @@ internal fun ServerSource.icon(platform: Platform): ImageVector = when (this) {
     ServerSource.LOCAL_MICROSOFT_ONNX,
     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
-        -> Icons.Default.Android
-
     ServerSource.LOCAL_APPLE_CORE_ML,
-        -> BrandIcons.Apple
-
     ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
         Platform.ANDROID -> Icons.Default.Android
         Platform.IOS -> BrandIcons.Apple
@@ -319,7 +315,9 @@ internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platfo
         ServerSource.STABILITY_AI -> strings.stabilitySubtitle
         ServerSource.FAL_AI -> strings.falAiSubtitle
         ServerSource.ARLI_AI -> strings.arliAiSubtitle
-        ServerSource.LOCAL_MNN -> strings.mnnSubtitle
+        ServerSource.LOCAL_MNN -> if (platform == Platform.IOS)
+            Localization.string("hint_mnn_profile_ios") else strings.mnnSubtitle
+
         ServerSource.LOCAL_MICROSOFT_ONNX -> strings.localDiffusionSubtitle
         ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> strings.mediaPipeSubtitle
         ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.sdxlSubtitle

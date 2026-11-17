@@ -8,7 +8,7 @@ package com.shifthackz.aisdv1.domain.entity
  * @author Dmitriy Moroz
  */
 enum class MnnBackend(val key: String) {
-    CPU("cpu"), OPENCL("opencl");
+    CPU("cpu"), OPENCL("opencl"), METAL("metal");
 
     companion object {
         /**

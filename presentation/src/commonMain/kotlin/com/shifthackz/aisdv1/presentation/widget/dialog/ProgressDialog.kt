@@ -11,16 +11,18 @@ import com.shifthackz.aisdv1.core.model.asString
 import com.shifthackz.aisdv1.core.model.asUiText
 
 /**
- * Renders the `ProgressDialog` UI for the SDAI presentation layer.
+ * Shows generation or remote-queue progress with optional cancellation content.
  *
- * @param title title value consumed by the API.
- * @param subTitle sub title value consumed by the API.
- * @param canDismiss can dismiss value consumed by the API.
- * @param onDismissRequest callback invoked by the component.
- * @param waitTimeSeconds wait time seconds value consumed by the API.
- * @param positionInQueue position in queue value consumed by the API.
- * @param step step value consumed by the API.
- * @param content content value consumed by the API.
+ * @param title Heading naming the provider or operation.
+ * @param subTitle Stage or waiting explanation beneath the heading.
+ * @param canDismiss Whether outside taps or Back may close the dialog.
+ * @param onDismissRequest Handles permitted dismissal requests.
+ * @param waitTimeSeconds Optional server estimate, measured in seconds.
+ * @param positionInQueue Optional queue position, taking precedence over generation progress.
+ * @param step Completed and total denoising iterations, absent for overall progress.
+ * @param overallPercentage Overall completion from zero to one hundred, never a sampling count.
+ * @param content Optional actions rendered below the progress status.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -32,6 +34,7 @@ fun ProgressDialog(
     waitTimeSeconds: Int? = null,
     positionInQueue: Int? = null,
     step: Pair<Int, Int>? = null,
+    overallPercentage: Int? = null,
     content: (@Composable () -> Unit)? = null,
 ) {
     Dialog(
@@ -47,18 +50,21 @@ fun ProgressDialog(
             waitTimeSeconds = waitTimeSeconds,
             positionInQueue = positionInQueue,
             step = step,
+            overallPercentage = overallPercentage,
             content = content,
         )
     }
 }
 
 /**
- * Renders the `ProgressDialogStatus` UI for the SDAI presentation layer.
+ * Shows waiting time and the active queue, sampling or overall-percentage status.
  *
  * @param modifier Compose modifier applied to the rendered UI.
- * @param waitTimeSeconds wait time seconds value consumed by the API.
- * @param positionInQueue position in queue value consumed by the API.
- * @param step step value consumed by the API.
+ * @param waitTimeSeconds Optional server estimate, measured in seconds.
+ * @param positionInQueue Optional queue position, taking precedence over generation progress.
+ * @param step Completed and total denoising iterations, absent for overall progress.
+ * @param overallPercentage Overall completion from zero to one hundred, never a sampling count.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -67,18 +73,20 @@ fun ProgressDialogStatus(
     waitTimeSeconds: Int?,
     positionInQueue: Int?,
     step: Pair<Int, Int>?,
+    overallPercentage: Int? = null,
 ) {
     ProgressDialogStatusContent(
         modifier = modifier,
         waitTimeText = waitTimeText(waitTimeSeconds),
-        statusText = statusText(positionInQueue, step),
+        statusText = progressStatusText(positionInQueue, step, overallPercentage),
     )
 }
 
 /**
- * Renders the `ProgressDialogCancelButton` UI for the SDAI presentation layer.
+ * Offers the shared localized cancellation action beneath generation progress.
  *
- * @param onClick callback invoked when the user activates the control.
+ * @param onClick Requests cancellation of the captured generation.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -90,14 +98,16 @@ fun ProgressDialogCancelButton(onClick: () -> Unit) {
 }
 
 /**
- * Renders the `GeneratingProgressDialogContent` UI for the SDAI presentation layer.
+ * Builds the shared generation dialog content with counters in their actual unit.
  *
- * @param title title value consumed by the API.
- * @param subTitle sub title value consumed by the API.
- * @param waitTimeSeconds wait time seconds value consumed by the API.
- * @param positionInQueue position in queue value consumed by the API.
- * @param step step value consumed by the API.
- * @param content content value consumed by the API.
+ * @param title Heading naming the provider or operation.
+ * @param subTitle Stage or waiting explanation beneath the heading.
+ * @param waitTimeSeconds Optional server estimate, measured in seconds.
+ * @param positionInQueue Optional queue position, taking precedence over generation progress.
+ * @param step Completed and total denoising iterations, absent for overall progress.
+ * @param overallPercentage Overall completion from zero to one hundred, never a sampling count.
+ * @param content Optional actions rendered below the progress status.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -107,22 +117,24 @@ fun GeneratingProgressDialogContent(
     waitTimeSeconds: Int? = null,
     positionInQueue: Int? = null,
     step: Pair<Int, Int>? = null,
+    overallPercentage: Int? = null,
     content: (@Composable () -> Unit)? = null,
 ) {
     ProgressDialogContent(
         title = title.asString(),
         subTitle = subTitle.asString(),
         waitTimeText = waitTimeText(waitTimeSeconds),
-        statusText = statusText(positionInQueue, step),
+        statusText = progressStatusText(positionInQueue, step, overallPercentage),
         content = content,
     )
 }
 
 /**
- * Executes the `waitTimeText` step in the SDAI presentation layer.
+ * Formats an available server wait estimate using the current locale.
  *
- * @param waitTimeSeconds wait time seconds value consumed by the API.
- * @return Result produced by `waitTimeText`.
+ * @param waitTimeSeconds Optional server estimate, measured in seconds.
+ * @return Localized wait estimate, or null when the server provides none.
+ *
  * @author Dmitriy Moroz
  */
 private fun waitTimeText(waitTimeSeconds: Int?): String? {
@@ -135,20 +147,23 @@ private fun waitTimeText(waitTimeSeconds: Int?): String? {
 }
 
 /**
- * Executes the `statusText` step in the SDAI presentation layer.
+ * Formats queue position, overall completion or sampling counters without mixing their units.
  *
- * @param positionInQueue position in queue value consumed by the API.
- * @param step step value consumed by the API.
- * @return Result produced by `statusText`.
+ * @param positionInQueue Optional queue position, taking precedence over generation progress.
+ * @param step Completed and total denoising iterations, absent for overall progress.
+ * @param overallPercentage Overall completion from zero to one hundred, never a sampling count.
+ * @return Status text in the provider's unit, or null before counters arrive.
+ *
  * @author Dmitriy Moroz
  */
-private fun statusText(
+internal fun progressStatusText(
     positionInQueue: Int?,
     step: Pair<Int, Int>?,
+    overallPercentage: Int?,
 ): String? {
     return positionInQueue?.let { position ->
         Localization.string("communicating_status_queue", position)
-    } ?: step?.let { (current, total) ->
+    } ?: overallPercentage?.let { "${it.coerceIn(0, 100)}%" } ?: step?.let { (current, total) ->
         Localization.string("communicating_status_steps", current, total)
     }
 }

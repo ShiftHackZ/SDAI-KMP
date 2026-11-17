@@ -125,7 +125,7 @@ enum class ServerSource(
         readiness = PlatformValue(ServerSourceReadiness.ALPHA),
         version = "2026.11.17",
         featureTags = setOf(FeatureTag.Offline, FeatureTag.Txt2Img, FeatureTag.MultipleModels),
-        allowedPlatforms = setOf(Platform.ANDROID),
+        allowedPlatforms = setOf(Platform.ANDROID, Platform.IOS),
     ),
     LOCAL_APPLE_CORE_ML(
         key = "local_apple_core_ml",

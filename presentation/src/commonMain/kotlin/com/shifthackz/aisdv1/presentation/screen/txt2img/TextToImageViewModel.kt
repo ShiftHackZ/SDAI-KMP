@@ -1,5 +1,11 @@
 package com.shifthackz.aisdv1.presentation.screen.txt2img
 
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
+
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+
+import com.shifthackz.aisdv1.domain.gateway.MnnBackendPolicy
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
 import com.shifthackz.aisdv1.presentation.model.toGenerationModal
 
@@ -78,6 +84,8 @@ import kotlinx.coroutines.withContext
  * @param interruptSourceGenerationUseCase Interrupts only the captured legacy provider after its foreground job is cancelled.
  * @param observeEasyDiffusionProgressUseCase Shared hot queued/sampling progress, reset when its owning operation finishes.
  * @param nativeGenerationGateway Engine-specific progress/stages for the captured generation modal.
+ * @param mnnBackendPolicy Supplies supported choices and normalizes restored foreign backend values.
+ * @param observeMnnProcessStatusUseCase Reports iOS MNN overall percentage after native admission.
  * @param observeHordeProcessStatusUseCase Observes remote AI Horde queue position and wait estimates.
  * @param observeLocalDiffusionProcessStatusUseCase Observes legacy ONNX inference progress.
  * @param observeStableDiffusionCppProcessStatusUseCase Observes stable-diffusion.cpp inference progress.
@@ -119,6 +127,8 @@ class TextToImageViewModel(
     private val interruptSourceGenerationUseCase: InterruptSourceGenerationUseCase,
     private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val nativeGenerationGateway: NativeGenerationGateway,
+    private val mnnBackendPolicy: MnnBackendPolicy,
+    private val observeMnnProcessStatusUseCase: ObserveMnnProcessStatusUseCase,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
     private val observeStableDiffusionCppProcessStatusUseCase: ObserveStableDiffusionCppProcessStatusUseCase,
@@ -151,6 +161,7 @@ class TextToImageViewModel(
         samplingSteps = preferenceManager.textToImageSamplingSteps,
         cfgScale = preferenceManager.textToImageCfgScale,
         platform = buildInfoProvider.platform,
+        supportedMnnBackends = mnnBackendPolicy.supportedBackends,
         bonsaiBackendSelectionVisible = buildInfoProvider.platform == Platform.ANDROID,
     ),
     effectDispatcher = dispatchersProvider.immediate,
@@ -166,7 +177,10 @@ class TextToImageViewModel(
      */
     private fun updateFormState(mutation: (TextToImageState) -> TextToImageState) {
         updateState {
-            val updated = mutation(it).withMnnProfile()
+            val updated = mutation(it).withMnnProfile().let { state ->
+                state.copy(mnnBackend = state.mnnBackend.takeIf { backend -> backend in mnnBackendPolicy.supportedBackends }
+                    ?: MnnBackend.CPU)
+            }
             updated.withSeedValidation(
                 seedValidator,
                 if (updated.mode == ServerSource.LOCAL_MNN) mnnSeedValidator else nativeSeedValidator,
@@ -413,6 +427,16 @@ class TextToImageViewModel(
                     ) {
                         state.copy(screenModal = progress.toGenerationModal())
                     } else state
+                }
+            }
+        }
+        if (buildInfoProvider.platform == Platform.IOS) launch(dispatchersProvider.immediate) {
+            observeMnnProcessStatusUseCase().collect { status ->
+                updateFormState { state ->
+                    val modal = state.screenModal
+                    if (state.mode == ServerSource.LOCAL_MNN && modal is GenerationModal.Generating)
+                        state.copy(screenModal = modal.copy(status = status))
+                    else state
                 }
             }
         }

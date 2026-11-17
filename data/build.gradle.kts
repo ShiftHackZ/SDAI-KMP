@@ -14,6 +14,10 @@ android {
 
 kotlin {
     sourceSets {
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.test.coroutines)
+        }
         commonMain.dependencies {
             implementation(project(":core:common"))
             implementation(project(":domain"))
@@ -35,6 +39,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.google.gson)
             implementation(libs.okhttp.core)
+        }
+        iosMain.dependencies {
+            implementation(project(":feature:mnn"))
         }
         androidUnitTest.dependencies {
             implementation(libs.test.junit)

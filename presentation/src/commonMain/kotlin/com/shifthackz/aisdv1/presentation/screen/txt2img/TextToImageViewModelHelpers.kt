@@ -123,7 +123,7 @@ internal data class StableDiffusionSamplersKey(
 )
 
 /**
- * Maps current provider progress to queued or sampling UI while preserving cancellation availability.
+ * Maps provider progress to queued, sampling or overall-percentage UI while preserving cancellation.
  *
  * @param canCancelLocalGeneration Whether the active local engine supports cancellation in the current lifecycle.
  *
@@ -146,6 +146,10 @@ internal fun TextToImageState.progressModal(
         canCancel = canCancelLocalGeneration || platform == Platform.ANDROID,
         nativeEngine = NativeGenerationEngine.BONSAI.takeIf { platform == Platform.ANDROID },
         nativeStage = NativeGenerationStage.PREPARING.takeIf { platform == Platform.ANDROID },
+    )
+
+    mode == ServerSource.LOCAL_MNN && platform == Platform.IOS -> GenerationModal.Generating(
+        title = "MNN".asUiText(), canCancel = true, isOverallProgress = true,
     )
 
     localSourceSelected -> GenerationModal.Generating(

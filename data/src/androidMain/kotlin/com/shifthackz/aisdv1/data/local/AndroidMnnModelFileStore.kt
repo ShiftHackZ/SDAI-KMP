@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.local
 
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
+
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.common.file.MNN_INFERENCE_LOCK_SUFFIX
 import com.shifthackz.aisdv1.domain.validator.MnnBundleValidator
@@ -30,7 +32,10 @@ internal class AndroidMnnModelFileStore(
     private val descriptor: FileProviderDescriptor,
     private val validator: MnnBundleValidator,
     private val configuration: ConfigurationStore
-) : MnnModelFileStore {
+) : MnnModelStore {
+    override fun path(id: String, activationId: String): String =
+        directoryFile(id, activationId).path
+
     init {
         pruneUnselectedCustomSnapshots()
         File(descriptor.localModelDirPath).listFiles()?.forEach { file ->
@@ -54,7 +59,7 @@ internal class AndroidMnnModelFileStore(
      *
      * @author Dmitriy Moroz
      */
-    override fun directory(id: String, activationId: String): File {
+    private fun directoryFile(id: String, activationId: String = ""): File {
         val ownedId = if (id == LocalAiModel.CustomMnn.id) "mnn_custom" else id
         require(ownedId.matches(Regex("mnn_[A-Za-z0-9_-]+")))
         val root = File(descriptor.localModelDirPath, ownedId).canonicalFile
@@ -75,7 +80,7 @@ internal class AndroidMnnModelFileStore(
         val source = File(sourcePath).canonicalFile
         val manifest = validator(source.path)
         val identity = manifest.activationId
-        val existing = directory(LocalAiModel.CustomMnn.id, identity)
+        val existing = directoryFile(LocalAiModel.CustomMnn.id, identity)
         if (File(existing, ".complete").isFile && !File(existing, ".delete-requested").exists()) {
             acquire(LocalAiModel.CustomMnn.id, identity).use { validator(existing.path) }
             return identity
@@ -114,7 +119,7 @@ internal class AndroidMnnModelFileStore(
      *
      * @author Dmitriy Moroz
      */
-    override fun isDownloaded(id: String): Boolean = directory(id).let {
+    override fun isDownloaded(id: String): Boolean = directoryFile(id).let {
         File(it, ".complete").isFile && !File(it, ".delete-requested").exists()
     }
 
@@ -127,7 +132,7 @@ internal class AndroidMnnModelFileStore(
      * @author Dmitriy Moroz
      */
     override fun acquire(id: String, activationId: String): AutoCloseable {
-        val root = directory(id, activationId)
+        val root = directoryFile(id, activationId)
         val file = lockFile(root)
         val lock = try {
             file.channel.tryLock()
@@ -160,7 +165,7 @@ internal class AndroidMnnModelFileStore(
      * @author Dmitriy Moroz
      */
     override fun acquireSelection(id: String, activationId: String): AutoCloseable =
-        reserveSelection(directory(id, activationId))
+        reserveSelection(directoryFile(id, activationId))
 
     /**
      * Defers deletion while an attempt owns the unchanged path and payload files.
@@ -174,7 +179,7 @@ internal class AndroidMnnModelFileStore(
             val roots = File(descriptor.localModelDirPath, "mnn_custom").listFiles()
                 ?.filter(File::isDirectory)?.sortedBy { it.name }.orEmpty()
             withSelectionReservations(roots) { roots.forEach(::deleteReservedRoot) }
-        } else deleteRoot(directory(id))
+        } else deleteRoot(directoryFile(id))
     }
 
 
@@ -182,16 +187,16 @@ internal class AndroidMnnModelFileStore(
      * Extracts only flat regular payload names under a bounded private staging root.
      *
      * @param id Catalog identity.
-     * @param archive Downloaded ZIP that remains private until validation completes.
+     * @param archivePath Downloaded private ZIP path retained until validation completes.
      *
      * @author Dmitriy Moroz
      */
-    override suspend fun activate(id: String, archive: File) {
-        activateRoot(directory(id), archive)
+    override suspend fun activate(id: String, archivePath: String) {
+        activateRoot(directoryFile(id), File(archivePath))
     }
 
     private suspend fun activateCustom(identity: String, archive: File) {
-        activateRoot(directory(LocalAiModel.CustomMnn.id, identity), archive)
+        activateRoot(directoryFile(LocalAiModel.CustomMnn.id, identity), archive)
     }
 
     private suspend fun activateRoot(root: File, archive: File) {

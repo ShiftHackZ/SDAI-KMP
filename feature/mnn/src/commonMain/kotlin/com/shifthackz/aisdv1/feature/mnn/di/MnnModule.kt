@@ -11,7 +11,21 @@ import org.koin.core.module.Module
 val mnnModule: Module = platformMnnModule()
 
 /**
- * Supplies Android execution or the unsupported-platform implementation without native iOS linkage.
+ * Installs only platform host dependencies; Android native bindings remain child-only.
+ *
+ * @author Dmitriy Moroz
+ */
+val mnnHostRuntimeModule: Module = platformMnnHostModule()
+
+/**
+ * Supplies the in-process Apple binding or an empty Android host module.
+ *
+ * @author Dmitriy Moroz
+ */
+internal expect fun platformMnnHostModule(): Module
+
+/**
+ * Supplies isolated Android execution or injected in-process Apple execution.
  *
  * @author Dmitriy Moroz
  */

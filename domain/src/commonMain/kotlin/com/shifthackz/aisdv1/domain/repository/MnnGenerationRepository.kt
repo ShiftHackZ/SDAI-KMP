@@ -54,4 +54,13 @@ interface MnnGenerationRepository {
      * @author Dmitriy Moroz
      */
     suspend fun interruptGeneration()
+
+    /**
+     * Interrupts only the captured background operation, leaving successor work unchanged.
+     *
+     * @param ownerId Exact operation UUID captured by the worker.
+     *
+     * @author Dmitriy Moroz
+     */
+    suspend fun interruptOwnedGeneration(ownerId: String)
 }

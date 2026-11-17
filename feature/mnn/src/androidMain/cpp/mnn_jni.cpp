@@ -1,4 +1,5 @@
 #include <jni.h>
+#include "sdai_attempt.hpp"
 #include <MNN/Interpreter.hpp>
 #include <MNN/expr/ExecutorScope.hpp>
 #include <diffusion/stable_diffusion.hpp>
@@ -40,7 +41,7 @@ Java_com_shifthackz_aisdv1_feature_mnn_MnnNativeBridgeImpl_generateNative(
         env->GetByteArrayRegion(prompt, 0, text.size(), reinterpret_cast<jbyte*>(text.data()));
         if (env->ExceptionCheck()) throw std::runtime_error("MNN prompt allocation failed");
         auto cachePath = fromJava(env, cache);
-        if (setenv("SDAI_MNN_CACHE", cachePath.c_str(), 1) != 0) throw std::runtime_error("MNN cache setup failed");
+        sdai::AttemptConfiguration attemptConfiguration(cachePath);
         auto backend = isOpenCl ? MNN_FORWARD_OPENCL : MNN_FORWARD_CPU;
         MNN::ScheduleConfig config;
         config.type = backend;

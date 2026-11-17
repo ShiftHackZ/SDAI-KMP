@@ -689,6 +689,7 @@
     <!-- MNN SD 1.5 -->
     <string name="srv_type_mnn">MNN SD 1.5</string>
     <string name="hint_mnn_profile">Одно изображение 512×512, PNDM, CFG 7.5, 1–50 шагов. CPU или OpenCL.</string>
+    <string name="hint_mnn_profile_ios">Одно изображение 512×512, PNDM, CFG 7.5, 1–50 шагов. CPU или Metal.</string>
     <string name="hint_mnn_backend">Движок MNN</string>
     <string name="settings_usage_summary_models_mnn">Модели MNN</string>
     <string name="local_catalog_loading">Загрузка каталога моделей</string>

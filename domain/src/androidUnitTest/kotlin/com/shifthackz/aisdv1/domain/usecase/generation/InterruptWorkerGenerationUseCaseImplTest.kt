@@ -22,7 +22,7 @@ class InterruptWorkerGenerationUseCaseImplTest {
     private val interruptSource = mockk<InterruptSourceGenerationUseCase>(relaxed = true)
     private val buildInfo = mockk<BuildInfoProvider>()
     private val useCase =
-        InterruptWorkerGenerationUseCaseImpl(gateway, interruptSource, buildInfo, mockk())
+        InterruptWorkerGenerationUseCaseImpl(gateway, interruptSource, buildInfo, mockk(), mockk())
 
     @Test
     fun `given Android Bonsai worker, cancellation uses its exact owner`() = runTest {

@@ -1,7 +1,9 @@
 package com.shifthackz.aisdv1.data.di
 
 import android.content.Context
-import com.shifthackz.aisdv1.data.local.MnnModelFileStore
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
+import com.shifthackz.aisdv1.data.local.AndroidMnnBundleFileSystem
+import com.shifthackz.aisdv1.domain.gateway.MnnBundleFileSystem
 import com.shifthackz.aisdv1.data.local.AndroidMnnModelFileStore
 import com.shifthackz.aisdv1.data.validator.MnnBundleValidatorImpl
 import com.shifthackz.aisdv1.domain.validator.MnnBundleValidator
@@ -51,8 +53,9 @@ private val androidDataOverridesModule = module {
         }
     }
 
+    singleOf(::AndroidMnnBundleFileSystem) bind MnnBundleFileSystem::class
     singleOf(::MnnBundleValidatorImpl) bind MnnBundleValidator::class
-    singleOf(::AndroidMnnModelFileStore) bind MnnModelFileStore::class
+    singleOf(::AndroidMnnModelFileStore) bind MnnModelStore::class
     factoryOf(::MnnGenerationRepositoryImpl) bind MnnGenerationRepository::class
     factoryOf(::AndroidDownloadableModelFileDownloader) bind DownloadableModelFileDownloader::class
     factoryOf(::AndroidDownloadableModelFileStore) bind DownloadableModelFileStore::class

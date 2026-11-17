@@ -34,6 +34,34 @@ class MnnPreferencePersistenceTest {
     }
 
     @Test
+    fun `given MNN configuration adapter, unknown raw backend is restored, expected CPU persisted before snapshot`() {
+        // Given
+        values["key_mnn_backend"] = "future_backend"
+        val store = KeyValueConfigurationStore(keyValues)
+
+        // When
+        val backend = store.localMnnBackend
+
+        // Then
+        assertEquals(MnnBackend.CPU, backend)
+        assertEquals("cpu", values["key_mnn_backend"])
+    }
+
+    @Test
+    fun `given MNN preference adapter, unknown raw backend is restored, expected CPU persisted before capture`() {
+        // Given
+        values["key_mnn_backend"] = "future_backend"
+        val preferences = PreferenceManagerImpl(keyValues)
+
+        // When
+        val backend = preferences.localMnnBackend
+
+        // Then
+        assertEquals(MnnBackend.CPU, backend)
+        assertEquals("cpu", values["key_mnn_backend"])
+    }
+
+    @Test
     fun `given MNN preferences, no values exist, expected independent CPU and empty identities`() {
         // Given
         val preferences = PreferenceManagerImpl(keyValues)

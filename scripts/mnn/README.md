@@ -1,8 +1,9 @@
 # MNN SD 1.5 model packaging
 
-The Android MNN provider accepts the `sd15-512-general-int8-v1` profile. End users
-select a complete downloaded bundle or use the existing custom model folder
-picker outside the Play build. They do not convert weights.
+The Android and iOS MNN provider accepts the `sd15-512-general-int8-v1` profile. End users
+select a complete downloaded bundle. Android builds outside Play additionally
+support the existing custom model folder picker; iOS is catalog-only. End users
+do not convert weights.
 
 The maintainer utility reuses the immutable taobao-mnn general SD 1.5 graphs and
 weights. It compares their original vocabulary and merges with the source CLIP
@@ -62,3 +63,28 @@ MNN runtime code is separately Apache-2.0. Eight-bit weights do not imply INT8
 activations or universal GPU acceleration. NPU, fused graphs, SDXL and arbitrary
 checkpoints are outside this profile. Reconvert only after a demonstrated graph
 incompatibility requires a replacement, using the same pinned upstream revision.
+
+## Apple native bootstrap
+
+Run this before SwiftPM package resolution or opening the iOS Xcode project:
+
+```sh
+python3 scripts/build_mnn_ios.py
+swift package --package-path feature/mnn resolve
+swift test --package-path feature/mnn/swift
+```
+
+The module-root wrapper and developer package under `feature/mnn/swift` expose
+`SiliconDiffusionMnn`. The bootstrap verifies MNN 3.6.2 revision
+`7e3c6fb5225d3ccf22807ee641332669df34650d` and source archive SHA256
+`01dcdce39072b70188079a1dca0600e782c8dd0fcf2ad77f610bab264166a0cf`, applies
+the shared portable adapter and builds separate arm64 device, simulator and macOS
+slices with the selected Xcode SDKs. Generated XCFrameworks and upstream sources
+remain ignored. CPU/Metal use the same immutable model archive as Android;
+Metal4 tensor, OpenCL and unrelated demos are disabled in Apple builds.
+
+Rebuilding unsigned slices requires identical Xcode, SDK, source, patch and build
+options. Compare corresponding native binaries separately from code signing.
+No prebuilt public native binary or model conversion is required. Actual
+inference is available only on physical iOS 17+ devices, with finite UIKit
+background time and cooperative cancellation after native boundaries.

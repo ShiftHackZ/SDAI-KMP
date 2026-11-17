@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.local
 
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
+
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import java.io.File
@@ -14,7 +16,7 @@ import java.io.File
  */
 internal class AndroidDownloadableModelFileStore(
     private val fileProviderDescriptor: FileProviderDescriptor,
-    private val mnnModels: MnnModelFileStore,
+    private val mnnModels: MnnModelStore,
 ) : DownloadableModelFileStore {
 
     /**
@@ -75,7 +77,7 @@ internal class AndroidDownloadableModelFileStore(
      * @author Dmitriy Moroz
      */
     override fun resolvePath(model: LocalAiModel): String {
-        if (model.type == LocalAiModel.Type.Mnn) return mnnModels.directory(model.id).path
+        if (model.type == LocalAiModel.Type.Mnn) return mnnModels.path(model.id)
         val directory = getLocalModelDirectory(model.id)
         if (model.type != LocalAiModel.Type.Sdxl) return directory.path
 

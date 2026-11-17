@@ -1,14 +1,15 @@
 package com.shifthackz.aisdv1.feature.mnn
 
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.coVerify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
@@ -55,13 +56,31 @@ class MnnInferenceEngineTest {
     )
 
     @Test
+    fun `given Android MNN engine, Metal request arrives, expected rejection before native admission`() =
+        runTest {
+            // Given
+            val invalid =
+                request.copy(payload = request.payload.copy(mnnBackend = MnnBackend.METAL))
+            val stages = mutableListOf<NativeGenerationStage>()
+
+            // When
+            val failure =
+                runCatching { engine.generate(invalid, {}, stages::add) }.exceptionOrNull()
+
+            // Then
+            assertTrue(failure is IllegalArgumentException)
+            assertTrue(stages.isEmpty())
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
+        }
+
+    @Test
     fun `given MNN engine, supported request completes, expected lifecycle and opaque percentage progress`() =
         runTest {
             // Given
             val stages = mutableListOf<NativeGenerationStage>()
             val progress = mutableListOf<LocalDiffusionStatus>()
             val output = byteArrayOf(1, 2, 3)
-            every {
+            coEvery {
                 bridge.generate(
                     request,
                     any()
@@ -84,7 +103,7 @@ class MnnInferenceEngineTest {
     fun `given MNN engine, native boundary cancels, expected original cancellation`() = runTest {
         // Given
         val cancellation = CancellationException("cancel")
-        every { bridge.generate(any(), any()) } throws cancellation
+        coEvery { bridge.generate(any(), any()) } throws cancellation
 
         // When
         val failure = runCatching { engine.generate(request, {}, {}) }.exceptionOrNull()
@@ -96,15 +115,15 @@ class MnnInferenceEngineTest {
     @Test
     fun `given MNN engine, interruption is requested, expected bridge interruption and harmless close`() {
         // Given
-        every { bridge.interrupt() } returns Unit
+        coEvery { bridge.interrupt() } returns Unit
 
         // When
         engine.interrupt()
         engine.close()
 
         // Then
-        verify(exactly = 1) { bridge.interrupt() }
-        verify(exactly = 0) { bridge.generate(any(), any()) }
+        coVerify(exactly = 1) { bridge.interrupt() }
+        coVerify(exactly = 0) { bridge.generate(any(), any()) }
     }
 
     @Test
@@ -121,7 +140,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -138,7 +157,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -155,7 +174,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -172,7 +191,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -189,7 +208,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -206,7 +225,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -223,7 +242,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -240,7 +259,7 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 
     @Test
@@ -257,6 +276,6 @@ class MnnInferenceEngineTest {
             // Then
             assertTrue(failure is IllegalArgumentException)
             assertTrue(stages.isEmpty())
-            verify(exactly = 0) { bridge.generate(any(), any()) }
+            coVerify(exactly = 0) { bridge.generate(any(), any()) }
         }
 }

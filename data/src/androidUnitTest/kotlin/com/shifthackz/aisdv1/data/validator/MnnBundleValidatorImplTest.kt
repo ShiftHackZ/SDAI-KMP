@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.data.validator
 
+import com.shifthackz.aisdv1.data.local.AndroidMnnBundleFileSystem
+
 import java.io.File
 import java.nio.file.Files
 import java.security.MessageDigest
@@ -32,7 +34,7 @@ import org.robolectric.annotation.Config
 class MnnBundleValidatorImplTest {
     @get:Rule
     val temporary = TemporaryFolder()
-    private val validator = MnnBundleValidatorImpl()
+    private val validator = MnnBundleValidatorImpl(AndroidMnnBundleFileSystem())
 
     @Test
     fun `given MNN manifest, unknown schema is present, expected strict rejection`() = runTest {

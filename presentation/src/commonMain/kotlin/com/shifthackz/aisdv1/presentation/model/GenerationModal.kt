@@ -11,34 +11,34 @@ import com.shifthackz.aisdv1.feature.benchmark.BenchmarkLimitExceeded
 import com.shifthackz.aisdv1.feature.benchmark.BenchmarkRecommendation
 
 /**
- * Defines the `GenerationModal` contract for the SDAI presentation layer.
+ * Dialog state for generation progress, background work, decisions and completed results.
  *
  * @author Dmitriy Moroz
  */
 sealed interface GenerationModal {
 
     /**
-     * Provides the `None` singleton used by the SDAI presentation layer.
+     * Keeps the generation surface free of modal content.
      *
      * @author Dmitriy Moroz
      */
     data object None : GenerationModal
 
     /**
-     * Defines the `Background` contract for the SDAI presentation layer.
+     * Notices confirming background work admission or an already running operation.
      *
      * @author Dmitriy Moroz
      */
     sealed interface Background : GenerationModal {
         /**
-         * Provides the `Running` singleton used by the SDAI presentation layer.
+         * Explains that the existing background operation is still running.
          *
          * @author Dmitriy Moroz
          */
         data object Running : Background
 
         /**
-         * Provides the `Scheduled` singleton used by the SDAI presentation layer.
+         * Confirms that background work was scheduled for later execution.
          *
          * @author Dmitriy Moroz
          */
@@ -46,7 +46,7 @@ sealed interface GenerationModal {
     }
 
     /**
-     * Defines benchmark-related decisions shown before local generation starts.
+     * Captures benchmark decisions shown before local generation starts.
      *
      * @author Dmitriy Moroz
      */
@@ -73,145 +73,117 @@ sealed interface GenerationModal {
     }
 
     /**
-     * Carries `Generating` data through the SDAI presentation layer.
+     * Captures active generation progress and cancellation controls for the shared dialog.
+     *
+     * @param title Provider-specific heading, or null for the standard local-generation heading.
+     * @param canCancel Whether cancellation is available for this operation.
+     * @param status Current provider counters in their declared progress unit.
+     * @param nativeEngine Captured Android engine used for lifecycle-specific rendering.
+     * @param nativeStage Sanitized native lifecycle stage, absent for generic provider progress.
+     * @param isOverallProgress Whether counters represent overall work rather than sampling steps.
      *
      * @author Dmitriy Moroz
      */
     @Immutable
     data class Generating(
-        /**
-         * Exposes the `title` value used by the SDAI presentation layer.
-         *
-         * @author Dmitriy Moroz
-         */
         val title: UiText? = null,
-        /**
-         * Exposes the `canCancel` value used by the SDAI presentation layer.
-         *
-         * @author Dmitriy Moroz
-         */
         val canCancel: Boolean = false,
-        /**
-         * Exposes the `status` value used by the SDAI presentation layer.
-         *
-         * @author Dmitriy Moroz
-         */
         val status: LocalDiffusionStatus? = null,
-        /**
-         * Captured attempted native engine.
-         *
-         * @author Dmitriy Moroz
-         */
         val nativeEngine: NativeGenerationEngine? = null,
+        val nativeStage: NativeGenerationStage? = null,
+        val isOverallProgress: Boolean = false,
+    ) : GenerationModal {
         /**
-         * Sanitized stage for this engine.
+         * Sampling counters shown only when the provider actually reports denoising steps.
          *
          * @author Dmitriy Moroz
          */
-        val nativeStage: NativeGenerationStage? = null,
-    ) : GenerationModal {
         val pair: Pair<Int, Int>?
-            get() = status?.takeIf { it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.DENOISING) }
+            get() = status?.takeIf { !isOverallProgress && it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.DENOISING) }
                 ?.let { (current, total) -> current to total }
+
+        /**
+         * Bounded overall completion percentage, independent of the requested sampling count.
+         *
+         * @author Dmitriy Moroz
+         */
+        val overallPercentage: Int?
+            get() = status?.takeIf { isOverallProgress && it.total > 0 }
+                ?.let { (it.current.toLong() * 100 / it.total).coerceIn(0, 100).toInt() }
     }
 
     /**
-     * Carries `Communicating` data through the SDAI presentation layer.
+     * Captures remote queue status before generation results become available.
+     *
+     * @param canCancel Whether the remote operation offers cancellation.
+     * @param hordeProcessStatus Latest queue position and wait estimate.
      *
      * @author Dmitriy Moroz
      */
     @Immutable
     data class Communicating(
-        /**
-         * Exposes the `canCancel` value used by the SDAI presentation layer.
-         *
-         * @author Dmitriy Moroz
-         */
         val canCancel: Boolean = true,
-        /**
-         * Exposes the `hordeProcessStatus` value used by the SDAI presentation layer.
-         *
-         * @author Dmitriy Moroz
-         */
         val hordeProcessStatus: HordeProcessStatus? = null,
     ) : GenerationModal
 
     /**
-     * Carries `Error` data through the SDAI presentation layer.
+     * Displays a controlled generation failure and its recovery message.
      *
-     * @param error error value consumed by the API.
+     * @param error Localized user-visible failure message.
      * @author Dmitriy Moroz
      */
     @Immutable
     data class Error(val error: UiText) : GenerationModal
 
     /**
-     * Defines the `Image` contract for the SDAI presentation layer.
+     * Completed results offered for inspection, export and optional reporting.
      *
      * @author Dmitriy Moroz
      */
     sealed interface Image : GenerationModal {
 
         /**
-         * Carries `Single` data through the SDAI presentation layer.
+         * Presents one complete generated image and its available result actions.
+         *
+         * @param result Complete image and captured generation metadata.
+         * @param autoSaveEnabled Whether normal persistence already exported this image.
+         * @param reportEnabled Whether reporting is available for this result.
          *
          * @author Dmitriy Moroz
          */
         @Immutable
         data class Single(
-            /**
-             * Exposes the `result` value used by the SDAI presentation layer.
-             *
-             * @author Dmitriy Moroz
-             */
             val result: AiGenerationResult,
-            /**
-             * Exposes the `autoSaveEnabled` value used by the SDAI presentation layer.
-             *
-             * @author Dmitriy Moroz
-             */
             val autoSaveEnabled: Boolean,
-            /**
-             * Exposes the `reportEnabled` value used by the SDAI presentation layer.
-             *
-             * @author Dmitriy Moroz
-             */
             val reportEnabled: Boolean,
         ) : Image
 
         /**
-         * Carries `Batch` data through the SDAI presentation layer.
+         * Presents a complete generated image batch and shared result actions.
+         *
+         * @param results Complete images and their captured generation metadata.
+         * @param autoSaveEnabled Whether normal persistence already exported these images.
          *
          * @author Dmitriy Moroz
          */
         @Immutable
         data class Batch(
-            /**
-             * Exposes the `results` value used by the SDAI presentation layer.
-             *
-             * @author Dmitriy Moroz
-             */
             val results: List<AiGenerationResult>,
-            /**
-             * Exposes the `autoSaveEnabled` value used by the SDAI presentation layer.
-             *
-             * @author Dmitriy Moroz
-             */
             val autoSaveEnabled: Boolean,
         ) : Image
 
         /**
-         * Provides the `companion object` singleton used by the SDAI presentation layer.
+         * Selects an individual or batch result dialog from successful images.
          *
          * @author Dmitriy Moroz
          */
         companion object {
             /**
-             * Creates the SDAI value produced by `create`.
+             * Chooses the single-image or batch dialog from complete successful results.
              *
-             * @param list list value consumed by the API.
-             * @param autoSaveEnabled auto save enabled value consumed by the API.
-             * @param reportEnabled report enabled value consumed by the API.
+             * @param list Complete generated images; a single item uses the individual result dialog.
+             * @param autoSaveEnabled Whether normal persistence already exported these images.
+             * @param reportEnabled Whether reporting is available for the results.
              * @author Dmitriy Moroz
              */
             fun create(

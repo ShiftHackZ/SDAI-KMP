@@ -91,9 +91,13 @@ internal fun GenerationBaseProviderOption(
         GenerationBaseFormField.MNN_BACKEND -> DropdownTextField(
             modifier = Modifier.padding(top = 8.dp),
             label = Localization.string("hint_mnn_backend").asUiText(),
-            value = state.mnnBackend, items = MnnBackend.entries,
+            value = state.mnnBackend, items = state.supportedMnnBackends,
             onItemSelected = { onEvent(GenerationInputFormEvent.UpdateMnnBackend(it)) },
-            displayDelegate = { (if (it == MnnBackend.CPU) "CPU" else "OpenCL").asUiText() })
+            displayDelegate = {
+                (when (it) {
+                    MnnBackend.CPU -> "CPU"; MnnBackend.OPENCL -> "OpenCL"; MnnBackend.METAL -> "Metal"
+                }).asUiText()
+            })
 
         GenerationBaseFormField.SDXL_BACKEND -> {
 

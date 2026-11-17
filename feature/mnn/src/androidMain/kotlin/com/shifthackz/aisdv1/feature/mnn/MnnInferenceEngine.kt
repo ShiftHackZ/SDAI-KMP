@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.feature.mnn
 
 import com.shifthackz.aisdv1.core.common.log.infoLog
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
 import com.shifthackz.aisdv1.domain.feature.diffusion.NativeInferenceEngine
@@ -28,6 +29,7 @@ internal class MnnInferenceEngine(private val bridge: MnnRuntime) : NativeInfere
         onProgress: (LocalDiffusionStatus) -> Unit, onStage: (NativeGenerationStage) -> Unit
     ): ByteArray {
         val payload = request.payload
+        require(payload.mnnBackend in listOf(MnnBackend.CPU, MnnBackend.OPENCL))
         require(payload.width == 512 && payload.height == 512 && payload.cfgScale == 7.5f)
         require(payload.samplingSteps in 1..50 && payload.seed.toLongOrNull() in 0..Int.MAX_VALUE.toLong())
         require(payload.batchCount == 1 && payload.negativePrompt.isEmpty() && payload.sampler == "PNDM")

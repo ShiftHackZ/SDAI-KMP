@@ -17,6 +17,8 @@ import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.entity.MnnWorkOwner
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
@@ -44,6 +46,7 @@ import kotlin.coroutines.coroutineContext
  * @param observeLocalDiffusionProcessStatusUseCase Observes ONNX sampling steps.
  * @param observeCoreMlProcessStatusUseCase Observes Core ML sampling steps.
  * @param observeBonsaiProcessStatusUseCase Observes Bonsai sampling steps.
+ * @param observeMnnProcessStatusUseCase Observes overall MNN percentage for the captured job.
  * @param observeEasyDiffusionProgressUseCase Observes remote progress tagged with the exact background job UUID.
  * @param preferenceManager Supplies source defaults only for legacy payloads without captured source identity.
  *
@@ -59,6 +62,7 @@ internal class BackgroundTaskManagerImpl(
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
     private val observeCoreMlProcessStatusUseCase: ObserveCoreMlProcessStatusUseCase,
     private val observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
+    private val observeMnnProcessStatusUseCase: ObserveMnnProcessStatusUseCase,
     private val preferenceManager: PreferenceManager,
     private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
 ) : BackgroundTaskManager {
@@ -187,7 +191,7 @@ internal class BackgroundTaskManagerImpl(
                 backgroundExecution.begin()
                 listenSourceStatus(source, generationJob, ownerId)
                 postRunningMessage()
-                val result = withContext(EasyDiffusionWorkOwner(ownerId)) {
+                val result = withContext(EasyDiffusionWorkOwner(ownerId) + MnnWorkOwner(ownerId)) {
                     dispatchState.value = true
                     coroutineContext.ensureActive()
                     block()
@@ -260,6 +264,7 @@ internal class BackgroundTaskManagerImpl(
             ServerSource.LOCAL_MICROSOFT_ONNX -> listenLocalDiffusionStatus(job)
             ServerSource.LOCAL_APPLE_CORE_ML -> listenCoreMlStatus(job)
             ServerSource.LOCAL_APPLE_BONSAI -> listenBonsaiStatus(job)
+            ServerSource.LOCAL_MNN -> listenMnnStatus(job)
             else -> Unit
         }
     }
@@ -346,6 +351,25 @@ internal class BackgroundTaskManagerImpl(
                     if (!isActiveJob(job)) return@collect
                     postStepMessage(status.current, status.total)
                 }
+        }
+    }
+
+    /**
+     * Publishes overall MNN percentage only while the captured generation job owns the UI.
+     *
+     * @param job Immutable coroutine owner whose replacement invalidates late callbacks.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun listenMnnStatus(job: Job) {
+        statusScope.launch {
+            observeMnnProcessStatusUseCase().collect { status ->
+                if (!isActiveJob(job)) return@collect
+                backgroundWorkObserver.postStatusMessage(
+                    Localization.string("notification_running_title"),
+                    "${status.current.coerceIn(0, 100)}%",
+                )
+            }
         }
     }
 
