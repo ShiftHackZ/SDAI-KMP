@@ -128,6 +128,8 @@ jobs:
 
       - uses: android-actions/setup-android@v3
         if: steps.current.outputs.should_generate == 'true'
+        with:
+          packages: platform-tools
 
       - name: Install the configured Android platform
         if: steps.current.outputs.should_generate == 'true'
