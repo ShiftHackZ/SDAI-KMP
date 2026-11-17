@@ -315,6 +315,10 @@ class SettingsViewModel(
                 platformActions.openUrl(linksProvider.discordCommunityUrl)
             }
 
+            SettingsIntent.LaunchUrl.OpenLinkedInCommunity -> {
+                platformActions.openUrl(linksProvider.linkedInCommunityUrl)
+            }
+
             is SettingsIntent.UpdateFlag.DynamicColors -> {
                 preferenceManager.designUseSystemColorPalette = intent.flag
             }

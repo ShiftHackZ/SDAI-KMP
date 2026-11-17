@@ -377,6 +377,7 @@
     <string name="settings_item_source">Исходный код</string>
     <string name="settings_item_telegram">Telegram</string>
     <string name="settings_item_discord">Discord</string>
+    <string name="settings_item_linkedin">LinkedIn</string>
     <string name="settings_item_project_website">Сайт проекта</string>
     <string name="settings_item_developer_website">Сайт разработчика</string>
     <string name="settings_item_license">Лицензия</string>

@@ -410,6 +410,7 @@
     <string name="settings_item_source">Get source code</string>
     <string name="settings_item_telegram">Telegram</string>
     <string name="settings_item_discord">Discord</string>
+    <string name="settings_item_linkedin">LinkedIn</string>
     <string name="settings_item_project_website">Project website</string>
     <string name="settings_item_developer_website">Developer website</string>
     <string name="settings_item_license">License</string>

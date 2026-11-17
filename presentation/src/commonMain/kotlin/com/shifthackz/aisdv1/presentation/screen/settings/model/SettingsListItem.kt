@@ -39,6 +39,7 @@ internal enum class SettingsListItem {
     COMMUNITY_HEADER,
     TELEGRAM,
     DISCORD,
+    LINKED_IN,
     PROJECT_WEBSITE,
     DEVELOPER_WEBSITE,
     INFO_HEADER,

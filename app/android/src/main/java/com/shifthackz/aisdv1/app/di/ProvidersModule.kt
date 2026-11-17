@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.appbuild.BuildVersion
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
+import com.shifthackz.aisdv1.core.common.links.DefaultLinksProvider
 import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
@@ -40,6 +41,7 @@ val providersModule = module {
             override val demoModeUrl: String = BuildConfig.DEMO_MODE_API_URL
             override val telegramCommunityUrl: String = "https://t.me/sdai_app"
             override val discordCommunityUrl: String = "https://discord.gg/jzdR9m8Ves"
+            override val linkedInCommunityUrl: String = DefaultLinksProvider.linkedInCommunityUrl
         }
     }
 

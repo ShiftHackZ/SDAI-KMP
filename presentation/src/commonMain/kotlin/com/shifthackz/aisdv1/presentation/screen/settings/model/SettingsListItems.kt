@@ -59,6 +59,7 @@ internal fun settingsListItems(
         add(SettingsListItem.COMMUNITY_HEADER)
         add(SettingsListItem.TELEGRAM)
         add(SettingsListItem.DISCORD)
+        add(SettingsListItem.LINKED_IN)
         add(SettingsListItem.PROJECT_WEBSITE)
         add(SettingsListItem.DEVELOPER_WEBSITE)
         add(SettingsListItem.INFO_HEADER)

@@ -123,6 +123,7 @@ internal fun ContentSettingsState(
                     SettingsListItem.COMMUNITY_HEADER,
                     SettingsListItem.TELEGRAM,
                     SettingsListItem.DISCORD,
+                    SettingsListItem.LINKED_IN,
                     SettingsListItem.PROJECT_WEBSITE,
                     SettingsListItem.DEVELOPER_WEBSITE -> SettingsCommunitySection(
                         row = row,

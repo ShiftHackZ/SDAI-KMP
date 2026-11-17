@@ -133,6 +133,13 @@ sealed interface SettingsIntent : MviIntent {
         data object OpenTelegramCommunity : LaunchUrl
 
         data object OpenDiscordCommunity : LaunchUrl
+
+        /**
+         * Opens SDAI's public LinkedIn page through the current platform's URL handler.
+         *
+         * @author Dmitriy Moroz
+         */
+        data object OpenLinkedInCommunity : LaunchUrl
     }
 
     /**
