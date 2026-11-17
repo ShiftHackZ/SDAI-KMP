@@ -6,7 +6,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
+import com.android.build.gradle.LibraryExtension as LegacyLibraryExtension
 
+@Suppress("unused")
 class ComposeConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
@@ -21,7 +23,7 @@ class ComposeConventionPlugin : Plugin<Project> {
             val extension = extensions.getByType<LibraryExtension>()
             configureCompose(extension)
 
-            extensions.configure<com.android.build.gradle.LibraryExtension> {
+            extensions.configure<LegacyLibraryExtension> {
                 configureKotlinAndroid(this)
                 defaultConfig.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
             }

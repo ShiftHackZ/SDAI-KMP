@@ -2,11 +2,14 @@ name: Project Tests
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [master, develop]
   push:
     branches: [master, develop]
     paths-ignore:
       - "docs/docs/**"
+
+permissions:
+  contents: read
 
 jobs:
   test-feature:
@@ -15,6 +18,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Test OpenAI-compatible API contract
         run: python3 scripts/test_openai_compatible_contract.py
@@ -45,5 +51,32 @@ jobs:
           path: build/reports/kotlinLint/
           if-no-files-found: ignore
 
-      - name: Run Tests with Gradle
-        run: ./gradlew clean testDebugUnitTest :app:testFullDebugUnitTest
+      - name: Run unit tests and generate coverage
+        run: ./gradlew clean ciCoverage --no-daemon
+
+      - name: Upload unit-test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-jvm-test-coverage
+          path: |
+            build/reports/jacoco/ciCoverage/
+            **/build/reports/tests/test*UnitTest/
+            **/build/test-results/test*UnitTest/*.xml
+          if-no-files-found: warn
+
+      - name: Verify coverage report
+        run: test -s build/reports/jacoco/ciCoverage/ciCoverage.xml
+
+      # Public fork and Dependabot PRs use Codecov's tokenless public-PR uploads.
+      # Keep this on pull_request; untrusted PR code must never receive base-repo secrets.
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          override_branch: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' && format('pr{0}:{1}', github.event.pull_request.number, github.head_ref) || '' }}
+          files: build/reports/jacoco/ciCoverage/ciCoverage.xml
+          disable_search: true
+          fail_ci_if_error: true
+          flags: android-unit
+          name: android-jvm-unit-tests

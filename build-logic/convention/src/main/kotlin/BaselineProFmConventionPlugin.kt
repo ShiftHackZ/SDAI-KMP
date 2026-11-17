@@ -16,6 +16,7 @@ import java.util.Collections
  * Fix snippet   : https://gist.github.com/obfusk/61046e09cee352ae6dd109911534b12e
  * Issue tracker : https://issuetracker.google.com/issues/231837768
  */
+@Suppress("unused")
 class BaselineProFmConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
