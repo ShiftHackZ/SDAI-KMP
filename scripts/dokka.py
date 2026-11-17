@@ -4,7 +4,6 @@ import argparse
 import hashlib
 import os
 import subprocess
-import time
 from pathlib import Path
 
 
@@ -48,24 +47,23 @@ def fingerprint(ref):
     return hashlib.sha256(b"\0".join(inputs)).hexdigest()
 
 
-def plan(quiet_minutes, should_force):
-    """Regenerate released documentation only when master has changed and is quiet."""
+def plan(should_force, expected_digest):
+    """Check current master inputs after the workflow handles push debouncing."""
     sha = git("rev-parse", "refs/remotes/origin/master").decode().strip()
     digest = fingerprint(sha)
     # A missing marker is expected on the first automated build. Other Git
-    # failures must fail the check rather than silently schedule a build.
+    # failures must fail the check rather than silently request a build.
     has_state = bool(git("ls-tree", sha, "--", STATE_PATH).strip())
     previous = git("show", f"{sha}:{STATE_PATH}").decode().strip() if has_state else None
-    age = time.time() - int(git("show", "-s", "--format=%ct", sha))
     has_input_changed = previous != digest
-    has_quiet_period_elapsed = quiet_minutes == 0 or age >= quiet_minutes * 60
-    should_generate = should_force or (has_input_changed and has_quiet_period_elapsed)
-    if should_generate:
+    has_expected_inputs = expected_digest is None or digest == expected_digest
+    should_generate = has_expected_inputs and (should_force or has_input_changed)
+    if not has_expected_inputs:
+        print("master: inputs changed during the debounce; a newer push will check them.")
+    elif should_generate:
         print(f"master: regenerate Dokka for {sha}.")
-    elif not has_input_changed:
-        print("master: Dokka inputs are unchanged.")
     else:
-        print(f"master: waiting for {quiet_minutes} quiet minutes.")
+        print("master: Dokka inputs are unchanged.")
     if output := os.environ.get("GITHUB_OUTPUT"):
         with open(output, "a") as stream:
             stream.write(f"source_sha={sha}\n")
@@ -86,13 +84,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     planner = commands.add_parser("plan")
-    planner.add_argument("--quiet-minutes", type=int, default=10)
     planner.add_argument("--force", action="store_true")
+    planner.add_argument("--expected-digest")
     recorder = commands.add_parser("record")
     recorder.add_argument("digest")
     args = parser.parse_args()
     if args.command == "plan":
-        plan(args.quiet_minutes, args.force)
+        plan(args.force, args.expected_digest)
     else:
         record(args.digest)
 

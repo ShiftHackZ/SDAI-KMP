@@ -1,0 +1,143 @@
+name: Bug report
+description: Report a problem with SDAI, its generation providers, or the website.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report one problem per issue. For generation, connection, or model download problems, include the provider and model details below.
+        The [provider guide](https://github.com/ShiftHackZ/SDAI-KMP#provider-and-platform-matrix) lists the supported platforms and providers.
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Affected platform
+      options:
+        - Android
+        - iOS / iPadOS
+        - Website / documentation
+        - Build / CI
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: SDAI version and build
+      description: Copy the app version and build number from Settings. For nightly or custom builds, include the build date or commit SHA. Enter Not applicable for website-only reports.
+      placeholder: "e.g. 1.2.0 (220), or nightly build date / commit"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: android-flavor
+    attributes:
+      label: Android flavor
+      description: Full, FOSS and Google Play builds have different provider availability.
+      options:
+        - Full
+        - FOSS
+        - Google Play (playstore)
+        - Not Android / not applicable
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: Installation source
+      options:
+        - GitHub release
+        - GitHub nightly
+        - F-Droid
+        - Google Play
+        - App Store
+        - TestFlight
+        - Built from source
+        - Other / not sure
+        - Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: device-os
+    attributes:
+      label: Device and OS version
+      description: Include the exact phone/tablet model and Android or iOS version. Mention a custom ROM if used. For website or build issues, give the host OS and relevant browser or tool versions instead.
+      placeholder: "e.g. Google Pixel 8, Android 15 (stock ROM); iPhone 15, iOS 18.4"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: What happened?
+      description: Describe the actual result and copy the exact error message, if any.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Start from opening the app or selecting the provider. State whether this happens every time or intermittently, and whether the app is in the foreground, background, or the device is locked.
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Tap ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+
+  - type: input
+    id: provider
+    attributes:
+      label: Generation provider
+      description: Copy the selected provider name from Configuration settings. Enter Not applicable if unrelated to generation, or Not sure if the app cannot open.
+      placeholder: "e.g. AUTOMATIC1111 WebUI, OpenAI-compatible, ChatGPT OAuth, Local ONNX, or Core ML"
+    validations:
+      required: true
+
+  - type: textarea
+    id: model
+    attributes:
+      label: Model details (generation or model download issues)
+      description: Give the exact checkpoint, model ID, engine, or local model filename. Include its source/download link and format or quantization when relevant.
+      placeholder: |
+        Model name / ID / filename:
+        Source or download link:
+        Format / quantization (local models):
+
+  - type: textarea
+    id: generation-context
+    attributes:
+      label: Generation and server settings (if applicable)
+      description: Include the generation mode and settings needed to reproduce it. For local inference, name the selected runtime/backend. For self-hosted providers, include the server software/version and whether the phone connects over LAN or remotely.
+      placeholder: |
+        Mode: text to image / image to image / inpaint / batch
+        Image size, steps, CFG, sampler, seed, batch size:
+        Prompt / negative prompt (if needed to reproduce):
+        Local runtime/backend: CPU / NNAPI / GPU / Vulkan / other
+        Server software/version and connection setup:
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, video, and logs
+      description: Attach relevant screenshots/video and app or server logs. Remove API keys, passwords, OAuth codes and session tokens before posting.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Include the last working app version, recent changes, or a workaround if known.

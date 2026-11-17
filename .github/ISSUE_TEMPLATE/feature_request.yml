@@ -1,0 +1,70 @@
+name: Feature request
+description: Suggest an improvement to SDAI, its providers, or its documentation.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Describe what you are trying to accomplish and the limitation you encounter.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      description: Describe the behavior you would like and how it would help.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Affected platforms
+      multiple: true
+      options:
+        - Android
+        - iOS / iPadOS
+        - Website / documentation
+        - Build / CI
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: android-flavor
+    attributes:
+      label: Android flavor (if applicable)
+      options:
+        - Full
+        - FOSS
+        - Google Play (playstore)
+        - All Android flavors
+        - Not Android / not applicable
+        - Not sure
+
+  - type: input
+    id: provider
+    attributes:
+      label: Generation provider (if applicable)
+      description: Name the existing or proposed provider. For a new integration, link its official project or API documentation.
+      placeholder: "e.g. AUTOMATIC1111 WebUI, OpenAI-compatible, Local ONNX, or a new provider"
+
+  - type: textarea
+    id: model
+    attributes:
+      label: Model or runtime (if applicable)
+      description: For generation or model support requests, give the model name/ID, source link, format, and runtime/backend requirements if known.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds
+      description: Describe any existing way to achieve this and why it is insufficient.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Device, app version, and additional context
+      description: For device-specific requests, include the phone/tablet model, OS version, SDAI version/build, and installation source. Add screenshots or examples that explain the proposal.

@@ -184,9 +184,10 @@ Preferred feature shape:
 
 Feature PR CI may run Dokka as a validation step, but the generated output should stay as a CI artifact or temporary local output, not as committed source.
 
-Update Dokka checks `master` every 15 minutes and waits for a 10-minute quiet
-period. It generates only when source or build inputs differ from the last
-successful documentation build, then commits to `master`. Exactly aligned
+Update Dokka checks `master` after pushes and batches them with a 5-minute quiet
+period. It generates only when
+source or build inputs differ from the last successful documentation build,
+then commits to `master`. Exactly aligned
 `develop` receives the same commit through an atomic fast-forward; otherwise it
 is left untouched. Manual runs on `master` check immediately. See
 [Documentation Workflow](DOCUMENTATION.md#automatic-and-manual-updates) for
