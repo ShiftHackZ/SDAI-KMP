@@ -14,6 +14,7 @@
       company: "https://moroz.cc",
       telegram: "https://t.me/sdai_app",
       discord: "https://discord.gg/jzdR9m8Ves",
+      linkedin: "https://www.linkedin.com/company/sdai-app/",
       fourPda: "https://4pda.to/forum/index.php?showtopic=1082639",
       nightly: "nightly.html",
       testFlight: "testflight.html",
@@ -26,6 +27,8 @@
   };
 
   const icons = {
+    linkedin:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>',
     telegram:
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>',
     discord:
@@ -83,6 +86,7 @@
             <div class="social-links" aria-label="Community">
               <a class="icon-link" href="${site.links.telegram}" ${external} aria-label="Telegram">${icons.telegram}</a>
               <a class="icon-link" href="${site.links.discord}" ${external} aria-label="Discord">${icons.discord}</a>
+              <a class="icon-link" href="${site.links.linkedin}" ${external} aria-label="LinkedIn">${icons.linkedin}</a>
             </div>
           </div>
         </div>
@@ -136,6 +140,7 @@
             <h2>Community</h2>
             <a href="${site.links.telegram}" ${external}>Telegram</a>
             <a href="${site.links.discord}" ${external}>Discord</a>
+            <a href="${site.links.linkedin}" ${external}>LinkedIn</a>
             <a href="${site.links.fourPda}" ${external}>4PDA</a>
           </nav>
           <nav class="footer-column" aria-label="Beta testing">

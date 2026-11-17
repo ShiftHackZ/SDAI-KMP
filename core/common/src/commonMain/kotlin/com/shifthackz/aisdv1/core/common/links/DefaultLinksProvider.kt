@@ -1,118 +1,144 @@
 package com.shifthackz.aisdv1.core.common.links
 
 /**
- * Provides the `DefaultLinksProvider` singleton used by the SDAI core common layer.
+ * Supplies the standard web destinations used by the shared app when no platform override is installed.
  *
  * @author Dmitriy Moroz
  */
 object DefaultLinksProvider : LinksProvider {
     /**
-     * Exposes the `hordeUrl` value used by the SDAI core common layer.
+     * AI Horde service home page for learning about crowdsourced generation.
      *
      * @author Dmitriy Moroz
      */
     override val hordeUrl: String = "https://stablehorde.net/"
+
     /**
-     * Exposes the `hordeSignUpUrl` value used by the SDAI core common layer.
+     * AI Horde registration page for obtaining an account and API key.
      *
      * @author Dmitriy Moroz
      */
     override val hordeSignUpUrl: String = "https://stablehorde.net/register"
+
     /**
-     * Exposes the `huggingFaceUrl` value used by the SDAI core common layer.
+     * Hugging Face inference documentation for configuring a hosted provider.
      *
      * @author Dmitriy Moroz
      */
-    override val huggingFaceUrl: String = "https://huggingface.co/docs/inference-providers/providers/hf-inference"
+    override val huggingFaceUrl: String =
+        "https://huggingface.co/docs/inference-providers/providers/hf-inference"
+
     /**
-     * Exposes the `openAiInfoUrl` value used by the SDAI core common layer.
+     * OpenAI API key management page used during provider setup.
      *
      * @author Dmitriy Moroz
      */
     override val openAiInfoUrl: String = "https://platform.openai.com/api-keys"
+
     /**
-     * Exposes the `stabilityAiInfoUrl` value used by the SDAI core common layer.
+     * Stability AI platform page for managing hosted generation access.
      *
      * @author Dmitriy Moroz
      */
     override val stabilityAiInfoUrl: String = "https://platform.stability.ai/"
+
     /**
-     * Exposes the `falAiInfoUrl` value used by the SDAI core common layer.
+     * Fal.ai dashboard for creating and managing generation API keys.
      *
      * @author Dmitriy Moroz
      */
     override val falAiInfoUrl: String = "https://fal.ai/dashboard/keys"
+
     /**
-     * Exposes the `arliAiInfoUrl` value used by the SDAI core common layer.
+     * ArliAI quick-start documentation for configuring its image API.
      *
      * @author Dmitriy Moroz
      */
     override val arliAiInfoUrl: String = "https://www.arliai.com/quick-start"
+
     /**
-     * Exposes the `privacyPolicyUrl` value used by the SDAI core common layer.
+     * SDAI privacy policy opened from Settings and onboarding.
      *
      * @author Dmitriy Moroz
      */
     override val privacyPolicyUrl: String = "https://sdai.moroz.cc/policy.html"
+
     /**
-     * Exposes the `donateUrl` value used by the SDAI core common layer.
+     * SDAI support page listing ways to contribute to project development.
      *
      * @author Dmitriy Moroz
      */
     override val donateUrl: String = "https://sdai.moroz.cc/donate.html"
+
     /**
-     * Exposes the `projectWebsiteUrl` value used by the SDAI core common layer.
+     * SDAI home page with downloads, provider information and community links.
      *
      * @author Dmitriy Moroz
      */
     override val projectWebsiteUrl: String = "https://sdai.moroz.cc"
+
     /**
-     * Exposes the `developerWebsiteUrl` value used by the SDAI core common layer.
+     * Developer home page linked from the Settings community section.
      *
      * @author Dmitriy Moroz
      */
     override val developerWebsiteUrl: String = "https://moroz.cc"
+
     /**
      * Canonical repository URL opened by the app's source-code links.
      *
      * @author Dmitriy Moroz
      */
     override val gitHubSourceUrl: String = "https://github.com/ShiftHackZ/SDAI-KMP"
+
     /**
      * License page in the canonical repository, opened by the app's license links.
      *
      * @author Dmitriy Moroz
      */
     override val licenseUrl: String = "https://github.com/ShiftHackZ/SDAI-KMP/blob/master/LICENSE"
+
     /**
-     * Exposes the `setupInstructionsUrl` value used by the SDAI core common layer.
+     * AUTOMATIC1111 setup documentation for configuring a compatible server.
      *
      * @author Dmitriy Moroz
      */
     override val setupInstructionsUrl: String =
         "https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki"
+
     /**
-     * Exposes the `swarmUiInfoUrl` value used by the SDAI core common layer.
+     * SwarmUI documentation for configuring a compatible generation server.
      *
      * @author Dmitriy Moroz
      */
-    override val swarmUiInfoUrl: String = "https://github.com/mcmonkeyprojects/SwarmUI/tree/master/docs"
+    override val swarmUiInfoUrl: String =
+        "https://github.com/mcmonkeyprojects/SwarmUI/tree/master/docs"
+
     /**
-     * Exposes the `demoModeUrl` value used by the SDAI core common layer.
+     * Endpoint used when provider setup selects the demonstration server.
      *
      * @author Dmitriy Moroz
      */
     override val demoModeUrl: String = "https://sdai.moroz.cc"
+
     /**
-     * Exposes the `telegramCommunityUrl` value used by the SDAI core common layer.
+     * SDAI Telegram channel for project updates and announcements.
      *
      * @author Dmitriy Moroz
      */
     override val telegramCommunityUrl: String = "https://t.me/sdai_app"
+
     /**
-     * Exposes the `discordCommunityUrl` value used by the SDAI core common layer.
+     * SDAI Discord invitation for community discussion and support.
      *
      * @author Dmitriy Moroz
      */
     override val discordCommunityUrl: String = "https://discord.gg/jzdR9m8Ves"
+
+    /**
+     * Public SDAI LinkedIn page opened by the shared Settings community section.
+     *
+     * @author Dmitriy Moroz
+     */
+    override val linkedInCommunityUrl: String = "https://www.linkedin.com/company/sdai-app/"
 }

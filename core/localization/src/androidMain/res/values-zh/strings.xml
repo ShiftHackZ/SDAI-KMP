@@ -412,6 +412,7 @@
     <string name="settings_item_source">获取源代码</string>
     <string name="settings_item_telegram">Telegram</string>
     <string name="settings_item_discord">Discord</string>
+    <string name="settings_item_linkedin">LinkedIn</string>
     <string name="settings_item_project_website">项目网站</string>
     <string name="settings_item_developer_website">开发者网站</string>
     <string name="settings_item_license">许可证</string>

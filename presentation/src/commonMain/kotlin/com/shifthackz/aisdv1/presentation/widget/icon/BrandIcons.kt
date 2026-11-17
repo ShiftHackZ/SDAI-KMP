@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 object BrandIcons {
 
     /**
-     * Exposes the `Telegram` value used by the SDAI presentation layer.
+     * Cached Telegram vector used by community links.
      *
      * @author Dmitriy Moroz
      */
@@ -28,7 +28,7 @@ object BrandIcons {
         ).also { telegram = it }
 
     /**
-     * Exposes the `Discord` value used by the SDAI presentation layer.
+     * Cached Discord vector used by community links.
      *
      * @author Dmitriy Moroz
      */
@@ -39,7 +39,18 @@ object BrandIcons {
         ).also { discord = it }
 
     /**
-     * Exposes the `Apple` value used by the SDAI presentation layer.
+     * Cached LinkedIn vector used by project announcement links.
+     *
+     * @author Dmitriy Moroz
+     */
+    val LinkedIn: ImageVector
+        get() = linkedIn ?: brandIcon(
+            name = "Brand.LinkedIn",
+            pathData = LINKED_IN_PATH,
+        ).also { linkedIn = it }
+
+    /**
+     * Apple silhouette used to identify iOS and App Store destinations.
      *
      * @author Dmitriy Moroz
      */
@@ -50,7 +61,7 @@ object BrandIcons {
         ).also { apple = it }
 
     /**
-     * Exposes the `Moroz` value used by the SDAI presentation layer.
+     * Developer signature vector used by links to the developer website.
      *
      * @author Dmitriy Moroz
      */
@@ -66,18 +77,18 @@ object BrandIcons {
 }
 
 /**
- * Executes the `brandIcon` step in the SDAI presentation layer.
+ * Parses SVG path data into a monochrome, tintable 24dp icon with the supplied viewport.
  *
- * @param name name value consumed by the API.
- * @param pathData path data value consumed by the API.
- * @param viewportWidth viewport width value consumed by the API.
- * @param viewportHeight viewport height value consumed by the API.
- * @param pathFillType path fill type value consumed by the API.
- * @param strokeLineWidth stroke line width value consumed by the API.
- * @param scaleX scale x value consumed by the API.
- * @param scaleY scale y value consumed by the API.
- * @param pivotX pivot x value consumed by the API.
- * @param pivotY pivot y value consumed by the API.
+ * @param name Stable vector name used to identify the cached artwork.
+ * @param pathData SVG path commands expressed in viewport coordinates.
+ * @param viewportWidth Horizontal extent of the source SVG coordinate system.
+ * @param viewportHeight Vertical extent of the source SVG coordinate system.
+ * @param pathFillType Rule for filling overlapping path segments and holes.
+ * @param strokeLineWidth Outline width in viewport units; zero omits the outline.
+ * @param scaleX Horizontal scale applied to the path group.
+ * @param scaleY Vertical scale applied to the path group.
+ * @param pivotX Horizontal coordinate around which group scaling is applied.
+ * @param pivotY Vertical coordinate around which group scaling is applied.
  * @author Dmitriy Moroz
  */
 private fun brandIcon(
@@ -105,18 +116,18 @@ private fun brandIcon(
 )
 
 /**
- * Executes the `brandIcon` step in the SDAI presentation layer.
+ * Parses SVG path data into a monochrome, tintable 24dp icon with the supplied viewport.
  *
- * @param name name value consumed by the API.
- * @param pathData path data value consumed by the API.
- * @param viewportWidth viewport width value consumed by the API.
- * @param viewportHeight viewport height value consumed by the API.
- * @param pathFillType path fill type value consumed by the API.
- * @param strokeLineWidth stroke line width value consumed by the API.
- * @param scaleX scale x value consumed by the API.
- * @param scaleY scale y value consumed by the API.
- * @param pivotX pivot x value consumed by the API.
- * @param pivotY pivot y value consumed by the API.
+ * @param name Stable vector name used to identify the cached artwork.
+ * @param pathData SVG path commands expressed in viewport coordinates.
+ * @param viewportWidth Horizontal extent of the source SVG coordinate system.
+ * @param viewportHeight Vertical extent of the source SVG coordinate system.
+ * @param pathFillType Rule for filling overlapping path segments and holes.
+ * @param strokeLineWidth Outline width in viewport units; zero omits the outline.
+ * @param scaleX Horizontal scale applied to the path group.
+ * @param scaleY Vertical scale applied to the path group.
+ * @param pivotX Horizontal coordinate around which group scaling is applied.
+ * @param pivotY Vertical coordinate around which group scaling is applied.
  * @author Dmitriy Moroz
  */
 private fun brandIcon(
@@ -137,8 +148,8 @@ private fun brandIcon(
     viewportWidth = viewportWidth,
     viewportHeight = viewportHeight,
 ).apply {
-    val transformed = scaleX != 1f || scaleY != 1f
-    if (transformed) {
+    val isTransformed = scaleX != 1f || scaleY != 1f
+    if (isTransformed) {
         addGroup(
             scaleX = scaleX,
             scaleY = scaleY,
@@ -159,38 +170,48 @@ private fun brandIcon(
             strokeLineJoin = StrokeJoin.Round,
         )
     }
-    if (transformed) {
+    if (isTransformed) {
         clearGroup()
     }
 }.build()
 
 /**
- * Exposes the `telegram` value used by the SDAI presentation layer.
+ * Retains the parsed Telegram vector across recompositions.
  *
  * @author Dmitriy Moroz
  */
 private var telegram: ImageVector? = null
+
 /**
- * Exposes the `discord` value used by the SDAI presentation layer.
+ * Retains the parsed Discord vector across recompositions.
  *
  * @author Dmitriy Moroz
  */
 private var discord: ImageVector? = null
+
 /**
- * Exposes the `apple` value used by the SDAI presentation layer.
+ * Retains the parsed LinkedIn vector across recompositions and Settings visits.
+ *
+ * @author Dmitriy Moroz
+ */
+private var linkedIn: ImageVector? = null
+
+/**
+ * Retains the parsed Apple vector across recompositions.
  *
  * @author Dmitriy Moroz
  */
 private var apple: ImageVector? = null
+
 /**
- * Exposes the `moroz` value used by the SDAI presentation layer.
+ * Retains the parsed developer signature across recompositions.
  *
  * @author Dmitriy Moroz
  */
 private var moroz: ImageVector? = null
 
 /**
- * Exposes the `TELEGRAM_PATH` value used by the SDAI presentation layer.
+ * SVG path for the Telegram mark in a 24-unit viewport.
  *
  * @author Dmitriy Moroz
  */
@@ -198,7 +219,7 @@ private const val TELEGRAM_PATH =
     "M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.162l-2.015 9.49c-.153.685-.554.851-1.122.53l-3.105-2.29-1.497 1.44c-.166.166-.305.305-.625.305l.223-3.155 5.738-5.187c.25-.222-.054-.345-.386-.123l-7.09 4.465-3.052-.953c-.663-.207-.675-.663.138-.981l11.93-4.599c.553-.207 1.036.123.863 1.058z"
 
 /**
- * Exposes the `DISCORD_PATH` value used by the SDAI presentation layer.
+ * SVG path for the Discord mark in a 24-unit viewport.
  *
  * @author Dmitriy Moroz
  */
@@ -206,7 +227,15 @@ private const val DISCORD_PATH =
     "M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"
 
 /**
- * Exposes the `APPLE_PATH` value used by the SDAI presentation layer.
+ * SVG path for the LinkedIn mark in a 24-unit viewport.
+ *
+ * @author Dmitriy Moroz
+ */
+private const val LINKED_IN_PATH =
+    "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"
+
+/**
+ * SVG path for Apple's silhouette in the default 24-unit viewport.
  *
  * @author Dmitriy Moroz
  */
@@ -214,7 +243,7 @@ private const val APPLE_PATH =
     "M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
 
 /**
- * Exposes the `MOROZ_PATH` value used by the SDAI presentation layer.
+ * SVG path for the developer signature in a 100-unit viewport.
  *
  * @author Dmitriy Moroz
  */

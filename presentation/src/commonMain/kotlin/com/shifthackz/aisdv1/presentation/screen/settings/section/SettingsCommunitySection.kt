@@ -68,6 +68,16 @@ internal fun SettingsCommunitySection(
             )
         }
 
+        SettingsListItem.LINKED_IN -> {
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = BrandIcons.LinkedIn,
+                text = text("settings_item_linkedin"),
+                onClick = { processIntent(SettingsIntent.LaunchUrl.OpenLinkedInCommunity) },
+            )
+        }
+
         SettingsListItem.PROJECT_WEBSITE -> {
             SettingsItem(
                 modifier = itemModifier,

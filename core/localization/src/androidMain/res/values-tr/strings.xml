@@ -377,6 +377,7 @@
     <string name="settings_item_source">Kaynak kodunu alın</string>
     <string name="settings_item_telegram">Telegram</string>
     <string name="settings_item_discord">Discord</string>
+    <string name="settings_item_linkedin">LinkedIn</string>
     <string name="settings_item_project_website">Proje web sitesi</string>
     <string name="settings_item_developer_website">Geliştirici web sitesi</string>
     <string name="settings_item_license">Lisans</string>

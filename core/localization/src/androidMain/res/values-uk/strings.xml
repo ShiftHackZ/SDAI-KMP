@@ -377,6 +377,7 @@
     <string name="settings_item_source">Вихідний код</string>
     <string name="settings_item_telegram">Telegram</string>
     <string name="settings_item_discord">Discord</string>
+    <string name="settings_item_linkedin">LinkedIn</string>
     <string name="settings_item_project_website">Сайт проєкту</string>
     <string name="settings_item_developer_website">Сайт розробника</string>
     <string name="settings_item_license">Ліцензія</string>

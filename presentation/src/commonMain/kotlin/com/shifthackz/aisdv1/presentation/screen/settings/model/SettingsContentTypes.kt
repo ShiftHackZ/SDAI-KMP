@@ -48,6 +48,7 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
     SettingsListItem.GALLERY_GRID,
     SettingsListItem.TELEGRAM,
     SettingsListItem.DISCORD,
+    SettingsListItem.LINKED_IN,
     SettingsListItem.PROJECT_WEBSITE,
     SettingsListItem.DEVELOPER_WEBSITE,
     SettingsListItem.DONATE,

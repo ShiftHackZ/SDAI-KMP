@@ -377,4 +377,5 @@ private class TestLinksProvider : LinksProvider {
     override val demoModeUrl = ""
     override val telegramCommunityUrl = "https://telegram.test"
     override val discordCommunityUrl = "https://discord.test"
+    override val linkedInCommunityUrl = "https://linkedin.test"
 }
