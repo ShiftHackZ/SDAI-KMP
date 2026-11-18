@@ -744,9 +744,16 @@
     <string name="hint_mnn_profile_ios">单张512×512图像，PNDM，CFG 7.5，1–50步。CPU或Metal。</string>
     <string name="hint_mnn_backend">MNN 后端</string>
     <string name="settings_usage_summary_models_mnn">MNN 模型</string>
-    <string name="local_catalog_loading">正在加载模型目录</string>
     <string name="local_catalog_error_title">无法加载模型</string>
     <string name="local_catalog_error_body">请检查网络连接后重试。本地模型仍可使用。</string>
     <string name="local_catalog_empty_title">暂无可用模型</string>
     <string name="local_catalog_empty_body">请稍后重试刷新目录。</string>
+    <string name="download_all">全部下载</string>
+    <string name="download_cancel_all">取消全部下载</string>
+    <string name="download_switch_title">切换下载？</string>
+    <string name="download_switch_message">正在下载其他提供商的模型。切换将停止这些下载，并开始下载此提供商的模型。已完成的模型会保留。</string>
+    <string name="download_switch_confirm">切换</string>
+    <string name="loading">加载中</string>
+    <string name="notification_download_finish_title">下载完成 🤩</string>
+    <string name="notification_download_fail_title">下载失败 😞</string>
 </resources>

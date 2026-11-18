@@ -1,26 +1,15 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.OpenAiOAuthSetupPhase
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 import com.shifthackz.aisdv1.presentation.configuration.setup.openAiOAuthPhase
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
 
 /**
  * Pins only the actions available in the current OAuth phase below the scrolling form.
@@ -40,18 +29,11 @@ internal fun OpenAiOAuthActionBar(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .windowInsetsPadding(persistentBottomBarWindowInsets())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    SetupActionBar(modifier = modifier) {
         when (state.openAiOAuthPhase) {
             OpenAiOAuthSetupPhase.SIGNED_OUT -> OAuthPrimaryAction(
                 label = Localization.string("open_ai_oauth_login"),
-                enabled = !state.loadingConfiguration,
+                isEnabled = !state.loadingConfiguration,
                 onClick = { processIntent(ServerSetupIntent.OAuthLogin) },
             )
 
@@ -74,7 +56,7 @@ internal fun OpenAiOAuthActionBar(
             OpenAiOAuthSetupPhase.SIGNED_IN -> {
                 OAuthPrimaryAction(
                     label = strings.connect,
-                    enabled = !state.loadingConfiguration && state.mainButtonEnabled,
+                    isEnabled = !state.loadingConfiguration && state.mainButtonEnabled,
                     onClick = { processIntent(ServerSetupIntent.MainButtonClick) },
                 )
                 OAuthSecondaryAction(
@@ -85,7 +67,7 @@ internal fun OpenAiOAuthActionBar(
 
             OpenAiOAuthSetupPhase.STORAGE_ERROR -> OAuthPrimaryAction(
                 label = Localization.string("open_ai_oauth_reset"),
-                enabled = !state.loadingConfiguration,
+                isEnabled = !state.loadingConfiguration,
                 onClick = { processIntent(ServerSetupIntent.OAuthLogout) },
             )
         }
@@ -96,7 +78,8 @@ internal fun OpenAiOAuthActionBar(
  * Renders one full-width primary action without constraining multiline label height.
  *
  * @param label Localized visible and accessible action name.
- * @param enabled Whether the action can currently be submitted.
+ * @param modifier Layout modifiers for the shared action button.
+ * @param isEnabled Whether the action can currently be submitted.
  * @param onClick Action callback.
  *
  * @author Dmitriy Moroz
@@ -105,12 +88,12 @@ internal fun OpenAiOAuthActionBar(
 private fun OAuthPrimaryAction(
     label: String,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
+    isEnabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    Button(
-        modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
-        enabled = enabled,
+    SetupPrimaryAction(
+        modifier = modifier,
+        isEnabled = isEnabled,
         onClick = onClick,
     ) {
         Text(text = label, style = MaterialTheme.typography.labelLarge)
@@ -122,6 +105,7 @@ private fun OAuthPrimaryAction(
  *
  * @param label Localized visible and accessible action name.
  * @param onClick Action callback.
+ * @param modifier Layout modifiers for the shared action button.
  *
  * @author Dmitriy Moroz
  */
@@ -131,8 +115,8 @@ private fun OAuthSecondaryAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedButton(
-        modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
+    SetupSecondaryAction(
+        modifier = modifier,
         onClick = onClick,
     ) {
         Text(text = label, style = MaterialTheme.typography.labelLarge)

@@ -93,14 +93,16 @@ internal fun ServerSetupState.withCatalogResult(
         LocalAiModel.Type.Bonsai -> copy(localBonsaiModels = merged)
         LocalAiModel.Type.Mnn -> copy(localMnnModels = merged)
     }
-    return result.copy(localCatalogStatuses = result.localCatalogStatuses + (type to status))
+    val refreshed =
+        result.copy(localCatalogStatuses = result.localCatalogStatuses + (type to status))
+    return refreshed.withModelDownloadBatches(modelDownloadBatches)
 }
 
 /**
- * Recovers a completed owned install after a transfer has joined but its terminal emission was lost.
- * The owning file-store read must confirm completion before this transition; partial directory observations during active work are insufficient.
+ * Records an owned install verified by the file store or a completed download activation.
+ * Partial directory observations during active work are insufficient.
  *
- * @param id Model identity whose owned payload was verified after joining the transfer.
+ * @param id Model identity whose complete owned payload has been verified.
  * @param type Provider owning the completed payload and its deletion/transfer markers.
  *
  * @author Dmitriy Moroz

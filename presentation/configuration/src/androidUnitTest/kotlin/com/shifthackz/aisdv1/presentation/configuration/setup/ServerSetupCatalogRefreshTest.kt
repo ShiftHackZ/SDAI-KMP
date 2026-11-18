@@ -13,13 +13,9 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
 import com.shifthackz.aisdv1.domain.entity.DownloadState
-import com.shifthackz.aisdv1.presentation.configuration.setup.platform.NoOpServerSetupDownloadGuard
 import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserver
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.flow
 import com.shifthackz.aisdv1.domain.usecase.downloadable.RefreshLocalModelCatalogUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToMnnUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
@@ -35,6 +31,10 @@ import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.shifthackz.aisdv1.domain.entity.ModelDownloadBatch
+import com.shifthackz.aisdv1.domain.entity.ModelDownloadRequest
+import com.shifthackz.aisdv1.domain.feature.work.ModelDownloadManager
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -54,7 +54,8 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class ServerSetupCatalogRefreshTest {
     private val getCachedLocalModelCatalogUseCase = mockk<GetCachedLocalModelCatalogUseCase>()
-    private val downloadModelUseCase = mockk<DownloadModelUseCase>()
+    private val batches = MutableStateFlow<List<ModelDownloadBatch>>(emptyList())
+    private val modelDownloadManager = mockk<ModelDownloadManager>(relaxed = true)
     private val deleteModelUseCase = mockk<DeleteModelUseCase>()
     private val refreshLocalModelCatalogUseCase = mockk<RefreshLocalModelCatalogUseCase>()
     private val getConfigurationUseCase = mockk<GetConfigurationUseCase>()
@@ -79,6 +80,30 @@ class ServerSetupCatalogRefreshTest {
             localMnnModelId = LocalAiModel.CustomMnn.id,
             localMnnModelPath = "/custom/bundle",
         )
+        batches.value = emptyList()
+        every { modelDownloadManager.batches } returns batches
+        coEvery { modelDownloadManager.start(any(), any()) } coAnswers {
+            val request = firstArg<ModelDownloadRequest>()
+            batches.value = listOf(
+                ModelDownloadBatch(
+                    request.type,
+                    request.modelId,
+                    DownloadState.Downloading(50),
+                    isBatch = request.isBatch,
+                    workId = request.modelId.orEmpty(),
+                )
+            )
+        }
+        coEvery { modelDownloadManager.cancel(any(), any()) } coAnswers {
+            val type = firstArg<LocalAiModel.Type?>()
+            val id = secondArg<String?>()
+            batches.value = batches.value.map {
+                if ((type == null || it.type == type) && (id == null || it.modelId == id)) it.copy(
+                    progress = DownloadState.Unknown,
+                    isRunning = false
+                ) else it
+            }
+        }
         every { openAiOAuthGateway.observeIdentity() } returns flowOf(null)
         coEvery { openAiOAuthGateway.currentIdentity() } returns null
         coEvery { getCachedLocalModelCatalogUseCase(any()) } returns emptyList()
@@ -210,12 +235,6 @@ class ServerSetupCatalogRefreshTest {
             coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
                 listOf(LocalAiModel.CustomMnn, catalog)
             )
-            val completion = CompletableDeferred<Unit>()
-            coEvery { downloadModelUseCase(catalog.id, any()) } returns flow {
-                emit(DownloadState.Downloading(50))
-                completion.await()
-                emit(DownloadState.Complete("/owned/mnn"))
-            }
             val model = createViewModel()
             advanceUntilIdle()
             // When
@@ -231,7 +250,19 @@ class ServerSetupCatalogRefreshTest {
             val oldProgressRow = model.state.value.localMnnModels.first { it.id == catalog.id }
             model.processIntent(ServerSetupIntent.AllowLocalCustomModel(true))
             model.processIntent(ServerSetupIntent.UpdateServerMode(ServerSource.LOCAL_MICROSOFT_ONNX))
-            completion.complete(Unit)
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(LocalAiModel.CustomMnn, catalog.copy(downloaded = true))
+            )
+            coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
+                LocalAiModel.CustomMnn, catalog.copy(downloaded = true)
+            )
+            batches.value = batches.value.map {
+                it.copy(
+                    progress = DownloadState.Complete("/owned/mnn"),
+                    completedIds = listOf(catalog.id),
+                    isRunning = false,
+                )
+            }
             advanceUntilIdle()
             // Then
             val result = model.state.value.localMnnModels.first { it.id == catalog.id }
@@ -253,7 +284,7 @@ class ServerSetupCatalogRefreshTest {
         }
 
     @Test
-    fun `given active model transfer, cancellation starts before provider switches, expected cleanup stays with owning catalog`() =
+    fun `given single model worker, cancellation starts before provider switches, expected cancellation stays with owning catalog`() =
         runTest {
             // Given
             val catalog = LocalAiModel.CustomMnn.copy(
@@ -263,10 +294,6 @@ class ServerSetupCatalogRefreshTest {
             coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
                 listOf(catalog)
             )
-            coEvery { downloadModelUseCase(catalog.id, any()) } returns flow {
-                emit(DownloadState.Downloading(50))
-                awaitCancellation()
-            }
             val model = createViewModel()
             advanceUntilIdle()
             model.processIntent(
@@ -278,6 +305,9 @@ class ServerSetupCatalogRefreshTest {
             )
             runCurrent()
             val row = model.state.value.localMnnModels.single()
+            coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
+                catalog
+            )
 
             // When
             model.processIntent(ServerSetupIntent.LocalModel.ClickReduce(row))
@@ -285,7 +315,8 @@ class ServerSetupCatalogRefreshTest {
             advanceUntilIdle()
 
             // Then
-            coVerify(exactly = 1) { deleteModelUseCase(catalog.id) }
+            coVerify(exactly = 1) { modelDownloadManager.cancel(LocalAiModel.Type.Mnn, catalog.id) }
+            coVerify(exactly = 0) { deleteModelUseCase(catalog.id) }
             assertEquals(false, model.state.value.localMnnModels.single().downloaded)
             assertEquals(
                 DownloadState.Unknown,
@@ -296,7 +327,7 @@ class ServerSetupCatalogRefreshTest {
         }
 
     @Test
-    fun `given transfer cancellation, joined producer has already installed model, expected recovered install and storage notification`() =
+    fun `given single model worker cancellation, activation already finished, expected recovered install and storage notification`() =
         runTest {
             // Given
             val catalog = LocalAiModel.CustomMnn.copy(
@@ -306,10 +337,6 @@ class ServerSetupCatalogRefreshTest {
             coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
                 listOf(catalog)
             )
-            coEvery { downloadModelUseCase(catalog.id, any()) } returns flow {
-                emit(DownloadState.Downloading(99))
-                awaitCancellation()
-            }
             val model = createViewModel()
             advanceUntilIdle()
             model.processIntent(
@@ -323,6 +350,9 @@ class ServerSetupCatalogRefreshTest {
             val row = model.state.value.localMnnModels.single()
             coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
                 catalog.copy(downloaded = true)
+            )
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(catalog.copy(downloaded = true))
             )
 
             // When
@@ -379,9 +409,8 @@ class ServerSetupCatalogRefreshTest {
             connectToStabilityAiUseCase = mockk(relaxed = true),
             connectToFalAiUseCase = mockk(relaxed = true),
             connectToArliAiUseCase = mockk(relaxed = true),
-            downloadModelUseCase = downloadModelUseCase,
+            modelDownloadManager = modelDownloadManager,
             deleteModelUseCase = deleteModelUseCase,
-            downloadGuard = NoOpServerSetupDownloadGuard,
             storageUsageObserver = storageUsageObserver,
             linksProvider = mockk(relaxed = true),
             preferenceManager = preferenceManager,

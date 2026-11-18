@@ -692,9 +692,16 @@
     <string name="hint_mnn_profile_ios">Bir 512×512 görsel, PNDM, CFG 7.5, 1–50 adım. CPU veya Metal.</string>
     <string name="hint_mnn_backend">MNN arka ucu</string>
     <string name="settings_usage_summary_models_mnn">MNN modelleri</string>
-    <string name="local_catalog_loading">Model kataloğu yükleniyor</string>
     <string name="local_catalog_error_title">Modeller yüklenemedi</string>
     <string name="local_catalog_error_body">Bağlantınızı kontrol edip yeniden deneyin. Yerel modelleriniz kullanılabilir durumda.</string>
     <string name="local_catalog_empty_title">Kullanılabilir model yok</string>
     <string name="local_catalog_empty_body">Kataloğu daha sonra yeniden yenilemeyi deneyin.</string>
+    <string name="download_all">Tümünü indir</string>
+    <string name="download_cancel_all">Tüm indirmeleri iptal et</string>
+    <string name="download_switch_title">İndirmeler değiştirilsin mi?</string>
+    <string name="download_switch_message">Başka bir sağlayıcının modelleri indiriliyor. Değiştirmek bu indirmeleri durdurur ve bu sağlayıcının modellerini indirmeye başlar. Tamamlanan modeller korunur.</string>
+    <string name="download_switch_confirm">Değiştir</string>
+    <string name="loading">Yükleniyor</string>
+    <string name="notification_download_finish_title">İndirme tamamlandı 🤩</string>
+    <string name="notification_download_fail_title">İndirme başarısız 😞</string>
 </resources>

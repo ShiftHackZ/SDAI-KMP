@@ -86,6 +86,22 @@ internal fun ServerSetupModal(
     processIntent: (ServerSetupIntent) -> Unit,
 ) {
     when (modal) {
+        is ServerSetupState.Modal.SwitchModelDownloads -> AlertDialog(
+            onDismissRequest = { processIntent(ServerSetupIntent.DismissDialog) },
+            title = { Text(Localization.string("download_switch_title")) },
+            text = { Text(Localization.string("download_switch_message")) },
+            confirmButton = {
+                TextButton(onClick = { processIntent(ServerSetupIntent.ConfirmModelDownloadSwitch) }) {
+                    Text(Localization.string("download_switch_confirm"))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { processIntent(ServerSetupIntent.DismissDialog) }) {
+                    Text(Localization.string("close"))
+                }
+            },
+        )
+
         ServerSetupState.Modal.ConnectionUnverified -> AlertDialog(
             onDismissRequest = { processIntent(ServerSetupIntent.AcknowledgeUnverifiedConnection) },
             title = { Text(strings.connectionUnverifiedTitle) },

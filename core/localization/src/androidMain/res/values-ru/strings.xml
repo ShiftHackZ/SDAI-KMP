@@ -692,9 +692,16 @@
     <string name="hint_mnn_profile_ios">Одно изображение 512×512, PNDM, CFG 7.5, 1–50 шагов. CPU или Metal.</string>
     <string name="hint_mnn_backend">Движок MNN</string>
     <string name="settings_usage_summary_models_mnn">Модели MNN</string>
-    <string name="local_catalog_loading">Загрузка каталога моделей</string>
     <string name="local_catalog_error_title">Не удалось загрузить модели</string>
     <string name="local_catalog_error_body">Проверьте подключение и повторите попытку. Локальные модели остаются доступны.</string>
     <string name="local_catalog_empty_title">Нет доступных моделей</string>
     <string name="local_catalog_empty_body">Попробуйте обновить каталог позже.</string>
+    <string name="download_all">Скачать все</string>
+    <string name="download_cancel_all">Отменить все загрузки</string>
+    <string name="download_switch_title">Переключить загрузки?</string>
+    <string name="download_switch_message">Сейчас загружаются модели другого провайдера. Переключение остановит их загрузку и запустит загрузку моделей этого провайдера. Готовые модели сохранятся.</string>
+    <string name="download_switch_confirm">Переключить</string>
+    <string name="loading">Загрузка</string>
+    <string name="notification_download_finish_title">Загрузка завершена 🤩</string>
+    <string name="notification_download_fail_title">Не удалось загрузить 😞</string>
 </resources>

@@ -15,10 +15,6 @@ import com.shifthackz.aisdv1.presentation.components.model.localizedDescription
 import com.shifthackz.aisdv1.presentation.components.model.observeOpenAiOAuthIdentity
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.currentCoroutineContext
@@ -28,7 +24,9 @@ import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.validation.common.CommonStringValidator
 import com.shifthackz.aisdv1.core.validation.path.FilePathValidator
 import com.shifthackz.aisdv1.core.validation.url.UrlValidator
+import com.shifthackz.aisdv1.domain.entity.ModelDownloadRequest
 import com.shifthackz.aisdv1.domain.entity.DownloadState
+import com.shifthackz.aisdv1.domain.feature.work.ModelDownloadManager
 import com.shifthackz.aisdv1.domain.entity.HuggingFaceModel
 import com.shifthackz.aisdv1.domain.entity.OpenAiCompatibleConnection
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
@@ -41,7 +39,6 @@ import com.shifthackz.aisdv1.domain.usecase.settings.SetServerConfigurationUseCa
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.RefreshLocalModelCatalogUseCase
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -64,16 +61,12 @@ import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToSwarmUiUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
 import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
-import com.shifthackz.aisdv1.presentation.configuration.setup.platform.ServerSetupDownloadGuard
 import com.shifthackz.aisdv1.presentation.configuration.setup.reducer.ServerSetupIntentProcessor
 import com.shifthackz.aisdv1.presentation.configuration.setup.validation.validateServerSetup
 import com.shifthackz.aisdv1.presentation.configuration.setup.viewmodel.HUGGING_FACE_MODELS_TIMEOUT_MILLIS
 import com.shifthackz.aisdv1.domain.entity.setupAllowedModes
 import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserver
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.cancellation.CancellationException
@@ -109,9 +102,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param connectToStabilityAiUseCase Applies Stability AI configuration.
  * @param connectToFalAiUseCase Applies Fal AI configuration.
  * @param connectToArliAiUseCase Validates ArliAI credentials and publishes the selected remote source.
- * @param downloadModelUseCase Downloads a selected local model.
+ * @param modelDownloadManager Owns concurrent single downloads or an exclusive sequential batch independently of setup.
  * @param deleteModelUseCase Deletes a selected local model.
- * @param downloadGuard Platform guard for model download prerequisites.
  * @param storageUsageObserver Invalidates Settings storage summaries after model changes.
  * @param linksProvider External links and demo mode URL used by setup.
  * @param preferenceManager Persists setup preferences.
@@ -152,9 +144,8 @@ class ServerSetupViewModel(
     private val connectToStabilityAiUseCase: ConnectToStabilityAiUseCase,
     private val connectToFalAiUseCase: ConnectToFalAiUseCase,
     private val connectToArliAiUseCase: ConnectToArliAiUseCase,
-    private val downloadModelUseCase: DownloadModelUseCase,
+    private val modelDownloadManager: ModelDownloadManager,
     private val deleteModelUseCase: DeleteModelUseCase,
-    private val downloadGuard: ServerSetupDownloadGuard,
     private val storageUsageObserver: StorageUsageObserver,
     private val linksProvider: LinksProvider,
     private val preferenceManager: PreferenceManager,
@@ -176,9 +167,6 @@ class ServerSetupViewModel(
     effectDispatcher = dispatchersProvider.immediate,
 ) {
 
-    private val downloadJobs =
-        MutableStateFlow<Map<Pair<LocalAiModel.Type, String>, Job>>(emptyMap())
-    private val downloadCancellationMutex = Mutex()
     private val catalogRefreshMutex = Mutex()
     private val refreshingCatalogs = mutableSetOf<LocalAiModel.Type>()
     private var oauthLoginJob: Job? = null
@@ -253,6 +241,31 @@ class ServerSetupViewModel(
                             )
                         )
                     }
+                    launch(dispatchersProvider.io) {
+                        modelDownloadManager.batches.collect { batches ->
+                            val previous = currentState.modelDownloadBatches
+                            updateState { state -> state.withModelDownloadBatches(batches) }
+                            val completed = batches.filter { batch ->
+                                !batch.isRunning && previous.any { it.workId == batch.workId && it.isRunning }
+                            }
+                            completed.forEach { batch ->
+                                val failure = (batch.progress as? DownloadState.Error)?.error
+                                if (failure != null) {
+                                    onError(failure)
+                                    updateState {
+                                        it.copy(
+                                            modal = ServerSetupState.Modal.Error(
+                                                failure.message
+                                                    ?: Localization.string("error_title")
+                                            )
+                                        )
+                                    }
+                                }
+                                storageUsageObserver.notifyChanged()
+                                reconcileLocalModelOwnership(batch.type)
+                            }
+                        }
+                    }
                     currentState.allowedModes.forEach(::refreshLocalCatalog)
                 }
                 .onFailure { t ->
@@ -294,6 +307,56 @@ class ServerSetupViewModel(
 
     override fun processIntent(intent: ServerSetupIntent) {
         when (intent) {
+            ServerSetupIntent.DownloadAllModels -> {
+                val type = currentState.mode.localCatalogType ?: return
+                val active = currentState.modelDownloadBatches.filter { it.isRunning }
+                if (active.any { it.type != type }) {
+                    updateState { it.copy(modal = ServerSetupState.Modal.SwitchModelDownloads(type)) }
+                    return
+                }
+                launch(dispatchersProvider.io) {
+                    try {
+                        if (active.isEmpty()) modelDownloadManager.start(ModelDownloadRequest(type))
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (failure: Exception) {
+                        onError(failure)
+                    }
+                }
+                return
+            }
+
+            ServerSetupIntent.ConfirmModelDownloadSwitch -> {
+                val modal =
+                    currentState.modal as? ServerSetupState.Modal.SwitchModelDownloads ?: return
+                updateState { it.copy(modal = ServerSetupState.Modal.None) }
+                launch(dispatchersProvider.io) {
+                    try {
+                        modelDownloadManager.start(
+                            ModelDownloadRequest(modal.type),
+                            shouldReplace = true
+                        )
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (failure: Exception) {
+                        onError(failure)
+                        updateState {
+                            it.copy(
+                                modal = ServerSetupState.Modal.Error(
+                                    failure.message ?: Localization.string("error_title")
+                                )
+                            )
+                        }
+                    }
+                }
+                return
+            }
+
+            ServerSetupIntent.CancelModelDownloads -> {
+                launch(dispatchersProvider.io) { modelDownloadManager.cancel() }
+                return
+            }
+
             is ServerSetupIntent.RetryLocalCatalog -> {
                 refreshLocalCatalog(intent.source); return
             }
@@ -386,11 +449,17 @@ class ServerSetupViewModel(
         launch(dispatchersProvider.io) {
             val canRefresh = catalogRefreshMutex.withLock { refreshingCatalogs.add(type) }
             if (!canRefresh) return@launch
-            updateState { it.copy(localCatalogStatuses = it.localCatalogStatuses + (type to LocalCatalogStatus.LOADING)) }
+            updateState { it.copy(refreshingLocalCatalogs = it.refreshingLocalCatalogs + type) }
             try {
                 val cached = getCachedLocalModelCatalogUseCase(type)
                 currentCoroutineContext().ensureActive()
-                updateState { it.withCatalogResult(type, cached, LocalCatalogStatus.LOADING) }
+                updateState {
+                    it.withCatalogResult(
+                        type,
+                        cached,
+                        it.localCatalogStatuses[type] ?: LocalCatalogStatus.LOADING
+                    )
+                }
                 val result = refreshLocalModelCatalogUseCase(type)
                 currentCoroutineContext().ensureActive()
                 updateState { state ->
@@ -408,7 +477,32 @@ class ServerSetupViewModel(
                 onError(failure)
             } finally {
                 catalogRefreshMutex.withLock { refreshingCatalogs.remove(type) }
+                currentCoroutineContext().ensureActive()
+                updateState { it.copy(refreshingLocalCatalogs = it.refreshingLocalCatalogs - type) }
             }
+        }
+    }
+
+    /**
+     * Reads installed files after work stops without restarting network refresh or loading UI.
+     * @param type Provider whose ownership may have changed during activation or cleanup.
+     * @author Dmitriy Moroz
+     */
+    private suspend fun reconcileLocalModelOwnership(type: LocalAiModel.Type) {
+        try {
+            val cached = getCachedLocalModelCatalogUseCase(type)
+            currentCoroutineContext().ensureActive()
+            updateState {
+                it.withCatalogResult(
+                    type,
+                    cached,
+                    it.localCatalogStatuses[type] ?: LocalCatalogStatus.READY
+                )
+            }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            onError(failure)
         }
     }
 
@@ -788,9 +882,21 @@ class ServerSetupViewModel(
      */
     private fun localModelDownloadClickReducer(value: ServerSetupState.LocalModel) {
         val type = currentState.mode.localCatalogType ?: return
+        val active = currentState.modelDownloadBatches.filter { it.isRunning }
+        if (active.any { it.isBatch }) return
+        if (active.any { it.type == type && it.modelId == value.id }) {
+            launch(dispatchersProvider.io) { modelDownloadManager.cancel(type, value.id) }
+            return
+        }
         val model = currentState.catalogModels(type).firstOrNull { it.id == value.id } ?: return
         when {
-            model.downloadState is DownloadState.Downloading -> cancelDownload(model.id, type)
+            model.downloadState is DownloadState.Downloading -> launch(dispatchersProvider.io) {
+                modelDownloadManager.cancel(
+                    type,
+                    model.id
+                )
+            }
+
             model.downloaded -> updateState {
                 it.copy(
                     modal = ServerSetupState.Modal.DeleteLocalModelConfirm(
@@ -812,143 +918,33 @@ class ServerSetupViewModel(
     }
 
     /**
-     * Cancels and joins only the owning transfer before removing partial files; completed installs survive late Cancel.
-     *
-     * @param id Stable model identity whose active transfer is cancelled.
-     * @param type Provider captured when the action was requested.
-     *
-     * @author Dmitriy Moroz
-     */
-    private fun cancelDownload(id: String, type: LocalAiModel.Type) {
-        launch(dispatchersProvider.io) {
-            try {
-                downloadCancellationMutex.withLock {
-                    val job = downloadJobs.value[type to id] ?: return@withLock
-                    job.cancelAndJoin()
-                    if (currentState.catalogModels(type)
-                            .firstOrNull { it.id == id }?.downloaded == true
-                    ) return@withLock
-                    val owned = getCachedLocalModelCatalogUseCase(type).firstOrNull { it.id == id }
-                    if (owned?.downloaded == true) {
-                        updateState { it.withVerifiedOwnedModel(id, type) }
-                        storageUsageObserver.notifyChanged()
-                        return@withLock
-                    }
-                    deleteModelUseCase(id)
-                    updateState { state ->
-                        val current = state.catalogModels(type).firstOrNull { it.id == id }
-                            ?: return@updateState state
-                        state.withDeletedLocalModel(current, type)
-                    }
-                    storageUsageObserver.notifyChanged()
-                }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (failure: Exception) {
-                onDownloadFailure(id, type, failure)
-            }
-        }
-    }
-
-    /**
-     * Starts the confirmed source-owned model transfer once, independent of subsequent mode changes.
-     *
-     * @param modelId Stable model identifier associated with the chosen download.
-     * @param url Chosen archive mirror.
-     * @param type Provider captured when its source picker opened.
-     *
+     * Schedules the selected archive in platform work, retaining ownership after setup closes.
+     * @param modelId Stable identity of the model selected in the source picker.
+     * @param url Confirmed catalog mirror for that single model.
+     * @param type Provider captured when the source picker opened.
      * @author Dmitriy Moroz
      */
     private fun download(modelId: String, url: String, type: LocalAiModel.Type) {
+        if (currentState.modelDownloadBatches.any { it.isRunning && (it.isBatch || it.type == type && it.modelId == modelId) }) return
         val model = currentState.catalogModels(type).firstOrNull { it.id == modelId } ?: return
-        if (model.downloaded || downloadJobs.value[type to modelId]?.isActive == true) return
-        updateState { state ->
-            val current = state.catalogModels(type).firstOrNull { it.id == modelId }
-                ?: return@updateState state
-            state.copy(modal = ServerSetupState.Modal.None)
-                .withUpdatedLocalModel(
-                    current.copy(downloadState = DownloadState.Downloading()),
-                    type
-                )
-        }
-        val job = scopeLaunchDownload(modelId, url, type)
-        downloadJobs.update { it + ((type to modelId) to job) }
-        job.start()
-    }
-
-    /**
-     * Publishes progress into the captured provider using its current selection, never the download-start snapshot.
-     *
-     * @param id Stable model identity being transferred.
-     * @param url Chosen archive source.
-     * @param type Runtime owning every progress, completion and error callback.
-     *
-     * @author Dmitriy Moroz
-     */
-    private fun scopeLaunchDownload(id: String, url: String, type: LocalAiModel.Type): Job =
-        launch(dispatchersProvider.io, start = CoroutineStart.LAZY) {
+        if (model.downloaded) return
+        updateState { it.copy(modal = ServerSetupState.Modal.None) }
+        launch(dispatchersProvider.io) {
             try {
-                downloadGuard.withDownload {
-                    downloadModelUseCase(id, url).distinctUntilChanged().catch { failure ->
-                        if (failure is CancellationException) throw failure
-                        onDownloadFailure(id, type, failure)
-                    }.collect { progress ->
-                        currentCoroutineContext().ensureActive()
-                        updateState { state ->
-                            val current = state.catalogModels(type).firstOrNull { it.id == id }
-                                ?: return@updateState state
-                            state.withUpdatedLocalModel(
-                                current.copy(
-                                    downloadState = progress,
-                                    downloaded = progress is DownloadState.Complete
-                                ), type
-                            )
-                        }
-                        if (progress is DownloadState.Complete) storageUsageObserver.notifyChanged()
-                    }
-                }
+                modelDownloadManager.start(ModelDownloadRequest(type, modelId, url))
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {
-                onDownloadFailure(id, type, failure)
-            } finally {
-                val job = currentCoroutineContext()[Job]
-                downloadJobs.update { jobs -> if (jobs[type to id] == job) jobs - (type to id) else jobs }
-                if (currentCoroutineContext().isActive) updateState { state ->
-                    val current = state.catalogModels(type).firstOrNull { it.id == id }
-                        ?: return@updateState state
-                    if (current.downloadState is DownloadState.Downloading) state.withUpdatedLocalModel(
-                        current.copy(downloadState = DownloadState.Unknown),
-                        type
-                    ) else state
+                onError(failure)
+                updateState {
+                    it.copy(
+                        modal = ServerSetupState.Modal.Error(
+                            failure.message ?: Localization.string("error_title")
+                        )
+                    )
                 }
             }
         }
-
-    /**
-     * Keeps an archive failure with its owning item and reports it through the existing error sink.
-     *
-     * @param id Stable model identity whose transfer failed.
-     * @param type Provider that started the transfer.
-     * @param failure Underlying download failure.
-     *
-     * @author Dmitriy Moroz
-     */
-    private fun onDownloadFailure(id: String, type: LocalAiModel.Type, failure: Throwable) {
-        updateState { state ->
-            val current =
-                state.catalogModels(type).firstOrNull { it.id == id } ?: return@updateState state
-            state.withUpdatedLocalModel(
-                current.copy(downloadState = DownloadState.Error(failure)),
-                type
-            )
-                .copy(
-                    modal = ServerSetupState.Modal.Error(
-                        failure.message ?: Localization.string("error_title")
-                    )
-                )
-        }
-        onError(failure)
     }
 
     /**
@@ -963,16 +959,14 @@ class ServerSetupViewModel(
         updateState { it.copy(modal = ServerSetupState.Modal.None) }
         launch(dispatchersProvider.io) {
             try {
-                downloadCancellationMutex.withLock {
-                    downloadJobs.value[type to id]?.cancelAndJoin()
-                    deleteModelUseCase(id)
-                    updateState { state ->
-                        val current = state.catalogModels(type).firstOrNull { it.id == id }
-                            ?: return@updateState state
-                        state.withDeletedLocalModel(current, type)
-                    }
-                    storageUsageObserver.notifyChanged()
+                if (currentState.modelDownloadBatches.any { it.isRunning && (it.isBatch || it.type == type && it.modelId == id) }) return@launch
+                deleteModelUseCase(id)
+                updateState { state ->
+                    val current = state.catalogModels(type).firstOrNull { it.id == id }
+                        ?: return@updateState state
+                    state.withDeletedLocalModel(current, type)
                 }
+                storageUsageObserver.notifyChanged()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {

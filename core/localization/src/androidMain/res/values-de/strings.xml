@@ -729,9 +729,16 @@
     <string name="hint_mnn_profile_ios">Ein 512×512-Bild, PNDM, CFG 7,5, 1–50 Schritte. CPU oder Metal.</string>
     <string name="hint_mnn_backend">MNN-Backend</string>
     <string name="settings_usage_summary_models_mnn">MNN-Modelle</string>
-    <string name="local_catalog_loading">Modellkatalog wird geladen</string>
     <string name="local_catalog_error_title">Modelle konnten nicht geladen werden</string>
     <string name="local_catalog_error_body">Prüfe die Verbindung und versuche es erneut. Deine lokalen Modelle bleiben verfügbar.</string>
     <string name="local_catalog_empty_title">Keine Modelle verfügbar</string>
     <string name="local_catalog_empty_body">Versuche später, den Katalog erneut zu laden.</string>
+    <string name="download_all">Alle herunterladen</string>
+    <string name="download_cancel_all">Alle Downloads abbrechen</string>
+    <string name="download_switch_title">Downloads wechseln?</string>
+    <string name="download_switch_message">Ein anderer Anbieter lädt Modelle herunter. Beim Wechsel werden diese Downloads gestoppt und die Modelle dieses Anbieters geladen. Fertige Modelle bleiben erhalten.</string>
+    <string name="download_switch_confirm">Wechseln</string>
+    <string name="loading">Laden</string>
+    <string name="notification_download_finish_title">Download abgeschlossen 🤩</string>
+    <string name="notification_download_fail_title">Download fehlgeschlagen 😞</string>
 </resources>

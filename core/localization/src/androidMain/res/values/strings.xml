@@ -729,9 +729,16 @@
     <string name="hint_mnn_profile_ios">One 512×512 image, PNDM, CFG 7.5, 1–50 steps. CPU or Metal.</string>
     <string name="hint_mnn_backend">MNN backend</string>
     <string name="settings_usage_summary_models_mnn">MNN models</string>
-    <string name="local_catalog_loading">Loading model catalog</string>
     <string name="local_catalog_error_title">Unable to load models</string>
     <string name="local_catalog_error_body">Check your connection and try again. Your local models remain available.</string>
     <string name="local_catalog_empty_title">No models available</string>
     <string name="local_catalog_empty_body">Try refreshing the catalog again later.</string>
+    <string name="download_all">Download all</string>
+    <string name="download_cancel_all">Cancel all downloads</string>
+    <string name="download_switch_title">Switch downloads?</string>
+    <string name="download_switch_message">Another provider is downloading models. Switching stops those downloads and starts this provider. Completed models are kept.</string>
+    <string name="download_switch_confirm">Switch</string>
+    <string name="loading">Loading</string>
+    <string name="notification_download_finish_title">Download complete 🤩</string>
+    <string name="notification_download_fail_title">Download failed 😞</string>
 </resources>

@@ -117,6 +117,8 @@ import com.shifthackz.aisdv1.domain.usecase.donate.FetchSupportersUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelsUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCaseImpl
@@ -439,7 +441,8 @@ val coreDomainModule = module {
     factory<GetLocalModelUseCase> {
         GetLocalModelUseCaseImpl(localDataSource = get())
     }
-    factory<DownloadModelUseCase> {
+    factory<DownloadModelsUseCase> { DownloadModelsUseCaseImpl(get(), get()) }
+    single<DownloadModelUseCase> {
         DownloadModelUseCaseImpl(downloadableModelRepository = get())
     }
     factory<DeleteModelUseCase> {

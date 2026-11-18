@@ -1,27 +1,30 @@
 package com.shifthackz.aisdv1.domain.usecase.downloadable
 
 import com.shifthackz.aisdv1.domain.repository.DownloadableModelRepository
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
- * Implements `DownloadModelUseCase` behavior in the SDAI domain layer.
- *
+ * Allows independent installs concurrently while a replacement waits for the same model's cleanup.
+ * @param downloadableModelRepository Streams archives and activates complete owned payloads.
  * @author Dmitriy Moroz
  */
 internal class DownloadModelUseCaseImpl(
-    /**
-     * Exposes the `downloadableModelRepository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val downloadableModelRepository: DownloadableModelRepository,
 ) : DownloadModelUseCase {
+    private val registryMutex = Mutex()
+    private val transferMutexes = mutableMapOf<String, Mutex>()
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
-     *
-     * @param id identifier of the target entity.
-     * @param url remote URL used by the operation.
+     * Holds exclusive ownership of this model until activation or cancellation cleanup finishes.
+     * @param id Catalog identity naming the app-owned destination.
+     * @param url Selected catalog mirror for the archive.
      * @author Dmitriy Moroz
      */
-    override fun invoke(id: String, url: String) = downloadableModelRepository.download(id, url)
+    override fun invoke(id: String, url: String) = flow {
+        val transferMutex = registryMutex.withLock { transferMutexes.getOrPut(id) { Mutex() } }
+        transferMutex.withLock { emitAll(downloadableModelRepository.download(id, url)) }
+    }
 }

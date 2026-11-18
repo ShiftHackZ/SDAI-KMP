@@ -26,47 +26,50 @@ internal class AndroidDownloadableModelFileStore(
      *
      * @author Dmitriy Moroz
      */
-    override fun isDownloaded(model: LocalAiModel): Boolean = try {
-        when (model.id) {
-            LocalAiModel.CustomMnn.id -> mnnModels.isDownloaded(model.id)
+    override fun isDownloaded(model: LocalAiModel): Boolean {
+        if (File(getLocalModelDirectory(model.id), ".download-in-progress").exists()) return false
+        return try {
+            when (model.id) {
+                LocalAiModel.CustomMnn.id -> mnnModels.isDownloaded(model.id)
 
 
-            LocalAiModel.CustomOnnx.id,
-            LocalAiModel.CustomMediaPipe.id,
-            LocalAiModel.CustomSdxl.id,
-            LocalAiModel.CustomCoreMl.id,
-            LocalAiModel.CustomBonsai.id,
-                -> true
+                LocalAiModel.CustomOnnx.id,
+                LocalAiModel.CustomMediaPipe.id,
+                LocalAiModel.CustomSdxl.id,
+                LocalAiModel.CustomCoreMl.id,
+                LocalAiModel.CustomBonsai.id,
+                    -> true
 
-            else -> when (model.type) {
-                LocalAiModel.Type.Mnn -> mnnModels.isDownloaded(model.id)
-                LocalAiModel.Type.ONNX -> {
-                    val files = getLocalModelFiles(model.id).filter { it.isDirectory }
-                    files.size == 4
-                }
+                else -> when (model.type) {
+                    LocalAiModel.Type.Mnn -> mnnModels.isDownloaded(model.id)
+                    LocalAiModel.Type.ONNX -> {
+                        val files = getLocalModelFiles(model.id).filter { it.isDirectory }
+                        files.size == 4
+                    }
 
-                LocalAiModel.Type.MediaPipe -> {
-                    val files = getLocalModelFiles(model.id)
-                    files.isNotEmpty()
-                }
+                    LocalAiModel.Type.MediaPipe -> {
+                        val files = getLocalModelFiles(model.id)
+                        files.isNotEmpty()
+                    }
 
-                LocalAiModel.Type.Sdxl -> {
-                    val files = getLocalModelFiles(model.id)
-                    files.isNotEmpty()
-                }
+                    LocalAiModel.Type.Sdxl -> {
+                        val files = getLocalModelFiles(model.id)
+                        files.isNotEmpty()
+                    }
 
-                LocalAiModel.Type.CoreMl -> {
-                    val files = getLocalModelFiles(model.id)
-                    files.isNotEmpty()
-                }
+                    LocalAiModel.Type.CoreMl -> {
+                        val files = getLocalModelFiles(model.id)
+                        files.isNotEmpty()
+                    }
 
-                LocalAiModel.Type.Bonsai -> {
-                    getLocalModelDirectory(model.id).hasBonsaiModelLayout()
+                    LocalAiModel.Type.Bonsai -> {
+                        getLocalModelDirectory(model.id).hasBonsaiModelLayout()
+                    }
                 }
             }
+        } catch (_: Exception) {
+            false
         }
-    } catch (_: Exception) {
-        false
     }
 
     /**
