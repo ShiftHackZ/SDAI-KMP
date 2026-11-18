@@ -13,7 +13,6 @@ import com.shifthackz.aisdv1.presentation.settings.SettingsState
 import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
 import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppThemeState
 
-
 @Preview(name = "Settings content", widthDp = 360, heightDp = 740, showBackground = true)
 @Composable
 private fun SettingsContentPreview() {

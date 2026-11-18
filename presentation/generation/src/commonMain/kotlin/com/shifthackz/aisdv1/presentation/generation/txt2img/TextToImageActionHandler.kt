@@ -43,9 +43,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
-
 /**
  * Handles form actions, captured foreground/background generation, result persistence and platform export.
+ *
  * @param openAiOAuthGateway Guards completed results against account replacement or logout.
  * @param providerSelectionGuard Serializes final UI publication with provider replacement.
  * @param dispatchersProvider Dispatches persistence and generation off the UI thread and publishes state immediately.
@@ -71,6 +71,7 @@ import kotlin.coroutines.coroutineContext
  * @param updateState Atomically transforms current presentation state after asynchronous actions.
  * @param launch Starts coroutines in the owning view model lifecycle.
  * @param onError Reports generation, persistence, picker and export failures to the application error sink.
+ *
  * @author Dmitriy Moroz
  */
 internal class TextToImageActionHandler(
@@ -638,19 +639,26 @@ internal class TextToImageActionHandler(
     }
 }
 
-/** Immutable form and request retained while a local benchmark recommendation is visible.
+/**
+ * Immutable form and request retained while a local benchmark recommendation is visible.
+ *
  * @param state Form snapshot retained while a benchmark or validation decision is pending.
  * @param payload Immutable generation request captured from that form snapshot.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 private data class PendingGeneration(
     val state: TextToImageState,
     val payload: TextToImagePayload,
 )
 
-/** Maps supported local-generation controls into a performance admission request without changing form state.
+/**
+ * Maps supported local-generation controls into a performance admission request without changing form state.
+ *
  * @param payload Captured generation inputs or history transfer being applied to this form.
- * @author Dmitriy Moroz */
-
+ *
+ * @author Dmitriy Moroz
+ */
 private fun TextToImageState.toBenchmarkRequest(payload: TextToImagePayload): LocalGenerationRequest =
     LocalGenerationRequest(
         source = mode,

@@ -24,7 +24,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-
 /**
  * Verifies that network usage UI state is driven by observed Room-backed traffic counters.
  *
@@ -174,6 +173,7 @@ class NetworkUsageViewModelTest {
  */
 private class TestNetworkUsageRouter : NetworkUsageRouter {
     var backInvocations = 0
+
 
     override fun navigateBack() {
         backInvocations++

@@ -56,6 +56,7 @@ internal fun OpenAiCompatibleModelInput(
  * @param state Current dimension text and validation feedback.
  * @param onEvent Receives width and height text edits.
  * @param modifier Layout modifiers for the paired dimension row.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -67,7 +68,6 @@ internal fun OpenAiCompatibleDimensionsInput(
     Row(
         modifier.fillMaxWidth().padding(top = 8.dp),
     ) {
-
         OutlinedTextField(
             modifier = Modifier.weight(1f).padding(end = 4.dp),
             value = state.width,
@@ -88,6 +88,5 @@ internal fun OpenAiCompatibleDimensionsInput(
             supportingText = { state.heightValidationError?.let { Text(it.asString()) } },
             singleLine = true,
         )
-
     }
 }

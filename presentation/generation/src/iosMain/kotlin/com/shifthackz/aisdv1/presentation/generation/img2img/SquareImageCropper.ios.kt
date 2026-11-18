@@ -2,14 +2,12 @@ package com.shifthackz.aisdv1.presentation.generation.img2img
 
 import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageBudget
 import com.shifthackz.aisdv1.core.localization.Localization
-
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.SamplingMode
 import org.jetbrains.skia.Surface
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * Center-crops an admitted original and normalizes it to at most 1536px JPEG at quality 95.
@@ -25,7 +23,6 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  *
  * @author Dmitriy Moroz
  */
-@OptIn(ExperimentalEncodingApi::class)
 internal actual suspend fun cropBase64ImageToSquare(
     base64: String,
     budget: OriginalImageBudget
@@ -62,8 +59,6 @@ internal actual suspend fun cropBase64ImageToSquare(
     return Base64.encode(data.bytes)
 }
 
-
 private const val MAX_CROPPED_IMAGE_SIDE = 1536
-
 
 private const val CROPPED_IMAGE_JPEG_QUALITY = 95

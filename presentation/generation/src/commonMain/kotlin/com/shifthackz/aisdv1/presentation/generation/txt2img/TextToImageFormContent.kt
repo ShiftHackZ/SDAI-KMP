@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.generation.txt2img
 
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +25,6 @@ import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUr
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInputFormItems
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
-
 
 /**
  * Displays the text-to-image card as independently composed list items. Advanced fields below

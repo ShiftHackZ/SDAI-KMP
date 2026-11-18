@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 
-
 /**
  * Inpaint editor sections for drawing and request-parameter adjustment.
  *

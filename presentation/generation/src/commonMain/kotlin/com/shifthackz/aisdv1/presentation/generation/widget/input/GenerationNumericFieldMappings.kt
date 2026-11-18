@@ -166,8 +166,11 @@ internal fun GenerationFormField.numericParameters(
  *
  * @param value Clamped and rounded value emitted by the shared editor.
  * @param state Current configurations needed to preserve unrelated provider parameters.
+ *
  * @receiver Logical field whose structural content type is SLIDER_EDITOR.
+ *
  * @return The owning screen's existing numeric or configuration update event.
+ *
  * @throws IllegalStateException If called for a field that is not a numeric editor.
  *
  * @author Dmitriy Moroz

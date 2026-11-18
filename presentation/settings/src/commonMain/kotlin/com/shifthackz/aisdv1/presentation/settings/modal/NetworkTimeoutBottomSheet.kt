@@ -30,6 +30,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
  * @param descriptionKey Localized explanation and any platform limitation.
  * @param onSelected Persists a choice and closes the sheet.
  * @param modifier Layout modifiers for the scrollable timeout-choice list.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

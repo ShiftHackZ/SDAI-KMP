@@ -94,6 +94,7 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  * @param aDetailer Extension configuration forwarded only for AUTOMATIC1111 when enabled and available.
  * @param aDetailerAvailable Whether the active AUTOMATIC1111 endpoint advertises ADetailer.
  * @param aDetailerRefreshing Whether ADetailer availability is being refreshed.
+ *
  * @author Dmitriy Moroz
  */
 @Immutable

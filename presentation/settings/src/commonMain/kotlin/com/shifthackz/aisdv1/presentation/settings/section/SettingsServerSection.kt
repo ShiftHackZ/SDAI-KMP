@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.settings.section
 
 import androidx.compose.material.icons.Icons
@@ -18,7 +16,6 @@ import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -95,7 +92,6 @@ internal fun SettingsServerSection(
         }
 
         SettingsListItem.CREDITS -> {
-
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
@@ -104,11 +100,9 @@ internal fun SettingsServerSection(
                 text = text("settings_item_stability_ai_credits"),
                 endValueText = state.stabilityAiCredits.roundTo(4).toString().asUiText(),
             )
-
         }
 
         SettingsListItem.CONNECTION_TIMEOUT -> {
-
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
@@ -132,7 +126,6 @@ internal fun SettingsServerSection(
         }
 
         SettingsListItem.MODEL -> {
-
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
@@ -141,7 +134,6 @@ internal fun SettingsServerSection(
                 endValueText = state.sdModelSelected.asUiText(),
                 onClick = { processIntent(SettingsIntent.SdModel.OpenChooser) },
             )
-
         }
 
         SettingsListItem.NNAPI -> {
@@ -157,13 +149,11 @@ internal fun SettingsServerSection(
         }
 
         SettingsListItem.NNAPI_WARNING -> {
-
             Text(
                 modifier = warningModifier,
                 text = Localization.string("settings_item_local_nnapi_warning"),
                 style = MaterialTheme.typography.labelMedium,
             )
-
         }
 
         SettingsListItem.BACKGROUND_GENERATION -> {
@@ -185,17 +175,14 @@ internal fun SettingsServerSection(
         }
 
         SettingsListItem.BACKGROUND_WARNING -> {
-
             Text(
                 modifier = warningModifier,
                 text = Localization.string(backgroundGenerationWarningKey),
                 style = MaterialTheme.typography.labelMedium,
             )
-
         }
 
         SettingsListItem.DEBUG_MENU -> {
-
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
@@ -203,7 +190,6 @@ internal fun SettingsServerSection(
                 text = text("title_debug_menu"),
                 onClick = { processIntent(SettingsIntent.NavigateDeveloperMode) },
             )
-
         }
 
         SettingsListItem.APP_HEADER -> {
@@ -215,7 +201,6 @@ internal fun SettingsServerSection(
         }
 
         SettingsListItem.MONITOR_CONNECTION -> {
-
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
@@ -240,7 +225,6 @@ internal fun SettingsServerSection(
         }
 
         SettingsListItem.AUTO_SAVE_WARNING -> {
-
             Text(
                 modifier = warningModifier,
                 text = Localization.string("settings_item_auto_save_warning"),
@@ -272,7 +256,6 @@ internal fun SettingsServerSection(
         }
 
         SettingsListItem.ADVANCED_DEFAULT -> {
-
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,

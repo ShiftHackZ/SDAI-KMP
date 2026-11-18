@@ -6,9 +6,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 
-
 private const val CHAR_BOLD_START = '['
-
 
 private const val CHAR_BOLD_END = ']'
 

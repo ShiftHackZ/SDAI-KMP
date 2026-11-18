@@ -9,7 +9,6 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-
 /**
  * Supplies Android factories for reading the app log file and native clipboard/text-sharing actions.
  *

@@ -15,7 +15,6 @@ import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.presentation.components.widget.input.chip.ChipTextFieldWithItem
 
-
 /**
  * Displays either prompt through one shared editor structure. Text and chip selection remain
  * owned by the screen; scrolling a field out of view does not own or clear its generation value.

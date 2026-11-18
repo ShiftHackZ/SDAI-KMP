@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.TextFieldValue
  * offscreen Column before the first expansion frame.
  *
  * @receiver The screen's existing vertical lazy list; no nested scrolling list is created.
+ *
  * @param state Current provider inputs and advanced visibility.
  * @param isImg2Img Whether to use image-to-image fields and surface styling.
  * @param promptChipTextFieldState Caller-owned prompt selection and chip editing state.
@@ -82,10 +83,12 @@ internal fun LazyListScope.generationInputFormItems(
  * made before composition; each item mounts only its own logical field.
  *
  * @receiver The generation screen's vertical lazy list.
+ *
  * @param state Current advanced values and provider capabilities.
  * @param isImg2Img Whether text-only Forge and Hires controls are excluded.
  * @param onEvent Receives generation edits from the visible field.
  * @param afterSlidersSection Additional image-to-image denoising content.
+ *
  * @author Dmitriy Moroz
  */
 internal fun LazyListScope.generationInputAdvancedItems(

@@ -40,4 +40,3 @@ internal actual fun DrawerPlatformIcon(modifier: Modifier) {
         contentDescription = "Android",
     )
 }
-

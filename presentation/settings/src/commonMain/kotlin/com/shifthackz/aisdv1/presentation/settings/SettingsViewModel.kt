@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration.Companion.milliseconds
 
-
 /**
  * ViewModel for the Settings tab.
  *
@@ -109,6 +108,7 @@ class SettingsViewModel(
 ) {
 
     private val ioDispatcher = dispatchersProvider.io
+
     private val immediateDispatcher = dispatchersProvider.immediate
 
     private val appVersionProducer = flow { emit(buildInfoProvider.toString()) }

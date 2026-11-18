@@ -52,7 +52,6 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.withContext
 
-
 /**
  * Owns the retained image-to-image form, including the state shared with the inpaint route.
  *
@@ -95,6 +94,7 @@ import kotlinx.coroutines.withContext
  * @param platformActions Acquires or transforms input images through supported native image actions.
  * @param originalImageBudget Bounds full-resolution mask encoding for the selected source image.
  * @param onError Receives failures reported by configuration, metadata and delegated image operations.
+ *
  * @author Dmitriy Moroz
  */
 class ImageToImageViewModel(
@@ -149,6 +149,7 @@ class ImageToImageViewModel(
      * Applies a reducer and validates provider-specific seed fields in the same state publication.
      *
      * @param mutation Transformation applied to the current image-to-image state.
+     *
      * @author Dmitriy Moroz
      */
     private fun updateFormState(mutation: (ImageToImageState) -> ImageToImageState) {
@@ -165,6 +166,7 @@ class ImageToImageViewModel(
      * Validates seed fields before publishing a replacement state supplied by the action handler.
      *
      * @param state Replacement form state, including its provider selection and seed text.
+     *
      * @author Dmitriy Moroz
      */
     private fun emitFormState(state: ImageToImageState) {
@@ -243,6 +245,7 @@ class ImageToImageViewModel(
      * Dispatches form and benchmark actions, handles sampler retries, then persists steps and guidance scale.
      *
      * @param intent User interaction or foreground-recovery event for the retained form.
+     *
      * @author Dmitriy Moroz
      */
     override fun processIntent(intent: ImageToImageIntent) {
@@ -278,9 +281,9 @@ class ImageToImageViewModel(
      *
      * @param ai Saved result whose metadata is applied to the form.
      * @param inputImage Whether to replace the current input; false retains its image and mask.
+     *
      * @author Dmitriy Moroz
      */
-
     private fun applyGenerationResult(
         ai: AiGenerationResult,
         inputImage: Boolean,
@@ -303,6 +306,7 @@ class ImageToImageViewModel(
      *
      * @param ai Saved result supplying metadata to restore.
      * @param imageBase64 Replacement encoded input, or null to preserve the current input and mask.
+     *
      * @author Dmitriy Moroz
      */
     private fun applyGenerationResult(
@@ -384,6 +388,7 @@ class ImageToImageViewModel(
      * Restores a transfer's metadata and replaces the form input with its selected saved image.
      *
      * @param payload Uses the saved input when requested and nonblank, otherwise the generated output.
+     *
      * @author Dmitriy Moroz
      */
 
@@ -451,7 +456,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadConfiguration() {
         updateFormState { it.copy(loadingConfiguration = true, error = null) }
         launch(dispatchersProvider.io) {
@@ -491,7 +495,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeSettings() {
         launch(dispatchersProvider.immediate) {
             preferenceManager
@@ -526,6 +529,7 @@ class ImageToImageViewModel(
      * cached choices before starting sampler, Forge-module and ADetailer availability loads.
      *
      * @param settings Provider selection, server address and demo mode identifying the metadata source.
+     *
      * @author Dmitriy Moroz
      */
     private fun refreshStableDiffusionMetadataIfNeeded(settings: Settings) {
@@ -618,7 +622,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadForgeModules() {
         launch(dispatchersProvider.io) {
             runCatching { getForgeModulesUseCase() }
@@ -660,9 +663,9 @@ class ImageToImageViewModel(
      * unavailable and is forwarded to the error sink.
      *
      * @param force Whether to ignore an already resolved in-memory availability result.
+     *
      * @author Dmitriy Moroz
      */
-
     private fun loadADetailerAvailability(force: Boolean = false) {
         if (!force && aDetailerAvailable != null) return
         updateFormState { it.copy(aDetailerRefreshing = true) }
@@ -700,9 +703,9 @@ class ImageToImageViewModel(
      * Leaving ArliAI invalidates the key so returning to it triggers another load.
      *
      * @param settings Persisted provider selection used to decide whether ArliAI discovery applies.
+     *
      * @author Dmitriy Moroz
      */
-
     private fun refreshArliAiModelsIfNeeded(settings: Settings) {
         if (settings.source != ServerSource.ARLI_AI) {
             arliAiModelsKey = null
@@ -731,7 +734,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadArliAiModels() {
         launch(dispatchersProvider.io) {
             runCatching {

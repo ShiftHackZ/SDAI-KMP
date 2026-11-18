@@ -21,7 +21,6 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 
-
 @Ignore("ToDo: Investigate why sometimes tests fail on remote worker due to race-conditions.")
 @OptIn(ExperimentalCoroutinesApi::class)
 class OnBoardingViewModelSplashSourceTest {

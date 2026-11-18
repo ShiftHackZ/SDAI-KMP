@@ -13,7 +13,6 @@ import java.io.File
  * @author Dmitriy Moroz
  */
 class AndroidLogReader(
-
     private val fileProviderDescriptor: FileProviderDescriptor,
 ) : LogReader {
     /**

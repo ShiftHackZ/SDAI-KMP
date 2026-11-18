@@ -13,9 +13,9 @@ import com.shifthackz.aisdv1.core.sharing.shareText
  * @author Dmitriy Moroz
  */
 internal class AndroidLoggerPlatformActions(
-
     private val context: Context,
 ) : LoggerPlatformActions {
+
     /**
      * Copies the supplied snapshot using the application log clipboard label.
      *
@@ -39,9 +39,7 @@ internal class AndroidLoggerPlatformActions(
         context.shareText(text)
     }
 
-
     private companion object {
-
         const val CLIP_LABEL = "SDAI logs"
     }
 }

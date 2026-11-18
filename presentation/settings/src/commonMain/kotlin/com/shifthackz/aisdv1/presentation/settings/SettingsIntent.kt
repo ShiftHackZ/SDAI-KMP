@@ -6,7 +6,6 @@ import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.entity.NetworkTimeout
 import com.shifthackz.aisdv1.domain.entity.Grid
 
-
 /**
  * Describes user actions and screen side-effect requests handled by SettingsViewModel.
  *
@@ -175,9 +174,7 @@ sealed interface SettingsIntent : MviIntent {
 
         data class DarkTheme(override val flag: Boolean) : UpdateFlag
     }
-
     data class NewColorToken(val token: ColorToken) : SettingsIntent
-
     data class NewDarkThemeToken(val token: DarkThemeToken) : SettingsIntent
 
     /**

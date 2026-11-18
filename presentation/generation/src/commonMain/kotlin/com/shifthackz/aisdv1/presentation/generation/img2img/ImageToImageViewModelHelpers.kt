@@ -113,9 +113,13 @@ internal data class StableDiffusionSamplersKey(
     val demoMode: Boolean,
 )
 
-/** Maps current provider progress to queued or sampling UI while preserving cancellation availability.
+/**
+ * Maps current provider progress to queued or sampling UI while preserving cancellation availability.
+ *
  * @param canCancelLocalGeneration Whether the active local engine supports cancellation in the current lifecycle.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal fun ImageToImageState.progressModal(
     canCancelLocalGeneration: Boolean,
 ): GenerationModal = if (mode == ServerSource.EASY_DIFFUSION) {

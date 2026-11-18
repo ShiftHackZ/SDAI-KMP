@@ -44,7 +44,6 @@ import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-
 /**
  * Hosts the onboarding pager and receives generation, provider and settings previews as slots.
  *

@@ -15,18 +15,7 @@ import com.shifthackz.aisdv1.presentation.components.model.UsageState
  */
 @Immutable
 data class StorageUsageState(
-    /**
-     * Shared usage dashboard state with storage categories and loading flag.
-     *
-     * @author Dmitriy Moroz
-     */
     val usage: UsageState = UsageState(loading = true),
-
-    /**
-     * Confirmation dialog state for destructive storage actions.
-     *
-     * @author Dmitriy Moroz
-     */
     val screenModal: StorageUsageModal = StorageUsageModal.None,
 ) : MviState
 

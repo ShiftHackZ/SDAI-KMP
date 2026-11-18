@@ -13,10 +13,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
  * @author Dmitriy Moroz
  */
 data class WebUiState(
-
     val loading: Boolean = true,
-
     val source: ServerSource = ServerSource.AUTOMATIC1111,
-
     val url: String = "",
 ) : MviState

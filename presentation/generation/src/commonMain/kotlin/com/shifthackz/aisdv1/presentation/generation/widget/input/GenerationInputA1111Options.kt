@@ -186,7 +186,6 @@ private fun ADetailerOption(
     }
 }
 
-
 @Composable
 private fun ADetailerMissingContent(
     refreshing: Boolean,

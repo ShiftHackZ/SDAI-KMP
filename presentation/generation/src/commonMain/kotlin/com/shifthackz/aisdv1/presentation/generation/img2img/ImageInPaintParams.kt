@@ -37,7 +37,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-
 /**
  * Edits brush diameter while previewing the current brush size.
  *
@@ -244,7 +243,9 @@ internal fun Offset.toInPaintPoint(): InPaintPoint = InPaintPoint(x = x, y = y)
  *
  * @param targetWidth Width of the destination canvas in pixels.
  * @param targetHeight Height of the destination canvas in pixels.
+ *
  * @receiver Stroke retaining its original canvas dimensions and points.
+ *
  * @return Empty path for an empty stroke, otherwise the scaled smoothed stroke path.
  *
  * @author Dmitriy Moroz

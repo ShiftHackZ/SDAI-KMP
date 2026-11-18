@@ -68,17 +68,13 @@ actual fun rememberImageToImagePlatformActions(budget: OriginalImageBudget): Ima
     }
 }
 
-
 private sealed interface IosImagePickOutcome {
 
     data class Selected(val image: UIImage) : IosImagePickOutcome
 
-
     data object Cancelled : IosImagePickOutcome
 
-
     data object Unsupported : IosImagePickOutcome
-
 
     data class Failed(val message: String) : IosImagePickOutcome
 }
@@ -91,7 +87,6 @@ private sealed interface IosImagePickOutcome {
 private class IosImagePicker : NSObject(),
     UIImagePickerControllerDelegateProtocol,
     UINavigationControllerDelegateProtocol {
-
 
     private var continuation: CancellableContinuation<IosImagePickOutcome>? = null
 
@@ -195,7 +190,7 @@ private class IosImagePicker : NSObject(),
 }
 
 
-@OptIn(ExperimentalEncodingApi::class, ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class)
 private fun UIImage.base64Jpeg(): String? {
     val data = UIImageJPEGRepresentation(this, compressionQuality = 0.95) ?: return null
     val length = data.length.toInt()

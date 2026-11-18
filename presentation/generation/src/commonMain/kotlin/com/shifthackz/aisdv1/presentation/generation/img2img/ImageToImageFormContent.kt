@@ -23,7 +23,6 @@ import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInputFormItems
 
-
 /**
  * Adds shared generation fields and image-to-image validation/progress feedback to a lazy form.
  *

@@ -47,7 +47,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-
 /**
  * Verifies storage usage loading, confirmation dialogs, and observer-driven refreshes.
  *

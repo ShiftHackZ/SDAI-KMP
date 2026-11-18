@@ -31,9 +31,11 @@ import kotlinx.coroutines.launch
 
 /**
  * Presents settings dialogs and sheets, opening timeout choices fully above system navigation.
+ *
  * @param screenModal Active dialog or preference picker and its current selection.
  * @param platformActions Handles platform settings and permission actions.
  * @param processIntent Dispatches selections and dismissals through settings MVI.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

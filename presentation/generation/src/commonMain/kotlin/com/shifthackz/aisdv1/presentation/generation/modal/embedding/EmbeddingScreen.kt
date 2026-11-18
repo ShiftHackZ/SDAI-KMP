@@ -304,7 +304,6 @@ private fun EmbeddingEmptyState(
     }
 }
 
-
 @Composable
 private fun EmbeddingItemComposable(
     item: EmbeddingItemUi,

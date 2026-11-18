@@ -6,8 +6,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Deterministic revision source for screen state tests. @author Dmitriy Moroz */
 internal class FakeStorageUsageObserver : StorageUsageObserver {
+
     private val revision = MutableStateFlow(0L)
+
     override fun observe(): Flow<Long> = revision
+
     override fun notifyChanged() {
         revision.value += 1L
     }

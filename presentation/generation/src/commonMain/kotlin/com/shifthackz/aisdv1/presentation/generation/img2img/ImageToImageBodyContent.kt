@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +23,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeviceUnknown
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -49,7 +46,6 @@ import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUr
 import com.shifthackz.aisdv1.presentation.components.widget.image.rememberPreviewImage
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
-
 
 /**
  * Explains why the selected provider cannot accept image-to-image requests.

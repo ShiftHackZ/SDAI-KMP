@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.input.TextFieldValue
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult

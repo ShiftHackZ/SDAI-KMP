@@ -58,13 +58,9 @@ data class ImageInPaintState(
  */
 @Immutable
 data class InPaintStroke(
-
     val points: List<InPaintPoint>,
-
     val brushSize: Int,
-
     val canvasWidth: Int,
-
     val canvasHeight: Int,
 )
 
@@ -78,35 +74,24 @@ data class InPaintStroke(
  */
 @Immutable
 data class InPaintPoint(
-
     val x: Float,
-
     val y: Float,
 )
 
-
 internal const val IN_PAINT_BRUSH_SIZE_MIN = 1
-
 
 internal const val IN_PAINT_BRUSH_SIZE_MAX = 60
 
-
 internal const val IN_PAINT_MASK_BLUR_MIN = 1
-
 
 internal const val IN_PAINT_MASK_BLUR_MAX = 64
 
-
 internal const val IN_PAINT_MASK_PADDING_MIN = 0
-
 
 internal const val IN_PAINT_MASK_PADDING_MAX = 256
 
-
 internal const val DEFAULT_IN_PAINT_BRUSH_SIZE = 16
 
-
 internal const val DEFAULT_IN_PAINT_MASK_BLUR = 4
-
 
 internal const val DEFAULT_IN_PAINT_MASK_PADDING = 32

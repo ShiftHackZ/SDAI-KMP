@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.settings.content
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -9,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -94,7 +91,6 @@ internal fun ContentSettingsState(
                         itemModifier = itemModifier,
                         warningModifier = warningModifier,
                         backgroundGenerationWarningKey = platformActions.backgroundGenerationWarningKey,
-
                         processIntent = processIntent,
                     )
 
@@ -109,7 +105,6 @@ internal fun ContentSettingsState(
                         row = row,
                         isLoading = state.loading,
                         galleryGrid = state.galleryGrid,
-
                         shouldUseSystemColorPalette = state.useSystemColorPalette,
                         shouldUseSystemDarkTheme = state.useSystemDarkTheme,
                         isDarkTheme = state.darkTheme,
@@ -129,7 +124,6 @@ internal fun ContentSettingsState(
                     SettingsListItem.DEVELOPER_WEBSITE -> SettingsCommunitySection(
                         row = row,
                         isLoading = state.loading,
-
                         headerModifier = headerModifier,
                         itemModifier = itemModifier,
                         processIntent = processIntent,
@@ -144,7 +138,6 @@ internal fun ContentSettingsState(
                     SettingsListItem.SOURCE_CODE -> SettingsInfoSection(
                         row = row,
                         isLoading = state.loading,
-
                         headerModifier = headerModifier,
                         itemModifier = itemModifier,
                         processIntent = processIntent,

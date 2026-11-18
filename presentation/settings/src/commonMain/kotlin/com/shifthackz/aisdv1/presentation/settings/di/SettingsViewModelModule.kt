@@ -5,7 +5,6 @@ import com.shifthackz.aisdv1.presentation.settings.SettingsViewModel
 import com.shifthackz.aisdv1.presentation.settings.platform.SettingsPlatformActions
 import org.koin.dsl.module
 
-
 /**
  * Creates settings state holders with domain operations, the shared storage observer/developer accessor,
  * and the router/platform actions supplied by the current settings screen.

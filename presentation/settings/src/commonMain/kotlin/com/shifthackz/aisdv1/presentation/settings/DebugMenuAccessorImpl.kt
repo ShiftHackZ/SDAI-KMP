@@ -11,7 +11,6 @@ import com.shifthackz.aisdv1.domain.preference.PreferenceManager
  * @author Dmitriy Moroz
  */
 internal class DebugMenuAccessorImpl(
-
     private val preferenceManager: PreferenceManager,
 ) : DebugMenuAccessor {
 

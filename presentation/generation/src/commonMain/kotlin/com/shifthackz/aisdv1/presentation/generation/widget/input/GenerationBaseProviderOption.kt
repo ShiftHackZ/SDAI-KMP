@@ -17,7 +17,6 @@ import com.shifthackz.aisdv1.domain.entity.SdxlBackend
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
 
-
 /**
  * Displays one provider or local-backend selection without mounting prompt editors.
  * Provider visibility is selected by generationInputBaseFields before composition.
@@ -38,7 +37,6 @@ internal fun GenerationBaseProviderOption(
 ) {
     when (field) {
         GenerationBaseFormField.PROVIDER -> when (state.mode) {
-
             ServerSource.AUTOMATIC1111,
             ServerSource.SWARM_UI,
             ServerSource.EASY_DIFFUSION,
@@ -87,7 +85,6 @@ internal fun GenerationBaseProviderOption(
             )
 
             else -> Unit
-
         }
 
         GenerationBaseFormField.MNN_BACKEND -> DropdownTextField(
@@ -102,7 +99,6 @@ internal fun GenerationBaseProviderOption(
             })
 
         GenerationBaseFormField.SDXL_BACKEND -> {
-
             DropdownTextField(
                 modifier = Modifier.padding(top = 8.dp),
                 label = Localization.string("hint_sdxl_backend").asUiText(),
@@ -115,7 +111,6 @@ internal fun GenerationBaseProviderOption(
         }
 
         GenerationBaseFormField.BONSAI_BACKEND -> {
-
             DropdownTextField(
                 modifier = Modifier.padding(top = 8.dp),
                 label = Localization.string("hint_bonsai_backend").asUiText(),

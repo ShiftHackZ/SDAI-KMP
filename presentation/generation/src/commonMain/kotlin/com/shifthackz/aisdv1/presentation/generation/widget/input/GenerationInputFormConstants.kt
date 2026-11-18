@@ -15,30 +15,21 @@ internal object GenerationInputFormConstants {
      */
     const val RANDOM_SEED_BOUND_EXCLUSIVE = 4_294_967_294L
 
-
     const val SUB_SEED_STRENGTH_MIN = 0f
-
 
     const val SUB_SEED_STRENGTH_MAX = 1f
 
-
     const val SAMPLING_STEPS_RANGE_MIN = 1
-
 
     const val SAMPLING_STEPS_RANGE_MAX = 150
 
-
     const val SAMPLING_STEPS_RANGE_STABILITY_AI_MAX = 50
-
 
     const val SAMPLING_STEPS_RANGE_ARLI_AI_MAX = 40
 
-
     const val SAMPLING_STEPS_LOCAL_DIFFUSION_MAX = 50
 
-
     const val BATCH_RANGE_MIN = 1
-
 
     const val BATCH_RANGE_MAX = 20
 
@@ -49,36 +40,25 @@ internal object GenerationInputFormConstants {
      */
     const val BATCH_RANGE_FAL_AI_MAX = 4
 
-
     const val CFG_SCALE_RANGE_MIN = 1
-
 
     const val CFG_SCALE_RANGE_MAX = 35
 
-
     const val HIRES_SCALE_MIN = 1f
-
 
     const val HIRES_SCALE_MAX = 4f
 
-
     const val HIRES_STEPS_MIN = 0
-
 
     const val HIRES_STEPS_MAX = 150
 
-
     const val DENOISING_STRENGTH_MIN = 0f
-
 
     const val DENOISING_STRENGTH_MAX = 1f
 
-
     const val ADETAILER_CONFIDENCE_MIN = 0.1f
 
-
     const val ADETAILER_CONFIDENCE_MAX = 1f
-
 
     val sizes = listOf("64", "128", "256", "320", "384", "448", "512")
 }

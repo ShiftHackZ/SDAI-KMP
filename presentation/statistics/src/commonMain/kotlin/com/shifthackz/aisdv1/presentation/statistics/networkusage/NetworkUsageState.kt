@@ -13,10 +13,5 @@ import com.shifthackz.aisdv1.presentation.components.model.UsageState
  */
 @Immutable
 data class NetworkUsageState(
-    /**
-     * Shared usage dashboard state with traffic buckets and loading flag.
-     *
-     * @author Dmitriy Moroz
-     */
     val usage: UsageState = UsageState(loading = true),
 ) : MviState

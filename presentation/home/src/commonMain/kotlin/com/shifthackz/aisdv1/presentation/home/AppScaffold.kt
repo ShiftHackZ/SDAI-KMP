@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.home
 
 import com.shifthackz.aisdv1.core.navigation.isHomeRoute
@@ -26,7 +24,6 @@ import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
@@ -227,7 +224,6 @@ private fun appBottomNavigationItems(
         onClick = router::navigateToSettings,
     ),
 )
-
 
 @Composable
 private fun appDrawerItems(

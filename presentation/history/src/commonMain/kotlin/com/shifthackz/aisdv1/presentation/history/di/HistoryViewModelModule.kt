@@ -4,7 +4,6 @@ import com.shifthackz.aisdv1.core.navigation.router.HistoryRouter
 import com.shifthackz.aisdv1.presentation.history.HistoryViewModel
 import org.koin.dsl.module
 
-
 /**
  * Creates history metadata state holders with the supplied back-navigation owner.
  *

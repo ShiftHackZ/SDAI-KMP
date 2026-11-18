@@ -6,7 +6,6 @@ import com.shifthackz.aisdv1.presentation.logger.NoOpLogReader
 import com.shifthackz.aisdv1.presentation.logger.NoOpLoggerPlatformActions
 import org.koin.dsl.module
 
-
 /**
  * Supplies singleton empty-log and inert native-action adapters for hosts without a log integration.
  *

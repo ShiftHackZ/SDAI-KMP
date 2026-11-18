@@ -27,7 +27,6 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  *
  * @author Dmitriy Moroz
  */
-@OptIn(ExperimentalEncodingApi::class)
 internal actual suspend fun encodeInPaintMaskBase64(
     imageBase64: String,
     strokes: List<InPaintStroke>,

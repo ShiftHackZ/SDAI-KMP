@@ -29,10 +29,15 @@ actual fun rememberSettingsPlatformActions(): SettingsPlatformActions {
 private class IosSettingsPlatformActions(
     private val fileSystem: StorageUsageFileSystem,
 ) : SettingsPlatformActions {
+
     override val requiresStoragePermissionForMediaStore: Boolean = false
+
     override val supportsBackgroundGeneration: Boolean = true
+
     override val supportsConnectionTimeout: Boolean = true
+
     override val isNnapiAvailable: Boolean = false
+
     override val backgroundGenerationWarningKey = "settings_item_background_generation_warning_ios"
 
     override fun mapStorageBytesForUi(bytes: Long): Long =
@@ -47,7 +52,6 @@ private class IosSettingsPlatformActions(
     override suspend fun clearAppCache() {
         fileSystem.clearAppCache()
     }
-
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long =
         fileSystem.getDownloadedModelsBytes(modelIds)

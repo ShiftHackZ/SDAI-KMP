@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.catch
  * updates when Ktor calls or model downloads report bytes. Resetting statistics clears Room data
  * and briefly switches to the shimmer state while the new zero snapshot is emitted.
  *
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  * @param dispatchersProvider App coroutine dispatchers used by the MVI base class and IO work.
  * @param observeNetworkUsageUseCase Live Room-backed traffic counter stream.
  * @param resetNetworkUsageUseCase Use case that clears all persisted network counters.
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.catch
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
  * @author Dmitriy Moroz
- * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class NetworkUsageViewModel(
     diagnostics: UiDiagnostics,

@@ -182,6 +182,7 @@ internal fun RowScope.GenerationSizeTextFieldsComponent(
  *
  * @param keywords Current ordered prompt keywords.
  * @param event Requested addition, batch addition, replacement or removal.
+ *
  * @return Prompt tags joined by a comma and one space.
  *
  * @author Dmitriy Moroz

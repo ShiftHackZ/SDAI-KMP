@@ -213,7 +213,6 @@ fun ReportScreenContent(
     }
 }
 
-
 @Composable
 private fun ReportLoadedContent(
     state: ReportScreenContentState,
@@ -288,7 +287,6 @@ private fun ReportLoadedContent(
         }
     }
 }
-
 
 private fun ReportScreenStrings.label(reason: ReportReason): String = when (reason) {
     ReportReason.InappropriateContent -> reasonInappropriateContent

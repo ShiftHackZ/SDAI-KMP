@@ -41,7 +41,6 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 import kotlin.io.encoding.Base64
 
-
 /**
  * Handles form actions, captured foreground/background generation, result persistence and platform export.
  *
@@ -110,20 +109,32 @@ internal class ImageToImageActionHandler(
      */
     private var generationJob: Job? = null
 
-    /** Per-operation dispatch marker; a cancelled replacement still awaiting cleanup owns no legacy task.
-     * @author Dmitriy Moroz */
+    /**
+     * Per-operation dispatch marker; a cancelled replacement still awaiting cleanup owns no legacy task.
+     *
+     * @author Dmitriy Moroz
+     */
     private var generationDispatchState: MutableStateFlow<Boolean>? = null
 
-    /** Provider identity captured from the launched form snapshot, retained independently of later edits.
-     * @author Dmitriy Moroz */
+    /**
+     * Provider identity captured from the launched form snapshot, retained independently of later edits.
+     *
+     * @author Dmitriy Moroz
+     */
     private var generationSource: ServerSource? = null
 
-    /** Selection revision captured with the launched form and used only for its cancellation ownership.
-     * @author Dmitriy Moroz */
+    /**
+     * Selection revision captured with the launched form and used only for its cancellation ownership.
+     *
+     * @author Dmitriy Moroz
+     */
     private var generationSelectionRevision: Long? = null
 
-    /** Independent join barrier retaining every cancelled predecessor until its provider cleanup finishes.
-     * @author Dmitriy Moroz */
+    /**
+     * Independent join barrier retaining every cancelled predecessor until its provider cleanup finishes.
+     *
+     * @author Dmitriy Moroz
+     */
     private var cleanupJob: Job? = null
 
     private var pendingGenerationState: ImageToImageState? = null
@@ -132,6 +143,7 @@ internal class ImageToImageActionHandler(
      * Opens the requested platform input source and resets obsolete mask/results when a new image is selected.
      *
      * @param source Platform input source to open.
+     *
      * @author Dmitriy Moroz
      */
     fun pickImage(source: ImageToImagePickSource) {
@@ -264,6 +276,7 @@ internal class ImageToImageActionHandler(
 
     /**
      * Records the skipped benchmark and resumes the captured pending generation request.
+     *
      * @author Dmitriy Moroz
      */
     fun skipBenchmarkPrompt() {
@@ -746,7 +759,6 @@ internal class ImageToImageActionHandler(
  * @param payload Captured generation inputs or history transfer being applied to this form.
  *
  * @author Dmitriy Moroz */
-
 private fun ImageToImageState.toBenchmarkRequest(payload: ImageToImagePayload): LocalGenerationRequest =
     LocalGenerationRequest(
         source = mode,

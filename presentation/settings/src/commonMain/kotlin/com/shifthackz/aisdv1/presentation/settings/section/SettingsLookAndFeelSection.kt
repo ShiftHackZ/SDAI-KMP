@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.settings.section
 
 import androidx.compose.foundation.background
@@ -16,7 +14,6 @@ import androidx.compose.material.icons.filled.FormatColorFill
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -108,7 +105,6 @@ internal fun SettingsLookAndFeelSection(
         }
 
         SettingsListItem.DYNAMIC_COLORS -> {
-
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
@@ -117,7 +113,6 @@ internal fun SettingsLookAndFeelSection(
                 isChecked = shouldUseSystemColorPalette,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.DynamicColors(it)) },
             )
-
         }
 
         SettingsListItem.SYSTEM_DARK -> {
@@ -132,7 +127,6 @@ internal fun SettingsLookAndFeelSection(
         }
 
         SettingsListItem.MANUAL_DARK -> {
-
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
@@ -141,11 +135,9 @@ internal fun SettingsLookAndFeelSection(
                 isChecked = isDarkTheme,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.DarkTheme(it)) },
             )
-
         }
 
         SettingsListItem.DARK_PALETTE -> {
-
             Column(
                 modifier = itemModifier
                     .clip(RoundedCornerShape(16.dp))
@@ -168,11 +160,9 @@ internal fun SettingsLookAndFeelSection(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
             }
-
         }
 
         SettingsListItem.ACCENT_COLOR -> {
-
             Column(
                 modifier = itemModifier
                     .clip(RoundedCornerShape(16.dp))
@@ -196,7 +186,6 @@ internal fun SettingsLookAndFeelSection(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
             }
-
         }
 
         else -> Unit

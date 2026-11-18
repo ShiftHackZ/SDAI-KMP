@@ -24,7 +24,6 @@ class WebUiViewModel(
     diagnostics: UiDiagnostics,
     dispatchersProvider: DispatchersProvider,
     preferenceManager: PreferenceManager,
-
     private val router: WebUiRouter,
 ) : BaseMviViewModel<WebUiState, WebUiIntent, EmptyEffect>(
     diagnostics = diagnostics,
@@ -43,7 +42,6 @@ class WebUiViewModel(
         }
     }
 }
-
 
 private fun PreferenceManager.webUiUrl(): String = when (source) {
     ServerSource.AUTOMATIC1111 -> automatic1111ServerUrl

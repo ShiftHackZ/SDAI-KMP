@@ -9,6 +9,7 @@ package com.shifthackz.aisdv1.presentation.settings
  * @param shouldShowConnectionTimeout Whether this platform supports the connection timeout row.
  * @param isNnapiAvailable Whether the platform is Android 8.1 or newer; older Android and other
  * platforms omit the NNAPI switch and warning, regardless of any saved preference.
+ *
  * @return Ordered stable row identities matching current provider and appearance visibility.
  *
  * @author Dmitriy Moroz

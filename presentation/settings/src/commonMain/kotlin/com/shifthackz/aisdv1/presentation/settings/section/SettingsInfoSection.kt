@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.settings.section
 
 import androidx.compose.material.icons.Icons
@@ -9,7 +7,6 @@ import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Report
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
@@ -26,6 +23,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
  * @param headerModifier Layout applied to the section header.
  * @param itemModifier Layout applied to each link row.
  * @param processIntent Receives link and version actions from the section.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

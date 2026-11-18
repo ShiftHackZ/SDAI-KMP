@@ -13,6 +13,7 @@ import com.shifthackz.aisdv1.presentation.components.model.shortDisplayName
  * Resolves a localization key to the UiText format consumed by Settings rows.
  *
  * @param key localization key from the app string catalog.
+ *
  * @author Dmitriy Moroz
  */
 internal fun text(key: String): UiText = Localization.string(key).asUiText()

@@ -136,8 +136,11 @@ sealed interface SettingsModal {
      * @author Dmitriy Moroz
      */
     data object Language : SettingsModal
+
     data class SelectSdModel(val models: List<String>, val selected: String) : SettingsModal
+
     data class ManualPermission(val permission: String) : SettingsModal
+
     data class GalleryGrid(val grid: Grid) : SettingsModal
 
     /**

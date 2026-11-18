@@ -4,7 +4,6 @@ import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImagePlatfor
 import com.shifthackz.aisdv1.presentation.generation.img2img.NoOpImageToImagePlatformActions
 import org.koin.dsl.module
 
-
 /**
  * Provides an unsupported picker singleton for hosts without a composition-bound native image picker.
  *

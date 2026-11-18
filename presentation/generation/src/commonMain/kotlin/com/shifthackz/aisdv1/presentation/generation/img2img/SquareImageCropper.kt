@@ -9,8 +9,11 @@ import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageB
  *
  * @param base64 Original encoded image, optionally prefixed by a data URI.
  * @param budget Encoded/pixel admission applied before full bitmap allocation.
+ *
  * @return Normalized original image bytes encoded as Base64.
+ *
  * @throws IllegalArgumentException when the encoded source or original dimensions exceed admission.
+ *
  * @author Dmitriy Moroz
  */
 internal expect suspend fun cropBase64ImageToSquare(

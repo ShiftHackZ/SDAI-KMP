@@ -13,7 +13,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-
 class SplashViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()

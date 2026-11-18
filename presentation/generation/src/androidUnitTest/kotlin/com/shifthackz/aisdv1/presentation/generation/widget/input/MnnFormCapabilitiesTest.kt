@@ -12,7 +12,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-
 /**
  * Checks the actual form's fixed-profile field selection and supported-device provider policy.
  *

@@ -36,6 +36,13 @@ jobs:
         uses: actions/checkout@v4.1.0
         with:
           persist-credentials: false
+      # Compose's UIKit bridge links symbols from the iOS 26 SDK.
+      - name: Select Xcode 26.2 for Apple builds
+        if: runner.os == 'macOS'
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
       - name: Install Apple build tools
         if: runner.os == 'macOS'
         run: brew install cmake ninja

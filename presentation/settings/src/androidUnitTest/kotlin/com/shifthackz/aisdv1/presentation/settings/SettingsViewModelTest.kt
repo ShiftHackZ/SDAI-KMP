@@ -1,6 +1,5 @@
 package com.shifthackz.aisdv1.presentation.settings
 
-
 import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
@@ -54,7 +53,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-
 
 /**
  * Verifies Settings state aggregation, including observed storage/network usage summaries.

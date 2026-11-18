@@ -6,7 +6,6 @@ import com.shifthackz.aisdv1.presentation.settings.DebugMenuAccessor
 import com.shifthackz.aisdv1.presentation.settings.DebugMenuAccessorImpl
 import org.koin.dsl.module
 
-
 /**
  * Retains one developer-unlock counter and supplies default settings actions until a native adapter replaces them.
  *

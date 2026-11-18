@@ -15,7 +15,6 @@ import com.shifthackz.aisdv1.domain.entity.FalAiImageSize
 import com.shifthackz.aisdv1.domain.entity.OpenAiSize
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 
-
 /**
  * Displays the existing provider-specific dimension controls as one horizontal lazy item.
  * Width and height remain paired so their proportions, validation and ratio actions are unchanged.
@@ -38,7 +37,6 @@ internal fun GenerationBaseDimensions(
         modifier = modifier.fillMaxWidth().padding(top = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-
         val localModifier = Modifier.weight(1f)
 
         when (state.mode) {
@@ -115,6 +113,5 @@ internal fun GenerationBaseDimensions(
 
             else -> Unit
         }
-
     }
 }
