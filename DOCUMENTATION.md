@@ -18,8 +18,7 @@ login, protected sessions and direct image generation on Android/iOS. The
 `:feature:openai-oauth` Gradle module owns the provider implementation under
 [`feature/openai-oauth/`](feature/openai-oauth/); the shared `:presentation:app`
 composition root registers its public Koin module. Its consumed contracts live in
-[network/openai-oauth.openapi.json](network/openai-oauth.openapi.json). Static
-contract gates run in Project Tests.
+[network/openai-oauth.openapi.json](network/openai-oauth.openapi.json).
 
 When changing provider behavior, keep the README, website and FAQ, privacy
 description, localized store metadata and screenshot caption sources aligned
@@ -29,6 +28,8 @@ with the implementation.
 
 Project Tests downloads the current official schemas for OpenAI, AI Horde,
 Stability AI v1, Hugging Face and every Fal AI endpoint in the app catalogue.
+Each provider runs as a separate matrix job with its own CI result and artifact;
+one provider's failure does not cancel the others.
 The checker compares consumed routes and request/response wire types with metadata
 exported from the compiled application serializers. Hugging Face inference uses
 its official task JSON Schema alongside the Hub OpenAPI document. ArliAI and
@@ -46,7 +47,7 @@ python3 -m venv /tmp/sdai-provider-contracts
 
 Each invocation fetches fresh upstream documents. A failed download or invalid
 document fails the check; there is no bundled-spec fallback. CI uploads differences,
-source URLs, fetch times and SHA-256 hashes under `upstream-provider-contracts`.
+source URLs, fetch times and SHA-256 hashes under `upstream-provider-contracts-<provider>`.
 Use `--provider OPEN_AI` (or `HORDE`, `HUGGING_FACE`, `STABILITY_AI`, `FAL_AI`) to
 check one provider. Missing routes, removed consumed fields and incompatible wire
 types fail even when the application DTO field is optional. Additional upstream
@@ -58,8 +59,8 @@ Stability's dynamic multipart request values, Fal's catalogue validation endpoin
 and Hugging Face's binary output remain outside the DTO comparison. Published
 schema discrepancies require investigation before treating them as runtime bugs.
 The checked-in OpenAI-compatible, OAuth and Easy Diffusion specifications still
-serve as application documentation, with separate completeness/parity checks;
-those local checks do not establish upstream freshness.
+serve as application documentation. Their former static test scripts and CI jobs
+have been removed; these documents are not used as upstream test inputs.
 
 ## Presentation modules and application composition
 

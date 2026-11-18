@@ -95,49 +95,28 @@ jobs:
             feature/mnn/build/test-results/iosSimulatorArm64Test/*.xml
           if-no-files-found: warn
 
-  test-openai:
-    name: OpenAI — compatible API and OAuth documentation
-    runs-on: ubuntu-24.04
-    env:
-      JOB_DESCRIPTION: >-
-        Validates the documented OpenAI-compatible image API and ChatGPT OAuth contracts.
-    steps:
-      - name: Describe OpenAI checks
-        run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
-      - name: Checkout code
-        uses: actions/checkout@v4.1.0
-        with:
-          persist-credentials: false
-      - name: Test OpenAI-compatible API contract
-        run: python3 scripts/test_openai_compatible_contract.py
-      - name: Test OpenAI OAuth API contract
-        run: python3 scripts/test_openai_oauth_contract.py
-
-  test-easy-diffusion:
-    name: Easy Diffusion — API documentation
-    runs-on: ubuntu-24.04
-    env:
-      JOB_DESCRIPTION: >-
-        Validates the documented Easy Diffusion API contract.
-    steps:
-      - name: Describe Easy Diffusion checks
-        run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
-      - name: Checkout code
-        uses: actions/checkout@v4.1.0
-        with:
-          persist-credentials: false
-      - name: Test Easy Diffusion API contract
-        run: python3 scripts/test_easy_diffusion_contract.py
-
   test-cloud-contracts:
-    name: Cloud providers — current upstream schemas
+    name: ${{ matrix.name }} — current upstream schemas
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: OpenAI
+            provider: OPEN_AI
+          - name: AI Horde
+            provider: HORDE
+          - name: Hugging Face
+            provider: HUGGING_FACE
+          - name: Stability AI
+            provider: STABILITY_AI
+          - name: Fal AI
+            provider: FAL_AI
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       JOB_DESCRIPTION: >-
-        Fetches current official OpenAI, Horde, Stability AI, Hugging Face and Fal AI schemas
-        and checks consumed routes and wire types against the compiled application serializers.
-        ArliAI and ChatGPT OAuth are skipped because no public upstream schema is available.
+        Fetches current official ${{ matrix.name }} schemas and checks consumed routes
+        and wire types against the compiled application serializers.
     steps:
       - name: Describe upstream checks
         run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
@@ -161,12 +140,12 @@ jobs:
       - name: Export compiled provider wire contracts
         run: ./gradlew :network:exportProviderContracts --no-daemon
       - name: Check current upstream provider schemas
-        run: python3 scripts/check_provider_contracts.py
+        run: python3 scripts/check_provider_contracts.py --provider "${{ matrix.provider }}"
       - name: Upload upstream contract report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: upstream-provider-contracts
+          name: upstream-provider-contracts-${{ matrix.provider }}
           path: |
             build/reports/provider-contracts/
             network/build/provider-contracts/models.json
