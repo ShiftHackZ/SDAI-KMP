@@ -84,15 +84,17 @@ class ServerSetupCatalogRefreshTest {
         every { modelDownloadManager.batches } returns batches
         coEvery { modelDownloadManager.start(any(), any()) } coAnswers {
             val request = firstArg<ModelDownloadRequest>()
-            batches.value = listOf(
-                ModelDownloadBatch(
-                    request.type,
-                    request.modelId,
-                    DownloadState.Downloading(50),
-                    isBatch = request.isBatch,
-                    workId = request.modelId.orEmpty(),
+            val shouldReplace = secondArg<Boolean>()
+            batches.value =
+                batches.value.filterNot { shouldReplace || it.type == request.type && it.modelId == request.modelId } + listOf(
+                    ModelDownloadBatch(
+                        request.type,
+                        request.modelId,
+                        DownloadState.Downloading(50),
+                        isBatch = request.isBatch,
+                        workId = request.modelId.orEmpty(),
+                    )
                 )
-            )
         }
         coEvery { modelDownloadManager.cancel(any(), any()) } coAnswers {
             val type = firstArg<LocalAiModel.Type?>()
@@ -367,6 +369,205 @@ class ServerSetupCatalogRefreshTest {
             )
             coVerify(exactly = 0) { deleteModelUseCase(catalog.id) }
             verify(exactly = 1) { storageUsageObserver.notifyChanged() }
+        }
+
+    @Test
+    fun `given download all action, no provider work is active, expected current provider batch scheduled`() =
+        runTest {
+            // Given
+            val model = createViewModel()
+            advanceUntilIdle()
+            // When
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 1) {
+                modelDownloadManager.start(
+                    ModelDownloadRequest(LocalAiModel.Type.Mnn),
+                    false
+                )
+            }
+        }
+
+    @Test
+    fun `given other provider download, download all is clicked then dialog closed, expected existing worker unchanged`() =
+        runTest {
+            // Given
+            val work = ModelDownloadBatch(
+                LocalAiModel.Type.ONNX,
+                "first",
+                DownloadState.Downloading(30),
+                isBatch = false,
+                workId = "other"
+            )
+            batches.value = listOf(work)
+            val model = createViewModel()
+            advanceUntilIdle()
+            // When
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            val dialog = model.state.value.modal
+            model.processIntent(ServerSetupIntent.DismissDialog)
+            advanceUntilIdle()
+            // Then
+            assertEquals(ServerSetupState.Modal.SwitchModelDownloads(LocalAiModel.Type.Mnn), dialog)
+            assertEquals(ServerSetupState.Modal.None, model.state.value.modal)
+            assertEquals(listOf(work), batches.value)
+            coVerify(exactly = 0) { modelDownloadManager.start(any(), any()) }
+            coVerify(exactly = 0) { modelDownloadManager.cancel(any(), any()) }
+        }
+
+    @Test
+    fun `given other provider download, switch is confirmed, expected captured destination replaces existing work`() =
+        runTest {
+            // Given
+            batches.value = listOf(ModelDownloadBatch(LocalAiModel.Type.ONNX, workId = "other"))
+            val model = createViewModel()
+            advanceUntilIdle()
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            // When
+            model.processIntent(ServerSetupIntent.ConfirmModelDownloadSwitch)
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 1) {
+                modelDownloadManager.start(
+                    ModelDownloadRequest(LocalAiModel.Type.Mnn),
+                    true
+                )
+            }
+            assertEquals(ServerSetupState.Modal.None, model.state.value.modal)
+        }
+
+    @Test
+    fun `given current provider single download, download all intent arrives, expected active transfer retained`() =
+        runTest {
+            // Given
+            batches.value = listOf(
+                ModelDownloadBatch(
+                    LocalAiModel.Type.Mnn,
+                    "first",
+                    isBatch = false,
+                    workId = "single"
+                )
+            )
+            val model = createViewModel()
+            advanceUntilIdle()
+            // When
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 0) { modelDownloadManager.start(any(), any()) }
+            coVerify(exactly = 0) { modelDownloadManager.cancel(any(), any()) }
+        }
+
+    @Test
+    fun `given concurrent single model downloads, one row is cancelled, expected other row continues without network catalog reload`() =
+        runTest {
+            // Given
+            val first = LocalAiModel(
+                "first",
+                LocalAiModel.Type.Mnn,
+                "First",
+                "1 GB",
+                listOf("https://models/first")
+            )
+            val second = first.copy(id = "second", sources = listOf("https://models/second"))
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(first, second)
+            )
+            coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
+                first,
+                second
+            )
+            val model = createViewModel()
+            advanceUntilIdle()
+            model.processIntent(
+                ServerSetupIntent.LocalModel.DownloadConfirm(
+                    first.id,
+                    first.sources.single(),
+                    first.type
+                )
+            )
+            runCurrent()
+            model.processIntent(
+                ServerSetupIntent.LocalModel.DownloadConfirm(
+                    second.id,
+                    second.sources.single(),
+                    second.type
+                )
+            )
+            runCurrent()
+            val row = model.state.value.localMnnModels.first { it.id == first.id }
+            // When
+            model.processIntent(ServerSetupIntent.LocalModel.ClickReduce(row))
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 1) { modelDownloadManager.cancel(first.type, first.id) }
+            coVerify(exactly = 1) { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) }
+            assertEquals(
+                DownloadState.Unknown,
+                model.state.value.localMnnModels.first { it.id == first.id }.downloadState
+            )
+            assertEquals(
+                DownloadState.Downloading(50),
+                model.state.value.localMnnModels.first { it.id == second.id }.downloadState
+            )
+            assertEquals(
+                LocalCatalogStatus.READY,
+                model.state.value.localCatalogStatuses[first.type]
+            )
+            assertEquals(emptySet<LocalAiModel.Type>(), model.state.value.refreshingLocalCatalogs)
+        }
+
+    @Test
+    fun `given failed catalog, retry remains pending, expected error card status retained with refreshing flag`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(LocalAiModel.CustomMnn),
+                failure
+            )
+            val model = createViewModel()
+            advanceUntilIdle()
+            val pending = CompletableDeferred<LocalModelCatalogResult>()
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } coAnswers { pending.await() }
+            // When
+            model.processIntent(ServerSetupIntent.RetryLocalCatalog(ServerSource.LOCAL_MNN))
+            runCurrent()
+            val during = model.state.value
+            pending.complete(LocalModelCatalogResult(listOf(LocalAiModel.CustomMnn), failure))
+            advanceUntilIdle()
+            // Then
+            assertEquals(
+                LocalCatalogStatus.ERROR,
+                during.localCatalogStatuses[LocalAiModel.Type.Mnn]
+            )
+            assertEquals(setOf(LocalAiModel.Type.Mnn), during.refreshingLocalCatalogs)
+            assertEquals(
+                LocalCatalogStatus.ERROR,
+                model.state.value.localCatalogStatuses[LocalAiModel.Type.Mnn]
+            )
+            assertEquals(emptySet<LocalAiModel.Type>(), model.state.value.refreshingLocalCatalogs)
+        }
+
+    @Test
+    fun `given persisted terminal failure, setup opens after work ended, expected no historical error dialog replay`() =
+        runTest {
+            // Given
+            batches.value = listOf(
+                ModelDownloadBatch(
+                    LocalAiModel.Type.Mnn,
+                    progress = DownloadState.Error(IllegalStateException("old failure")),
+                    isRunning = false,
+                    workId = "history"
+                )
+            )
+            // When
+            val model = createViewModel()
+            advanceUntilIdle()
+            // Then
+            assertEquals(ServerSetupState.Modal.None, model.state.value.modal)
+            verify(exactly = 0) { storageUsageObserver.notifyChanged() }
         }
 
     /**

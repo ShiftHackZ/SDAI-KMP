@@ -39,25 +39,17 @@ internal fun LocalModelDownloadAction(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val type = state.mode.localCatalogType ?: return
-    val active = state.modelDownloadBatches.filter { it.isRunning }
-    val isWorkRunning = active.isNotEmpty()
-    val isCurrentBatch = active.any { it.isBatch && it.type == type }
-    val hasMissingModels =
-        state.localModels.any { !it.isCustom && !it.downloaded && it.sources.isNotEmpty() }
-    val canStart = state.localCatalogStatuses[type] == LocalCatalogStatus.READY &&
-            !isWorkRunning && hasMissingModels
-    val hasSingleDownload = active.any { !it.isBatch && it.type == type }
-    val shouldShowAction = isCurrentBatch || (hasMissingModels && !hasSingleDownload)
+    val action = state.toLocalModelDownloadActionState()
+    val isCurrentBatch = action.isCancelling
     AnimatedVisibility(
-        visible = shouldShowAction,
+        visible = action.isVisible,
         modifier = modifier,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut(),
     ) {
         Column {
             SetupSecondaryAction(
-                isEnabled = !state.loadingConfiguration && (isWorkRunning || canStart),
+                isEnabled = action.isEnabled,
                 onClick = { processIntent(if (isCurrentBatch) ServerSetupIntent.CancelModelDownloads else ServerSetupIntent.DownloadAllModels) },
             ) {
                 Icon(
@@ -71,4 +63,26 @@ internal fun LocalModelDownloadAction(
             Spacer(Modifier.height(8.dp))
         }
     }
+}
+
+/**
+ * Maps current catalogs and worker ownership to the footer's visibility and click behavior.
+ * Keeps another provider's action enabled so it can open the switch confirmation.
+ * @author Dmitriy Moroz
+ */
+internal fun ServerSetupState.toLocalModelDownloadActionState(): LocalModelDownloadActionState {
+    val type = mode.localCatalogType ?: return LocalModelDownloadActionState(false, false, false)
+    val active = modelDownloadBatches.filter { it.isRunning }
+    val isWorkRunning = active.isNotEmpty()
+    val isCurrentBatch = active.any { it.isBatch && it.type == type }
+    val hasMissingModels =
+        localModels.any { !it.isCustom && !it.downloaded && it.sources.isNotEmpty() }
+    val canStart =
+        localCatalogStatuses[type] == LocalCatalogStatus.READY && !isWorkRunning && hasMissingModels
+    val hasSingleDownload = active.any { !it.isBatch && it.type == type }
+    return LocalModelDownloadActionState(
+        isVisible = isCurrentBatch || (hasMissingModels && !hasSingleDownload),
+        isEnabled = !loadingConfiguration && (isWorkRunning || canStart),
+        isCancelling = isCurrentBatch,
+    )
 }
