@@ -1,0 +1,53 @@
+package com.shifthackz.aisdv1.presentation.settings
+
+/**
+ * Code-owned identities for Settings list rows. Their names are stable saveable lazy-item keys,
+ * independent of preference values, loading state, theme and translated labels.
+ *
+ * @author Dmitriy Moroz
+ */
+internal enum class SettingsListItem {
+    SERVER_HEADER,
+    CONFIGURATION,
+    BENCHMARK,
+    CREDITS,
+    CONNECTION_TIMEOUT,
+    GENERATION_TIMEOUT,
+    MODEL,
+    NNAPI,
+    NNAPI_WARNING,
+    BACKGROUND_GENERATION,
+    BACKGROUND_WARNING,
+    DEBUG_MENU,
+    APP_HEADER,
+    MONITOR_CONNECTION,
+    AUTO_SAVE,
+    AUTO_SAVE_WARNING,
+    MEDIA_STORE,
+    TAGGED_INPUT,
+    ADVANCED_DEFAULT,
+    STORAGE_USAGE,
+    NETWORK_USAGE,
+    LOOK_HEADER,
+    LANGUAGE,
+    GALLERY_GRID,
+    DYNAMIC_COLORS,
+    SYSTEM_DARK,
+    MANUAL_DARK,
+    DARK_PALETTE,
+    ACCENT_COLOR,
+    COMMUNITY_HEADER,
+    TELEGRAM,
+    DISCORD,
+    LINKED_IN,
+    PROJECT_WEBSITE,
+    DEVELOPER_WEBSITE,
+    INFO_HEADER,
+    DONATE,
+    ONBOARDING,
+    REPORT_PROBLEM,
+    PRIVACY,
+    LICENSE,
+    SOURCE_CODE,
+    VERSION,
+}

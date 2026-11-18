@@ -16,14 +16,66 @@ IDs and troubleshooting. Its consumed API contract lives in
 The bundled [ChatGPT OAuth guide](docs/openai-oauth.html) describes device-code
 login, protected sessions and direct image generation on Android/iOS. The
 `:feature:openai-oauth` Gradle module owns the provider implementation under
-[`feature/openai-oauth/`](feature/openai-oauth/); app hosts register its public Koin
-module. Its consumed contracts live in
+[`feature/openai-oauth/`](feature/openai-oauth/); the shared `:presentation:app`
+composition root registers its public Koin module. Its consumed contracts live in
 [network/openai-oauth.openapi.json](network/openai-oauth.openapi.json). Static
 contract gates run in Project Tests.
 
 When changing provider behavior, keep the README, website and FAQ, privacy
 description, localized store metadata and screenshot caption sources aligned
 with the implementation.
+
+## Presentation modules and application composition
+
+`app/android` and `app/ios` are native hosts for platform lifecycle, permissions,
+IPC and native runtime registration. `:presentation:app` owns the shared Compose
+entrypoint, route composition and application dependency graph. Android starts
+that graph through typed bootstrap bindings and receives typed host services;
+the native Android app has no direct Koin dependency.
+
+`:presentation:components` owns reusable UI, themes, image adapters and shared
+UI services. Screen modules depend only on `:domain`, `:core:*`,
+`:presentation:components` and external presentation libraries. Implementations
+from `:feature:*`, data, network and storage are assembled by
+`:presentation:app`. Screen ViewModels receive domain interfaces through their
+local DI registrations. Shared services retain a single application binding.
+
+| Presentation module                          | Responsibility                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------- |
+| `app`                                        | Shared entrypoint, graph assembly and concrete route composition  |
+| `components`                                 | Reusable UI and shared presentation services                      |
+| `home`                                       | Drawer and home navigation, with content supplied by the app root |
+| `onboarding`, `splash`                       | First-run flow and startup UI                                     |
+| `settings`, `configuration`                  | Preferences, provider setup and model loading                     |
+| `generation`                                 | Text-to-image, image-to-image and inpainting forms                |
+| `gallery`, `history`                         | Gallery list/details and generation history                       |
+| `statistics`, `benchmark`                    | Storage/network usage and local engine benchmarks                 |
+| `donate`, `report`, `debug`, `logger`, `web` | Supporting screens                                                |
+
+Source directories match `com.shifthackz.aisdv1.presentation.<module>`. A
+single-screen module keeps its screen, ViewModel, state and intents in that
+package, with `di` and `navigation` subpackages. Multi-screen modules use context
+subpackages such as `generation.txt2img`, `generation.img2img`,
+`statistics.storageusage` and `statistics.networkusage`.
+
+Home and onboarding accept content slots; the app root supplies concrete
+screens and previews. The root retains the generation ViewModels and supplies
+the same image-to-image instance to inpainting. `:core:navigation` owns route
+contracts independently of screen implementations.
+
+The iOS host consumes the `AiSdPresentation` framework built by
+`:presentation:app`; its Xcode integration uses
+`:presentation:app:embedAndSignAppleFrameworkForXcode`. The main CI job runs Kotlin lint and
+presentation architecture verification in separate steps. Run their checks
+individually:
+
+```sh
+./gradlew kotlinLint
+```
+
+```sh
+./gradlew checkPresentationArchitecture
+```
 
 ## Android native inference ownership
 

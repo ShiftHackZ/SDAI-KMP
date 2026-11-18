@@ -5,36 +5,19 @@ import android.app.Application
 import android.app.ActivityManager
 import android.os.Build
 import android.os.Process
-import com.shifthackz.aisdv1.app.di.inferenceChildModule
-import com.shifthackz.aisdv1.app.di.inferenceHostModule
 import com.shifthackz.aisdv1.app.inference.InferenceServiceDependencies
 import android.database.CursorWindow
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import androidx.work.Configuration
 import androidx.work.WorkManager
-import com.shifthackz.aisdv1.app.di.featureModule
-import com.shifthackz.aisdv1.app.di.preferenceModule
-import com.shifthackz.aisdv1.app.di.providersModule
 import com.shifthackz.aisdv1.core.common.log.FileLoggingTree
 import com.shifthackz.aisdv1.core.common.log.errorLog
-import com.shifthackz.aisdv1.core.imageprocessing.di.imageProcessingModule
-import com.shifthackz.aisdv1.core.notification.di.notificationModule
-import com.shifthackz.aisdv1.core.validation.di.validatorsModule
-import com.shifthackz.aisdv1.data.di.coreDataModule
-import com.shifthackz.aisdv1.data.di.dataModule
-import com.shifthackz.aisdv1.demo.di.demoModule
-import com.shifthackz.aisdv1.domain.di.coreDomainModule
-import com.shifthackz.aisdv1.domain.di.domainModule
-import com.shifthackz.aisdv1.network.di.coreNetworkModule
-import com.shifthackz.aisdv1.network.di.networkModule
-import com.shifthackz.aisdv1.core.mvi.diagnostics.uiDiagnosticsModule
-import com.shifthackz.aisdv1.presentation.di.presentationModule
-import com.shifthackz.aisdv1.work.di.SdaiWorkerFactory
-import com.shifthackz.aisdv1.work.di.backgroundWorkModule
-import org.koin.android.ext.android.inject
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
+import com.shifthackz.aisdv1.presentation.app.bootstrap.AndroidAppServices
+import com.shifthackz.aisdv1.presentation.app.bootstrap.startAndroidApplication
+import com.shifthackz.aisdv1.presentation.app.bootstrap.createNativeInferenceEngineFactory
+import com.shifthackz.aisdv1.app.inference.FileGenerationFileStore
+import com.shifthackz.aisdv1.app.inference.CompletePngImageValidator
 import timber.log.Timber
 
 /**
@@ -45,10 +28,15 @@ import timber.log.Timber
 class AiStableDiffusionClientApp : Application() {
 
     /**
-     * Minimal child composition; the host never accesses runtime collaborators.
+     * Host-only access to lazily resolved worker and preference services; not initialized in :inference.
      *
      * @author Dmitriy Moroz
      */
+    internal lateinit var appServices: AndroidAppServices
+        private set
+
+    private val nativeHostBindings by lazy { NativeHostBindings(this) }
+
     internal lateinit var inferenceDependencies: InferenceServiceDependencies
         private set
 
@@ -67,16 +55,15 @@ class AiStableDiffusionClientApp : Application() {
             if (BuildConfig.BUILD_TYPE == "dev") {
                 Timber.plant(Timber.DebugTree())
             }
-            val graph = startKoin {
-                androidContext(this@AiStableDiffusionClientApp)
-                modules(inferenceChildModule)
-            }
-            inferenceDependencies = graph.koin.get()
+            inferenceDependencies = InferenceServiceDependencies(
+                engines = createNativeInferenceEngineFactory(this, BuildConfig.BUILD_TYPE == "dev"),
+                files = FileGenerationFileStore(this, CompletePngImageValidator()),
+            )
             return
         }
         StrictMode.setVmPolicy(VmPolicy.Builder().build())
         initializeComposeTracing(this)
-        initializeKoin()
+        initializeApplicationServices()
         initializeLogging()
         initializeUncaughtExceptionHandler()
         initializeCursorSize()
@@ -99,26 +86,11 @@ class AiStableDiffusionClientApp : Application() {
         }
     }
 
-    private fun initializeKoin() = startKoin {
-        androidContext(this@AiStableDiffusionClientApp)
-        modules(
-            notificationModule,
-            coreNetworkModule,
-            networkModule,
-            coreDomainModule,
-            coreDataModule,
-            *domainModule,
-            *dataModule,
-            backgroundWorkModule,
-            *featureModule,
-            demoModule,
-            validatorsModule,
-            imageProcessingModule,
-            *presentationModule,
-            uiDiagnosticsModule(isEnabled = BuildConfig.UI_DIAGNOSTICS_ENABLED),
-            preferenceModule,
-            providersModule,
-            inferenceHostModule,
+    private fun initializeApplicationServices() {
+        appServices = startAndroidApplication(
+            this,
+            nativeHostBindings,
+            BuildConfig.UI_DIAGNOSTICS_ENABLED
         )
     }
 
@@ -126,7 +98,12 @@ class AiStableDiffusionClientApp : Application() {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
-        Timber.plant(FileLoggingTree())
+        Timber.plant(
+            FileLoggingTree(
+                nativeHostBindings.fileProviderDescriptor,
+                nativeHostBindings.buildInfoProvider
+            )
+        )
     }
 
     private fun initializeUncaughtExceptionHandler() {
@@ -139,7 +116,7 @@ class AiStableDiffusionClientApp : Application() {
 
     private fun initializeWorkManager() {
         try {
-            val workerFactory: SdaiWorkerFactory by inject()
+            val workerFactory = appServices.workerFactory
             val configuration = Configuration.Builder()
                 .setWorkerFactory(workerFactory)
                 .build()

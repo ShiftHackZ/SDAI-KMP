@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.feature.benchmark
 
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkAccelerator
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
@@ -10,6 +14,8 @@ import java.io.File
  *
  * All platform calls are best-effort and guarded because vendor builds can hide
  * or partially implement the APIs used for GPU and accelerator discovery.
+ *
+ * @param context Application context used to query activity-manager hardware and memory capabilities.
  *
  * @author Dmitriy Moroz
  */
@@ -51,10 +57,13 @@ internal class AndroidBenchmarkDeviceProbe(
                     when {
                         normalized.startsWith("Hardware", ignoreCase = true) ->
                             normalized.substringAfter(':').trim()
+
                         normalized.startsWith("model name", ignoreCase = true) ->
                             normalized.substringAfter(':').trim()
+
                         normalized.startsWith("Processor", ignoreCase = true) ->
                             normalized.substringAfter(':').trim()
+
                         else -> null
                     }?.takeIf(String::isNotBlank)
                 }

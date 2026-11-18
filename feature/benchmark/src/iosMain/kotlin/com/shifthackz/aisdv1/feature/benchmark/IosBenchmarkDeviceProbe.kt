@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.feature.benchmark
 
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkAccelerator
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import platform.Foundation.NSProcessInfo
 import platform.Metal.MTLCreateSystemDefaultDevice
 import platform.UIKit.UIDevice
@@ -36,7 +40,7 @@ internal class IosBenchmarkDeviceProbe : BenchmarkDeviceProbe {
                 ?: hardwareIdentifier?.appleMarketingName()
                 ?: UIDevice.currentDevice.model.orUnknown(),
             osVersion = "${UIDevice.currentDevice.systemName.orUnknown()} " +
-                UIDevice.currentDevice.systemVersion.orUnknown(),
+                    UIDevice.currentDevice.systemVersion.orUnknown(),
             cpuName = "Apple Silicon",
             cpuCores = processInfo.processorCount.toInt().coerceAtLeast(1),
             gpuName = metalDevice?.name ?: "Apple GPU",
@@ -77,7 +81,8 @@ internal class IosBenchmarkDeviceProbe : BenchmarkDeviceProbe {
     private fun fallback(): BenchmarkDeviceInfo = BenchmarkDeviceInfo(
         platform = BenchmarkPlatform.IOS,
         manufacturer = "Apple",
-        model = hardwareIdentifier()?.appleMarketingName() ?: UIDevice.currentDevice.model.orUnknown(),
+        model = hardwareIdentifier()?.appleMarketingName()
+            ?: UIDevice.currentDevice.model.orUnknown(),
         osVersion = UIDevice.currentDevice.systemVersion.orUnknown(),
         cpuName = "Apple Silicon",
         cpuCores = 1,

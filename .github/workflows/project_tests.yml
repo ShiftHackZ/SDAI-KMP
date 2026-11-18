@@ -28,6 +28,7 @@ jobs:
         Validates MNN catalog and packaging contracts on Linux, tests the native
         graph and allocator on both platforms, and builds pinned Apple slices
         with Swift ownership, archive and Kotlin/Native storage and host tests on macOS.
+        The Apple job also links the shared app framework and builds the iOS host for device and simulator.
     steps:
       - name: Describe MNN checks
         run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
@@ -67,6 +68,14 @@ jobs:
       - name: Test MNN iOS storage, model leases and host admission
         if: runner.os == 'macOS'
         run: ./gradlew :data:iosSimulatorArm64Test :feature:mnn:iosSimulatorArm64Test --no-daemon
+      - name: Compile and link shared presentation for Apple targets
+        if: runner.os == 'macOS'
+        run: ./gradlew :presentation:app:linkDebugFrameworkIosArm64 :presentation:app:linkDebugFrameworkIosSimulatorArm64 --no-daemon
+      - name: Build iOS native integration
+        if: runner.os == 'macOS'
+        run: |
+          xcodebuild -project app/ios/iosApp.xcodeproj -scheme Debug -configuration Debug -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project app/ios/iosApp.xcodeproj -scheme Debug -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' ARCHS=arm64 CODE_SIGNING_ALLOWED=NO build
       - name: Upload Kotlin/Native test reports
         if: always() && runner.os == 'macOS'
         uses: actions/upload-artifact@v4
@@ -114,11 +123,11 @@ jobs:
         run: python3 scripts/test_easy_diffusion_contract.py
 
   test-feature:
-    name: Main — all Kotlin unit tests, lint and Codecov
+    name: Main — all Kotlin unit tests, lint, architecture and Codecov
     runs-on: ubuntu-24.04
     env:
       JOB_DESCRIPTION: >-
-        Lints Kotlin sources, runs the complete Android/JVM unit suite,
+        Lints Kotlin sources, checks presentation architecture and runs the complete Android/JVM unit suite,
         generates aggregate JaCoCo coverage and uploads it to Codecov.
     steps:
       - name: Describe main checks
@@ -147,6 +156,9 @@ jobs:
           name: kotlin-lint-reports
           path: build/reports/kotlinLint/
           if-no-files-found: ignore
+
+      - name: Check presentation architecture
+        run: ./gradlew checkPresentationArchitecture --no-daemon
 
       - name: Run unit tests and generate coverage
         run: ./gradlew clean ciCoverage --no-daemon

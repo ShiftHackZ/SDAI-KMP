@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.app.inference
 
+import com.shifthackz.aisdv1.presentation.app.bootstrap.createNativeInferenceEngineFactory
+
 import android.app.Application
 import com.shifthackz.aisdv1.app.diagnostics.GenerationAttemptJournal
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
@@ -108,7 +110,10 @@ class MnnNativeGatewayTest {
     fun `given native engine factory, MNN graph is requested, expected independent closable engine without native loading`() {
         // Given
         val request = bonsaiRequest().copy(engine = NativeGenerationEngine.MNN)
-        val factory = NativeInferenceEngineFactoryImpl(RuntimeEnvironment.getApplication())
+        val factory = createNativeInferenceEngineFactory(
+            RuntimeEnvironment.getApplication(),
+            isDiagnosticsEnabled = false
+        )
 
         // When
         val first = factory.create(request)

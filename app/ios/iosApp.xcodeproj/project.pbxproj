@@ -193,7 +193,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/../..\"\nSDAI_GRADLE_JVMARGS=\"${SDAI_GRADLE_JVMARGS:--Xmx8g -XX:MaxMetaspaceSize=1536m -Dfile.encoding=UTF-8}\"\nSDAI_GRADLE_MAX_WORKERS=\"${SDAI_GRADLE_MAX_WORKERS:-2}\"\n./gradlew :presentation:embedAndSignAppleFrameworkForXcode \\\n  --no-daemon \\\n  --max-workers=\"$SDAI_GRADLE_MAX_WORKERS\" \\\n  -Dorg.gradle.jvmargs=\"$SDAI_GRADLE_JVMARGS\" \\\n  -Dorg.gradle.workers.max=\"$SDAI_GRADLE_MAX_WORKERS\"\n";
+			shellScript = "cd \"$SRCROOT/../..\"\nSDAI_GRADLE_JVMARGS=\"${SDAI_GRADLE_JVMARGS:--Xmx8g -XX:MaxMetaspaceSize=1536m -Dfile.encoding=UTF-8}\"\nSDAI_GRADLE_MAX_WORKERS=\"${SDAI_GRADLE_MAX_WORKERS:-2}\"\n./gradlew :presentation:app:embedAndSignAppleFrameworkForXcode \\\n  --no-daemon \\\n  --max-workers=\"$SDAI_GRADLE_MAX_WORKERS\" \\\n  -Dorg.gradle.jvmargs=\"$SDAI_GRADLE_JVMARGS\" \\\n  -Dorg.gradle.workers.max=\"$SDAI_GRADLE_MAX_WORKERS\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -339,7 +339,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../../presentation/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"$(SRCROOT)/../../presentation/app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -375,7 +375,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../../presentation/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"$(SRCROOT)/../../presentation/app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;
