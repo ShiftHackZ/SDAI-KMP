@@ -25,6 +25,42 @@ When changing provider behavior, keep the README, website and FAQ, privacy
 description, localized store metadata and screenshot caption sources aligned
 with the implementation.
 
+### Current upstream schema checks
+
+Project Tests downloads the current official schemas for OpenAI, AI Horde,
+Stability AI v1, Hugging Face and every Fal AI endpoint in the app catalogue.
+The checker compares consumed routes and request/response wire types with metadata
+exported from the compiled application serializers. Hugging Face inference uses
+its official task JSON Schema alongside the Hub OpenAPI document. ArliAI and
+ChatGPT OAuth are excluded until public upstream schemas are available.
+
+Run the same checks locally with JDK 17, the Android SDK and Python 3.10 or newer:
+
+```sh
+python3 -m venv /tmp/sdai-provider-contracts
+/tmp/sdai-provider-contracts/bin/pip install -r scripts/provider_contracts/requirements.txt
+./gradlew :network:exportProviderContracts --no-daemon
+/tmp/sdai-provider-contracts/bin/python scripts/test_provider_contract_checker.py
+/tmp/sdai-provider-contracts/bin/python scripts/check_provider_contracts.py
+```
+
+Each invocation fetches fresh upstream documents. A failed download or invalid
+document fails the check; there is no bundled-spec fallback. CI uploads differences,
+source URLs, fetch times and SHA-256 hashes under `upstream-provider-contracts`.
+Use `--provider OPEN_AI` (or `HORDE`, `HUGGING_FACE`, `STABILITY_AI`, `FAL_AI`) to
+check one provider. Missing routes, removed consumed fields and incompatible wire
+types fail even when the application DTO field is optional. Additional upstream
+response fields are allowed because the application ignores unknown keys.
+
+These checks compare published structural contracts. They do not call generation
+APIs or prove service behavior, authentication, value ranges or model availability.
+Stability's dynamic multipart request values, Fal's catalogue validation endpoint
+and Hugging Face's binary output remain outside the DTO comparison. Published
+schema discrepancies require investigation before treating them as runtime bugs.
+The checked-in OpenAI-compatible, OAuth and Easy Diffusion specifications still
+serve as application documentation, with separate completeness/parity checks;
+those local checks do not establish upstream freshness.
+
 ## Presentation modules and application composition
 
 `app/android` and `app/ios` are native hosts for platform lifecycle, permissions,
