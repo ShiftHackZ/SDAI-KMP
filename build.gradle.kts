@@ -16,6 +16,7 @@ plugins {
 
 apply(from = "gradle/kotlin-lint.gradle.kts")
 apply(from = "gradle/coverage.gradle.kts")
+apply(from = "gradle/presentation-architecture.gradle.kts")
 
 // Grouping projects such as :core and :feature have no build script or sources.
 val documentedProjects = subprojects.filter { it.buildFile.isFile }

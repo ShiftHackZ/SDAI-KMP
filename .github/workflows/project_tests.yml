@@ -28,6 +28,7 @@ jobs:
         Validates MNN catalog and packaging contracts on Linux, tests the native
         graph and allocator on both platforms, and builds pinned Apple slices
         with Swift ownership, archive and Kotlin/Native storage and host tests on macOS.
+        The Apple job also links the shared app framework and builds the iOS host for device and simulator.
     steps:
       - name: Describe MNN checks
         run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
@@ -35,6 +36,13 @@ jobs:
         uses: actions/checkout@v4.1.0
         with:
           persist-credentials: false
+      # Compose's UIKit bridge links symbols from the iOS 26 SDK.
+      - name: Select Xcode 26.2 for Apple builds
+        if: runner.os == 'macOS'
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
       - name: Install Apple build tools
         if: runner.os == 'macOS'
         run: brew install cmake ninja
@@ -67,6 +75,14 @@ jobs:
       - name: Test MNN iOS storage, model leases and host admission
         if: runner.os == 'macOS'
         run: ./gradlew :data:iosSimulatorArm64Test :feature:mnn:iosSimulatorArm64Test --no-daemon
+      - name: Compile and link shared presentation for Apple targets
+        if: runner.os == 'macOS'
+        run: ./gradlew :presentation:app:linkDebugFrameworkIosArm64 :presentation:app:linkDebugFrameworkIosSimulatorArm64 --no-daemon
+      - name: Build iOS native integration
+        if: runner.os == 'macOS'
+        run: |
+          xcodebuild -project app/ios/iosApp.xcodeproj -scheme Debug -configuration Debug -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project app/ios/iosApp.xcodeproj -scheme Debug -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' ARCHS=arm64 CODE_SIGNING_ALLOWED=NO build
       - name: Upload Kotlin/Native test reports
         if: always() && runner.os == 'macOS'
         uses: actions/upload-artifact@v4
@@ -79,46 +95,68 @@ jobs:
             feature/mnn/build/test-results/iosSimulatorArm64Test/*.xml
           if-no-files-found: warn
 
-  test-openai:
-    name: OpenAI — compatible API and OAuth contracts
+  test-cloud-contracts:
+    name: ${{ matrix.name }} — current upstream schemas
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: OpenAI
+            provider: OPEN_AI
+          - name: AI Horde
+            provider: HORDE
+          - name: Hugging Face
+            provider: HUGGING_FACE
+          - name: Stability AI
+            provider: STABILITY_AI
+          - name: Fal AI
+            provider: FAL_AI
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     env:
       JOB_DESCRIPTION: >-
-        Validates the documented OpenAI-compatible image API and ChatGPT OAuth contracts.
+        Fetches current official ${{ matrix.name }} schemas and checks consumed routes
+        and wire types against the compiled application serializers.
     steps:
-      - name: Describe OpenAI checks
+      - name: Describe upstream checks
         run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
       - name: Checkout code
         uses: actions/checkout@v4.1.0
         with:
           persist-credentials: false
-      - name: Test OpenAI-compatible API contract
-        run: python3 scripts/test_openai_compatible_contract.py
-      - name: Test OpenAI OAuth API contract
-        run: python3 scripts/test_openai_oauth_contract.py
-
-  test-easy-diffusion:
-    name: Easy Diffusion — API contract
-    runs-on: ubuntu-24.04
-    env:
-      JOB_DESCRIPTION: >-
-        Validates the documented Easy Diffusion API contract.
-    steps:
-      - name: Describe Easy Diffusion checks
-        run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
-      - name: Checkout code
-        uses: actions/checkout@v4.1.0
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3.13.0
         with:
-          persist-credentials: false
-      - name: Test Easy Diffusion API contract
-        run: python3 scripts/test_easy_diffusion_contract.py
+          distribution: "adopt"
+          java-version: "17"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install schema parser
+        run: python3 -m pip install -r scripts/provider_contracts/requirements.txt
+      - name: Check schema comparison logic
+        run: python3 scripts/test_provider_contract_checker.py
+      - name: Export compiled provider wire contracts
+        run: ./gradlew :network:exportProviderContracts --no-daemon
+      - name: Check current upstream provider schemas
+        run: python3 scripts/check_provider_contracts.py --provider "${{ matrix.provider }}"
+      - name: Upload upstream contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-provider-contracts-${{ matrix.provider }}
+          path: |
+            build/reports/provider-contracts/
+            network/build/provider-contracts/models.json
+          if-no-files-found: warn
 
   test-feature:
-    name: Main — all Kotlin unit tests, lint and Codecov
+    name: Main — all Kotlin unit tests, lint, architecture and Codecov
     runs-on: ubuntu-24.04
     env:
       JOB_DESCRIPTION: >-
-        Lints Kotlin sources, runs the complete Android/JVM unit suite,
+        Lints Kotlin sources, checks presentation architecture and runs the complete Android/JVM unit suite,
         generates aggregate JaCoCo coverage and uploads it to Codecov.
     steps:
       - name: Describe main checks
@@ -147,6 +185,9 @@ jobs:
           name: kotlin-lint-reports
           path: build/reports/kotlinLint/
           if-no-files-found: ignore
+
+      - name: Check presentation architecture
+        run: ./gradlew checkPresentationArchitecture --no-daemon
 
       - name: Run unit tests and generate coverage
         run: ./gradlew clean ciCoverage --no-daemon

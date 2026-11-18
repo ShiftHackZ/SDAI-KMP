@@ -4,21 +4,27 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Carries `StabilityGenerationResponse` data through the SDAI network layer.
+ * JSON generation response containing the provider's completed or filtered image artifacts.
+ *
+ * @param artifacts Returned images and completion metadata, absent when the response has no artifacts.
  *
  * @author Dmitriy Moroz
  */
 @Serializable
 data class StabilityGenerationResponse(
-    /**
-     * Exposes the `artifacts` value used by the SDAI network layer.
-     *
-     * @author Dmitriy Moroz
-     */
     @SerialName("artifacts")
     val artifacts: List<Artifact>? = null,
 ) {
 
+    /**
+     * Generated image bytes and provider completion metadata.
+     *
+     * @param base64 Image content encoded as base64 when generation produced an image.
+     * @param finishReason Provider status such as success, error or content filtering.
+     * @param seed Numeric seed metadata returned by the provider's number-typed response contract.
+     *
+     * @author Dmitriy Moroz
+     */
     @Serializable
     data class Artifact(
         @SerialName("base64")
@@ -26,6 +32,6 @@ data class StabilityGenerationResponse(
         @SerialName("finishReason")
         val finishReason: String? = null,
         @SerialName("seed")
-        val seed: Long? = null,
+        val seed: Double? = null,
     )
 }

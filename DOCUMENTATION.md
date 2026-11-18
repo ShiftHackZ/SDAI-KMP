@@ -16,14 +16,118 @@ IDs and troubleshooting. Its consumed API contract lives in
 The bundled [ChatGPT OAuth guide](docs/openai-oauth.html) describes device-code
 login, protected sessions and direct image generation on Android/iOS. The
 `:feature:openai-oauth` Gradle module owns the provider implementation under
-[`feature/openai-oauth/`](feature/openai-oauth/); app hosts register its public Koin
-module. Its consumed contracts live in
-[network/openai-oauth.openapi.json](network/openai-oauth.openapi.json). Static
-contract gates run in Project Tests.
+[`feature/openai-oauth/`](feature/openai-oauth/); the shared `:presentation:app`
+composition root registers its public Koin module. Its consumed contracts live in
+[network/openai-oauth.openapi.json](network/openai-oauth.openapi.json).
 
 When changing provider behavior, keep the README, website and FAQ, privacy
 description, localized store metadata and screenshot caption sources aligned
 with the implementation.
+
+### Current upstream schema checks
+
+Project Tests downloads the current official schemas for OpenAI, AI Horde,
+Stability AI v1, Hugging Face and every Fal AI endpoint in the app catalogue.
+Each provider runs as a separate matrix job with its own CI result and artifact;
+one provider's failure does not cancel the others.
+The checker compares consumed routes and request/response wire types with metadata
+exported from the compiled application serializers. Hugging Face inference uses
+its official task JSON Schema alongside the Hub OpenAPI document. ArliAI and
+ChatGPT OAuth are excluded until public upstream schemas are available.
+
+Run the same checks locally with JDK 17, the Android SDK and Python 3.10 or newer:
+
+```sh
+python3 -m venv /tmp/sdai-provider-contracts
+/tmp/sdai-provider-contracts/bin/pip install -r scripts/provider_contracts/requirements.txt
+./gradlew :network:exportProviderContracts --no-daemon
+/tmp/sdai-provider-contracts/bin/python scripts/test_provider_contract_checker.py
+/tmp/sdai-provider-contracts/bin/python scripts/check_provider_contracts.py
+```
+
+Each invocation fetches fresh upstream documents. A failed download or invalid
+document fails the check; there is no bundled-spec fallback. CI uploads differences,
+source URLs, fetch times and SHA-256 hashes under `upstream-provider-contracts-<provider>`.
+Use `--provider OPEN_AI` (or `HORDE`, `HUGGING_FACE`, `STABILITY_AI`, `FAL_AI`) to
+check one provider. Missing routes, removed consumed response fields and incompatible wire
+types fail even when the application DTO field is optional. Additional upstream
+response fields are allowed because the application ignores unknown keys.
+
+Optional nullable request fields absent from an open upstream schema produce a
+coverage warning: null values are omitted and the schema permits extensions.
+A closed upstream schema or a published incompatible field type still fails.
+Hugging Face's model-list route is an explicit coverage gap while absent from its
+Hub OpenAPI document; the checker starts validating it automatically if published.
+Both Hugging Face text-to-image and image-to-image task schemas are fetched.
+Fal queue responses use its full queue API specification alongside model-specific
+input/output schemas.
+
+Stability's known [missing artifacts envelope](https://github.com/Stability-AI/rest-api-support/issues/38)
+produces a linked warning when its upstream response is an array. Only that
+envelope difference is skipped; artifact item types and other operations remain
+blocking. If upstream publishes the correct object envelope, the exception no
+longer applies. Coverage warnings appear in logs and the report even when CI passes.
+
+These checks compare published structural contracts. They do not call generation
+APIs or prove service behavior, authentication, value ranges or model availability.
+Stability's dynamic multipart request values, Fal's catalogue validation endpoint
+and Hugging Face's binary output remain outside the DTO comparison. Published
+schema discrepancies require investigation before treating them as runtime bugs.
+The checked-in OpenAI-compatible, OAuth and Easy Diffusion specifications still
+serve as application documentation. Their former static test scripts and CI jobs
+have been removed; these documents are not used as upstream test inputs.
+
+## Presentation modules and application composition
+
+`app/android` and `app/ios` are native hosts for platform lifecycle, permissions,
+IPC and native runtime registration. `:presentation:app` owns the shared Compose
+entrypoint, route composition and application dependency graph. Android starts
+that graph through typed bootstrap bindings and receives typed host services;
+the native Android app has no direct Koin dependency.
+
+`:presentation:components` owns reusable UI, themes, image adapters and shared
+UI services. Screen modules depend only on `:domain`, `:core:*`,
+`:presentation:components` and external presentation libraries. Implementations
+from `:feature:*`, data, network and storage are assembled by
+`:presentation:app`. Screen ViewModels receive domain interfaces through their
+local DI registrations. Shared services retain a single application binding.
+
+| Presentation module                          | Responsibility                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------- |
+| `app`                                        | Shared entrypoint, graph assembly and concrete route composition  |
+| `components`                                 | Reusable UI and shared presentation services                      |
+| `home`                                       | Drawer and home navigation, with content supplied by the app root |
+| `onboarding`, `splash`                       | First-run flow and startup UI                                     |
+| `settings`, `configuration`                  | Preferences, provider setup and model loading                     |
+| `generation`                                 | Text-to-image, image-to-image and inpainting forms                |
+| `gallery`, `history`                         | Gallery list/details and generation history                       |
+| `statistics`, `benchmark`                    | Storage/network usage and local engine benchmarks                 |
+| `donate`, `report`, `debug`, `logger`, `web` | Supporting screens                                                |
+
+Source directories match `com.shifthackz.aisdv1.presentation.<module>`. A
+single-screen module keeps its screen, ViewModel, state and intents in that
+package, with `di` and `navigation` subpackages. Multi-screen modules use context
+subpackages such as `generation.txt2img`, `generation.img2img`,
+`statistics.storageusage` and `statistics.networkusage`.
+
+Home and onboarding accept content slots; the app root supplies concrete
+screens and previews. The root retains the generation ViewModels and supplies
+the same image-to-image instance to inpainting. `:core:navigation` owns route
+contracts independently of screen implementations.
+
+The iOS host consumes the `AiSdPresentation` framework built by
+`:presentation:app`; its Xcode integration uses
+`:presentation:app:embedAndSignAppleFrameworkForXcode`. The main CI job runs Kotlin lint and
+presentation architecture verification in separate steps. Run their checks
+individually:
+
+```sh
+./gradlew kotlinLint
+```
+
+```sh
+./gradlew checkPresentationArchitecture
+```
 
 ## Android native inference ownership
 

@@ -1,11 +1,16 @@
 package com.shifthackz.aisdv1.feature.benchmark
 
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkResult
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkRepository
 import com.shifthackz.aisdv1.storage.db.persistent.dao.BenchmarkResultDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * Room-backed benchmark repository.
+ * Observes and replaces the latest benchmark result through Room, returning its persisted identity.
+ * Database failures propagate to the caller.
+ *
+ * @param dao Reads the latest row and atomically replaces the stored benchmark result.
  *
  * @author Dmitriy Moroz
  */

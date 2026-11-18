@@ -7,7 +7,7 @@ val mockStabilityGenerationResponse = StabilityGenerationResponse(
         StabilityGenerationResponse.Artifact(
             base64 = "base64",
             finishReason = "reasonable reason",
-            seed = 5598L,
+            seed = 5598.0,
         ),
     ),
 )

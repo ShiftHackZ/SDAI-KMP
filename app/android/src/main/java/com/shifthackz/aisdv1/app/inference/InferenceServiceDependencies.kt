@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.app.inference
 
+import com.shifthackz.aisdv1.presentation.app.bootstrap.NativeInferenceEngineFactory
+
 /**
  * Framework-service composition supplied by the application root without host services.
  *

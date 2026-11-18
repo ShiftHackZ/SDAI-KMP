@@ -11,7 +11,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const source = path.join(root, "artwork/icon/sdai.png");
 const symbol = fs.readFileSync(
   path.join(root, "artwork/icon/sdai-symbol.svg"),
-  "utf8"
+  "utf8",
 );
 const viewBox = symbol.match(/viewBox="([^"]+)"/)[1];
 const paths = [...symbol.matchAll(/<path\b[^>]*>/gs)].map((match) => match[0]);
@@ -60,7 +60,7 @@ function launcher(
   label,
   isAdaptive = false,
   isThemed = false,
-  color = "#007BFE"
+  color = "#007BFE",
 ) {
   let body;
   if (isThemed) {
@@ -73,7 +73,7 @@ function launcher(
   } else {
     body = `<image href="${sourceImage}" width="1024" height="1024"/>${ribbon(
       label,
-      color
+      color,
     )}`;
   }
   // The 1024px art fits inside 72dp of Android's 108dp adaptive layer.
@@ -107,15 +107,15 @@ for (const locale of ["en-US", "ru", "uk"]) {
     source,
     512,
     `fastlane/metadata/android/${locale}/images/icon.png`,
-    true
+    true,
   );
 }
 const catalogDir = "app/ios/iosApp/Assets.xcassets/AppIcon.appiconset";
 const catalog = JSON.parse(
-  fs.readFileSync(path.join(root, catalogDir, "Contents.json"), "utf8")
+  fs.readFileSync(path.join(root, catalogDir, "Contents.json"), "utf8"),
 );
 for (const item of new Map(
-  catalog.images.map((item) => [item.filename, item])
+  catalog.images.map((item) => [item.filename, item]),
 ).values()) {
   const size = Number.parseFloat(item.size) * Number.parseFloat(item.scale);
   await png(source, size, `${catalogDir}/${item.filename}`, true);
@@ -125,19 +125,19 @@ for (const item of new Map(
 await png(
   Buffer.from(svg(mark())),
   512,
-  "presentation/src/commonMain/composeResources/drawable/sdai_logo.png"
+  "presentation/components/src/commonMain/composeResources/drawable/sdai_logo.png",
 );
 await png(
   Buffer.from(svg(mark())),
   512,
-  "presentation/src/androidMain/res/drawable/ic_sdai_logo.png"
+  "presentation/components/src/androidMain/res/drawable/ic_sdai_logo.png",
 );
 fs.rmSync(
   path.join(
     root,
-    "presentation/src/androidMain/res/drawable/ic_sdai_logo.webp"
+    "presentation/components/src/androidMain/res/drawable/ic_sdai_logo.webp",
   ),
-  { force: true }
+  { force: true },
 );
 write(".idea/icon.svg", symbol);
 
@@ -150,7 +150,7 @@ for (const [flavor, label] of [
   await androidLauncher(
     flavor,
     label,
-    flavor === "dev" ? "#7540AD" : "#007BFE"
+    flavor === "dev" ? "#7540AD" : "#007BFE",
   );
 }
 
@@ -166,7 +166,7 @@ async function androidLauncher(flavor, label, color) {
           input: Buffer.from(
             `<svg width="${size}" height="${size}"><circle cx="${
               size / 2
-            }" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`
+            }" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`,
           ),
           blend: "dest-in",
         },
@@ -177,25 +177,25 @@ async function androidLauncher(flavor, label, color) {
     await png(
       launcher(label, true, false, color),
       size * 2.25,
-      `${res}/drawable-${density}/ic_launcher_foreground.png`
+      `${res}/drawable-${density}/ic_launcher_foreground.png`,
     );
     await png(
       launcher(label, true, true),
       size * 2.25,
-      `${res}/drawable-${density}/ic_launcher_monochrome.png`
+      `${res}/drawable-${density}/ic_launcher_monochrome.png`,
     );
     if (flavor === "main") {
       // Dedicated resources prevent FOSS/FULL launcher overrides reaching the splash.
       await png(
         launcher("", true),
         size * 2.25,
-        `${res}/drawable-${density}/ic_splash_foreground.png`
+        `${res}/drawable-${density}/ic_splash_foreground.png`,
       );
       await png(
         launcher(""),
         size,
         `${res}/mipmap-${density}/ic_splash.png`,
-        true
+        true,
       );
     }
   }
@@ -205,12 +205,12 @@ const mainRes = "app/android/src/main/res";
 for (const name of ["ic_launcher", "ic_launcher_round"]) {
   write(
     `${mainRes}/mipmap-anydpi-v26/${name}.xml`,
-    adaptiveXml("ic_launcher_foreground", "ic_launcher_monochrome")
+    adaptiveXml("ic_launcher_foreground", "ic_launcher_monochrome"),
   );
 }
 write(
   `${mainRes}/mipmap-anydpi-v26/ic_splash.xml`,
-  adaptiveXml("ic_splash_foreground", "ic_splash_foreground")
+  adaptiveXml("ic_splash_foreground", "ic_splash_foreground"),
 );
 write(
   `${mainRes}/values/ic_launcher_background.xml`,
@@ -218,7 +218,7 @@ write(
 <resources>
     <color name="ic_launcher_background">${background}</color>
 </resources>
-`
+`,
 );
 fs.rmSync(path.join(root, `${mainRes}/drawable/ic_launcher_foreground.xml`), {
   force: true,
@@ -243,9 +243,9 @@ write(
     android:viewportWidth="${width}" android:viewportHeight="${height}">
 ${notificationPaths}
 </vector>
-`
+`,
 );
 
 console.log(
-  "Generated SDAI icons; ribbons are limited to Android FOSS/FULL/DEV launchers."
+  "Generated SDAI icons; ribbons are limited to Android FOSS/FULL/DEV launchers.",
 );

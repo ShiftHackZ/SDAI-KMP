@@ -1,6 +1,6 @@
 package com.shifthackz.aisdv1.feature.benchmark.di
 
-import com.shifthackz.aisdv1.feature.benchmark.BenchmarkDeviceProbe
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import com.shifthackz.aisdv1.feature.benchmark.IosBenchmarkDeviceProbe
 import org.koin.core.module.Module
 import org.koin.dsl.module

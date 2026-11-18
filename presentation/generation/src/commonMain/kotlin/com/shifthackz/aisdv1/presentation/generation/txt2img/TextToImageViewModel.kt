@@ -1,0 +1,845 @@
+package com.shifthackz.aisdv1.presentation.generation.txt2img
+
+import com.shifthackz.aisdv1.presentation.components.image.ImageSaver
+import com.shifthackz.aisdv1.presentation.components.image.ImageSharer
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+import com.shifthackz.aisdv1.domain.gateway.MnnBackendPolicy
+import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
+import com.shifthackz.aisdv1.presentation.generation.model.toGenerationModal
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
+import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
+import com.shifthackz.aisdv1.core.common.platform.Platform
+import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
+import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
+import com.shifthackz.aisdv1.core.mvi.EmptyEffect
+import com.shifthackz.aisdv1.core.model.UiText
+import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidator
+import com.shifthackz.aisdv1.core.validation.seed.SeedValidator
+import com.shifthackz.aisdv1.presentation.generation.widget.input.withSeedValidation
+import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
+import com.shifthackz.aisdv1.domain.entity.ForgeModule
+import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
+import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
+import kotlinx.coroutines.flow.combine
+import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
+import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
+import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
+import com.shifthackz.aisdv1.presentation.components.model.localizedDescription
+import com.shifthackz.aisdv1.presentation.components.model.observeOpenAiOAuthIdentity
+import com.shifthackz.aisdv1.domain.entity.Settings
+import com.shifthackz.aisdv1.domain.entity.StableDiffusionModel
+import com.shifthackz.aisdv1.domain.entity.StableDiffusionSampler
+import com.shifthackz.aisdv1.domain.feature.work.BackgroundTaskManager
+import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
+import com.shifthackz.aisdv1.domain.interactor.wakelock.WakeLockInterActor
+import com.shifthackz.aisdv1.domain.preference.PreferenceManager
+import com.shifthackz.aisdv1.domain.usecase.arliai.FetchAndGetArliAiModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.caching.SaveLastResultToCacheUseCase
+import com.shifthackz.aisdv1.domain.usecase.forgemodule.GetForgeModulesUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveStableDiffusionCppProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.SaveGenerationResultUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase
+import com.shifthackz.aisdv1.domain.usecase.sdscript.IsADetailerAvailableUseCase
+import com.shifthackz.aisdv1.domain.usecase.sdsampler.GetStableDiffusionSamplersUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
+import com.shifthackz.aisdv1.domain.usecase.benchmark.EvaluateGenerationBenchmarkUseCase
+import com.shifthackz.aisdv1.domain.usecase.benchmark.RecordBenchmarkPromptAnswerUseCase
+import com.shifthackz.aisdv1.domain.usecase.benchmark.SuppressBenchmarkWarningsUseCase
+import com.shifthackz.aisdv1.presentation.components.core.GenerationFormUpdateEvent
+import com.shifthackz.aisdv1.presentation.components.core.GenerationPlatformServices
+import com.shifthackz.aisdv1.presentation.generation.model.GenerationModal
+import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.withContext
+
+
+/**
+ * View-model for the txt2img screen.
+ *
+ * It loads provider configuration, mirrors the shared generation form state,
+ * gates local providers through benchmark recommendations, and delegates actual
+ * generation work to the action handler.
+ *
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
+ * @param dispatchersProvider Application dispatchers for background I/O and immediate UI state updates.
+ * @param getConfigurationUseCase Reads every provider’s independent saved settings and the selected source revision.
+ * @param getStableDiffusionSamplersUseCase Loads the cached AUTOMATIC1111 sampler catalog used to reconcile form selection.
+ * @param getForgeModulesUseCase Reads available Forge modules for the selected AUTOMATIC1111 endpoint.
+ * @param fetchAndGetArliAiModelsUseCase Discovers ArliAI checkpoint identifiers for its provider-specific model field.
+ * @param isADetailerAvailableUseCase Checks extension availability before exposing ADetailer controls.
+ * @param textToImageUseCase Dispatches immutable text-generation inputs through the selected provider.
+ * @param saveGenerationResultUseCase Persists newly generated results lacking a durable gallery identity.
+ * @param saveLastResultToCacheUseCase Caches selected output for normal preview, reporting and sharing workflows.
+ * @param interruptSourceGenerationUseCase Interrupts only the captured legacy provider after its foreground job is cancelled.
+ * @param observeEasyDiffusionProgressUseCase Shared hot queued/sampling progress, reset when its owning operation finishes.
+ * @param nativeGenerationGateway Engine-specific progress/stages for the captured generation modal.
+ * @param mnnBackendPolicy Supplies supported choices and normalizes restored foreign backend values.
+ * @param observeMnnProcessStatusUseCase Reports iOS MNN overall percentage after native admission.
+ * @param observeHordeProcessStatusUseCase Observes remote AI Horde queue position and wait estimates.
+ * @param observeLocalDiffusionProcessStatusUseCase Observes legacy ONNX inference progress.
+ * @param observeStableDiffusionCppProcessStatusUseCase Observes stable-diffusion.cpp inference progress.
+ * @param observeCoreMlProcessStatusUseCase Observes Core ML inference progress.
+ * @param observeBonsaiProcessStatusUseCase Observes Bonsai inference progress.
+ * @param preferenceManager Current provider selection and independent generation preferences.
+ * @param backgroundTaskManager Schedules captured requests through the platform background-generation workflow.
+ * @param backgroundWorkObserver Observes active background work and prevents overlapping foreground requests.
+ * @param wakeLockInterActor Acquires and releases the foreground generation wake lock.
+ * @param platformServices Reports platform capabilities and provides generation/export platform actions.
+ * @param buildInfoProvider Supplies platform/build-flavor information for supported controls and reporting.
+ * @param generationFormUpdateEvent Transfers history/metadata inputs to the currently active generation form.
+ * @param dimensionValidator Validates output dimensions before generation.
+ * @param seedValidator Validates edited, restored and provider-switched seeds before state publication.
+ * @param nativeSeedValidator Validates native provider seeds using their full integer precision.
+ * @param mnnSeedValidator Validates MNN seeds against its nonnegative signed-32-bit limit.
+ * @param easyDiffusionSeedValidator Validates Easy Diffusion seeds against its unsigned 32-bit maximum.
+ * @param evaluateGenerationBenchmarkUseCase Lazily obtains recommendation admission policy.
+ * @param recordBenchmarkPromptAnswerUseCase Lazily obtains the initial-question recorder.
+ * @param suppressBenchmarkWarningsUseCase Lazily obtains the recommendation warning preference writer.
+ * @param imageSaver Exports encoded output through the normal platform media-store workflow.
+ * @param imageSharer Shares encoded output through the normal platform share workflow.
+ * @param router Navigation destination owner after configuration loading.
+ * @param openAiOAuthGateway Observes token-free account revisions captured in submitted OAuth work.
+ * @param providerSelectionGuard Serializes final UI publication with provider replacement.
+ * @param onError Reports loading failures through the application error sink.
+ *
+ * @author Dmitriy Moroz
+ */
+class TextToImageViewModel(
+    diagnostics: UiDiagnostics,
+    private val dispatchersProvider: DispatchersProvider,
+    private val getConfigurationUseCase: GetConfigurationUseCase,
+    private val getStableDiffusionSamplersUseCase: GetStableDiffusionSamplersUseCase,
+    private val getForgeModulesUseCase: GetForgeModulesUseCase,
+    private val fetchAndGetArliAiModelsUseCase: FetchAndGetArliAiModelsUseCase,
+    private val isADetailerAvailableUseCase: IsADetailerAvailableUseCase,
+    private val textToImageUseCase: TextToImageUseCase,
+    private val saveGenerationResultUseCase: SaveGenerationResultUseCase,
+    private val saveLastResultToCacheUseCase: SaveLastResultToCacheUseCase,
+    private val interruptSourceGenerationUseCase: InterruptSourceGenerationUseCase,
+    private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
+    private val nativeGenerationGateway: NativeGenerationGateway,
+    private val mnnBackendPolicy: MnnBackendPolicy,
+    private val observeMnnProcessStatusUseCase: ObserveMnnProcessStatusUseCase,
+    private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
+    private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
+    private val observeStableDiffusionCppProcessStatusUseCase: ObserveStableDiffusionCppProcessStatusUseCase,
+    private val observeCoreMlProcessStatusUseCase: ObserveCoreMlProcessStatusUseCase,
+    private val observeBonsaiProcessStatusUseCase: ObserveBonsaiProcessStatusUseCase,
+    private val preferenceManager: PreferenceManager,
+    private val backgroundTaskManager: BackgroundTaskManager,
+    private val backgroundWorkObserver: BackgroundWorkObserver,
+    private val wakeLockInterActor: WakeLockInterActor,
+    private val platformServices: GenerationPlatformServices,
+    private val buildInfoProvider: BuildInfoProvider,
+    private val generationFormUpdateEvent: GenerationFormUpdateEvent,
+    private val dimensionValidator: DimensionValidator,
+    private val seedValidator: SeedValidator,
+    private val nativeSeedValidator: SeedValidator,
+    private val mnnSeedValidator: SeedValidator,
+    private val easyDiffusionSeedValidator: SeedValidator,
+    private val evaluateGenerationBenchmarkUseCase: () -> EvaluateGenerationBenchmarkUseCase,
+    private val recordBenchmarkPromptAnswerUseCase: () -> RecordBenchmarkPromptAnswerUseCase,
+    private val suppressBenchmarkWarningsUseCase: () -> SuppressBenchmarkWarningsUseCase,
+    private val imageSaver: ImageSaver,
+    private val imageSharer: ImageSharer,
+    private val router: TextToImageRouter,
+    private val openAiOAuthGateway: OpenAiOAuthGateway,
+    private val providerSelectionGuard: ProviderSelectionGuard,
+    private val onError: (Throwable) -> Unit = {},
+) : BaseMviViewModel<TextToImageState, TextToImageIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.TEXT_TO_IMAGE.asDiagnosticScreen(),
+    initialState = TextToImageState(
+        openAiCompatibleModel = preferenceManager.openAiCompatibleModel,
+        samplingSteps = preferenceManager.textToImageSamplingSteps,
+        cfgScale = preferenceManager.textToImageCfgScale,
+        platform = buildInfoProvider.platform,
+        supportedMnnBackends = mnnBackendPolicy.supportedBackends,
+        bonsaiBackendSelectionVisible = buildInfoProvider.platform == Platform.ANDROID,
+    ),
+    effectDispatcher = dispatchersProvider.immediate,
+) {
+
+    /**
+     * Publishes form edits with seed feedback from the injected validator in the same state update.
+     * This also revalidates provider switches and metadata restored from history.
+     *
+     * @param mutation transformation of the current generation state.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun updateFormState(mutation: (TextToImageState) -> TextToImageState) {
+        updateState {
+            val updated = mutation(it).withMnnProfile().let { state ->
+                state.copy(mnnBackend = state.mnnBackend.takeIf { backend -> backend in mnnBackendPolicy.supportedBackends }
+                    ?: MnnBackend.CPU)
+            }
+            updated.withSeedValidation(
+                seedValidator,
+                if (updated.mode == ServerSource.LOCAL_MNN) mnnSeedValidator else nativeSeedValidator,
+                easyDiffusionSeedValidator
+            )
+        }
+    }
+
+    /**
+     * Validates seed fields before publishing a complete state supplied by the action handler.
+     *
+     * @param state replacement generation state, including current provider and seed text.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun emitFormState(state: TextToImageState) {
+        emitState(
+            state.withMnnProfile().withSeedValidation(
+                seedValidator,
+                if (state.mode == ServerSource.LOCAL_MNN) mnnSeedValidator else nativeSeedValidator,
+                easyDiffusionSeedValidator
+            )
+        )
+    }
+
+    private var stableDiffusionSamplers: List<String>? = null
+    private var stableDiffusionSamplersKey: StableDiffusionSamplersKey? = null
+    private var forgeModules: List<ForgeModule>? = null
+    private var forgeModulesKey: StableDiffusionSamplersKey? = null
+    private var aDetailerAvailable: Boolean? = null
+    private var aDetailerAvailabilityKey: StableDiffusionSamplersKey? = null
+    private var arliAiModels: List<String>? = null
+    private var arliAiModelsKey: String? = null
+    private var samplersLoadJob: Job? = null
+
+    init {
+        launch(dispatchersProvider.io) {
+            observeOpenAiOAuthIdentity(
+                gateway = openAiOAuthGateway,
+                onIdentity = { identity ->
+                    updateFormState {
+                        val changed =
+                            it.mode == ServerSource.OPEN_AI_OAUTH && it.openAiOAuthRevision != identity?.revision
+                        it.copy(
+                            openAiOAuthAccountId = identity?.accountId,
+                            openAiOAuthRevision = identity?.revision,
+                            screenModal = if (changed) GenerationModal.None else it.screenModal,
+                            results = if (changed) emptyList() else it.results,
+                        )
+                    }
+                },
+                onUnavailable = { error ->
+                    updateFormState {
+                        if (it.mode == ServerSource.OPEN_AI_OAUTH) it.copy(
+                            error = UiText.Static(
+                                error.localizedDescription()
+                            )
+                        ) else it
+                    }
+                },
+            )
+        }
+        loadConfiguration()
+        observeSettings()
+        consumePendingGenerationFormUpdate()
+        observeGenerationFormUpdate()
+        observeGenerationProgress()
+    }
+
+    private val actionHandler = TextToImageActionHandler(
+        openAiOAuthGateway = openAiOAuthGateway,
+        providerSelectionGuard = providerSelectionGuard,
+        dispatchersProvider = dispatchersProvider,
+        textToImageUseCase = textToImageUseCase,
+        saveGenerationResultUseCase = saveGenerationResultUseCase,
+        saveLastResultToCacheUseCase = saveLastResultToCacheUseCase,
+        interruptSourceGenerationUseCase = interruptSourceGenerationUseCase,
+        preferenceManager = preferenceManager,
+        backgroundTaskManager = backgroundTaskManager,
+        backgroundWorkObserver = backgroundWorkObserver,
+        wakeLockInterActor = wakeLockInterActor,
+        platformServices = platformServices,
+        buildInfoProvider = buildInfoProvider,
+        dimensionValidator = dimensionValidator,
+        evaluateGenerationBenchmarkUseCase = evaluateGenerationBenchmarkUseCase,
+        recordBenchmarkPromptAnswerUseCase = recordBenchmarkPromptAnswerUseCase,
+        suppressBenchmarkWarningsUseCase = suppressBenchmarkWarningsUseCase,
+        imageSaver = imageSaver,
+        imageSharer = imageSharer,
+        router = router,
+        currentState = { currentState },
+        emitState = ::emitFormState,
+        updateState = { reducer -> updateFormState(reducer) },
+        launch = { dispatcher, start, block -> launch(dispatcher, start, block) },
+        onError = onError,
+    )
+
+    private val intentProcessor = TextToImageIntentProcessor(
+        router = router,
+        updateState = { reducer -> updateFormState(reducer) },
+        generate = actionHandler::generate,
+        cancelGeneration = actionHandler::cancelGeneration,
+        saveImage = actionHandler::saveImage,
+        shareImage = actionHandler::shareImage,
+        saveGenerationResults = actionHandler::saveGenerationResults,
+        viewGenerationResult = actionHandler::viewGenerationResult,
+        reportGenerationResult = actionHandler::reportGenerationResult,
+        applyGenerationResult = ::applyGenerationResult,
+    )
+
+    /**
+     * Routes form actions and retries missing samplers without duplicating an active request.
+     *
+     * @param intent User action or foreground recovery action for this generation screen.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun processIntent(intent: TextToImageIntent) {
+        when (intent) {
+            TextToImageIntent.RetrySamplers -> {
+                if (stableDiffusionSamplers.isNullOrEmpty()) loadSamplers()
+            }
+
+            TextToImageIntent.RefreshADetailerAvailability -> loadADetailerAvailability(force = true)
+            TextToImageIntent.OpenADetailerInstallInstructions -> Unit
+            TextToImageIntent.RunBenchmarkFromPrompt -> actionHandler.runBenchmarkFromPrompt()
+            TextToImageIntent.SkipBenchmarkPrompt -> actionHandler.skipBenchmarkPrompt()
+            TextToImageIntent.ContinueAfterBenchmarkWarning ->
+                actionHandler.continueAfterBenchmarkWarning(suppressFutureWarnings = false)
+
+            TextToImageIntent.SuppressBenchmarkWarningAndContinue ->
+                actionHandler.continueAfterBenchmarkWarning(suppressFutureWarnings = true)
+
+            TextToImageIntent.DismissModal -> actionHandler.dismissBenchmarkDialog()
+            is TextToImageIntent.UpdateOpenAiCompatibleModel -> {
+                preferenceManager.openAiCompatibleModel = intent.value
+                intentProcessor.process(intent)
+            }
+
+            is TextToImageIntent.UpdateArliAiModel -> {
+                preferenceManager.arliAiModel = intent.value
+                intentProcessor.process(intent)
+            }
+
+            else -> intentProcessor.process(intent)
+        }
+        persistGenerationParameters()
+    }
+
+    /**
+     * Restores image metadata while retaining diffusion controls when sampling metadata is absent.
+     * A zero step count marks results from providers that do not expose diffusion parameters.
+     *
+     * @param ai Gallery image whose available parameters are applied to the form.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun applyGenerationResult(ai: AiGenerationResult) {
+        val hasDiffusionParameters = ai.samplingSteps > 0
+        updateFormState { state ->
+            state.copy(
+                advancedOptionsVisible = true,
+                prompt = ai.prompt,
+                negativePrompt = if (hasDiffusionParameters) ai.negativePrompt else state.negativePrompt,
+                width = ai.width.toString(),
+                height = ai.height.toString(),
+                seed = if (hasDiffusionParameters) ai.seed else state.seed,
+                subSeed = if (hasDiffusionParameters) ai.subSeed else state.subSeed,
+                subSeedStrength = if (hasDiffusionParameters) ai.subSeedStrength else state.subSeedStrength,
+                samplingSteps = if (hasDiffusionParameters) ai.samplingSteps else state.samplingSteps,
+                cfgScale = if (hasDiffusionParameters) ai.cfgScale else state.cfgScale,
+                restoreFaces = if (hasDiffusionParameters) ai.restoreFaces else state.restoreFaces,
+                selectedSampler = ai.sampler.takeIf(state.availableSamplers::contains)
+                    ?: state.selectedSampler,
+                error = null,
+                message = null,
+            )
+        }
+        persistGenerationParameters()
+    }
+
+    /**
+     * Saves effective form values after edits, model clamping, or applying a history result.
+     * Unchanged values do not trigger preference writes.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun persistGenerationParameters() {
+        val state = currentState
+        if (state.mode == ServerSource.LOCAL_MNN) {
+            if (preferenceManager.localMnnBackend != state.mnnBackend) preferenceManager.localMnnBackend =
+                state.mnnBackend
+            return
+        }
+        if (state.mode == ServerSource.OPEN_AI_COMPATIBLE && preferenceManager.openAiCompatibleModel != state.openAiCompatibleModel) {
+            preferenceManager.openAiCompatibleModel = state.openAiCompatibleModel
+        }
+        if (preferenceManager.textToImageSamplingSteps != state.samplingSteps) {
+            preferenceManager.textToImageSamplingSteps = state.samplingSteps
+        }
+        if (preferenceManager.textToImageCfgScale != state.cfgScale) {
+            preferenceManager.textToImageCfgScale = state.cfgScale
+        }
+    }
+
+    /**
+     * Consumes incoming history/metadata requests and applies them to this screen’s shared form state.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun observeGenerationFormUpdate() {
+        launch(dispatchersProvider.immediate) {
+            generationFormUpdateEvent.observeTxt2ImgForm().collect { payload ->
+                if (payload is GenerationFormUpdateEvent.Payload.T2IForm) {
+                    applyGenerationResult(payload.ai)
+                }
+            }
+        }
+    }
+
+    /**
+     * Applies a queued history/metadata request once configuration is available, then clears the pending transfer.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun consumePendingGenerationFormUpdate() {
+        generationFormUpdateEvent.consumeTxt2ImgForm()?.let { payload ->
+            applyGenerationResult(payload.ai)
+        }
+    }
+
+    /**
+     * Observes provider/native progress and updates only the matching active generation modal.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun observeGenerationProgress() {
+        launch(dispatchersProvider.immediate) {
+            observeEasyDiffusionProgressUseCase().collect { progress ->
+                updateFormState { state ->
+                    if (state.mode == ServerSource.EASY_DIFFUSION && progress.isRunning &&
+                        (state.screenModal is GenerationModal.Communicating || state.screenModal is GenerationModal.Generating)
+                    ) {
+                        state.copy(screenModal = progress.toGenerationModal())
+                    } else state
+                }
+            }
+        }
+        if (buildInfoProvider.platform == Platform.IOS) launch(dispatchersProvider.immediate) {
+            observeMnnProcessStatusUseCase().collect { status ->
+                updateFormState { state ->
+                    val modal = state.screenModal
+                    if (state.mode == ServerSource.LOCAL_MNN && modal is GenerationModal.Generating)
+                        state.copy(screenModal = modal.copy(status = status))
+                    else state
+                }
+            }
+        }
+        NativeGenerationEngine.entries.forEach { engine ->
+            launch(dispatchersProvider.immediate) {
+                combine(
+                    nativeGenerationGateway.observeStage(engine),
+                    nativeGenerationGateway.observeStatus(engine)
+                ) { stage, status -> stage to status }
+                    .collect { (stage, status) ->
+                        updateFormState { state ->
+                            val modal = state.screenModal
+                            if (modal is GenerationModal.Generating && modal.nativeEngine == engine)
+                                state.copy(
+                                    screenModal = modal.copy(
+                                        nativeStage = stage,
+                                        status = status
+                                    )
+                                )
+                            else state
+                        }
+                    }
+            }
+        }
+        launch(dispatchersProvider.immediate) {
+            observeHordeProcessStatusUseCase().collect { status ->
+                updateFormState { state ->
+                    val modal = state.screenModal
+                    if (modal is GenerationModal.Communicating) {
+                        state.copy(screenModal = modal.copy(hordeProcessStatus = status))
+                    } else {
+                        state
+                    }
+                }
+            }
+        }
+        launch(dispatchersProvider.immediate) {
+            observeLocalDiffusionProcessStatusUseCase().collect { status ->
+                updateLocalGenerationStatus(status)
+            }
+        }
+        launch(dispatchersProvider.immediate) {
+            observeStableDiffusionCppProcessStatusUseCase().collect { status ->
+                updateLocalGenerationStatus(status)
+            }
+        }
+        launch(dispatchersProvider.immediate) {
+            observeCoreMlProcessStatusUseCase().collect { status ->
+                updateLocalGenerationStatus(status)
+            }
+        }
+        launch(dispatchersProvider.immediate) {
+            observeBonsaiProcessStatusUseCase().collect { status ->
+                updateLocalGenerationStatus(status)
+            }
+        }
+    }
+
+    /**
+     * Updates sampling progress only while a local generation modal is active.
+     *
+     * @param status Native sampling step and total for the active local operation.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun updateLocalGenerationStatus(status: LocalDiffusionStatus) {
+        updateFormState { state ->
+            val modal = state.screenModal
+            if (modal is GenerationModal.Generating && modal.nativeEngine == null) {
+                state.copy(screenModal = modal.copy(status = status))
+            } else {
+                state
+            }
+        }
+    }
+
+    /**
+     * Loads saved provider/form controls and starts provider-specific model/extension discovery.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun loadConfiguration() {
+        updateFormState { it.copy(loadingConfiguration = true, error = null) }
+        launch(dispatchersProvider.io) {
+            runCatching { getConfigurationUseCase() }
+                .onSuccess { configuration ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState {
+                            it.copy(
+                                loadingConfiguration = false,
+                                openAiCompatibleModel = configuration.openAiCompatibleModel,
+                                mnnBackend = configuration.localMnnBackend,
+                                mnnActivationId = configuration.localMnnActivationId,
+                                mnnModelId = configuration.localMnnModelId,
+                                providerSelectionRevision = configuration.providerSelectionRevision,
+                            ).withSource(
+                                source = configuration.source,
+                                stableDiffusionSamplers = stableDiffusionSamplers,
+                                forgeModules = forgeModules,
+                                aDetailerAvailable = aDetailerAvailable,
+                                arliAiModels = arliAiModels,
+                            )
+                        }
+                    }
+                }
+                .onFailure { t ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState {
+                            it.copy(
+                                loadingConfiguration = false,
+                                error = t.localizedMessageText(),
+                            )
+                        }
+                    }
+                    onError(t)
+                }
+        }
+    }
+
+    /**
+     * Reconciles persisted provider/control changes with current form selection and visible validation.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun observeSettings() {
+        launch(dispatchersProvider.immediate) {
+            preferenceManager
+                .observe()
+                .catch { t ->
+                    updateFormState { it.copy(error = t.localizedMessageText()) }
+                    onError(t)
+                }
+                .collect { settings ->
+                    refreshStableDiffusionMetadataIfNeeded(settings)
+                    refreshArliAiModelsIfNeeded(settings)
+                    updateFormState { state ->
+                        state.copy(
+                            mnnActivationId = preferenceManager.localMnnActivationId,
+                            mnnModelId = preferenceManager.localMnnModelId,
+                            mnnBackend = if (state.providerSelectionRevision != settings.providerSelectionRevision) preferenceManager.localMnnBackend else state.mnnBackend,
+                            cfgScale = if (state.mode == ServerSource.LOCAL_MNN && settings.source != ServerSource.LOCAL_MNN) preferenceManager.textToImageCfgScale else state.cfgScale,
+                            samplingSteps = if (state.mode == ServerSource.LOCAL_MNN && settings.source != ServerSource.LOCAL_MNN) preferenceManager.textToImageSamplingSteps else state.samplingSteps
+                        ).withSettings(
+                            settings = settings,
+                            stableDiffusionSamplers = stableDiffusionSamplers,
+                            forgeModules = forgeModules,
+                            aDetailerAvailable = aDetailerAvailable,
+                            arliAiModels = arliAiModels,
+                        )
+                    }
+                }
+        }
+    }
+
+    /**
+     * Invalidates metadata on provider or server changes and cancels the previous sampler attempt.
+     *
+     * @param settings Current provider selection and server address used to identify metadata.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun refreshStableDiffusionMetadataIfNeeded(settings: Settings) {
+        if (settings.source != ServerSource.AUTOMATIC1111) {
+            samplersLoadJob?.cancel()
+            updateFormState { it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = false) }
+            stableDiffusionSamplersKey = null
+            forgeModulesKey = null
+            forgeModules = null
+            aDetailerAvailabilityKey = null
+            aDetailerAvailable = null
+            return
+        }
+        val key = StableDiffusionSamplersKey(
+            serverUrl = settings.serverUrl,
+            demoMode = settings.demoMode,
+        )
+        if (
+            stableDiffusionSamplersKey == key &&
+            forgeModulesKey == key &&
+            aDetailerAvailabilityKey == key
+        ) return
+
+        stableDiffusionSamplersKey = key
+        samplersLoadJob?.cancel()
+        forgeModulesKey = key
+        aDetailerAvailabilityKey = key
+        stableDiffusionSamplers = emptyList()
+        forgeModules = emptyList()
+        aDetailerAvailable = null
+        updateFormState {
+            it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = false).withSource(
+                source = ServerSource.AUTOMATIC1111,
+                stableDiffusionSamplers = stableDiffusionSamplers,
+                forgeModules = forgeModules,
+                aDetailerAvailable = aDetailerAvailable,
+                arliAiModels = arliAiModels,
+            )
+        }
+        loadSamplers()
+        loadForgeModules()
+        loadADetailerAvailability()
+    }
+
+    /**
+     * Loads an empty sampler list once per attempt. Failed and empty results remain retryable.
+     * Server changes cancel the previous load; its result cannot update the new server form.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun loadSamplers() {
+        val key = stableDiffusionSamplersKey ?: return
+        if (currentState.isLoadingSamplers) return
+        updateFormState { it.copy(isLoadingSamplers = true, hasSamplerLoadFailed = false) }
+        samplersLoadJob = launch(dispatchersProvider.immediate) {
+            try {
+                val samplers = withContext(dispatchersProvider.io) {
+                    getStableDiffusionSamplersUseCase().map(StableDiffusionSampler::name)
+                        .filter(String::isNotBlank)
+                        .distinct()
+                }
+                ensureActive()
+                if (stableDiffusionSamplersKey != key) return@launch
+                stableDiffusionSamplers = samplers
+                updateFormState {
+                    it.copy(
+                        isLoadingSamplers = false,
+                        hasSamplerLoadFailed = samplers.isEmpty(),
+                    ).withSource(
+                        source = it.mode,
+                        stableDiffusionSamplers = samplers,
+                        forgeModules = forgeModules,
+                        aDetailerAvailable = aDetailerAvailable,
+                        arliAiModels = arliAiModels,
+                    )
+                }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                if (stableDiffusionSamplersKey != key) return@launch
+                updateFormState { it.copy(isLoadingSamplers = false, hasSamplerLoadFailed = true) }
+                onError(error)
+            }
+        }
+    }
+
+    /**
+     * Reads Forge module choices and clears unavailable selection when the catalog cannot be loaded.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun loadForgeModules() {
+        launch(dispatchersProvider.io) {
+            runCatching { getForgeModulesUseCase() }
+                .onSuccess { modules ->
+                    forgeModules = modules
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState {
+                            it.withSource(
+                                source = it.mode,
+                                stableDiffusionSamplers = stableDiffusionSamplers,
+                                forgeModules = forgeModules,
+                                aDetailerAvailable = aDetailerAvailable,
+                                arliAiModels = arliAiModels,
+                            )
+                        }
+                    }
+                }
+                .onFailure { t ->
+                    forgeModules = emptyList()
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState {
+                            it.withSource(
+                                source = it.mode,
+                                stableDiffusionSamplers = stableDiffusionSamplers,
+                                forgeModules = forgeModules,
+                                aDetailerAvailable = aDetailerAvailable,
+                                arliAiModels = arliAiModels,
+                            )
+                        }
+                    }
+                    onError(t)
+                }
+        }
+    }
+
+    /**
+     * Updates ADetailer availability for the active AUTOMATIC1111 endpoint, optionally bypassing its cached result.
+     *
+     * @param force Whether to refresh extension availability even when a cached value exists.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun loadADetailerAvailability(force: Boolean = false) {
+        if (!force && aDetailerAvailable != null) return
+        updateFormState { it.copy(aDetailerRefreshing = true) }
+        launch(dispatchersProvider.io) {
+            runCatching { isADetailerAvailableUseCase() }
+                .onSuccess { available ->
+                    aDetailerAvailable = available
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState {
+                            it.copy(
+                                aDetailerAvailable = available,
+                                aDetailerRefreshing = false,
+                                error = null,
+                            )
+                        }
+                    }
+                }
+                .onFailure { t ->
+                    aDetailerAvailable = false
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState { state ->
+                            state.copy(
+                                aDetailerAvailable = false,
+                                aDetailerRefreshing = false,
+                            )
+                        }
+                    }
+                    onError(t)
+                }
+        }
+    }
+
+    /**
+     * Refreshes ArliAI model choices only when its active configuration differs from the last loaded key.
+     *
+     * @param settings Current persisted provider selection and shared form preferences.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun refreshArliAiModelsIfNeeded(settings: Settings) {
+        if (settings.source != ServerSource.ARLI_AI) {
+            arliAiModelsKey = null
+            return
+        }
+        val key = preferenceManager.arliAiApiKey
+        if (arliAiModelsKey == key) return
+
+        arliAiModelsKey = key
+        arliAiModels = emptyList()
+        updateFormState {
+            it.withSource(
+                source = ServerSource.ARLI_AI,
+                stableDiffusionSamplers = stableDiffusionSamplers,
+                forgeModules = forgeModules,
+                aDetailerAvailable = aDetailerAvailable,
+                arliAiModels = arliAiModels,
+            )
+        }
+        loadArliAiModels()
+    }
+
+    /**
+     * Loads supported ArliAI model identifiers and reconciles the selected checkpoint with available choices.
+     *
+     * @author Dmitriy Moroz
+     */
+
+    private fun loadArliAiModels() {
+        launch(dispatchersProvider.io) {
+            runCatching {
+                fetchAndGetArliAiModelsUseCase()
+                    .map(StableDiffusionModel::arliAiCheckpointName)
+                    .filter(String::isNotBlank)
+                    .distinct()
+            }
+                .onSuccess { models ->
+                    arliAiModels = models
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState {
+                            it.copy(arliAiModel = preferenceManager.arliAiModel)
+                                .withSource(
+                                    source = it.mode,
+                                    stableDiffusionSamplers = stableDiffusionSamplers,
+                                    forgeModules = forgeModules,
+                                    aDetailerAvailable = aDetailerAvailable,
+                                    arliAiModels = arliAiModels,
+                                )
+                        }
+                    }
+                }
+                .onFailure { t ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateFormState { it.copy(error = t.localizedMessageText()) }
+                    }
+                    onError(t)
+                }
+        }
+    }
+}
+
+private val StableDiffusionModel.arliAiCheckpointName: String
+    get() = title.ifBlank { modelName }.ifBlank { filename }

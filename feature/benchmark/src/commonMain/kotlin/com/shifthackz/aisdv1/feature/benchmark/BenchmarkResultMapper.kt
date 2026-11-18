@@ -1,5 +1,11 @@
 package com.shifthackz.aisdv1.feature.benchmark
 
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkResult
+import com.shifthackz.aisdv1.domain.policy.benchmark.BenchmarkRecommendationPolicy
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkAccelerator
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkRecommendation
 import com.shifthackz.aisdv1.domain.entity.SdxlBackend
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.storage.db.persistent.entity.BenchmarkResultEntity
@@ -8,7 +14,9 @@ private const val SEPARATOR = "|"
 
 internal fun BenchmarkResultEntity.toDomain(): BenchmarkResult {
     val deviceInfo = BenchmarkDeviceInfo(
-        platform = runCatching { BenchmarkPlatform.valueOf(platform) }.getOrDefault(BenchmarkPlatform.UNKNOWN),
+        platform = runCatching { BenchmarkPlatform.valueOf(platform) }.getOrDefault(
+            BenchmarkPlatform.UNKNOWN
+        ),
         manufacturer = manufacturer,
         model = model,
         osVersion = osVersion,

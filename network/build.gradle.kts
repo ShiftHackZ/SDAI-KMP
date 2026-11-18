@@ -1,6 +1,27 @@
+import org.gradle.api.tasks.testing.Test
+
 plugins {
     alias(libs.plugins.generic.kmp.library)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+}
+
+val providerContractOutput = layout.buildDirectory.file("provider-contracts/models.json")
+
+tasks.register<JavaExec>("exportProviderContracts") {
+    group = "verification"
+    description =
+        "Exports the compiled cloud-provider serialization contracts for upstream schema checks."
+    val unitTests = tasks.named<Test>("testDebugUnitTest")
+    dependsOn(
+        "compileDebugUnitTestKotlinAndroid",
+        "compileDebugUnitTestJavaWithJavac",
+        "processDebugUnitTestJavaRes"
+    )
+    classpath =
+        files(provider { unitTests.get().classpath }, provider { unitTests.get().testClassesDirs })
+    mainClass.set("com.shifthackz.aisdv1.network.contract.ProviderContractExporter")
+    args(providerContractOutput.get().asFile.absolutePath)
+    outputs.file(providerContractOutput)
 }
 
 android {

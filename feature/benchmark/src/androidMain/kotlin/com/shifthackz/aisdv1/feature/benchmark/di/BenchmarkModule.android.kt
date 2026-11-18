@@ -1,7 +1,7 @@
 package com.shifthackz.aisdv1.feature.benchmark.di
 
 import com.shifthackz.aisdv1.feature.benchmark.AndroidBenchmarkDeviceProbe
-import com.shifthackz.aisdv1.feature.benchmark.BenchmarkDeviceProbe
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module

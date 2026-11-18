@@ -1,0 +1,274 @@
+package com.shifthackz.aisdv1.presentation.benchmark
+
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
+
+import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
+import com.shifthackz.aisdv1.core.navigation.NavigationDestination
+import com.shifthackz.aisdv1.core.common.platform.Platform
+import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
+import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
+import com.shifthackz.aisdv1.core.mvi.EmptyEffect
+import com.shifthackz.aisdv1.domain.usecase.benchmark.ObserveLatestBenchmarkUseCase
+import com.shifthackz.aisdv1.domain.usecase.benchmark.InspectBenchmarkDeviceUseCase
+import com.shifthackz.aisdv1.domain.usecase.benchmark.RunBenchmarkUseCase
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkProviderIssue
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkProviderRecommendation
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkResult
+import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
+import com.shifthackz.aisdv1.domain.entity.SdxlBackend
+import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.presentation.components.model.compactDisplayName
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.withContext
+
+
+/**
+ * Coordinates benchmark screen state and safe benchmark execution.
+ *
+ * The ViewModel never invokes model inference. It delegates to the injected benchmark operations,
+ * which only read hardware metadata and runs bounded synthetic CPU/memory work.
+ *
+ * @param dispatchersProvider Dispatchers used for UI updates and background work.
+ * @param observeLatestBenchmarkUseCase Injected operation for observe latest benchmark.
+ * @param inspectBenchmarkDeviceUseCase Injected operation for inspect benchmark device.
+ * @param runBenchmarkUseCase Injected operation for run benchmark.
+ * @param router Navigation contract for this screen.
+ * @param platformActions Native actions delegated outside common UI code.
+ * @param onError Callback for on error.
+ * @author Dmitriy Moroz
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
+ */
+class BenchmarkViewModel(
+    diagnostics: UiDiagnostics,
+    private val dispatchersProvider: DispatchersProvider,
+    private val observeLatestBenchmarkUseCase: ObserveLatestBenchmarkUseCase,
+    private val inspectBenchmarkDeviceUseCase: InspectBenchmarkDeviceUseCase,
+    private val runBenchmarkUseCase: RunBenchmarkUseCase,
+    private val router: BenchmarkRouter,
+    private val platformActions: BenchmarkPlatformActions,
+    private val onError: (Throwable) -> Unit = {},
+) : BaseMviViewModel<BenchmarkState, BenchmarkIntent, EmptyEffect>(
+    diagnostics = diagnostics,
+    diagnosticScreen = NavigationDestination.BENCHMARK.asDiagnosticScreen(),
+    initialState = BenchmarkState(),
+    effectDispatcher = dispatchersProvider.immediate,
+) {
+
+    init {
+        observeBenchmarkData()
+        refreshDevice()
+    }
+
+    override fun processIntent(intent: BenchmarkIntent) {
+        when (intent) {
+            BenchmarkIntent.NavigateBack -> router.navigateBack()
+            BenchmarkIntent.RunBenchmark -> runBenchmark()
+            BenchmarkIntent.ShareResults -> shareResults()
+            BenchmarkIntent.DismissError -> updateState { it.copy(error = null) }
+        }
+    }
+
+    private fun observeBenchmarkData() {
+        launch(dispatchersProvider.io) {
+            observeLatestBenchmarkUseCase()
+                .catch { throwable -> handleFailure(throwable) }
+                .collect { latest ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateState {
+                            it.copy(
+                                loadingResult = false,
+                                latestResult = latest,
+                            )
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun refreshDevice() {
+        updateState { it.copy(loadingDevice = true, error = null) }
+        launch(dispatchersProvider.io) {
+            runCatching { inspectBenchmarkDeviceUseCase() }
+                .onSuccess { deviceInfo ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateState {
+                            it.copy(
+                                loadingDevice = false,
+                                deviceInfo = deviceInfo,
+                            )
+                        }
+                    }
+                }
+                .onFailure { throwable ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateState {
+                            it.copy(
+                                loadingDevice = false,
+                                error = throwable.localizedMessage(),
+                            )
+                        }
+                    }
+                    onError(throwable)
+                }
+        }
+    }
+
+    private fun runBenchmark() {
+        if (currentState.running) return
+        updateState { it.copy(running = true, error = null) }
+        launch(dispatchersProvider.io) {
+            runCatching { runBenchmarkUseCase() }
+                .onSuccess { result ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateState {
+                            it.copy(
+                                running = false,
+                                loadingDevice = false,
+                                deviceInfo = result.deviceInfo,
+                                latestResult = result,
+                            )
+                        }
+                    }
+                }
+                .onFailure { throwable ->
+                    withContext(dispatchersProvider.immediate) {
+                        updateState {
+                            it.copy(
+                                running = false,
+                                error = throwable.localizedMessage(),
+                            )
+                        }
+                    }
+                    onError(throwable)
+                }
+        }
+    }
+
+    private fun shareResults() {
+        val latest = currentState.latestResult ?: return
+        launch(dispatchersProvider.io) {
+            when (val result = platformActions.shareText(latest.shareText())) {
+                BenchmarkActionResult.Done -> Unit
+                BenchmarkActionResult.Unsupported -> withContext(dispatchersProvider.immediate) {
+                    updateState { it.copy(error = Localization.string("error_generic")) }
+                }
+
+                is BenchmarkActionResult.Failed -> withContext(dispatchersProvider.immediate) {
+                    updateState { it.copy(error = result.message) }
+                }
+            }
+        }
+    }
+
+    private suspend fun handleFailure(throwable: Throwable) {
+        withContext(dispatchersProvider.immediate) {
+            updateState {
+                it.copy(
+                    loadingResult = false,
+                    error = throwable.localizedMessage(),
+                )
+            }
+        }
+        onError(throwable)
+    }
+
+    private fun Throwable.localizedMessage(): String =
+        message ?: Localization.string("benchmark_error_generic")
+}
+
+private fun BenchmarkResult.shareText(): String = buildString {
+    appendLine(Localization.string("title_benchmark"))
+    appendLine("${Localization.string("benchmark_score")}: $totalScore")
+    appendLine("${Localization.string("benchmark_device")}: ${deviceInfo.deviceName()}")
+    appendLine("${Localization.string("benchmark_cpu")}: ${deviceInfo.cpuName}")
+    appendLine("${Localization.string("benchmark_gpu")}: ${deviceInfo.gpuName}")
+    appendLine(
+        "${Localization.string("benchmark_ram")}: ${
+            Localization.string(
+                "benchmark_mb",
+                deviceInfo.totalRamMb
+            )
+        }"
+    )
+    appendLine(
+        "${Localization.string("benchmark_estimated_time_short")}: ${
+            Localization.string(
+                "benchmark_seconds",
+                estimatedTimeSeconds
+            )
+        }"
+    )
+    providerRecommendations.forEach { recommendation ->
+        appendLine()
+        appendLine(
+            "${recommendation.provider.compactDisplayName(deviceInfo.platform.toPlatform())} " +
+                    Localization.string("benchmark_recommendations"),
+        )
+        if (recommendation.recommended) {
+            appendLine("${Localization.string("benchmark_recommended_size")}: ${recommendation.width} x ${recommendation.height}")
+            appendLine("${Localization.string("benchmark_recommended_steps")}: ${recommendation.samplingSteps}")
+            appendLine("${Localization.string("benchmark_recommended_cfg")}: ${recommendation.cfgScale}")
+            appendLine("${Localization.string("benchmark_recommended_background")}: ${recommendation.backgroundLabel()}")
+            if (recommendation.provider == ServerSource.LOCAL_STABLE_DIFFUSION_CPP) {
+                appendLine("${Localization.string("benchmark_recommended_backend")}: ${recommendation.sdxlBackend.displayName()}")
+            }
+        } else {
+            appendLine(Localization.string("benchmark_provider_not_recommended"))
+            recommendation.issues.forEach { issue ->
+                appendLine("- ${issue.localizedText()}")
+            }
+        }
+    }
+}
+
+private fun BenchmarkProviderRecommendation.backgroundLabel(): String =
+    if (backgroundGeneration) {
+        Localization.string("benchmark_recommended")
+    } else {
+        Localization.string("benchmark_not_recommended")
+    }
+
+private fun BenchmarkProviderIssue.localizedText(): String = when (this) {
+    BenchmarkProviderIssue.PLATFORM_UNSUPPORTED ->
+        Localization.string("benchmark_issue_platform_unsupported")
+
+    BenchmarkProviderIssue.LOW_MEMORY ->
+        Localization.string("benchmark_issue_low_memory")
+
+    BenchmarkProviderIssue.LOW_SCORE ->
+        Localization.string("benchmark_issue_low_score")
+
+    BenchmarkProviderIssue.ONNX_SLOW_LOW_MEMORY ->
+        Localization.string("benchmark_issue_onnx_slow_low_memory")
+
+    BenchmarkProviderIssue.MEDIAPIPE_UNSTABLE_LOW_MEMORY ->
+        Localization.string("benchmark_issue_mediapipe_unstable_low_memory")
+
+    BenchmarkProviderIssue.SDXL_TINY_EXPERIMENTAL_ONLY ->
+        Localization.string("benchmark_issue_sdxl_tiny_experimental_only")
+
+    BenchmarkProviderIssue.SDXL_BACKEND_NOT_VALIDATED ->
+        Localization.string("benchmark_issue_sdxl_backend_not_validated")
+
+    BenchmarkProviderIssue.ACCELERATOR_API_NOT_AVAILABLE ->
+        Localization.string("benchmark_issue_accelerator_api_not_available")
+}
+
+private fun SdxlBackend.displayName(): String = displayName
+
+private fun BenchmarkPlatform.toPlatform(): Platform = when (this) {
+    BenchmarkPlatform.ANDROID,
+    BenchmarkPlatform.UNKNOWN,
+        -> Platform.ANDROID
+
+    BenchmarkPlatform.IOS -> Platform.IOS
+}
+
+private fun BenchmarkDeviceInfo.deviceName(): String =
+    listOf(manufacturer, model)
+        .filter(String::isNotBlank)
+        .joinToString(" ")
+        .ifBlank { Localization.string("benchmark_unknown") }

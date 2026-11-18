@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 sys.dont_write_bytecode = True
-from test_openai_compatible_contract import validate
+from mnn.openapi import validate_document
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,12 +15,15 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     """Reject undocumented contracts, DTO drift and unusable catalog source placeholders."""
     document = json.loads((ROOT / "network/mnn-catalog.openapi.json").read_text())
-    validate(document, compatible_client=False)
+    validate_document(document)
     assert set(document["paths"]) == {"/mnn.json"}
     operation = document["paths"]["/mnn.json"]["get"]
     assert operation["operationId"] == "fetchMnnModels"
     schema = document["components"]["schemas"]["MnnCatalogEntry"]
-    source = (ROOT / "network/src/commonMain/kotlin/com/shifthackz/aisdv1/network/response/DownloadableModelResponse.kt").read_text()
+    source = (
+        ROOT
+        / "network/src/commonMain/kotlin/com/shifthackz/aisdv1/network/response/DownloadableModelResponse.kt"
+    ).read_text()
     fields = set(re.findall(r"val\s+(\w+)\s*:", source))
     assert fields == set(schema["properties"]) == set(schema["required"])
     catalog = json.loads((ROOT / "docs/mnn.json").read_text())
@@ -36,13 +39,18 @@ def main():
         assert isinstance(model["sources"], list) and model["sources"]
         for url in model["sources"]:
             assert isinstance(url, str) and url.startswith("https://")
-            assert not any(value in url.lower() for value in ("example.com", "localhost", "pending", "placeholder"))
+            assert not any(
+                value in url.lower()
+                for value in ("example.com", "localhost", "pending", "placeholder")
+            )
     manifest = json.loads((ROOT / "scripts/mnn/bundle.schema.json").read_text())
     assert manifest["additionalProperties"] is False
     assert set(manifest["required"]) == set(manifest["properties"])
     assert manifest["properties"]["profile"]["const"] == "sd15-512-general-int8-v1"
     assert manifest["properties"]["runtimeVersion"]["const"] == "3.6.2"
-    print("MNN whole-document completeness, DTO/catalog and manifest contract gates passed.")
+    print(
+        "MNN whole-document completeness, DTO/catalog and manifest contract gates passed."
+    )
 
 
 if __name__ == "__main__":
