@@ -173,7 +173,7 @@ enum class ServerSource(
         key = "hugging_face",
         type = ServerSourceType.CLOUD,
         readiness = PlatformValue(ServerSourceReadiness.STABLE),
-        version = "2026.6.10",
+        version = "2026.11.18",
         featureTags = setOf(
             FeatureTag.Txt2Img,
             FeatureTag.Img2Img,
@@ -210,7 +210,7 @@ enum class ServerSource(
         key = "stability_ai",
         type = ServerSourceType.CLOUD,
         readiness = PlatformValue(ServerSourceReadiness.STABLE),
-        version = "2026.6.10",
+        version = "2026.11.18",
         featureTags = setOf(
             FeatureTag.Txt2Img,
             FeatureTag.Img2Img,
