@@ -7,14 +7,21 @@ import os
 from pathlib import Path
 
 from provider_contracts.providers import PROVIDERS, SKIPPED, sources, verify_inventory
-from provider_contracts.schema import compare, operation, payload
+from provider_contracts.schema import compare, operation, payload, resolve
 from provider_contracts.upstream import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def check_binding(document, binding, models):
+def check_binding(document, binding, models, warnings=None):
     """Check route existence and each consumed request/response shape independently."""
+    if warnings is None:
+        warnings = []
+    if binding.missing_operation_reason and binding.method not in document.get(
+        "paths", {}
+    ).get(binding.path, {}):
+        warnings.append(f"{binding.missing_operation_reason} (coverage gap)")
+        return []
     endpoint = (
         operation(document, binding.path, binding.method)
         if binding.method != "schema"
@@ -38,7 +45,20 @@ def check_binding(document, binding, models):
                 if endpoint is None
                 else payload(document, endpoint, direction, binding.status)
             )
-            errors.extend(compare(document, client, schema, direction))
+            if (
+                direction == "response"
+                and binding.response_envelope_issue
+                and resolve(document, schema).get("type") == "array"
+                and client.get("type") == "object"
+                and set(client.get("properties", {})) == {"artifacts"}
+            ):
+                warnings.append(
+                    f"Known upstream artifacts-envelope mismatch skipped: {binding.response_envelope_issue} (coverage gap); artifact item types are still checked"
+                )
+                client = client["properties"]["artifacts"]
+            errors.extend(
+                compare(document, client, schema, direction, warnings=warnings)
+            )
         except (ValueError, KeyError, TypeError) as error:
             errors.append(f"{direction}: {error}")
     return errors
@@ -89,14 +109,18 @@ def main():
             result["download_error"] = f"{type(error).__name__}: {error}"
         else:
             for binding in bindings:
+                warnings = []
                 try:
-                    errors = check_binding(document, binding, metadata["models"])
+                    errors = check_binding(
+                        document, binding, metadata["models"], warnings
+                    )
                 except (ValueError, KeyError, TypeError) as error:
                     errors = [str(error)]
                 result["checks"].append(
                     {
                         "operation": f"{binding.method.upper()} {binding.path}",
                         "errors": errors,
+                        "warnings": warnings,
                     }
                 )
         report["sources"].append(result)
@@ -125,8 +149,16 @@ def main():
                 errors.extend(
                     f"{check['operation']} {error}" for error in check["errors"]
                 )
-        lines.append(f"### {provider}: {'FAIL' if errors else 'PASS'}")
+        warnings = [
+            f"{check['operation']} {note}"
+            for entry in entries
+            for check in entry["checks"]
+            for note in check["warnings"]
+        ]
+        status = "FAIL" if errors else "PASS with coverage gaps" if warnings else "PASS"
+        lines.append(f"### {provider}: {status}")
         lines.extend(f"- {error}" for error in errors)
+        lines.extend(f"- WARNING: {note}" for note in warnings)
         lines.extend([f"- Source: {entry['url']}" for entry in entries])
         lines.append("")
         has_failed = has_failed or bool(errors)

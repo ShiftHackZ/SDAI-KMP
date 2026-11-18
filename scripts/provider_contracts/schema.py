@@ -64,13 +64,15 @@ def variants(document, schema, depth=0):
     return [schema]
 
 
-def compare(document, client, upstream, direction, path="$", depth=0):
+def compare(document, client, upstream, direction, path="$", depth=0, warnings=None):
     """Return differences; request unions accept one shape, responses must accept all."""
     if depth > 32:
         raise ValueError(f"Consumed schema exceeds maximum nesting at {path}")
     choices = variants(document, upstream)
     differences = []
+    branch_warnings = []
     for choice in choices:
+        notices = []
         if choice["type"] == "null":
             result = (
                 []
@@ -78,24 +80,30 @@ def compare(document, client, upstream, direction, path="$", depth=0):
                 else [f"{path}: upstream can return null"]
             )
         else:
-            result = compare_shape(document, client, choice, direction, path, depth)
+            result = compare_shape(
+                document, client, choice, direction, path, depth, notices
+            )
         differences.append(result)
+        branch_warnings.append(notices)
     if direction == "request":
         # explicitNulls=false means nullable request values are omitted, not sent as null.
         non_null = [
-            result
-            for choice, result in zip(choices, differences)
-            if choice["type"] != "null"
+            index for index, choice in enumerate(choices) if choice["type"] != "null"
         ]
-        return (
-            min(non_null, key=len)
-            if non_null
-            else [f"{path}: upstream only accepts null"]
+        if not non_null:
+            return [f"{path}: upstream only accepts null"]
+        selected = min(non_null, key=lambda index: len(differences[index]))
+        if warnings is not None:
+            warnings.extend(branch_warnings[selected])
+        return differences[selected]
+    if warnings is not None:
+        warnings.extend(
+            sorted(set(note for notices in branch_warnings for note in notices))
         )
     return sorted(set(error for result in differences for error in result))
 
 
-def compare_shape(document, client, upstream, direction, path, depth):
+def compare_shape(document, client, upstream, direction, path, depth, warnings):
     expected, actual = upstream["type"], client["type"]
     is_compatible = (
         actual == expected
@@ -112,6 +120,7 @@ def compare_shape(document, client, upstream, direction, path, depth):
             direction,
             path + "[]",
             depth + 1,
+            warnings,
         )
     if actual != "object":
         return []
@@ -126,6 +135,7 @@ def compare_shape(document, client, upstream, direction, path, depth):
             direction,
             path + ".*",
             depth + 1,
+            warnings,
         )
     errors = []
     properties = upstream.get("properties", {})
@@ -139,6 +149,15 @@ def compare_shape(document, client, upstream, direction, path, depth):
     for name, field in client_properties.items():
         field_path = f"{path}.{name}"
         if name not in properties:
+            if (
+                direction == "request"
+                and field.get("nullable")
+                and upstream.get("additionalProperties") is not False
+            ):
+                warnings.append(
+                    f"{field_path}: optional nullable request field is not documented; null is omitted and upstream permits extensions (coverage gap)"
+                )
+                continue
             errors.append(
                 f"{field_path}: app field absent from published schema ({direction})"
             )
@@ -155,7 +174,13 @@ def compare_shape(document, client, upstream, direction, path, depth):
         try:
             errors.extend(
                 compare(
-                    document, field, properties[name], direction, field_path, depth + 1
+                    document,
+                    field,
+                    properties[name],
+                    direction,
+                    field_path,
+                    depth + 1,
+                    warnings,
                 )
             )
         except (ValueError, KeyError, TypeError) as error:

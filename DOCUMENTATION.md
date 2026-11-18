@@ -49,9 +49,24 @@ Each invocation fetches fresh upstream documents. A failed download or invalid
 document fails the check; there is no bundled-spec fallback. CI uploads differences,
 source URLs, fetch times and SHA-256 hashes under `upstream-provider-contracts-<provider>`.
 Use `--provider OPEN_AI` (or `HORDE`, `HUGGING_FACE`, `STABILITY_AI`, `FAL_AI`) to
-check one provider. Missing routes, removed consumed fields and incompatible wire
+check one provider. Missing routes, removed consumed response fields and incompatible wire
 types fail even when the application DTO field is optional. Additional upstream
 response fields are allowed because the application ignores unknown keys.
+
+Optional nullable request fields absent from an open upstream schema produce a
+coverage warning: null values are omitted and the schema permits extensions.
+A closed upstream schema or a published incompatible field type still fails.
+Hugging Face's model-list route is an explicit coverage gap while absent from its
+Hub OpenAPI document; the checker starts validating it automatically if published.
+Both Hugging Face text-to-image and image-to-image task schemas are fetched.
+Fal queue responses use its full queue API specification alongside model-specific
+input/output schemas.
+
+Stability's known [missing artifacts envelope](https://github.com/Stability-AI/rest-api-support/issues/38)
+produces a linked warning when its upstream response is an array. Only that
+envelope difference is skipped; artifact item types and other operations remain
+blocking. If upstream publishes the correct object envelope, the exception no
+longer applies. Coverage warnings appear in logs and the report even when CI passes.
 
 These checks compare published structural contracts. They do not call generation
 APIs or prove service behavior, authentication, value ranges or model availability.

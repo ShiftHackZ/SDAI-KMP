@@ -6,11 +6,115 @@ from io import BytesIO
 from unittest.mock import patch
 from urllib.error import URLError
 
+from check_provider_contracts import check_binding
+from provider_contracts.providers import Binding, STABILITY_ENVELOPE_ISSUE
 from provider_contracts.schema import compare, operation, payload
 from provider_contracts.upstream import fetch
 
 
 class ContractCheckerTests(unittest.TestCase):
+    def test_optional_request_extensions(self):
+        """given optional nullable request field, schema permits extensions, expected warning only"""
+        # Given a shared DTO field omitted when null and an open upstream object.
+        client = {
+            "type": "object",
+            "properties": {"image_size": {"type": "string", "nullable": True}},
+        }
+        upstream = {"type": "object", "properties": {}}
+        warnings = []
+        # When checking the request contract.
+        errors = compare({}, client, upstream, "request", warnings=warnings)
+        # Then this absence is a coverage warning; an explicitly closed schema still fails.
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertEqual(
+            compare({}, {**client, "required": ["image_size"]}, upstream, "request"), []
+        )
+        self.assertTrue(
+            compare({}, client, {**upstream, "additionalProperties": False}, "request")
+        )
+        self.assertTrue(
+            compare(
+                {},
+                client,
+                {"type": "object", "properties": {"image_size": {"type": "integer"}}},
+                "request",
+            )
+        )
+
+    def test_stability_envelope_issue(self):
+        """given known Stability envelope issue, nested types change, expected unrelated mismatch still fails"""
+        # Given the published array response and an app artifacts envelope.
+        item = {"type": "object", "properties": {"base64": {"type": "string"}}}
+        document = {
+            "paths": {
+                "/generation": {
+                    "post": {
+                        "responses": {
+                            "200": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"type": "array", "items": item}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        models = {
+            "Result": {
+                "type": "object",
+                "properties": {"artifacts": {"type": "array", "items": item}},
+            }
+        }
+        binding = Binding(
+            "/generation",
+            "post",
+            response="Result",
+            response_envelope_issue=STABILITY_ENVELOPE_ISSUE,
+        )
+        warnings = []
+        # When the documented issue is the only difference.
+        errors = check_binding(document, binding, models, warnings)
+        # Then it is linked in the warning, but incompatible nested fields still block CI.
+        self.assertEqual(errors, [])
+        self.assertIn(STABILITY_ENVELOPE_ISSUE, warnings[0])
+        changed = {"type": "object", "properties": {"base64": {"type": "integer"}}}
+        models["Result"]["properties"]["artifacts"]["items"] = changed
+        self.assertTrue(check_binding(document, binding, models))
+
+    def test_unpublished_operation_gap(self):
+        """given explicitly unpublished operation, provider starts documenting it, expected validation resumes"""
+        # Given a named coverage gap, not a blanket allowance for missing routes.
+        binding = Binding(
+            "/models", response="Result", missing_operation_reason="Not published"
+        )
+        models = {"Result": {"type": "integer"}}
+        warnings = []
+        # When the route is absent and subsequently becomes available with an incompatible response.
+        errors = check_binding({"paths": {}}, binding, models, warnings)
+        published = {
+            "paths": {
+                "/models": {
+                    "get": {
+                        "responses": {
+                            "200": {
+                                "content": {
+                                    "application/json": {"schema": {"type": "string"}}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        # Then the coverage gap is visible, and new published fields cannot bypass comparison.
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertTrue(check_binding(published, binding, models))
+
     def test_structural_compatibility(self):
         # Given compiled wire shapes and provider schema changes.
         integer = {"type": "integer"}

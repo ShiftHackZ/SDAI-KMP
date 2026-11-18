@@ -18,10 +18,13 @@ class Binding:
     response: str | None = None
     status: str = "200"
     is_array: bool = False
+    missing_operation_reason: str | None = None
+    response_envelope_issue: str | None = None
 
 
 SKIPPED = {"ARLI_AI", "OPEN_AI_OAUTH"}
 PROVIDERS = ("OPEN_AI", "HORDE", "HUGGING_FACE", "STABILITY_AI", "FAL_AI")
+STABILITY_ENVELOPE_ISSUE = "https://github.com/Stability-AI/rest-api-support/issues/38"
 
 
 def sources(root):
@@ -54,11 +57,13 @@ def sources(root):
             "post",
             "StabilityTextToImageRequest",
             "StabilityGenerationResponse",
+            response_envelope_issue=STABILITY_ENVELOPE_ISSUE,
         ),
         Binding(
             "/generation/{engine_id}/image-to-image",
             "post",
             response="StabilityGenerationResponse",
+            response_envelope_issue=STABILITY_ENVELOPE_ISSUE,
         ),
         Binding(
             "/generation/{engine_id}/text-to-image",
@@ -75,12 +80,28 @@ def sources(root):
     ]
     yield "HUGGING_FACE", "https://huggingface.co/.well-known/openapi.json", [
         Binding("/api/whoami-v2"),
-        Binding("/api/models", response="HuggingFaceModelRaw", is_array=True),
+        Binding(
+            "/api/models",
+            response="HuggingFaceModelRaw",
+            is_array=True,
+            missing_operation_reason="Hugging Face does not publish its model-list operation in the Hub OpenAPI document; model-list response coverage is unavailable",
+        ),
     ]
     yield "HUGGING_FACE", (
         "https://raw.githubusercontent.com/huggingface/huggingface.js/main/"
         "packages/tasks/src/tasks/text-to-image/spec/input.json"
     ), [Binding("text-to-image JSON Schema", "schema", "HuggingFaceGenerationRequest")]
+    yield "HUGGING_FACE", (
+        "https://raw.githubusercontent.com/huggingface/huggingface.js/main/"
+        "packages/tasks/src/tasks/image-to-image/spec/input.json"
+    ), [Binding("image-to-image JSON Schema", "schema", "HuggingFaceGenerationRequest")]
+    yield "FAL_AI", "https://fal.ai/docs/api-reference/inference-api/openapi/queue.json", [
+        Binding("/{owner}/{app}/{path}", "post", response="FalAiQueueSubmitResponse"),
+        Binding(
+            "/{owner}/{app}/requests/{request_id}/status",
+            response="FalAiQueueStatusResponse",
+        ),
+    ]
     catalogue = (
         root
         / "domain/src/commonMain/kotlin/com/shifthackz/aisdv1/domain/entity/FalAiModel.kt"
@@ -97,11 +118,7 @@ def sources(root):
         yield "FAL_AI", "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=" + quote(
             alias, safe=""
         ), [
-            Binding(f"/{alias}", "post", request, "FalAiQueueSubmitResponse"),
-            Binding(
-                f"/{alias}/requests/{{request_id}}/status",
-                response="FalAiQueueStatusResponse",
-            ),
+            Binding(f"/{alias}", "post", request),
             Binding(
                 f"/{alias}/requests/{{request_id}}", response="FalAiGenerationResponse"
             ),
