@@ -26,25 +26,6 @@ interface StorageUsagePlatformActions : StorageUsageByteMapper {
      */
     suspend fun clearAppCache()
 
-    /**
-     * Returns total bytes occupied by every downloaded model directory visible to the platform.
-     *
-     * This is used as a filesystem fallback when the model catalog has not produced model ids yet,
-     * but the app-private model store already contains downloaded archives.
-     *
-     * @author Dmitriy Moroz
-     */
-    suspend fun getAllDownloadedModelsBytes(): Long
-
-    /**
-     * Deletes every downloaded model directory visible to the platform.
-     *
-     * Common code uses this only when a platform stores a single local model provider and the
-     * filesystem contains model bytes that are not addressable through catalog model ids.
-     *
-     * @author Dmitriy Moroz
-     */
-    suspend fun clearAllDownloadedModels()
 
     /**
      * Returns total bytes occupied by downloaded model directories for [modelIds].
@@ -66,9 +47,6 @@ object NoOpStorageUsagePlatformActions : StorageUsagePlatformActions {
 
     override suspend fun clearAppCache() = Unit
 
-    override suspend fun getAllDownloadedModelsBytes(): Long = 0L
-
-    override suspend fun clearAllDownloadedModels() = Unit
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long = 0L
 }

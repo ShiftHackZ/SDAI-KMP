@@ -5,152 +5,172 @@ import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Defines the `DownloadableModelDataSource` contract for the SDAI domain layer.
+ * Separates remote catalog transfers from local metadata, download completeness and selected-model observation.
  *
  * @author Dmitriy Moroz
  */
 sealed interface DownloadableModelDataSource {
 
     /**
-     * Defines the `Remote` contract for the SDAI domain layer.
+     * Remote catalog HTTP and archive-download operations; transport and decoding failures remain observable.
      *
      * @author Dmitriy Moroz
      */
     interface Remote : DownloadableModelDataSource {
         /**
-         * Loads SDAI data through `fetch`.
+         * Fetches exactly one provider catalog; HTTP, decoding and cancellation failures propagate.
          *
-         * @return Result produced by `fetch`.
+         * @param type Runtime family identifying the catalog endpoint.
+         *
          * @author Dmitriy Moroz
          */
-        suspend fun fetch(): List<LocalAiModel>
+        suspend fun fetchCatalog(type: LocalAiModel.Type): List<LocalAiModel>
+
         /**
-         * Executes the `download` step in the SDAI domain layer.
+         * Streams the selected catalog source and publishes completion only after its complete model payload is activated.
          *
          * @param id identifier of the target entity.
          * @param url remote URL used by the operation.
-         * @return Result produced by `download`.
+         *
          * @author Dmitriy Moroz
          */
         fun download(id: String, url: String): Flow<DownloadState>
     }
 
     /**
-     * Defines the `Local` contract for the SDAI domain layer.
+     * Cached catalog metadata with current filesystem completeness and independent provider selection.
      *
      * @author Dmitriy Moroz
      */
     interface Local : DownloadableModelDataSource {
         /**
-         * Loads SDAI data through `getAllOnnx`.
+         * Reads ONNX catalog models with current downloaded and selected state, including the custom entry outside Play.
          *
-         * @return Result produced by `getAllOnnx`.
          * @author Dmitriy Moroz
          */
         suspend fun getAllOnnx(): List<LocalAiModel>
+
         /**
-         * Loads SDAI data through `getAllMediaPipe`.
+         * Reads cached MNN models with current completion and selection state.
          *
-         * @return Result produced by `getAllMediaPipe`.
+         * @author Dmitriy Moroz
+         */
+        suspend fun getAllMnn(): List<LocalAiModel>
+
+        /**
+         * Observes cached MNN metadata combined with selection changes.
+         *
+         * @author Dmitriy Moroz
+         */
+        fun observeAllMnn(): Flow<List<LocalAiModel>>
+
+        /**
+         * Reads available MediaPipe model metadata with current local download and selection state.
+         *
          * @author Dmitriy Moroz
          */
         suspend fun getAllMediaPipe(): List<LocalAiModel>
+
         /**
-         * Loads SDAI data through `getAllSdxl`.
+         * Reads stable-diffusion.cpp model metadata with current local download and selection state.
          *
-         * @return Result produced by `getAllSdxl`.
          * @author Dmitriy Moroz
          */
         suspend fun getAllSdxl(): List<LocalAiModel>
+
         /**
-         * Loads SDAI data through `getAllCoreMl`.
+         * Reads Core ML model metadata with current local download and selection state.
          *
-         * @return Result produced by `getAllCoreMl`.
          * @author Dmitriy Moroz
          */
         suspend fun getAllCoreMl(): List<LocalAiModel>
+
         /**
-         * Loads SDAI data through `getAllBonsai`.
+         * Reads Bonsai model metadata with current local download and selection state.
          *
-         * @return Result produced by `getAllBonsai`.
          * @author Dmitriy Moroz
          */
         suspend fun getAllBonsai(): List<LocalAiModel>
+
         /**
-         * Loads SDAI data through `getById`.
+         * Resolves a catalog or supported custom identity and attaches its current file and selection state; missing identities fail.
          *
          * @param id identifier of the target entity.
-         * @return Result produced by `getById`.
+         *
          * @author Dmitriy Moroz
          */
         suspend fun getById(id: String): LocalAiModel
+
         /**
-         * Loads SDAI data through `getSelectedOnnx`.
+         * Resolves the currently selected ONNX identity; absent metadata remains a failure.
          *
-         * @return Result produced by `getSelectedOnnx`.
          * @author Dmitriy Moroz
          */
         suspend fun getSelectedOnnx(): LocalAiModel
+
         /**
-         * Loads SDAI data through `getSelectedCoreMl`.
+         * Resolves the currently selected Core ML identity; absent metadata remains a failure.
          *
-         * @return Result produced by `getSelectedCoreMl`.
          * @author Dmitriy Moroz
          */
         suspend fun getSelectedCoreMl(): LocalAiModel
+
         /**
-         * Loads SDAI data through `getSelectedBonsai`.
+         * Resolves the currently selected Bonsai identity; absent metadata remains a failure.
          *
-         * @return Result produced by `getSelectedBonsai`.
          * @author Dmitriy Moroz
          */
         suspend fun getSelectedBonsai(): LocalAiModel
+
         /**
-         * Loads SDAI data through `getSelectedSdxl`.
+         * Resolves the currently selected stable-diffusion.cpp identity; absent metadata remains a failure.
          *
-         * @return Result produced by `getSelectedSdxl`.
          * @author Dmitriy Moroz
          */
         suspend fun getSelectedSdxl(): LocalAiModel
+
         /**
-         * Loads SDAI data through `observeAllOnnx`.
+         * Observes cached ONNX models combined with current selection and completion state.
          *
-         * @return Result produced by `observeAllOnnx`.
          * @author Dmitriy Moroz
          */
         fun observeAllOnnx(): Flow<List<LocalAiModel>>
+
         /**
-         * Loads SDAI data through `observeAllSdxl`.
+         * Observes cached stable-diffusion.cpp models combined with current selection and completion state.
          *
-         * @return Result produced by `observeAllSdxl`.
          * @author Dmitriy Moroz
          */
         fun observeAllSdxl(): Flow<List<LocalAiModel>>
+
         /**
-         * Loads SDAI data through `observeAllCoreMl`.
+         * Observes cached Core ML models combined with current selection and completion state.
          *
-         * @return Result produced by `observeAllCoreMl`.
          * @author Dmitriy Moroz
          */
         fun observeAllCoreMl(): Flow<List<LocalAiModel>>
+
         /**
-         * Loads SDAI data through `observeAllBonsai`.
+         * Observes cached Bonsai models combined with current selection and completion state.
          *
-         * @return Result produced by `observeAllBonsai`.
          * @author Dmitriy Moroz
          */
         fun observeAllBonsai(): Flow<List<LocalAiModel>>
+
         /**
-         * Performs the SDAI side effect handled by `save`.
+         * Upserts catalog metadata without persisting synthetic custom-model entries.
          *
-         * @param list list value consumed by the API.
+         * @param list Fetched provider catalog metadata to upsert; synthetic custom entries are not persisted.
+         *
          * @author Dmitriy Moroz
          */
         suspend fun save(list: List<LocalAiModel>)
+
         /**
-         * Performs the SDAI side effect handled by `delete`.
+         * Removes only the owned model payload; MNN removal waits for active inference leases.
          *
          * @param id identifier of the target entity.
+         *
          * @author Dmitriy Moroz
          */
         suspend fun delete(id: String)

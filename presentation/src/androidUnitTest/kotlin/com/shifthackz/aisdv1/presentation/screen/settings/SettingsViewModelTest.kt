@@ -30,9 +30,16 @@ import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsIntent
 import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsModal
 import com.shifthackz.aisdv1.presentation.screen.settings.platform.SettingsPlatformActions
 import com.shifthackz.aisdv1.presentation.screen.storageusage.StorageUsageObserver
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
+import com.shifthackz.aisdv1.domain.entity.mnn.MnnCatalogResult
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import com.shifthackz.aisdv1.presentation.screen.setup.platform.isServerSourceAvailableOnAndroid
+import com.shifthackz.aisdv1.presentation.screen.setup.platform.isServerSourceAvailableOnPlatform
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -72,6 +79,7 @@ class SettingsViewModelTest {
     private val getLocalSdxlModelsUseCase = mockk<GetLocalSdxlModelsUseCase>()
     private val getLocalCoreMlModelsUseCase = mockk<GetLocalCoreMlModelsUseCase>()
     private val getLocalBonsaiModelsUseCase = mockk<GetLocalBonsaiModelsUseCase>()
+    private val getLocalMnnModelsUseCase = mockk<GetLocalMnnModelsUseCase>()
     private val observeNetworkUsageUseCase = mockk<ObserveNetworkUsageUseCase>()
     private val preferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val router = TestSettingsRouter()
@@ -83,6 +91,10 @@ class SettingsViewModelTest {
 
     @Before
     fun initialize() {
+        mockkStatic(::isServerSourceAvailableOnPlatform)
+        every { isServerSourceAvailableOnPlatform(any()) } answers {
+            isServerSourceAvailableOnAndroid(firstArg(), arrayOf("arm64-v8a"))
+        }
         storageUsageObserver = StorageUsageObserver()
         coEvery { getStableDiffusionModelsUseCase() } returns mockStableDiffusionModels
         coEvery { clearAppCacheUseCase() } returns Unit
@@ -93,6 +105,7 @@ class SettingsViewModelTest {
         coEvery { getLocalSdxlModelsUseCase() } returns emptyList()
         coEvery { getLocalCoreMlModelsUseCase() } returns emptyList()
         coEvery { getLocalBonsaiModelsUseCase() } returns emptyList()
+        coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(emptyList())
         every { observeStabilityAiCreditsUseCase() } returns stabilityCredits
         every { observeNetworkUsageUseCase() } returns networkUsage
         every { preferenceManager.observe() } returns settings
@@ -101,6 +114,7 @@ class SettingsViewModelTest {
 
     @After
     fun tearDown() {
+        unmockkStatic(::isServerSourceAvailableOnPlatform)
         viewModelScope?.cancel()
         viewModelScope = null
     }
@@ -171,6 +185,57 @@ class SettingsViewModelTest {
         }
 
     @Test
+    fun `given Settings storage summary, MNN catalog and custom snapshots exist, expected only catalog bytes`() =
+        runTest {
+            // Given
+            val catalog = LocalAiModel.CustomMnn.copy(id = "mnn-catalog", downloaded = true)
+            coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(
+                listOf(catalog, LocalAiModel.CustomMnn.copy(downloaded = true)),
+            )
+            platformActions.modelBytes.putAll(
+                mapOf(
+                    catalog.id to 4096L,
+                    LocalAiModel.CustomMnn.id to 8192L,
+                    "mnn_custom" to 16384L
+                ),
+            )
+            // When
+            val viewModel = createViewModel(object : BuildInfoProvider by TestBuildInfoProvider {
+                override val type = BuildType.FULL
+            })
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(4096L, viewModel.state.value.storageUsageBytes)
+        }
+
+    @Test
+    fun `given Settings storage summary, Core ML custom and unknown directories exist, expected only catalog bytes`() =
+        runTest {
+            // Given
+            val catalog = LocalAiModel.CustomCoreMl.copy(id = "coreml-catalog", downloaded = true)
+            coEvery { getLocalCoreMlModelsUseCase() } returns listOf(
+                catalog, LocalAiModel.CustomCoreMl.copy(downloaded = true),
+            )
+            platformActions.modelBytes.putAll(
+                mapOf(
+                    catalog.id to 4096L,
+                    LocalAiModel.CustomCoreMl.id to 8192L,
+                    "unknown-custom" to 16384L
+                ),
+            )
+            // When
+            val viewModel = createViewModel(object : BuildInfoProvider by TestBuildInfoProvider {
+                override val type = BuildType.FULL
+                override val platform = Platform.IOS
+            })
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(4096L, viewModel.state.value.storageUsageBytes)
+        }
+
+    @Test
     fun `given launch url intents, expected platform opens configured urls`() = runTest {
         val viewModel = createViewModel()
 
@@ -238,7 +303,9 @@ class SettingsViewModelTest {
         assertEquals(SettingsModal.None, viewModel.state.value.screenModal)
     }
 
-    private fun TestScope.createViewModel(): SettingsViewModel {
+    private fun TestScope.createViewModel(
+        buildInfoProvider: BuildInfoProvider = TestBuildInfoProvider,
+    ): SettingsViewModel {
         val dispatcher = StandardTestDispatcher(testScheduler)
         dispatchersProvider = object : DispatchersProvider {
             override val io: CoroutineDispatcher = dispatcher
@@ -259,11 +326,12 @@ class SettingsViewModelTest {
             getLocalSdxlModelsUseCase = getLocalSdxlModelsUseCase,
             getLocalCoreMlModelsUseCase = getLocalCoreMlModelsUseCase,
             getLocalBonsaiModelsUseCase = getLocalBonsaiModelsUseCase,
+            getLocalMnnModelsUseCase = getLocalMnnModelsUseCase,
             observeNetworkUsageUseCase = observeNetworkUsageUseCase,
             storageUsageObserver = storageUsageObserver,
             preferenceManager = preferenceManager,
             debugMenuAccessor = DebugMenuAccessor(preferenceManager),
-            buildInfoProvider = TestBuildInfoProvider,
+            buildInfoProvider = buildInfoProvider,
             linksProvider = linksProvider,
             router = router,
             platformActions = platformActions,
@@ -319,6 +387,7 @@ private class TestSettingsPlatformActions : SettingsPlatformActions {
     var notificationPermissionGranted = true
     var appCacheBytes = 0L
     var visibleStorageThresholdBytes = 0L
+    val modelBytes = mutableMapOf<String, Long>()
     val openedUrls = mutableListOf<String>()
 
     override val requiresStoragePermissionForMediaStore: Boolean
@@ -343,9 +412,9 @@ private class TestSettingsPlatformActions : SettingsPlatformActions {
         appCacheBytes = 0L
     }
 
-    override suspend fun getAllDownloadedModelsBytes(): Long = 0L
 
-    override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long = 0L
+    override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long =
+        modelIds.distinct().sumOf { modelBytes[it] ?: 0L }
 
     override fun openUrl(url: String) {
         openedUrls += url

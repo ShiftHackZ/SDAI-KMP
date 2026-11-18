@@ -27,7 +27,7 @@ with the implementation.
 
 ## Android native inference ownership
 
-ONNX, MediaPipe, stable-diffusion.cpp and experimental PrismML Bonsai execute in
+ONNX, MediaPipe, MNN, stable-diffusion.cpp and experimental PrismML Bonsai execute in
 the private `:inference` process. Foreground generation and WorkManager use the
 same host gateway; WorkManager owns scheduling and notifications while the child
 owns native loading and execution. Feature host bindings must remain gateway
@@ -40,7 +40,33 @@ Cancellation follows the attempt owner, with bounded child termination when the
 runtime does not cooperate. Interrupted native work requires explicit retry and
 is never replayed automatically. Isolation contains process-local failures; it
 does not prevent device-wide memory pressure or GPU driver failures. iOS keeps
-its existing Core ML and Bonsai MLX execution paths.
+in-process Core ML, Bonsai MLX and MNN execution paths; MNN cancellation waits for native return before releasing model leases.
+
+## MNN model bundles
+
+The Alpha MNN provider supports Android arm64 and physical iOS 17+ devices and runs one SD 1.5 image at 512×512,
+with PNDM, CFG 7.5 and 1–50 steps. Android offers CPU/OpenCL; iOS offers CPU/Metal. It has no negative prompt,
+img2img, batch, LoRA or NPU execution. The iOS simulator explicitly rejects inference. Backend selection does not guarantee
+that all operators execute on a GPU. Requested unavailable GPU backends fail explicitly.
+
+Catalog downloads use `docs/mnn.json`, the existing typed model response and
+[the documented catalog contract](network/mnn-catalog.openapi.json). The catalog
+includes the SD 1.5 General bundle with eight-bit weights, hosted on
+[Hugging Face](https://huggingface.co/moroz-ellmsha/sdai-mnn-model-archives).
+Its download URL pins the exact artifact revision; the host also provides the
+integrity manifest, archive SHA256, license and attribution.
+Android Full/FOSS custom selection reuses the existing folder picker and storage
+permission flow. Setup validates the complete external bundle and creates an
+app-owned immutable snapshot, preserving the external source. Model deletion
+waits for active native leases; queued removed/replaced identities fail explicitly.
+
+[The packaging guide](scripts/mnn/README.md) describes pinned prebuilt graphs,
+matching tokenizer preparation, licensing and the versioned integrity manifest.
+Generated weights and archives remain outside Git. The runtime source is fetched
+by exact revision and SHA256, with a narrow build-local SD 1.5 patch. Its common
+`MnnRuntime` API has isolated Android execution and an injected asynchronous iOS bridge. Android installs its native bindings only in the inference child graph.
+
+The same `feature/mnn` module owns the iOS Swift package under `swift/`, with a module-root wrapper like Bonsai. Run `python3 scripts/build_mnn_ios.py` before SwiftPM resolution or Xcode builds; it generates ignored unsigned device, simulator and macOS native slices from pinned source. iOS accepts catalog models only. Its serial runtime retains immutable model leases and backup-excluded Application Support workspaces until native return, including cooperative cancellation. UIKit background execution is finite; expiration cancels the exact owner. Native crashes and memory termination remain outside recoverable errors.
 
 ## UI performance diagnostics
 

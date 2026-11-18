@@ -25,6 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.file.LOCAL_DIFFUSION_CUSTOM_PATH
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.DownloadState
+import com.shifthackz.aisdv1.presentation.screen.setup.model.LocalCatalogStatus
+import com.shifthackz.aisdv1.presentation.screen.setup.model.localCatalogType
 import com.shifthackz.aisdv1.presentation.screen.setup.component.SwitchRow
 import com.shifthackz.aisdv1.presentation.screen.setup.component.isCustom
 import com.shifthackz.aisdv1.presentation.screen.setup.component.message
@@ -52,11 +55,13 @@ import com.shifthackz.aisdv1.presentation.widget.scrollbar.verticalScrollbar
 
 /**
  * Scrolls the selected provider's configuration form above the wizard's pinned actions.
+ *
  * @param state Current provider and editable configuration.
  * @param strings Shared setup labels.
  * @param listState Scroll position retained across recompositions.
  * @param processIntent Dispatches form changes through MVI.
  * @param modifier Scaffold-inset content bounds.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -132,6 +137,7 @@ internal fun ConfigurationStep(
                     processIntent = processIntent,
                 )
 
+                ServerSource.LOCAL_MNN,
                 ServerSource.LOCAL_MICROSOFT_ONNX,
                 ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
                 ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
@@ -149,11 +155,15 @@ internal fun ConfigurationStep(
 
 @Composable
 
-/** Displays downloaded/custom model selection and provider-specific local runtime controls.
+/**
+ * Displays downloaded/custom model selection and provider-specific local runtime controls.
+ *
  * @param state Current provider setup fields, catalogs and validation feedback.
  * @param strings Localized strings supplied by the setup composition root.
  * @param processIntent Routes setup interactions to the owning view model.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal fun LocalGenerationForm(
     state: ServerSetupState,
     strings: ServerSetupStrings,
@@ -186,7 +196,9 @@ internal fun LocalGenerationForm(
                 processIntent = processIntent,
             )
         }
-        state.visibleLocalModels.forEach { model ->
+        val customModels = state.localModels.filter(ServerSetupState.LocalModel::isCustom)
+        val catalogModels = state.localModels.filterNot(ServerSetupState.LocalModel::isCustom)
+        if (state.localCustomModel) customModels.forEach { model ->
             LocalModelItem(
                 model = model,
                 selected = model.selected,
@@ -195,27 +207,37 @@ internal fun LocalGenerationForm(
                 onAction = { processIntent(ServerSetupIntent.LocalModel.ClickReduce(model)) },
             )
         }
+        val catalogStatus = state.mode.localCatalogType?.let { state.localCatalogStatuses[it] }
+            ?: LocalCatalogStatus.LOADING
+        if (catalogStatus != LocalCatalogStatus.READY || catalogModels.isEmpty()) {
+            LocalCatalogStatusCard(catalogStatus) {
+                processIntent(ServerSetupIntent.RetryLocalCatalog(state.mode))
+            }
+        }
+        catalogModels.filter { catalogStatus != LocalCatalogStatus.ERROR || it.downloaded || it.downloadState != DownloadState.Unknown }
+            .forEach { model ->
+                LocalModelItem(
+                    model = model,
+                    selected = model.selected,
+                    strings = strings,
+                    onSelect = { processIntent(ServerSetupIntent.SelectLocalModel(model)) },
+                    onAction = { processIntent(ServerSetupIntent.LocalModel.ClickReduce(model)) },
+                )
+            }
     }
 }
 
-private val ServerSetupState.visibleLocalModels: List<ServerSetupState.LocalModel>
-    get() {
-        val customModels = localModels.filter(ServerSetupState.LocalModel::isCustom)
-        val builtInModels = localModels.filterNot(ServerSetupState.LocalModel::isCustom)
-        return if (localCustomModel) {
-            customModels + builtInModels
-        } else {
-            builtInModels
-        }
-    }
-
 @Composable
 
-/** Displays the active local provider’s custom model path and validation feedback.
+/**
+ * Displays the active local provider’s custom model path and validation feedback.
+ *
  * @param state Current provider setup fields, catalogs and validation feedback.
  * @param strings Localized strings supplied by the setup composition root.
  * @param processIntent Routes setup interactions to the owning view model.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal fun LocalCustomModelPathForm(
     state: ServerSetupState,
     strings: ServerSetupStrings,

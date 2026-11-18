@@ -1,5 +1,13 @@
 package com.shifthackz.aisdv1.domain.di
 
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCaseImpl
+
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
+
+import com.shifthackz.aisdv1.domain.gateway.MnnBackendPolicyImpl
+
+import com.shifthackz.aisdv1.domain.gateway.MnnBackendPolicy
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.SelectEasyDiffusionModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.SelectEasyDiffusionModelUseCaseImpl
 
@@ -40,6 +48,20 @@ import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.domain.gateway.ServerConnectivityGateway
 import com.shifthackz.aisdv1.domain.interactor.wakelock.WakeLockInterActor
 import com.shifthackz.aisdv1.domain.interactor.wakelock.WakeLockInterActorImpl
+import com.shifthackz.aisdv1.domain.repository.MnnGenerationRepository
+import com.shifthackz.aisdv1.domain.repository.UnsupportedMnnGenerationRepository
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.RefreshLocalModelCatalogUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.downloadable.RefreshLocalModelCatalogUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.downloadable.ObserveLocalMnnModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.ObserveLocalMnnModelsUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToMnnUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.SelectMnnModelUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.SelectMnnModelUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToMnnUseCaseImpl
 import com.shifthackz.aisdv1.domain.repository.BonsaiGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.CoreMlGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.LocalDiffusionGenerationRepository
@@ -257,6 +279,8 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDomainModule = module {
+    single<MnnBackendPolicy> { MnnBackendPolicyImpl(get()) }
+    factory<ObserveMnnProcessStatusUseCase> { ObserveMnnProcessStatusUseCaseImpl(get()) }
     single<NativeGenerationGateway> { NoOpNativeGenerationGateway }
     single { ProviderSelectionGuard() }
     single<ServerConnectivityGateway> { NoOpServerConnectivityGateway }
@@ -266,6 +290,18 @@ val coreDomainModule = module {
     single<MediaPipeGenerationRepository> { NoOpMediaPipeGenerationRepository }
     single<StableDiffusionCppGenerationRepository> { NoOpStableDiffusionCppGenerationRepository }
     single<CoreMlGenerationRepository> { NoOpCoreMlGenerationRepository }
+    single<MnnGenerationRepository> { UnsupportedMnnGenerationRepository }
+    factory<GetCachedLocalModelCatalogUseCase> {
+        GetCachedLocalModelCatalogUseCaseImpl(
+            get(),
+            get()
+        )
+    }
+    factory<RefreshLocalModelCatalogUseCase> { RefreshLocalModelCatalogUseCaseImpl(get(), get()) }
+    factory<GetLocalMnnModelsUseCase> { GetLocalMnnModelsUseCaseImpl(get()) }
+    factory<ObserveLocalMnnModelsUseCase> { ObserveLocalMnnModelsUseCaseImpl(get()) }
+    factory<SelectMnnModelUseCase> { SelectMnnModelUseCaseImpl(get(), get(), get()) }
+    factory<ConnectToMnnUseCase> { ConnectToMnnUseCaseImpl(get(), get(), get()) }
     single<BonsaiGenerationRepository> { NoOpBonsaiGenerationRepository }
     single<WakeLockRepository> { NoOpWakeLockRepository }
     single<NetworkUsageRepository> { NoOpNetworkUsageRepository }
@@ -386,19 +422,19 @@ val coreDomainModule = module {
         ObserveLocalSdxlModelsUseCaseImpl(repository = get())
     }
     factory<GetLocalOnnxModelsUseCase> {
-        GetLocalOnnxModelsUseCaseImpl(downloadableModelRepository = get())
+        GetLocalOnnxModelsUseCaseImpl(refreshCatalog = get())
     }
     factory<GetLocalMediaPipeModelsUseCase> {
-        GetLocalMediaPipeModelsUseCaseImpl(downloadableModelRepository = get())
+        GetLocalMediaPipeModelsUseCaseImpl(refreshCatalog = get())
     }
     factory<GetLocalSdxlModelsUseCase> {
-        GetLocalSdxlModelsUseCaseImpl(downloadableModelRepository = get())
+        GetLocalSdxlModelsUseCaseImpl(refreshCatalog = get())
     }
     factory<GetLocalCoreMlModelsUseCase> {
-        GetLocalCoreMlModelsUseCaseImpl(downloadableModelRepository = get())
+        GetLocalCoreMlModelsUseCaseImpl(refreshCatalog = get())
     }
     factory<GetLocalBonsaiModelsUseCase> {
-        GetLocalBonsaiModelsUseCaseImpl(downloadableModelRepository = get())
+        GetLocalBonsaiModelsUseCaseImpl(refreshCatalog = get())
     }
     factory<GetLocalModelUseCase> {
         GetLocalModelUseCaseImpl(localDataSource = get())
@@ -407,7 +443,7 @@ val coreDomainModule = module {
         DownloadModelUseCaseImpl(downloadableModelRepository = get())
     }
     factory<DeleteModelUseCase> {
-        DeleteModelUseCaseImpl(downloadableModelRepository = get())
+        DeleteModelUseCaseImpl(downloadableModelRepository = get(), preferenceManager = get())
     }
     factory<TextToImageUseCase> {
         TextToImageUseCaseImpl(
@@ -428,6 +464,7 @@ val coreDomainModule = module {
             stableDiffusionCppGenerationRepository = get(),
             coreMlGenerationRepository = get(),
             bonsaiGenerationRepository = get(),
+            mnnGenerationRepository = get(),
             preferenceManager = get(),
         )
     }
@@ -468,6 +505,7 @@ val coreDomainModule = module {
     }
     factory<InterruptWorkerGenerationUseCase> {
         InterruptWorkerGenerationUseCaseImpl(
+            mnnRepository = get(),
             interruptEasyDiffusionUseCase = get(),
             nativeGenerationGateway = get(),
             interruptSourceGenerationUseCase = get(),
@@ -482,6 +520,7 @@ val coreDomainModule = module {
             stableDiffusionCppGenerationRepository = get(),
             coreMlGenerationRepository = get(),
             bonsaiGenerationRepository = get(),
+            mnnGenerationRepository = get(),
         )
     }
     factory<SaveGenerationResultUseCase> {
@@ -556,6 +595,7 @@ val coreDomainModule = module {
         DefaultGetConfigurationUseCaseImpl(
             configurationStore = get(),
             authorizationStore = get(),
+            mnnBackendPolicy = get(),
         )
     }
     factory<SetServerConfigurationUseCase> {

@@ -65,28 +65,6 @@ internal class IosStorageUsageFileSystem(
             }
     }
 
-    /**
-     * Returns the total size of every local model directory in bytes.
-     *
-     * @author Dmitriy Moroz
-     */
-    fun getAllDownloadedModelsBytes(): Long = localModelDirPath.pathSize()
-
-    /**
-     * Deletes every local model directory without deleting the model store directory itself.
-     *
-     * @author Dmitriy Moroz
-     */
-    fun clearAllDownloadedModels() {
-        fileManager.contentsOfDirectoryAtPath(path = localModelDirPath, error = null)
-            ?.filterIsInstance<String>()
-            ?.forEach { name ->
-                fileManager.removeItemAtPath(
-                    path = localModelDirPath.child(name),
-                    error = null,
-                )
-            }
-    }
 
     /**
      * Returns the total size of downloaded local model directories in bytes.
@@ -135,8 +113,8 @@ internal class IosStorageUsageFileSystem(
     /**
      * Appends a single child component to an app-private path.
      *
-     * @receiver Parent directory path.
      * @param name Child file or directory name.
+     * @receiver Parent directory path.
      *
      * @author Dmitriy Moroz
      */

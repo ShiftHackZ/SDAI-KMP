@@ -15,6 +15,15 @@ import com.shifthackz.aisdv1.presentation.model.localizedDescription
 import com.shifthackz.aisdv1.presentation.model.observeOpenAiOAuthIdentity
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
+import com.shifthackz.aisdv1.presentation.screen.setup.model.catalogModels
+import com.shifthackz.aisdv1.presentation.screen.setup.model.withVerifiedOwnedModel
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.currentCoroutineContext
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
@@ -24,6 +33,7 @@ import com.shifthackz.aisdv1.core.validation.url.UrlValidator
 import com.shifthackz.aisdv1.domain.entity.DownloadState
 import com.shifthackz.aisdv1.domain.entity.HuggingFaceModel
 import com.shifthackz.aisdv1.domain.entity.OpenAiCompatibleConnection
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
 import com.shifthackz.aisdv1.domain.entity.OpenAiOAuthFailure
@@ -34,11 +44,13 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalCoreMlModelsUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMediaPipeModelsUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalOnnxModelsUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalSdxlModelsUseCase
+import com.shifthackz.aisdv1.presentation.screen.setup.model.localCatalogType
+import com.shifthackz.aisdv1.presentation.screen.setup.model.withCatalogResult
+import com.shifthackz.aisdv1.presentation.screen.setup.model.LocalCatalogStatus
+import com.shifthackz.aisdv1.domain.usecase.downloadable.RefreshLocalModelCatalogUseCase
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToMnnUseCase
 import com.shifthackz.aisdv1.domain.usecase.huggingface.FetchHuggingFaceModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToA1111UseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToArliAiUseCase
@@ -80,16 +92,14 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Owns provider setup state, validation, local model downloads, and final connection side effects.
  *
- * @param retryAuthorizationStorageUseCase Completes checked local persistence after an explicit retry.
- * @param resetAuthorizationCredentialsUseCase Resets only saved Basic Auth after dedicated confirmation.
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  * @param launchSource Screen that opened setup, used to decide back navigation and completion route.
  * @param dispatchersProvider App coroutine dispatchers used by setup work.
  * @param buildInfoProvider Build metadata used to filter platform-supported local providers.
+ * @param getCachedLocalModelCatalogUseCase Publishes existing downloaded/custom choices before remote catalog work.
+ * @param refreshLocalModelCatalogUseCase Refreshes independent local catalogs and reports offline recovery explicitly.
  * @param getConfigurationUseCase Reads the current provider configuration.
- * @param getLocalOnnxModelsUseCase Reads locally configured ONNX models.
- * @param getLocalMediaPipeModelsUseCase Reads locally configured MediaPipe models.
- * @param getLocalSdxlModelsUseCase Reads locally configured SDXL models.
- * @param getLocalCoreMlModelsUseCase Reads locally configured Core ML models on supported builds.
+ * @param connectToMnnUseCase Validates the selected bundle and commits its independent backend.
  * @param fetchHuggingFaceModelsUseCase Fetches Hugging Face model list for remote setup.
  * @param urlValidator Validates provider URL input.
  * @param stringValidator Validates text settings entered by the user.
@@ -102,10 +112,13 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param connectToMediaPipeUseCase Applies MediaPipe local diffusion configuration.
  * @param connectToSdxlUseCase Applies SDXL local diffusion configuration.
  * @param connectToCoreMlUseCase Applies Core ML local diffusion configuration.
+ * @param connectToBonsaiUseCase Publishes the selected Bonsai model and independent local runtime configuration.
  * @param connectToOpenAiCompatibleUseCase Validates and applies independent image-server configuration.
+ * @param connectToEasyDiffusionUseCase Validates candidate readiness/catalog before atomically publishing an anonymous connection.
  * @param connectToOpenAiUseCase Applies OpenAI configuration.
  * @param connectToStabilityAiUseCase Applies Stability AI configuration.
  * @param connectToFalAiUseCase Applies Fal AI configuration.
+ * @param connectToArliAiUseCase Validates ArliAI credentials and publishes the selected remote source.
  * @param downloadModelUseCase Downloads a selected local model.
  * @param deleteModelUseCase Deletes a selected local model.
  * @param downloadGuard Platform guard for model download prerequisites.
@@ -115,26 +128,21 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param router Setup navigation contract.
  * @param openAiOAuthGateway Device authorization and protected session lifecycle.
  * @param setServerConfigurationUseCase Commits the selected source after a completed login.
+ * @param retryAuthorizationStorageUseCase Completes checked local persistence after an explicit retry.
+ * @param resetAuthorizationCredentialsUseCase Resets only saved Basic Auth after dedicated confirmation.
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
- * @param connectToEasyDiffusionUseCase Validates candidate readiness/catalog before atomically publishing an anonymous connection.
- * @param getLocalBonsaiModelsUseCase Reads downloaded and custom Bonsai models available to provider setup.
- * @param connectToBonsaiUseCase Publishes the selected Bonsai model and independent local runtime configuration.
- * @param connectToArliAiUseCase Validates ArliAI credentials and publishes the selected remote source.
  * @author Dmitriy Moroz
- * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class ServerSetupViewModel(
     diagnostics: UiDiagnostics,
     private val launchSource: LaunchSource = LaunchSource.SPLASH,
     private val dispatchersProvider: DispatchersProvider,
     private val buildInfoProvider: BuildInfoProvider,
+    private val getCachedLocalModelCatalogUseCase: GetCachedLocalModelCatalogUseCase,
+    private val refreshLocalModelCatalogUseCase: RefreshLocalModelCatalogUseCase,
     private val getConfigurationUseCase: GetConfigurationUseCase,
-    private val getLocalOnnxModelsUseCase: GetLocalOnnxModelsUseCase,
-    private val getLocalMediaPipeModelsUseCase: GetLocalMediaPipeModelsUseCase,
-    private val getLocalSdxlModelsUseCase: GetLocalSdxlModelsUseCase,
-    private val getLocalCoreMlModelsUseCase: GetLocalCoreMlModelsUseCase,
-    private val getLocalBonsaiModelsUseCase: GetLocalBonsaiModelsUseCase,
+    private val connectToMnnUseCase: ConnectToMnnUseCase,
     private val fetchHuggingFaceModelsUseCase: FetchHuggingFaceModelsUseCase,
     private val urlValidator: UrlValidator,
     private val stringValidator: CommonStringValidator,
@@ -178,7 +186,11 @@ class ServerSetupViewModel(
     effectDispatcher = dispatchersProvider.immediate,
 ) {
 
-    private val downloadJobs: MutableMap<String, Job> = mutableMapOf()
+    private val downloadJobs =
+        MutableStateFlow<Map<Pair<LocalAiModel.Type, String>, Job>>(emptyMap())
+    private val downloadCancellationMutex = Mutex()
+    private val catalogRefreshMutex = Mutex()
+    private val refreshingCatalogs = mutableSetOf<LocalAiModel.Type>()
     private var oauthLoginJob: Job? = null
     private var oauthAttempt = 0L
 
@@ -206,31 +218,6 @@ class ServerSetupViewModel(
             runCatching {
                 val configuration = getConfigurationUseCase()
                 val allowedModes = buildInfoProvider.setupAllowedModes()
-                val onnxModels = if (ServerSource.LOCAL_MICROSOFT_ONNX in allowedModes) {
-                    getLocalOnnxModelsUseCase()
-                } else {
-                    emptyList()
-                }
-                val mediaPipeModels = if (ServerSource.LOCAL_GOOGLE_MEDIA_PIPE in allowedModes) {
-                    getLocalMediaPipeModelsUseCase()
-                } else {
-                    emptyList()
-                }
-                val sdxlModels = if (ServerSource.LOCAL_STABLE_DIFFUSION_CPP in allowedModes) {
-                    getLocalSdxlModelsUseCase()
-                } else {
-                    emptyList()
-                }
-                val coreMlModels = if (ServerSource.LOCAL_APPLE_CORE_ML in allowedModes) {
-                    getLocalCoreMlModelsUseCase()
-                } else {
-                    emptyList()
-                }
-                val bonsaiModels = if (ServerSource.LOCAL_APPLE_BONSAI in allowedModes) {
-                    getLocalBonsaiModelsUseCase()
-                } else {
-                    emptyList()
-                }
                 val models = runCatching {
                     withTimeout(HUGGING_FACE_MODELS_TIMEOUT_MILLIS.milliseconds) {
                         fetchHuggingFaceModelsUseCase()
@@ -244,11 +231,24 @@ class ServerSetupViewModel(
                     allowedModes = allowedModes,
                     platform = buildInfoProvider.platform,
                     huggingFaceModels = models,
-                    localOnnxModels = onnxModels,
-                    localMediaPipeModels = mediaPipeModels,
-                    localSdxlModels = sdxlModels,
-                    localCoreMlModels = coreMlModels,
-                    localBonsaiModels = bonsaiModels,
+                    localMnnModels = if (buildInfoProvider.type != BuildType.PLAY) listOf(
+                        LocalAiModel.CustomMnn.copy(selected = configuration.localMnnModelId == LocalAiModel.CustomMnn.id)
+                    ) else emptyList(),
+                    localOnnxModels = if (buildInfoProvider.type != BuildType.PLAY) listOf(
+                        LocalAiModel.CustomOnnx.copy(selected = configuration.localOnnxModelId == LocalAiModel.CustomOnnx.id)
+                    ) else emptyList(),
+                    localMediaPipeModels = if (buildInfoProvider.type != BuildType.PLAY) listOf(
+                        LocalAiModel.CustomMediaPipe.copy(selected = configuration.localMediaPipeModelId == LocalAiModel.CustomMediaPipe.id)
+                    ) else emptyList(),
+                    localSdxlModels = if (buildInfoProvider.type != BuildType.PLAY) listOf(
+                        LocalAiModel.CustomSdxl.copy(selected = configuration.localSdxlModelId == LocalAiModel.CustomSdxl.id)
+                    ) else emptyList(),
+                    localCoreMlModels = if (buildInfoProvider.type != BuildType.PLAY) listOf(
+                        LocalAiModel.CustomCoreMl.copy(selected = configuration.localCoreMlModelId == LocalAiModel.CustomCoreMl.id)
+                    ) else emptyList(),
+                    localBonsaiModels = if (buildInfoProvider.type != BuildType.PLAY) listOf(
+                        LocalAiModel.CustomBonsai.copy(selected = configuration.localBonsaiModelId == LocalAiModel.CustomBonsai.id)
+                    ) else emptyList(),
                     allowLocalCustomModels = buildInfoProvider.type != BuildType.PLAY,
                     demoModeUrl = linksProvider.demoModeUrl,
                     showBackNavArrow = launchSource == LaunchSource.SETTINGS,
@@ -263,6 +263,7 @@ class ServerSetupViewModel(
                             )
                         )
                     }
+                    currentState.allowedModes.forEach(::refreshLocalCatalog)
                 }
                 .onFailure { t ->
                     withContext(dispatchersProvider.immediate) {
@@ -293,12 +294,20 @@ class ServerSetupViewModel(
         connectToServer = ::connectToServer,
     )
 
-    /** Routes a user intent to its state transition or authorized side-effect handler.
+    /**
+     * Routes a user intent to its state transition or authorized side-effect handler.
+     *
      * @param intent User event emitted by this screen’s production controls.
-     * @author Dmitriy Moroz */
+     *
+     * @author Dmitriy Moroz
+     */
 
     override fun processIntent(intent: ServerSetupIntent) {
         when (intent) {
+            is ServerSetupIntent.RetryLocalCatalog -> {
+                refreshLocalCatalog(intent.source); return
+            }
+
             ServerSetupIntent.RetryAuthorizationStorage -> {
                 recoverAuthorizationStorage(shouldReset = false); return
             }
@@ -374,9 +383,50 @@ class ServerSetupViewModel(
         viewModelScope.cancel()
     }
 
-    /** Validates active provider inputs and starts connection only when the form has no blocking errors.
-     * @author Dmitriy Moroz */
+    /**
+     * Refreshes one allowed provider independently and coalesces concurrent retries for that source.
+     *
+     * @param source Provider owning the refresh; completion never changes the visible mode.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun refreshLocalCatalog(source: ServerSource) {
+        val type = source.localCatalogType ?: return
+        if (source !in currentState.allowedModes) return
+        launch(dispatchersProvider.io) {
+            val canRefresh = catalogRefreshMutex.withLock { refreshingCatalogs.add(type) }
+            if (!canRefresh) return@launch
+            updateState { it.copy(localCatalogStatuses = it.localCatalogStatuses + (type to LocalCatalogStatus.LOADING)) }
+            try {
+                val cached = getCachedLocalModelCatalogUseCase(type)
+                currentCoroutineContext().ensureActive()
+                updateState { it.withCatalogResult(type, cached, LocalCatalogStatus.LOADING) }
+                val result = refreshLocalModelCatalogUseCase(type)
+                currentCoroutineContext().ensureActive()
+                updateState { state ->
+                    state.withCatalogResult(
+                        type,
+                        result.models,
+                        if (result.failure == null) LocalCatalogStatus.READY else LocalCatalogStatus.ERROR
+                    )
+                }
+                result.failure?.let(onError)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                updateState { it.withCatalogResult(type, null, LocalCatalogStatus.ERROR) }
+                onError(failure)
+            } finally {
+                catalogRefreshMutex.withLock { refreshingCatalogs.remove(type) }
+            }
+        }
+    }
 
+    /**
+     * Validates active provider inputs and starts connection only when the form has no blocking errors.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun validateAndConnectToServer() {
         if (currentState.isAuthorizationStorageBusy) return
         val requiresAuthorization = currentState.mode == ServerSource.SWARM_UI ||
@@ -390,6 +440,7 @@ class ServerSetupViewModel(
      * Retries storage or completes explicitly confirmed recovery without discarding editable settings.
      *
      * @param shouldReset True only after the dedicated destructive-action confirmation.
+     *
      * @author Dmitriy Moroz
      */
     private fun recoverAuthorizationStorage(shouldReset: Boolean) {
@@ -476,8 +527,11 @@ class ServerSetupViewModel(
         }
     }
 
-    /** Publishes current provider validation feedback and returns whether connection may proceed.
-     * @author Dmitriy Moroz */
+    /**
+     * Publishes current provider validation feedback and returns whether connection may proceed.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun validate(): Boolean {
         val result = currentState.validateServerSetup(
@@ -489,8 +543,11 @@ class ServerSetupViewModel(
         return result.isValid
     }
 
-    /** Dispatches the selected provider’s connection operation and reports loading or failure through setup state.
-     * @author Dmitriy Moroz */
+    /**
+     * Dispatches the selected provider’s connection operation and reports loading or failure through setup state.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun connectToServer() {
         emitEffect(ServerSetupEffect.HideKeyboard)
@@ -531,6 +588,12 @@ class ServerSetupViewModel(
                     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> connectToMediaPipe()
                     ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> connectToSdxl()
                     ServerSource.LOCAL_APPLE_CORE_ML -> connectToCoreMl()
+                    ServerSource.LOCAL_MNN -> connectToMnnUseCase(
+                        if (currentState.isLocalMnnCustomModel) LocalAiModel.CustomMnn.id
+                        else currentState.localMnnModels.find { it.selected }?.id.orEmpty(),
+                        currentState.localMnnCustomModelPath, preferenceManager.localMnnBackend
+                    )
+
                     ServerSource.LOCAL_APPLE_BONSAI -> connectToBonsai()
                 }
             } catch (t: Throwable) {
@@ -565,8 +628,11 @@ class ServerSetupViewModel(
         }
     }
 
-    /** Clears the forced-setup flag, closes progress and navigates through post-setup configuration loading.
-     * @author Dmitriy Moroz */
+    /**
+     * Clears the forced-setup flag, closes progress and navigates through post-setup configuration loading.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private fun finishConnection() {
         preferenceManager.forceSetupAfterUpdate = false
@@ -574,8 +640,11 @@ class ServerSetupViewModel(
         router.navigateToPostSetupConfigLoader()
     }
 
-    /** Applies the candidate AUTOMATIC1111 endpoint, demonstration option and HTTP authorization.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the candidate AUTOMATIC1111 endpoint, demonstration option and HTTP authorization.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToAutomaticInstance(): Result<Unit> {
         val isDemo = currentState.demoMode
@@ -587,16 +656,22 @@ class ServerSetupViewModel(
         )
     }
 
-    /** Applies the candidate SwarmUI endpoint and supported HTTP authorization.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the candidate SwarmUI endpoint and supported HTTP authorization.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToSwarmUi(): Result<Unit> = connectToSwarmUiUseCase(
         url = currentState.swarmUiUrl,
         credentials = currentState.credentialsDomain(),
     )
 
-    /** Applies the candidate AI Horde key or its explicitly selected anonymous default.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the candidate AI Horde key or its explicitly selected anonymous default.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToHorde(): Result<Unit> = connectToHordeUseCase(
         apiKey = if (currentState.hordeDefaultApiKey) {
@@ -606,76 +681,106 @@ class ServerSetupViewModel(
         },
     )
 
-    /** Applies the Hugging Face token and supported inference model.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the Hugging Face token and supported inference model.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToHuggingFace(): Result<Unit> = connectToHuggingFaceUseCase(
         apiKey = currentState.huggingFaceApiKey,
         model = currentState.huggingFaceModel,
     )
 
-    /** Applies the official OpenAI API key independently of compatible servers and OAuth sessions.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the official OpenAI API key independently of compatible servers and OAuth sessions.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToOpenAi(): Result<Unit> = connectToOpenAiUseCase(
         apiKey = currentState.openAiApiKey,
     )
 
-    /** Applies the candidate Stability AI API key and completes provider setup.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the candidate Stability AI API key and completes provider setup.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToStabilityAi(): Result<Unit> = connectToStabilityAiUseCase(
         apiKey = currentState.stabilityAiApiKey,
     )
 
-    /** Applies the candidate Fal.ai API key and completes provider setup.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the candidate Fal.ai API key and completes provider setup.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToFalAi(): Result<Unit> = connectToFalAiUseCase(
         apiKey = currentState.falAiApiKey,
     )
 
-    /** Applies the candidate ArliAI API key and completes provider setup.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the candidate ArliAI API key and completes provider setup.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToArliAi(): Result<Unit> = connectToArliAiUseCase(
         apiKey = currentState.arliAiApiKey,
     )
 
-    /** Applies the selected downloaded or custom ONNX model to local generation.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the selected downloaded or custom ONNX model to local generation.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToLocalDiffusion(): Result<Unit> = connectToLocalDiffusionUseCase(
         modelId = currentState.localOnnxModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localOnnxCustomModelPath,
     )
 
-    /** Applies the selected downloaded or custom MediaPipe model to local generation.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the selected downloaded or custom MediaPipe model to local generation.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToMediaPipe(): Result<Unit> = connectToMediaPipeUseCase(
         modelId = currentState.localMediaPipeModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localMediaPipeCustomModelPath,
     )
 
-    /** Applies the selected downloaded or custom stable-diffusion.cpp model.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the selected downloaded or custom stable-diffusion.cpp model.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToSdxl(): Result<Unit> = connectToSdxlUseCase(
         modelId = currentState.localSdxlModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localSdxlCustomModelPath,
     )
 
-    /** Applies the selected downloaded or custom Core ML model.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the selected downloaded or custom Core ML model.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToCoreMl(): Result<Unit> = connectToCoreMlUseCase(
         modelId = currentState.localCoreMlModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localCoreMlCustomModelPath,
     )
 
-    /** Applies the selected downloaded or custom Bonsai model.
-     * @author Dmitriy Moroz */
+    /**
+     * Applies the selected downloaded or custom Bonsai model.
+     *
+     * @author Dmitriy Moroz
+     */
 
     private suspend fun connectToBonsai(): Result<Unit> {
         return connectToBonsaiUseCase(
@@ -684,128 +789,205 @@ class ServerSetupViewModel(
         )
     }
 
-    /** Opens the appropriate download-source, deletion or unsupported-model confirmation for a local catalog item.
-     * @param value Clicked model and its current downloaded/source state.
-     * @author Dmitriy Moroz */
-
+    /**
+     * Uses the latest owning-list item so a stale row cannot cancel a completed transfer.
+     *
+     * @param value Clicked model identity; its old progress/selection snapshot is not reused.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun localModelDownloadClickReducer(value: ServerSetupState.LocalModel) {
-
-        /** Finds the active provider’s selected local model or fails when the selection is unavailable.
-         * @author Dmitriy Moroz */
-        fun localModel(): ServerSetupState.LocalModel =
-            currentState.localModels.firstOrNull { it.id == value.id }
-                ?.let { value.copy(selected = it.selected) }
-                ?: value
-
+        val type = currentState.mode.localCatalogType ?: return
+        val model = currentState.catalogModels(type).firstOrNull { it.id == value.id } ?: return
         when {
-            localModel().downloadState is DownloadState.Downloading -> {
-                downloadJobs.remove(localModel().id)?.cancel()
-                deleteLocalModel(localModel().id)
-                updateState { state ->
-                    state.withUpdatedLocalModel(
-                        value = localModel().copy(downloadState = DownloadState.Unknown),
+            model.downloadState is DownloadState.Downloading -> cancelDownload(model.id, type)
+            model.downloaded -> updateState {
+                it.copy(
+                    modal = ServerSetupState.Modal.DeleteLocalModelConfirm(
+                        model,
+                        type
                     )
-                }
-            }
-
-            localModel().downloaded -> updateState {
-                it.copy(modal = ServerSetupState.Modal.DeleteLocalModelConfirm(localModel()))
+                )
             }
 
             else -> updateState {
-                it.copy(modal = ServerSetupState.Modal.SelectDownloadSource(localModel().id))
+                it.copy(
+                    modal = ServerSetupState.Modal.SelectDownloadSource(
+                        model.id,
+                        type
+                    )
+                )
             }
         }
     }
 
-    /** Checks platform download prerequisites before launching the selected model archive download.
-     * @param modelId Stable local model identifier associated with the chosen download.
-     * @param url Chosen local model archive source.
-     * @author Dmitriy Moroz */
+    /**
+     * Cancels and joins only the owning transfer before removing partial files; completed installs survive late Cancel.
+     *
+     * @param id Stable model identity whose active transfer is cancelled.
+     * @param type Provider captured when the action was requested.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun cancelDownload(id: String, type: LocalAiModel.Type) {
+        launch(dispatchersProvider.io) {
+            try {
+                downloadCancellationMutex.withLock {
+                    val job = downloadJobs.value[type to id] ?: return@withLock
+                    job.cancelAndJoin()
+                    if (currentState.catalogModels(type)
+                            .firstOrNull { it.id == id }?.downloaded == true
+                    ) return@withLock
+                    val owned = getCachedLocalModelCatalogUseCase(type).firstOrNull { it.id == id }
+                    if (owned?.downloaded == true) {
+                        updateState { it.withVerifiedOwnedModel(id, type) }
+                        storageUsageObserver.notifyChanged()
+                        return@withLock
+                    }
+                    deleteModelUseCase(id)
+                    updateState { state ->
+                        val current = state.catalogModels(type).firstOrNull { it.id == id }
+                            ?: return@updateState state
+                        state.withDeletedLocalModel(current, type)
+                    }
+                    storageUsageObserver.notifyChanged()
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                onDownloadFailure(id, type, failure)
+            }
+        }
+    }
 
-    private fun download(modelId: String, url: String) {
-        val localModel = currentState.localModels.firstOrNull { it.id == modelId } ?: return
-
+    /**
+     * Starts the confirmed source-owned model transfer once, independent of subsequent mode changes.
+     *
+     * @param modelId Stable model identifier associated with the chosen download.
+     * @param url Chosen archive mirror.
+     * @param type Provider captured when its source picker opened.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun download(modelId: String, url: String, type: LocalAiModel.Type) {
+        val model = currentState.catalogModels(type).firstOrNull { it.id == modelId } ?: return
+        if (model.downloaded || downloadJobs.value[type to modelId]?.isActive == true) return
         updateState { state ->
-            state
-                .copy(modal = ServerSetupState.Modal.None)
+            val current = state.catalogModels(type).firstOrNull { it.id == modelId }
+                ?: return@updateState state
+            state.copy(modal = ServerSetupState.Modal.None)
                 .withUpdatedLocalModel(
-                    localModel.copy(downloadState = DownloadState.Downloading()),
+                    current.copy(downloadState = DownloadState.Downloading()),
+                    type
                 )
         }
-
-        val job = scopeLaunchDownload(localModel, url)
-        downloadJobs[localModel.id] = job
+        val job = scopeLaunchDownload(modelId, url, type)
+        downloadJobs.update { it + ((type to modelId) to job) }
         job.start()
     }
 
-    /** Downloads the chosen archive in the view-model scope and publishes model/storage state changes.
-     * @param localModel Local catalog item whose download state is being changed.
-     * @param url Chosen local model archive source.
-     * @author Dmitriy Moroz */
-
-    private fun scopeLaunchDownload(
-        localModel: ServerSetupState.LocalModel,
-        url: String,
-    ): Job =
+    /**
+     * Publishes progress into the captured provider using its current selection, never the download-start snapshot.
+     *
+     * @param id Stable model identity being transferred.
+     * @param url Chosen archive source.
+     * @param type Runtime owning every progress, completion and error callback.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun scopeLaunchDownload(id: String, url: String, type: LocalAiModel.Type): Job =
         launch(dispatchersProvider.io, start = CoroutineStart.LAZY) {
-            downloadGuard.withDownload {
-                try {
-                    downloadModelUseCase(localModel.id, url)
-                        .distinctUntilChanged()
-                        .catch { t ->
-                            if (t is CancellationException) throw t
-                            onDownloadFailure(localModel, t)
+            try {
+                downloadGuard.withDownload {
+                    downloadModelUseCase(id, url).distinctUntilChanged().catch { failure ->
+                        if (failure is CancellationException) throw failure
+                        onDownloadFailure(id, type, failure)
+                    }.collect { progress ->
+                        currentCoroutineContext().ensureActive()
+                        updateState { state ->
+                            val current = state.catalogModels(type).firstOrNull { it.id == id }
+                                ?: return@updateState state
+                            state.withUpdatedLocalModel(
+                                current.copy(
+                                    downloadState = progress,
+                                    downloaded = progress is DownloadState.Complete
+                                ), type
+                            )
                         }
-                        .collect { downloadState ->
-                            if (downloadState is DownloadState.Complete) {
-                                storageUsageObserver.notifyChanged()
-                            }
-                            updateState { state ->
-                                state.withUpdatedLocalModel(
-                                    localModel.copy(
-                                        downloadState = downloadState,
-                                        downloaded = downloadState is DownloadState.Complete,
-                                    ),
-                                )
-                            }
-                        }
-                } finally {
-                    downloadJobs.remove(localModel.id)
+                        if (progress is DownloadState.Complete) storageUsageObserver.notifyChanged()
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                onDownloadFailure(id, type, failure)
+            } finally {
+                val job = currentCoroutineContext()[Job]
+                downloadJobs.update { jobs -> if (jobs[type to id] == job) jobs - (type to id) else jobs }
+                if (currentCoroutineContext().isActive) updateState { state ->
+                    val current = state.catalogModels(type).firstOrNull { it.id == id }
+                        ?: return@updateState state
+                    if (current.downloadState is DownloadState.Downloading) state.withUpdatedLocalModel(
+                        current.copy(downloadState = DownloadState.Unknown),
+                        type
+                    ) else state
                 }
             }
         }
 
-    /** Updates the failed local download state and forwards the underlying failure to the application error sink.
-     * @param localModel Local catalog item whose download state is being changed.
-     * @param t Underlying generation or download failure.
-     * @author Dmitriy Moroz */
-
-    private fun onDownloadFailure(localModel: ServerSetupState.LocalModel, t: Throwable) {
+    /**
+     * Keeps an archive failure with its owning item and reports it through the existing error sink.
+     *
+     * @param id Stable model identity whose transfer failed.
+     * @param type Provider that started the transfer.
+     * @param failure Underlying download failure.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun onDownloadFailure(id: String, type: LocalAiModel.Type, failure: Throwable) {
         updateState { state ->
-            state
-                .withUpdatedLocalModel(
-                    localModel.copy(downloadState = DownloadState.Error(t)),
-                )
+            val current =
+                state.catalogModels(type).firstOrNull { it.id == id } ?: return@updateState state
+            state.withUpdatedLocalModel(
+                current.copy(downloadState = DownloadState.Error(failure)),
+                type
+            )
                 .copy(
                     modal = ServerSetupState.Modal.Error(
-                        t.message ?: Localization.string("error_title"),
-                    ),
+                        failure.message ?: Localization.string("error_title")
+                    )
                 )
         }
-        onError(t)
+        onError(failure)
     }
 
-    /** Deletes a downloaded model and invalidates model/storage state for the active setup screen.
-     * @param id Stable local model or custom-model identifier to select or delete.
-     * @author Dmitriy Moroz */
-
-    private fun deleteLocalModel(id: String) {
+    /**
+     * Removes a confirmed owned model and updates only its captured provider after successful deletion.
+     *
+     * @param id Stable identity of the confirmed model.
+     * @param type Provider captured in the deletion confirmation.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun deleteLocalModel(id: String, type: LocalAiModel.Type) {
+        updateState { it.copy(modal = ServerSetupState.Modal.None) }
         launch(dispatchersProvider.io) {
-            runCatching { deleteModelUseCase(id) }
-                .onSuccess { storageUsageObserver.notifyChanged() }
-                .onFailure(onError)
+            try {
+                downloadCancellationMutex.withLock {
+                    downloadJobs.value[type to id]?.cancelAndJoin()
+                    deleteModelUseCase(id)
+                    updateState { state ->
+                        val current = state.catalogModels(type).firstOrNull { it.id == id }
+                            ?: return@updateState state
+                        state.withDeletedLocalModel(current, type)
+                    }
+                    storageUsageObserver.notifyChanged()
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                onError(failure)
+            }
         }
     }
-
 }

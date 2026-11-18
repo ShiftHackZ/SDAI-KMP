@@ -29,10 +29,11 @@ import kotlin.math.roundToInt
  * Resolves only the display parameters of a numeric field before its shared editor is composed.
  * Provider bounds, clamping, tick counts and decimal precision match the existing controls.
  *
- * @receiver Logical field whose structural content type is SLIDER_EDITOR.
  * @param state Current numeric values and provider limits from the owning form.
+ * @receiver Logical field whose structural content type is SLIDER_EDITOR.
  * @return Label and editor values without behavior or screen dependencies.
  * @throws IllegalStateException If called for a field that is not a numeric editor.
+ *
  * @author Dmitriy Moroz
  */
 internal fun GenerationFormField.numericParameters(
@@ -51,6 +52,7 @@ internal fun GenerationFormField.numericParameters(
         val minimum = if (state.mode == ServerSource.FAL_AI) state.falAiModel.minInferenceSteps
         else SAMPLING_STEPS_RANGE_MIN
         val maximum = when (state.mode) {
+            ServerSource.LOCAL_MNN,
             ServerSource.LOCAL_MICROSOFT_ONNX,
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
@@ -159,11 +161,12 @@ internal fun GenerationFormField.numericParameters(
  * Maps one applied numeric edit back to the original form event. Configuration copies preserve
  * every unrelated Hires or ADetailer value supplied by the screen.
  *
- * @receiver Logical field whose structural content type is SLIDER_EDITOR.
  * @param value Clamped and rounded value emitted by the shared editor.
  * @param state Current configurations needed to preserve unrelated provider parameters.
+ * @receiver Logical field whose structural content type is SLIDER_EDITOR.
  * @return The owning screen's existing numeric or configuration update event.
  * @throws IllegalStateException If called for a field that is not a numeric editor.
+ *
  * @author Dmitriy Moroz
  */
 internal fun GenerationFormField.numericChangeEvent(

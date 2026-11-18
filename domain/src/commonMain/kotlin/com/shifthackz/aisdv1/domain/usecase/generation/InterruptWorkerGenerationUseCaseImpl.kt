@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
+import com.shifthackz.aisdv1.domain.repository.MnnGenerationRepository
 
 /**
  * Preserves worker ownership when interrupting an engine or remote source.
@@ -14,6 +15,8 @@ import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
  * @param interruptSourceGenerationUseCase Routes the immutable remote source to its repository.
  * @param buildInfoProvider Keeps shared Bonsai cancellation on its platform-specific runtime path.
  * @param interruptEasyDiffusionUseCase Cancels the matching remote operation while preserving its captured task identity.
+ * @param mnnRepository Cancels the exact iOS MNN owner after platform dispatch.
+ *
  * @author Dmitriy Moroz
  */
 internal class InterruptWorkerGenerationUseCaseImpl(
@@ -21,12 +24,14 @@ internal class InterruptWorkerGenerationUseCaseImpl(
     private val interruptSourceGenerationUseCase: InterruptSourceGenerationUseCase,
     private val buildInfoProvider: BuildInfoProvider,
     private val interruptEasyDiffusionUseCase: InterruptEasyDiffusionUseCase,
+    private val mnnRepository: MnnGenerationRepository,
 ) : InterruptWorkerGenerationUseCase {
     /**
      * Requests interruption without reading the selected provider preference.
      *
      * @param source Source captured by the work request.
      * @param ownerId Exact native owner associated with the worker.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun invoke(source: ServerSource, ownerId: String) {
@@ -36,8 +41,11 @@ internal class InterruptWorkerGenerationUseCaseImpl(
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> nativeGenerationGateway.cancelActive(ownerId)
 
+            ServerSource.LOCAL_MNN,
             ServerSource.LOCAL_APPLE_BONSAI -> if (buildInfoProvider.platform == Platform.ANDROID) {
                 nativeGenerationGateway.cancelActive(ownerId)
+            } else if (source == ServerSource.LOCAL_MNN) {
+                mnnRepository.interruptOwnedGeneration(ownerId)
             } else {
                 interruptSourceGenerationUseCase(source)
             }

@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.presentation.screen.txt2img
 import com.shifthackz.aisdv1.core.mvi.MviIntent
 import com.shifthackz.aisdv1.domain.entity.ADetailerConfig
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.FalAiAcceleration
 import com.shifthackz.aisdv1.domain.entity.FalAiImageSize
@@ -24,6 +25,8 @@ import com.shifthackz.aisdv1.presentation.widget.input.GenerationAspectRatio
  * Benchmark warning actions are modeled here with regular generation intents so
  * the view-model can gate local providers without coupling the shared input
  * form to benchmark-specific UI.
+ *
+ * @author Dmitriy Moroz
  */
 sealed interface TextToImageIntent : MviIntent {
     /**
@@ -57,13 +60,16 @@ sealed interface TextToImageIntent : MviIntent {
         val tag: String,
         val isNegative: Boolean,
     ) : TextToImageIntent
+
     data class ApplyPrompts(
         val prompt: String,
         val negativePrompt: String,
     ) : TextToImageIntent
+
     data class ApplyGenerationResult(
         val ai: AiGenerationResult,
     ) : TextToImageIntent
+
     data class UpdateAdvancedOptionsVisibility(val visible: Boolean) : TextToImageIntent
     data class UpdatePrompt(val value: String) : TextToImageIntent
     data class UpdateNegativePrompt(val value: String) : TextToImageIntent
@@ -89,6 +95,16 @@ sealed interface TextToImageIntent : MviIntent {
     data class UpdateFalAiImageSize(val value: FalAiImageSize) : TextToImageIntent
     data class UpdateFalAiAcceleration(val value: FalAiAcceleration) : TextToImageIntent
     data class UpdateSdxlBackend(val value: SdxlBackend) : TextToImageIntent
+
+    /**
+     * Selects the captured MNN backend for subsequent explicit requests.
+     *
+     * @param value Requested backend.
+     *
+     * @author Dmitriy Moroz
+     */
+    data class UpdateMnnBackend(val value: MnnBackend) : TextToImageIntent
+
     data class UpdateBonsaiBackend(val value: BonsaiBackend) : TextToImageIntent
     data class UpdateFalAiSyncMode(val value: Boolean) : TextToImageIntent
     data class UpdateOpenAiCompatibleModel(val value: String) : TextToImageIntent

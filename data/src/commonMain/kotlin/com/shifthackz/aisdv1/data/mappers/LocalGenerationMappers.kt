@@ -1,12 +1,15 @@
 package com.shifthackz.aisdv1.data.mappers
 
+import kotlin.time.Clock
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
 
 /**
- * Converts SDAI data with `mapLocalDiffusionToAiGenResult`.
+ * Creates a gallery record from complete local PNG data and captured generation parameters.
  *
- * @return Result produced by `mapLocalDiffusionToAiGenResult`.
+ * @receiver Immutable payload paired with complete Base64 PNG data.
+ * @return Gallery record preserving the actual seed, dimensions, scheduler and steps.
+ *
  * @author Dmitriy Moroz
  */
 fun Pair<TextToImagePayload, String>.mapLocalDiffusionToAiGenResult(): AiGenerationResult =
@@ -15,7 +18,7 @@ fun Pair<TextToImagePayload, String>.mapLocalDiffusionToAiGenResult(): AiGenerat
             id = 0L,
             image = base64,
             inputImage = "",
-            createdAt = System.currentTimeMillis(),
+            createdAt = Clock.System.now().toEpochMilliseconds(),
             type = AiGenerationResult.Type.TEXT_TO_IMAGE,
             denoisingStrength = 0f,
             prompt = payload.prompt,

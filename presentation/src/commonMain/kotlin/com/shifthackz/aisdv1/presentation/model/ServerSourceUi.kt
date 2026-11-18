@@ -7,7 +7,9 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceReadiness
 
 /**
  * Returns whether the provider should be selectable on the current platform.
+ *
  * @param platform Platform whose provider availability and readiness apply.
+ *
  * @author Dmitriy Moroz
  */
 internal fun ServerSource.isAvailableOn(platform: Platform): Boolean =
@@ -15,7 +17,9 @@ internal fun ServerSource.isAvailableOn(platform: Platform): Boolean =
 
 /**
  * Picks the user-facing readiness badge for the current platform.
+ *
  * @param platform Platform whose provider availability and readiness apply.
+ *
  * @author Dmitriy Moroz
  */
 internal fun ServerSource.readinessFor(platform: Platform): ServerSourceReadiness =
@@ -27,7 +31,9 @@ internal fun ServerSource.readinessFor(platform: Platform): ServerSourceReadines
  * Bonsai keeps one domain source id for persistence, but the label is platform
  * aware: iOS shows the Silicon Diffusion wording and Android shows Local
  * Diffusion while preserving the same underlying provider configuration.
+ *
  * @param platform Platform whose local-provider naming applies.
+ *
  * @author Dmitriy Moroz
  */
 internal fun ServerSource.displayName(platform: Platform): String = when (this) {
@@ -42,6 +48,7 @@ internal fun ServerSource.displayName(platform: Platform): String = when (this) 
     ServerSource.STABILITY_AI -> Localization.string("srv_type_stability_ai")
     ServerSource.FAL_AI -> Localization.string("srv_type_fal_ai")
     ServerSource.ARLI_AI -> Localization.string("srv_type_arli_ai")
+    ServerSource.LOCAL_MNN -> Localization.string("srv_type_mnn")
     ServerSource.LOCAL_MICROSOFT_ONNX -> Localization.string("srv_type_local")
     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> Localization.string("srv_type_media_pipe")
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> Localization.string("srv_type_sdxl")
@@ -56,6 +63,7 @@ internal fun ServerSource.displayName(platform: Platform): String = when (this) 
 
 /**
  * Short provider label used where the full setup name would be too long.
+ *
  * @author Dmitriy Moroz
  */
 internal fun ServerSource.shortDisplayName(): String = when (this) {
@@ -70,6 +78,7 @@ internal fun ServerSource.shortDisplayName(): String = when (this) {
     ServerSource.STABILITY_AI -> Localization.string("srv_type_stability_ai")
     ServerSource.FAL_AI -> Localization.string("srv_type_fal_ai")
     ServerSource.ARLI_AI -> Localization.string("srv_type_arli_ai")
+    ServerSource.LOCAL_MNN -> Localization.string("srv_type_mnn")
     ServerSource.LOCAL_MICROSOFT_ONNX -> Localization.string("srv_type_local_short")
     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> Localization.string("srv_type_media_pipe_short")
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> Localization.string("srv_type_sdxl_short")
@@ -79,7 +88,9 @@ internal fun ServerSource.shortDisplayName(): String = when (this) {
 
 /**
  * Compact label for chips and small controls.
+ *
  * @param platform Platform whose local-provider naming applies.
+ *
  * @author Dmitriy Moroz
  */
 internal fun ServerSource.compactDisplayName(platform: Platform): String = when (this) {

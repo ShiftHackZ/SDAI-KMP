@@ -32,6 +32,7 @@ import com.shifthackz.aisdv1.domain.entity.OpenAiQuality
  * @param promptChipTextFieldState Caller-owned positive prompt chip text and selection.
  * @param negativePromptChipTextFieldState Caller-owned negative prompt chip text and selection.
  * @param onEvent Receives generation edits and actions.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -46,6 +47,7 @@ internal fun GenerationInputBaseOption(
 ) {
     when (field) {
         GenerationBaseFormField.PROVIDER,
+        GenerationBaseFormField.MNN_BACKEND,
         GenerationBaseFormField.SDXL_BACKEND,
         GenerationBaseFormField.BONSAI_BACKEND -> GenerationBaseProviderOption(
             field,

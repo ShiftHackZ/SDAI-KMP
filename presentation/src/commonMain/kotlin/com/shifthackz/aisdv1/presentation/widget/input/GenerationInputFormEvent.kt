@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.widget.input
 
 import com.shifthackz.aisdv1.domain.entity.ADetailerConfig
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.FalAiAcceleration
 import com.shifthackz.aisdv1.domain.entity.FalAiImageSize
@@ -21,6 +22,8 @@ import com.shifthackz.aisdv1.domain.entity.StabilityAiStylePreset
  * Screen-specific processors translate these into txt2img/img2img intents so
  * the form can stay shared while each screen decides how to persist settings,
  * validate dimensions, and handle provider-specific side effects.
+ *
+ * @author Dmitriy Moroz
  */
 sealed interface GenerationInputFormEvent {
     /**
@@ -62,12 +65,24 @@ sealed interface GenerationInputFormEvent {
     data class UpdateFalAiImageSize(val value: FalAiImageSize) : GenerationInputFormEvent
     data class UpdateFalAiAcceleration(val value: FalAiAcceleration) : GenerationInputFormEvent
     data class UpdateSdxlBackend(val value: SdxlBackend) : GenerationInputFormEvent
+
+    /**
+     * Selects the captured MNN backend for subsequent explicit requests.
+     *
+     * @param value Requested backend.
+     *
+     * @author Dmitriy Moroz
+     */
+    data class UpdateMnnBackend(val value: MnnBackend) : GenerationInputFormEvent
+
     data class UpdateBonsaiBackend(val value: BonsaiBackend) : GenerationInputFormEvent
     data class UpdateFalAiSyncMode(val value: Boolean) : GenerationInputFormEvent
     data class UpdateOpenAiCompatibleModel(val value: String) : GenerationInputFormEvent
     data class UpdateArliAiModel(val value: String) : GenerationInputFormEvent
     data class UpdateStabilityAiStyle(val value: StabilityAiStylePreset) : GenerationInputFormEvent
-    data class UpdateStabilityAiClipGuidance(val value: StabilityAiClipGuidance) : GenerationInputFormEvent
+    data class UpdateStabilityAiClipGuidance(val value: StabilityAiClipGuidance) :
+        GenerationInputFormEvent
+
     data class UpdateHiresConfig(val value: HiresConfig) : GenerationInputFormEvent
     data class UpdateADetailerConfig(val value: ADetailerConfig) : GenerationInputFormEvent
     data object RefreshADetailerAvailability : GenerationInputFormEvent
@@ -76,6 +91,12 @@ sealed interface GenerationInputFormEvent {
 
 /**
  * Preset aspect ratios applied by resizing the active width/height fields.
+ *
+ * @param displayName Aspect-ratio label displayed to the user, such as 16:9.
+ * @param width Width component of the preset aspect ratio, before scaling to image dimensions.
+ * @param height Height component of the preset aspect ratio, before scaling to image dimensions.
+ *
+ * @author Dmitriy Moroz
  */
 enum class GenerationAspectRatio(
     val displayName: String,

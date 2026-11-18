@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDAI MNN SD 1.5 bundle",
+  "description": "Validated immutable MNN model bundle manifest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profile",
+    "prebuiltRepository",
+    "sourceRepository",
+    "prebuiltRevision",
+    "sourceRevision",
+    "runtimeRevision",
+    "tokenizerSourceRevision",
+    "tokenizerToolRevision",
+    "runtimeVersion",
+    "packagingLockSha256",
+    "width",
+    "height",
+    "guidance",
+    "scheduler",
+    "files"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "description": "Bundle manifest format version.",
+      "const": 1
+    },
+    "profile": {
+      "type": "string",
+      "description": "Exact supported graph and generation profile.",
+      "const": "sd15-512-general-int8-v1"
+    },
+    "prebuiltRepository": {
+      "type": "string",
+      "description": "Immutable preconverted graph source repository.",
+      "minLength": 1
+    },
+    "sourceRepository": {
+      "type": "string",
+      "description": "Underlying model and tokenizer lineage repository.",
+      "minLength": 1
+    },
+    "prebuiltRevision": {
+      "type": "string",
+      "description": "Preconverted graph source commit.",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sourceRevision": {
+      "type": "string",
+      "description": "Original weights source commit.",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "runtimeRevision": {
+      "type": "string",
+      "description": "MNN runtime source commit.",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "tokenizerSourceRevision": {
+      "type": "string",
+      "description": "Matching CLIP tokenizer commit.",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "tokenizerToolRevision": {
+      "type": "string",
+      "description": "MNN tokenizer exporter source commit.",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "runtimeVersion": {
+      "type": "string",
+      "description": "MNN release used to execute this bundle.",
+      "const": "3.6.2"
+    },
+    "packagingLockSha256": {
+      "type": "string",
+      "description": "SHA256 of exact packaging Python dependency lock.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "width": {
+      "type": "integer",
+      "description": "Fixed output image dimension in pixels.",
+      "const": 512
+    },
+    "height": {
+      "type": "integer",
+      "description": "Fixed output image dimension in pixels.",
+      "const": 512
+    },
+    "guidance": {
+      "type": "number",
+      "description": "Fixed classifier-free guidance scale.",
+      "const": 7.5
+    },
+    "scheduler": {
+      "type": "string",
+      "description": "Implemented sampling scheduler.",
+      "const": "PNDM"
+    },
+    "files": {
+      "type": "array",
+      "description": "Complete payload inventory excluding the manifest itself.",
+      "minItems": 9,
+      "items": {
+        "type": "object",
+        "description": "One root payload file and its integrity metadata.",
+        "additionalProperties": false,
+        "required": ["path", "size", "sha256"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Single root filename without path separators.",
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Exact number of bytes.",
+            "minimum": 1
+          },
+          "sha256": {
+            "type": "string",
+            "description": "Lowercase SHA256 of file bytes.",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "maxItems": 9,
+      "uniqueItems": true
+    }
+  }
+}

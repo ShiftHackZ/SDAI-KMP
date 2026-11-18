@@ -1,148 +1,154 @@
 package com.shifthackz.aisdv1.data.repository
 
-import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
-import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.repository.DownloadableModelRepository
 
 /**
- * Implements `DownloadableModelRepository` behavior in the SDAI data layer.
+ * Catalog and owned-model operations used by domain download, selection and storage workflows.
+ *
+ * @param remoteDataSource Strict remote catalog fetch and archive transfer operations.
+ * @param localDataSource Cached model metadata with current owned-file state.
  *
  * @author Dmitriy Moroz
  */
 internal class DownloadableModelRepositoryImpl(
-    /**
-     * Exposes the `remoteDataSource` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val remoteDataSource: DownloadableModelDataSource.Remote,
-    /**
-     * Exposes the `localDataSource` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val localDataSource: DownloadableModelDataSource.Local,
-    /**
-     * Exposes the `buildInfoProvider` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val buildInfoProvider: BuildInfoProvider,
 ) : DownloadableModelRepository {
 
     /**
-     * Executes the `download` step in the SDAI data layer.
+     * Streams the selected catalog source and publishes completion only after its complete model payload is activated.
      *
      * @param id identifier of the target entity.
      * @param url remote URL used by the operation.
+     *
      * @author Dmitriy Moroz
      */
     override fun download(id: String, url: String) = remoteDataSource.download(id, url)
 
     /**
-     * Performs the SDAI side effect handled by `delete`.
+     * Removes only the owned model payload; MNN removal waits for active inference leases.
      *
      * @param id identifier of the target entity.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun delete(id: String) = localDataSource.delete(id)
 
     /**
-     * Loads SDAI data through `getAllOnnx`.
+     * Persists exactly one fetched provider catalog and propagates every fetch/save failure.
      *
-     * @return Result produced by `getAllOnnx`.
+     * @param type Runtime family to refresh independently.
+     *
+     * @author Dmitriy Moroz
+     */
+    override suspend fun fetchCatalog(type: LocalAiModel.Type) {
+        localDataSource.save(remoteDataSource.fetchCatalog(type))
+    }
+
+    /**
+     * Reads current cached metadata with platform file and selection state, without network access.
+     *
+     * @param type Runtime family whose cache is requested.
+     *
+     * @author Dmitriy Moroz
+     */
+    override suspend fun readCachedCatalog(type: LocalAiModel.Type): List<LocalAiModel> =
+        when (type) {
+            LocalAiModel.Type.ONNX -> getAllOnnx()
+            LocalAiModel.Type.MediaPipe -> getAllMediaPipe()
+            LocalAiModel.Type.Sdxl -> getAllSdxl()
+            LocalAiModel.Type.CoreMl -> getAllCoreMl()
+            LocalAiModel.Type.Bonsai -> getAllBonsai()
+            LocalAiModel.Type.Mnn -> getAllMnn()
+        }
+
+    /**
+     * Reads MNN model metadata with current completion and independent selection state.
+     *
+     * @author Dmitriy Moroz
+     */
+    override suspend fun getAllMnn() = localDataSource.getAllMnn()
+
+    /**
+     * Observes cached MNN model states combined with provider selection changes.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun observeAllMnn() = localDataSource.observeAllMnn()
+
+    /**
+     * Reads cached ONNX choices with current owned-file and selection state.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun getAllOnnx(): List<LocalAiModel> {
-        refreshCache()
         return localDataSource.getAllOnnx()
     }
 
     /**
-     * Loads SDAI data through `getAllMediaPipe`.
+     * Reads available MediaPipe model metadata with current local download and selection state.
      *
-     * @return Result produced by `getAllMediaPipe`.
      * @author Dmitriy Moroz
      */
     override suspend fun getAllMediaPipe(): List<LocalAiModel> {
-        if (buildInfoProvider.type == BuildType.FOSS) {
-            return emptyList()
-        }
-        refreshCache()
         return localDataSource.getAllMediaPipe()
     }
 
     /**
-     * Loads SDAI data through `getAllSdxl`.
+     * Reads stable-diffusion.cpp model metadata with current local download and selection state.
      *
-     * @return Result produced by `getAllSdxl`.
      * @author Dmitriy Moroz
      */
     override suspend fun getAllSdxl(): List<LocalAiModel> {
-        refreshCache()
         return localDataSource.getAllSdxl()
     }
 
     /**
-     * Loads SDAI data through `getAllCoreMl`.
+     * Reads Core ML model metadata with current local download and selection state.
      *
-     * @return Result produced by `getAllCoreMl`.
      * @author Dmitriy Moroz
      */
     override suspend fun getAllCoreMl(): List<LocalAiModel> {
-        refreshCache()
         return localDataSource.getAllCoreMl()
     }
 
     /**
-     * Loads SDAI data through `getAllBonsai`.
+     * Reads Bonsai model metadata with current local download and selection state.
      *
-     * @return Result produced by `getAllBonsai`.
      * @author Dmitriy Moroz
      */
     override suspend fun getAllBonsai(): List<LocalAiModel> {
-        refreshCache()
         return localDataSource.getAllBonsai()
     }
 
     /**
-     * Loads SDAI data through `observeAllOnnx`.
+     * Observes cached ONNX models combined with current selection and completion state.
      *
      * @author Dmitriy Moroz
      */
     override fun observeAllOnnx() = localDataSource.observeAllOnnx()
 
     /**
-     * Loads SDAI data through `observeAllSdxl`.
+     * Observes cached stable-diffusion.cpp models combined with current selection and completion state.
      *
      * @author Dmitriy Moroz
      */
     override fun observeAllSdxl() = localDataSource.observeAllSdxl()
 
     /**
-     * Loads SDAI data through `observeAllCoreMl`.
+     * Observes cached Core ML models combined with current selection and completion state.
      *
      * @author Dmitriy Moroz
      */
     override fun observeAllCoreMl() = localDataSource.observeAllCoreMl()
 
     /**
-     * Loads SDAI data through `observeAllBonsai`.
+     * Observes cached Bonsai models combined with current selection and completion state.
      *
      * @author Dmitriy Moroz
      */
     override fun observeAllBonsai() = localDataSource.observeAllBonsai()
 
-    /**
-     * Executes the `refreshCache` step in the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private suspend fun refreshCache() {
-        runCatching {
-            localDataSource.save(remoteDataSource.fetch())
-        }
-    }
 }

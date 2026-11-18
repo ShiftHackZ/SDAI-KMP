@@ -685,4 +685,16 @@
     <string name="easy_diffusion_failure">Easy Diffusion isteği tamamlayamadı. Sunucuyu, bağlantıyı ve seçili modeli kontrol edip yeniden deneyin.</string>
     <string name="easy_diffusion_timeout">Easy Diffusion zaman aşımına uğradı. Sunucuyu ve zaman aşımı ayarını kontrol edip yeniden deneyin. Gönderim onaylanmadıysa sunucudaki sonuç bilinmiyor.</string>
     <string name="easy_diffusion_submission_unknown">Easy Diffusion gönderimi onaylanmadı. Sunucudaki tamamlanma durumu bilinmiyor. Yeniden denemeden önce sunucuyu kontrol edin.</string>
+
+    <!-- MNN SD 1.5 -->
+    <string name="srv_type_mnn">MNN SD 1.5</string>
+    <string name="hint_mnn_profile">Tek 512×512 görüntü, PNDM, CFG 7.5, 1–50 adım. CPU veya OpenCL.</string>
+    <string name="hint_mnn_profile_ios">Bir 512×512 görsel, PNDM, CFG 7.5, 1–50 adım. CPU veya Metal.</string>
+    <string name="hint_mnn_backend">MNN arka ucu</string>
+    <string name="settings_usage_summary_models_mnn">MNN modelleri</string>
+    <string name="local_catalog_loading">Model kataloğu yükleniyor</string>
+    <string name="local_catalog_error_title">Modeller yüklenemedi</string>
+    <string name="local_catalog_error_body">Bağlantınızı kontrol edip yeniden deneyin. Yerel modelleriniz kullanılabilir durumda.</string>
+    <string name="local_catalog_empty_title">Kullanılabilir model yok</string>
+    <string name="local_catalog_empty_body">Kataloğu daha sonra yeniden yenilemeyi deneyin.</string>
 </resources>

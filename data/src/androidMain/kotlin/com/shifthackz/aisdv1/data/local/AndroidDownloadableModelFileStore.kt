@@ -1,40 +1,45 @@
 package com.shifthackz.aisdv1.data.local
 
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
+
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import java.io.File
 
 /**
- * Coordinates `AndroidDownloadableModelFileStore` behavior in the SDAI data layer.
+ * Resolves provider model layouts and routes MNN deletion through its immutable-root lease owner.
+ *
+ * @param fileProviderDescriptor App-private root for downloaded model payloads.
+ * @param mnnModels Immutable MNN roots and active attempt leases.
  *
  * @author Dmitriy Moroz
  */
 internal class AndroidDownloadableModelFileStore(
-    /**
-     * Exposes the `fileProviderDescriptor` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val fileProviderDescriptor: FileProviderDescriptor,
+    private val mnnModels: MnnModelStore,
 ) : DownloadableModelFileStore {
 
     /**
-     * Executes the `isDownloaded` step in the SDAI data layer.
+     * Checks the provider-specific complete model layout; custom legacy entries remain selectable before path validation.
      *
-     * @param model model value consumed by the API.
-     * @return Result produced by `isDownloaded`.
+     * @param model Catalog or supported custom identity whose provider-specific owned layout is resolved.
+     *
      * @author Dmitriy Moroz
      */
     override fun isDownloaded(model: LocalAiModel): Boolean = try {
         when (model.id) {
+            LocalAiModel.CustomMnn.id -> mnnModels.isDownloaded(model.id)
+
+
             LocalAiModel.CustomOnnx.id,
             LocalAiModel.CustomMediaPipe.id,
             LocalAiModel.CustomSdxl.id,
             LocalAiModel.CustomCoreMl.id,
             LocalAiModel.CustomBonsai.id,
-            -> true
+                -> true
 
             else -> when (model.type) {
+                LocalAiModel.Type.Mnn -> mnnModels.isDownloaded(model.id)
                 LocalAiModel.Type.ONNX -> {
                     val files = getLocalModelFiles(model.id).filter { it.isDirectory }
                     files.size == 4
@@ -65,13 +70,14 @@ internal class AndroidDownloadableModelFileStore(
     }
 
     /**
-     * Loads SDAI data through `resolvePath`.
+     * Resolves the app-accessible model root or the concrete single-file checkpoint expected by its runtime.
      *
-     * @param model model value consumed by the API.
-     * @return Result produced by `resolvePath`.
+     * @param model Catalog or supported custom identity whose provider-specific owned layout is resolved.
+     *
      * @author Dmitriy Moroz
      */
     override fun resolvePath(model: LocalAiModel): String {
+        if (model.type == LocalAiModel.Type.Mnn) return mnnModels.path(model.id)
         val directory = getLocalModelDirectory(model.id)
         if (model.type != LocalAiModel.Type.Sdxl) return directory.path
 
@@ -79,10 +85,10 @@ internal class AndroidDownloadableModelFileStore(
     }
 
     /**
-     * Loads SDAI data through `resolveSingleFilePath`.
+     * Selects the largest supported checkpoint in a directory, preserving the input when no checkpoint is found.
      *
      * @param path raw file or directory path used by the operation.
-     * @return Result produced by `resolveSingleFilePath`.
+     *
      * @author Dmitriy Moroz
      */
     override fun resolveSingleFilePath(path: String): String {
@@ -98,20 +104,22 @@ internal class AndroidDownloadableModelFileStore(
     }
 
     /**
-     * Performs the SDAI side effect handled by `delete`.
+     * Removes only the owned model payload; MNN removal waits for active inference leases.
      *
      * @param id identifier of the target entity.
+     *
      * @author Dmitriy Moroz
      */
     override fun delete(id: String) {
-        getLocalModelDirectory(id).deleteRecursively()
+        if (id.startsWith("mnn_") || id == LocalAiModel.CustomMnn.id) mnnModels.delete(id)
+        else getLocalModelDirectory(id).deleteRecursively()
     }
 
     /**
-     * Loads SDAI data through `getLocalModelDirectory`.
+     * Resolves the catalog model directory under the application-owned model root.
      *
      * @param id identifier of the target entity.
-     * @return Result produced by `getLocalModelDirectory`.
+     *
      * @author Dmitriy Moroz
      */
     private fun getLocalModelDirectory(id: String): File {
@@ -119,10 +127,10 @@ internal class AndroidDownloadableModelFileStore(
     }
 
     /**
-     * Loads SDAI data through `getLocalModelFiles`.
+     * Lists files immediately inside the owned model directory, returning an empty list when it is absent.
      *
      * @param id identifier of the target entity.
-     * @return Result produced by `getLocalModelFiles`.
+     *
      * @author Dmitriy Moroz
      */
     private fun getLocalModelFiles(id: String): List<File> {
@@ -181,8 +189,8 @@ private fun File.isBonsaiRoot(): Boolean {
     )
 
     return quantizationConfig.isFile &&
-        listOf(TEXT_ENCODER_MLX_DIRECTORY, TEXT_ENCODER_LEGACY_DIRECTORY)
-            .map { name -> File(this, name) }
-            .any(File::isDirectory) &&
-        requiredDirectories.all(File::isDirectory)
+            listOf(TEXT_ENCODER_MLX_DIRECTORY, TEXT_ENCODER_LEGACY_DIRECTORY)
+                .map { name -> File(this, name) }
+                .any(File::isDirectory) &&
+            requiredDirectories.all(File::isDirectory)
 }

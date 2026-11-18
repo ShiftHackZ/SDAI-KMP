@@ -19,3 +19,5 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# JNI entry points and synchronous callback must retain their names.
+-keep class com.shifthackz.aisdv1.feature.mnn.MnnNativeBridgeImpl { *; }

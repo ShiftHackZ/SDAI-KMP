@@ -6,216 +6,256 @@ import com.shifthackz.aisdv1.domain.entity.DownloadState
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.network.api.sdai.SdaiAppApi
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Test
 
+/**
+ * Verifies provider-owned strict HTTP dispatch independently from download transport.
+ *
+ * @author Dmitriy Moroz
+ */
 class DownloadableModelRemoteDataSourceTest {
-
-    private val stubException = Throwable("Internal server error.")
-    private val stubApi = mockk<SdaiAppApi>()
-    private val stubFileDownloader = mockk<DownloadableModelFileDownloader>()
-
-    private val remoteDataSource = DownloadableModelRemoteDataSource(
-        api = stubApi,
-        fileDownloader = stubFileDownloader,
-    )
+    private val api = mockk<SdaiAppApi>()
+    private val downloader = mockk<DownloadableModelFileDownloader>()
+    private val source = DownloadableModelRemoteDataSource(api, downloader)
 
     @Test
-    fun `given attempt to fetch models list, api returns data, expected valid domain models list`() = runTest {
-        coEvery {
-            stubApi.fetchOnnxModels()
-        } returns mockDownloadableModelsResponse
+    fun `given ONNX catalog fetch, HTTP succeeds, expected only owning endpoint and typed catalog`() =
+        runTest {
+            // Given
+            coEvery { api.fetchOnnxModels() } returns mockDownloadableModelsResponse
 
-        coEvery {
-            stubApi.fetchMediaPipeModels()
-        } returns mockDownloadableModelsResponse
+            // When
+            val actual = source.fetchCatalog(LocalAiModel.Type.ONNX)
 
-        coEvery {
-            stubApi.fetchSdxlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchCoreMlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchBonsaiModels()
-        } returns emptyList()
-
-        val expected = listOf(
-            mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.ONNX),
-            mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.MediaPipe),
-        ).flatten()
-
-        val actual = remoteDataSource.fetch()
-
-        Assert.assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `given attempt to fetch models list, api returns empty data, expected empty domain models list`() = runTest {
-        coEvery {
-            stubApi.fetchOnnxModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchMediaPipeModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchSdxlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchCoreMlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchBonsaiModels()
-        } returns emptyList()
-
-        val actual = remoteDataSource.fetch()
-
-        Assert.assertEquals(emptyList<LocalAiModel>(), actual)
-    }
-
-    @Test
-    fun `given attempt to fetch models list, sdxl api returns data, expected sdxl models included`() = runTest {
-        coEvery {
-            stubApi.fetchOnnxModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchMediaPipeModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchSdxlModels()
-        } returns mockDownloadableModelsResponse
-
-        coEvery {
-            stubApi.fetchCoreMlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchBonsaiModels()
-        } returns emptyList()
-
-        val expected = mockDownloadableModelsResponse
-            .mapRawToCheckpointDomain(LocalAiModel.Type.Sdxl)
-
-        val actual = remoteDataSource.fetch()
-
-        Assert.assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `given attempt to fetch models list, sdxl api throws error, expected other models returned`() = runTest {
-        coEvery {
-            stubApi.fetchOnnxModels()
-        } returns mockDownloadableModelsResponse
-
-        coEvery {
-            stubApi.fetchMediaPipeModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchSdxlModels()
-        } throws stubException
-
-        coEvery {
-            stubApi.fetchCoreMlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchBonsaiModels()
-        } returns emptyList()
-
-        val expected = mockDownloadableModelsResponse
-            .mapRawToCheckpointDomain(LocalAiModel.Type.ONNX)
-
-        val actual = remoteDataSource.fetch()
-
-        Assert.assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `given attempt to fetch models list, bonsai api returns data, expected bonsai models included`() = runTest {
-        coEvery {
-            stubApi.fetchOnnxModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchMediaPipeModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchSdxlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchCoreMlModels()
-        } returns emptyList()
-
-        coEvery {
-            stubApi.fetchBonsaiModels()
-        } returns mockDownloadableModelsResponse
-
-        val expected = mockDownloadableModelsResponse
-            .mapRawToCheckpointDomain(LocalAiModel.Type.Bonsai)
-
-        val actual = remoteDataSource.fetch()
-
-        Assert.assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `given attempt to fetch models list, api returns error, expected error value`() = runTest {
-        coEvery {
-            stubApi.fetchOnnxModels()
-        } throws stubException
-
-        coEvery {
-            stubApi.fetchMediaPipeModels()
-        } throws stubException
-
-        val actual = runCatching { remoteDataSource.fetch() }
-
-        Assert.assertSame(stubException, actual.exceptionOrNull())
-    }
-
-    @Test
-    fun `given attempt to download model, expected file downloader invoked with id and url`() = runTest {
-        every {
-            stubFileDownloader.download(MODEL_ID, MODEL_URL)
-        } returns flowOf(
-            DownloadState.Downloading(0),
-            DownloadState.Complete(FILE_PATH),
-        )
-
-        val actual = remoteDataSource.download(MODEL_ID, MODEL_URL).toList()
-
-        Assert.assertEquals(
-            listOf(
-                DownloadState.Downloading(0),
-                DownloadState.Complete(FILE_PATH),
-            ),
-            actual,
-        )
-        verify {
-            stubFileDownloader.download(MODEL_ID, MODEL_URL)
+            // Then
+            assertEquals(
+                mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.ONNX),
+                actual
+            )
+            coVerify(exactly = 1) { api.fetchOnnxModels() }
+            confirmVerified(api)
         }
-    }
 
-    private companion object {
-        const val MODEL_ID = "model_id"
-        const val MODEL_URL = "https://example.com/model.zip"
-        const val FILE_PATH = "/storage/emulated/0/model.zip"
-    }
+    @Test
+    fun `given ONNX catalog fetch, HTTP fails, expected original failure without empty fallback`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { api.fetchOnnxModels() } throws failure
+
+            // When
+            val actual =
+                runCatching { source.fetchCatalog(LocalAiModel.Type.ONNX) }.exceptionOrNull()
+
+            // Then
+            assertSame(failure, actual)
+            coVerify(exactly = 1) { api.fetchOnnxModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given MediaPipe catalog fetch, HTTP succeeds, expected only owning endpoint and typed catalog`() =
+        runTest {
+            // Given
+            coEvery { api.fetchMediaPipeModels() } returns mockDownloadableModelsResponse
+
+            // When
+            val actual = source.fetchCatalog(LocalAiModel.Type.MediaPipe)
+
+            // Then
+            assertEquals(
+                mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.MediaPipe),
+                actual
+            )
+            coVerify(exactly = 1) { api.fetchMediaPipeModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given MediaPipe catalog fetch, HTTP fails, expected original failure without empty fallback`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { api.fetchMediaPipeModels() } throws failure
+
+            // When
+            val actual =
+                runCatching { source.fetchCatalog(LocalAiModel.Type.MediaPipe) }.exceptionOrNull()
+
+            // Then
+            assertSame(failure, actual)
+            coVerify(exactly = 1) { api.fetchMediaPipeModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given Sdxl catalog fetch, HTTP succeeds, expected only owning endpoint and typed catalog`() =
+        runTest {
+            // Given
+            coEvery { api.fetchSdxlModels() } returns mockDownloadableModelsResponse
+
+            // When
+            val actual = source.fetchCatalog(LocalAiModel.Type.Sdxl)
+
+            // Then
+            assertEquals(
+                mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.Sdxl),
+                actual
+            )
+            coVerify(exactly = 1) { api.fetchSdxlModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given Sdxl catalog fetch, HTTP fails, expected original failure without empty fallback`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { api.fetchSdxlModels() } throws failure
+
+            // When
+            val actual =
+                runCatching { source.fetchCatalog(LocalAiModel.Type.Sdxl) }.exceptionOrNull()
+
+            // Then
+            assertSame(failure, actual)
+            coVerify(exactly = 1) { api.fetchSdxlModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given CoreMl catalog fetch, HTTP succeeds, expected only owning endpoint and typed catalog`() =
+        runTest {
+            // Given
+            coEvery { api.fetchCoreMlModels() } returns mockDownloadableModelsResponse
+
+            // When
+            val actual = source.fetchCatalog(LocalAiModel.Type.CoreMl)
+
+            // Then
+            assertEquals(
+                mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.CoreMl),
+                actual
+            )
+            coVerify(exactly = 1) { api.fetchCoreMlModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given CoreMl catalog fetch, HTTP fails, expected original failure without empty fallback`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { api.fetchCoreMlModels() } throws failure
+
+            // When
+            val actual =
+                runCatching { source.fetchCatalog(LocalAiModel.Type.CoreMl) }.exceptionOrNull()
+
+            // Then
+            assertSame(failure, actual)
+            coVerify(exactly = 1) { api.fetchCoreMlModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given Bonsai catalog fetch, HTTP succeeds, expected only owning endpoint and typed catalog`() =
+        runTest {
+            // Given
+            coEvery { api.fetchBonsaiModels() } returns mockDownloadableModelsResponse
+
+            // When
+            val actual = source.fetchCatalog(LocalAiModel.Type.Bonsai)
+
+            // Then
+            assertEquals(
+                mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.Bonsai),
+                actual
+            )
+            coVerify(exactly = 1) { api.fetchBonsaiModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given Bonsai catalog fetch, HTTP fails, expected original failure without empty fallback`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { api.fetchBonsaiModels() } throws failure
+
+            // When
+            val actual =
+                runCatching { source.fetchCatalog(LocalAiModel.Type.Bonsai) }.exceptionOrNull()
+
+            // Then
+            assertSame(failure, actual)
+            coVerify(exactly = 1) { api.fetchBonsaiModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given Mnn catalog fetch, HTTP succeeds, expected only owning endpoint and typed catalog`() =
+        runTest {
+            // Given
+            coEvery { api.fetchMnnModels() } returns mockDownloadableModelsResponse
+
+            // When
+            val actual = source.fetchCatalog(LocalAiModel.Type.Mnn)
+
+            // Then
+            assertEquals(
+                mockDownloadableModelsResponse.mapRawToCheckpointDomain(LocalAiModel.Type.Mnn),
+                actual
+            )
+            coVerify(exactly = 1) { api.fetchMnnModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given Mnn catalog fetch, HTTP fails, expected original failure without empty fallback`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { api.fetchMnnModels() } throws failure
+
+            // When
+            val actual =
+                runCatching { source.fetchCatalog(LocalAiModel.Type.Mnn) }.exceptionOrNull()
+
+            // Then
+            assertSame(failure, actual)
+            coVerify(exactly = 1) { api.fetchMnnModels() }
+            confirmVerified(api)
+        }
+
+    @Test
+    fun `given model download transport, ID and mirror are submitted, expected unchanged downloader states`() =
+        runTest {
+            // Given
+            val states =
+                listOf(DownloadState.Downloading(0), DownloadState.Complete("/owned/model"))
+            every {
+                downloader.download(
+                    "model_id",
+                    "https://example.com/model.zip"
+                )
+            } returns flowOf(*states.toTypedArray())
+
+            // When
+            val actual = source.download("model_id", "https://example.com/model.zip").toList()
+
+            // Then
+            assertEquals(states, actual)
+            verify(exactly = 1) { downloader.download("model_id", "https://example.com/model.zip") }
+        }
 }

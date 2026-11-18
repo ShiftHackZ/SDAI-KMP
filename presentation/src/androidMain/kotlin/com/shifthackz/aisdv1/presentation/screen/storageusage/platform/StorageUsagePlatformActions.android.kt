@@ -38,14 +38,6 @@ private class AndroidStorageUsagePlatformActions(
         }
     }
 
-    override suspend fun getAllDownloadedModelsBytes(): Long =
-        File(context.filesDir, LOCAL_MODEL_DIRECTORY).directorySize()
-
-    override suspend fun clearAllDownloadedModels() {
-        File(context.filesDir, LOCAL_MODEL_DIRECTORY).listFiles()?.forEach { file ->
-            runCatching { file.deleteRecursively() }
-        }
-    }
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long {
         val modelDir = File(context.filesDir, LOCAL_MODEL_DIRECTORY)

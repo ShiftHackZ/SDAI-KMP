@@ -20,6 +20,7 @@ dependencies {
 // Detekt uses NIO globs: **/ does not also match the repository root.
 val lintIncludes = listOf("*.kt", "*.kts", "**/*.kt", "**/*.kts")
 val lintExclusions = listOf(
+    "tmp/**",
     "build/**",
     "**/build/**",
     "vendor/**",

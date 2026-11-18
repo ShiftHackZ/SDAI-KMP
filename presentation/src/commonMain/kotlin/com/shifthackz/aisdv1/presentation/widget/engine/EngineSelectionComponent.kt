@@ -33,6 +33,7 @@ import com.shifthackz.aisdv1.presentation.theme.textFieldColors
  * Binds the shared model picker to its injected view model and renders provider-specific choices.
  *
  * @param modifier Compose modifier applied to the rendered UI.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -60,6 +61,7 @@ fun EngineSelectionComponent(
  * @param state Provider-specific choices, selected identifier and discovery status.
  * @param processIntent Delivers model selection and explicit refresh actions to the owning view model.
  * @param modifier Compose modifier applied to the rendered UI.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -137,6 +139,7 @@ fun EngineSelectionContent(
             displayDelegate = { it.name },
         )
 
+        ServerSource.LOCAL_MNN,
         ServerSource.LOCAL_APPLE_BONSAI -> DropdownTextField(
             label = Localization.string("hint_sd_model"),
             loading = state.loading,
@@ -168,6 +171,7 @@ fun EngineSelectionContent(
  * @param items Available choices supplied by the provider-specific catalog.
  * @param onItemSelected Receives a changed item after the menu closes; persistence belongs to the caller.
  * @param displayDelegate Maps each item into the visible field and menu label.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

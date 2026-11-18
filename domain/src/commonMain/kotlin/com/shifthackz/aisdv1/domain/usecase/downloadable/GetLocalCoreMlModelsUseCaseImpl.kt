@@ -1,25 +1,21 @@
 package com.shifthackz.aisdv1.domain.usecase.downloadable
 
-import com.shifthackz.aisdv1.domain.repository.DownloadableModelRepository
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 
 /**
- * Implements `GetLocalCoreMlModelsUseCase` behavior in the SDAI domain layer.
+ * Keeps the existing CoreMl model-list operation while shared catalog recovery owns offline policy.
+ *
+ * @param refreshCatalog Refreshes one provider and reads usable cached model states.
  *
  * @author Dmitriy Moroz
  */
-internal class GetLocalCoreMlModelsUseCaseImpl(
+internal class GetLocalCoreMlModelsUseCaseImpl(private val refreshCatalog: RefreshLocalModelCatalogUseCase) :
+    GetLocalCoreMlModelsUseCase {
     /**
-     * Exposes the `downloadableModelRepository` value used by the SDAI domain layer.
+     * Returns current CoreMl choices after an independent refresh; cancellation and cache failures propagate.
      *
      * @author Dmitriy Moroz
      */
-    private val downloadableModelRepository: DownloadableModelRepository,
-) : GetLocalCoreMlModelsUseCase {
-
-    /**
-     * Executes the `invoke` step in the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    override suspend fun invoke() = downloadableModelRepository.getAllCoreMl()
+    override suspend fun invoke() =
+        refreshCatalog(LocalAiModel.Type.CoreMl).let { result -> result.models }
 }

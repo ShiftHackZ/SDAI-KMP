@@ -30,6 +30,7 @@ import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -371,6 +372,12 @@ class EngineSelectionViewModelTest {
         getConfigurationUseCase = stubGetConfigurationUseCase,
         selectStableDiffusionModelUseCase = stubSelectStableDiffusionModelUseCase,
         getStableDiffusionModelsUseCase = stubGetStableDiffusionModelsUseCase,
+        observeLocalMnnModelsUseCase = mockk {
+            every { this@mockk.invoke() } returns flowOf(
+                emptyList()
+            )
+        },
+        selectMnnModelUseCase = mockk(),
         observeLocalOnnxModelsUseCase = stubObserveLocalAiModelsUseCase,
         observeLocalCoreMlModelsUseCase = stubObserveLocalCoreMlModelsUseCase,
         observeLocalBonsaiModelsUseCase = stubObserveLocalBonsaiModelsUseCase,

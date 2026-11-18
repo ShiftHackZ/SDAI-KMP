@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.widget.input
 
 import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.domain.entity.ADetailerConfig
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.FalAiAcceleration
 import com.shifthackz.aisdv1.domain.entity.FalAiImageSize
@@ -41,12 +42,14 @@ interface GenerationInputFormState {
     val restoreFaces: Boolean
     val seed: String
     val subSeed: String
+
     /**
      * Inline error computed by the owning screen through its injected seed validator.
      *
      * @author Dmitriy Moroz
      */
     val seedValidationError: UiText?
+
     /**
      * Inline error for a supported variation seed; unused variation values do not block generation.
      *
@@ -59,6 +62,7 @@ interface GenerationInputFormState {
     val availableForgeModules: List<ForgeModule>
     val selectedForgeModules: List<ForgeModule>
     val availableSamplers: List<String>
+
     /**
      * Whether the current server sampler request is running.
      *
@@ -66,6 +70,7 @@ interface GenerationInputFormState {
      */
     val isLoadingSamplers: Boolean
         get() = false
+
     /**
      * Whether no usable sampler list could be loaded; the form offers a retry.
      *
@@ -84,6 +89,20 @@ interface GenerationInputFormState {
     val falAiImageSize: FalAiImageSize
     val falAiAcceleration: FalAiAcceleration
     val falAiSyncMode: Boolean
+
+    /**
+     * Captured MNN backend for the current platform's txt2img request.
+     *
+     * @author Dmitriy Moroz
+     */
+    val mnnBackend: MnnBackend get() = MnnBackend.CPU
+
+    /**
+     * Backends offered by the current platform; an empty list hides unsupported controls.
+     *
+     * @author Dmitriy Moroz
+     */
+    val supportedMnnBackends: List<MnnBackend> get() = emptyList()
     val sdxlBackend: SdxlBackend
     val bonsaiBackend: BonsaiBackend
     val bonsaiBackendSelectionVisible: Boolean

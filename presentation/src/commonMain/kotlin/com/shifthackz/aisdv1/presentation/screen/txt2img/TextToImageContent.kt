@@ -80,6 +80,14 @@ data class TextToImageStrings(
  *
  * The composable owns transient modal selection and pending prompt-chip text,
  * while all durable state changes are sent back through [processIntent].
+ *
+ * @param state Current immutable text-to-image screen state to render.
+ * @param processIntent Dispatches user actions to the owning text-to-image flow.
+ * @param modifier Layout bounds and insets supplied by the screen host.
+ * @param strings Localized screen labels that previews and tests can override.
+ * @param useDrawerNavigation Whether the top app bar opens the app drawer instead of navigating back.
+ *
+ * @author Dmitriy Moroz
  */
 @Composable
 fun TextToImageContent(
@@ -238,6 +246,7 @@ fun TextToImageContent(
             },
             onClose = { activeModal = null },
         )
+
         is TextToImagePanel.Extras -> ExtrasScreen(
             prompt = modal.prompt,
             negativePrompt = modal.negativePrompt,
@@ -247,6 +256,7 @@ fun TextToImageContent(
             },
             onClose = { activeModal = null },
         )
+
         TextToImagePanel.History -> GenerationHistoryDialog(
             onClose = { activeModal = null },
             onGenerationSelected = { ai ->
@@ -273,6 +283,7 @@ fun TextToImageContent(
  * Maps shared generation form events into txt2img intents.
  *
  * @return The corresponding screen action, or null for controls unsupported by txt2img.
+ *
  * @author Dmitriy Moroz
  */
 internal fun GenerationInputFormEvent.toTextToImageIntent(): TextToImageIntent? = when (this) {
@@ -283,8 +294,10 @@ internal fun GenerationInputFormEvent.toTextToImageIntent(): TextToImageIntent? 
         tag = tag,
         isNegative = isNegative,
     )
+
     is GenerationInputFormEvent.UpdateAdvancedOptionsVisibility ->
         TextToImageIntent.UpdateAdvancedOptionsVisibility(visible)
+
     is GenerationInputFormEvent.UpdateBatch -> TextToImageIntent.UpdateBatchCount(value)
     is GenerationInputFormEvent.UpdateCfgScale -> TextToImageIntent.UpdateCfgScale(value)
     is GenerationInputFormEvent.ApplyAspectRatio -> TextToImageIntent.ApplyAspectRatio(ratio)
@@ -297,11 +310,18 @@ internal fun GenerationInputFormEvent.toTextToImageIntent(): TextToImageIntent? 
     is GenerationInputFormEvent.UpdateOpenAiSize -> TextToImageIntent.UpdateOpenAiSize(value)
     is GenerationInputFormEvent.UpdateFalAiModel -> TextToImageIntent.UpdateFalAiModel(value)
     is GenerationInputFormEvent.UpdateFalAiImageSize -> TextToImageIntent.UpdateFalAiImageSize(value)
-    is GenerationInputFormEvent.UpdateFalAiAcceleration -> TextToImageIntent.UpdateFalAiAcceleration(value)
+    is GenerationInputFormEvent.UpdateFalAiAcceleration -> TextToImageIntent.UpdateFalAiAcceleration(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateSdxlBackend -> TextToImageIntent.UpdateSdxlBackend(value)
+    is GenerationInputFormEvent.UpdateMnnBackend -> TextToImageIntent.UpdateMnnBackend(value)
     is GenerationInputFormEvent.UpdateBonsaiBackend -> TextToImageIntent.UpdateBonsaiBackend(value)
     is GenerationInputFormEvent.UpdateFalAiSyncMode -> TextToImageIntent.UpdateFalAiSyncMode(value)
-    is GenerationInputFormEvent.UpdateOpenAiCompatibleModel -> TextToImageIntent.UpdateOpenAiCompatibleModel(value)
+    is GenerationInputFormEvent.UpdateOpenAiCompatibleModel -> TextToImageIntent.UpdateOpenAiCompatibleModel(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateArliAiModel -> TextToImageIntent.UpdateArliAiModel(value)
     is GenerationInputFormEvent.UpdatePrompt -> TextToImageIntent.UpdatePrompt(value)
     is GenerationInputFormEvent.UpdateRestoreFaces -> TextToImageIntent.UpdateRestoreFaces(value)
@@ -312,12 +332,22 @@ internal fun GenerationInputFormEvent.toTextToImageIntent(): TextToImageIntent? 
     is GenerationInputFormEvent.UpdateSeed -> TextToImageIntent.UpdateSeed(value)
     is GenerationInputFormEvent.UpdateStabilityAiClipGuidance ->
         TextToImageIntent.UpdateStabilityAiClipGuidance(value)
-    is GenerationInputFormEvent.UpdateStabilityAiStyle -> TextToImageIntent.UpdateStabilityAiStyle(value)
+
+    is GenerationInputFormEvent.UpdateStabilityAiStyle -> TextToImageIntent.UpdateStabilityAiStyle(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateSubSeed -> TextToImageIntent.UpdateSubSeed(value)
-    is GenerationInputFormEvent.UpdateSubSeedStrength -> TextToImageIntent.UpdateSubSeedStrength(value)
+    is GenerationInputFormEvent.UpdateSubSeedStrength -> TextToImageIntent.UpdateSubSeedStrength(
+        value
+    )
+
     is GenerationInputFormEvent.UpdateWidth -> TextToImageIntent.UpdateWidth(value)
     is GenerationInputFormEvent.UpdateHiresConfig -> TextToImageIntent.UpdateHiresConfig(value)
-    is GenerationInputFormEvent.UpdateADetailerConfig -> TextToImageIntent.UpdateADetailerConfig(value)
+    is GenerationInputFormEvent.UpdateADetailerConfig -> TextToImageIntent.UpdateADetailerConfig(
+        value
+    )
+
     GenerationInputFormEvent.RefreshADetailerAvailability -> TextToImageIntent.RefreshADetailerAvailability
     GenerationInputFormEvent.OpenADetailerInstallInstructions -> TextToImageIntent.OpenADetailerInstallInstructions
 }
@@ -365,6 +395,7 @@ private sealed interface TextToImagePanel {
         val prompt: String,
         val negativePrompt: String,
     ) : TextToImagePanel
+
     data class Extras(
         val prompt: String,
         val negativePrompt: String,

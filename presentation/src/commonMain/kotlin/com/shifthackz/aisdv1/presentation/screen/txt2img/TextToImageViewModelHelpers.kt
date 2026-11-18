@@ -104,6 +104,7 @@ internal const val MAX_SUB_SEED_STRENGTH = 1f
  *
  * @param serverUrl AUTOMATIC1111 server root used for metadata and generation.
  * @param demoMode Whether AUTOMATIC1111 uses the configured demonstration endpoint.
+ *
  * @author Dmitriy Moroz
  */
 internal data class StableDiffusionSamplersKey(
@@ -121,9 +122,13 @@ internal data class StableDiffusionSamplersKey(
     val demoMode: Boolean,
 )
 
-/** Maps current provider progress to queued or sampling UI while preserving cancellation availability.
+/**
+ * Maps provider progress to queued, sampling or overall-percentage UI while preserving cancellation.
+ *
  * @param canCancelLocalGeneration Whether the active local engine supports cancellation in the current lifecycle.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal fun TextToImageState.progressModal(
     canCancelLocalGeneration: Boolean,
 ): GenerationModal = when {
@@ -143,13 +148,19 @@ internal fun TextToImageState.progressModal(
         nativeStage = NativeGenerationStage.PREPARING.takeIf { platform == Platform.ANDROID },
     )
 
+    mode == ServerSource.LOCAL_MNN && platform == Platform.IOS -> GenerationModal.Generating(
+        title = "MNN".asUiText(), canCancel = true, isOverallProgress = true,
+    )
+
     localSourceSelected -> GenerationModal.Generating(
         canCancel = canCancelLocalGeneration || (platform == Platform.ANDROID && mode in setOf(
+            ServerSource.LOCAL_MNN,
             ServerSource.LOCAL_MICROSOFT_ONNX,
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
         )),
         nativeEngine = when (mode) {
+            ServerSource.LOCAL_MNN -> NativeGenerationEngine.MNN
             ServerSource.LOCAL_MICROSOFT_ONNX -> NativeGenerationEngine.ONNX
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> NativeGenerationEngine.SDCPP
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> NativeGenerationEngine.MEDIA_PIPE
@@ -166,6 +177,7 @@ internal fun TextToImageState.progressModal(
  *
  * @param autoSaveEnabled Whether successful results are already saved by the normal generation path.
  * @param reportEnabled Whether the result dialog offers reporting.
+ *
  * @author Dmitriy Moroz
  */
 internal fun List<AiGenerationResult>.toTextToImageResultModal(
@@ -186,6 +198,7 @@ internal fun List<AiGenerationResult>.toTextToImageResultModal(
  * Builds visible dimension and provider validation errors before generation; Easy Diffusion additionally requires multiples of eight.
  *
  * @param dimensionValidator Injected validator defining supported pixel-size bounds.
+ *
  * @author Dmitriy Moroz
  */
 internal fun TextToImageState.validated(
@@ -259,8 +272,11 @@ internal fun ValidationResult<DimensionValidator.Error>.errorMessage(): UiText? 
     )
 }
 
-/** Returns localized Bonsai size feedback when this dimension violates the supported integer alignment.
- * @author Dmitriy Moroz */
+/**
+ * Returns localized Bonsai size feedback when this dimension violates the supported integer alignment.
+ *
+ * @author Dmitriy Moroz
+ */
 
 private fun String.bonsaiSizeError(): UiText? {
     val size = toIntOrNull() ?: return null
@@ -276,6 +292,7 @@ private fun String.bonsaiSizeError(): UiText? {
  * @param forgeModules Available AUTOMATIC1111 Forge module identifiers, or null when unavailable.
  * @param aDetailerAvailable Whether the selected AUTOMATIC1111 endpoint advertises ADetailer.
  * @param arliAiModels Available ArliAI checkpoint identifiers.
+ *
  * @author Dmitriy Moroz
  */
 internal fun TextToImageState.withSettings(
@@ -316,6 +333,7 @@ internal fun TextToImageState.withSettings(
  * @param forgeModules Available AUTOMATIC1111 Forge modules, or null when unavailable.
  * @param aDetailerAvailable Whether the selected AUTOMATIC1111 endpoint advertises ADetailer.
  * @param arliAiModels Available ArliAI checkpoint identifiers.
+ *
  * @author Dmitriy Moroz
  */
 internal fun TextToImageState.withSource(
@@ -326,6 +344,7 @@ internal fun TextToImageState.withSource(
     arliAiModels: List<String>?,
 ): TextToImageState {
     val samplers = when (source) {
+        ServerSource.LOCAL_MNN -> listOf("PNDM")
         ServerSource.EASY_DIFFUSION -> listOf("ddim")
         ServerSource.STABILITY_AI -> StabilityAiSampler.entries.map { "$it" }
         ServerSource.ARLI_AI -> ArliAiSampler.supported
@@ -339,6 +358,13 @@ internal fun TextToImageState.withSource(
             mode != ServerSource.LOCAL_APPLE_BONSAI
     return copy(
         mode = source,
+        negativePrompt = if (source == ServerSource.LOCAL_MNN) "" else negativePrompt,
+        cfgScale = if (source == ServerSource.LOCAL_MNN) 7.5f else cfgScale,
+        samplingSteps = if (source == ServerSource.LOCAL_MNN) samplingSteps.coerceIn(
+            1,
+            50
+        ) else samplingSteps,
+        batchCount = if (source == ServerSource.LOCAL_MNN) 1 else batchCount,
         availableSamplers = samplers,
         selectedSampler = selectedSampler.takeIf { sampler -> samplers.contains(sampler) }
             ?: samplers.firstOrNull()
@@ -363,12 +389,12 @@ internal fun TextToImageState.withSource(
         } else {
             false
         },
-        width = if (switchingToBonsai) {
+        width = if (source == ServerSource.LOCAL_MNN) "512" else if (switchingToBonsai) {
             BONSAI_DEFAULT_SIZE.toString()
         } else {
             width
         },
-        height = if (switchingToBonsai) {
+        height = if (source == ServerSource.LOCAL_MNN) "512" else if (switchingToBonsai) {
             BONSAI_DEFAULT_SIZE.toString()
         } else {
             height
@@ -381,6 +407,7 @@ internal fun TextToImageState.withSource(
  * Native failures use the captured engine/backend without displaying native exception contents.
  *
  * @return Message suitable for a generation error modal.
+ *
  * @author Dmitriy Moroz
  */
 internal fun Throwable.localizedMessageText(): UiText {
@@ -405,3 +432,23 @@ internal fun Throwable.localizedMessageText(): UiText {
     }
     return UiText.Static(text)
 }
+
+/**
+ * Reconciles restored or stale form inputs with the single supported MNN profile before rendering.
+ * Values are transient form state; MNN does not overwrite other providers' saved diffusion defaults.
+ *
+ * @author Dmitriy Moroz
+ */
+internal fun TextToImageState.withMnnProfile(): TextToImageState =
+    if (mode == ServerSource.LOCAL_MNN) {
+        copy(
+            width = "512",
+            height = "512",
+            cfgScale = 7.5f,
+            samplingSteps = samplingSteps.coerceIn(1, 50),
+            negativePrompt = "",
+            selectedSampler = "PNDM",
+            batchCount = 1,
+            restoreFaces = false
+        )
+    } else this

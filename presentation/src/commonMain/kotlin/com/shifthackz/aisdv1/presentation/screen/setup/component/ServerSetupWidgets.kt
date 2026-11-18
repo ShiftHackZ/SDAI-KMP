@@ -37,11 +37,15 @@ import com.shifthackz.aisdv1.presentation.widget.item.SettingsItem
 
 @Composable
 
-/** Displays a setup action row whose tap invokes the supplied action.
+/**
+ * Displays a setup action row whose tap invokes the supplied action.
+ *
  * @param text Localized visible label for the setup control.
  * @param icon Icon rendered alongside the action or switch label.
  * @param onClick Invoked when the user taps the action row.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal fun SettingsAction(
     text: String,
     icon: ImageVector,
@@ -59,12 +63,16 @@ internal fun SettingsAction(
 
 @Composable
 
-/** Displays a setup toggle and reports the requested checked state to its owner.
+/**
+ * Displays a setup toggle and reports the requested checked state to its owner.
+ *
  * @param text Localized visible label for the setup control.
  * @param icon Icon rendered alongside the action or switch label.
  * @param checked Current toggle value owned by the setup state.
  * @param onCheckedChange Receives the requested toggle state; persistence remains with its owner.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal fun SwitchRow(
     text: String,
     icon: ImageVector,
@@ -91,11 +99,15 @@ internal fun SwitchRow(
 
 @Composable
 
-/** Renders the active setup confirmation/error dialog and maps its buttons to setup intents.
+/**
+ * Renders the active setup confirmation/error dialog and maps its buttons to setup intents.
+ *
  * @param modal Active confirmation, source choice or error state.
  * @param strings Localized strings supplied by the setup composition root.
  * @param processIntent Routes setup interactions to the owning view model.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 internal fun ServerSetupModal(
     modal: ServerSetupState.Modal,
     strings: ServerSetupStrings,
@@ -164,7 +176,12 @@ internal fun ServerSetupModal(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        processIntent(ServerSetupIntent.LocalModel.DeleteConfirm(modal.model))
+                        processIntent(
+                            ServerSetupIntent.LocalModel.DeleteConfirm(
+                                modal.model,
+                                modal.type
+                            )
+                        )
                     },
                 ) {
                     Text(text = Localization.string("yes"))
@@ -196,15 +213,25 @@ internal fun ServerSetupModal(
                 processIntent(ServerSetupIntent.DismissDialog)
             },
             onDownloadSourceSelected = { url ->
-                processIntent(ServerSetupIntent.LocalModel.DownloadConfirm(modal.modelId, url))
+                processIntent(
+                    ServerSetupIntent.LocalModel.DownloadConfirm(
+                        modal.modelId,
+                        url,
+                        modal.type
+                    )
+                )
             },
         )
     }
 }
 
-/** Chooses the setup icon for this provider on the supplied platform.
+/**
+ * Chooses the setup icon, branding local providers with the current platform.
+ *
  * @param platform Platform whose provider availability and readiness apply.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 internal fun ServerSource.icon(platform: Platform): ImageVector = when (this) {
     ServerSource.AUTOMATIC1111,
@@ -222,24 +249,25 @@ internal fun ServerSource.icon(platform: Platform): ImageVector = when (this) {
     ServerSource.ARLI_AI,
         -> Icons.Default.Cloud
 
+    ServerSource.LOCAL_MNN,
     ServerSource.LOCAL_MICROSOFT_ONNX,
     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
-        -> Icons.Default.Android
-
     ServerSource.LOCAL_APPLE_CORE_ML,
-        -> BrandIcons.Apple
-
     ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
         Platform.ANDROID -> Icons.Default.Android
         Platform.IOS -> BrandIcons.Apple
     }
 }
 
-/** Returns the localized provider title used by setup.
+/**
+ * Returns the localized provider title used by setup.
+ *
  * @param strings Localized strings supplied by the setup composition root.
  * @param platform Platform whose provider availability and readiness apply.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 internal fun ServerSource.title(strings: ServerSetupStrings, platform: Platform): String =
     when (this) {
@@ -254,6 +282,7 @@ internal fun ServerSource.title(strings: ServerSetupStrings, platform: Platform)
         ServerSource.STABILITY_AI -> strings.stabilityTitle
         ServerSource.FAL_AI -> strings.falAiTitle
         ServerSource.ARLI_AI -> strings.arliAiTitle
+        ServerSource.LOCAL_MNN -> strings.mnnTitle
         ServerSource.LOCAL_MICROSOFT_ONNX -> strings.localDiffusionTitle
         ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> strings.mediaPipeTitle
         ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.sdxlTitle
@@ -264,10 +293,14 @@ internal fun ServerSource.title(strings: ServerSetupStrings, platform: Platform)
         }
     }
 
-/** Returns the localized provider description used by setup.
+/**
+ * Returns the localized provider description used by setup.
+ *
  * @param strings Localized strings supplied by the setup composition root.
  * @param platform Platform whose provider availability and readiness apply.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platform): String =
     when (this) {
@@ -282,6 +315,9 @@ internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platfo
         ServerSource.STABILITY_AI -> strings.stabilitySubtitle
         ServerSource.FAL_AI -> strings.falAiSubtitle
         ServerSource.ARLI_AI -> strings.arliAiSubtitle
+        ServerSource.LOCAL_MNN -> if (platform == Platform.IOS)
+            Localization.string("hint_mnn_profile_ios") else strings.mnnSubtitle
+
         ServerSource.LOCAL_MICROSOFT_ONNX -> strings.localDiffusionSubtitle
         ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> strings.mediaPipeSubtitle
         ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.sdxlSubtitle
@@ -292,9 +328,13 @@ internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platfo
         }
     }
 
-/** Returns localized inline feedback for this setup validation failure.
+/**
+ * Returns localized inline feedback for this setup validation failure.
+ *
  * @param strings Localized strings supplied by the setup composition root.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 internal fun ServerSetupState.ValidationError.message(
     strings: ServerSetupStrings,
@@ -316,6 +356,7 @@ internal val ServerSetupState.mainButtonEnabled: Boolean
             ServerSetupState.Step.SOURCE -> true
             ServerSetupState.Step.CONFIGURE -> when (mode) {
                 ServerSource.OPEN_AI_OAUTH -> openAiOAuthAccount != null && !openAiOAuthBusy
+                ServerSource.LOCAL_MNN -> isLocalMnnCustomModel || localMnnModels.any { it.selected && it.downloaded }
                 ServerSource.LOCAL_MICROSOFT_ONNX -> localOnnxCustomModel ||
                         localOnnxModels.any { it.selected && it.downloaded }
 
@@ -347,4 +388,4 @@ internal val ServerSetupState.LocalModel.isCustom: Boolean
             id == LocalAiModel.CustomMediaPipe.id ||
             id == LocalAiModel.CustomSdxl.id ||
             id == LocalAiModel.CustomCoreMl.id ||
-            id == LocalAiModel.CustomBonsai.id
+            id == LocalAiModel.CustomBonsai.id || id == LocalAiModel.CustomMnn.id

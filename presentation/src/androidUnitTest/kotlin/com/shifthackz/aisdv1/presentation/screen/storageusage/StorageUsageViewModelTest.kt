@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.screen.storageusage
 
+import com.shifthackz.aisdv1.domain.entity.mnn.MnnCatalogResult
 import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
@@ -22,8 +23,15 @@ import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsage
 import com.shifthackz.aisdv1.presentation.screen.storageusage.model.StorageUsageModal
 import com.shifthackz.aisdv1.presentation.screen.storageusage.platform.StorageUsagePlatformActions
 import com.shifthackz.aisdv1.presentation.model.UsageCategory
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
+import io.mockk.coVerify
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.every
+import com.shifthackz.aisdv1.presentation.screen.setup.platform.isServerSourceAvailableOnAndroid
+import com.shifthackz.aisdv1.presentation.screen.setup.platform.isServerSourceAvailableOnPlatform
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,6 +63,7 @@ class StorageUsageViewModelTest {
     private val getLocalSdxlModelsUseCase = mockk<GetLocalSdxlModelsUseCase>()
     private val getLocalCoreMlModelsUseCase = mockk<GetLocalCoreMlModelsUseCase>()
     private val getLocalBonsaiModelsUseCase = mockk<GetLocalBonsaiModelsUseCase>()
+    private val getLocalMnnModelsUseCase = mockk<GetLocalMnnModelsUseCase>()
     private val deleteModelUseCase = mockk<DeleteModelUseCase>()
     private val storageUsageObserver = StorageUsageObserver()
     private val router = TestStorageUsageRouter()
@@ -65,6 +74,10 @@ class StorageUsageViewModelTest {
 
     @Before
     fun initialize() {
+        mockkStatic(::isServerSourceAvailableOnPlatform)
+        every { isServerSourceAvailableOnPlatform(any()) } answers {
+            isServerSourceAvailableOnAndroid(firstArg(), arrayOf("arm64-v8a"))
+        }
         coEvery { getAllGalleryUseCase() } returns emptyList()
         coEvery { galleryReads.storageBytes() } coAnswers { getAllGalleryUseCase().sumOf { it.image.encodeToByteArray().size.toLong() + it.inputImage.encodeToByteArray().size } }
         coEvery { deleteAllGalleryUseCase() } returns Unit
@@ -73,11 +86,13 @@ class StorageUsageViewModelTest {
         coEvery { getLocalSdxlModelsUseCase() } returns emptyList()
         coEvery { getLocalCoreMlModelsUseCase() } returns emptyList()
         coEvery { getLocalBonsaiModelsUseCase() } returns emptyList()
+        coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(emptyList())
         coEvery { deleteModelUseCase(any()) } returns Unit
     }
 
     @After
     fun tearDown() {
+        unmockkStatic(::isServerSourceAvailableOnPlatform)
         viewModelScope?.cancel()
         viewModelScope = null
         onnxModels = emptyList()
@@ -202,6 +217,96 @@ class StorageUsageViewModelTest {
     }
 
     @Test
+    fun `given storage accounting, every Android provider has custom models, expected zero managed model bytes`() =
+        runTest {
+            // Given
+            val customs = listOf(
+                LocalAiModel.CustomOnnx, LocalAiModel.CustomMediaPipe, LocalAiModel.CustomSdxl,
+                LocalAiModel.CustomBonsai, LocalAiModel.CustomMnn,
+            ).map { it.copy(downloaded = true) }
+            onnxModels = listOf(customs[0])
+            coEvery { getLocalMediaPipeModelsUseCase() } returns listOf(customs[1])
+            coEvery { getLocalSdxlModelsUseCase() } returns listOf(customs[2])
+            coEvery { getLocalBonsaiModelsUseCase() } returns listOf(customs[3])
+            coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(listOf(customs[4]))
+            customs.forEach { platformActions.modelBytes[it.id] = 8192L }
+            // When
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(0L, viewModel.state.value.usage.totalBytes)
+            assertTrue(viewModel.state.value.usage.items.all { it.modelIds.isEmpty() })
+        }
+
+    @Test
+    fun `given MNN storage category, catalog and custom snapshots exist, expected only catalog counted and cleared`() =
+        runTest {
+            // Given
+            val catalog = downloadedModel("mnn-catalog", LocalAiModel.Type.Mnn)
+            coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(
+                listOf(catalog, LocalAiModel.CustomMnn.copy(downloaded = true)),
+            )
+            platformActions.modelBytes.putAll(
+                mapOf(
+                    catalog.id to 4096L,
+                    LocalAiModel.CustomMnn.id to 8192L,
+                    "mnn_custom" to 16384L
+                ),
+            )
+            // When
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            val item =
+                viewModel.state.value.usage.items.first { it.category == UsageCategory.MODELS_MNN }
+            // Then
+            assertEquals(4096L, item.bytes)
+            assertEquals(listOf(catalog.id), item.modelIds)
+            assertEquals(4096L, viewModel.state.value.usage.totalBytes)
+            viewModel.processIntent(StorageUsageIntent.ConfirmClearCategory(UsageCategory.MODELS_MNN))
+            advanceUntilIdle()
+
+            coVerify(exactly = 1) { deleteModelUseCase(catalog.id) }
+            coVerify(exactly = 0) { deleteModelUseCase(LocalAiModel.CustomMnn.id) }
+            coVerify(exactly = 0) { deleteModelUseCase("mnn_custom") }
+        }
+
+    @Test
+    fun `given Core ML storage category, custom and unknown directories exist, expected only catalog counted and cleared`() =
+        runTest {
+            // Given
+            val catalog = downloadedModel("coreml-catalog", LocalAiModel.Type.CoreMl)
+            coEvery { getLocalCoreMlModelsUseCase() } returns listOf(
+                catalog, LocalAiModel.CustomCoreMl.copy(downloaded = true),
+            )
+            platformActions.modelBytes.putAll(
+                mapOf(
+                    catalog.id to 4096L,
+                    LocalAiModel.CustomCoreMl.id to 8192L,
+                    "unknown-custom" to 16384L
+                ),
+            )
+            // When
+            val viewModel = createViewModel(object : BuildInfoProvider by TestBuildInfoProvider {
+                override val platform = Platform.IOS
+            })
+            advanceUntilIdle()
+
+            val item =
+                viewModel.state.value.usage.items.first { it.category == UsageCategory.MODELS_CORE_ML }
+            // Then
+            assertEquals(4096L, item.bytes)
+            assertEquals(listOf(catalog.id), item.modelIds)
+            viewModel.processIntent(StorageUsageIntent.ConfirmClearAll(listOf(UsageCategory.MODELS_CORE_ML)))
+            advanceUntilIdle()
+
+            coVerify(exactly = 1) { deleteModelUseCase(catalog.id) }
+            coVerify(exactly = 0) { deleteModelUseCase(LocalAiModel.CustomCoreMl.id) }
+            coVerify(exactly = 0) { deleteModelUseCase("unknown-custom") }
+        }
+
+    @Test
     fun `given back intent, expected router navigates back`() = runTest {
         val viewModel = createViewModel()
 
@@ -210,7 +315,9 @@ class StorageUsageViewModelTest {
         assertEquals(1, router.backInvocations)
     }
 
-    private fun TestScope.createViewModel(): StorageUsageViewModel {
+    private fun TestScope.createViewModel(
+        buildInfoProvider: BuildInfoProvider = TestBuildInfoProvider,
+    ): StorageUsageViewModel {
         val dispatcher = StandardTestDispatcher(testScheduler)
         dispatchersProvider = object : DispatchersProvider {
             override val io: CoroutineDispatcher = dispatcher
@@ -227,10 +334,11 @@ class StorageUsageViewModelTest {
             getLocalMediaPipeModelsUseCase = getLocalMediaPipeModelsUseCase,
             getLocalSdxlModelsUseCase = getLocalSdxlModelsUseCase,
             getLocalCoreMlModelsUseCase = getLocalCoreMlModelsUseCase,
+            getLocalMnnModelsUseCase = getLocalMnnModelsUseCase,
             getLocalBonsaiModelsUseCase = getLocalBonsaiModelsUseCase,
             deleteModelUseCase = deleteModelUseCase,
             storageUsageObserver = storageUsageObserver,
-            buildInfoProvider = TestBuildInfoProvider,
+            buildInfoProvider = buildInfoProvider,
             router = router,
             platformActions = platformActions,
         )
@@ -304,11 +412,6 @@ private class TestStorageUsagePlatformActions : StorageUsagePlatformActions {
         appCacheBytes = 0L
     }
 
-    override suspend fun getAllDownloadedModelsBytes(): Long = modelBytes.values.sum()
-
-    override suspend fun clearAllDownloadedModels() {
-        modelBytes.clear()
-    }
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long =
         modelIds.distinct().sumOf { id -> modelBytes[id] ?: 0L }

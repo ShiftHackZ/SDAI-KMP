@@ -16,6 +16,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.util.UUID
+import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
 import java.util.concurrent.TimeUnit
 
 /**
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit
  *
  * @param fileProviderDescriptor Provides the app-private local model directory path.
  * @param networkUsageRepository Persists downloaded byte deltas for network usage statistics.
+ * @param mnnModels Immutable MNN roots and active attempt leases.
  * @throws IllegalStateException when OkHttp returns a non-successful download response.
  *
  * @author Dmitriy Moroz
@@ -40,6 +43,7 @@ internal class AndroidDownloadableModelFileDownloader(
      * @author Dmitriy Moroz
      */
     private val networkUsageRepository: NetworkUsageRepository,
+    private val mnnModels: MnnModelStore,
 ) : DownloadableModelFileDownloader {
 
     /**
@@ -62,6 +66,25 @@ internal class AndroidDownloadableModelFileDownloader(
         id: String,
         url: String,
     ): Flow<DownloadState> = flow {
+        require(id.matches(Regex("[A-Za-z0-9_-]+")))
+        if (id.startsWith("mnn_")) {
+            val staging =
+                File(fileProviderDescriptor.localModelDirPath, ".mnn-download-${UUID.randomUUID()}")
+            check(staging.mkdirs())
+            try {
+                val archive = File(staging, "model.zip")
+                downloadToFile(url, archive) { emit(DownloadState.Downloading(it)) }
+                mnnModels.activate(id, archive.path)
+                emit(DownloadState.Complete(mnnModels.path(id)))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                emit(DownloadState.Error(failure))
+            } finally {
+                staging.deleteRecursively()
+            }
+            return@flow
+        }
         val dir = File("${fileProviderDescriptor.localModelDirPath}/$id")
         if (dir.exists()) dir.deleteRecursively()
         dir.mkdirs()

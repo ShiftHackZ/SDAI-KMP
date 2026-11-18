@@ -27,6 +27,7 @@ kotlin {
             baseName = "AiSdPresentation"
             isStatic = true
             export(project(":feature:bonsai"))
+            export(project(":feature:mnn"))
             export(project(":feature:coreml"))
             export(project(":feature:openai-oauth"))
         }
@@ -45,6 +46,7 @@ kotlin {
             implementation(project(":feature:benchmark"))
             implementation(project(":feature:work"))
             api(project(":feature:bonsai"))
+            api(project(":feature:mnn"))
             api(project(":feature:coreml"))
             api(project(":feature:openai-oauth"))
             implementation(project(":network"))

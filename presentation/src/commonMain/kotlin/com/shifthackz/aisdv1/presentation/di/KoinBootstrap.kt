@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.di
 
+import com.shifthackz.aisdv1.feature.mnn.di.mnnHostRuntimeModule
 import com.shifthackz.aisdv1.core.validation.di.validatorsModule
 import com.shifthackz.aisdv1.data.di.coreDataModule
 import com.shifthackz.aisdv1.data.di.dataModule
@@ -17,9 +18,10 @@ import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
 
 /**
- * Executes the `initKoin` step in the SDAI presentation layer.
+ * Builds the application graph once; hosts inject native collaborators before creating UI.
  *
- * @return Result produced by `initKoin`.
+ * @return Existing or newly initialized application composition root.
+ *
  * @author Dmitriy Moroz
  */
 fun initKoin(): Koin =
@@ -36,6 +38,7 @@ fun initKoin(): Koin =
             benchmarkModule,
             bonsaiModule,
             coreMlModule,
+            mnnHostRuntimeModule,
             backgroundWorkModule,
             corePresentationModule,
             platformPresentationModule,

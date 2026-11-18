@@ -10,6 +10,7 @@ import com.shifthackz.aisdv1.core.mvi.EmptyEffect
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalCoreMlModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMediaPipeModelsUseCase
@@ -29,8 +30,6 @@ import com.shifthackz.aisdv1.presentation.model.UsageState
 import com.shifthackz.aisdv1.presentation.model.isModelCategory
 import com.shifthackz.aisdv1.presentation.model.isStorageCategory
 import com.shifthackz.aisdv1.presentation.model.resolveSelectedCategory
-import com.shifthackz.aisdv1.presentation.model.shouldUseCoreMlModelStoreFallback
-import com.shifthackz.aisdv1.presentation.model.storageTextByteSize
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -41,6 +40,7 @@ import kotlinx.coroutines.flow.map
  * model directories. The ViewModel listens to [StorageUsageObserver] instead of lifecycle callbacks
  * so Settings summaries and the standalone screen refresh from the same invalidation signal.
  *
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  * @param dispatchersProvider App coroutine dispatchers used by the MVI base class and IO work.
  * @param galleryReads Reads payload-free gallery storage aggregates.
  * @param deleteAllGalleryUseCase Deletes gallery records after explicit user confirmation.
@@ -48,6 +48,8 @@ import kotlinx.coroutines.flow.map
  * @param getLocalMediaPipeModelsUseCase Reads locally configured MediaPipe models.
  * @param getLocalSdxlModelsUseCase Reads locally configured SDXL models.
  * @param getLocalCoreMlModelsUseCase Reads locally configured Core ML models on supported builds.
+ * @param getLocalMnnModelsUseCase Reads MNN catalog identities; custom models are excluded from accounting.
+ * @param getLocalBonsaiModelsUseCase Reads catalog Bonsai downloads for supported-platform storage accounting.
  * @param deleteModelUseCase Deletes downloaded local model metadata and files.
  * @param storageUsageObserver Shared invalidation stream used by Settings and this screen.
  * @param buildInfoProvider Build metadata used to filter platform-supported model categories.
@@ -56,7 +58,6 @@ import kotlinx.coroutines.flow.map
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
  * @author Dmitriy Moroz
- * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 class StorageUsageViewModel(
     diagnostics: UiDiagnostics,
@@ -67,6 +68,7 @@ class StorageUsageViewModel(
     private val getLocalMediaPipeModelsUseCase: GetLocalMediaPipeModelsUseCase,
     private val getLocalSdxlModelsUseCase: GetLocalSdxlModelsUseCase,
     private val getLocalCoreMlModelsUseCase: GetLocalCoreMlModelsUseCase,
+    private val getLocalMnnModelsUseCase: GetLocalMnnModelsUseCase,
     private val getLocalBonsaiModelsUseCase: GetLocalBonsaiModelsUseCase,
     private val deleteModelUseCase: DeleteModelUseCase,
     private val storageUsageObserver: StorageUsageObserver,
@@ -141,6 +143,8 @@ class StorageUsageViewModel(
         val mediaPipeModels = getDownloadedModels(getLocalMediaPipeModelsUseCase::invoke)
         val sdxlModels = getDownloadedModels(getLocalSdxlModelsUseCase::invoke)
         val coreMlModels = getDownloadedModels(getLocalCoreMlModelsUseCase::invoke)
+        val mnnModels = getDownloadedModels { getLocalMnnModelsUseCase().models }
+        val mnnModelIds = mnnModels.map(LocalAiModel::id)
         val bonsaiModels = getDownloadedModels(getLocalBonsaiModelsUseCase::invoke)
         val coreMlModelIds = coreMlModels.map(LocalAiModel::id)
         val bonsaiModelIds = bonsaiModels.map(LocalAiModel::id)
@@ -200,13 +204,23 @@ class StorageUsageViewModel(
                     UsageItem(
                         category = UsageCategory.MODELS_CORE_ML,
                         bytes = platformActions.mapStorageBytesForUi(
-                            getCoreMlModelBytes(
-                                allowedModes = allowedModes,
-                                modelIds = coreMlModelIds,
-                            ),
+                            platformActions.getDownloadedModelsBytes(coreMlModelIds),
                         ),
                         modelIds = coreMlModelIds,
                     ),
+                )
+            }
+            if (ServerSource.LOCAL_MNN in allowedModes) {
+                add(
+                    UsageItem(
+                        category = UsageCategory.MODELS_MNN,
+                        bytes = platformActions.mapStorageBytesForUi(
+                            platformActions.getDownloadedModelsBytes(
+                                mnnModelIds
+                            )
+                        ),
+                        modelIds = mnnModelIds
+                    )
                 )
             }
             if (ServerSource.LOCAL_APPLE_BONSAI in allowedModes) {
@@ -294,9 +308,6 @@ class StorageUsageViewModel(
                 if (UsageCategory.GALLERY in categories) {
                     deleteAllGalleryUseCase()
                 }
-                if (UsageCategory.MODELS_CORE_ML in categories && shouldUseCoreMlModelStoreFallback()) {
-                    platformActions.clearAllDownloadedModels()
-                }
                 currentState.usage.items
                     .filter { item -> item.category in categories && item.category.isModelCategory() }
                     .flatMap(UsageItem::modelIds)
@@ -324,16 +335,12 @@ class StorageUsageViewModel(
             UsageCategory.MODELS_MEDIAPIPE,
             UsageCategory.MODELS_SDXL,
             UsageCategory.MODELS_CORE_ML,
+            UsageCategory.MODELS_MNN,
             UsageCategory.MODELS_BONSAI,
                 -> currentState.usage.items
                 .firstOrNull { it.category == category }
                 ?.modelIds
                 ?.forEach { id -> deleteModelUseCase(id) }
-                .also {
-                    if (category == UsageCategory.MODELS_CORE_ML && shouldUseCoreMlModelStoreFallback()) {
-                        platformActions.clearAllDownloadedModels()
-                    }
-                }
 
             UsageCategory.TRAFFIC_MODELS,
             UsageCategory.TRAFFIC_CONFIGS,
@@ -341,33 +348,6 @@ class StorageUsageViewModel(
                 -> Unit
         }
     }
-
-    /**
-     * Reads Core ML model bytes from the entire platform model store on iOS-style targets.
-     *
-     * @param allowedModes Providers available on the current platform.
-     * @param modelIds Catalog model identifiers known to the app.
-     * @return Filesystem byte count for the Core ML storage row.
-     * @author Dmitriy Moroz
-     */
-    private suspend fun getCoreMlModelBytes(
-        allowedModes: List<ServerSource>,
-        modelIds: List<String>,
-    ): Long =
-        if (allowedModes.shouldUseCoreMlModelStoreFallback()) {
-            platformActions.getAllDownloadedModelsBytes()
-        } else {
-            platformActions.getDownloadedModelsBytes(modelIds)
-        }
-
-    /**
-     * Returns true when Core ML is the only local model provider exposed by this platform.
-     *
-     * @return True for iOS targets where all app-private model bytes belong to Core ML.
-     * @author Dmitriy Moroz
-     */
-    private fun shouldUseCoreMlModelStoreFallback(): Boolean =
-        buildInfoProvider.setupAllowedModes().shouldUseCoreMlModelStoreFallback()
 
     private suspend fun getDownloadedModels(
         getModels: suspend () -> List<LocalAiModel>,
@@ -381,7 +361,7 @@ class StorageUsageViewModel(
 }
 
 /**
- * Custom local model placeholders are user-managed paths and must not count as downloaded files.
+ * Custom model identities are excluded from catalog storage totals, including app-owned snapshots.
  *
  * @author Dmitriy Moroz
  */
@@ -391,4 +371,5 @@ private val customModelIds = setOf(
     LocalAiModel.CustomSdxl.id,
     LocalAiModel.CustomCoreMl.id,
     LocalAiModel.CustomBonsai.id,
+    LocalAiModel.CustomMnn.id,
 )

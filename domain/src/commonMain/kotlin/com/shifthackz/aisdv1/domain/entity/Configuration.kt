@@ -7,7 +7,6 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
  *
  * @param authorizationStorageFailure Non-persisted credential error; authCredentials is unavailable when set.
  * @param providerSelectionRevision Durable revision of the selected source; changes on source replacement.
- *
  * @param serverUrl AUTOMATIC1111 server root used for metadata and generation.
  * @param easyDiffusionUrl HTTP(S) root or reverse-proxy prefix of the anonymous Easy Diffusion instance.
  * @param easyDiffusionModel Complete Easy Diffusion checkpoint identifier, including folder separators.
@@ -36,7 +35,13 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
  * @param localCoreMlModelId Selected downloaded Core ML model identifier.
  * @param localCoreMlModelPath Filesystem path to the selected custom Core ML model.
  * @param localBonsaiModelId Selected downloaded Bonsai model identifier.
+ * @param localMnnCustomActivationId Last committed owned custom manifest identity, retained across catalog selections.
+ * @param localMnnActivationId SHA256 of the selected immutable MNN manifest.
+ * @param localMnnModelId Selected complete MNN catalog or custom snapshot identity.
+ * @param localMnnModelPath External custom bundle source shown in setup.
+ * @param localMnnBackend Independent requested CPU/OpenCL backend.
  * @param localBonsaiModelPath Filesystem path to the selected custom Bonsai model.
+ *
  * @author Dmitriy Moroz
  */
 data class Configuration(
@@ -53,11 +58,15 @@ data class Configuration(
      * @author Dmitriy Moroz
      */
     val serverUrl: String = "",
-    /** HTTP(S) root or reverse-proxy prefix of the anonymous Easy Diffusion instance.
+    /**
+     * HTTP(S) root or reverse-proxy prefix of the anonymous Easy Diffusion instance.
+     *
      * @author Dmitriy Moroz
      */
     val easyDiffusionUrl: String = "",
-    /** Complete checkpoint identifier from the Easy Diffusion stable-diffusion catalog.
+    /**
+     * Complete checkpoint identifier from the Easy Diffusion stable-diffusion catalog.
+     *
      * @author Dmitriy Moroz
      */
     val easyDiffusionModel: String = "",
@@ -211,6 +220,11 @@ data class Configuration(
      * @author Dmitriy Moroz
      */
     val localBonsaiModelId: String = "",
+    val localMnnCustomActivationId: String = "",
+    val localMnnActivationId: String = "",
+    val localMnnModelId: String = "",
+    val localMnnModelPath: String = "",
+    val localMnnBackend: MnnBackend = MnnBackend.CPU,
     /**
      * Filesystem path to the selected custom Bonsai model.
      *

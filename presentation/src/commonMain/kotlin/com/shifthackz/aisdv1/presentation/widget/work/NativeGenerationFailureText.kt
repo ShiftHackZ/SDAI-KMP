@@ -9,10 +9,12 @@ import com.shifthackz.aisdv1.domain.entity.NativeGenerationFailure
  * Arbitrary native exception messages and current provider selection never enter this description.
  *
  * @receiver Failure captured for the failed attempt.
+ *
  * @author Dmitriy Moroz
  */
 internal fun NativeGenerationFailure.toUserMessage(): String {
     val engineName = when (engine) {
+        NativeGenerationEngine.MNN -> "MNN"
         NativeGenerationEngine.ONNX -> "ONNX"
         NativeGenerationEngine.MEDIA_PIPE -> "MediaPipe"
         NativeGenerationEngine.SDCPP -> "SDCPP"
@@ -28,7 +30,7 @@ internal fun NativeGenerationFailure.toUserMessage(): String {
         NativeGenerationFailure.Category.INVALID_RESULT -> "native_generation_invalid_result"
         NativeGenerationFailure.Category.INTERRUPTED -> "native_generation_interrupted"
     }
-    val backendName = backend?.displayName ?: bonsaiBackend?.displayName
+    val backendName = backend?.displayName ?: bonsaiBackend?.displayName ?: mnnBackend?.name
     val attemptedEngine = backendName?.let { "$engineName / $it" } ?: engineName
     return Localization.string(
         "native_generation_failure_context",

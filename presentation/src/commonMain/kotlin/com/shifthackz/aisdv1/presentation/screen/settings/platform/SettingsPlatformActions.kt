@@ -76,15 +76,6 @@ interface SettingsPlatformActions : StorageUsageByteMapper {
      */
     suspend fun clearAppCache()
 
-    /**
-     * Returns total bytes occupied by every downloaded model directory visible to the platform.
-     *
-     * Settings uses this as a fallback when platform storage contains downloaded models before
-     * the model catalog provides their ids.
-     *
-     * @author Dmitriy Moroz
-     */
-    suspend fun getAllDownloadedModelsBytes(): Long
 
     /**
      * Returns total bytes occupied by downloaded model directories for [modelIds].
@@ -146,7 +137,6 @@ object NoOpSettingsPlatformActions : SettingsPlatformActions {
 
     override suspend fun clearAppCache() = Unit
 
-    override suspend fun getAllDownloadedModelsBytes(): Long = 0L
 
     override suspend fun getDownloadedModelsBytes(modelIds: List<String>): Long = 0L
 

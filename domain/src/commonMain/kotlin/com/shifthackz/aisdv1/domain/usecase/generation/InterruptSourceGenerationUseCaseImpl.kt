@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.domain.usecase.generation
 
 
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.repository.MnnGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.BonsaiGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.CoreMlGenerationRepository
 import com.shifthackz.aisdv1.domain.repository.HordeGenerationRepository
@@ -18,6 +19,8 @@ import com.shifthackz.aisdv1.domain.repository.StableDiffusionGenerationReposito
  * @param stableDiffusionCppGenerationRepository Owns interruption of StableDiffusionCpp generation.
  * @param coreMlGenerationRepository Owns interruption of CoreMl generation.
  * @param bonsaiGenerationRepository Owns interruption of Bonsai generation.
+ * @param mnnGenerationRepository Cancels the admitted MNN foreground attempt through its gateway.
+ *
  * @author Dmitriy Moroz
  */
 internal class InterruptSourceGenerationUseCaseImpl(
@@ -27,11 +30,13 @@ internal class InterruptSourceGenerationUseCaseImpl(
     private val stableDiffusionCppGenerationRepository: StableDiffusionCppGenerationRepository,
     private val coreMlGenerationRepository: CoreMlGenerationRepository,
     private val bonsaiGenerationRepository: BonsaiGenerationRepository,
+    private val mnnGenerationRepository: MnnGenerationRepository,
 ) : InterruptSourceGenerationUseCase {
     /**
      * Requests interruption of a supported source and propagates repository failures.
      *
      * @param source Explicit source whose generation should be interrupted.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun invoke(source: ServerSource) {
@@ -42,6 +47,7 @@ internal class InterruptSourceGenerationUseCaseImpl(
             ServerSource.LOCAL_MICROSOFT_ONNX -> localDiffusionGenerationRepository.interruptGeneration()
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> stableDiffusionCppGenerationRepository.interruptGeneration()
             ServerSource.LOCAL_APPLE_CORE_ML -> coreMlGenerationRepository.interruptGeneration()
+            ServerSource.LOCAL_MNN -> mnnGenerationRepository.interruptGeneration()
             ServerSource.LOCAL_APPLE_BONSAI -> bonsaiGenerationRepository.interruptGeneration()
             else -> Unit
         }

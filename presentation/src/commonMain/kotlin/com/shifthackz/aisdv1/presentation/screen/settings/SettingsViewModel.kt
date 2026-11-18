@@ -18,6 +18,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.caching.ClearAppCacheUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalCoreMlModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMediaPipeModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalOnnxModelsUseCase
@@ -38,8 +39,6 @@ import com.shifthackz.aisdv1.presentation.screen.settings.model.SettingsState
 import com.shifthackz.aisdv1.presentation.screen.settings.platform.SettingsPlatformActions
 import com.shifthackz.aisdv1.presentation.screen.setup.viewmodel.setupAllowedModes
 import com.shifthackz.aisdv1.presentation.screen.storageusage.StorageUsageObserver
-import com.shifthackz.aisdv1.presentation.model.shouldUseCoreMlModelStoreFallback
-import com.shifthackz.aisdv1.presentation.model.storageTextByteSize
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -57,6 +56,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * It owns the lightweight settings summaries, including observed storage and network usage byte
  * totals, and delegates detailed cleanup/statistics flows to standalone usage screens.
  *
+ * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  * @param dispatchersProvider App coroutine dispatchers used by the MVI base class and IO work.
  * @param getStableDiffusionModelsUseCase Reads provider model names for the Settings picker.
  * @param observeStabilityAiCreditsUseCase Observes Stability AI credits for Settings summary rows.
@@ -68,6 +68,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param getLocalSdxlModelsUseCase Reads locally configured SDXL models.
  * @param getLocalCoreMlModelsUseCase Reads locally configured Core ML models on supported builds.
  * @param getLocalBonsaiModelsUseCase Reads locally configured Bonsai models on supported builds.
+ * @param getLocalMnnModelsUseCase Reads MNN catalog identities; custom models are excluded from totals.
  * @param observeNetworkUsageUseCase Live Room-backed network usage stream.
  * @param storageUsageObserver Shared invalidation stream for non-Room storage usage.
  * @param preferenceManager Preferences source observed for provider/model refreshes.
@@ -79,7 +80,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param onError Error callback forwarded to the app-level error handling pipeline.
  *
  * @author Dmitriy Moroz
- * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModel(
@@ -95,6 +95,7 @@ class SettingsViewModel(
     private val getLocalSdxlModelsUseCase: GetLocalSdxlModelsUseCase,
     private val getLocalCoreMlModelsUseCase: GetLocalCoreMlModelsUseCase,
     private val getLocalBonsaiModelsUseCase: GetLocalBonsaiModelsUseCase,
+    private val getLocalMnnModelsUseCase: GetLocalMnnModelsUseCase,
     private val observeNetworkUsageUseCase: ObserveNetworkUsageUseCase,
     private val storageUsageObserver: StorageUsageObserver,
     private val preferenceManager: PreferenceManager,
@@ -438,6 +439,7 @@ class SettingsViewModel(
         val sdxlModels = getDownloadedModels(getLocalSdxlModelsUseCase::invoke)
         val coreMlModels = getDownloadedModels(getLocalCoreMlModelsUseCase::invoke)
         val bonsaiModels = getDownloadedModels(getLocalBonsaiModelsUseCase::invoke)
+        val mnnModels = getDownloadedModels { getLocalMnnModelsUseCase().models }
         val coreMlModelIds = coreMlModels.map(LocalAiModel::id)
         val allowedModes = buildInfoProvider.setupAllowedModes()
         val galleryBytes = galleryReads.storageBytes()
@@ -459,10 +461,7 @@ class SettingsViewModel(
         }
         if (ServerSource.LOCAL_APPLE_CORE_ML in allowedModes) {
             modelBytes += platformActions.mapStorageBytesForUi(
-                getCoreMlModelBytes(
-                    allowedModes = allowedModes,
-                    modelIds = coreMlModelIds,
-                ),
+                platformActions.getDownloadedModelsBytes(coreMlModelIds),
             )
         }
         if (ServerSource.LOCAL_APPLE_BONSAI in allowedModes) {
@@ -470,27 +469,14 @@ class SettingsViewModel(
                 platformActions.getDownloadedModelsBytes(bonsaiModels.map(LocalAiModel::id)),
             )
         }
+        if (ServerSource.LOCAL_MNN in allowedModes) {
+            modelBytes += platformActions.mapStorageBytesForUi(
+                platformActions.getDownloadedModelsBytes(mnnModels.map(LocalAiModel::id)),
+            )
+        }
         val cacheBytes = platformActions.mapStorageBytesForUi(platformActions.getAppCacheBytes())
         return cacheBytes + galleryBytes + modelBytes
     }
-
-    /**
-     * Reads Core ML model bytes from the entire platform model store on iOS-style targets.
-     *
-     * @param allowedModes Providers available on the current platform.
-     * @param modelIds Catalog model identifiers known to the app.
-     * @return Filesystem byte count included in the Settings storage summary.
-     * @author Dmitriy Moroz
-     */
-    private suspend fun getCoreMlModelBytes(
-        allowedModes: List<ServerSource>,
-        modelIds: List<String>,
-    ): Long =
-        if (allowedModes.shouldUseCoreMlModelStoreFallback()) {
-            platformActions.getAllDownloadedModelsBytes()
-        } else {
-            platformActions.getDownloadedModelsBytes(modelIds)
-        }
 
     private suspend fun getDownloadedModels(
         getModels: suspend () -> List<LocalAiModel>,
@@ -582,7 +568,7 @@ private data class SdModelsRefreshKey(
 )
 
 /**
- * Custom local model placeholders are user-managed paths and must not count as downloaded files.
+ * Custom model identities are excluded from catalog storage totals, including app-owned snapshots.
  *
  * @author Dmitriy Moroz
  */
@@ -592,4 +578,5 @@ private val customModelIds = setOf(
     LocalAiModel.CustomSdxl.id,
     LocalAiModel.CustomCoreMl.id,
     LocalAiModel.CustomBonsai.id,
+    LocalAiModel.CustomMnn.id,
 )

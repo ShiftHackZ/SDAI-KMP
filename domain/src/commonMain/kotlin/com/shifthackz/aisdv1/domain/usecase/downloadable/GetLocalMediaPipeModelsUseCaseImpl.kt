@@ -1,25 +1,21 @@
 package com.shifthackz.aisdv1.domain.usecase.downloadable
 
-import com.shifthackz.aisdv1.domain.repository.DownloadableModelRepository
+import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 
 /**
- * Implements `GetLocalMediaPipeModelsUseCase` behavior in the SDAI domain layer.
+ * Keeps the existing MediaPipe model-list operation while shared catalog recovery owns offline policy.
+ *
+ * @param refreshCatalog Refreshes one provider and reads usable cached model states.
  *
  * @author Dmitriy Moroz
  */
-internal class GetLocalMediaPipeModelsUseCaseImpl(
+internal class GetLocalMediaPipeModelsUseCaseImpl(private val refreshCatalog: RefreshLocalModelCatalogUseCase) :
+    GetLocalMediaPipeModelsUseCase {
     /**
-     * Exposes the `downloadableModelRepository` value used by the SDAI domain layer.
+     * Returns current MediaPipe choices after an independent refresh; cancellation and cache failures propagate.
      *
      * @author Dmitriy Moroz
      */
-    private val downloadableModelRepository: DownloadableModelRepository,
-) : GetLocalMediaPipeModelsUseCase {
-
-    /**
-     * Executes the `invoke` step in the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    override suspend fun invoke() = downloadableModelRepository.getAllMediaPipe()
+    override suspend fun invoke() =
+        refreshCatalog(LocalAiModel.Type.MediaPipe).let { result -> result.models }
 }

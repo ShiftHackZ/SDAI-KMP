@@ -279,7 +279,6 @@ val coreDataModule = module {
         DownloadableModelRepositoryImpl(
             remoteDataSource = get(),
             localDataSource = get(),
-            buildInfoProvider = get(),
         )
     }
     single<GenerationResultRepository> {

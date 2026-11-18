@@ -23,38 +23,37 @@ import kotlinx.coroutines.flow.combine
  * @author Dmitriy Moroz
  */
 internal class DownloadableModelLocalDataSource(
-    /**
-     * Exposes the `dao` value used by the SDAI data layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
     private val dao: LocalModelDao,
-    /**
-     * Exposes the `preferenceManager` value used by the SDAI data layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
     private val preferenceManager: PreferenceManager,
-    /**
-     * Exposes the `buildInfoProvider` value used by the SDAI data layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
     private val buildInfoProvider: BuildInfoProvider,
-    /**
-     * Exposes the `fileStore` value used by the SDAI data layer.
-     *
-     * @throws IllegalStateException when the delegated operation cannot complete.
-     * @author Dmitriy Moroz
-     */
     private val fileStore: DownloadableModelFileStore,
 ) : DownloadableModelDataSource.Local {
 
     /**
-     * Loads SDAI data through `getAllOnnx`.
+     * Reads MNN model metadata with current completion and independent selection state.
+     *
+     * @author Dmitriy Moroz
+     */
+    override suspend fun getAllMnn() = (dao.queryByType(LocalAiModel.Type.Mnn.key)
+        .mapEntityToDomain() + if (buildInfoProvider.type != BuildType.PLAY) listOf(LocalAiModel.CustomMnn) else emptyList())
+        .withLocalData()
+
+    /**
+     * Observes cached MNN model states combined with provider selection changes.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun observeAllMnn(): Flow<List<LocalAiModel>> =
+        dao.observeByType(LocalAiModel.Type.Mnn.key)
+            .combine(preferenceManager.observe()) { entities, _ ->
+                (entities.mapEntityToDomain() + if (buildInfoProvider.type != BuildType.PLAY) listOf(
+                    LocalAiModel.CustomMnn
+                ) else emptyList())
+                    .withLocalData()
+            }
+
+    /**
+     * Reads ONNX catalog and allowed custom entries with current file and selected state.
      *
      * @author Dmitriy Moroz
      */
@@ -72,7 +71,7 @@ internal class DownloadableModelLocalDataSource(
         .withLocalData()
 
     /**
-     * Loads SDAI data through `getAllMediaPipe`.
+     * Reads available MediaPipe model metadata with current local download and selection state.
      *
      * @author Dmitriy Moroz
      */
@@ -90,7 +89,7 @@ internal class DownloadableModelLocalDataSource(
         .withLocalData()
 
     /**
-     * Loads SDAI data through `getAllSdxl`.
+     * Reads stable-diffusion.cpp model metadata with current local download and selection state.
      *
      * @author Dmitriy Moroz
      */
@@ -108,7 +107,7 @@ internal class DownloadableModelLocalDataSource(
         .withLocalData()
 
     /**
-     * Loads SDAI data through `getAllCoreMl`.
+     * Reads Core ML model metadata with current local download and selection state.
      *
      * @author Dmitriy Moroz
      */
@@ -118,7 +117,7 @@ internal class DownloadableModelLocalDataSource(
         .withLocalData()
 
     /**
-     * Loads SDAI data through `getAllBonsai`.
+     * Reads Bonsai model metadata with current local download and selection state.
      *
      * @author Dmitriy Moroz
      */
@@ -128,14 +127,15 @@ internal class DownloadableModelLocalDataSource(
         .withLocalData()
 
     /**
-     * Loads SDAI data through `getById`.
+     * Resolves a catalog or supported custom identity and attaches its current file and selection state; missing identities fail.
      *
      * @param id identifier of the target entity.
-     * @return Result produced by `getById`.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun getById(id: String): LocalAiModel {
         val chain = when (id) {
+            LocalAiModel.CustomMnn.id -> LocalAiModel.CustomMnn
             LocalAiModel.CustomOnnx.id -> LocalAiModel.CustomOnnx
             LocalAiModel.CustomMediaPipe.id -> LocalAiModel.CustomMediaPipe
             LocalAiModel.CustomSdxl.id -> LocalAiModel.CustomSdxl
@@ -149,7 +149,7 @@ internal class DownloadableModelLocalDataSource(
     }
 
     /**
-     * Loads SDAI data through `getSelectedOnnx`.
+     * Resolves the currently selected ONNX identity; absent metadata remains a failure.
      *
      * @author Dmitriy Moroz
      */
@@ -160,7 +160,7 @@ internal class DownloadableModelLocalDataSource(
     }
 
     /**
-     * Loads SDAI data through `getSelectedSdxl`.
+     * Resolves the currently selected stable-diffusion.cpp identity; absent metadata remains a failure.
      *
      * @author Dmitriy Moroz
      */
@@ -171,7 +171,7 @@ internal class DownloadableModelLocalDataSource(
     }
 
     /**
-     * Loads SDAI data through `getSelectedCoreMl`.
+     * Resolves the currently selected Core ML identity; absent metadata remains a failure.
      *
      * @author Dmitriy Moroz
      */
@@ -182,7 +182,7 @@ internal class DownloadableModelLocalDataSource(
     }
 
     /**
-     * Loads SDAI data through `getSelectedBonsai`.
+     * Resolves the currently selected Bonsai identity; absent metadata remains a failure.
      *
      * @author Dmitriy Moroz
      */
@@ -193,9 +193,8 @@ internal class DownloadableModelLocalDataSource(
     }
 
     /**
-     * Loads SDAI data through `observeAllOnnx`.
+     * Observes cached ONNX models combined with current selection and completion state.
      *
-     * @return Result produced by `observeAllOnnx`.
      * @author Dmitriy Moroz
      */
     override fun observeAllOnnx(): Flow<List<LocalAiModel>> = dao
@@ -209,9 +208,8 @@ internal class DownloadableModelLocalDataSource(
         }
 
     /**
-     * Loads SDAI data through `observeAllSdxl`.
+     * Observes cached stable-diffusion.cpp models combined with current selection and completion state.
      *
-     * @return Result produced by `observeAllSdxl`.
      * @author Dmitriy Moroz
      */
     override fun observeAllSdxl(): Flow<List<LocalAiModel>> = dao
@@ -227,9 +225,8 @@ internal class DownloadableModelLocalDataSource(
         }
 
     /**
-     * Loads SDAI data through `observeAllCoreMl`.
+     * Observes cached Core ML models combined with current selection and completion state.
      *
-     * @return Result produced by `observeAllCoreMl`.
      * @author Dmitriy Moroz
      */
     override fun observeAllCoreMl(): Flow<List<LocalAiModel>> = dao
@@ -241,9 +238,8 @@ internal class DownloadableModelLocalDataSource(
         }
 
     /**
-     * Loads SDAI data through `observeAllBonsai`.
+     * Observes cached Bonsai models combined with current selection and completion state.
      *
-     * @return Result produced by `observeAllBonsai`.
      * @author Dmitriy Moroz
      */
     override fun observeAllBonsai(): Flow<List<LocalAiModel>> = dao
@@ -255,9 +251,10 @@ internal class DownloadableModelLocalDataSource(
         }
 
     /**
-     * Performs the SDAI side effect handled by `save`.
+     * Upserts catalog metadata without persisting synthetic custom-model entries.
      *
-     * @param list list value consumed by the API.
+     * @param list Fetched provider catalog metadata to upsert; synthetic custom entries are not persisted.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun save(list: List<LocalAiModel>) {
@@ -269,9 +266,10 @@ internal class DownloadableModelLocalDataSource(
     }
 
     /**
-     * Performs the SDAI side effect handled by `delete`.
+     * Removes only the owned model payload; MNN removal waits for active inference leases.
      *
      * @param id identifier of the target entity.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun delete(id: String) {
@@ -279,20 +277,21 @@ internal class DownloadableModelLocalDataSource(
     }
 
     /**
-     * Executes the `withLocalData` step in the SDAI data layer.
+     * Attaches filesystem completion and independently persisted model selection without changing catalog metadata.
      *
      * @author Dmitriy Moroz
      */
     private fun List<LocalAiModel>.withLocalData() = map { model -> model.withLocalData() }
 
     /**
-     * Executes the `withLocalData` step in the SDAI data layer.
+     * Attaches filesystem completion and independently persisted model selection without changing catalog metadata.
      *
      * @author Dmitriy Moroz
      */
     private fun LocalAiModel.withLocalData() = copy(
         downloaded = fileStore.isDownloaded(this),
         selected = when (this.type) {
+            LocalAiModel.Type.Mnn -> preferenceManager.localMnnModelId == id
             LocalAiModel.Type.ONNX -> preferenceManager.localOnnxModelId == id
             LocalAiModel.Type.MediaPipe -> preferenceManager.localMediaPipeModelId == id
             LocalAiModel.Type.Sdxl -> preferenceManager.localSdxlModelId == id
@@ -303,6 +302,7 @@ internal class DownloadableModelLocalDataSource(
 
     private companion object {
         val customModelIds = setOf(
+            LocalAiModel.CustomMnn.id,
             LocalAiModel.CustomOnnx.id,
             LocalAiModel.CustomMediaPipe.id,
             LocalAiModel.CustomSdxl.id,

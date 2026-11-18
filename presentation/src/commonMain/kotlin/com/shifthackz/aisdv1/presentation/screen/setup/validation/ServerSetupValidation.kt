@@ -15,8 +15,10 @@ import com.shifthackz.aisdv1.presentation.screen.setup.viewmodel.mapUrlToValidat
  *
  * `state` may contain newly assigned validation errors or a modal requesting localhost
  * confirmation, so callers must use it even when `isValid` is false.
+ *
  * @param isValid Whether all active-provider inputs pass validation and connection may proceed.
  * @param state Form snapshot retained while a benchmark or validation decision is pending.
+ *
  * @author Dmitriy Moroz
  */
 internal data class ServerSetupValidationResult(
@@ -29,9 +31,11 @@ internal data class ServerSetupValidationResult(
  *
  * Remote providers validate URL/auth/API key inputs. Local providers validate that either a
  * downloaded model is selected or, when custom models are enabled, that the custom path is usable.
+ *
  * @param urlValidator Injected URL validation contract.
  * @param stringValidator Injected nonempty credential/key validator.
  * @param filePathValidator Injected local filesystem path validation contract.
+ *
  * @author Dmitriy Moroz
  */
 internal fun ServerSetupState.validateServerSetup(
@@ -110,6 +114,14 @@ internal fun ServerSetupState.validateServerSetup(
         update = { error -> copy(arliAiApiKeyValidationError = error) },
     )
 
+    ServerSource.LOCAL_MNN -> validateLocalModel(
+        customModel = isLocalMnnCustomModel,
+        customModelPath = localMnnCustomModelPath,
+        hasDownloadedSelection = localMnnModels.any { it.selected && it.downloaded },
+        filePathValidator = filePathValidator,
+        update = { error -> copy(localCustomMnnPathValidationError = error) },
+    )
+
     ServerSource.LOCAL_MICROSOFT_ONNX -> validateLocalModel(
         customModel = localOnnxCustomModel,
         customModelPath = localOnnxCustomModelPath,
@@ -145,12 +157,16 @@ internal fun ServerSetupState.validateServerSetup(
     )
 }
 
-/** Validates the active service key unless its anonymous default was explicitly selected.
+/**
+ * Validates the active service key unless its anonymous default was explicitly selected.
+ *
  * @param key Candidate service API key.
  * @param stringValidator Injected nonempty credential/key validator.
  * @param useDefault Whether the user explicitly selected the provider’s supported anonymous default.
  * @param update Updates the active field’s validation feedback in setup state.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 private fun ServerSetupState.validateApiKey(
     key: String,
@@ -164,13 +180,17 @@ private fun ServerSetupState.validateApiKey(
     return ServerSetupValidationResult(validation.isValid, update(error))
 }
 
-/** Requires either a valid custom path or a downloaded model selection for the active local runtime.
+/**
+ * Requires either a valid custom path or a downloaded model selection for the active local runtime.
+ *
  * @param customModel Whether the active provider is configured to use a custom filesystem path.
  * @param customModelPath Candidate filesystem path for the custom local model.
  * @param hasDownloadedSelection Whether a downloaded model is selected for the active local provider.
  * @param filePathValidator Injected local filesystem path validation contract.
  * @param update Updates the active field’s validation feedback in setup state.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 private fun ServerSetupState.validateLocalModel(
     customModel: Boolean,
@@ -185,11 +205,15 @@ private fun ServerSetupState.validateLocalModel(
     return ServerSetupValidationResult(validation.isValid, update(error))
 }
 
-/** Validates the self-hosted endpoint and any selected Basic Auth fields without publishing configuration.
+/**
+ * Validates the self-hosted endpoint and any selected Basic Auth fields without publishing configuration.
+ *
  * @param url Candidate self-hosted endpoint, including any reverse-proxy prefix.
  * @param urlValidator Injected URL validation contract.
  * @param stringValidator Injected nonempty credential/key validator.
- * @author Dmitriy Moroz */
+ *
+ * @author Dmitriy Moroz
+ */
 
 private fun ServerSetupState.validateServerUrlAndCredentials(
     url: String,

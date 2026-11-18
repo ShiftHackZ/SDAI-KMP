@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.screen.samplers
 
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+
 import com.shifthackz.aisdv1.presentation.widget.image.OriginalImageBudget
 import androidx.lifecycle.viewModelScope
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
@@ -44,8 +46,9 @@ import kotlinx.coroutines.flow.emptyFlow
  * @param getSamplers Configurable sampler boundary for failed, delayed, empty and successful attempts.
  * @param immediateDispatcher Entry dispatcher, optionally eager to model Main.immediate initialization.
  * @param seedValidator Seed validator supplied to both production view models; unrelated sampler tests accept all seeds.
- * @param easyDiffusionSeedValidator Validator configured for the Easy Diffusion unsigned 32-bit seed range.
  * @param nativeSeedValidator Validator configured for native providers, independently supplied by seed tests.
+ * @param easyDiffusionSeedValidator Validator configured for the Easy Diffusion unsigned 32-bit seed range.
+ *
  * @author Dmitriy Moroz
  */
 internal class SamplerRecoveryViewModelFixture(
@@ -93,6 +96,13 @@ internal class SamplerRecoveryViewModelFixture(
     init {
         if (type == AiGenerationResult.Type.TEXT_TO_IMAGE) {
             textToImage = TextToImageViewModel(
+                mnnBackendPolicy = mockk {
+                    every { supportedBackends } returns listOf(
+                        MnnBackend.CPU,
+                        MnnBackend.OPENCL
+                    )
+                },
+                observeMnnProcessStatusUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 observeEasyDiffusionProgressUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 nativeGenerationGateway = mockk {
                     every { observeStage(any()) } returns emptyFlow()
@@ -130,6 +140,7 @@ internal class SamplerRecoveryViewModelFixture(
                 dimensionValidator = mockk(),
                 seedValidator = seedValidator,
                 nativeSeedValidator = nativeSeedValidator,
+                mnnSeedValidator = nativeSeedValidator,
                 easyDiffusionSeedValidator = easyDiffusionSeedValidator,
                 localGenerationBenchmarkGateProvider = { mockk() },
                 imageSaver = mockk(),
@@ -187,6 +198,7 @@ internal class SamplerRecoveryViewModelFixture(
      * Sends an input edit through the selected screen's production event mapping and view model.
      *
      * @param event edit emitted by the shared generation form.
+     *
      * @author Dmitriy Moroz
      */
     fun process(event: GenerationInputFormEvent) {

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "mnn_sd15_general_int8_v1",
+    "name": "SD 1.5 General (8-bit weights)",
+    "size": "1.15 GB",
+    "sources": [
+      "https://huggingface.co/moroz-ellmsha/sdai-mnn-model-archives/resolve/5c242a99361e6ee55371e5d8dd196c8b4840b01d/sd15-512-general-int8-v1.zip?download=true"
+    ]
+  }
+]
