@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,7 +62,14 @@ internal fun BackupSelectionList(
             val hasSomeProviders =
                 category == BackupCategory.PROVIDERS && state.selection.providers.isNotEmpty()
             val hasAllProviders = state.selection.providers.containsAll(state.inspection.providers)
-            Card(Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f),
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
                 Row(
                     Modifier.fillMaxWidth().then(
                         if (category == BackupCategory.PROVIDERS) Modifier.triStateToggleable(
