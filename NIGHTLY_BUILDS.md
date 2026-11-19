@@ -61,7 +61,9 @@ The APK is hosted on GitHub rather than attached to Discord because Full APKs ex
 
 ## Telegram Notifications
 
-After successfully publishing a nightly, the workflow posts a comment under the configured Telegram announcement in the channel's linked discussion group. It uses the same title, version, recent changes, links and disclaimer as Discord, rendered as HTML text with link previews disabled. The APK is linked from GitHub, not attached as a file.
+After successfully publishing a nightly, the workflow posts a comment under the configured Telegram announcement in the channel's linked discussion group. It uses the same title, version, recent changes, links and disclaimer as Discord, rendered as HTML text with link previews disabled. The exact signed APK published to GitHub is sent as a file in a reply to that comment, with its version as the caption. The full announcement stays in a separate text message to avoid Telegram's shorter document caption limit.
+
+Uploads use a temporary local Bot API server on the runner, supporting files up to 2 GB. Its executable is built from pinned Telegram source and cached separately from bot session data. The server listens only on loopback, logs out the bot before discarding its session and stops when delivery finishes or the step is cancelled. Notification tools come from the workflow's commit, independently of the APK's build target.
 
 Skipped builds and runs with `publish=false` do not post. A missing reply target fails delivery instead of posting an unrelated group message. Telegram delivery is attempted even if Discord delivery fails. Neither destination retries automatically, since a lost response could duplicate an announcement.
 
