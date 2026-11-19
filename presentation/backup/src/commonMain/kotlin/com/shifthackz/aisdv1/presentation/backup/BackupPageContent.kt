@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.backup.create.CreateBackupScreen
 import com.shifthackz.aisdv1.presentation.backup.restore.RestoreBackupScreen
+import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 
 /**
  * Keeps each pager page's vertical scroll independent while reusing dedicated create/restore content.
@@ -30,7 +31,11 @@ internal fun BackupPageContent(
     processIntent: (BackupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier.fillMaxSize().verticalScrollbar(scrollState).verticalScroll(scrollState)
+            .padding(16.dp)
+    ) {
         if (isRestore) RestoreBackupScreen(page, isEnabled, canEditSelection, processIntent)
         else CreateBackupScreen(page, isEnabled && canEditSelection, processIntent)
     }

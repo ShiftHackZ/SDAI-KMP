@@ -44,6 +44,7 @@ internal class LoadPendingBackupUseCaseImpl(
     private val staging: BackupStagingCleaner,
     private val changes: BackupChangesGateway,
 ) : LoadPendingBackupUseCase {
+
     override suspend fun invoke(): BackupRecovery? = withContext(dispatchers.io) {
         staging.prepare()
         val pending =

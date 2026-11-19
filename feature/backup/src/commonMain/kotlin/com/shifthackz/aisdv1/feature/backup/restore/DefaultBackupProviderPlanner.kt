@@ -14,6 +14,7 @@ import okio.ByteString.Companion.encodeUtf8
  */
 internal class DefaultBackupProviderPlanner(private val codec: BackupPreferencesCodec) :
     BackupProviderPlanner {
+
     override fun plan(
         current: BackupPreferences,
         incoming: BackupPreferences,

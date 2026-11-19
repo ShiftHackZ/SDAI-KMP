@@ -1,6 +1,5 @@
 package com.shifthackz.aisdv1.feature.backup.usecase
 
-
 import com.shifthackz.aisdv1.domain.usecase.backup.ExportBackupUseCase
 import com.shifthackz.aisdv1.feature.backup.archive.BackupArchiveStore
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
@@ -16,6 +15,7 @@ internal class ExportBackupUseCaseImpl(
     private val archives: BackupArchiveStore,
     private val dispatchers: DispatchersProvider
 ) : ExportBackupUseCase {
+
     override suspend operator fun invoke(document: String, destination: String): Unit =
         withContext(dispatchers.io) { archives.export(document, destination) }
 }

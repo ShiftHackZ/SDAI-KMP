@@ -11,6 +11,7 @@ import com.shifthackz.aisdv1.domain.usecase.backup.SetBackupStartupStageUseCase
  */
 internal class SetBackupStartupStageUseCaseImpl(private val preferences: BackupPreferencesGateway) :
     SetBackupStartupStageUseCase {
+
     override operator fun invoke(stage: BackupStartupStage) {
         if (stage.ordinal < preferences.readStartupStage().ordinal) return
         preferences.writeStartupStage(stage)

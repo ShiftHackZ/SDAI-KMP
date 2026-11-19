@@ -33,6 +33,7 @@ import kotlinx.serialization.json.Json
 import okio.Buffer
 import okio.FileSystem
 import okio.Path
+import okio.SYSTEM
 import okio.buffer
 
 /**
@@ -65,6 +66,7 @@ internal class DefaultBackupArchiveStore(
     private val json: Json,
     private val staging: BackupStagingCleaner,
 ) : BackupArchiveStore {
+
     override fun preparedExport(handle: String, filename: String): BackupExport {
         val path = directory(handle) / ARCHIVE
         check(FileSystem.SYSTEM.exists(path)) { "Pending backup source is unavailable" }
@@ -148,10 +150,10 @@ internal class DefaultBackupArchiveStore(
                             galleryCodec.write(sink, row)
                             offset++
                             afterId = row.id
-                            progress(BackupProgress(BackupCategory.GALLERY, offset.toLong(), 0))
+                            progress(BackupProgress(BackupCategory.GALLERY, offset, 0))
                         }
                     }
-                    offset.toLong()
+                    offset
                 }
                 payload(BackupCategory.NETWORK) { path ->
                     val values = database.networkUsageDao().query()

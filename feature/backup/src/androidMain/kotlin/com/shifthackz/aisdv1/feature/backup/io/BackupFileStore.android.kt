@@ -21,6 +21,7 @@ import okio.sink
  */
 internal class AndroidBackupFileStore(private val context: Context) : BackupFileStore {
     override val root: Path get() = context.filesDir.resolve("backup").absolutePath.toPath()
+
     override fun documentReference(path: Path): String =
         Uri.fromFile(File(path.toString())).toString()
 
@@ -62,6 +63,7 @@ internal class AndroidBackupFileStore(private val context: Context) : BackupFile
     }
 
     override fun newId(): String = UUID.randomUUID().toString()
+
     override fun openDocument(document: String) =
         checkNotNull(context.contentResolver.openInputStream(Uri.parse(document))).source().buffer()
 

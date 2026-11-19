@@ -5,6 +5,8 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupExport
 import com.shifthackz.aisdv1.domain.entity.backup.BackupExportCompletion
 import com.shifthackz.aisdv1.domain.entity.backup.BackupExportIntent
 import com.shifthackz.aisdv1.domain.entity.backup.BackupExportStatus
+import com.shifthackz.aisdv1.domain.entity.backup.BackupCategory
+import com.shifthackz.aisdv1.domain.entity.backup.BackupSelection
 import com.shifthackz.aisdv1.domain.gateway.backup.BackupExportStateStore
 import com.shifthackz.aisdv1.domain.usecase.backup.ExportBackupUseCase
 import com.shifthackz.aisdv1.feature.backup.archive.BackupArchiveStore
@@ -22,6 +24,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -226,4 +229,135 @@ class DefaultBackupExportCoordinatorTest {
             owner.close()
         }
 
+    @Test
+    fun `given no pending export, preparation runs, expected archive created and durable association before picker`() =
+        runTest {
+            // Given
+            val owner = coordinator()
+            val selection = BackupSelection(setOf(BackupCategory.SETTINGS))
+            coEvery { archives.create(selection, any()) } returns backup
+            // When
+            val result = owner.prepare(selection) {}
+            // Then
+            assertEquals(backup, result)
+            assertEquals(BackupExportIntent(backup.handle, backup.filename), stored)
+            assertEquals(BackupExportStatus.READY, owner.observe().value.status)
+            coVerify(exactly = 1) { archives.create(selection, any()) }
+            owner.close()
+        }
+
+    @Test
+    fun `given retained pending export, preparation repeats after recreation, expected same source without new archive`() =
+        runTest {
+            // Given
+            stored = BackupExportIntent(backup.handle, backup.filename)
+            val owner = coordinator()
+            // When
+            val result = owner.prepare(BackupSelection(setOf(BackupCategory.SETTINGS))) {}
+            // Then
+            assertEquals(backup, result)
+            coVerify(exactly = 0) { archives.create(any(), any()) }
+            owner.close()
+        }
+
+    @Test
+    fun `given created source, durable association write fails, expected source retained and original error propagated`() =
+        runTest {
+            // Given
+            val owner = coordinator()
+            advanceUntilIdle()
+            coEvery { archives.create(any(), any()) } returns backup
+            val failure = IllegalStateException("checked write failed")
+            every { records.write(any()) } throws failure
+            // When
+            val caught =
+                runCatching { owner.prepare(BackupSelection(setOf(BackupCategory.SETTINGS))) {} }.exceptionOrNull()
+            // Then
+            assertTrue(caught is IllegalStateException)
+            assertEquals(failure.message, caught?.message)
+            verify(exactly = 0) { archives.discard(any()); records.clear() }
+            owner.close()
+        }
+
+    @Test
+    fun `given native platform copied archive, completion callback arrives, expected durable success without another copy`() =
+        runTest {
+            // Given
+            stored = BackupExportIntent(backup.handle, backup.filename)
+            val owner = coordinator()
+            // When
+            owner.submit(BackupExportCompletion.NativeCompleted(backup.handle))
+            advanceUntilIdle()
+            // Then
+            assertEquals(BackupExportStatus.COMPLETE, stored?.status)
+            assertEquals(BackupExportStatus.COMPLETE, owner.observe().value.status)
+            coVerify(exactly = 0) { export(any(), any()) }
+            owner.close()
+        }
+
+    @Test
+    fun `given owned source, picker returns blank destination, expected failure and retained source`() =
+        runTest {
+            // Given
+            stored = BackupExportIntent(backup.handle, backup.filename)
+            val owner = coordinator()
+            // When
+            owner.submit(BackupExportCompletion.DestinationSelected(" ", backup.handle))
+            advanceUntilIdle()
+            // Then
+            assertEquals(BackupExportStatus.FAILED, owner.observe().value.status)
+            assertEquals(backup.handle, stored?.handle)
+            coVerify(exactly = 0) { export(any(), any()) }
+            verify(exactly = 0) { archives.discard(any()) }
+            owner.close()
+        }
+
+    @Test
+    fun `given completed export, stale cancellation for same handle arrives, expected durable success preserved`() =
+        runTest {
+            // Given
+            stored = BackupExportIntent(backup.handle, backup.filename, BackupExportStatus.COMPLETE)
+            val owner = coordinator()
+            // When
+            owner.submit(BackupExportCompletion.Canceled(backup.handle))
+            advanceUntilIdle()
+            // Then
+            assertEquals(BackupExportStatus.COMPLETE, stored?.status)
+            assertEquals(BackupExportStatus.COMPLETE, owner.observe().value.status)
+            verify(exactly = 0) { archives.discard(any()); records.clear() }
+            owner.close()
+        }
+
+    @Test
+    fun `given pending source, checked clear fails during dismissal, expected source preserved for recovery`() =
+        runTest {
+            // Given
+            stored = BackupExportIntent(backup.handle, backup.filename)
+            val owner = coordinator()
+            advanceUntilIdle()
+            val failure = IllegalStateException("clear failed")
+            every { records.clear() } throws failure
+            // When
+            val caught = runCatching { owner.dismiss() }.exceptionOrNull()
+            // Then
+            assertTrue(caught is IllegalStateException)
+            assertEquals(failure.message, caught?.message)
+            assertEquals(backup.handle, stored?.handle)
+            verify(exactly = 0) { archives.discard(any()) }
+            owner.close()
+        }
+
+    @Test
+    fun `given durable operation storage unreadable, coordinator initializes, expected visible failure without deleting source`() =
+        runTest {
+            // Given
+            val owner = coordinator()
+            every { records.recoverPendingWrite() } throws IllegalStateException("untrusted checked state")
+            // When
+            advanceUntilIdle()
+            // Then
+            assertEquals(BackupExportStatus.FAILED, owner.observe().value.status)
+            verify(exactly = 0) { records.clear(); archives.discard(any()) }
+            owner.close()
+        }
 }

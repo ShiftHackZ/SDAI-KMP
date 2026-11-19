@@ -9,5 +9,6 @@ import kotlinx.coroutines.sync.withLock
  */
 internal class DefaultBackupRestoreGuard : BackupRestoreGuard {
     private val mutex = Mutex()
+
     override suspend fun <T> exclusive(block: suspend () -> T): T = mutex.withLock { block() }
 }

@@ -17,6 +17,7 @@ internal class InspectBackupUseCaseImpl(
     private val archives: BackupArchiveStore,
     private val dispatchers: DispatchersProvider
 ) : InspectBackupUseCase {
+
     override suspend operator fun invoke(
         document: String,
         onProgress: (BackupProgress) -> Unit

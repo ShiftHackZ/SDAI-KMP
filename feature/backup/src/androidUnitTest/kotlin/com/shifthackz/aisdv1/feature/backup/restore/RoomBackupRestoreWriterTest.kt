@@ -267,6 +267,68 @@ class RoomBackupRestoreWriterTest {
             coVerify(atLeast = 1) { savedImages.queryImageChunk(71, any(), any()) }
         }
 
+    @Test
+    fun `given gallery spans multiple identity pages, duplicate exists after first page, expected image skipped without altering stored rows`() =
+        runTest {
+            // Given
+            val rows =
+                (1L..130L).map { id -> row(if (id == 130L) "AQIDBA==" else "AQIDBQ==", id = id) }
+                    .toMutableList()
+            val original = rows.toList()
+            val outcomes = mutableListOf<RestoreSectionEntity>()
+            configureGallery(rows, outcomes)
+            every { gallery.read(any(), any()) } returns row("AQIDBA==")
+            val writer = RoomBackupRestoreWriter(
+                database,
+                codec,
+                gallery,
+                files,
+                Json,
+                DefaultBackupImageFingerprint(),
+                budget
+            )
+            // When
+            writer.gallery("session", archive) {}
+            // Then
+            assertEquals(original, rows)
+            assertEquals(1L, outcomes.single().skippedCount)
+            assertEquals(0L, outcomes.single().importedCount)
+            coVerify { savedImages.queryImageIdsAfter(128, 128) }
+            coVerify(exactly = 0) { savedImages.insert(any()) }
+        }
+
+    @Test
+    fun `given gallery category already committed, session retries, expected no gallery scan or duplicate insertion`() =
+        runTest {
+            // Given
+            val rows = mutableListOf(row("AQIDBA==", id = 71))
+            val outcomes = mutableListOf<RestoreSectionEntity>()
+            configureGallery(rows, outcomes)
+            coEvery { ledger.completed("session") } returns listOf("gallery")
+            val writer = RoomBackupRestoreWriter(
+                database,
+                codec,
+                gallery,
+                files,
+                Json,
+                DefaultBackupImageFingerprint(),
+                budget
+            )
+            val progress = mutableListOf<BackupProgress>()
+            // When
+            writer.gallery("session", archive, progress::add)
+            // Then
+            assertEquals(1, rows.size)
+            assertTrue(outcomes.isEmpty())
+            assertTrue(progress.isEmpty())
+            coVerify(exactly = 0) {
+                savedImages.queryImageIdsAfter(
+                    any(),
+                    any()
+                ); savedImages.insert(any()); ledger.mark(any())
+            }
+        }
+
     /**
      * Supplies the production writer with a paged image store and an observed commit ledger.
      * @param rows Mutable persisted rows; fresh insert identities are assigned independently of the archive.

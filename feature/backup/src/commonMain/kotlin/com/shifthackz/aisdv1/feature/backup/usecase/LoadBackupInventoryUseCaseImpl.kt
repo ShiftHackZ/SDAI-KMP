@@ -16,6 +16,7 @@ internal class LoadBackupInventoryUseCaseImpl(
     private val archives: BackupArchiveStore,
     private val dispatchers: DispatchersProvider
 ) : LoadBackupInventoryUseCase {
+
     override suspend operator fun invoke(): BackupInspection =
         withContext(dispatchers.io) { archives.inventory() }
 }

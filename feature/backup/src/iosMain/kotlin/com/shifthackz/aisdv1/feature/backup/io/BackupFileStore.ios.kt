@@ -19,6 +19,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 @OptIn(ExperimentalForeignApi::class)
 internal class IosBackupFileStore : BackupFileStore {
     override val root: Path get() = (NSHomeDirectory() + "/Library/Application Support/backup").toPath()
+
     override fun documentReference(path: Path): String =
         NSURL.fileURLWithPath(path.toString()).absoluteString!!
 
@@ -35,6 +36,7 @@ internal class IosBackupFileStore : BackupFileStore {
         documentPath(document).toString()
 
     override fun newId(): String = NSUUID().UUIDString
+
     override fun openDocument(document: String) =
         FileSystem.SYSTEM.source(checkNotNull(NSURL.URLWithString(document)?.path).toPath())
             .buffer()

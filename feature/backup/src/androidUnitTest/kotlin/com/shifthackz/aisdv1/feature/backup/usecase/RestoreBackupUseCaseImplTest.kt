@@ -260,7 +260,7 @@ class RestoreBackupUseCaseImplTest {
         }
 
     @Test
-    fun `given completed additive import, explicit new restore session starts, expected data added again`() =
+    fun `given completed restore, explicit new session starts, expected category writers evaluate independent request`() =
         runTest {
             // Given
             useCase(request) {}
@@ -380,4 +380,168 @@ class RestoreBackupUseCaseImplTest {
             assertFalse(intents.getValue(request.sessionId).isComplete)
         }
 
+    @Test
+    fun `given invalid session identity, restore is requested, expected rejection before archive access`() =
+        runTest {
+            // Given
+            val invalid = request.copy(sessionId = "../invalid")
+            // When
+            val failure = runCatching { useCase(invalid) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Invalid restore session", failure?.message)
+            coVerify(exactly = 0) { archives.staged(any()); ledger.insert(any()) }
+        }
+
+    @Test
+    fun `given empty category selection, restore is requested, expected rejection without mutation`() =
+        runTest {
+            // Given
+            val invalid = request.copy(selection = BackupSelection(emptySet()))
+            // When
+            val failure = runCatching { useCase(invalid) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Select restore data", failure?.message)
+            coVerify(exactly = 0) { ledger.insert(any()); writer.gallery(any(), any(), any()) }
+        }
+
+    @Test
+    fun `given unavailable selected category, restore is requested, expected rejection before intent creation`() =
+        runTest {
+            // Given
+            every { archives.summary(archive) } returns summary.copy(entries = summary.entries.map {
+                it.copy(
+                    isAvailable = false
+                )
+            })
+            // When
+            val failure = runCatching { useCase(request) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Unavailable backup section", failure?.message)
+            coVerify(exactly = 0) { ledger.insert(any()) }
+        }
+
+    @Test
+    fun `given unknown selected provider, restore is requested, expected rejection without preference mutation`() =
+        runTest {
+            // Given
+            val invalid = request.copy(
+                selection = BackupSelection(
+                    setOf(BackupCategory.PROVIDERS),
+                    setOf("removed")
+                )
+            )
+            // When
+            val failure = runCatching { useCase(invalid) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Unavailable backup provider", failure?.message)
+            coVerify(exactly = 0) { preferences.writeProviders(any(), any()); ledger.insert(any()) }
+        }
+
+    @Test
+    fun `given background generation is active, restore is requested, expected failure before writes or journal creation`() =
+        runTest {
+            // Given
+            every { work.hasActiveTasks() } returns true
+            // When
+            val failure = runCatching { useCase(request) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Wait for generation to finish before restoring", failure?.message)
+            coVerify(exactly = 0) {
+                ledger.insert(any()); writer.gallery(
+                any(),
+                any(),
+                any()
+            ); preferences.writeSettings(any())
+            }
+        }
+
+    @Test
+    fun `given another pending session, new restore is requested, expected failure preserving original operation`() =
+        runTest {
+            // Given
+            intents["other"] =
+                RestoreSessionEntity("other", "retained", sessions.encode(request.selection))
+            // When
+            val failure = runCatching { useCase(request) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Finish or cancel the pending restore first", failure?.message)
+            coVerify(exactly = 0) { ledger.insert(any()); writer.gallery(any(), any(), any()) }
+            assertEquals(setOf("other"), intents.keys)
+        }
+
+    @Test
+    fun `given session bound to another archive, restore reuses its identity, expected failure without reapplying data`() =
+        runTest {
+            // Given
+            intents[request.sessionId] = RestoreSessionEntity(
+                request.sessionId,
+                "different-handle",
+                sessions.encode(request.selection)
+            )
+            // When
+            val failure = runCatching { useCase(request) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Restore session belongs to another request", failure?.message)
+            coVerify(exactly = 0) {
+                writer.gallery(any(), any(), any()); writer.network(
+                any(),
+                any()
+            )
+            }
+        }
+
+    @Test
+    fun `given session bound to original selection, retry changes categories, expected rejection before writes`() =
+        runTest {
+            // Given
+            intents[request.sessionId] = RestoreSessionEntity(
+                request.sessionId,
+                request.handle,
+                sessions.encode(request.selection)
+            )
+            val changed = request.copy(selection = BackupSelection(setOf(BackupCategory.SETTINGS)))
+            // When
+            val failure = runCatching { useCase(changed) {} }.exceptionOrNull()
+            // Then
+            assertEquals("Restore session belongs to another request", failure?.message)
+            coVerify(exactly = 0) { preferences.writeSettings(any()); ledger.finish(any()) }
+        }
+
+    @Test
+    fun `given skipped gallery rows, category commits, expected imported and skipped counts from ledger`() =
+        runTest {
+            // Given
+            coEvery { writer.gallery(any(), any(), any()) } coAnswers {
+                ledger.mark(RestoreSectionEntity(firstArg(), "gallery", 2, 7))
+            }
+            // When
+            val result = useCase(request) {} as BackupRestoreResult.Finished
+            // Then
+            assertEquals(2L, result.importedCounts[BackupCategory.GALLERY])
+            assertEquals(7, result.skippedCount)
+            assertFalse(result.hasFailed)
+            coVerify { ledger.finish(request.sessionId) }
+        }
+
+    @Test
+    fun `given settings write fails, restore includes gallery, expected partial failure and later categories untouched`() =
+        runTest {
+            // Given
+            val selected = request.copy(
+                selection = BackupSelection(
+                    setOf(
+                        BackupCategory.SETTINGS,
+                        BackupCategory.GALLERY
+                    )
+                )
+            )
+            coEvery { preferences.writeSettings(any()) } throws IllegalStateException("checked write failed")
+            // When
+            val result = useCase(selected) {} as BackupRestoreResult.Finished
+            // Then
+            assertTrue(result.hasFailed)
+            assertTrue(result.completed.isEmpty())
+            coVerify(exactly = 0) { writer.gallery(any(), any(), any()); ledger.finish(any()) }
+            assertFalse(intents.getValue(request.sessionId).isComplete)
+        }
 }

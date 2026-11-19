@@ -10,5 +10,6 @@ import com.shifthackz.aisdv1.feature.backup.export.BackupExportCoordinator
  */
 internal class DismissBackupExportUseCaseImpl(private val coordinator: BackupExportCoordinator) :
     DismissBackupExportUseCase {
+
     override suspend fun invoke() = coordinator.dismiss()
 }

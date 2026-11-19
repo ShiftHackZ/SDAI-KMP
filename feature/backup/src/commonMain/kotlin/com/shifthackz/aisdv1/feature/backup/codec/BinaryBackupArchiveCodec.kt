@@ -3,7 +3,6 @@ package com.shifthackz.aisdv1.feature.backup.codec
 import okio.use
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.blackholeSink
 import okio.Buffer
@@ -13,6 +12,7 @@ import okio.FileSystem
 import okio.HashingSink
 import okio.HashingSource
 import okio.Path
+import okio.SYSTEM
 import okio.buffer
 
 /**
@@ -21,6 +21,7 @@ import okio.buffer
  * @author Dmitriy Moroz
  */
 internal class BinaryBackupArchiveCodec(private val json: Json) : BackupArchiveCodec {
+
     override suspend fun write(path: Path, manifest: BackupManifest, payloads: List<Path>) {
         val bytes = json.encodeToString(manifest).encodeToByteArray()
         require(bytes.size <= MAX_METADATA) { "Backup manifest is too large" }

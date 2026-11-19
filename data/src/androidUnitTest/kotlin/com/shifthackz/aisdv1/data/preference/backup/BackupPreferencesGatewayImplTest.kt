@@ -258,4 +258,169 @@ class BackupPreferencesGatewayImplTest {
         )
     }
 
+    @Test
+    fun `given invalid numeric form defaults, compatibility filtering runs, expected nonfinite negative and zero steps skipped`() {
+        // Given
+        val invalidValues = listOf("NaN", "Infinity", "-1", "not-a-number")
+        // When
+        val filtered = invalidValues.map { text ->
+            gateway.filterSupported(
+                BackupPreferences(
+                    emptyMap(),
+                    mapOf(
+                        "textToImageCfg" to BackupValue.Text(text),
+                        "imageToImageSteps" to BackupValue.Integer(0)
+                    )
+                )
+            )
+        }
+        // Then
+        assertTrue(filtered.all { it.settings.isEmpty() })
+    }
+
+    @Test
+    fun `given zero guidance and positive sampling steps, compatibility filtering runs, expected valid boundary values retained`() {
+        // Given
+        val settings = mapOf(
+            "imageToImageCfg" to BackupValue.Text("0"),
+            "textToImageSteps" to BackupValue.Integer(1)
+        )
+        // When
+        val supported = gateway.filterSupported(BackupPreferences(emptyMap(), settings))
+        // Then
+        assertEquals(settings, supported.settings)
+    }
+
+    @Test
+    fun `given unknown theme language and grid values, compatibility filtering runs, expected unsupported options skipped`() {
+        // Given
+        val settings = mapOf(
+            "colorToken" to BackupValue.Text("future"),
+            "darkToken" to BackupValue.Text("future"),
+            "language" to BackupValue.Text("future"),
+            "galleryGrid" to BackupValue.Integer(-1)
+        )
+        // When
+        val supported = gateway.filterSupported(BackupPreferences(emptyMap(), settings))
+        // Then
+        assertTrue(supported.settings.isEmpty())
+    }
+
+    @Test
+    fun `given malformed flag and integer fields, compatibility filtering runs, expected explicit type rejection`() {
+        // Given
+        val malformed =
+            listOf("autoSave" to BackupValue.Text("true"), "galleryGrid" to BackupValue.Flag(true))
+        // When
+        val failures = malformed.map { (key, value) ->
+            runCatching {
+                gateway.filterSupported(
+                    BackupPreferences(
+                        emptyMap(),
+                        mapOf(key to value)
+                    )
+                )
+            }.exceptionOrNull()
+        }
+        // Then
+        assertTrue(failures.all { it is IllegalArgumentException && it.message == "Invalid portable preference type" })
+    }
+
+    @Test
+    fun `given selected provider already matches restored fields, backup applies, expected selection revision unchanged`() {
+        // Given
+        strings["key_provider_selection_state"] = "custom|41"
+        strings["key_server_url"] = "https://same"
+        // When
+        gateway.writeProviders(
+            mapOf("custom" to mapOf("serverUrl" to BackupValue.Text("https://same"))),
+            null
+        )
+        // Then
+        assertEquals("custom|41", strings["key_provider_selection_state"])
+    }
+
+    @Test
+    fun `given exhausted provider revision, backup changes selected provider, expected failure before durable write`() {
+        // Given
+        strings["key_provider_selection_state"] = "custom|${Long.MAX_VALUE}"
+        // When
+        val failure = runCatching {
+            gateway.writeProviders(
+                mapOf(
+                    "custom" to mapOf(
+                        "serverUrl" to BackupValue.Text("https://new")
+                    )
+                ), null
+            )
+        }.exceptionOrNull()
+        // Then
+        assertEquals("Provider revision exhausted", failure?.message)
+        verify(exactly = 0) { store.putConfigurationDurably(any(), any()) }
+    }
+
+    @Test
+    fun `given selected provider authorization reassociation, backup fields match, expected revision advances with checked association`() {
+        // Given
+        strings["key_provider_selection_state"] = "custom|41"
+        strings["key_server_url"] = "https://same"
+        // When
+        gateway.writeProviders(
+            mapOf("custom" to mapOf("serverUrl" to BackupValue.Text("https://same"))),
+            "new-association"
+        )
+        // Then
+        assertEquals("custom|42", strings["key_provider_selection_state"])
+        assertEquals("new-association", strings["key_authorization_commit_id"])
+    }
+
+    @Test
+    fun `given mixed portable settings, selective restore writes batch, expected only known typed settings persisted`() {
+        // Given
+        val values = mapOf(
+            "language" to BackupValue.Text("de"),
+            "autoSave" to BackupValue.Flag(false),
+            "textToImageSteps" to BackupValue.Integer(30),
+            "removed" to BackupValue.Text("ignored")
+        )
+        // When
+        gateway.writeSettings(values)
+        // Then
+        verify {
+            store.putSettingsDurably(
+                mapOf("key_language_code" to "de"),
+                mapOf("key_ai_auto_save" to false),
+                mapOf("key_text_to_image_sampling_steps" to 30)
+            )
+        }
+        verify(exactly = 0) { store.putConfigurationDurably(any(), any()) }
+    }
+
+    @Test
+    fun `given checked settings persistence failure, restore writes batch, expected original failure propagated`() {
+        // Given
+        val failure = IllegalStateException("disk unavailable")
+        every { store.putSettingsDurably(any(), any(), any()) } throws failure
+        // When
+        val caught =
+            runCatching { gateway.writeSettings(mapOf("autoSave" to BackupValue.Flag(true))) }.exceptionOrNull()
+        // Then
+        assertTrue(failure === caught)
+        verify(exactly = 0) {
+            store.putBoolean(any(), any()); store.putInt(
+            any(),
+            any()
+        ); store.putString(any(), any())
+        }
+    }
+
+    @Test
+    fun `given no pending checked write, recovery is requested, expected no invalidation categories`() {
+        // Given
+        every { store.retryPendingWrite() } returns false
+        // When
+        val recovered = gateway.recoverPendingWrite()
+        // Then
+        assertTrue(recovered.isEmpty())
+    }
 }

@@ -26,6 +26,7 @@ internal class DefaultGalleryBackupCodec(
     private val imageValidator: BackupImageValidator,
     private val budget: BackupImageBudget,
 ) : GalleryBackupCodec {
+
     override fun write(sink: BufferedSink, row: GenerationResultEntity) {
         val record = GalleryBackupRecord(
             createdAt = row.createdAt,

@@ -12,6 +12,7 @@ import okio.Timeout
  */
 internal class BoundedBackupSource(private val source: Source, private var remaining: Long) :
     Source {
+
     override fun read(sink: Buffer, byteCount: Long): Long {
         require(byteCount >= 0)
         if (remaining == 0L) return -1
@@ -22,5 +23,6 @@ internal class BoundedBackupSource(private val source: Source, private var remai
     }
 
     override fun timeout(): Timeout = source.timeout()
+
     override fun close() = source.close()
 }

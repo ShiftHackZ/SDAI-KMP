@@ -63,6 +63,7 @@ internal class RestoreBackupUseCaseImpl(
     private val generationGate: GenerationRestoreGate,
     private val dispatchers: DispatchersProvider,
 ) : RestoreBackupUseCase {
+
     override suspend fun invoke(
         request: BackupRestoreRequest,
         onProgress: (BackupProgress) -> Unit

@@ -35,6 +35,7 @@ internal class RoomBackupRestoreWriter(
     private val fingerprint: BackupImageFingerprint,
     private val budget: BackupImageBudget,
 ) : BackupRestoreWriter {
+
     override suspend fun gallery(
         sessionId: String,
         archive: StagedBackup,

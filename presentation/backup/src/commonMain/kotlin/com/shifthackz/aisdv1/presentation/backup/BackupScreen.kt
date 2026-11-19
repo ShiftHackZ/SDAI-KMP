@@ -15,7 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,9 +60,10 @@ fun BackupScreen(
         val pager = rememberPagerState(initialPage = if (state.isRestoreTab) 1 else 0) { 2 }
         val isRestoreSelected by rememberUpdatedState(state.isRestoreTab)
         val selectedPage = if (state.isRestoreTab) 1 else 0
-        val hasSettledPage = mode != BackupScreenMode.SETTINGS ||
-                (!pager.isScrollInProgress && pager.currentPage == selectedPage && pager.currentPageOffsetFraction == 0f)
-        LaunchedEffect(state.isRestoreTab) {
+        val canInteractWithPage = mode != BackupScreenMode.SETTINGS || canInteractWithBackupPage(
+            selectedPage, pager.currentPage, pager.currentPageOffsetFraction
+        )
+        LaunchedEffect(state.isRestoreTab, isEnabled) {
             if (mode == BackupScreenMode.SETTINGS) {
                 pager.animateScrollToPage(selectedPage)
             }
@@ -109,7 +110,7 @@ fun BackupScreen(
                 ScreenActionBar {
                     PrimaryActionButton(
                         onClick = { processIntent(if (isFinished) BackupIntent.NavigateBack else BackupIntent.Submit) },
-                        isEnabled = isEnabled && hasSettledPage && (isFinished || page.selection.categories.isNotEmpty()),
+                        isEnabled = isEnabled && canInteractWithPage && (isFinished || page.selection.categories.isNotEmpty()),
                     ) {
                         Text(Localization.string(if (isFinished) "backup_done" else if (state.isRestoreTab) "backup_restore" else "backup_create"))
                     }
@@ -118,7 +119,10 @@ fun BackupScreen(
         ) { padding ->
             Column(Modifier.padding(padding).fillMaxSize()) {
                 if (mode == BackupScreenMode.SETTINGS) {
-                    TabRow(selectedTabIndex = selectedPage) {
+                    SecondaryTabRow(
+                        selectedTabIndex = selectedPage,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ) {
                         Tab(
                             selected = !state.isRestoreTab,
                             onClick = { processIntent(BackupIntent.SelectTab(false)) },
@@ -142,7 +146,7 @@ fun BackupScreen(
                         BackupPageContent(
                             isRestore = isRestorePage,
                             page = if (isRestorePage) state.restore else state.create,
-                            isEnabled = isEnabled && hasSettledPage,
+                            isEnabled = isEnabled && canInteractWithPage && isRestorePage == state.isRestoreTab,
                             canEditSelection = if (isRestorePage) !state.isRestoreSelectionLocked else !state.hasPendingExport,
                             processIntent = processIntent,
                         )

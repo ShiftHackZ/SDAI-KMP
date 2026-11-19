@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
  * @author Dmitriy Moroz
  */
 internal class DefaultBackupSessionCodec(private val json: Json) : BackupSessionCodec {
+
     override fun encode(selection: BackupSelection): String = json.encodeToString(
         mapOf(
             "categories" to selection.categories.map { it.key }.sorted(),

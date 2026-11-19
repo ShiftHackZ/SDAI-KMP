@@ -15,6 +15,7 @@ internal class GetPendingBackupExportUseCaseImpl(
     private val records: BackupExportStateStore,
     private val dispatchers: DispatchersProvider
 ) : GetPendingBackupExportUseCase {
+
     override suspend fun invoke(): Boolean = withContext(dispatchers.io) {
         records.recoverPendingWrite()
         records.read() != null

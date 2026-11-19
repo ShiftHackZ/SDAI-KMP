@@ -13,6 +13,7 @@ import kotlinx.serialization.json.intOrNull
  * @author Dmitriy Moroz
  */
 internal class DefaultBackupPreferencesCodec(private val json: Json) : BackupPreferencesCodec {
+
     override fun encode(values: Map<String, BackupValue>): String =
         JsonObject(values.mapValues { (_, value) ->
             when (value) {

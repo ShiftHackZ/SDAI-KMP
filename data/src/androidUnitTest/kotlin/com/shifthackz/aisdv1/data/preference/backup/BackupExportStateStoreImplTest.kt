@@ -9,6 +9,7 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BackupExportStateStoreImplTest {
@@ -65,5 +66,74 @@ class BackupExportStateStoreImplTest {
         val error = assertThrows(IllegalStateException::class.java) { records.read() }
         // Then
         assertEquals("Unsupported pending export state", error.message)
+    }
+
+    @Test
+    fun `given transient export stages, durable write is requested, expected rejection before persistence`() {
+        // Given
+        val stages = listOf(BackupExportStatus.NONE, BackupExportStatus.PROCESSING)
+        // When
+        val failures = stages.map {
+            runCatching {
+                records.write(
+                    BackupExportIntent(
+                        "handle",
+                        "backup",
+                        it
+                    )
+                )
+            }.exceptionOrNull()
+        }
+        // Then
+        assertTrue(failures.all { it?.message == "Invalid durable export stage" })
+        verify(exactly = 0) { store.putStringDurably(any(), any()) }
+    }
+
+    @Test
+    fun `given missing source identity, durable export write is requested, expected rejection without storage changes`() {
+        // Given
+        val intents = listOf(BackupExportIntent("", "backup"), BackupExportIntent("handle", " "))
+        // When
+        val failures = intents.map { runCatching { records.write(it) }.exceptionOrNull() }
+        // Then
+        assertTrue(failures.all { it?.message == "Missing pending export identity" })
+        verify(exactly = 0) { store.putStringDurably(any(), any()) }
+    }
+
+    @Test
+    fun `given copying state without destination, durable write is requested, expected explicit rejection`() {
+        // Given
+        val intent = BackupExportIntent("handle", "backup", BackupExportStatus.COPYING)
+        // When
+        val failure = runCatching { records.write(intent) }.exceptionOrNull()
+        // Then
+        assertEquals("Missing pending export destination", failure?.message)
+        verify(exactly = 0) { store.putStringDurably(any(), any()) }
+    }
+
+    @Test
+    fun `given corrupted durable JSON, startup reads operation, expected failure without silent record clearing`() {
+        // Given
+        raw = "not JSON"
+        // When
+        val failure = runCatching { records.read() }.exceptionOrNull()
+        // Then
+        assertTrue(failure != null)
+        assertEquals("not JSON", raw)
+        verify(exactly = 0) { store.putStringDurably(any(), any()) }
+    }
+
+    @Test
+    fun `given retained pending export, checked clear fails, expected failure propagated and association retained`() {
+        // Given
+        val intent = BackupExportIntent("handle", "backup")
+        records.write(intent)
+        val failure = IllegalStateException("cannot clear")
+        every { store.putStringDurably("pending_export", "") } throws failure
+        // When
+        val caught = runCatching { records.clear() }.exceptionOrNull()
+        // Then
+        assertTrue(failure === caught)
+        assertEquals(intent, records.read())
     }
 }

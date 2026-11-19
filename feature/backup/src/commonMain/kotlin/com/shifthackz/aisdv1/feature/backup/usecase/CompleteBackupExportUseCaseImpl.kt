@@ -11,5 +11,6 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupExportCompletion
  */
 internal class CompleteBackupExportUseCaseImpl(private val coordinator: BackupExportCoordinator) :
     CompleteBackupExportUseCase {
+
     override fun invoke(completion: BackupExportCompletion): Unit = coordinator.submit(completion)
 }

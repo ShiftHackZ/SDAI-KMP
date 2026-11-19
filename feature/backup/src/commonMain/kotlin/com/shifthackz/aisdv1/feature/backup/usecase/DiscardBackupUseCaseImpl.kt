@@ -42,6 +42,7 @@ internal class DiscardBackupUseCaseImpl(
     private val sessions: BackupSessionCodec,
     private val changes: BackupChangesGateway,
 ) : DiscardBackupUseCase {
+
     override suspend fun invoke(handle: String) = withContext(dispatchers.io) {
         restoreGuard.exclusive {
             val pending =
