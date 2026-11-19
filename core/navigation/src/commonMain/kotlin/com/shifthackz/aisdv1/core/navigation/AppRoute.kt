@@ -14,10 +14,20 @@ sealed interface AppRoute {
     val destination: NavigationDestination
 
     /**
-     * Initial launch gate before onboarding, setup or configuration loading.
-     *
+     * Reusable backup route carrying settings or first-launch completion behavior.
+     * @param source Caller context; SPLASH requires configuration on exit.
      * @author Dmitriy Moroz
      */
+    data class Backup(val source: LaunchSource = LaunchSource.SETTINGS) : AppRoute {
+        override val destination = NavigationDestination.BACKUP
+    }
+
+    /** First-launch restore invitation, which cannot return to completed onboarding. @author Dmitriy Moroz */
+    data object BackupWelcome : AppRoute {
+        override val destination = NavigationDestination.BACKUP_WELCOME
+    }
+
+    /** Initial launch gate before onboarding, setup or configuration loading. @author Dmitriy Moroz */
     data object Splash : AppRoute {
         override val destination = NavigationDestination.SPLASH
     }

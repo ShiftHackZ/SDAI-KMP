@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.domain.usecase.easydiffusion.toEasyDiffusionRequest
 
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.coroutineContext
+import com.shifthackz.aisdv1.domain.gateway.GenerationRestoreGate
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
@@ -49,6 +50,7 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
  * @param bonsaiGenerationRepository Generation and result persistence for Bonsai.
  * @param mnnGenerationRepository Isolated MNN request execution after fixed-profile and seed admission.
  * @param preferenceManager Current provider selection and independent generation preferences.
+ * @param generationRestoreGate Serializes generation against portable backup restoration.
  * @param generateEasyDiffusionUseCase Owns captured-task batching, stream recovery, cancellation and deadlines.
  * @param captureEasyDiffusionConnectionUseCase Captures endpoint/checkpoint under the provider-selection lock, retaining the submitted revision.
  *
@@ -86,6 +88,7 @@ internal class TextToImageUseCaseImpl(
     private val mnnGenerationRepository: MnnGenerationRepository,
 
     private val preferenceManager: PreferenceManager,
+    private val generationRestoreGate: GenerationRestoreGate,
     private val generateEasyDiffusionUseCase: GenerateEasyDiffusionUseCase,
     private val captureEasyDiffusionConnectionUseCase: CaptureEasyDiffusionConnectionUseCase,
 ) : TextToImageUseCase {
@@ -101,9 +104,15 @@ internal class TextToImageUseCaseImpl(
      *
      * @author Dmitriy Moroz
      */
-    override suspend operator fun invoke(
-        payload: TextToImagePayload,
-    ): List<AiGenerationResult> {
+    override suspend operator fun invoke(payload: TextToImagePayload): List<AiGenerationResult> =
+        generationRestoreGate.generating { generate(payload) }
+
+    /**
+     * Executes a captured text request while this operation owns generation admission.
+     * @param payload Immutable provider generation inputs.
+     * @author Dmitriy Moroz
+     */
+    private suspend fun generate(payload: TextToImagePayload): List<AiGenerationResult> {
         val source = payload.sourceSnapshot ?: preferenceManager.source
         check(source == preferenceManager.source) { "Generation source changed" }
         if (source == ServerSource.LOCAL_MNN) {

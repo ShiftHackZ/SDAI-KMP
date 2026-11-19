@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.storage.db.persistent
 
+import com.shifthackz.aisdv1.storage.db.persistent.entity.RestoreSessionEntity
+import com.shifthackz.aisdv1.storage.db.persistent.entity.RestoreSectionEntity
+import com.shifthackz.aisdv1.storage.db.persistent.dao.RestoreSessionDao
 import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
@@ -26,7 +29,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 /**
  * Main Room database containing generated images, downloaded models, and app statistics.
  *
- * Schema version 13 adds an opaque image revision so thumbnail caches invalidate on replacement.
+ * Schema version 15 retains first-launch restore handoffs and typed omission metadata across interruptions.
  *
  * @author Dmitriy Moroz
  */
@@ -40,8 +43,12 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
         SupporterEntity::class,
         BenchmarkResultEntity::class,
         NetworkUsageEntity::class,
+        RestoreSessionEntity::class,
+        RestoreSectionEntity::class,
     ],
     autoMigrations = [
+        AutoMigration(from = 13, to = 14),
+        AutoMigration(from = 14, to = 15),
         /**
          * Added 3 fields to [GenerationResultEntity]:
          * - [GenerationResultContract.SUB_SEED]
@@ -125,41 +132,41 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 @ConstructedBy(PersistentDatabaseConstructor::class)
 internal abstract class PersistentDatabase : RoomDatabase() {
     /**
-     * Executes the `generationResultDao` step in the SDAI storage layer.
+     * Reads and mutates saved gallery images and their metadata.
      *
-     * @return Result produced by `generationResultDao`.
+     * @return The corresponding persistent table access owner.
      * @author Dmitriy Moroz
      */
     abstract fun generationResultDao(): GenerationResultDao
 
     /**
-     * Executes the `localModelDao` step in the SDAI storage layer.
+     * Tracks downloaded local model records without changing user-managed sources.
      *
-     * @return Result produced by `localModelDao`.
+     * @return The corresponding persistent table access owner.
      * @author Dmitriy Moroz
      */
     abstract fun localModelDao(): LocalModelDao
 
     /**
-     * Executes the `huggingFaceModelDao` step in the SDAI storage layer.
+     * Reads saved Hugging Face model catalog records.
      *
-     * @return Result produced by `huggingFaceModelDao`.
+     * @return The corresponding persistent table access owner.
      * @author Dmitriy Moroz
      */
     abstract fun huggingFaceModelDao(): HuggingFaceModelDao
 
     /**
-     * Executes the `supporterDao` step in the SDAI storage layer.
+     * Reads cached supporter records.
      *
-     * @return Result produced by `supporterDao`.
+     * @return The corresponding persistent table access owner.
      * @author Dmitriy Moroz
      */
     abstract fun supporterDao(): SupporterDao
 
     /**
-     * Executes the `benchmarkResultDao` step in the SDAI storage layer.
+     * Reads device-specific benchmark history.
      *
-     * @return Result produced by `benchmarkResultDao`.
+     * @return The corresponding persistent table access owner.
      * @author Dmitriy Moroz
      */
     abstract fun benchmarkResultDao(): BenchmarkResultDao
@@ -172,38 +179,44 @@ internal abstract class PersistentDatabase : RoomDatabase() {
     abstract fun networkUsageDao(): NetworkUsageDao
 
     /**
-     * Provides the `companion object` singleton used by the SDAI storage layer.
+     * Stable database filename and current migration target.
      *
      * @author Dmitriy Moroz
      */
+    /**
+     * Returns durable restore intent and category-commit records.
+     * @author Dmitriy Moroz
+     */
+    abstract fun restoreSessionDao(): RestoreSessionDao
+
     companion object {
         /**
-         * Exposes the `DB_NAME` value used by the SDAI storage layer.
+         * Installed database filename; preserve it across schema upgrades.
          *
          * @author Dmitriy Moroz
          */
         const val DB_NAME = "ai_sd_v1_storage_db"
 
         /**
-         * Exposes the `DB_VERSION` value used by the SDAI storage layer.
+         * Schema target including durable restore session and section ledgers.
          *
          * @author Dmitriy Moroz
          */
-        const val DB_VERSION = 13
+        const val DB_VERSION = 15
     }
 }
 
 /**
- * Provides the `PersistentDatabaseConstructor` singleton used by the SDAI storage layer.
+ * Constructs native Room implementations for each supported target.
  *
  * @author Dmitriy Moroz
  */
 @Suppress("KotlinNoActualForExpect")
 internal expect object PersistentDatabaseConstructor : RoomDatabaseConstructor<PersistentDatabase> {
     /**
-     * Executes the `initialize` step in the SDAI storage layer.
+     * Creates the platform Room database implementation generated from this schema.
      *
-     * @return Result produced by `initialize`.
+     * @return Constructed persistent database owner.
      * @author Dmitriy Moroz
      */
     override fun initialize(): PersistentDatabase

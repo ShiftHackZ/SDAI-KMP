@@ -8,23 +8,17 @@ package com.shifthackz.aisdv1.core.navigation.router
  */
 interface OnBoardingRouter {
     /**
+     * Replaces completed onboarding with the first-launch recovery invitation.
+     * @author Dmitriy Moroz
+     */
+    fun navigateToBackupWelcome()
+
+    /**
      * Closes the drawer first, otherwise returns to the previous route or the generation-home fallback.
      *
      * @author Dmitriy Moroz
      */
     fun navigateBack()
 
-    /**
-     * Replaces completed onboarding with initial-launch server setup.
-     *
-     * @author Dmitriy Moroz
-     */
-    fun navigateToServerSetupAfterOnBoarding()
 
-    /**
-     * Replaces completed onboarding with configuration loading.
-     *
-     * @author Dmitriy Moroz
-     */
-    fun navigateToPostOnBoardingConfigLoader()
 }

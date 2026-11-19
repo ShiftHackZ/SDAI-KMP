@@ -33,6 +33,28 @@ private class NsUserDefaultsKeyValueStore(
         }
     }
 
+    /**
+     * Reports trusted persisted presence, including explicitly saved default values.
+     * @param key Existing preference key.
+     * @author Dmitriy Moroz
+     */
+    override fun contains(key: String): Boolean = withMemoryLock {
+        val mask = configurationMask
+        when {
+            mask?.strings?.containsKey(key) == true -> mask.strings[key] != null
+            mask?.booleans?.containsKey(key) == true -> mask.booleans[key] != null
+            mask?.integers?.containsKey(key) == true -> mask.integers[key] != null
+            else -> defaults.objectForKey(key) != null
+        }
+    }
+
+    /** Finishes the exact quarantined write before a restore session may be abandoned. @author Dmitriy Moroz */
+    override fun retryPendingWrite(): Boolean {
+        val batch = withMemoryLock { configurationMask } ?: return false
+        putSettingsDurably(batch.candidateStrings, batch.candidateBooleans, batch.candidateIntegers)
+        return true
+    }
+
     private var configurationMask: ConfigurationMemoryMask? = null
     private var isBatchInFlight = false
 
@@ -83,11 +105,29 @@ private class NsUserDefaultsKeyValueStore(
     override fun putConfigurationDurably(
         strings: Map<String, String>,
         booleans: Map<String, Boolean>
+    ) = putSettingsDurably(strings, booleans, emptyMap())
+
+    /**
+     * Persists a complete typed backup settings batch with the same quarantine as configuration.
+     * @param strings String replacements.
+     * @param booleans Boolean replacements.
+     * @param integers Integer replacements.
+     * @author Dmitriy Moroz
+     */
+    override fun putSettingsDurably(
+        strings: Map<String, String>,
+        booleans: Map<String, Boolean>,
+        integers: Map<String, Int>,
     ) {
         val batch = withMemoryLock {
             if (isBatchInFlight) persistenceFailure()
             val current = configurationMask
-            if (current != null && !current.matches(strings, booleans)) persistenceFailure()
+            if (current != null && !current.matches(
+                    strings,
+                    booleans,
+                    integers
+                )
+            ) persistenceFailure()
             if (current == null) configurationMask = ConfigurationMemoryMask(
                 strings.keys.associateWith { key -> defaults.stringForKey(key) },
                 booleans.keys.associateWith { key ->
@@ -97,6 +137,12 @@ private class NsUserDefaultsKeyValueStore(
                 },
                 strings.toMap(),
                 booleans.toMap(),
+                integers.keys.associateWith { key ->
+                    if (defaults.objectForKey(key) != null) defaults.integerForKey(
+                        key
+                    ).toInt() else null
+                },
+                integers.toMap(),
             )
             isBatchInFlight = true
             checkNotNull(configurationMask)
@@ -105,7 +151,7 @@ private class NsUserDefaultsKeyValueStore(
         try {
             withMemoryLock {
                 val domain = defaults.persistentDomainForName(name)
-                    .orEmpty() + batch.candidateStrings + batch.candidateBooleans
+                    .orEmpty() + batch.candidateStrings + batch.candidateBooleans + batch.candidateIntegers
                 defaults.setPersistentDomain(domain, name)
             }
             check(defaults.synchronize()) { "Configuration persistence failed" }
@@ -151,7 +197,10 @@ private class NsUserDefaultsKeyValueStore(
      * @author Dmitriy Moroz
      */
     override fun getInt(key: String, default: Int): Int = withMemoryLock {
-        if (defaults.objectForKey(key) == null) default else defaults.integerForKey(key).toInt()
+        val mask = configurationMask
+        if (mask?.integers?.containsKey(key) == true) mask.integers[key] ?: default
+        else if (defaults.objectForKey(key) == null) default else defaults.integerForKey(key)
+            .toInt()
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.settings.section
 
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.AutoFixNormal
@@ -77,6 +78,16 @@ internal fun SettingsServerSection(
                 text = text("settings_item_config"),
                 endValueText = state.serverSource.shortTitle().asUiText(),
                 onClick = { processIntent(SettingsIntent.NavigateConfiguration) },
+            )
+        }
+
+        SettingsListItem.BACKUP -> {
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = Icons.Default.Backup,
+                text = text("backup_title"),
+                onClick = { processIntent(SettingsIntent.NavigateBackup) },
             )
         }
 

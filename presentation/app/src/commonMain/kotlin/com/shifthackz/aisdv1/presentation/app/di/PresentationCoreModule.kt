@@ -22,6 +22,7 @@ import com.shifthackz.aisdv1.presentation.generation.di.generationCoreModule
 import com.shifthackz.aisdv1.presentation.generation.di.generationViewModelModule
 import com.shifthackz.aisdv1.presentation.debug.di.debugCoreModule
 import com.shifthackz.aisdv1.presentation.debug.di.debugViewModelModule
+import com.shifthackz.aisdv1.presentation.backup.di.backupViewModelModule
 import org.koin.dsl.module
 
 /**
@@ -31,6 +32,7 @@ import org.koin.dsl.module
  */
 val corePresentationModule = module {
     includes(
+        backupViewModelModule,
         benchmarkCoreModule,
         benchmarkViewModelModule,
         statisticsViewModelModule,

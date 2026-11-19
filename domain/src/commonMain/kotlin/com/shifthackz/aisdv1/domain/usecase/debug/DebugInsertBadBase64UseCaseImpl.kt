@@ -5,27 +5,20 @@ import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.repository.GenerationResultRepository
 
 /**
- * Implements `DebugInsertBadBase64UseCase` behavior in the SDAI domain layer.
+ * Adds a deliberately invalid gallery image for the developer diagnostics action.
+ *
+ * @param repository Persists the diagnostic gallery entry.
+ * @param timeProvider Supplies its creation timestamp and invalid image content.
  *
  * @author Dmitriy Moroz
  */
-class DebugInsertBadBase64UseCaseImpl(
-    /**
-     * Exposes the `repository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class DebugInsertBadBase64UseCaseImpl(
     private val repository: GenerationResultRepository,
-    /**
-     * Exposes the `timeProvider` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val timeProvider: TimeProvider,
 ) : DebugInsertBadBase64UseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Inserts one diagnostic gallery entry with intentionally invalid image bytes.
      *
      * @author Dmitriy Moroz
      */
@@ -33,16 +26,11 @@ class DebugInsertBadBase64UseCaseImpl(
         repository.insert(stubBadBase64Generation(timeProvider.currentTimeMillis()))
     }
 
-    /**
-     * Provides the `companion object` singleton used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     companion object {
         /**
-         * Executes the `stubBadBase64Generation` step in the SDAI domain layer.
+         * Builds an invalid-image entry with otherwise usable generation metadata.
          *
-         * @param now now value consumed by the API.
+         * @param now Creation timestamp also used as deliberately invalid Base64 content.
          * @author Dmitriy Moroz
          */
         private fun stubBadBase64Generation(now: Long) = AiGenerationResult(

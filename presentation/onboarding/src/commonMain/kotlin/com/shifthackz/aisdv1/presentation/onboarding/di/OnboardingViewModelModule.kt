@@ -17,7 +17,7 @@ val onboardingViewModelModule = module {
             launchSource = launchSource,
             dispatchersProvider = get(),
             router = router,
-            splashNavigationUseCase = get(),
+            setBackupStartupStage = get(),
             preferenceManager = get(),
             buildInfoProvider = get(),
         )

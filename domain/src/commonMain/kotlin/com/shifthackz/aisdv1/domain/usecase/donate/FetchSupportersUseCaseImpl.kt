@@ -4,21 +4,18 @@ import com.shifthackz.aisdv1.domain.entity.Supporter
 import com.shifthackz.aisdv1.domain.repository.SupportersRepository
 
 /**
- * Implements `FetchSupportersUseCase` behavior in the SDAI domain layer.
+ * Refreshes the supporter list through its repository.
+ *
+ * @param repository Loads the current supporter list and its stored representation.
  *
  * @author Dmitriy Moroz
  */
-class FetchSupportersUseCaseImpl(
-    /**
-     * Exposes the `repository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class FetchSupportersUseCaseImpl(
     private val repository: SupportersRepository,
 ) : FetchSupportersUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns supporters after the repository refresh completes.
      *
      * @author Dmitriy Moroz
      */

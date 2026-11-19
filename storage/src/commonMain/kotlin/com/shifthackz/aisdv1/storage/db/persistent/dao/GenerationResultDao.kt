@@ -11,39 +11,76 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.GenerationResultPrevie
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Defines the `GenerationResultDao` contract for the SDAI storage layer.
+ * Reads paged gallery metadata and persists complete image rows; backup imports must use fresh IDs.
  *
  * @author Dmitriy Moroz
  */
 @Dao
 interface GenerationResultDao {
+    /**
+     * Advances through a stable backup snapshot by primary key without repeated OFFSET scans.
+     * @param afterId Exclusive ID cursor from the previous page, or zero for the first page.
+     * @param limit Maximum number of full image rows held at once.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT * FROM generation_results WHERE id > :afterId ORDER BY id LIMIT :limit")
+    suspend fun queryBackupPage(afterId: Long, limit: Int): List<GenerationResultEntity>
+
 
     /**
-     * Executes the `query` step in the SDAI storage layer.
+     * Pages every saved image identity, including hidden history, without materializing image payloads.
+     * @param afterId Exclusive primary-key cursor, or zero for the first page.
+     * @param limit Maximum IDs read for duplicate checking at once.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id FROM generation_results WHERE id > :afterId ORDER BY id LIMIT :limit")
+    suspend fun queryImageIdsAfter(afterId: Long, limit: Int): List<Long>
+
+    /**
+     * Admits one output-only image string before materialization for a single-pass duplicate check.
+     * @param id Saved gallery or hidden-history identity.
+     * @param maxBytes Maximum stored UTF8 bytes allowed in the admitted text.
+     * @return Base64 text, or null for an oversized representation or missing row.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT image_base_64 FROM generation_results WHERE id = :id AND length(CAST(image_base_64 AS BLOB)) <= :maxBytes")
+    suspend fun queryImageTextForFingerprint(id: Long, maxBytes: Long): String?
+
+    /**
+     * Reads a bounded Kotlin chunk from an oversized legacy representation.
+     * Used only when the single-read admission rejects the text; SQLite may materialize its value natively.
+     * @param id Saved gallery or hidden-history identity.
+     * @param offset One-based byte position in the stored UTF8 Base64 representation.
+     * @param maxBytes Maximum UTF8 bytes materialized in the result; BLOB slicing avoids repeated text-prefix scans.
+     * @return Image text bytes, an empty array at EOF, or null if the row no longer exists.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT substr(CAST(image_base_64 AS BLOB), :offset, :maxBytes) FROM generation_results WHERE id = :id")
+    suspend fun queryImageChunk(id: Long, offset: Long, maxBytes: Int): ByteArray?
+
+    /**
+     * Reads all gallery rows, including hidden generation history.
      *
-     * @return Result produced by `query`.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC")
     suspend fun query(): List<GenerationResultEntity>
 
     /**
-     * Executes the `queryPage` step in the SDAI storage layer.
+     * Reads one full-image page ordered by creation time and ID.
      *
-     * @param limit limit value consumed by the API.
-     * @param offset offset value consumed by the API.
-     * @return Result produced by `queryPage`.
+     * @param limit Maximum rows held in one page.
+     * @param offset Number of prior ordered rows to skip.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC LIMIT :limit OFFSET :offset ")
     suspend fun queryPage(limit: Int, offset: Int): List<GenerationResultEntity>
 
     /**
-     * Executes the `queryPagePreview` step in the SDAI storage layer.
+     * Reads one preview-only page without full image payloads.
      *
-     * @param limit limit value consumed by the API.
-     * @param offset offset value consumed by the API.
-     * @return Result produced by `queryPagePreview`.
+     * @param limit Maximum rows held in one page.
+     * @param offset Number of prior ordered rows to skip.
      * @author Dmitriy Moroz
      */
     @Query(
@@ -61,22 +98,20 @@ interface GenerationResultDao {
     suspend fun queryPagePreview(limit: Int, offset: Int): List<GenerationResultPreviewEntity>
 
     /**
-     * Loads SDAI data through `observePage`.
+     * Observes a full-image gallery page after Room invalidations.
      *
-     * @param limit limit value consumed by the API.
-     * @param offset offset value consumed by the API.
-     * @return Result produced by `observePage`.
+     * @param limit Maximum rows held in one page.
+     * @param offset Number of prior ordered rows to skip.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC LIMIT :limit OFFSET :offset ")
     fun observePage(limit: Int, offset: Int): Flow<List<GenerationResultEntity>>
 
     /**
-     * Loads SDAI data through `observePagePreview`.
+     * Observes a preview-only page after Room invalidations.
      *
-     * @param limit limit value consumed by the API.
-     * @param offset offset value consumed by the API.
-     * @return Result produced by `observePagePreview`.
+     * @param limit Maximum rows held in one page.
+     * @param offset Number of prior ordered rows to skip.
      * @author Dmitriy Moroz
      */
     @Query(
@@ -94,93 +129,88 @@ interface GenerationResultDao {
     fun observePagePreview(limit: Int, offset: Int): Flow<List<GenerationResultPreviewEntity>>
 
     /**
-     * Loads SDAI data through `observeCount`.
+     * Observes the current total number of persisted generation rows.
      *
-     * @return Result produced by `observeCount`.
      * @author Dmitriy Moroz
      */
     @Query("SELECT COUNT(*) FROM ${GenerationResultContract.TABLE}")
     fun observeCount(): Flow<Int>
 
     /**
-     * Executes the `queryIds` step in the SDAI storage layer.
+     * Reads IDs of all saved generation rows.
      *
-     * @return Result produced by `queryIds`.
      * @author Dmitriy Moroz
      */
     @Query("SELECT ${GenerationResultContract.ID} FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC")
     suspend fun queryIds(): List<Long>
 
     /**
-     * Executes the `queryById` step in the SDAI storage layer.
+     * Reads one complete saved image row by local identity.
      *
-     * @param id identifier of the target entity.
-     * @return Result produced by `queryById`.
+     * @param id Local persisted row identity.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} WHERE ${GenerationResultContract.ID} = :id LIMIT 1")
     suspend fun queryById(id: Long): GenerationResultEntity
 
     /**
-     * Executes the `queryByIdList` step in the SDAI storage layer.
+     * Reads complete saved rows for explicit local identities.
      *
-     * @param idList id list value consumed by the API.
-     * @return Result produced by `queryByIdList`.
+     * @param idList Explicit local row identities to read or update.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} WHERE ${GenerationResultContract.ID} IN (:idList)")
     suspend fun queryByIdList(idList: List<Long>): List<GenerationResultEntity>
 
     /**
-     * Performs the SDAI side effect handled by `updateHiddenByIdList`.
+     * Changes history visibility without replacing image content.
      *
-     * @param idList id list value consumed by the API.
-     * @param hidden hidden value consumed by the API.
+     * @param idList Explicit local row identities to read or update.
+     * @param hidden Whether selected rows appear only in generation history.
      * @author Dmitriy Moroz
      */
     @Query("UPDATE ${GenerationResultContract.TABLE} SET ${GenerationResultContract.HIDDEN} = :hidden WHERE ${GenerationResultContract.ID} IN (:idList)")
     suspend fun updateHiddenByIdList(idList: List<Long>, hidden: Boolean)
 
     /**
-     * Performs the SDAI side effect handled by `updateLikedByIdList`.
+     * Changes favorite flags without replacing image content.
      *
-     * @param idList id list value consumed by the API.
-     * @param liked liked value consumed by the API.
+     * @param idList Explicit local row identities to read or update.
+     * @param liked Whether selected rows are marked as favorites.
      * @author Dmitriy Moroz
      */
     @Query("UPDATE ${GenerationResultContract.TABLE} SET ${GenerationResultContract.LIKED} = :liked WHERE ${GenerationResultContract.ID} IN (:idList)")
     suspend fun updateLikedByIdList(idList: List<Long>, liked: Boolean)
 
     /**
-     * Performs the SDAI side effect handled by `insert`.
+     * Inserts a complete gallery row; nonzero conflicting IDs replace existing rows.
      *
-     * @param item item value consumed by the API.
-     * @return Result produced by `insert`.
+     * @param item Full image row; use ID zero for additive backup import.
      * @author Dmitriy Moroz
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: GenerationResultEntity): Long
 
     /**
-     * Performs the SDAI side effect handled by `deleteById`.
+     * Removes one saved row by local identity.
      *
-     * @param id identifier of the target entity.
+     * @param id Local persisted row identity.
      * @author Dmitriy Moroz
      */
     @Query("DELETE FROM ${GenerationResultContract.TABLE} WHERE ${GenerationResultContract.ID} = :id")
     suspend fun deleteById(id: Long)
 
     /**
-     * Performs the SDAI side effect handled by `deleteByIdList`.
+     * Removes only the explicitly selected saved rows.
      *
-     * @param idList id list value consumed by the API.
+     * @param idList Explicit local row identities to read or update.
      * @author Dmitriy Moroz
      */
     @Query("DELETE FROM ${GenerationResultContract.TABLE} WHERE ${GenerationResultContract.ID} IN (:idList)")
     suspend fun deleteByIdList(idList: List<Long>)
 
     /**
-     * Performs the SDAI side effect handled by `deleteAll`.
+     * Removes every saved gallery and hidden history row.
      *
      * @author Dmitriy Moroz
      */

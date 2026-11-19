@@ -6,6 +6,10 @@ package com.shifthackz.aisdv1.core.navigation.router
  * @author Dmitriy Moroz
  */
 object NoOpSplashRouter : SplashRouter {
+    override fun navigateToInitialRestore() = Unit
+    override fun navigateToBackupWelcome() = Unit
+    override fun navigateToBackupRestore() = Unit
+
     /**
      * Ignores this action because no navigation host is attached.
      *

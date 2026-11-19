@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.mocks.ImmediateGenerationRestoreGate
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.EasyDiffusionConnection
 import com.shifthackz.aisdv1.domain.entity.EasyDiffusionRequest
@@ -48,6 +49,7 @@ class ImageToImageUseCaseImplTest {
     private val generateEasyDiffusion = mockk<GenerateEasyDiffusionUseCase>()
     private val captureEasyDiffusion = mockk<CaptureEasyDiffusionConnectionUseCase>()
     private val useCase = ImageToImageUseCaseImpl(
+        generationRestoreGate = ImmediateGenerationRestoreGate(),
         generateEasyDiffusionUseCase = generateEasyDiffusion,
         captureEasyDiffusionConnectionUseCase = captureEasyDiffusion,
         stableDiffusionGenerationRepository = stubStableDiffusionGenerationRepository,
@@ -62,8 +64,9 @@ class ImageToImageUseCaseImplTest {
     )
 
     @Test
-    fun `Easy Diffusion captures one immutable connection and delegates the complete batch once`() =
+    fun `given Easy Diffusion generation, complete batch is submitted, generation is requested, expected one immutable connection capture`() =
         runTest {
+            // Given
             every { stubPreferenceManager.source } returns ServerSource.EASY_DIFFUSION
             val connection = EasyDiffusionConnection("https://server.example", "folder/model", 7)
             coEvery { captureEasyDiffusion(7, null) } returns connection
@@ -74,7 +77,10 @@ class ImageToImageUseCaseImplTest {
                 sourceSnapshot = ServerSource.EASY_DIFFUSION, providerSelectionRevision = 7,
                 batchCount = 3, seed = "4294967295", base64Image = "AQID", denoisingStrength = 0.5f
             )
-            assertSame(results, useCase(payload))
+            // When
+            val actual = useCase(payload)
+            // Then
+            assertSame(results, actual)
             assertEquals(connection.url, request.captured.url)
             assertEquals(connection.model, request.captured.model)
             assertEquals(7L, request.captured.selectionRevision)
@@ -84,179 +90,265 @@ class ImageToImageUseCaseImplTest {
         }
 
     @Test
-    fun `stale Easy Diffusion capture stops dispatch before any generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.EASY_DIFFUSION
-        coEvery { captureEasyDiffusion(6, null) } throws stubException
-        assertSame(stubException, runCatching {
-            useCase(
-                mockImageToImagePayload.copy(
-                    sourceSnapshot = ServerSource.EASY_DIFFUSION,
-                    providerSelectionRevision = 6, base64Image = "AQID", denoisingStrength = 0.5f
+    fun `given Easy Diffusion generation, captured connection is stale, generation is requested, expected no generation dispatch`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.EASY_DIFFUSION
+            coEvery { captureEasyDiffusion(6, null) } throws stubException
+            // When
+            val actual = runCatching {
+                useCase(
+                    mockImageToImagePayload.copy(
+                        sourceSnapshot = ServerSource.EASY_DIFFUSION,
+                        providerSelectionRevision = 6,
+                        base64Image = "AQID",
+                        denoisingStrength = 0.5f
+                    )
                 )
+            }
+            // Then
+            assertSame(stubException, actual.exceptionOrNull())
+            coVerify(exactly = 0) { generateEasyDiffusion(any()) }
+        }
+
+    @Test
+    fun `given source is AUTOMATIC1111, generation is requested, expected stable diffusion generation`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
+            coEvery { stubStableDiffusionGenerationRepository.generateFromImage(any()) } returns listOf(
+                mockAiGenerationResult
             )
-        }.exceptionOrNull())
-        coVerify(exactly = 0) { generateEasyDiffusion(any()) }
-    }
+
+            // When
+
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+
+            // Then
+
+            assertEquals(listOf(mockAiGenerationResult), actual)
+            coVerify(exactly = 1) { stubStableDiffusionGenerationRepository.generateFromImage(any()) }
+        }
 
     @Test
-    fun `given source is AUTOMATIC1111, expected stable diffusion generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
-        coEvery { stubStableDiffusionGenerationRepository.generateFromImage(any()) } returns listOf(
-            mockAiGenerationResult
-        )
+    fun `given source is SWARM_UI, generation is requested, expected swarm ui generation`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.SWARM_UI
+            coEvery { stubSwarmUiGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+            // When
 
-        assertEquals(listOf(mockAiGenerationResult), actual)
-        coVerify(exactly = 1) { stubStableDiffusionGenerationRepository.generateFromImage(any()) }
-    }
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
 
-    @Test
-    fun `given source is SWARM_UI, expected swarm ui generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.SWARM_UI
-        coEvery { stubSwarmUiGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
+            // Then
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
-
-        assertEquals(listOf(mockAiGenerationResult), actual)
-        coVerify(exactly = 1) { stubSwarmUiGenerationRepository.generateFromImage(any()) }
-    }
+            assertEquals(listOf(mockAiGenerationResult), actual)
+            coVerify(exactly = 1) { stubSwarmUiGenerationRepository.generateFromImage(any()) }
+        }
 
     @Test
-    fun `given source is HORDE, expected horde generation`() = runTest {
+    fun `given source is HORDE, generation is requested, expected horde generation`() = runTest {
+        // Given
         every { stubPreferenceManager.source } returns ServerSource.HORDE
         coEvery { stubHordeGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
 
+        // When
+
         val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+
+        // Then
 
         assertEquals(listOf(mockAiGenerationResult), actual)
         coVerify(exactly = 1) { stubHordeGenerationRepository.generateFromImage(any()) }
     }
 
     @Test
-    fun `given source is HUGGING_FACE, expected hugging face generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.HUGGING_FACE
-        coEvery { stubHuggingFaceGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
+    fun `given source is HUGGING_FACE, generation is requested, expected hugging face generation`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.HUGGING_FACE
+            coEvery { stubHuggingFaceGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+            // When
 
-        assertEquals(listOf(mockAiGenerationResult), actual)
-        coVerify(exactly = 1) { stubHuggingFaceGenerationRepository.generateFromImage(any()) }
-    }
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
 
-    @Test
-    fun `given source is STABILITY_AI, expected stability ai generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.STABILITY_AI
-        coEvery { stubStabilityAiGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
+            // Then
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
-
-        assertEquals(listOf(mockAiGenerationResult), actual)
-        coVerify(exactly = 1) { stubStabilityAiGenerationRepository.generateFromImage(any()) }
-    }
+            assertEquals(listOf(mockAiGenerationResult), actual)
+            coVerify(exactly = 1) { stubHuggingFaceGenerationRepository.generateFromImage(any()) }
+        }
 
     @Test
-    fun `given source is LOCAL_APPLE_CORE_ML, expected core ml generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.LOCAL_APPLE_CORE_ML
-        coEvery { stubCoreMlGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
+    fun `given source is STABILITY_AI, generation is requested, expected stability ai generation`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.STABILITY_AI
+            coEvery { stubStabilityAiGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+            // When
 
-        assertEquals(listOf(mockAiGenerationResult), actual)
-        coVerify(exactly = 1) { stubCoreMlGenerationRepository.generateFromImage(any()) }
-    }
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+
+            // Then
+
+            assertEquals(listOf(mockAiGenerationResult), actual)
+            coVerify(exactly = 1) { stubStabilityAiGenerationRepository.generateFromImage(any()) }
+        }
 
     @Test
-    fun `given source is FAL_AI, expected fal ai generation`() = runTest {
+    fun `given source is LOCAL_APPLE_CORE_ML, generation is requested, expected core ml generation`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.LOCAL_APPLE_CORE_ML
+            coEvery { stubCoreMlGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
+
+            // When
+
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+
+            // Then
+
+            assertEquals(listOf(mockAiGenerationResult), actual)
+            coVerify(exactly = 1) { stubCoreMlGenerationRepository.generateFromImage(any()) }
+        }
+
+    @Test
+    fun `given source is FAL_AI, generation is requested, expected fal ai generation`() = runTest {
+        // Given
         every { stubPreferenceManager.source } returns ServerSource.FAL_AI
         coEvery { stubFalAiGenerationRepository.generateFromImage(any()) } returns listOf(
             mockAiGenerationResult
         )
 
+        // When
+
         val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+
+        // Then
 
         assertEquals(listOf(mockAiGenerationResult), actual)
         coVerify(exactly = 1) { stubFalAiGenerationRepository.generateFromImage(any()) }
     }
 
     @Test
-    fun `given source is ARLI_AI, expected arli ai generation`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.ARLI_AI
-        coEvery { stubArliAiGenerationRepository.generateFromImage(any()) } returns listOf(
-            mockAiGenerationResult
-        )
+    fun `given source is ARLI_AI, generation is requested, expected arli ai generation`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.ARLI_AI
+            coEvery { stubArliAiGenerationRepository.generateFromImage(any()) } returns listOf(
+                mockAiGenerationResult
+            )
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+            // When
 
-        assertEquals(listOf(mockAiGenerationResult), actual)
-        coVerify(exactly = 1) { stubArliAiGenerationRepository.generateFromImage(any()) }
-    }
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 1))
+
+            // Then
+
+            assertEquals(listOf(mockAiGenerationResult), actual)
+            coVerify(exactly = 1) { stubArliAiGenerationRepository.generateFromImage(any()) }
+        }
 
     @Test
-    fun `given automatic1111 batch count is 10, expected batch generated by repository`() =
+    fun `given automatic1111 batch count is 10, generation is requested, expected batch generated by repository`() =
         runTest {
+            // Given
             every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
             coEvery { stubStableDiffusionGenerationRepository.generateFromImage(any()) } returns List(
                 10
             ) { mockAiGenerationResult }
 
+            // When
+
             val actual = useCase(mockImageToImagePayload.copy(batchCount = 10))
+
+            // Then
 
             assertEquals(List(10) { mockAiGenerationResult }, actual)
             coVerify(exactly = 1) { stubStableDiffusionGenerationRepository.generateFromImage(any()) }
         }
 
     @Test
-    fun `given non batch source batch count is 10, expected generation repeated 10 times`() =
+    fun `given non batch source batch count is 10, generation is requested, expected generation repeated 10 times`() =
         runTest {
+            // Given
             every { stubPreferenceManager.source } returns ServerSource.HORDE
             coEvery { stubHordeGenerationRepository.generateFromImage(any()) } returns mockAiGenerationResult
 
+            // When
+
             val actual = useCase(mockImageToImagePayload.copy(batchCount = 10))
+
+            // Then
 
             assertEquals(List(10) { mockAiGenerationResult }, actual)
             coVerify(exactly = 10) { stubHordeGenerationRepository.generateFromImage(any()) }
         }
 
     @Test
-    fun `given fal ai batch count is 4, expected batch generated by repository`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.FAL_AI
-        coEvery { stubFalAiGenerationRepository.generateFromImage(any()) } returns List(4) { mockAiGenerationResult }
+    fun `given fal ai batch count is 4, generation is requested, expected batch generated by repository`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.FAL_AI
+            coEvery { stubFalAiGenerationRepository.generateFromImage(any()) } returns List(4) { mockAiGenerationResult }
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 4))
+            // When
 
-        assertEquals(List(4) { mockAiGenerationResult }, actual)
-        coVerify(exactly = 1) { stubFalAiGenerationRepository.generateFromImage(any()) }
-    }
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 4))
 
-    @Test
-    fun `given arli ai batch count is 4, expected batch generated by repository`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.ARLI_AI
-        coEvery { stubArliAiGenerationRepository.generateFromImage(any()) } returns List(4) { mockAiGenerationResult }
+            // Then
 
-        val actual = useCase(mockImageToImagePayload.copy(batchCount = 4))
-
-        assertEquals(List(4) { mockAiGenerationResult }, actual)
-        coVerify(exactly = 1) { stubArliAiGenerationRepository.generateFromImage(any()) }
-    }
+            assertEquals(List(4) { mockAiGenerationResult }, actual)
+            coVerify(exactly = 1) { stubFalAiGenerationRepository.generateFromImage(any()) }
+        }
 
     @Test
-    fun `given generation fails, expected error propagated`() = runTest {
+    fun `given arli ai batch count is 4, generation is requested, expected batch generated by repository`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.ARLI_AI
+            coEvery { stubArliAiGenerationRepository.generateFromImage(any()) } returns List(4) { mockAiGenerationResult }
+
+            // When
+
+            val actual = useCase(mockImageToImagePayload.copy(batchCount = 4))
+
+            // Then
+
+            assertEquals(List(4) { mockAiGenerationResult }, actual)
+            coVerify(exactly = 1) { stubArliAiGenerationRepository.generateFromImage(any()) }
+        }
+
+    @Test
+    fun `given generation fails, generation is requested, expected error propagated`() = runTest {
+        // Given
         every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
         coEvery { stubStableDiffusionGenerationRepository.generateFromImage(any()) } throws stubException
 
+        // When
+
         val actual = runCatching { useCase(mockImageToImagePayload.copy(batchCount = 1)) }
+
+        // Then
 
         assertSame(stubException, actual.exceptionOrNull())
     }
 
     @Test
-    fun `given unsupported source, expected unsupported error`() = runTest {
-        every { stubPreferenceManager.source } returns ServerSource.LOCAL_MICROSOFT_ONNX
+    fun `given unsupported source, generation is requested, expected unsupported error`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.LOCAL_MICROSOFT_ONNX
 
-        val actual = runCatching { useCase(mockImageToImagePayload.copy(batchCount = 1)) }
+            // When
 
-        assertTrue(actual.exceptionOrNull() is IllegalStateException)
-        assertTrue(actual.exceptionOrNull()?.message?.startsWith("Img2Img not yet supported") == true)
-    }
+            val actual = runCatching { useCase(mockImageToImagePayload.copy(batchCount = 1)) }
+
+            // Then
+
+            assertTrue(actual.exceptionOrNull() is IllegalStateException)
+            assertTrue(actual.exceptionOrNull()?.message?.startsWith("Img2Img not yet supported") == true)
+        }
 }

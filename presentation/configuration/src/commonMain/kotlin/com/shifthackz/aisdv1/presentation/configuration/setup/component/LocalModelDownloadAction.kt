@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.component
 
+import com.shifthackz.aisdv1.presentation.components.widget.action.SecondaryActionButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -48,7 +49,7 @@ internal fun LocalModelDownloadAction(
         exit = shrinkVertically() + fadeOut(),
     ) {
         Column {
-            SetupSecondaryAction(
+            SecondaryActionButton(
                 isEnabled = action.isEnabled,
                 onClick = { processIntent(if (isCurrentBatch) ServerSetupIntent.CancelModelDownloads else ServerSetupIntent.DownloadAllModels) },
             ) {

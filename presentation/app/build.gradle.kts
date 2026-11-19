@@ -24,6 +24,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":presentation:benchmark"))
+            implementation(project(":presentation:backup"))
             implementation(project(":presentation:components"))
             implementation(project(":presentation:configuration"))
             implementation(project(":presentation:debug"))
@@ -48,6 +49,7 @@ kotlin {
             implementation(project(":demo"))
             implementation(project(":network"))
             implementation(project(":feature:auth"))
+            implementation(project(":feature:backup"))
             implementation(project(":feature:benchmark"))
             implementation(project(":feature:work"))
             api(project(":feature:bonsai"))
@@ -74,6 +76,8 @@ kotlin {
             implementation(libs.androidx.work.runtime)
             implementation(libs.koin.android)
         }
+
+        androidUnitTest.dependencies { implementation(libs.test.junit) }
 
         iosMain.dependencies {
             implementation(project(":feature:sdxl"))

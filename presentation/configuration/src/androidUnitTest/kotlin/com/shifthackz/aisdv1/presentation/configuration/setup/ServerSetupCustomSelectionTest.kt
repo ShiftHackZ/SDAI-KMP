@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.configuration.setup
 
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.mainButtonEnabled
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,6 +54,74 @@ class ServerSetupCustomSelectionTest(
 
         // Then
         assertEquals(true, refreshed.catalogModels(custom.type).single().selected)
+    }
+
+    @Test
+    fun `given custom model enabled, user selects undownloaded catalog model, expected setup disabled`() {
+        // Given
+        val catalog = custom.copy(id = "catalog-model", selected = false, downloaded = false)
+        val initial = ServerSetupState(mode = source, step = ServerSetupState.Step.CONFIGURE)
+            .withCatalogResult(custom.type, listOf(custom, catalog), LocalCatalogStatus.READY)
+            .withAllowCustomModel(true)
+
+        // When
+        val selected = initial.withSelectedLocalModel(
+            initial.catalogModels(custom.type).first { it.id == catalog.id })
+
+        // Then
+        assertEquals(true, selected.localCustomModel)
+        assertEquals(
+            true,
+            selected.catalogModels(custom.type).first { it.id == catalog.id }.selected
+        )
+        assertEquals(false, selected.mainButtonEnabled)
+    }
+
+    @Test
+    fun `given custom model enabled, user selects downloaded catalog model, expected setup enabled`() {
+        // Given
+        val catalog = custom.copy(id = "catalog-model", selected = false, downloaded = true)
+        val initial = ServerSetupState(mode = source, step = ServerSetupState.Step.CONFIGURE)
+            .withCatalogResult(custom.type, listOf(custom, catalog), LocalCatalogStatus.READY)
+            .withAllowCustomModel(true)
+
+        // When
+        val selected = initial.withSelectedLocalModel(
+            initial.catalogModels(custom.type).first { it.id == catalog.id })
+
+        // Then
+        assertEquals(true, selected.mainButtonEnabled)
+    }
+
+    @Test
+    fun `given custom model enabled, user selects custom entry, expected setup enabled without catalog download`() {
+        // Given
+        val initial = ServerSetupState(mode = source, step = ServerSetupState.Step.CONFIGURE)
+            .withCatalogResult(
+                custom.type,
+                listOf(custom.copy(downloaded = false)),
+                LocalCatalogStatus.READY
+            )
+
+        // When
+        val selected = initial.withAllowCustomModel(true)
+
+        // Then
+        assertEquals(true, selected.mainButtonEnabled)
+    }
+
+    @Test
+    fun `given custom model disabled, no model is selected, expected setup disabled`() {
+        // Given
+        val initial = ServerSetupState(mode = source, step = ServerSetupState.Step.CONFIGURE)
+            .withCatalogResult(custom.type, listOf(custom), LocalCatalogStatus.READY)
+            .withAllowCustomModel(true)
+
+        // When
+        val selected = initial.withAllowCustomModel(false)
+
+        // Then
+        assertEquals(false, selected.mainButtonEnabled)
     }
 
     companion object {

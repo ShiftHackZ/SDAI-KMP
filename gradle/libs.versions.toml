@@ -17,6 +17,7 @@ lifecycleViewModel = "2.10.0"
 navigation = "2.9.8"
 gson = "2.15.0"
 okhttp = "5.4.0"
+okio = "3.17.0"
 ktor = "3.5.0"
 koin = "4.2.1"
 koinCompose = "4.2.1"
@@ -46,6 +47,7 @@ dokka = "2.3.0"
 detekt = "2.0.0-alpha.3"
 
 [libraries]
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 android-tools-build-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 apache-stringutils = { group = "org.apache.commons", name = "commons-lang3", version.ref = "apacheStringUtils" }

@@ -3,21 +3,18 @@ package com.shifthackz.aisdv1.domain.usecase.gallery
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 
 /**
- * Implements `GetMediaStoreInfoUseCase` behavior in the SDAI domain layer.
+ * Reads storage information for the gallery export destination.
+ *
+ * @param mediaStoreGateway Provides platform-specific media storage information.
  *
  * @author Dmitriy Moroz
  */
-class GetMediaStoreInfoUseCaseImpl(
-    /**
-     * Exposes the `mediaStoreGateway` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class GetMediaStoreInfoUseCaseImpl(
     private val mediaStoreGateway: MediaStoreGateway,
 ) : GetMediaStoreInfoUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns the platform media storage information.
      *
      * @author Dmitriy Moroz
      */

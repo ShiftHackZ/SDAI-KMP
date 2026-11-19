@@ -2,104 +2,81 @@ package com.shifthackz.aisdv1.presentation.onboarding
 
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
-import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
-import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.domain.usecase.splash.SplashNavigationUseCase
 import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.core.navigation.router.OnBoardingRouter
-import io.mockk.coEvery
+import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
+import com.shifthackz.aisdv1.domain.entity.backup.BackupStartupStage
+import com.shifthackz.aisdv1.domain.preference.PreferenceManager
+import com.shifthackz.aisdv1.domain.usecase.backup.SetBackupStartupStageUseCase
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Ignore
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Test
 
-@Ignore("ToDo: Investigate why sometimes tests fail on remote worker due to race-conditions.")
 @OptIn(ExperimentalCoroutinesApi::class)
 class OnBoardingViewModelSplashSourceTest {
+    private val router = mockk<OnBoardingRouter>(relaxed = true)
+    private val preferences = mockk<PreferenceManager>(relaxed = true) {
+        every { designDarkThemeToken } returns DarkThemeToken.FRAPPE.toString()
+    }
+    private val stage = mockk<SetBackupStartupStageUseCase>(relaxed = true)
 
-    private val stubRouter = mockk<OnBoardingRouter>(relaxed = true)
-    private val stubSplashNavigationUseCase = mockk<SplashNavigationUseCase>()
-    private val stubPreferenceManager = mockk<PreferenceManager>()
-    private val stubBuildInfoProvider = mockk<BuildInfoProvider>()
-
-    @Before
-    fun initialize() {
-        every {
-            stubPreferenceManager::designDarkThemeToken.get()
-        } returns DarkThemeToken.FRAPPE.toString()
-
-        every {
-            stubPreferenceManager::onBoardingComplete.set(any())
-        } returns Unit
-
-        every {
-            stubBuildInfoProvider.toString()
-        } returns ""
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun `given on boarding view model splash source, received Navigate intent from splash, expected navigation processed`() =
+    fun `given first launch onboarding, user completes onboarding, expected durable invitation and no old loader navigation`() =
         runTest {
             // Given
-
-            coEvery {
-                stubSplashNavigationUseCase()
-            } returns SplashNavigationUseCase.Action.LAUNCH_HOME
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            Dispatchers.setMain(dispatcher)
+            val viewModel = OnBoardingViewModel(
+                mockk(relaxed = true),
+                LaunchSource.SPLASH,
+                mockk<DispatchersProvider> { every { io } returns dispatcher; every { immediate } returns dispatcher },
+                router,
+                preferences,
+                BuildInfoProvider.stub,
+                stage
+            )
             // When
-            val viewModel = createViewModel(LaunchSource.SPLASH)
-
             viewModel.processIntent(OnBoardingIntent.Navigate)
             advanceUntilIdle()
-
             // Then
-            verify {
-                stubRouter.navigateToPostOnBoardingConfigLoader()
-            }
-
+            verify { stage(BackupStartupStage.INVITATION); router.navigateToBackupWelcome() }
+            verify(exactly = 0) { router.navigateBack() }
         }
 
     @Test
-    fun `given on boarding view model splash source, received Navigate intent from settings, expected navigateBack processed`() =
+    fun `given settings onboarding, user completes walkthrough, expected return without first launch invitation`() =
         runTest {
             // Given
-
-            val viewModel = createViewModel(LaunchSource.SETTINGS)
-
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            Dispatchers.setMain(dispatcher)
+            val viewModel = OnBoardingViewModel(
+                mockk(relaxed = true),
+                LaunchSource.SETTINGS,
+                mockk<DispatchersProvider> { every { io } returns dispatcher; every { immediate } returns dispatcher },
+                router,
+                preferences,
+                BuildInfoProvider.stub,
+                stage
+            )
             // When
             viewModel.processIntent(OnBoardingIntent.Navigate)
-
+            advanceUntilIdle()
             // Then
-            verify {
-                stubRouter.navigateBack()
-            }
-
+            verify { router.navigateBack() }
+            verify(exactly = 0) { stage(any()) }
         }
-
-    private fun TestScope.createViewModel(
-        source: LaunchSource,
-    ): OnBoardingViewModel {
-        val dispatcher = StandardTestDispatcher(testScheduler)
-        val dispatchersProvider = object : DispatchersProvider {
-            override val io: CoroutineDispatcher = dispatcher
-            override val ui: CoroutineDispatcher = dispatcher
-            override val immediate: CoroutineDispatcher = dispatcher
-        }
-        return OnBoardingViewModel(
-            diagnostics = mockk(relaxed = true),
-            launchSource = source,
-            dispatchersProvider = dispatchersProvider,
-            router = stubRouter,
-            splashNavigationUseCase = stubSplashNavigationUseCase,
-            preferenceManager = stubPreferenceManager,
-            buildInfoProvider = stubBuildInfoProvider,
-        )
-    }
 }

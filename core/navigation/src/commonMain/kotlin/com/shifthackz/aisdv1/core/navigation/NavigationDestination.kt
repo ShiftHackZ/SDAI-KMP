@@ -7,6 +7,8 @@ package com.shifthackz.aisdv1.core.navigation
  */
 enum class NavigationDestination {
     SPLASH,
+    BACKUP,
+    BACKUP_WELCOME,
     ON_BOARDING,
     SERVER_SETUP,
     CONFIGURATION_LOADER,

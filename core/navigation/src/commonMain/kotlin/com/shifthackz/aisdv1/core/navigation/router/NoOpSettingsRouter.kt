@@ -8,6 +8,8 @@ import com.shifthackz.aisdv1.core.navigation.LaunchSource
  * @author Dmitriy Moroz
  */
 object NoOpSettingsRouter : SettingsRouter {
+    override fun navigateToBackup() = Unit
+
     /**
      * Ignores this action because no navigation host is attached.
      *

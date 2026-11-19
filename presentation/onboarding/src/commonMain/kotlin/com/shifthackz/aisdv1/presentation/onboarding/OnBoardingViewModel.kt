@@ -7,25 +7,25 @@ import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
+import com.shifthackz.aisdv1.domain.entity.backup.BackupStartupStage
+import com.shifthackz.aisdv1.domain.usecase.backup.SetBackupStartupStageUseCase
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.domain.usecase.splash.SplashNavigationUseCase
 import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.core.navigation.router.OnBoardingRouter
-import com.shifthackz.aisdv1.presentation.onboarding.navigation.postOnBoardingNavigation
 import kotlinx.coroutines.withContext
 
 /**
- * Initializes onboarding previews from saved appearance and advances to the correct post-onboarding route.
+ * Initializes onboarding previews and replaces first-launch completion with the restore invitation.
  * Completion is persisted before navigation; a settings launch returns to the caller, while first launch
- * rechecks configuration off the UI dispatcher.
+ * persists recovery progression off the UI dispatcher before navigating.
  *
  * @param diagnostics Optional bounded observer for MVI state transitions.
  * @param launchSource Distinguishes first-launch completion from revisiting onboarding through settings.
  * @param dispatchersProvider Runs configuration checks on IO and publishes navigation on the UI dispatcher.
  * @param router Receives setup, loader or back navigation after completion.
- * @param splashNavigationUseCase Reassesses saved configuration after first-launch onboarding.
- * @param preferenceManager Supplies preview appearance and stores the completed-onboarding flag.
+ * @param setBackupStartupStage Persists the fresh-install restore invitation before onboarding is consumed.
+ * @param preferenceManager Supplies saved preview appearance; the checked startup transition owns onboarding completion.
  * @param buildInfoProvider Supplies the version displayed in the appearance preview.
  *
  * @author Dmitriy Moroz
@@ -35,9 +35,9 @@ class OnBoardingViewModel(
     val launchSource: LaunchSource,
     private val dispatchersProvider: DispatchersProvider,
     private val router: OnBoardingRouter,
-    private val splashNavigationUseCase: SplashNavigationUseCase,
     private val preferenceManager: PreferenceManager,
     private val buildInfoProvider: BuildInfoProvider,
+    private val setBackupStartupStage: SetBackupStartupStageUseCase,
 ) : BaseMviViewModel<OnBoardingState, OnBoardingIntent, EmptyEffect>(
     diagnostics = diagnostics,
     diagnosticScreen = NavigationDestination.ON_BOARDING.asDiagnosticScreen(),
@@ -62,16 +62,10 @@ class OnBoardingViewModel(
     }
 
     private fun navigate() {
-        preferenceManager.onBoardingComplete = true
         when (launchSource) {
             LaunchSource.SPLASH -> launch(dispatchersProvider.io) {
-                runCatching { splashNavigationUseCase() }
-                    .onSuccess { action ->
-                        withContext(dispatchersProvider.immediate) {
-                            router.postOnBoardingNavigation(action)
-                        }
-                    }
-                    .onFailure { }
+                setBackupStartupStage(BackupStartupStage.INVITATION)
+                withContext(dispatchersProvider.immediate) { router.navigateToBackupWelcome() }
             }
 
             LaunchSource.SETTINGS -> router.navigateBack()

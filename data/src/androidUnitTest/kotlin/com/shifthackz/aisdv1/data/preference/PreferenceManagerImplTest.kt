@@ -249,6 +249,20 @@ class PreferenceManagerImplTest {
         }
 
     private class InMemoryKeyValueStore : KeyValueStore {
+        override fun retryPendingWrite(): Boolean = false
+        override fun contains(key: String): Boolean =
+            key in strings || key in booleans || key in ints
+
+        override fun putSettingsDurably(
+            strings: Map<String, String>,
+            booleans: Map<String, Boolean>,
+            integers: Map<String, Int>
+        ) {
+            this.strings.putAll(strings)
+            this.booleans.putAll(booleans)
+            this.ints.putAll(integers)
+        }
+
         override fun putConfigurationDurably(
             strings: Map<String, String>,
             booleans: Map<String, Boolean>

@@ -18,6 +18,8 @@ fun AppRoute.asHomeTabRoute(): AppRoute? = when (this) {
     AppRoute.Benchmark,
     AppRoute.StorageUsage,
     AppRoute.NetworkUsage,
+    AppRoute.BackupWelcome,
+    is AppRoute.Backup,
     AppRoute.Splash,
     is AppRoute.OnBoarding,
     is AppRoute.Setup,

@@ -26,6 +26,28 @@ private class AndroidPreferencesKeyValueStore(
      */
     private fun <T> withMemoryLock(block: () -> T): T = synchronized(memoryLock, block)
 
+    /**
+     * Reports trusted persisted presence, including explicitly saved default values.
+     * @param key Existing preference key.
+     * @author Dmitriy Moroz
+     */
+    override fun contains(key: String): Boolean = withMemoryLock {
+        val mask = configurationMask
+        when {
+            mask?.strings?.containsKey(key) == true -> mask.strings[key] != null
+            mask?.booleans?.containsKey(key) == true -> mask.booleans[key] != null
+            mask?.integers?.containsKey(key) == true -> mask.integers[key] != null
+            else -> preferences.contains(key)
+        }
+    }
+
+    /** Finishes the exact quarantined write before a restore session may be abandoned. @author Dmitriy Moroz */
+    override fun retryPendingWrite(): Boolean {
+        val batch = withMemoryLock { configurationMask } ?: return false
+        putSettingsDurably(batch.candidateStrings, batch.candidateBooleans, batch.candidateIntegers)
+        return true
+    }
+
     private var configurationMask: ConfigurationMemoryMask? = null
     private var isBatchInFlight = false
 
@@ -76,11 +98,29 @@ private class AndroidPreferencesKeyValueStore(
     override fun putConfigurationDurably(
         strings: Map<String, String>,
         booleans: Map<String, Boolean>
+    ) = putSettingsDurably(strings, booleans, emptyMap())
+
+    /**
+     * Persists a complete typed backup settings batch with the same quarantine as configuration.
+     * @param strings String replacements.
+     * @param booleans Boolean replacements.
+     * @param integers Integer replacements.
+     * @author Dmitriy Moroz
+     */
+    override fun putSettingsDurably(
+        strings: Map<String, String>,
+        booleans: Map<String, Boolean>,
+        integers: Map<String, Int>,
     ) {
         val batch = withMemoryLock {
             if (isBatchInFlight) persistenceFailure()
             val current = configurationMask
-            if (current != null && !current.matches(strings, booleans)) persistenceFailure()
+            if (current != null && !current.matches(
+                    strings,
+                    booleans,
+                    integers
+                )
+            ) persistenceFailure()
             if (current == null) configurationMask = ConfigurationMemoryMask(
                 strings.keys.associateWith { key -> preferences.getString(key, null) },
                 booleans.keys.associateWith { key ->
@@ -91,6 +131,13 @@ private class AndroidPreferencesKeyValueStore(
                 },
                 strings.toMap(),
                 booleans.toMap(),
+                integers.keys.associateWith { key ->
+                    if (preferences.contains(key)) preferences.getInt(
+                        key,
+                        0
+                    ) else null
+                },
+                integers.toMap(),
             )
             isBatchInFlight = true
             checkNotNull(configurationMask)
@@ -100,6 +147,7 @@ private class AndroidPreferencesKeyValueStore(
             check(preferences.edit().apply {
                 batch.candidateStrings.forEach { (key, value) -> putString(key, value) }
                 batch.candidateBooleans.forEach { (key, value) -> putBoolean(key, value) }
+                batch.candidateIntegers.forEach { (key, value) -> putInt(key, value) }
             }.commit()) { "Configuration persistence failed" }
             hasPersisted = true
         } finally {
@@ -143,7 +191,11 @@ private class AndroidPreferencesKeyValueStore(
      * @author Dmitriy Moroz
      */
     override fun getInt(key: String, default: Int): Int =
-        withMemoryLock { preferences.getInt(key, default) }
+        withMemoryLock {
+            val mask = configurationMask
+            if (mask?.integers?.containsKey(key) == true) mask.integers[key] ?: default
+            else preferences.getInt(key, default)
+        }
 
     /**
      * Writes an ordinary integer, rejecting accidental overlap with pending configuration keys.
