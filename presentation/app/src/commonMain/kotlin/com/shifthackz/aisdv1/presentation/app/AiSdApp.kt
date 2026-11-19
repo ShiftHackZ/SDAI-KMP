@@ -30,7 +30,6 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import com.shifthackz.aisdv1.presentation.components.extensions.generationBrightnessInteraction
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.extensions.clearFocusOnTap
-import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import org.koin.mp.KoinPlatform.getKoin
 import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
@@ -63,7 +62,6 @@ fun AiSdApp(
     val route by router.route.collectAsState()
     val isDrawerOpen by router.drawerOpen.collectAsState()
     val canNavigateBack by router.canNavigateBack.collectAsState()
-    val languageCode by Localization.languageCodeFlow.collectAsState()
     val urlLauncher = rememberExternalUrlLauncher()
     val imageToImagePlatformActions =
         rememberImageToImagePlatformActions(remember(koin) { koin.get<OriginalImageBudget>() })
@@ -132,7 +130,6 @@ fun AiSdApp(
 
                         if (shellHomeRoute != null) {
                             HomeRoutesScaffold(
-                                languageCode = languageCode,
                                 activeRoute = shellHomeRoute,
                                 renderedRoutes = renderedHomeRoutes,
                                 router = router,
@@ -146,7 +143,6 @@ fun AiSdApp(
 
                         if (selectedHomeRoute == null) {
                             OverlayRouteContent(
-                                languageCode = languageCode,
                                 route = currentRoute,
                                 koin = koin,
                                 router = router,

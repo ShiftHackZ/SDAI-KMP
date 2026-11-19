@@ -1,76 +1,58 @@
 package com.shifthackz.aisdv1.core.localization
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.compose.runtime.mutableStateOf
 
 /**
- * Carries `LocalizationLanguage` data through the SDAI localization layer.
+ * A supported application language displayed in the language picker.
+ *
+ * @param code Normalized language code used to select the bundled catalog.
+ * @param name Native language name displayed independently of the selected locale.
  *
  * @author Dmitriy Moroz
  */
 data class LocalizationLanguage(
-    /**
-     * Exposes the `code` value used by the SDAI localization layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val code: String,
-    /**
-     * Exposes the `name` value used by the SDAI localization layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val name: String,
 )
 
 /**
- * Provides the `Localization` singleton used by the SDAI localization layer.
+ * Resolves bundled translations using the selected application language.
+ * Language reads participate in Compose snapshot observation, so a locale change invalidates
+ * each composition scope that resolved text, including retained tabs and lazy list items.
  *
  * @author Dmitriy Moroz
  */
 object Localization {
 
     /**
-     * Exposes the `DEFAULT_LANGUAGE_CODE` value used by the SDAI localization layer.
+     * Fallback catalog used when a language or translation key is unavailable.
      *
      * @author Dmitriy Moroz
      */
     const val DEFAULT_LANGUAGE_CODE = "en"
 
-    /**
-     * Exposes the `languageCodeState` value used by the SDAI localization layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val languageCodeState = MutableStateFlow(supportedLanguageCode(platformLanguageCode()))
+    private val languageCodeState = mutableStateOf(supportedLanguageCode(platformLanguageCode()))
 
     /**
-     * Exposes the `entries` value used by the SDAI localization layer.
+     * Supported languages in the catalog order used by the language picker.
      *
      * @author Dmitriy Moroz
      */
     val entries: List<LocalizationLanguage> = localizationLanguages
 
     /**
-     * Exposes the `languageCodeFlow` value used by the SDAI localization layer.
+     * Returns the active normalized language code and observes it when read during composition.
      *
-     * @author Dmitriy Moroz
-     */
-    val languageCodeFlow: StateFlow<String> = languageCodeState.asStateFlow()
-
-    /**
-     * Executes the `currentLanguageCode` step in the SDAI localization layer.
-     *
-     * @return Result produced by `currentLanguageCode`.
+     * @return Supported language code for the active catalog.
      * @author Dmitriy Moroz
      */
     fun currentLanguageCode(): String = languageCodeState.value
 
     /**
-     * Executes the `setLanguageCode` step in the SDAI localization layer.
+     * Selects a bundled language and immediately invalidates observing composition scopes.
+     * Re-selecting the current language leaves those scopes unchanged.
      *
-     * @param code code value consumed by the API.
+     * @param code Language code to normalize; null selects the platform language.
      * @author Dmitriy Moroz
      */
     fun setLanguageCode(code: String?) {
@@ -79,20 +61,21 @@ object Localization {
     }
 
     /**
-     * Executes the `strings` step in the SDAI localization layer.
+     * Returns the bundled catalog for a language, falling back to English if unsupported.
      *
      * @param languageCode BCP-47 language code handled by the platform layer.
-     * @return Result produced by `strings`.
+     * @return Translation keys mapped to their localized text.
      * @author Dmitriy Moroz
      */
     fun strings(languageCode: String = currentLanguageCode()): Map<String, String> =
         localizationCatalog.getValue(supportedLanguageCode(languageCode))
 
     /**
-     * Executes the `string` step in the SDAI localization layer.
+     * Resolves a translation and substitutes sequential or numbered string placeholders.
+     * Missing translations fall back to English, then to the key itself.
      *
-     * @param key key value consumed by the API.
-     * @param args args value consumed by the API.
+     * @param key Translation key from the bundled catalog.
+     * @param args Values substituted for `%s` or numbered `%1$s` placeholders.
      * @param languageCode BCP-47 language code handled by the platform layer.
      * @author Dmitriy Moroz
      */
@@ -105,18 +88,10 @@ object Localization {
         .format(args)
 
     /**
-     * Loads SDAI data through `getCountryFlagDrawableResId`.
+     * Normalizes a locale to a bundled base language, with English as the fallback.
      *
-     * @param code code value consumed by the API.
-     * @author Dmitriy Moroz
-     */
-    fun getCountryFlagDrawableResId(code: String): Int? = countryFlagDrawableResId(code)
-
-    /**
-     * Executes the `supportedLanguageCode` step in the SDAI localization layer.
-     *
-     * @param code code value consumed by the API.
-     * @return Result produced by `supportedLanguageCode`.
+     * @param code Locale code to normalize; null and unsupported codes select English.
+     * @return Supported base language code.
      * @author Dmitriy Moroz
      */
     private fun supportedLanguageCode(code: String?): String {
@@ -132,10 +107,10 @@ object Localization {
     }
 
     /**
-     * Executes the `format` step in the SDAI localization layer.
+     * Substitutes numbered placeholders before consuming sequential string placeholders.
      *
-     * @param args args value consumed by the API.
-     * @return Result produced by `format`.
+     * @param args Values substituted for `%s` or numbered `%1$s` placeholders.
+     * @return Text with supplied placeholder values substituted.
      * @author Dmitriy Moroz
      */
     private fun String.format(args: Array<out Any?>): String {
@@ -151,32 +126,23 @@ object Localization {
 }
 
 /**
- * Exposes the `localizationLanguages` value used by the SDAI localization layer.
+ * Platform catalog languages and native names generated from the canonical string resources.
  *
  * @author Dmitriy Moroz
  */
 internal expect val localizationLanguages: List<LocalizationLanguage>
 
 /**
- * Exposes the `localizationCatalog` value used by the SDAI localization layer.
+ * Generated platform translations keyed by normalized language code and translation key.
  *
  * @author Dmitriy Moroz
  */
 internal expect val localizationCatalog: Map<String, Map<String, String>>
 
 /**
- * Executes the `countryFlagDrawableResId` step in the SDAI localization layer.
+ * Reads the preferred language supplied by the native host.
  *
- * @param code code value consumed by the API.
- * @return Result produced by `countryFlagDrawableResId`.
- * @author Dmitriy Moroz
- */
-internal expect fun countryFlagDrawableResId(code: String): Int?
-
-/**
- * Executes the `platformLanguageCode` step in the SDAI localization layer.
- *
- * @return Result produced by `platformLanguageCode`.
+ * @return Platform locale code, or null when unavailable.
  * @author Dmitriy Moroz
  */
 internal expect fun platformLanguageCode(): String?

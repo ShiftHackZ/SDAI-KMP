@@ -5,7 +5,7 @@ import org.w3c.dom.Element
 import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
-    alias(libs.plugins.generic.kmp.library)
+    alias(libs.plugins.generic.kmp.compose)
 }
 
 android {
@@ -63,7 +63,9 @@ private fun Task.configureLocalizationCatalogTask(
             ?: error("Missing default localization file src/androidMain/res/values/strings.xml")
 
         val languages = languageStrings.keys
-            .sortedWith(compareBy({ preferredLanguageOrder.indexOf(it).takeIf { index -> index >= 0 } ?: Int.MAX_VALUE }, { it }))
+            .sortedWith(compareBy({
+                preferredLanguageOrder.indexOf(it).takeIf { index -> index >= 0 } ?: Int.MAX_VALUE
+            }, { it }))
 
         val outputFile = generatedLocalizationDir.get()
             .file("com/shifthackz/aisdv1/core/localization/LocalizationCatalog.kt")
@@ -87,7 +89,10 @@ private fun Task.configureLocalizationCatalogTask(
                     .filterNot { it == defaultLanguageCode }
                     .forEach { code ->
                         appendLine()
-                        appendStringsMap("${code.sanitizedMapName()}Strings", languageStrings.getValue(code))
+                        appendStringsMap(
+                            "${code.sanitizedMapName()}Strings",
+                            languageStrings.getValue(code)
+                        )
                     }
                 appendLine()
                 appendLine("internal actual val localizationCatalog: Map<String, Map<String, String>> = mapOf(")
@@ -112,7 +117,7 @@ kotlin {
         }
         commonMain {
             dependencies {
-                implementation(libs.kotlinx.coroutines.core)
+                implementation(compose.runtime)
             }
         }
     }

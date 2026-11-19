@@ -78,7 +78,6 @@ import org.koin.core.parameter.parametersOf
  * Standalone overlay routes such as storage usage and network usage are deliberately excluded so
  * they can render without the bottom bar.
  *
- * @param languageCode Locale revision carried through the root’s captured content lambdas.
  * @param modifier Layout modifiers for the retained home scaffold.
  * @param activeRoute Route currently visible in the home scaffold.
  * @param renderedRoutes Home routes already created and kept alive.
@@ -93,7 +92,6 @@ import org.koin.core.parameter.parametersOf
  */
 @Composable
 internal fun HomeRoutesScaffold(
-    languageCode: String,
     activeRoute: AppRoute,
     renderedRoutes: List<AppRoute>,
     router: RootAppRouter,
@@ -207,7 +205,6 @@ internal fun HomeRouteSlot(
 /**
  * Renders routes that sit above the home scaffold and own their full-screen layout.
  *
- * @param languageCode Locale revision carried through the root’s captured content lambdas.
  * @param route Route currently requested by the root router.
  * @param koin Presentation Koin instance used to resolve route dependencies.
  * @param router Root router passed to overlay screens.
@@ -218,7 +215,6 @@ internal fun HomeRouteSlot(
  */
 @Composable
 internal fun OverlayRouteContent(
-    languageCode: String,
     route: AppRoute,
     koin: Koin,
     router: RootAppRouter,
