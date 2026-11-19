@@ -17,6 +17,7 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
     SettingsListItem.COMMUNITY_HEADER,
     SettingsListItem.INFO_HEADER -> SettingsContentType.HEADER
 
+    SettingsListItem.PERFORMANCE_OVERLAY,
     SettingsListItem.DIM_SCREEN,
     SettingsListItem.NNAPI,
     SettingsListItem.BACKGROUND_GENERATION,

@@ -41,6 +41,7 @@ internal fun settingsListItems(
         }
         if (!state.loading && state.developerMode) add(SettingsListItem.DEBUG_MENU)
         add(SettingsListItem.APP_HEADER)
+        add(SettingsListItem.PERFORMANCE_OVERLAY)
         add(SettingsListItem.DIM_SCREEN)
         if (!state.loading && state.backgroundGeneration) add(SettingsListItem.DIM_SCREEN_WARNING)
         if (state.showMonitorConnectionOption) add(SettingsListItem.MONITOR_CONNECTION)

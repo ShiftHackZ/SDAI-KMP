@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.app.inference
 
 import android.util.Base64
 import com.shifthackz.aisdv1.app.diagnostics.GenerationAttemptJournal
+import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
@@ -45,6 +46,14 @@ internal class NativeGenerationGatewayImpl(
 ) : NativeGenerationGateway {
     private val admission = Mutex()
     private val active = AtomicReference<OwnedInferenceConnection?>()
+
+    /**
+     * Requests counters through the owned connection without starting or binding a service.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun readProcessPerformance(): ProcessPerformanceReading? =
+        active.get()?.connection?.readPerformance()
+
     private val initialized = CompletableDeferred<Unit>()
     private val progress = NativeGenerationEngine.entries.associateWith {
         MutableStateFlow(

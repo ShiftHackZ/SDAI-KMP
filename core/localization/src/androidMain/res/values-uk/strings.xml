@@ -741,4 +741,12 @@
     <string name="backup_shared_credentials_retained">Спільні облікові дані збережено для невибраних провайдерів: %1$s.</string>
     <string name="settings_item_dim_screen">Затемнювати екран</string>
     <string name="settings_item_dim_screen_warning">*Затемнення екрана працює лише за вимкненої фонової генерації.</string>
+
+    <string name="settings_item_performance_overlay">Накладання продуктивності</string>
+    <string name="performance_app_usage">Останні 60 секунд</string>
+    <string name="performance_cpu">ЦП</string>
+    <string name="performance_ram">ОЗП</string>
+    <string name="performance_memory_value">%1$s / %2$s МіБ</string>
+    <string name="performance_this_app">Цей застосунок</string>
+    <string name="performance_total">Загалом</string>
 </resources>

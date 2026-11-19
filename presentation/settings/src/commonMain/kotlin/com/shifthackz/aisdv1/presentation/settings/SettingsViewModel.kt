@@ -173,6 +173,7 @@ class SettingsViewModel(
                             stabilityAiCredits = credits,
                             localUseNNAPI = settings.localUseNNAPI,
                             shouldDimScreen = settings.shouldDimScreen,
+                            shouldShowPerformanceOverlay = settings.shouldShowPerformanceOverlay,
                             backgroundGenerationAvailable = platformActions.supportsBackgroundGeneration,
                             backgroundGeneration = settings.backgroundGeneration &&
                                     platformActions.supportsBackgroundGeneration,
@@ -269,6 +270,10 @@ class SettingsViewModel(
 
             is SettingsIntent.UpdateFlag.AutoSaveResult -> {
                 preferenceManager.autoSaveAiResults = intent.flag
+            }
+
+            is SettingsIntent.UpdateFlag.PerformanceOverlay -> {
+                preferenceManager.shouldShowPerformanceOverlay = intent.flag
             }
 
             is SettingsIntent.UpdateFlag.DimScreen -> {

@@ -212,6 +212,17 @@ internal fun SettingsServerSection(
             )
         }
 
+        SettingsListItem.PERFORMANCE_OVERLAY -> {
+            SettingsToggleItem(
+                modifier = itemModifier,
+                isLoading = state.loading,
+                startIcon = Icons.Default.Speed,
+                text = text("settings_item_performance_overlay"),
+                isChecked = state.shouldShowPerformanceOverlay,
+                onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.PerformanceOverlay(it)) },
+            )
+        }
+
         SettingsListItem.DIM_SCREEN -> {
             SettingsToggleItem(
                 modifier = itemModifier,

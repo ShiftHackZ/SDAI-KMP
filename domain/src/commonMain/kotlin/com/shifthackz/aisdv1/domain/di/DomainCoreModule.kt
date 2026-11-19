@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.domain.di
 
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCaseImpl
 
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
@@ -281,6 +283,9 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDomainModule = module {
+    factory<ObserveGenerationPerformanceUseCase> {
+        ObserveGenerationPerformanceUseCaseImpl(get(), get(), get())
+    }
     single<MnnBackendPolicy> { MnnBackendPolicyImpl(get()) }
     factory<ObserveMnnProcessStatusUseCase> { ObserveMnnProcessStatusUseCaseImpl(get()) }
     single<NativeGenerationGateway> { NoOpNativeGenerationGateway }

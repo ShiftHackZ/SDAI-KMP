@@ -138,7 +138,7 @@ internal fun ImageToImageState.progressModal(
         } else {
             null
         },
-        canCancel = canCancelLocalGeneration || (platform == Platform.ANDROID && mode in setOf(
+        canCancel = mode == ServerSource.LOCAL_APPLE_CORE_ML || canCancelLocalGeneration || (platform == Platform.ANDROID && mode in setOf(
             ServerSource.LOCAL_MICROSOFT_ONNX,
             ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,

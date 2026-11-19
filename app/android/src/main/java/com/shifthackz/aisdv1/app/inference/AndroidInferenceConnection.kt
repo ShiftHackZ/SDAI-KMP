@@ -12,6 +12,7 @@ import android.os.Message
 import android.os.Messenger
 import android.os.Process
 import android.os.SystemClock
+import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
@@ -28,6 +29,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
@@ -42,11 +45,16 @@ internal class AndroidInferenceConnection(private val context: Context) : Infere
     private val ready = CompletableDeferred<Unit>()
     private val identityReady = CompletableDeferred<Unit>()
     private val result = CompletableDeferred<Unit>()
+    private val performanceMutex = Mutex()
+    private var resourceRequestId = 0L
+    private var pendingPerformance: CompletableDeferred<ProcessPerformanceReading>? = null
     private val dead = CompletableDeferred<Unit>()
     private val reply = Messenger(Handler(Looper.getMainLooper(), ::onMessage))
     private var remote: Messenger? = null
     private var binder: IBinder? = null
     private var incarnation = ""
+
+    @Volatile
     private var pid = -1
     private var sequence = -1L
     private var job = ""
@@ -156,6 +164,27 @@ internal class AndroidInferenceConnection(private val context: Context) : Infere
         result.await()
     }
 
+    /**
+     * Serializes opt-in resource requests on the control dispatcher. A short read deadline affects
+     * only the overlay; it never interrupts native generation or its heartbeat.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun readPerformance(): ProcessPerformanceReading? = performanceMutex.withLock {
+        withContext(Dispatchers.Main.immediate) {
+            if (!hasSubmitted || result.isCompleted) return@withContext null
+            val response = CompletableDeferred<ProcessPerformanceReading>()
+            pendingPerformance = response
+            resourceRequestId++
+            try {
+                send(InferenceProtocol.READ_PERFORMANCE)
+                withTimeoutOrNull(2_000) { response.await() }
+                    ?: error("Inference resource reading timed out")
+            } finally {
+                pendingPerformance = null
+            }
+        }
+    }
+
     private fun onMessage(message: Message): Boolean {
         val data = message.data
         if (message.sendingUid != Process.myUid() || data.getInt(InferenceProtocol.VERSION_KEY) != InferenceProtocol.VERSION) return true
@@ -178,6 +207,23 @@ internal class AndroidInferenceConnection(private val context: Context) : Infere
         }
         if (data.getString(InferenceProtocol.JOB) != job || data.getString(InferenceProtocol.ENGINE_KEY) != expectedEngine?.name) return true
         when (message.what) {
+            InferenceProtocol.PERFORMANCE -> {
+                if (data.getLong(InferenceProtocol.RESOURCE_REQUEST_ID) != resourceRequestId) return true
+                val cpu = data.getLong(InferenceProtocol.CPU_NANOS, -1)
+                val rss = data.getLong(InferenceProtocol.RESIDENT_BYTES, -1)
+                if (cpu >= 0 && rss >= 0) {
+                    pendingPerformance?.complete(
+                        ProcessPerformanceReading(
+                            "$pid:$incarnation",
+                            cpu,
+                            rss
+                        )
+                    )
+                } else {
+                    pendingPerformance?.completeExceptionally(IllegalStateException("Inference resource reading failed"))
+                }
+            }
+
             InferenceProtocol.STAGE -> if (!result.isCompleted) {
                 runCatching {
                     NativeGenerationStage.valueOf(
@@ -208,6 +254,10 @@ internal class AndroidInferenceConnection(private val context: Context) : Infere
     private fun send(what: Int) {
         try {
             remote?.send(InferenceProtocol.message(what, incarnation, job, replyTo = reply).apply {
+                if (what == InferenceProtocol.READ_PERFORMANCE) data.putLong(
+                    InferenceProtocol.RESOURCE_REQUEST_ID,
+                    resourceRequestId
+                )
                 if (what == InferenceProtocol.SUBMIT) data.putString(
                     InferenceProtocol.ENGINE_KEY,
                     expectedEngine?.name
@@ -219,6 +269,7 @@ internal class AndroidInferenceConnection(private val context: Context) : Infere
     }
 
     private fun processDied() {
+        pendingPerformance?.completeExceptionally(IllegalStateException("Inference process exited"))
         dead.complete(Unit)
         fail(NativeGenerationFailure.Category.PROCESS_DIED)
     }

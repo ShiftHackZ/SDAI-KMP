@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -192,15 +191,14 @@ fun ProgressDialogContent(
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
             Text(
                 text = title,
-                style = TextStyle(fontSize = 16.sp),
-                fontWeight = FontWeight.Bold,
-                color = AlertDialogDefaults.titleContentColor,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 modifier = Modifier.padding(top = 14.dp),
                 text = subTitle,
-                style = TextStyle(fontSize = 14.sp),
-                color = AlertDialogDefaults.textContentColor,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             ProgressDialogStatusContent(
                 waitTimeText = waitTimeText,
@@ -210,7 +208,7 @@ fun ProgressDialogContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                color = AlertDialogDefaults.iconContentColor,
+                color = MaterialTheme.colorScheme.primary,
             )
             content?.invoke()
         }
@@ -235,13 +233,13 @@ fun ProgressDialogStatusContent(
     Column(modifier.padding(vertical = 4.dp)) {
         Text(
             text = waitTimeText.orEmpty(),
-            style = TextStyle(fontSize = 12.sp),
-            color = AlertDialogDefaults.textContentColor,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground,
         )
         Text(
             text = statusText.orEmpty(),
-            style = TextStyle(fontSize = 12.sp),
-            color = AlertDialogDefaults.textContentColor,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground,
         )
     }
 }

@@ -10,7 +10,7 @@ import android.os.Messenger
  * @author Dmitriy Moroz
  */
 internal object InferenceProtocol {
-    const val VERSION = 1
+    const val VERSION = 2
     const val HELLO = 1
     const val READY = 2
     const val SUBMIT = 3
@@ -21,6 +21,11 @@ internal object InferenceProtocol {
     const val PING = 8
     const val PONG = 9
     const val EXIT = 10
+    const val RESOURCE_REQUEST_ID = "resource_request_id"
+    const val READ_PERFORMANCE = 12
+    const val PERFORMANCE = 13
+    const val CPU_NANOS = "cpu_nanos"
+    const val RESIDENT_BYTES = "resident_bytes"
     const val STAGE = 11
     const val STAGE_KEY = "stage"
     const val ENGINE_KEY = "engine"

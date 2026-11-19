@@ -33,6 +33,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialo
 /**
  * Renders the active generation decision, progress or result dialog and forwards its actions.
  *
+ * @param performanceOverlay Optional resource panel, composed only during generation progress.
  * @param screenModal Captured dialog state, including provider progress units.
  * @param onDismissRequest Closes a dismissible dialog.
  * @param onCancelGeneration Requests cancellation of the active generation owner.
@@ -58,6 +59,7 @@ fun GenerationModalRenderer(
     onSkipBenchmarkRequest: () -> Unit,
     onBenchmarkContinueRequest: () -> Unit,
     onBenchmarkDoNotAskRequest: () -> Unit,
+    performanceOverlay: @Composable () -> Unit = {},
 ) {
     when (screenModal) {
         GenerationModal.None -> Unit
@@ -66,10 +68,9 @@ fun GenerationModalRenderer(
             canDismiss = false,
             waitTimeSeconds = screenModal.hordeProcessStatus?.waitTimeSeconds,
             positionInQueue = screenModal.hordeProcessStatus?.queuePosition,
-            content = screenModal.canCancel.takeIf { it }?.let {
-                {
-                    ProgressDialogCancelButton(onClick = onCancelGeneration)
-                }
+            content = {
+                performanceOverlay()
+                if (screenModal.canCancel) ProgressDialogCancelButton(onClick = onCancelGeneration)
             },
         )
 
@@ -81,10 +82,9 @@ fun GenerationModalRenderer(
             overallPercentage = screenModal.overallPercentage,
             subTitle = (screenModal.nativeStage?.localizedText()
                 ?: Localization.string("communicating_progress_sub_title")).asUiText(),
-            content = screenModal.canCancel.takeIf { it }?.let {
-                {
-                    ProgressDialogCancelButton(onClick = onCancelGeneration)
-                }
+            content = {
+                performanceOverlay()
+                if (screenModal.canCancel) ProgressDialogCancelButton(onClick = onCancelGeneration)
             },
         )
 

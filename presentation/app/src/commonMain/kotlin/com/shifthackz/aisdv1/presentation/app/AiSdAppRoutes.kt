@@ -68,6 +68,8 @@ import com.shifthackz.aisdv1.presentation.app.onboarding.FormPageContent
 import com.shifthackz.aisdv1.presentation.app.onboarding.ProviderPageContent
 import com.shifthackz.aisdv1.presentation.app.onboarding.LocalDiffusionPageContent
 import com.shifthackz.aisdv1.presentation.app.onboarding.LookAndFeelPageContent
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
+import com.shifthackz.aisdv1.presentation.generation.performance.GenerationPerformanceOverlay
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
 
@@ -85,6 +87,7 @@ import org.koin.core.parameter.parametersOf
  * @param buildInfoProvider Build metadata consumed by scaffold-level UI.
  * @param preferenceManager Preferences source consumed by scaffold-level UI.
  * @param shouldShowHomeChrome Whether bottom tabs and home-level chrome should be visible.
+ * @param observePerformance Cold opt-in sampler shared with visible generation dialogs.
  * @param textToImageViewModel Shared Text-to-Image ViewModel kept alive with its tab.
  * @param imageToImageViewModel Shared Image-to-Image ViewModel kept alive with its tab.
  *
@@ -99,6 +102,7 @@ internal fun HomeRoutesScaffold(
     preferenceManager: PreferenceManager,
     modifier: Modifier = Modifier,
     shouldShowHomeChrome: Boolean = true,
+    observePerformance: ObserveGenerationPerformanceUseCase,
     textToImageViewModel: TextToImageViewModel,
     imageToImageViewModel: ImageToImageViewModel,
 ) {
@@ -122,6 +126,10 @@ internal fun HomeRoutesScaffold(
                         state = state,
                         processIntent = processIntent,
                         useDrawerNavigation = true,
+                        performanceOverlay = {
+                            val history = remember(observePerformance) { observePerformance() }
+                            GenerationPerformanceOverlay(history)
+                        },
                     )
                 }
             }
@@ -136,6 +144,10 @@ internal fun HomeRoutesScaffold(
                         state = state,
                         processIntent = processIntent,
                         useDrawerNavigation = true,
+                        performanceOverlay = {
+                            val history = remember(observePerformance) { observePerformance() }
+                            GenerationPerformanceOverlay(history)
+                        },
                     )
                 }
             }

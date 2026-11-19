@@ -26,6 +26,7 @@ internal class BackupPreferencesGatewayImpl(
     private val store: KeyValueStore,
     private val preferences: PreferenceManager
 ) : BackupPreferencesGateway {
+
     override fun recoverPendingWrite(): Set<BackupCategory> {
         val previous = read()
         val authorizationCommit = store.getString("key_authorization_commit_id")
@@ -101,6 +102,7 @@ internal class BackupPreferencesGatewayImpl(
             "taggedInput" to BackupValue.Flag(preferences.formPromptTaggedInput),
             "connectionTimeout" to BackupValue.Integer(preferences.connectionTimeout.seconds),
             "generationTimeout" to BackupValue.Integer(preferences.generationRequestTimeout.seconds),
+            "performanceOverlay" to BackupValue.Flag(preferences.shouldShowPerformanceOverlay),
             "dimScreen" to BackupValue.Flag(preferences.shouldDimScreen),
             "backgroundGeneration" to BackupValue.Flag(preferences.backgroundGeneration),
             "monitorConnection" to BackupValue.Flag(preferences.monitorConnectivity),

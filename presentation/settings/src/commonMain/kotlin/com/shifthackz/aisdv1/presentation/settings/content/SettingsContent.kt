@@ -78,6 +78,7 @@ internal fun ContentSettingsState(
                     SettingsListItem.BACKGROUND_WARNING,
                     SettingsListItem.DEBUG_MENU,
                     SettingsListItem.APP_HEADER,
+                    SettingsListItem.PERFORMANCE_OVERLAY,
                     SettingsListItem.DIM_SCREEN,
                     SettingsListItem.DIM_SCREEN_WARNING,
                     SettingsListItem.MONITOR_CONNECTION,

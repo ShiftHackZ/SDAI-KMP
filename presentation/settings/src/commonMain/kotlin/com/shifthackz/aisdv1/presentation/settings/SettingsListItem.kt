@@ -21,6 +21,7 @@ internal enum class SettingsListItem {
     BACKGROUND_WARNING,
     DEBUG_MENU,
     APP_HEADER,
+    PERFORMANCE_OVERLAY,
     DIM_SCREEN,
     DIM_SCREEN_WARNING,
     MONITOR_CONNECTION,

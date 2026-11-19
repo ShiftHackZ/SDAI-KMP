@@ -30,6 +30,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
+import com.shifthackz.aisdv1.data.performance.AndroidPerformanceGateway
+import com.shifthackz.aisdv1.domain.gateway.PerformanceGateway
 import org.koin.dsl.module
 
 /**
@@ -38,6 +40,7 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 private val androidDataOverridesModule = module {
+    single<PerformanceGateway> { AndroidPerformanceGateway(androidContext(), get()) }
     singleOf(::DatabaseClearGatewayImpl) bind DatabaseClearGateway::class
     singleOf(::MediaStoreImageFormatResolverImpl) bind MediaStoreImageFormatResolver::class
     single<MediaStoreGateway> {
