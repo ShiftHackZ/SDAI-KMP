@@ -93,6 +93,7 @@ sealed interface ChipTextFieldEvent<T : Any> {
  *
  * @param modifier Layout modifiers for the complete outlined chip field.
  * @param label Optional field-caption content.
+ * @param trailingIcon Optional action content at the outlined field’s trailing edge.
  * @param textStyle Style for the pending unsubmitted text.
  * @param textFieldValueState Mutable pending text and cursor selection retained by the caller.
  * @param chips Current ordered chip values; mutations are reported through events.
@@ -109,6 +110,7 @@ sealed interface ChipTextFieldEvent<T : Any> {
 fun ChipTextField(
     modifier: Modifier = Modifier,
     label: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     textStyle: TextStyle = TextStyle.Default,
     textFieldValueState: MutableState<TextFieldValue> = remember { mutableStateOf(TextFieldValue()) },
     chips: List<String> = remember { emptyList() },
@@ -122,6 +124,7 @@ fun ChipTextField(
     ChipTextField(
         modifier = modifier,
         label = label,
+        trailingIcon = trailingIcon,
         textStyle = textStyle,
         textFieldValueState = textFieldValueState,
         chips = chips,
@@ -142,6 +145,7 @@ fun ChipTextField(
  *
  * @param modifier Layout modifiers for the complete outlined chip field.
  * @param label Optional field-caption content.
+ * @param trailingIcon Optional action content at the outlined field’s trailing edge.
  * @param textStyle Style for the pending unsubmitted text.
  * @param textFieldValueState Mutable pending text and cursor selection retained by the caller.
  * @param chips Current ordered chip values; mutations are reported through events.
@@ -160,6 +164,7 @@ fun ChipTextField(
 fun <T : Any> ChipTextField(
     modifier: Modifier = Modifier,
     label: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     textStyle: TextStyle = TextStyle.Default,
     textFieldValueState: MutableState<TextFieldValue> = remember { mutableStateOf(TextFieldValue()) },
     chips: List<T> = remember { emptyList() },
@@ -189,6 +194,7 @@ fun <T : Any> ChipTextField(
     ) {
         TextFieldDefaults.DecorationBox(
             label = label,
+            trailingIcon = trailingIcon,
             value = textFieldValueState.value.text + if (chips.isNotEmpty()) " " else "",
             innerTextField = {
                 FlowRow(
