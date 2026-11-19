@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.app.inference
 
+import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
@@ -16,6 +17,13 @@ internal interface InferenceConnection {
      * @author Dmitriy Moroz
      */
     val processId: Int?
+
+    /**
+     * Reads child-owned counters on demand. Returns null before submission or after completion;
+     * timeout, child death and malformed responses fail this read without cancelling inference.
+     * @author Dmitriy Moroz
+     */
+    suspend fun readPerformance(): ProcessPerformanceReading?
 
     /**
      * Binds and validates one child incarnation, persists its identity, then awaits this job completion.

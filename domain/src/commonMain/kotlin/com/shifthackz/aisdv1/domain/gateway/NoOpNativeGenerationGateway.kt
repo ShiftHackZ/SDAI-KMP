@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.gateway
 
+import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
@@ -13,6 +14,12 @@ import kotlinx.coroutines.flow.emptyFlow
  * @author Dmitriy Moroz
  */
 internal object NoOpNativeGenerationGateway : NativeGenerationGateway {
+    /**
+     * No inference child exists on this platform.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun readProcessPerformance(): ProcessPerformanceReading? = null
+
     /**
      * Fails explicitly because this platform has no Android inference process.
      *

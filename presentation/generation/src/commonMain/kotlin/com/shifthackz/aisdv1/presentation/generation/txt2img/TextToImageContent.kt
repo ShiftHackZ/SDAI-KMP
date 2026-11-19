@@ -71,6 +71,7 @@ data class TextToImageStrings(
  * @param processIntent Dispatches user actions to the owning text-to-image flow.
  * @param modifier Layout bounds and insets supplied by the screen host.
  * @param strings Localized screen labels that previews and tests can override.
+ * @param performanceOverlay Optional live resource panel supplied by the application root.
  * @param useDrawerNavigation Whether the top app bar opens the app drawer instead of navigating back.
  *
  * @author Dmitriy Moroz
@@ -82,6 +83,7 @@ fun TextToImageContent(
     modifier: Modifier = Modifier,
     strings: TextToImageStrings = TextToImageStrings(),
     useDrawerNavigation: Boolean = false,
+    performanceOverlay: @Composable () -> Unit = {},
 ) {
     val promptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     val negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
@@ -252,6 +254,7 @@ fun TextToImageContent(
         )
     }
     GenerationModalRenderer(
+        performanceOverlay = performanceOverlay,
         screenModal = state.screenModal,
         onDismissRequest = { processIntent(TextToImageIntent.DismissModal) },
         onCancelGeneration = { processIntent(TextToImageIntent.CancelGeneration) },

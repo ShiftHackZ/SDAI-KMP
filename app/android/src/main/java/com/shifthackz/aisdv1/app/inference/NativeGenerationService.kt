@@ -10,6 +10,7 @@ import android.os.Messenger
 import android.os.Process
 import com.shifthackz.aisdv1.app.AiStableDiffusionClientApp
 import com.shifthackz.aisdv1.domain.feature.diffusion.NativeInferenceEngine
+import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import java.util.UUID
@@ -151,6 +152,21 @@ internal class NativeGenerationService : Service() {
                 }
             }
 
+            InferenceProtocol.READ_PERFORMANCE -> if (job == activeJob) {
+                val resourceRequestId = message.data.getLong(InferenceProtocol.RESOURCE_REQUEST_ID)
+                scope.launch {
+                    val reading = withContext(Dispatchers.IO) {
+                        runCatching { dependencies.performanceReader.read() }
+                    }
+                    send(
+                        InferenceProtocol.PERFORMANCE,
+                        job,
+                        performance = reading.getOrNull(),
+                        resourceRequestId = resourceRequestId
+                    )
+                }
+            }
+
             InferenceProtocol.PING -> send(InferenceProtocol.PONG)
             InferenceProtocol.EXIT -> Process.killProcess(Process.myPid())
         }
@@ -162,10 +178,12 @@ internal class NativeGenerationService : Service() {
         job: String = "",
         current: Int = 0,
         total: Int = 0,
-        stage: NativeGenerationStage? = null
+        stage: NativeGenerationStage? = null,
+        performance: ProcessPerformanceReading? = null,
+        resourceRequestId: Long = 0L,
     ) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            control.post { send(what, job, current, total, stage) }
+            control.post { send(what, job, current, total, stage, performance, resourceRequestId) }
             return
         }
         if (what == InferenceProtocol.STAGE) {
@@ -174,6 +192,11 @@ internal class NativeGenerationService : Service() {
         }
         val reply = host ?: return
         val message = InferenceProtocol.message(what, incarnation, job, sequence.incrementAndGet())
+        message.data.putLong(InferenceProtocol.RESOURCE_REQUEST_ID, resourceRequestId)
+        performance?.let {
+            message.data.putLong(InferenceProtocol.CPU_NANOS, it.cpuTimeNanos)
+            message.data.putLong(InferenceProtocol.RESIDENT_BYTES, it.residentBytes)
+        }
         message.data.putInt(InferenceProtocol.PID, Process.myPid())
         message.data.putString(InferenceProtocol.ENGINE_KEY, engineKind?.name)
         message.data.putString(InferenceProtocol.STAGE_KEY, stage?.name)

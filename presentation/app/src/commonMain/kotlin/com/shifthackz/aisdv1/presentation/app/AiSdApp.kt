@@ -31,6 +31,7 @@ import com.shifthackz.aisdv1.presentation.components.extensions.generationBright
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.extensions.clearFocusOnTap
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
 import org.koin.mp.KoinPlatform.getKoin
 import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageIntent
@@ -136,6 +137,7 @@ fun AiSdApp(
                                 buildInfoProvider = koin.get<BuildInfoProvider>(),
                                 preferenceManager = preferenceManager,
                                 shouldShowHomeChrome = selectedHomeRoute != null,
+                                observePerformance = remember(koin) { koin.get<ObserveGenerationPerformanceUseCase>() },
                                 textToImageViewModel = textToImageViewModel,
                                 imageToImageViewModel = imageToImageViewModel,
                             )

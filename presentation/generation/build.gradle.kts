@@ -19,6 +19,7 @@ android {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.androidx.lifecycle.compose)
             implementation(project(":core:common"))
             implementation(project(":core:localization"))
             implementation(project(":core:ui"))

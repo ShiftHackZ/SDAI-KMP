@@ -27,6 +27,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceType
  * @param stabilityAiCredits Current Stability AI balance shown in Settings.
  * @param localUseNNAPI Whether ONNX local diffusion should use NNAPI acceleration.
  * @param backgroundGenerationAvailable Whether background generation is supported by this target.
+ * @param shouldShowPerformanceOverlay Whether generation dialogs display live app CPU and RAM history.
  * @param shouldDimScreen Whether active foreground generation dims the screen.
  * @param backgroundGeneration Whether background generation is currently enabled.
  * @param monitorConnectivity Whether server connectivity monitoring is enabled.
@@ -62,6 +63,7 @@ data class SettingsState(
     val backgroundGenerationAvailable: Boolean = false,
     val backgroundGeneration: Boolean = false,
     val shouldDimScreen: Boolean = false,
+    val shouldShowPerformanceOverlay: Boolean = true,
     val monitorConnectivity: Boolean = false,
     val autoSaveAiResults: Boolean = false,
     val saveToMediaStore: Boolean = false,

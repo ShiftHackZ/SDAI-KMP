@@ -138,7 +138,7 @@ internal fun TextToImageState.progressModal(
 
     mode == ServerSource.LOCAL_APPLE_CORE_ML -> GenerationModal.Generating(
         title = Localization.string("communicating_core_ml_title").asUiText(),
-        canCancel = canCancelLocalGeneration,
+        canCancel = true,
     )
 
     mode == ServerSource.LOCAL_APPLE_BONSAI -> GenerationModal.Generating(

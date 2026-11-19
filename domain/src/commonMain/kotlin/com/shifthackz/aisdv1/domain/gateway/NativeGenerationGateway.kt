@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.gateway
 
+import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationStage
@@ -13,6 +14,14 @@ import kotlinx.coroutines.flow.Flow
  * @author Dmitriy Moroz
  */
 interface NativeGenerationGateway {
+    /**
+     * Requests resource counters from the currently owned child without starting a process.
+     * Returns null before submission or after teardown; transport/read failures propagate.
+     * Cancelling the read must not cancel inference or the connection's heartbeat.
+     * @author Dmitriy Moroz
+     */
+    suspend fun readProcessPerformance(): ProcessPerformanceReading?
+
     /**
      * Submits one immutable attempt; concurrent submissions fail without interrupting its owner.
      *

@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.ActivityManager
 import android.os.Build
 import android.os.Process
+import com.shifthackz.aisdv1.app.inference.AndroidCurrentProcessPerformanceReader
 import com.shifthackz.aisdv1.app.inference.InferenceServiceDependencies
 import android.database.CursorWindow
 import android.os.StrictMode
@@ -56,6 +57,7 @@ class AiStableDiffusionClientApp : Application() {
                 Timber.plant(Timber.DebugTree())
             }
             inferenceDependencies = InferenceServiceDependencies(
+                performanceReader = AndroidCurrentProcessPerformanceReader(),
                 engines = createNativeInferenceEngineFactory(this, BuildConfig.BUILD_TYPE == "dev"),
                 files = FileGenerationFileStore(this, CompletePngImageValidator()),
             )

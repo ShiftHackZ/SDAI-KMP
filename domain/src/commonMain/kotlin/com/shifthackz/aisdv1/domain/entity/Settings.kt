@@ -5,6 +5,7 @@ import com.shifthackz.aisdv1.core.common.schedulers.SchedulersToken
 /**
  * Observable application preferences including the selected generation source.
  *
+ * @param shouldShowPerformanceOverlay Whether generation dialogs display live app CPU and RAM history.
  * @param shouldDimScreen Whether active foreground generation lowers screen brightness.
  * @param providerSelectionRevision Durable source revision used to invalidate earlier queued work.
  *
@@ -83,6 +84,7 @@ data class Settings(
      * @author Dmitriy Moroz
      */
     val shouldDimScreen: Boolean = false,
+    val shouldShowPerformanceOverlay: Boolean = true,
     /**
      * Whether completed images are automatically persisted to the gallery.
      *

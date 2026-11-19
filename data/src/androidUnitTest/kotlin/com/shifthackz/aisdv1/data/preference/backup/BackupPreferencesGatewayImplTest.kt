@@ -423,4 +423,75 @@ class BackupPreferencesGatewayImplTest {
         // Then
         assertTrue(recovered.isEmpty())
     }
+
+    @Test
+    fun `given performance overlay backup, saved choice is exported then restored, expected both flag choices survive round trip`() {
+        // Given
+        val actualPreferences = PreferenceManagerImpl(store)
+        val actualGateway = BackupPreferencesGatewayImpl(store, actualPreferences)
+        every { store.putSettingsDurably(any(), any(), any()) } answers {
+            strings.putAll(firstArg()); flags.putAll(secondArg()); integers.putAll(thirdArg())
+        }
+        val choices = listOf(false, true)
+
+        // When
+        val restored = choices.map { isEnabled ->
+            flags["key_performance_overlay"] = isEnabled
+            val exported = actualGateway.read()
+            val supported = actualGateway.filterSupported(exported)
+            flags.remove("key_performance_overlay")
+            actualGateway.writeSettings(supported.settings)
+            PreferenceManagerImpl(store).shouldShowPerformanceOverlay
+        }
+
+        // Then
+        assertEquals(choices, restored)
+    }
+
+    @Test
+    fun `given older settings backup, overlay flag is absent, expected current explicit choice is preserved`() {
+        // Given
+        flags["key_performance_overlay"] = false
+        val actualPreferences = PreferenceManagerImpl(store)
+
+        // When
+        gateway.writeSettings(mapOf("autoSave" to BackupValue.Flag(true)))
+
+        // Then
+        assertFalse(actualPreferences.shouldShowPerformanceOverlay)
+        verify {
+            store.putSettingsDurably(emptyMap(), mapOf("key_ai_auto_save" to true), emptyMap())
+        }
+    }
+
+    @Test
+    fun `given performance overlay backup, nonboolean value is imported, expected validation failure`() {
+        // Given
+        val incoming =
+            BackupPreferences(emptyMap(), mapOf("performanceOverlay" to BackupValue.Text("false")))
+
+        // When
+        val failure =
+            assertThrows(IllegalArgumentException::class.java) { gateway.filterSupported(incoming) }
+
+        // Then
+        assertEquals("Invalid portable preference type", failure.message)
+    }
+
+    @Test
+    fun `given recovered overlay preference write, effective choice changes, expected settings invalidation`() {
+        // Given
+        every { preferences.shouldShowPerformanceOverlay } answers {
+            flags["key_performance_overlay"] ?: true
+        }
+        every { store.retryPendingWrite() } answers {
+            flags["key_performance_overlay"] = false; true
+        }
+
+        // When
+        val recovered = gateway.recoverPendingWrite()
+
+        // Then
+        assertEquals(setOf(BackupCategory.SETTINGS), recovered)
+    }
 }

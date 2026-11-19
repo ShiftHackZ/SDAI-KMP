@@ -166,6 +166,13 @@ sealed interface SettingsIntent : MviIntent {
          */
         data class DimScreen(override val flag: Boolean) : UpdateFlag
 
+        /**
+         * Persists visibility of resource graphs in generation dialogs.
+         * @param flag Whether the overlay is enabled.
+         * @author Dmitriy Moroz
+         */
+        data class PerformanceOverlay(override val flag: Boolean) : UpdateFlag
+
         data class MonitorConnection(override val flag: Boolean) : UpdateFlag
 
         data class AutoSaveResult(override val flag: Boolean) : UpdateFlag

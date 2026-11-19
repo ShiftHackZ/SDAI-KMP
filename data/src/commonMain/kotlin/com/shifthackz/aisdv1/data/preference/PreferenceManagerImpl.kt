@@ -586,8 +586,16 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_DESIGN_DARK_TOKEN, value)
 
     /**
-     * Whether active foreground generation lowers display brightness.
+     * Whether generation progress displays app CPU and resident-memory history.
      *
+     * @author Dmitriy Moroz
+     */
+    override var shouldShowPerformanceOverlay: Boolean
+        get() = keyValueStore.getBoolean(KEY_PERFORMANCE_OVERLAY, true)
+        set(value) = putBoolean(KEY_PERFORMANCE_OVERLAY, value)
+
+    /**
+     * Whether active foreground generation lowers display brightness.
      * @author Dmitriy Moroz
      */
     override var shouldDimScreen: Boolean
@@ -670,6 +678,7 @@ internal class PreferenceManagerImpl(
                 monitorConnectivity = monitorConnectivity,
                 backgroundGeneration = backgroundGeneration,
                 shouldDimScreen = shouldDimScreen,
+                shouldShowPerformanceOverlay = shouldShowPerformanceOverlay,
                 autoSaveAiResults = autoSaveAiResults,
                 saveToMediaStore = saveToMediaStore,
                 formAdvancedOptionsAlwaysShow = formAdvancedOptionsAlwaysShow,
@@ -1115,8 +1124,14 @@ internal class PreferenceManagerImpl(
         const val KEY_DESIGN_DARK_TOKEN = "key_design_dark_color_token_theme"
 
         /**
-         * Stable storage key for the opt-in foreground display dimming preference.
+         * Stable storage key for the generation resource overlay preference.
          *
+         * @author Dmitriy Moroz
+         */
+        const val KEY_PERFORMANCE_OVERLAY = "key_performance_overlay"
+
+        /**
+         * Stable storage key for the opt-in foreground display dimming preference.
          * @author Dmitriy Moroz
          */
         const val KEY_DIM_SCREEN = "key_dim_screen"

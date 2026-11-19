@@ -92,6 +92,7 @@ data class ImageToImageStrings(
  * @param processIntent Publishes field, generation, export and navigation requests.
  * @param modifier Layout modifiers for the form scaffold.
  * @param strings Localized labels and provider capability explanations.
+ * @param performanceOverlay Optional live resource panel supplied by the application root.
  * @param useDrawerNavigation Whether the toolbar opens the home drawer instead of navigating back.
  *
  * @author Dmitriy Moroz
@@ -103,6 +104,7 @@ fun ImageToImageContent(
     modifier: Modifier = Modifier,
     strings: ImageToImageStrings = ImageToImageStrings(),
     useDrawerNavigation: Boolean = false,
+    performanceOverlay: @Composable () -> Unit = {},
 ) {
     val promptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     val negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
@@ -289,6 +291,7 @@ fun ImageToImageContent(
         )
     }
     GenerationModalRenderer(
+        performanceOverlay = performanceOverlay,
         screenModal = state.screenModal,
         onDismissRequest = { processIntent(ImageToImageIntent.DismissModal) },
         onCancelGeneration = { processIntent(ImageToImageIntent.CancelGeneration) },

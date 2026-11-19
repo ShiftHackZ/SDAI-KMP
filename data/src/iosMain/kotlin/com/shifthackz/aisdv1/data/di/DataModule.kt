@@ -18,6 +18,8 @@ import com.shifthackz.aisdv1.domain.repository.WakeLockRepository
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
+import com.shifthackz.aisdv1.data.performance.IosPerformanceGateway
+import com.shifthackz.aisdv1.domain.gateway.PerformanceGateway
 import org.koin.dsl.module
 import platform.Foundation.NSBundle
 import platform.Foundation.NSHomeDirectory
@@ -28,6 +30,7 @@ import platform.Foundation.NSHomeDirectory
  * @author Dmitriy Moroz
  */
 private val iosDataOverridesModule = module {
+    single<PerformanceGateway> { IosPerformanceGateway() }
     singleOf(::MnnBundleValidatorImpl) bind MnnBundleValidator::class
     singleOf(::IosMnnModelFileStore) bind MnnModelStore::class
     singleOf(::MnnGenerationRepositoryImpl) bind MnnGenerationRepository::class

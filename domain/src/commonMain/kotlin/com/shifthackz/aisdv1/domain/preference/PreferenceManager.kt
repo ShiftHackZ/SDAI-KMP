@@ -436,6 +436,13 @@ interface PreferenceManager {
     var shouldDimScreen: Boolean
 
     /**
+     * Enables live CPU and resident-memory graphs in foreground generation progress dialogs.
+     * Defaults to true; an explicitly disabled preference prevents resource sampling.
+     * @author Dmitriy Moroz
+     */
+    var shouldShowPerformanceOverlay: Boolean
+
+    /**
      * Number of background processes tracked by the existing work UI.
      *
      * @author Dmitriy Moroz

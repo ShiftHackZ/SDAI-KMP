@@ -741,4 +741,11 @@
     <string name="backup_shared_credentials_retained">Seçilmeyen sağlayıcıları korumak için ortak kimlik bilgileri tutuldu: %1$s.</string>
     <string name="settings_item_dim_screen">Ekranı karart</string>
     <string name="settings_item_dim_screen_warning">*Ekran karartma yalnızca arka planda üretim kapalıyken etkindir.</string>
+
+    <string name="settings_item_performance_overlay">Performans göstergesi</string>
+    <string name="performance_cpu">CPU</string>
+    <string name="performance_ram">RAM</string>
+    <string name="performance_memory_value">%1$s / %2$s MiB</string>
+    <string name="performance_this_app">Bu uygulama</string>
+    <string name="performance_total">Toplam</string>
 </resources>

@@ -4,6 +4,7 @@ import com.shifthackz.aisdv1.presentation.app.bootstrap.createNativeInferenceEng
 
 import android.app.Application
 import com.shifthackz.aisdv1.app.diagnostics.GenerationAttemptJournal
+import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
@@ -17,6 +18,7 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -37,7 +39,9 @@ class MnnNativeGatewayTest {
     fun `given MNN gateway, child completes isolated attempt, expected MNN callbacks and owned output publication`() =
         runTest {
             // Given
-            val connection = mockk<InferenceConnection>(relaxed = true)
+            val connection = mockk<InferenceConnection>(relaxed = true) {
+                every { processId } returns 4321
+            }
             val connections =
                 mockk<InferenceConnectionFactory> { every { create() } returns connection }
             val files = mockk<GenerationFileStore>(relaxed = true) {
@@ -62,6 +66,8 @@ class MnnNativeGatewayTest {
                     )
                 )
             }
+            val reading = ProcessPerformanceReading("4321:worker", 123, 456)
+            coEvery { connection.readPerformance() } returns reading
             coEvery { connection.close() } returns true
             coEvery {
                 connection.run(
@@ -72,6 +78,7 @@ class MnnNativeGatewayTest {
                     any()
                 )
             } coAnswers {
+                assertEquals(reading, gateway.readProcessPerformance())
                 arg<(LocalDiffusionStatus) -> Unit>(2)(LocalDiffusionStatus(15, 100))
                 arg<(NativeGenerationStage) -> Unit>(3)(NativeGenerationStage.RUNNING)
                 assertEquals(
@@ -88,6 +95,7 @@ class MnnNativeGatewayTest {
             val output = gateway.generate(request)
 
             // Then
+            assertNull(gateway.readProcessPerformance())
             assertEquals("AQID", output)
             assertEquals(
                 LocalDiffusionStatus(0, 0),

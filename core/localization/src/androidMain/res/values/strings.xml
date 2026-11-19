@@ -778,4 +778,11 @@
     <string name="backup_shared_credentials_retained">Shared sign-in credentials were kept to preserve unselected providers: %1$s.</string>
     <string name="settings_item_dim_screen">Dim screen</string>
     <string name="settings_item_dim_screen_warning">*Screen dimming is active only when background generation is off.</string>
+
+    <string name="settings_item_performance_overlay">Performance overlay</string>
+    <string name="performance_cpu">CPU</string>
+    <string name="performance_ram">RAM</string>
+    <string name="performance_memory_value">%1$s / %2$s MiB</string>
+    <string name="performance_this_app">This app</string>
+    <string name="performance_total">Total</string>
 </resources>
