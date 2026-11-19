@@ -13,18 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,65 +55,33 @@ internal fun BackupSelectionList(
             val hasSomeProviders =
                 category == BackupCategory.PROVIDERS && state.selection.providers.isNotEmpty()
             val hasAllProviders = state.selection.providers.containsAll(state.inspection.providers)
-            Card(Modifier.fillMaxWidth()) {
-                Row(
-                    Modifier.fillMaxWidth().then(
-                        if (category == BackupCategory.PROVIDERS) Modifier.triStateToggleable(
-                            state = when {
-                                hasSomeProviders && !hasAllProviders -> ToggleableState.Indeterminate
-                                isSelected -> ToggleableState.On
-                                else -> ToggleableState.Off
-                            },
-                            enabled = isEnabled && entry.isAvailable,
-                            role = Role.Checkbox,
-                            onClick = { processIntent(BackupIntent.ToggleCategory(category)) },
-                        ) else Modifier.toggleable(
-                            value = isSelected,
-                            enabled = isEnabled && entry.isAvailable,
-                            role = Role.Checkbox,
-                            onValueChange = { processIntent(BackupIntent.ToggleCategory(category)) },
-                        )
-                    ).padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (category == BackupCategory.PROVIDERS) {
-                        TriStateCheckbox(
-                            state = when {
-                                hasSomeProviders && !hasAllProviders -> ToggleableState.Indeterminate
-                                isSelected -> ToggleableState.On
-                                else -> ToggleableState.Off
-                            }, onClick = null, enabled = isEnabled && entry.isAvailable
-                        )
-                    } else Checkbox(
-                        checked = isSelected,
-                        onCheckedChange = null,
-                        enabled = isEnabled && entry.isAvailable
-                    )
-                    Spacer(Modifier.size(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            Localization.string("backup_category_" + category.key),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            if (entry.isAvailable) Localization.string(
-                                "backup_items",
-                                entry.itemCount
-                            ) else Localization.string("backup_unavailable"),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (category == BackupCategory.PROVIDERS && state.inspection.providers.isNotEmpty()) IconButton(
-                        onClick = { processIntent(BackupIntent.ToggleProvidersExpanded) },
-                        enabled = isEnabled
-                    ) {
-                        Icon(
-                            if (state.areProvidersExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            Localization.string("backup_provider_choices")
-                        )
-                    }
-                }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f),
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                BackupCategoryHeader(
+                    title = Localization.string("backup_category_" + category.key),
+                    subtitle = if (entry.isAvailable) Localization.string(
+                        "backup_items",
+                        entry.itemCount
+                    ) else Localization.string("backup_unavailable"),
+                    selectionState = when {
+                        hasSomeProviders && !hasAllProviders -> ToggleableState.Indeterminate
+                        isSelected -> ToggleableState.On
+                        else -> ToggleableState.Off
+                    },
+                    isSelectionEnabled = isEnabled && entry.isAvailable,
+                    onToggleSelection = { processIntent(BackupIntent.ToggleCategory(category)) },
+                    isExpanded = state.areProvidersExpanded,
+                    isExpansionEnabled = isEnabled,
+                    onToggleExpanded = if (category == BackupCategory.PROVIDERS && state.inspection.providers.isNotEmpty()) {
+                        { processIntent(BackupIntent.ToggleProvidersExpanded) }
+                    } else null,
+                )
                 if (category == BackupCategory.PROVIDERS) {
                     AnimatedVisibility(
                         visible = state.areProvidersExpanded,
