@@ -53,6 +53,9 @@ internal class ServerSetupIntentProcessor(
 
     fun process(intent: ServerSetupIntent) {
         when (intent) {
+            ServerSetupIntent.ConfirmModelDownloadSwitch,
+            ServerSetupIntent.DownloadAllModels,
+            ServerSetupIntent.CancelModelDownloads,
             is ServerSetupIntent.RetryLocalCatalog,
             ServerSetupIntent.RetryAuthorizationStorage,
             ServerSetupIntent.RequestAuthorizationReset,

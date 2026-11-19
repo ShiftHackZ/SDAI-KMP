@@ -5,7 +5,6 @@ import com.shifthackz.aisdv1.presentation.benchmark.di.benchmarkViewModelModule
 import com.shifthackz.aisdv1.presentation.statistics.di.statisticsViewModelModule
 import com.shifthackz.aisdv1.presentation.settings.di.settingsCoreModule
 import com.shifthackz.aisdv1.presentation.settings.di.settingsViewModelModule
-import com.shifthackz.aisdv1.presentation.configuration.di.configurationCoreModule
 import com.shifthackz.aisdv1.presentation.configuration.di.configurationViewModelModule
 import com.shifthackz.aisdv1.presentation.splash.di.splashViewModelModule
 import com.shifthackz.aisdv1.presentation.donate.di.donateViewModelModule
@@ -37,7 +36,6 @@ val corePresentationModule = module {
         statisticsViewModelModule,
         settingsCoreModule,
         settingsViewModelModule,
-        configurationCoreModule,
         configurationViewModelModule,
         splashViewModelModule,
         donateViewModelModule,

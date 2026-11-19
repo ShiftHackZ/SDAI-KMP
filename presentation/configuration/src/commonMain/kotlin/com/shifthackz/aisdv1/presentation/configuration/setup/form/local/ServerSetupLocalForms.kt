@@ -153,8 +153,6 @@ internal fun ConfigurationStep(
     }
 }
 
-@Composable
-
 /**
  * Displays downloaded/custom model selection and provider-specific local runtime controls.
  *
@@ -164,6 +162,7 @@ internal fun ConfigurationStep(
  *
  * @author Dmitriy Moroz
  */
+@Composable
 internal fun LocalGenerationForm(
     state: ServerSetupState,
     strings: ServerSetupStrings,
@@ -209,16 +208,21 @@ internal fun LocalGenerationForm(
         }
         val catalogStatus = state.mode.localCatalogType?.let { state.localCatalogStatuses[it] }
             ?: LocalCatalogStatus.LOADING
-        if (catalogStatus != LocalCatalogStatus.READY || catalogModels.isEmpty()) {
+        if (catalogStatus == LocalCatalogStatus.LOADING && catalogModels.isEmpty()) {
+            LocalModelShimmerItems()
+        } else if (catalogStatus == LocalCatalogStatus.ERROR || catalogModels.isEmpty()) {
             LocalCatalogStatusCard(
                 status = catalogStatus,
+                isRefreshing = state.mode.localCatalogType in state.refreshingLocalCatalogs,
                 onRetry = { processIntent(ServerSetupIntent.RetryLocalCatalog(state.mode)) },
             )
         }
+        val isBatchRunning = state.modelDownloadBatches.any { it.isRunning && it.isBatch }
         catalogModels.filter { catalogStatus != LocalCatalogStatus.ERROR || it.downloaded || it.downloadState != DownloadState.Unknown }
             .forEach { model ->
                 LocalModelItem(
                     model = model,
+                    isActionEnabled = !isBatchRunning,
                     selected = model.selected,
                     strings = strings,
                     onSelect = { processIntent(ServerSetupIntent.SelectLocalModel(model)) },
@@ -227,8 +231,6 @@ internal fun LocalGenerationForm(
             }
     }
 }
-
-@Composable
 
 /**
  * Displays the active local provider’s custom model path and validation feedback.
@@ -239,6 +241,7 @@ internal fun LocalGenerationForm(
  *
  * @author Dmitriy Moroz
  */
+@Composable
 internal fun LocalCustomModelPathForm(
     state: ServerSetupState,
     strings: ServerSetupStrings,

@@ -16,6 +16,15 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceType
  * @author Dmitriy Moroz
  */
 sealed interface ServerSetupIntent : MviIntent {
+    /** Downloads missing models of the visible provider in catalog order. */
+    data object DownloadAllModels : ServerSetupIntent
+
+    /** Replaces current provider downloads with the destination captured by the confirmation dialog. */
+    data object ConfirmModelDownloadSwitch : ServerSetupIntent
+
+    /** Stops the background batch while retaining completed models. */
+    data object CancelModelDownloads : ServerSetupIntent
+
     /**
      * Retries only the catalog whose recovery action was selected.
      *

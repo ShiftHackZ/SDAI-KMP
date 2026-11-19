@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.work.core
 
+import android.R
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -13,48 +14,44 @@ import androidx.work.WorkerParameters
 import com.shifthackz.aisdv1.core.common.appbuild.ActivityIntentProvider
 import com.shifthackz.aisdv1.core.common.extensions.isAppInForeground
 import com.shifthackz.aisdv1.core.notification.PushNotificationManager
+import com.shifthackz.aisdv1.core.localization.Localization
 
 /**
- * Coordinates `NotificationWorker` behavior in the SDAI background work feature layer.
+ * Shares app navigation and foreground notification appearance across long-running workers.
+ *
+ * @param context Application context supplied by WorkManager.
+ * @param workerParameters Persisted request input and cancellation lifetime.
+ * @param pushNotificationManager Creates notifications using the application channel and branding.
+ * @param activityIntentProvider Opens the application when the notification is tapped.
  *
  * @author Dmitriy Moroz
  */
 internal abstract class NotificationWorker(
     context: Context,
     workerParameters: WorkerParameters,
-    /**
-     * Exposes the `pushNotificationManager` value used by the SDAI background work feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val pushNotificationManager: PushNotificationManager,
-    /**
-     * Exposes the `activityIntentProvider` value used by the SDAI background work feature layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val activityIntentProvider: ActivityIntentProvider,
 ) : CoroutineWorker(context, workerParameters) {
 
     /**
-     * Exposes the `notificationId` value used by the SDAI background work feature layer.
+     * Stable notification identity used while this worker runs in the foreground.
      *
      * @author Dmitriy Moroz
      */
     abstract val notificationId: Int
 
     /**
-     * Exposes the `genericNotificationId` value used by the SDAI background work feature layer.
+     * Separate notification identity for dismissible completion or failure messages.
      *
      * @author Dmitriy Moroz
      */
     abstract val genericNotificationId: Int
 
     /**
-     * Executes the `showGenericNotification` step in the SDAI background work feature layer.
+     * Posts a dismissible result message whose tap opens the application.
      *
-     * @param text text value consumed by the API.
-     * @param body body value consumed by the API.
+     * @param text Localized notification title.
+     * @param body Optional detail shown below the title.
      * @author Dmitriy Moroz
      */
     fun showGenericNotification(text: String, body: String?) {
@@ -79,14 +76,16 @@ internal abstract class NotificationWorker(
     }
 
     /**
-     * Executes the `setForegroundNotification` step in the SDAI background work feature layer.
+     * Updates the ongoing foreground notification and its optional worker cancellation action.
      *
-     * @param title title value consumed by the API.
-     * @param body body value consumed by the API.
-     * @param subText sub text value consumed by the API.
-     * @param progress progress value consumed by the API.
-     * @param silent silent value consumed by the API.
-     * @param canCancel can cancel value consumed by the API.
+     * @param title Localized operation title.
+     * @param body Current operation detail, such as a model name.
+     * @param subText Optional compact status rendered by the system.
+     * @param progress Completed units and total units; null displays an indeterminate bar.
+     * @param silent Whether progress updates suppress sound and vibration.
+     * @param canCancel Whether to expose cancellation for this WorkManager request.
+     * @param cancelText Localized label describing what the cancellation action stops.
+     *
      * @author Dmitriy Moroz
      */
     fun setForegroundNotification(
@@ -96,6 +95,7 @@ internal abstract class NotificationWorker(
         progress: Pair<Int, Int>? = null,
         silent: Boolean = false,
         canCancel: Boolean = false,
+        cancelText: String = Localization.string("cancel"),
     ) {
         pushNotificationManager.createNotificationChannel()
         val notification = pushNotificationManager.createProgressNotification(title, body) {
@@ -114,7 +114,7 @@ internal abstract class NotificationWorker(
                 val intent = WorkManager
                     .getInstance(applicationContext)
                     .createCancelPendingIntent(id)
-                addAction(android.R.drawable.ic_delete, "Cancel", intent)
+                addAction(R.drawable.ic_menu_close_clear_cancel, cancelText, intent)
             }
 
             setAutoCancel(false)

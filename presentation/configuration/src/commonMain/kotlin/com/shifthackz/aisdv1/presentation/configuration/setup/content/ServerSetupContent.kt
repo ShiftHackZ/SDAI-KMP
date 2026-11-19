@@ -2,23 +2,18 @@
 
 package com.shifthackz.aisdv1.presentation.configuration.setup.content
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
@@ -29,7 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.LocalModelDownloadAction
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.SetupActionBar
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.SetupPrimaryAction
+import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.ConfigurationStepBar
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.OpenAiOAuthActionBar
@@ -43,7 +41,6 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceFilte
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionEffects
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionStep
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSortBottomSheet
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 
 /**
@@ -111,31 +108,28 @@ fun ServerSetupContent(
                         processIntent = processIntent
                     )
                 } else {
-                    Button(
-                        modifier = Modifier
-                            .windowInsetsPadding(persistentBottomBarWindowInsets())
-                            .fillMaxWidth()
-                            .height(68.dp)
-                            .background(MaterialTheme.colorScheme.background)
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 16.dp, top = 8.dp),
-                        enabled = !state.loadingConfiguration && state.mainButtonEnabled,
-                        onClick = { processIntent(ServerSetupIntent.MainButtonClick) },
-                    ) {
-                        Text(
-                            text = when (state.step) {
-                                ServerSetupState.Step.SOURCE -> strings.next
-                                ServerSetupState.Step.CONFIGURE -> when (state.mode) {
-                                    ServerSource.LOCAL_MICROSOFT_ONNX,
-                                    ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
-                                    ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
-                                        -> strings.setup
+                    SetupActionBar(verticalArrangement = Arrangement.Top) {
+                        if (state.step == ServerSetupState.Step.CONFIGURE && state.mode.localCatalogType != null) {
+                            LocalModelDownloadAction(state, processIntent)
+                        }
+                        SetupPrimaryAction(
+                            isEnabled = !state.loadingConfiguration && state.mainButtonEnabled,
+                            onClick = { processIntent(ServerSetupIntent.MainButtonClick) },
+                        ) {
+                            Text(
+                                text = when (state.step) {
+                                    ServerSetupState.Step.SOURCE -> strings.next
+                                    ServerSetupState.Step.CONFIGURE -> when (state.mode) {
+                                        ServerSource.LOCAL_MICROSOFT_ONNX,
+                                        ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
+                                        ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.setup
 
-                                    else -> strings.connect
-                                }
-                            },
-                            color = LocalContentColor.current,
-                        )
+                                        else -> strings.connect
+                                    }
+                                },
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
                     }
                 }
             },

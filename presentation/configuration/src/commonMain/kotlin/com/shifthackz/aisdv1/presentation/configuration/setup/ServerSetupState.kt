@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.core.mvi.MviState
 import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
 import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.DownloadState
+import com.shifthackz.aisdv1.domain.entity.ModelDownloadBatch
 import com.shifthackz.aisdv1.domain.entity.FeatureTag
 import com.shifthackz.aisdv1.domain.entity.HuggingFaceModel
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
@@ -21,6 +22,8 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
  * per-provider form inputs, and the local model lists mirror downloadable model state for each
  * local runtime. Derived properties expose the active provider's local model selection.
  *
+ * @param modelDownloadBatches Independent single downloads and the exclusive provider batch.
+ * @param refreshingLocalCatalogs Providers refreshing metadata while retaining feedback layout.
  * @param showBackNavArrow Whether this setup flow may return to its opening screen.
  * @param step Current provider-selection or provider-configuration stage.
  * @param mode Selected provider whose visible controls and generation dispatch apply.
@@ -102,6 +105,8 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
  */
 @Immutable
 data class ServerSetupState(
+    val modelDownloadBatches: List<ModelDownloadBatch> = emptyList(),
+    val refreshingLocalCatalogs: Set<LocalAiModel.Type> = emptySet(),
     val showBackNavArrow: Boolean = false,
     val step: Step = Step.SOURCE,
     val mode: ServerSource = ServerSource.AUTOMATIC1111,
@@ -467,6 +472,13 @@ data class ServerSetupState(
     }
 
     sealed interface Modal {
+        /**
+         * Retains the destination provider until a conflicting batch replacement is confirmed.
+         * @param type Provider whose missing models should replace current download work.
+         * @author Dmitriy Moroz
+         */
+        data class SwitchModelDownloads(val type: LocalAiModel.Type) : Modal
+
         data object ConnectionUnverified : Modal
         data object None : Modal
         data object Communicating : Modal

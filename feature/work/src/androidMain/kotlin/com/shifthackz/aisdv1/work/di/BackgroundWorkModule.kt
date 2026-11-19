@@ -19,13 +19,16 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.binds
 import org.koin.dsl.module
+import com.shifthackz.aisdv1.domain.feature.work.ModelDownloadManager
+import com.shifthackz.aisdv1.work.ModelDownloadManagerImpl
 
 /**
- * Exposes the `backgroundWorkModule` value used by the SDAI background work feature layer.
+ * Binds platform task scheduling, progress observation and model download ownership.
  *
  * @author Dmitriy Moroz
  */
 actual val backgroundWorkModule = module {
+    singleOf(::ModelDownloadManagerImpl) bind ModelDownloadManager::class
     factory {
         WorkManagerProvider { WorkManager.getInstance(androidApplication()) }
     }

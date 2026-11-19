@@ -97,7 +97,6 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
-
     protected fun clearSubscriptions() {
         coroutineScope.coroutineContext.cancelChildren()
     }
@@ -152,7 +151,6 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
-
     private fun listenNativeStatus(engine: NativeGenerationEngine) {
         coroutineScope.launch {
             combine(
@@ -190,7 +188,6 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
-
     private fun stageText(stage: NativeGenerationStage): String = applicationContext.getString(
         when (stage) {
             NativeGenerationStage.PREPARING -> LocalizationR.string.native_generation_stage_preparing
@@ -207,7 +204,6 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
-
     protected fun listenHordeStatus() {
         coroutineScope.launch {
             observeHordeProcessStatusUseCase()
@@ -250,7 +246,6 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
-
     protected fun handleStart() {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
         val title = applicationContext.getString(LocalizationR.string.notification_started_title)
@@ -296,7 +291,6 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
-
     protected fun handleSuccess(result: List<AiGenerationResult>) {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
         backgroundWorkObserver.refreshStatus()
@@ -318,7 +312,6 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
-
     protected fun handleError(t: Throwable) {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {}) return
         backgroundWorkObserver.publishForOwner(id.toString()) {

@@ -87,7 +87,9 @@ internal class AndroidDownloadableModelFileDownloader(
         }
         val dir = File("${fileProviderDescriptor.localModelDirPath}/$id")
         if (dir.exists()) dir.deleteRecursively()
-        dir.mkdirs()
+        check(dir.mkdirs()) { "Cannot create model directory" }
+        val pending = File(dir, ".download-in-progress")
+        check(pending.createNewFile()) { "Cannot mark incomplete model download" }
 
         val destination = File(getDestinationPath(id, url))
 
@@ -102,6 +104,7 @@ internal class AndroidDownloadableModelFileDownloader(
                 complete.unzip()
                 complete.delete()
             }
+            check(pending.delete()) { "Cannot finalize model download" }
             emit(DownloadState.Complete(complete.path))
         } catch (e: CancellationException) {
             dir.deleteRecursively()

@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +40,17 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.component.isCustom
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 
+/**
+ * Shows model selection, ownership and the active archive transfer in one catalog row.
+ * @param model Current catalog metadata and transfer progress.
+ * @param selected Whether the setup candidate uses this model.
+ * @param strings Localized row actions and feedback.
+ * @param onSelect Selects the candidate without changing download ownership.
+ * @param onAction Downloads, retries, cancels or deletes the model.
+ * @param modifier Layout and decoration applied to the row surface.
+ * @param isActionEnabled Prevents conflicting transfers or removal while a batch owns the catalog.
+ * @author Dmitriy Moroz
+ */
 @Composable
 internal fun LocalModelItem(
     model: ServerSetupState.LocalModel,
@@ -47,11 +59,13 @@ internal fun LocalModelItem(
     onSelect: () -> Unit,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    isActionEnabled: Boolean = true,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 50.dp)
+            .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onSelect),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f),
@@ -90,6 +104,7 @@ internal fun LocalModelItem(
                         model = model,
                         strings = strings,
                         onClick = onAction,
+                        isEnabled = isActionEnabled,
                     )
                 }
             }
@@ -187,12 +202,14 @@ private fun LocalModelActionButton(
     strings: ServerSetupStrings,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isEnabled: Boolean = true,
 ) {
     val action = model.action(strings)
 
     OutlinedIconButton(
         modifier = modifier.size(40.dp),
         onClick = onClick,
+        enabled = isEnabled,
     ) {
         Icon(
             modifier = Modifier.size(20.dp),

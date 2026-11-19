@@ -3,6 +3,8 @@ package com.shifthackz.aisdv1.work.di
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
 
 import android.content.Context
+import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelsUseCase
+import com.shifthackz.aisdv1.work.task.DownloadModelsTask
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadCleanup
 import com.shifthackz.aisdv1.work.GenerationWorkPayloadStore
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
@@ -38,6 +40,7 @@ import com.shifthackz.aisdv1.work.task.TextToImageTask
  * @param activityIntentProvider Creates app navigation intents for notifications.
  * @param payloads Reads immutable work files.
  * @param nativeGateway Shared child-process status and cancellation gateway.
+ * @param downloadModels Sequential model download policy for foreground work.
  * @param payloadCleanup Cleans terminal request files and retains retry input.
  * @author Dmitriy Moroz
  */
@@ -54,6 +57,7 @@ class SdaiWorkerFactory(
     private val payloads: GenerationWorkPayloadStore,
     private val nativeGateway: NativeGenerationGateway,
     private val payloadCleanup: GenerationWorkPayloadCleanup,
+    private val downloadModels: DownloadModelsUseCase,
 ) : WorkerFactory() {
 
     /**
@@ -70,6 +74,14 @@ class SdaiWorkerFactory(
         workerParameters: WorkerParameters
     ): ListenableWorker? {
         return when (workerClassName) {
+            DownloadModelsTask::class.java.name -> DownloadModelsTask(
+                appContext,
+                workerParameters,
+                pushNotificationManager,
+                activityIntentProvider,
+                downloadModels
+            )
+
             TextToImageTask::class.java.name -> TextToImageTask(
                 context = appContext,
                 payloads = payloads,

@@ -13,13 +13,9 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
-import com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
 import com.shifthackz.aisdv1.domain.entity.DownloadState
-import com.shifthackz.aisdv1.presentation.configuration.setup.platform.NoOpServerSetupDownloadGuard
 import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserver
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.flow
 import com.shifthackz.aisdv1.domain.usecase.downloadable.RefreshLocalModelCatalogUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.ConnectToMnnUseCase
 import com.shifthackz.aisdv1.domain.usecase.settings.GetConfigurationUseCase
@@ -35,6 +31,10 @@ import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.shifthackz.aisdv1.domain.entity.ModelDownloadBatch
+import com.shifthackz.aisdv1.domain.entity.ModelDownloadRequest
+import com.shifthackz.aisdv1.domain.feature.work.ModelDownloadManager
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -54,7 +54,8 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class ServerSetupCatalogRefreshTest {
     private val getCachedLocalModelCatalogUseCase = mockk<GetCachedLocalModelCatalogUseCase>()
-    private val downloadModelUseCase = mockk<DownloadModelUseCase>()
+    private val batches = MutableStateFlow<List<ModelDownloadBatch>>(emptyList())
+    private val modelDownloadManager = mockk<ModelDownloadManager>(relaxed = true)
     private val deleteModelUseCase = mockk<DeleteModelUseCase>()
     private val refreshLocalModelCatalogUseCase = mockk<RefreshLocalModelCatalogUseCase>()
     private val getConfigurationUseCase = mockk<GetConfigurationUseCase>()
@@ -79,6 +80,32 @@ class ServerSetupCatalogRefreshTest {
             localMnnModelId = LocalAiModel.CustomMnn.id,
             localMnnModelPath = "/custom/bundle",
         )
+        batches.value = emptyList()
+        every { modelDownloadManager.batches } returns batches
+        coEvery { modelDownloadManager.start(any(), any()) } coAnswers {
+            val request = firstArg<ModelDownloadRequest>()
+            val shouldReplace = secondArg<Boolean>()
+            batches.value =
+                batches.value.filterNot { shouldReplace || it.type == request.type && it.modelId == request.modelId } + listOf(
+                    ModelDownloadBatch(
+                        request.type,
+                        request.modelId,
+                        DownloadState.Downloading(50),
+                        isBatch = request.isBatch,
+                        workId = request.modelId.orEmpty(),
+                    )
+                )
+        }
+        coEvery { modelDownloadManager.cancel(any(), any()) } coAnswers {
+            val type = firstArg<LocalAiModel.Type?>()
+            val id = secondArg<String?>()
+            batches.value = batches.value.map {
+                if ((type == null || it.type == type) && (id == null || it.modelId == id)) it.copy(
+                    progress = DownloadState.Unknown,
+                    isRunning = false
+                ) else it
+            }
+        }
         every { openAiOAuthGateway.observeIdentity() } returns flowOf(null)
         coEvery { openAiOAuthGateway.currentIdentity() } returns null
         coEvery { getCachedLocalModelCatalogUseCase(any()) } returns emptyList()
@@ -210,12 +237,6 @@ class ServerSetupCatalogRefreshTest {
             coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
                 listOf(LocalAiModel.CustomMnn, catalog)
             )
-            val completion = CompletableDeferred<Unit>()
-            coEvery { downloadModelUseCase(catalog.id, any()) } returns flow {
-                emit(DownloadState.Downloading(50))
-                completion.await()
-                emit(DownloadState.Complete("/owned/mnn"))
-            }
             val model = createViewModel()
             advanceUntilIdle()
             // When
@@ -231,7 +252,19 @@ class ServerSetupCatalogRefreshTest {
             val oldProgressRow = model.state.value.localMnnModels.first { it.id == catalog.id }
             model.processIntent(ServerSetupIntent.AllowLocalCustomModel(true))
             model.processIntent(ServerSetupIntent.UpdateServerMode(ServerSource.LOCAL_MICROSOFT_ONNX))
-            completion.complete(Unit)
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(LocalAiModel.CustomMnn, catalog.copy(downloaded = true))
+            )
+            coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
+                LocalAiModel.CustomMnn, catalog.copy(downloaded = true)
+            )
+            batches.value = batches.value.map {
+                it.copy(
+                    progress = DownloadState.Complete("/owned/mnn"),
+                    completedIds = listOf(catalog.id),
+                    isRunning = false,
+                )
+            }
             advanceUntilIdle()
             // Then
             val result = model.state.value.localMnnModels.first { it.id == catalog.id }
@@ -253,7 +286,7 @@ class ServerSetupCatalogRefreshTest {
         }
 
     @Test
-    fun `given active model transfer, cancellation starts before provider switches, expected cleanup stays with owning catalog`() =
+    fun `given single model worker, cancellation starts before provider switches, expected cancellation stays with owning catalog`() =
         runTest {
             // Given
             val catalog = LocalAiModel.CustomMnn.copy(
@@ -263,10 +296,6 @@ class ServerSetupCatalogRefreshTest {
             coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
                 listOf(catalog)
             )
-            coEvery { downloadModelUseCase(catalog.id, any()) } returns flow {
-                emit(DownloadState.Downloading(50))
-                awaitCancellation()
-            }
             val model = createViewModel()
             advanceUntilIdle()
             model.processIntent(
@@ -278,6 +307,9 @@ class ServerSetupCatalogRefreshTest {
             )
             runCurrent()
             val row = model.state.value.localMnnModels.single()
+            coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
+                catalog
+            )
 
             // When
             model.processIntent(ServerSetupIntent.LocalModel.ClickReduce(row))
@@ -285,7 +317,8 @@ class ServerSetupCatalogRefreshTest {
             advanceUntilIdle()
 
             // Then
-            coVerify(exactly = 1) { deleteModelUseCase(catalog.id) }
+            coVerify(exactly = 1) { modelDownloadManager.cancel(LocalAiModel.Type.Mnn, catalog.id) }
+            coVerify(exactly = 0) { deleteModelUseCase(catalog.id) }
             assertEquals(false, model.state.value.localMnnModels.single().downloaded)
             assertEquals(
                 DownloadState.Unknown,
@@ -296,7 +329,7 @@ class ServerSetupCatalogRefreshTest {
         }
 
     @Test
-    fun `given transfer cancellation, joined producer has already installed model, expected recovered install and storage notification`() =
+    fun `given single model worker cancellation, activation already finished, expected recovered install and storage notification`() =
         runTest {
             // Given
             val catalog = LocalAiModel.CustomMnn.copy(
@@ -306,10 +339,6 @@ class ServerSetupCatalogRefreshTest {
             coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
                 listOf(catalog)
             )
-            coEvery { downloadModelUseCase(catalog.id, any()) } returns flow {
-                emit(DownloadState.Downloading(99))
-                awaitCancellation()
-            }
             val model = createViewModel()
             advanceUntilIdle()
             model.processIntent(
@@ -324,6 +353,9 @@ class ServerSetupCatalogRefreshTest {
             coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
                 catalog.copy(downloaded = true)
             )
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(catalog.copy(downloaded = true))
+            )
 
             // When
             model.processIntent(ServerSetupIntent.LocalModel.ClickReduce(row))
@@ -337,6 +369,205 @@ class ServerSetupCatalogRefreshTest {
             )
             coVerify(exactly = 0) { deleteModelUseCase(catalog.id) }
             verify(exactly = 1) { storageUsageObserver.notifyChanged() }
+        }
+
+    @Test
+    fun `given download all action, no provider work is active, expected current provider batch scheduled`() =
+        runTest {
+            // Given
+            val model = createViewModel()
+            advanceUntilIdle()
+            // When
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 1) {
+                modelDownloadManager.start(
+                    ModelDownloadRequest(LocalAiModel.Type.Mnn),
+                    false
+                )
+            }
+        }
+
+    @Test
+    fun `given other provider download, download all is clicked then dialog closed, expected existing worker unchanged`() =
+        runTest {
+            // Given
+            val work = ModelDownloadBatch(
+                LocalAiModel.Type.ONNX,
+                "first",
+                DownloadState.Downloading(30),
+                isBatch = false,
+                workId = "other"
+            )
+            batches.value = listOf(work)
+            val model = createViewModel()
+            advanceUntilIdle()
+            // When
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            val dialog = model.state.value.modal
+            model.processIntent(ServerSetupIntent.DismissDialog)
+            advanceUntilIdle()
+            // Then
+            assertEquals(ServerSetupState.Modal.SwitchModelDownloads(LocalAiModel.Type.Mnn), dialog)
+            assertEquals(ServerSetupState.Modal.None, model.state.value.modal)
+            assertEquals(listOf(work), batches.value)
+            coVerify(exactly = 0) { modelDownloadManager.start(any(), any()) }
+            coVerify(exactly = 0) { modelDownloadManager.cancel(any(), any()) }
+        }
+
+    @Test
+    fun `given other provider download, switch is confirmed, expected captured destination replaces existing work`() =
+        runTest {
+            // Given
+            batches.value = listOf(ModelDownloadBatch(LocalAiModel.Type.ONNX, workId = "other"))
+            val model = createViewModel()
+            advanceUntilIdle()
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            // When
+            model.processIntent(ServerSetupIntent.ConfirmModelDownloadSwitch)
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 1) {
+                modelDownloadManager.start(
+                    ModelDownloadRequest(LocalAiModel.Type.Mnn),
+                    true
+                )
+            }
+            assertEquals(ServerSetupState.Modal.None, model.state.value.modal)
+        }
+
+    @Test
+    fun `given current provider single download, download all intent arrives, expected active transfer retained`() =
+        runTest {
+            // Given
+            batches.value = listOf(
+                ModelDownloadBatch(
+                    LocalAiModel.Type.Mnn,
+                    "first",
+                    isBatch = false,
+                    workId = "single"
+                )
+            )
+            val model = createViewModel()
+            advanceUntilIdle()
+            // When
+            model.processIntent(ServerSetupIntent.DownloadAllModels)
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 0) { modelDownloadManager.start(any(), any()) }
+            coVerify(exactly = 0) { modelDownloadManager.cancel(any(), any()) }
+        }
+
+    @Test
+    fun `given concurrent single model downloads, one row is cancelled, expected other row continues without network catalog reload`() =
+        runTest {
+            // Given
+            val first = LocalAiModel(
+                "first",
+                LocalAiModel.Type.Mnn,
+                "First",
+                "1 GB",
+                listOf("https://models/first")
+            )
+            val second = first.copy(id = "second", sources = listOf("https://models/second"))
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(first, second)
+            )
+            coEvery { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns listOf(
+                first,
+                second
+            )
+            val model = createViewModel()
+            advanceUntilIdle()
+            model.processIntent(
+                ServerSetupIntent.LocalModel.DownloadConfirm(
+                    first.id,
+                    first.sources.single(),
+                    first.type
+                )
+            )
+            runCurrent()
+            model.processIntent(
+                ServerSetupIntent.LocalModel.DownloadConfirm(
+                    second.id,
+                    second.sources.single(),
+                    second.type
+                )
+            )
+            runCurrent()
+            val row = model.state.value.localMnnModels.first { it.id == first.id }
+            // When
+            model.processIntent(ServerSetupIntent.LocalModel.ClickReduce(row))
+            advanceUntilIdle()
+            // Then
+            coVerify(exactly = 1) { modelDownloadManager.cancel(first.type, first.id) }
+            coVerify(exactly = 1) { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) }
+            assertEquals(
+                DownloadState.Unknown,
+                model.state.value.localMnnModels.first { it.id == first.id }.downloadState
+            )
+            assertEquals(
+                DownloadState.Downloading(50),
+                model.state.value.localMnnModels.first { it.id == second.id }.downloadState
+            )
+            assertEquals(
+                LocalCatalogStatus.READY,
+                model.state.value.localCatalogStatuses[first.type]
+            )
+            assertEquals(emptySet<LocalAiModel.Type>(), model.state.value.refreshingLocalCatalogs)
+        }
+
+    @Test
+    fun `given failed catalog, retry remains pending, expected error card status retained with refreshing flag`() =
+        runTest {
+            // Given
+            val failure = IllegalStateException("offline")
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } returns LocalModelCatalogResult(
+                listOf(LocalAiModel.CustomMnn),
+                failure
+            )
+            val model = createViewModel()
+            advanceUntilIdle()
+            val pending = CompletableDeferred<LocalModelCatalogResult>()
+            coEvery { refreshLocalModelCatalogUseCase(LocalAiModel.Type.Mnn) } coAnswers { pending.await() }
+            // When
+            model.processIntent(ServerSetupIntent.RetryLocalCatalog(ServerSource.LOCAL_MNN))
+            runCurrent()
+            val during = model.state.value
+            pending.complete(LocalModelCatalogResult(listOf(LocalAiModel.CustomMnn), failure))
+            advanceUntilIdle()
+            // Then
+            assertEquals(
+                LocalCatalogStatus.ERROR,
+                during.localCatalogStatuses[LocalAiModel.Type.Mnn]
+            )
+            assertEquals(setOf(LocalAiModel.Type.Mnn), during.refreshingLocalCatalogs)
+            assertEquals(
+                LocalCatalogStatus.ERROR,
+                model.state.value.localCatalogStatuses[LocalAiModel.Type.Mnn]
+            )
+            assertEquals(emptySet<LocalAiModel.Type>(), model.state.value.refreshingLocalCatalogs)
+        }
+
+    @Test
+    fun `given persisted terminal failure, setup opens after work ended, expected no historical error dialog replay`() =
+        runTest {
+            // Given
+            batches.value = listOf(
+                ModelDownloadBatch(
+                    LocalAiModel.Type.Mnn,
+                    progress = DownloadState.Error(IllegalStateException("old failure")),
+                    isRunning = false,
+                    workId = "history"
+                )
+            )
+            // When
+            val model = createViewModel()
+            advanceUntilIdle()
+            // Then
+            assertEquals(ServerSetupState.Modal.None, model.state.value.modal)
+            verify(exactly = 0) { storageUsageObserver.notifyChanged() }
         }
 
     /**
@@ -379,9 +610,8 @@ class ServerSetupCatalogRefreshTest {
             connectToStabilityAiUseCase = mockk(relaxed = true),
             connectToFalAiUseCase = mockk(relaxed = true),
             connectToArliAiUseCase = mockk(relaxed = true),
-            downloadModelUseCase = downloadModelUseCase,
+            modelDownloadManager = modelDownloadManager,
             deleteModelUseCase = deleteModelUseCase,
-            downloadGuard = NoOpServerSetupDownloadGuard,
             storageUsageObserver = storageUsageObserver,
             linksProvider = mockk(relaxed = true),
             preferenceManager = preferenceManager,
