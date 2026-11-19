@@ -776,4 +776,6 @@
     <string name="backup_replace_providers">Replace provider settings</string>
     <string name="backup_cancel">Cancel</string>
     <string name="backup_shared_credentials_retained">Shared sign-in credentials were kept to preserve unselected providers: %1$s.</string>
+    <string name="settings_item_dim_screen">Dim screen</string>
+    <string name="settings_item_dim_screen_warning">*Screen dimming is active only when background generation is off.</string>
 </resources>

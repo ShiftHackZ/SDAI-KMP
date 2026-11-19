@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.shifthackz.aisdv1.presentation.components.extensions.LocalGenerationBrightnessInteraction
+import com.shifthackz.aisdv1.presentation.components.extensions.generationBrightnessInteraction
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.localization.formatter.DurationFormatter
 import com.shifthackz.aisdv1.core.model.UiText
@@ -12,6 +14,8 @@ import com.shifthackz.aisdv1.core.model.asUiText
 
 /**
  * Shows generation or remote-queue progress with optional cancellation content.
+ * Touches inside the dialog or its scrim notify the active dimming timer without dismissing
+ * non-dismissible progress or intercepting child controls.
  *
  * @param title Heading naming the provider or operation.
  * @param subTitle Stage or waiting explanation beneath the heading.
@@ -37,14 +41,19 @@ fun ProgressDialog(
     overallPercentage: Int? = null,
     content: (@Composable () -> Unit)? = null,
 ) {
+    val onBrightnessInteraction = LocalGenerationBrightnessInteraction.current
     Dialog(
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = {
+            onBrightnessInteraction?.invoke()
+            if (canDismiss) onDismissRequest()
+        },
         properties = DialogProperties(
-            dismissOnClickOutside = canDismiss,
+            dismissOnClickOutside = canDismiss || onBrightnessInteraction != null,
             dismissOnBackPress = canDismiss,
         ),
     ) {
         GeneratingProgressDialogContent(
+            modifier = Modifier.generationBrightnessInteraction(),
             title = title,
             subTitle = subTitle,
             waitTimeSeconds = waitTimeSeconds,

@@ -739,4 +739,6 @@
     <string name="backup_replace_providers">Sağlayıcı ayarlarını değiştir</string>
     <string name="backup_cancel">İptal</string>
     <string name="backup_shared_credentials_retained">Seçilmeyen sağlayıcıları korumak için ortak kimlik bilgileri tutuldu: %1$s.</string>
+    <string name="settings_item_dim_screen">Ekranı karart</string>
+    <string name="settings_item_dim_screen_warning">*Ekran karartma yalnızca arka planda üretim kapalıyken etkindir.</string>
 </resources>

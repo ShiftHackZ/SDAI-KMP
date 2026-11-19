@@ -146,6 +146,7 @@ internal object PortablePreferenceSchema {
             "key_generation_request_timeout_seconds",
             PortablePreferenceType.INTEGER
         ),
+        "dimScreen" to PortablePreferenceField("key_dim_screen", PortablePreferenceType.FLAG),
         "backgroundGeneration" to PortablePreferenceField(
             "key_background_generation",
             PortablePreferenceType.FLAG

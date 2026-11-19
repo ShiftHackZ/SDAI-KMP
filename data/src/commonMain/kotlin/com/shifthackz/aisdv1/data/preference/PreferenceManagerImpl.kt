@@ -586,6 +586,15 @@ internal class PreferenceManagerImpl(
         set(value) = putString(KEY_DESIGN_DARK_TOKEN, value)
 
     /**
+     * Whether active foreground generation lowers display brightness.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var shouldDimScreen: Boolean
+        get() = keyValueStore.getBoolean(KEY_DIM_SCREEN)
+        set(value) = putBoolean(KEY_DIM_SCREEN, value)
+
+    /**
      * Whether generation is scheduled through the background task manager.
      *
      * @author Dmitriy Moroz
@@ -660,6 +669,7 @@ internal class PreferenceManagerImpl(
                 localDiffusionSchedulerThread = localOnnxSchedulerThread,
                 monitorConnectivity = monitorConnectivity,
                 backgroundGeneration = backgroundGeneration,
+                shouldDimScreen = shouldDimScreen,
                 autoSaveAiResults = autoSaveAiResults,
                 saveToMediaStore = saveToMediaStore,
                 formAdvancedOptionsAlwaysShow = formAdvancedOptionsAlwaysShow,
@@ -1105,10 +1115,14 @@ internal class PreferenceManagerImpl(
         const val KEY_DESIGN_DARK_TOKEN = "key_design_dark_color_token_theme"
 
         /**
-         * Stable storage key `key_background_generation`; preserve its value to retain existing user settings.
+         * Stable storage key for the opt-in foreground display dimming preference.
          *
          * @author Dmitriy Moroz
          */
+        const val KEY_DIM_SCREEN = "key_dim_screen"
+
+        /** Stable storage key for background generation scheduling.
+         * @author Dmitriy Moroz */
         const val KEY_BACKGROUND_GENERATION = "key_background_generation"
 
         /**

@@ -14,6 +14,8 @@ import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageL
 import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.shifthackz.aisdv1.presentation.components.extensions.generationBrightnessInteraction
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.extensions.clearFocusOnTap
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -74,6 +77,16 @@ fun AiSdApp(
             parametersOf(router, imageToImagePlatformActions)
         }
     }
+    val isTextGenerating by remember(textToImageViewModel) {
+        textToImageViewModel.state.map { it.generating }.distinctUntilChanged()
+    }.collectAsState(false)
+    val isImageGenerating by remember(imageToImageViewModel) {
+        imageToImageViewModel.state.map { it.generating }.distinctUntilChanged()
+    }.collectAsState(false)
+    val displaySettings by remember(preferenceManager) {
+        preferenceManager.observe().map { it.backgroundGeneration to it.shouldDimScreen }
+            .distinctUntilChanged()
+    }.collectAsState(preferenceManager.backgroundGeneration to preferenceManager.shouldDimScreen)
     val visitedHomeRoutes = remember { mutableStateListOf<AppRoute>() }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         textToImageViewModel.processIntent(TextToImageIntent.RetrySamplers)
@@ -97,44 +110,50 @@ fun AiSdApp(
         onBack = router::navigateBack,
     )
 
-    CompositionLocalProvider(
-        LocalGalleryImageLoader provides remember(koin) { koin.get<GalleryImageLoader>() },
-        LocalOriginalImageLoader provides remember(koin) { koin.get<OriginalImageLoader>() }) {
-        AiSdAppTheme {
-            Surface(
-                modifier = modifier
-                    .fillMaxSize()
-                    .clearFocusOnTap(),
-                color = MaterialTheme.colorScheme.background,
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    val shellHomeRoute = selectedHomeRoute ?: lastHomeRoute
-                    val renderedHomeRoutes =
-                        (visitedHomeRoutes + listOfNotNull(shellHomeRoute)).distinct()
+    GenerationScreenProtection(
+        isGenerating = (isTextGenerating || isImageGenerating) && !displaySettings.first,
+        shouldDimScreen = displaySettings.second,
+    ) {
+        CompositionLocalProvider(
+            LocalGalleryImageLoader provides remember(koin) { koin.get<GalleryImageLoader>() },
+            LocalOriginalImageLoader provides remember(koin) { koin.get<OriginalImageLoader>() }) {
+            AiSdAppTheme {
+                Surface(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .generationBrightnessInteraction()
+                        .clearFocusOnTap(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val shellHomeRoute = selectedHomeRoute ?: lastHomeRoute
+                        val renderedHomeRoutes =
+                            (visitedHomeRoutes + listOfNotNull(shellHomeRoute)).distinct()
 
-                    if (shellHomeRoute != null) {
-                        HomeRoutesScaffold(
-                            languageCode = languageCode,
-                            activeRoute = shellHomeRoute,
-                            renderedRoutes = renderedHomeRoutes,
-                            router = router,
-                            buildInfoProvider = koin.get<BuildInfoProvider>(),
-                            preferenceManager = preferenceManager,
-                            shouldShowHomeChrome = selectedHomeRoute != null,
-                            textToImageViewModel = textToImageViewModel,
-                            imageToImageViewModel = imageToImageViewModel,
-                        )
-                    }
+                        if (shellHomeRoute != null) {
+                            HomeRoutesScaffold(
+                                languageCode = languageCode,
+                                activeRoute = shellHomeRoute,
+                                renderedRoutes = renderedHomeRoutes,
+                                router = router,
+                                buildInfoProvider = koin.get<BuildInfoProvider>(),
+                                preferenceManager = preferenceManager,
+                                shouldShowHomeChrome = selectedHomeRoute != null,
+                                textToImageViewModel = textToImageViewModel,
+                                imageToImageViewModel = imageToImageViewModel,
+                            )
+                        }
 
-                    if (selectedHomeRoute == null) {
-                        OverlayRouteContent(
-                            languageCode = languageCode,
-                            route = currentRoute,
-                            koin = koin,
-                            router = router,
-                            urlLauncher = urlLauncher,
-                            imageToImageViewModel = imageToImageViewModel,
-                        )
+                        if (selectedHomeRoute == null) {
+                            OverlayRouteContent(
+                                languageCode = languageCode,
+                                route = currentRoute,
+                                koin = koin,
+                                router = router,
+                                urlLauncher = urlLauncher,
+                                imageToImageViewModel = imageToImageViewModel,
+                            )
+                        }
                     }
                 }
             }

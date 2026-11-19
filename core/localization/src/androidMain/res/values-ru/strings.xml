@@ -739,4 +739,6 @@
     <string name="backup_replace_providers">Заменить настройки</string>
     <string name="backup_cancel">Отмена</string>
     <string name="backup_shared_credentials_retained">Общие учётные данные сохранены для невыбранных провайдеров: %1$s.</string>
+    <string name="settings_item_dim_screen">Затемнять экран</string>
+    <string name="settings_item_dim_screen_warning">*Затемнение экрана работает только при отключённой фоновой генерации.</string>
 </resources>

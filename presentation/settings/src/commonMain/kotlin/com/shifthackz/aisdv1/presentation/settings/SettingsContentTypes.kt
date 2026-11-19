@@ -17,6 +17,7 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
     SettingsListItem.COMMUNITY_HEADER,
     SettingsListItem.INFO_HEADER -> SettingsContentType.HEADER
 
+    SettingsListItem.DIM_SCREEN,
     SettingsListItem.NNAPI,
     SettingsListItem.BACKGROUND_GENERATION,
     SettingsListItem.MONITOR_CONNECTION,
@@ -28,6 +29,7 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
     SettingsListItem.SYSTEM_DARK,
     SettingsListItem.MANUAL_DARK -> SettingsContentType.SWITCH
 
+    SettingsListItem.DIM_SCREEN_WARNING,
     SettingsListItem.NNAPI_WARNING,
     SettingsListItem.BACKGROUND_WARNING,
     SettingsListItem.AUTO_SAVE_WARNING -> SettingsContentType.WARNING
