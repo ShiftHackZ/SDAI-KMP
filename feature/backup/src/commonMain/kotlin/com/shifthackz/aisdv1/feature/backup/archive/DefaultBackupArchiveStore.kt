@@ -195,6 +195,9 @@ internal class DefaultBackupArchiveStore(
             val target = directory / ARCHIVE
             val displayName = files.documentName(document).take(512)
             FileSystem.SYSTEM.sink(directory / "name").buffer().use { it.writeUtf8(displayName) }
+            val sourceLocation = files.documentLocation(document).take(2048)
+            FileSystem.SYSTEM.sink(directory / "location").buffer()
+                .use { it.writeUtf8(sourceLocation) }
             files.openDocument(document).use { source ->
                 FileSystem.SYSTEM.sink(target).buffer().use { sink ->
                     val buffer = Buffer()
@@ -298,7 +301,11 @@ internal class DefaultBackupArchiveStore(
             entries,
             preferences.providers.keys,
             skipped,
-            filename
+            filename,
+            sourceLocation = (archive.path.parent!! / "location").let { location ->
+                if (FileSystem.SYSTEM.exists(location)) FileSystem.SYSTEM.source(location).buffer()
+                    .use { it.readUtf8() } else ""
+            },
         )
     }
 

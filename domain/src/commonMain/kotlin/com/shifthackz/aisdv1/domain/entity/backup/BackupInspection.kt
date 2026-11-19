@@ -11,6 +11,7 @@ package com.shifthackz.aisdv1.domain.entity.backup
  * @param providers Supported provider children present in the archive.
  * @param skippedCount Number of unsupported section, provider or field entries.
  * @param filename User-facing original filename, excluding its storage path.
+ * @param sourceLocation Native source path or provider document reference for display; never an archive payload field.
  * @author Dmitriy Moroz
  */
 data class BackupInspection(
@@ -22,4 +23,5 @@ data class BackupInspection(
     val providers: Set<String>,
     val skippedCount: Int = 0,
     val filename: String = "",
+    val sourceLocation: String = "",
 )

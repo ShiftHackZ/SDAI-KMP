@@ -330,6 +330,11 @@ internal fun ServerSetupState.ValidationError.message(
     ServerSetupState.ValidationError.InvalidUrl -> Localization.string("error_invalid_url")
 }
 
+/**
+ * Enables setup only for the selected usable model; allowing custom paths does not bypass catalog downloads.
+ * Authorization recovery and provider-specific account requirements remain authoritative.
+ * @author Dmitriy Moroz
+ */
 internal val ServerSetupState.mainButtonEnabled: Boolean
     get() = when {
         isAuthorizationStorageBusy -> false
@@ -340,15 +345,12 @@ internal val ServerSetupState.mainButtonEnabled: Boolean
             ServerSetupState.Step.SOURCE -> true
             ServerSetupState.Step.CONFIGURE -> when (mode) {
                 ServerSource.OPEN_AI_OAUTH -> openAiOAuthAccount != null && !openAiOAuthBusy
-                ServerSource.LOCAL_MNN -> isLocalMnnCustomModel || localMnnModels.any { it.selected && it.downloaded }
-                ServerSource.LOCAL_MICROSOFT_ONNX -> localOnnxCustomModel ||
-                        localOnnxModels.any { it.selected && it.downloaded }
-
-                ServerSource.LOCAL_GOOGLE_MEDIA_PIPE -> localMediaPipeCustomModel ||
-                        localMediaPipeModels.any { it.selected && it.downloaded }
-
-                ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> localSdxlCustomModel ||
-                        localSdxlModels.any { it.selected && it.downloaded }
+                ServerSource.LOCAL_MNN,
+                ServerSource.LOCAL_MICROSOFT_ONNX,
+                ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
+                ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> localModels.any { model ->
+                    model.selected && if (model.isCustom) localCustomModel else model.downloaded
+                }
 
                 ServerSource.LOCAL_APPLE_CORE_ML -> localCoreMlModels.any { model ->
                     model.selected &&
@@ -367,6 +369,10 @@ internal val ServerSetupState.mainButtonEnabled: Boolean
         }
     }
 
+/**
+ * Identifies the platform-neutral custom entry, whose source files are selected separately from catalog downloads.
+ * @author Dmitriy Moroz
+ */
 internal val ServerSetupState.LocalModel.isCustom: Boolean
     get() = id == LocalAiModel.CustomOnnx.id ||
             id == LocalAiModel.CustomMediaPipe.id ||

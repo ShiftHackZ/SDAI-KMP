@@ -90,13 +90,18 @@ class BackupViewModel(
                     hasExported = export.status == BackupExportStatus.COMPLETE,
                     hasCanceled = it.hasCanceled || export.status == BackupExportStatus.CANCELED,
                     hasError = it.hasError || export.status == BackupExportStatus.FAILED,
+                    isFeedbackVisible = it.isFeedbackVisible || export.status in setOf(
+                        BackupExportStatus.COMPLETE,
+                        BackupExportStatus.FAILED,
+                        BackupExportStatus.CANCELED,
+                    ),
                 )
             }
         }
     }
 
     init {
-        if (mode != BackupScreenMode.WELCOME) runOperation {
+        if (mode != BackupScreenMode.WELCOME) runOperation(shouldClearFeedback = false) {
             val recovery = loadPending()
             if (recovery != null) {
                 restoreRequest = recovery.request
@@ -148,7 +153,8 @@ class BackupViewModel(
                     isRestoreTab = intent.isRestore,
                     result = null,
                     hasError = false,
-                    hasCanceled = false
+                    hasCanceled = false,
+                    isFeedbackVisible = false,
                 )
             }
 
@@ -193,6 +199,12 @@ class BackupViewModel(
                         isRestoreSelectionLocked = restoreRequest != null
                     )
                 }
+            }
+
+            BackupIntent.DismissFeedback -> if (canInteract()) {
+                if (mode == BackupScreenMode.FIRST_LAUNCH && currentState.result?.hasFailed == false) {
+                    leave()
+                } else updateState { it.copy(isFeedbackVisible = false) }
             }
 
             is BackupIntent.ExportFinished -> completeExport(intent)
@@ -265,14 +277,9 @@ class BackupViewModel(
                         updateState {
                             it.copy(
                                 result = result,
-                                hasPendingSession = result.hasFailed
+                                hasPendingSession = result.hasFailed,
+                                isFeedbackVisible = true,
                             )
-                        }
-                        if (!result.hasFailed && mode == BackupScreenMode.FIRST_LAUNCH) {
-                            setStartupStage(BackupStartupStage.CONFIGURATION)
-                            discardBackup(inspection.handle)
-                            restoreRequest = null
-                            withContext(dispatchers.immediate) { router.navigateToInitialConfiguration() }
                         }
                     }
                 }
@@ -326,13 +333,20 @@ class BackupViewModel(
         }
     }
 
-    private fun runOperation(block: suspend () -> Unit) {
+    /**
+     * Serializes bounded work and publishes cancellable loading plus acknowledged failure feedback.
+     * @param shouldClearFeedback Whether a new user operation replaces the prior feedback; startup keeps durable export completion.
+     * @param block Work run on IO with state publication through the MVI owner.
+     * @author Dmitriy Moroz
+     */
+    private fun runOperation(shouldClearFeedback: Boolean = true, block: suspend () -> Unit) {
         if (operation?.isActive == true) return
         updateState {
             it.copy(
                 isBusy = true,
-                hasError = false,
-                hasCanceled = false,
+                hasError = if (shouldClearFeedback) false else it.hasError,
+                hasCanceled = if (shouldClearFeedback) false else it.hasCanceled,
+                isFeedbackVisible = if (shouldClearFeedback) false else it.isFeedbackVisible,
                 progress = null
             )
         }
@@ -340,10 +354,10 @@ class BackupViewModel(
             try {
                 block()
             } catch (cancelled: CancellationException) {
-                updateState { it.copy(hasCanceled = true) }
+                updateState { it.copy(hasCanceled = true, isFeedbackVisible = true) }
                 throw cancelled
             } catch (_: Exception) {
-                updateState { it.copy(hasError = true) }
+                updateState { it.copy(hasError = true, isFeedbackVisible = true) }
             } finally {
                 updateState { it.copy(isBusy = false, progress = null) }
             }

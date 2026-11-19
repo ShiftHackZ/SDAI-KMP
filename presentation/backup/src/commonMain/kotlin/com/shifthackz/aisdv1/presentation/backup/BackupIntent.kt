@@ -78,6 +78,12 @@ sealed interface BackupIntent : MviIntent {
     data object DismissConflict : BackupIntent
 
     /**
+     * Acknowledges feedback without clearing retry state; successful first-launch restore proceeds to setup.
+     * @author Dmitriy Moroz
+     */
+    data object DismissFeedback : BackupIntent
+
+    /**
      * Cancels active bounded work; already committed categories remain journal-owned.
      * @author Dmitriy Moroz
      */

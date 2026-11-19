@@ -31,6 +31,9 @@ internal class IosBackupFileStore : BackupFileStore {
     override fun documentName(document: String): String =
         NSURL.URLWithString(document)?.lastPathComponent ?: "SDAI.sdaibackup"
 
+    override fun documentLocation(document: String): String =
+        documentPath(document).toString()
+
     override fun newId(): String = NSUUID().UUIDString
     override fun openDocument(document: String) =
         FileSystem.SYSTEM.source(checkNotNull(NSURL.URLWithString(document)?.path).toPath())

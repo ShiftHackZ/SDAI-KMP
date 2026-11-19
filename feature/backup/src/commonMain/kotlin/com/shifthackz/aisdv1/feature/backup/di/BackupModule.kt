@@ -14,6 +14,8 @@ import com.shifthackz.aisdv1.feature.backup.restore.BackupProviderPlanner
 import com.shifthackz.aisdv1.feature.backup.restore.DefaultBackupProviderPlanner
 import com.shifthackz.aisdv1.feature.backup.restore.BackupRestoreGuard
 import com.shifthackz.aisdv1.feature.backup.restore.DefaultBackupRestoreGuard
+import com.shifthackz.aisdv1.feature.backup.restore.BackupImageFingerprint
+import com.shifthackz.aisdv1.feature.backup.restore.DefaultBackupImageFingerprint
 import com.shifthackz.aisdv1.feature.backup.restore.BackupRestoreWriter
 import com.shifthackz.aisdv1.feature.backup.restore.RoomBackupRestoreWriter
 import com.shifthackz.aisdv1.feature.backup.restore.BackupSessionCodec
@@ -83,13 +85,16 @@ val backupModule = module {
     single<BackupRestoreGuard> { DefaultBackupRestoreGuard() }
     single<BackupProviderPlanner> { DefaultBackupProviderPlanner(get()) }
     single<BackupSessionCodec> { DefaultBackupSessionCodec(get(named("backupJson"))) }
+    single<BackupImageFingerprint> { DefaultBackupImageFingerprint() }
     single<BackupRestoreWriter> {
         RoomBackupRestoreWriter(
             get(),
             get(),
             get(),
             get(),
-            get(named("backupJson"))
+            get(named("backupJson")),
+            get(),
+            get(),
         )
     }
     single<BackupStagingCleaner> { DefaultBackupStagingCleaner(get(), get(), get()) }

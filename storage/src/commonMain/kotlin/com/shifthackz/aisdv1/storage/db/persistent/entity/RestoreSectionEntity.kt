@@ -8,7 +8,7 @@ import androidx.room.Entity
  * @param sessionId Owning restore session.
  * @param category Stable completed section ID.
  * @param importedCount Number of destination records durably added or applied.
- * @param skippedCount Number of unsupported entries omitted from this committed category.
+ * @param skippedCount Number of duplicate or unsupported entries omitted from this committed category.
  * @param retainedCredentialProviders Comma-separated stable provider IDs whose shared credentials were preserved.
  * @author Dmitriy Moroz
  */

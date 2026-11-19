@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.component
 
+import com.shifthackz.aisdv1.presentation.components.widget.action.SecondaryActionButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,7 +32,7 @@ internal fun OpenAiOAuthActionBar(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SetupActionBar(modifier = modifier) {
+    ScreenActionBar(modifier = modifier) {
         when (state.openAiOAuthPhase) {
             OpenAiOAuthSetupPhase.SIGNED_OUT -> OAuthPrimaryAction(
                 label = Localization.string("open_ai_oauth_login"),
@@ -91,7 +94,7 @@ private fun OAuthPrimaryAction(
     isEnabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    SetupPrimaryAction(
+    PrimaryActionButton(
         modifier = modifier,
         isEnabled = isEnabled,
         onClick = onClick,
@@ -115,7 +118,7 @@ private fun OAuthSecondaryAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SetupSecondaryAction(
+    SecondaryActionButton(
         modifier = modifier,
         onClick = onClick,
     ) {

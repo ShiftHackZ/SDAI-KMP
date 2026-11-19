@@ -4,12 +4,13 @@ import com.shifthackz.aisdv1.feature.backup.archive.StagedBackup
 import com.shifthackz.aisdv1.domain.entity.backup.BackupProgress
 
 /**
- * Strict additive Room writes; each category and its ledger marker commit together.
+ * Strict additive Room writes; exact gallery duplicates are skipped and each category commits with its ledger marker.
  * @author Dmitriy Moroz
  */
 internal interface BackupRestoreWriter {
     /**
-     * Allocates fresh IDs and imports gallery rows with their section marker in one Room transaction.
+     * Allocates fresh IDs only for output images absent from gallery/history and earlier archive rows.
+     * Existing metadata, favorites and visibility remain unchanged; imports and skipped counts commit atomically.
      * @param sessionId Stable restore retry identity.
      * @param archive Validated immutable staged archive.
      * @param progress Processed-row progress; completion is acknowledged only after commit.

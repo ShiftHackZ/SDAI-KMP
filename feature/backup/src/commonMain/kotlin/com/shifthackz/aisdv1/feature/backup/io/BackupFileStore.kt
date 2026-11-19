@@ -24,10 +24,7 @@ internal interface BackupFileStore {
      * @author Dmitriy Moroz
      */
     fun documentPath(reference: String): Path
-    /**
-     * Returns a fresh UUID used only for private staging, sessions or imported revisions.
-     * @author Dmitriy Moroz
-     */
+
     /**
      * Reads only the display filename of a selected source, never its full storage path.
      * @param document Native user-selected source reference.
@@ -35,7 +32,18 @@ internal interface BackupFileStore {
      */
     fun documentName(document: String): String
 
-    /** Returns a fresh UUID for app-owned staging, sessions or imported image revisions. @author Dmitriy Moroz */
+    /**
+     * Describes the selected source for display without inventing a filesystem path for cloud providers.
+     * @param document Read-granted native source reference selected by the user.
+     * @return Available native path or a document-provider reference with query/fragment removed.
+     * @author Dmitriy Moroz
+     */
+    fun documentLocation(document: String): String
+
+    /**
+     * Returns a fresh UUID for app-owned staging, sessions or imported image revisions.
+     * @author Dmitriy Moroz
+     */
     fun newId(): String
 
     /**

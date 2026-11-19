@@ -28,9 +28,39 @@ interface GenerationResultDao {
 
 
     /**
+     * Pages every saved image identity, including hidden history, without materializing image payloads.
+     * @param afterId Exclusive primary-key cursor, or zero for the first page.
+     * @param limit Maximum IDs read for duplicate checking at once.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT id FROM generation_results WHERE id > :afterId ORDER BY id LIMIT :limit")
+    suspend fun queryImageIdsAfter(afterId: Long, limit: Int): List<Long>
+
+    /**
+     * Admits one output-only image string before materialization for a single-pass duplicate check.
+     * @param id Saved gallery or hidden-history identity.
+     * @param maxBytes Maximum stored UTF8 bytes allowed in the admitted text.
+     * @return Base64 text, or null for an oversized representation or missing row.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT image_base_64 FROM generation_results WHERE id = :id AND length(CAST(image_base_64 AS BLOB)) <= :maxBytes")
+    suspend fun queryImageTextForFingerprint(id: Long, maxBytes: Long): String?
+
+    /**
+     * Reads a bounded Kotlin chunk from an oversized legacy representation.
+     * Used only when the single-read admission rejects the text; SQLite may materialize its value natively.
+     * @param id Saved gallery or hidden-history identity.
+     * @param offset One-based byte position in the stored UTF8 Base64 representation.
+     * @param maxBytes Maximum UTF8 bytes materialized in the result; BLOB slicing avoids repeated text-prefix scans.
+     * @return Image text bytes, an empty array at EOF, or null if the row no longer exists.
+     * @author Dmitriy Moroz
+     */
+    @Query("SELECT substr(CAST(image_base_64 AS BLOB), :offset, :maxBytes) FROM generation_results WHERE id = :id")
+    suspend fun queryImageChunk(id: Long, offset: Long, maxBytes: Int): ByteArray?
+
+    /**
      * Reads all gallery rows, including hidden generation history.
      *
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC")
@@ -41,7 +71,6 @@ interface GenerationResultDao {
      *
      * @param limit Maximum rows held in one page.
      * @param offset Number of prior ordered rows to skip.
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC LIMIT :limit OFFSET :offset ")
@@ -52,7 +81,6 @@ interface GenerationResultDao {
      *
      * @param limit Maximum rows held in one page.
      * @param offset Number of prior ordered rows to skip.
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query(
@@ -74,7 +102,6 @@ interface GenerationResultDao {
      *
      * @param limit Maximum rows held in one page.
      * @param offset Number of prior ordered rows to skip.
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC LIMIT :limit OFFSET :offset ")
@@ -85,7 +112,6 @@ interface GenerationResultDao {
      *
      * @param limit Maximum rows held in one page.
      * @param offset Number of prior ordered rows to skip.
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query(
@@ -105,7 +131,6 @@ interface GenerationResultDao {
     /**
      * Observes the current total number of persisted generation rows.
      *
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query("SELECT COUNT(*) FROM ${GenerationResultContract.TABLE}")
@@ -114,7 +139,6 @@ interface GenerationResultDao {
     /**
      * Reads IDs of all saved generation rows.
      *
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query("SELECT ${GenerationResultContract.ID} FROM ${GenerationResultContract.TABLE} ORDER BY ${GenerationResultContract.CREATED_AT} DESC, ${GenerationResultContract.ID} DESC")
@@ -124,7 +148,6 @@ interface GenerationResultDao {
      * Reads one complete saved image row by local identity.
      *
      * @param id Local persisted row identity.
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} WHERE ${GenerationResultContract.ID} = :id LIMIT 1")
@@ -134,7 +157,6 @@ interface GenerationResultDao {
      * Reads complete saved rows for explicit local identities.
      *
      * @param idList Explicit local row identities to read or update.
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${GenerationResultContract.TABLE} WHERE ${GenerationResultContract.ID} IN (:idList)")
@@ -164,7 +186,6 @@ interface GenerationResultDao {
      * Inserts a complete gallery row; nonzero conflicting IDs replace existing rows.
      *
      * @param item Full image row; use ID zero for additive backup import.
-     * @return Matching saved rows or generated local identity, as described by the operation.
      * @author Dmitriy Moroz
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)

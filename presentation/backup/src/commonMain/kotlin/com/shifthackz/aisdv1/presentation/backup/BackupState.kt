@@ -16,6 +16,7 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupRestoreResult
  * @param progress Current bounded work stage.
  * @param conflict Named provider conflicts and opaque consent fingerprint.
  * @param result Durable completion report, including partial failure.
+ * @param isFeedbackVisible Whether the current completion, cancellation or failure still needs acknowledgement.
  * @param hasError Whether the last operation failed before a completion report.
  * @param hasCanceled Whether the user canceled active work.
  * @param hasExported Whether native document export actually completed.
@@ -34,6 +35,7 @@ data class BackupState(
     val progress: BackupProgress? = null,
     val conflict: BackupRestoreResult.Conflict? = null,
     val result: BackupRestoreResult.Finished? = null,
+    val isFeedbackVisible: Boolean = false,
     val hasError: Boolean = false,
     val hasCanceled: Boolean = false,
     val hasExported: Boolean = false,

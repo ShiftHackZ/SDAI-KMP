@@ -1,5 +1,11 @@
 package com.shifthackz.aisdv1.presentation.backup.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,14 +53,14 @@ internal fun BackupSelectionList(
     processIntent: (BackupIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         state.inspection?.entries?.forEach { entry ->
             val category = entry.category
             val isSelected = category in state.selection.categories
             val hasSomeProviders =
                 category == BackupCategory.PROVIDERS && state.selection.providers.isNotEmpty()
             val hasAllProviders = state.selection.providers.containsAll(state.inspection.providers)
-            Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+            Card(Modifier.fillMaxWidth()) {
                 Row(
                     Modifier.fillMaxWidth().then(
                         if (category == BackupCategory.PROVIDERS) Modifier.triStateToggleable(
@@ -113,24 +119,46 @@ internal fun BackupSelectionList(
                         )
                     }
                 }
-                if (category == BackupCategory.PROVIDERS && state.areProvidersExpanded) {
-                    state.inspection.providers.sorted().forEach { provider ->
-                        Row(
-                            Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
-                                value = provider in state.selection.providers,
-                                enabled = isEnabled && entry.isAvailable,
-                                role = Role.Checkbox,
-                                onValueChange = { processIntent(BackupIntent.ToggleProvider(provider)) },
-                            ).padding(start = 44.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = provider in state.selection.providers,
-                                onCheckedChange = null,
-                                enabled = isEnabled && entry.isAvailable
-                            )
-                            Spacer(Modifier.size(12.dp))
-                            Text(providerName(provider), style = MaterialTheme.typography.bodyLarge)
+                if (category == BackupCategory.PROVIDERS) {
+                    AnimatedVisibility(
+                        visible = state.areProvidersExpanded,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
+                        Column {
+                            state.inspection.providers.sorted().forEach { provider ->
+                                Row(
+                                    Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
+                                        value = provider in state.selection.providers,
+                                        enabled = isEnabled && entry.isAvailable,
+                                        role = Role.Checkbox,
+                                        onValueChange = {
+                                            processIntent(
+                                                BackupIntent.ToggleProvider(
+                                                    provider
+                                                )
+                                            )
+                                        },
+                                    ).padding(
+                                        start = 44.dp,
+                                        end = 16.dp,
+                                        top = 8.dp,
+                                        bottom = 8.dp
+                                    ),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Checkbox(
+                                        checked = provider in state.selection.providers,
+                                        onCheckedChange = null,
+                                        enabled = isEnabled && entry.isAvailable
+                                    )
+                                    Spacer(Modifier.size(12.dp))
+                                    Text(
+                                        providerName(provider),
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
                         }
                     }
                 }

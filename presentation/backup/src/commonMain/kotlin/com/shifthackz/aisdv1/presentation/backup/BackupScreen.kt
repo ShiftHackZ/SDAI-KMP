@@ -1,21 +1,14 @@
 package com.shifthackz.aisdv1.presentation.backup
 
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,22 +17,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.domain.entity.backup.BackupRestoreNotice
-import com.shifthackz.aisdv1.presentation.backup.component.providerName
-import com.shifthackz.aisdv1.presentation.backup.create.CreateBackupScreen
-import com.shifthackz.aisdv1.presentation.backup.restore.RestoreBackupScreen
+import com.shifthackz.aisdv1.presentation.backup.dialog.BackupDialogs
 import com.shifthackz.aisdv1.presentation.backup.welcome.RestoreWelcomeScreen
+import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
+import kotlinx.coroutines.flow.drop
 
 /**
- * Stateless backup host; dedicated create/restore content remains reusable across launch contexts.
- * @param mode Normal tabs or first-launch recovery chrome.
- * @param state Current nonsecret screen state.
+ * Hosts reusable backup content with configuration-aligned chrome and operation dialogs.
+ * @param mode Settings tabs or first-launch recovery context.
+ * @param state Nonsecret inventory, selection and operation feedback.
  * @param processIntent Caller-owned MVI event sink.
  * @param modifier Root screen placement.
  * @author Dmitriy Moroz
@@ -50,150 +45,119 @@ fun BackupScreen(
     mode: BackupScreenMode,
     state: BackupState,
     processIntent: (BackupIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val isEnabled = !state.isBusy && !state.isPicking && !state.isExporting
     if (mode == BackupScreenMode.WELCOME) {
         RestoreWelcomeScreen(
-            isEnabled,
-            state.hasError,
-            { processIntent(BackupIntent.BeginInitialRestore) },
-            { processIntent(BackupIntent.Continue) },
-            modifier
+            isEnabled = isEnabled,
+            onRestore = { processIntent(BackupIntent.BeginInitialRestore) },
+            onContinue = { processIntent(BackupIntent.Continue) },
+            modifier = modifier,
         )
-        return
-    }
-    val page = if (state.isRestoreTab) state.restore else state.create
-    Scaffold(modifier.safeDrawingPadding(), topBar = {
-        TopAppBar(
-            windowInsets = WindowInsets(0, 0, 0, 0),
-            title = { Text(Localization.string("backup_title")) },
-            navigationIcon = {
-                IconButton(
-                    onClick = { processIntent(BackupIntent.NavigateBack) },
-                    enabled = isEnabled
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, Localization.string("action_back"))
-                }
-            })
-    }, bottomBar = {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)) {
-            if (state.isBusy || state.isExporting) {
-                Row {
-                    CircularProgressIndicator(Modifier.size(24.dp)); Spacer(Modifier.size(12.dp)); Text(
-                    Localization.string("backup_working")
-                )
-                }
-                state.progress?.let { progress ->
-                    Text(
-                        if (progress.total > 0) "${progress.completed} / ${progress.total}" else progress.completed.toString(),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                TextButton(onClick = { processIntent(BackupIntent.CancelWork) }) {
-                    Text(
-                        Localization.string(
-                            "backup_cancel"
+    } else {
+        val page = if (state.isRestoreTab) state.restore else state.create
+        val pager = rememberPagerState(initialPage = if (state.isRestoreTab) 1 else 0) { 2 }
+        val isRestoreSelected by rememberUpdatedState(state.isRestoreTab)
+        val selectedPage = if (state.isRestoreTab) 1 else 0
+        val hasSettledPage = mode != BackupScreenMode.SETTINGS ||
+                (!pager.isScrollInProgress && pager.currentPage == selectedPage && pager.currentPageOffsetFraction == 0f)
+        LaunchedEffect(state.isRestoreTab) {
+            if (mode == BackupScreenMode.SETTINGS) {
+                pager.animateScrollToPage(selectedPage)
+            }
+        }
+        LaunchedEffect(pager) {
+            if (mode == BackupScreenMode.SETTINGS) {
+                snapshotFlow { pager.settledPage }.drop(1).collect { settledPage ->
+                    val shouldRestore = settledPage == 1
+                    if (shouldRestore != isRestoreSelected) processIntent(
+                        BackupIntent.SelectTab(
+                            shouldRestore
                         )
                     )
                 }
-            } else {
-                val isFinished =
-                    if (state.isRestoreTab) state.result?.hasFailed == false else state.hasExported
-                Button(
-                    onClick = { processIntent(if (isFinished) BackupIntent.NavigateBack else BackupIntent.Submit) },
-                    enabled = isEnabled && (isFinished || page.selection.categories.isNotEmpty()),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(Localization.string(if (isFinished) "backup_done" else if (state.isRestoreTab) "backup_restore" else "backup_create"))
-                }
             }
         }
-    }) { padding ->
-        Column(Modifier.padding(padding)) {
-            if (mode == BackupScreenMode.SETTINGS) TabRow(selectedTabIndex = if (state.isRestoreTab) 1 else 0) {
-                Tab(
-                    selected = !state.isRestoreTab,
-                    onClick = { processIntent(BackupIntent.SelectTab(false)) },
-                    enabled = isEnabled,
-                    text = { Text(Localization.string("backup_create_tab")) })
-                Tab(
-                    selected = state.isRestoreTab,
-                    onClick = { processIntent(BackupIntent.SelectTab(true)) },
-                    enabled = isEnabled,
-                    text = { Text(Localization.string("backup_restore_tab")) })
-            }
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
-                if (state.hasError) Text(
-                    Localization.string("backup_error"),
-                    color = MaterialTheme.colorScheme.error
-                )
-                if (state.hasCanceled) Text(
-                    Localization.string("backup_canceled"),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                if (state.hasExported && !state.isRestoreTab) Text(
-                    Localization.string("backup_exported"),
-                    color = MaterialTheme.colorScheme.primary
-                )
-                state.result?.let { result ->
-                    Text(
-                        Localization.string(if (result.hasFailed) "backup_partial" else "backup_restored"),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    result.importedCounts.forEach { (category, count) -> Text(Localization.string("backup_category_" + category.key) + ": " + count) }
-                    result.notices.forEach { notice ->
-                        when (notice) {
-                            is BackupRestoreNotice.SharedCredentialsRetained -> Text(
-                                Localization.string(
-                                    "backup_shared_credentials_retained",
-                                    notice.providers.joinToString(", ", transform = ::providerName)
-                                )
+        val isFinished =
+            if (state.isRestoreTab) state.result?.hasFailed == false else state.hasExported
+        Scaffold(
+            modifier = modifier,
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            Localization.string("backup_title"),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { processIntent(BackupIntent.NavigateBack) },
+                            enabled = isEnabled
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Outlined.ArrowBack,
+                                Localization.string("action_back")
                             )
                         }
+                    },
+                    windowInsets = persistentTopAppBarWindowInsets(),
+                )
+            },
+            bottomBar = {
+                ScreenActionBar {
+                    PrimaryActionButton(
+                        onClick = { processIntent(if (isFinished) BackupIntent.NavigateBack else BackupIntent.Submit) },
+                        isEnabled = isEnabled && hasSettledPage && (isFinished || page.selection.categories.isNotEmpty()),
+                    ) {
+                        Text(Localization.string(if (isFinished) "backup_done" else if (state.isRestoreTab) "backup_restore" else "backup_create"))
                     }
-                    if (result.skippedCount > 0) Text(
-                        Localization.string(
-                            "backup_skipped",
-                            result.skippedCount
+                }
+            },
+        ) { padding ->
+            Column(Modifier.padding(padding).fillMaxSize()) {
+                if (mode == BackupScreenMode.SETTINGS) {
+                    TabRow(selectedTabIndex = selectedPage) {
+                        Tab(
+                            selected = !state.isRestoreTab,
+                            onClick = { processIntent(BackupIntent.SelectTab(false)) },
+                            enabled = isEnabled,
+                            text = { Text(Localization.string("backup_create_tab")) },
                         )
+                        Tab(
+                            selected = state.isRestoreTab,
+                            onClick = { processIntent(BackupIntent.SelectTab(true)) },
+                            enabled = isEnabled,
+                            text = { Text(Localization.string("backup_restore_tab")) },
+                        )
+                    }
+                    HorizontalPager(
+                        state = pager,
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        userScrollEnabled = isEnabled,
+                        key = { it },
+                    ) { pageIndex ->
+                        val isRestorePage = pageIndex == 1
+                        BackupPageContent(
+                            isRestore = isRestorePage,
+                            page = if (isRestorePage) state.restore else state.create,
+                            isEnabled = isEnabled && hasSettledPage,
+                            canEditSelection = if (isRestorePage) !state.isRestoreSelectionLocked else !state.hasPendingExport,
+                            processIntent = processIntent,
+                        )
+                    }
+                } else {
+                    BackupPageContent(
+                        isRestore = true,
+                        page = state.restore,
+                        isEnabled = isEnabled,
+                        canEditSelection = !state.isRestoreSelectionLocked,
+                        processIntent = processIntent,
                     )
                 }
-                if (state.isRestoreTab) RestoreBackupScreen(
-                    page,
-                    isEnabled,
-                    !state.isRestoreSelectionLocked,
-                    processIntent
-                )
-                else CreateBackupScreen(page, isEnabled && !state.hasPendingExport, processIntent)
             }
         }
     }
-    state.conflict?.let { conflict ->
-        AlertDialog(
-            onDismissRequest = { processIntent(BackupIntent.DismissConflict) },
-            title = { Text(Localization.string("backup_conflict_title")) },
-            text = {
-                Text(
-                    Localization.string(
-                        "backup_conflict_description",
-                        conflict.providers.joinToString(", ", transform = ::providerName)
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { processIntent(BackupIntent.ConfirmProviderReplacement) }) {
-                    Text(
-                        Localization.string("backup_replace_providers")
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { processIntent(BackupIntent.DismissConflict) }) {
-                    Text(
-                        Localization.string("backup_cancel")
-                    )
-                }
-            })
-    }
+    BackupDialogs(state, processIntent)
 }

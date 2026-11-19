@@ -1,10 +1,12 @@
 package com.shifthackz.aisdv1.presentation.backup.create
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.backup.BackupCategory
 import com.shifthackz.aisdv1.presentation.backup.BackupPageState
@@ -26,7 +28,7 @@ internal fun CreateBackupScreen(
     processIntent: (BackupIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
             Localization.string("backup_create_description"),
             style = MaterialTheme.typography.bodyLarge

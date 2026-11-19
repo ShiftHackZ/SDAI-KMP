@@ -32,6 +32,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -78,8 +79,14 @@ class BackupViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun TestScope.viewModel(mode: BackupScreenMode = BackupScreenMode.SETTINGS): BackupViewModel {
-        val dispatcher = StandardTestDispatcher(testScheduler)
+    private fun TestScope.viewModel(
+        mode: BackupScreenMode = BackupScreenMode.SETTINGS,
+        shouldUseImmediateDispatcher: Boolean = false,
+    ): BackupViewModel {
+        val dispatcher =
+            if (shouldUseImmediateDispatcher) UnconfinedTestDispatcher(testScheduler) else StandardTestDispatcher(
+                testScheduler
+            )
         Dispatchers.setMain(dispatcher)
         coEvery { pending() } returns null
         coEvery { inventory() } returns summary
@@ -228,7 +235,7 @@ class BackupViewModelTest {
         }
 
     @Test
-    fun `given first launch restore, selected sections succeed, expected restored setup flow`() =
+    fun `given first launch restore, user acknowledges successful result, expected restored setup flow`() =
         runTest {
             // Given
             val vm = viewModel(BackupScreenMode.FIRST_LAUNCH)
@@ -242,13 +249,109 @@ class BackupViewModelTest {
             advanceUntilIdle()
             vm.processIntent(BackupIntent.DocumentSelected("content://backup"))
             advanceUntilIdle()
-            // When
             vm.processIntent(BackupIntent.Submit)
+            advanceUntilIdle()
+            assertTrue(vm.state.value.isFeedbackVisible)
+            verify(exactly = 0) { router.navigateToInitialConfiguration() }
+            // When
+            vm.processIntent(BackupIntent.DismissFeedback)
             advanceUntilIdle()
             // Then
             verify { startup(BackupStartupStage.CONFIGURATION); router.navigateToInitialConfiguration() }
             coVerify { discard(summary.handle) }
             verify(exactly = 0) { router.navigateBack() }
+        }
+
+    @Test
+    fun `given retained failed export, screen initializes on immediate dispatcher, expected failure feedback retained`() =
+        runTest {
+            // Given
+            exportState.value = BackupExportOperation(
+                BackupExportStatus.FAILED,
+                BackupExport("source", "name", "handle")
+            )
+
+            // When
+            val vm = viewModel(shouldUseImmediateDispatcher = true)
+            advanceUntilIdle()
+
+            // Then
+            assertTrue(vm.state.value.hasError)
+            assertTrue(vm.state.value.isFeedbackVisible)
+            assertFalse(vm.state.value.isBusy)
+            vm.onRouteDisposed()
+        }
+
+    @Test
+    fun `given retained canceled export, screen initializes on immediate dispatcher, expected cancellation feedback retained`() =
+        runTest {
+            // Given
+            exportState.value = BackupExportOperation(
+                BackupExportStatus.CANCELED,
+                BackupExport("source", "name", "handle")
+            )
+
+            // When
+            val vm = viewModel(shouldUseImmediateDispatcher = true)
+            advanceUntilIdle()
+
+            // Then
+            assertTrue(vm.state.value.hasCanceled)
+            assertTrue(vm.state.value.isFeedbackVisible)
+            assertFalse(vm.state.value.isBusy)
+            vm.onRouteDisposed()
+        }
+
+    @Test
+    fun `given failed backup inspection, user acknowledges error, expected file selection remains available`() =
+        runTest {
+            // Given
+            val vm = viewModel()
+            coEvery { inspect(any(), any()) } throws IllegalArgumentException("Invalid archive")
+            advanceUntilIdle()
+            vm.processIntent(BackupIntent.DocumentSelected("content://invalid"))
+            advanceUntilIdle()
+            assertTrue(vm.state.value.isFeedbackVisible)
+            assertTrue(vm.state.value.hasError)
+
+            // When
+            vm.processIntent(BackupIntent.DismissFeedback)
+            advanceUntilIdle()
+
+            // Then
+            assertFalse(vm.state.value.isFeedbackVisible)
+            assertFalse(vm.state.value.isBusy)
+            assertNull(vm.state.value.restore.inspection)
+            verify(exactly = 0) { router.navigateBack(); router.navigateToInitialConfiguration() }
+            vm.onRouteDisposed()
+        }
+
+    @Test
+    fun `given partial restore result, user acknowledges failure, expected journal selection retained for retry`() =
+        runTest {
+            // Given
+            val vm = viewModel()
+            coEvery { inspect(any(), any()) } returns summary
+            val result = BackupRestoreResult.Finished(setOf(BackupCategory.GALLERY), 0, true)
+            coEvery { restore(any(), any()) } returns result
+            advanceUntilIdle()
+            vm.processIntent(BackupIntent.SelectTab(true))
+            vm.processIntent(BackupIntent.DocumentSelected("content://backup"))
+            advanceUntilIdle()
+            vm.processIntent(BackupIntent.Submit)
+            advanceUntilIdle()
+
+            // When
+            vm.processIntent(BackupIntent.DismissFeedback)
+            advanceUntilIdle()
+
+            // Then
+            assertFalse(vm.state.value.isFeedbackVisible)
+            assertEquals(result, vm.state.value.result)
+            assertTrue(vm.state.value.hasPendingSession)
+            assertTrue(vm.state.value.isRestoreSelectionLocked)
+            coVerify(exactly = 0) { discard(any()) }
+            vm.onRouteDisposed()
         }
 
     @Test

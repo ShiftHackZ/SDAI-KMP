@@ -2,7 +2,9 @@ package com.shifthackz.aisdv1.feature.backup.io
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.os.StatFs
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import java.util.UUID
 import java.io.File
@@ -39,6 +41,24 @@ internal class AndroidBackupFileStore(private val context: Context) : BackupFile
         )?.use { cursor ->
             if (cursor.moveToFirst()) cursor.getString(0) else null
         } ?: "SDAI.sdaibackup"
+    }
+
+    override fun documentLocation(document: String): String {
+        val uri = Uri.parse(document)
+        if (uri.scheme == "file") return uri.path.orEmpty()
+        if (uri.authority == "com.android.externalstorage.documents" && DocumentsContract.isDocumentUri(
+                context,
+                uri
+            )
+        ) {
+            val id = DocumentsContract.getDocumentId(uri)
+            if (id.startsWith("primary:")) {
+                return Environment.getExternalStorageDirectory().absolutePath + "/" + id.substringAfter(
+                    ':'
+                )
+            }
+        }
+        return Uri.decode(uri.buildUpon().clearQuery().fragment(null).build().toString())
     }
 
     override fun newId(): String = UUID.randomUUID().toString()

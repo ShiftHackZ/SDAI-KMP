@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.generic.kmp.compose)
 }
 
+compose.resources {
+    packageOfResClass = "com.shifthackz.aisdv1.presentation.backup.generated.resources"
+}
+
 android {
     namespace = "com.shifthackz.aisdv1.presentation.backup"
     testOptions.unitTests {
@@ -24,8 +28,10 @@ kotlin {
             implementation(project(":domain"))
             implementation(project(":presentation:components"))
             implementation(compose.runtime)
+            implementation(compose.components.resources)
             implementation(compose.ui)
             implementation(compose.foundation)
+            implementation(compose.animation)
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.compose)

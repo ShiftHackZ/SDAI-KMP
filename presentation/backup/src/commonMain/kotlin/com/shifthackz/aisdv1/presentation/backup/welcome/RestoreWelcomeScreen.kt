@@ -1,85 +1,98 @@
 package com.shifthackz.aisdv1.presentation.backup.welcome
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Restore
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.backup.generated.resources.Res
+import com.shifthackz.aisdv1.presentation.backup.generated.resources.backup_welcome
+import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
+import com.shifthackz.aisdv1.presentation.components.widget.action.SecondaryActionButton
+import org.jetbrains.compose.resources.painterResource
 
 /**
- * First-launch invitation with two bottom actions and no path back to onboarding.
+ * Invites first-launch recovery with branded artwork and the same pinned action geometry as setup.
  * @param isEnabled Whether a durable navigation transition can start.
- * @param hasError Whether checked startup progression failed and can be retried.
  * @param onRestore Opens restore-only recovery.
- * @param onContinue Continues through provider setup toward home.
+ * @param onContinue Continues through mandatory provider setup.
  * @param modifier Root full-screen layout.
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun RestoreWelcomeScreen(
     isEnabled: Boolean,
-    hasError: Boolean,
     onRestore: () -> Unit,
     onContinue: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                Icons.Outlined.Restore,
-                null,
-                Modifier.size(96.dp),
-                tint = MaterialTheme.colorScheme.primary
+    Scaffold(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surface,
+        topBar = {
+            Spacer(
+                Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
+                    .windowInsetsPadding(persistentTopAppBarWindowInsets())
             )
-            Spacer(Modifier.size(32.dp))
+        },
+        bottomBar = {
+            ScreenActionBar(containerColor = MaterialTheme.colorScheme.surface) {
+                SecondaryActionButton(onClick = onContinue, isEnabled = isEnabled) {
+                    Text(Localization.string("backup_continue"))
+                }
+                PrimaryActionButton(onClick = onRestore, isEnabled = isEnabled) {
+                    Text(Localization.string("backup_restore_from_file"))
+                }
+            }
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier.padding(padding).fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.backup_welcome),
+                contentDescription = null,
+                modifier = Modifier.widthIn(max = 320.dp).fillMaxWidth().aspectRatio(1.25f),
+            )
+            Spacer(Modifier.height(24.dp))
             Text(
                 Localization.string("backup_welcome_title"),
-                style = MaterialTheme.typography.headlineLarge
+                modifier = Modifier.widthIn(max = 480.dp),
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.size(16.dp))
+            Spacer(Modifier.height(16.dp))
             Text(
                 Localization.string("backup_welcome_description"),
+                modifier = Modifier.widthIn(max = 480.dp),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
         }
-        if (hasError) Text(
-            Localization.string("backup_error"),
-            color = MaterialTheme.colorScheme.error
-        )
-        Button(onClick = onRestore, enabled = isEnabled, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                Localization.string("backup_restore_from_file")
-            )
-        }
-        OutlinedButton(
-            onClick = onContinue,
-            enabled = isEnabled,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text(Localization.string("backup_continue")) }
     }
 }

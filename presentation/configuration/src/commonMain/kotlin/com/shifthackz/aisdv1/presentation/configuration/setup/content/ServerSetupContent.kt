@@ -2,6 +2,8 @@
 
 package com.shifthackz.aisdv1.presentation.configuration.setup.content
 
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.LocalModelDownloadAction
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.SetupActionBar
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.SetupPrimaryAction
 import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.ConfigurationStepBar
@@ -108,11 +108,11 @@ fun ServerSetupContent(
                         processIntent = processIntent
                     )
                 } else {
-                    SetupActionBar(verticalArrangement = Arrangement.Top) {
+                    ScreenActionBar(verticalArrangement = Arrangement.Top) {
                         if (state.step == ServerSetupState.Step.CONFIGURE && state.mode.localCatalogType != null) {
                             LocalModelDownloadAction(state, processIntent)
                         }
-                        SetupPrimaryAction(
+                        PrimaryActionButton(
                             isEnabled = !state.loadingConfiguration && state.mainButtonEnabled,
                             onClick = { processIntent(ServerSetupIntent.MainButtonClick) },
                         ) {
