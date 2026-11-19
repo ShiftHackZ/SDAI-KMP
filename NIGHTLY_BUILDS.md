@@ -59,6 +59,12 @@ Give ordinary members View Channel and Read Message History, deny Send Messages,
 
 The APK is hosted on GitHub rather than attached to Discord because Full APKs exceed Discord's default upload limit. The fixed download URL always serves the latest nightly, including when opened from an older announcement. Mention parsing is disabled so commit subjects cannot notify roles or everyone.
 
+## Telegram Notifications
+
+After successfully publishing a nightly, the workflow posts a comment under the configured Telegram announcement in the channel's linked discussion group. It uses the same title, version, recent changes, links and disclaimer as Discord, rendered as HTML text with link previews disabled. The APK is linked from GitHub, not attached as a file.
+
+Skipped builds and runs with `publish=false` do not post. A missing reply target fails delivery instead of posting an unrelated group message. Telegram delivery is attempted even if Discord delivery fails. Neither destination retries automatically, since a lost response could duplicate an announcement.
+
 ## Manual Run
 
 GitHub only exposes `workflow_dispatch` for workflow files that exist on the repository default branch. Keep `.github/workflows/nightly_android.yml` on `master`; the workflow still builds `develop` through the `target_ref` input.
