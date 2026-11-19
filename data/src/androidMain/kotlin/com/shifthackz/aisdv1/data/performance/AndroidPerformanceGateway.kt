@@ -3,9 +3,8 @@ package com.shifthackz.aisdv1.data.performance
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Process
+import android.os.Debug
 import android.os.SystemClock
-import android.system.Os
-import android.system.OsConstants
 import com.shifthackz.aisdv1.domain.entity.CpuUsageCounters
 import com.shifthackz.aisdv1.domain.entity.PerformanceReading
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
@@ -15,8 +14,9 @@ import java.io.File
 /**
  * Combines host-owned counters with on-demand child IPC readings. Android blocks sibling /proc
  * reads even for the app's inference process; those reads must never stand in for worker telemetry.
- * RSS may count shared pages in both processes.
- * @param context Application context used to read device memory capacity and availability.
+ * Proportional resident memory apportions shared pages between their processes. Device usage
+ * includes reclaimable file caches, so file-backed model pages remain in both accounting scopes.
+ * @param context Application context used to read device physical memory capacity.
  * @param nativeGateway Current inference connection, queried without starting a worker.
  * @author Dmitriy Moroz
  */
@@ -26,13 +26,14 @@ internal class AndroidPerformanceGateway(
 ) : PerformanceGateway {
     private val activityManager =
         context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    private val pageBytes = Os.sysconf(OsConstants._SC_PAGESIZE)
 
     override suspend fun read(): PerformanceReading {
-        check(pageBytes > 0)
         val worker = nativeGateway.readProcessPerformance()
-        val fields =
-            File("/proc/self/stat").readText().substringAfterLast(") ").trim().split(Regex("\\s+"))
+        val processMemory = Debug.MemoryInfo()
+        Debug.getMemoryInfo(processMemory)
+        val residentKilobytes =
+            processMemory.dalvikPss.toLong() + processMemory.nativePss + processMemory.otherPss
+        check(residentKilobytes > 0)
         val memory = ActivityManager.MemoryInfo()
         activityManager.getMemoryInfo(memory)
         return PerformanceReading(
@@ -42,10 +43,10 @@ internal class AndroidPerformanceGateway(
                 worker?.let { put(it.identity, it.cpuTimeNanos) }
             },
             processorCount = Runtime.getRuntime().availableProcessors(),
-            residentBytes = fields[21].toLong() * pageBytes + (worker?.residentBytes ?: 0L),
+            residentBytes = residentKilobytes * 1024L + (worker?.residentBytes ?: 0L),
             totalMemoryBytes = memory.totalMem,
-            deviceUsedMemoryBytes = (memory.totalMem - memory.availMem).coerceIn(
-                0,
+            deviceUsedMemoryBytes = memory.totalMem - parseFreeMemoryBytes(
+                File("/proc/meminfo").readText(),
                 memory.totalMem
             ),
             deviceCpu = runCatching {

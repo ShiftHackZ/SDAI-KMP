@@ -437,7 +437,7 @@ interface PreferenceManager {
 
     /**
      * Enables live CPU and resident-memory graphs in foreground generation progress dialogs.
-     * Defaults to false; disabled dialogs perform no resource sampling.
+     * Defaults to true; an explicitly disabled preference prevents resource sampling.
      * @author Dmitriy Moroz
      */
     var shouldShowPerformanceOverlay: Boolean

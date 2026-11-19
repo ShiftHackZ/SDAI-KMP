@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,7 +25,7 @@ import kotlin.math.roundToInt
  * Collects resource history only while the generation dialog's tab is visible and resumed.
  * Removing the dialog or backgrounding the app cancels collection and discards its history.
  *
- * @param history Cold opt-in sampler supplied by the application composition root.
+ * @param history Cold preference-controlled sampler supplied by the application composition root.
  * @param modifier Layout applied to the resource panel.
  * @author Dmitriy Moroz
  */
@@ -55,10 +53,6 @@ fun GenerationPerformanceOverlay(
         modifier = modifier.fillMaxWidth().padding(top = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            Localization.string("performance_app_usage"),
-            style = MaterialTheme.typography.labelMedium
-        )
         PerformanceResourceGraph(
             label = Localization.string("performance_cpu"),
             appValue = latest.cpuPercent?.let { "${it.roundToInt()}%" },

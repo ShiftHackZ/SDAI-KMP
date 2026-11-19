@@ -7,6 +7,9 @@ import com.shifthackz.aisdv1.domain.entity.Grid
 import com.shifthackz.aisdv1.domain.entity.HuggingFaceModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
@@ -246,6 +249,54 @@ class PreferenceManagerImplTest {
 
             Assert.assertEquals("uk", preferenceManager.languageCode)
             Assert.assertEquals("uk", settings.languageCode)
+        }
+
+    @Test
+    fun `given performance overlay preferences, no choice is saved, expected overlay enabled in getter and snapshot`() =
+        runTest {
+            // Given
+            val freshPreferences = PreferenceManagerImpl(keyValueStore)
+
+            // When
+            val snapshot = freshPreferences.observe().first()
+
+            // Then
+            Assert.assertTrue(freshPreferences.shouldShowPerformanceOverlay)
+            Assert.assertTrue(snapshot.shouldShowPerformanceOverlay)
+        }
+
+    @Test
+    fun `given performance overlay preferences, disabled choice is saved then manager recreated, expected disabled choice preserved`() =
+        runTest {
+            // Given
+            preferenceManager.shouldShowPerformanceOverlay = false
+
+            // When
+            val recreated = PreferenceManagerImpl(keyValueStore)
+            val snapshot = recreated.observe().first()
+
+            // Then
+            Assert.assertFalse(recreated.shouldShowPerformanceOverlay)
+            Assert.assertFalse(snapshot.shouldShowPerformanceOverlay)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `given performance overlay preferences, user disables then reenables, expected live observer and durable choice updated`() =
+        runTest {
+            // Given
+            val values = mutableListOf<Boolean>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                preferenceManager.observe().collect { values.add(it.shouldShowPerformanceOverlay) }
+            }
+
+            // When
+            preferenceManager.shouldShowPerformanceOverlay = false
+            preferenceManager.shouldShowPerformanceOverlay = true
+
+            // Then
+            Assert.assertEquals(listOf(true, false, true), values)
+            Assert.assertTrue(PreferenceManagerImpl(keyValueStore).shouldShowPerformanceOverlay)
         }
 
     private class InMemoryKeyValueStore : KeyValueStore {

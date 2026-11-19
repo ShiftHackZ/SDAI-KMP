@@ -795,7 +795,6 @@
     <string name="settings_item_dim_screen_warning">*仅在关闭后台生成时才会调暗屏幕。</string>
 
     <string name="settings_item_performance_overlay">性能监视器</string>
-    <string name="performance_app_usage">最近 60 秒</string>
     <string name="performance_cpu">CPU</string>
     <string name="performance_ram">内存</string>
     <string name="performance_memory_value">%1$s / %2$s MiB</string>

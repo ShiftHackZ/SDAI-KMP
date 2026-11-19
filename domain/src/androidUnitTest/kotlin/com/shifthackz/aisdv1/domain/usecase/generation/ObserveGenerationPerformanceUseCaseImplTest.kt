@@ -182,7 +182,7 @@ class ObserveGenerationPerformanceUseCaseImplTest {
         }
 
     @Test
-    fun `given performance observation, platform operation is cancelled, expected cancellation propagates without unavailable history`() =
+    fun `given performance observation, platform operation is cancelled, expected no fallback sample or retry`() =
         runTest {
             // Given
             val dispatcher = StandardTestDispatcher(testScheduler)
@@ -194,6 +194,8 @@ class ObserveGenerationPerformanceUseCaseImplTest {
 
             // When
             val job = backgroundScope.launch { useCase().collect { values.add(it) } }
+            runCurrent()
+            advanceTimeBy(5_000)
             runCurrent()
 
             // Then

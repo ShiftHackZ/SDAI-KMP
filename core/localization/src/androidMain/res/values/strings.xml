@@ -780,7 +780,6 @@
     <string name="settings_item_dim_screen_warning">*Screen dimming is active only when background generation is off.</string>
 
     <string name="settings_item_performance_overlay">Performance overlay</string>
-    <string name="performance_app_usage">Last 60 seconds</string>
     <string name="performance_cpu">CPU</string>
     <string name="performance_ram">RAM</string>
     <string name="performance_memory_value">%1$s / %2$s MiB</string>

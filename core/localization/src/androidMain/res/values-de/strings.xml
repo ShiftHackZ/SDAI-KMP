@@ -780,7 +780,6 @@
     <string name="settings_item_dim_screen_warning">*Das Display wird nur gedimmt, wenn die Hintergrundgenerierung ausgeschaltet ist.</string>
 
     <string name="settings_item_performance_overlay">Leistungsanzeige</string>
-    <string name="performance_app_usage">Letzte 60 Sekunden</string>
     <string name="performance_cpu">CPU</string>
     <string name="performance_ram">RAM</string>
     <string name="performance_memory_value">%1$s / %2$s MiB</string>

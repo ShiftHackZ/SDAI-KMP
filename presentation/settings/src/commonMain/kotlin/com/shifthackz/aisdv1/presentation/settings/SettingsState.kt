@@ -63,7 +63,7 @@ data class SettingsState(
     val backgroundGenerationAvailable: Boolean = false,
     val backgroundGeneration: Boolean = false,
     val shouldDimScreen: Boolean = false,
-    val shouldShowPerformanceOverlay: Boolean = false,
+    val shouldShowPerformanceOverlay: Boolean = true,
     val monitorConnectivity: Boolean = false,
     val autoSaveAiResults: Boolean = false,
     val saveToMediaStore: Boolean = false,

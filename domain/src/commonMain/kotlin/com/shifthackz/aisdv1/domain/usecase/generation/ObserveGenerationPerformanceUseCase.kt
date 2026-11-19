@@ -4,7 +4,7 @@ import com.shifthackz.aisdv1.domain.entity.PerformanceSample
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Supplies opt-in resource history for a visible generation progress dialog.
+ * Supplies preference-controlled resource history for a visible generation progress dialog.
  * @author Dmitriy Moroz
  */
 interface ObserveGenerationPerformanceUseCase {

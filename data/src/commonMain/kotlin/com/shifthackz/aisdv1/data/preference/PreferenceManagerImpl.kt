@@ -591,7 +591,7 @@ internal class PreferenceManagerImpl(
      * @author Dmitriy Moroz
      */
     override var shouldShowPerformanceOverlay: Boolean
-        get() = keyValueStore.getBoolean(KEY_PERFORMANCE_OVERLAY)
+        get() = keyValueStore.getBoolean(KEY_PERFORMANCE_OVERLAY, true)
         set(value) = putBoolean(KEY_PERFORMANCE_OVERLAY, value)
 
     /**
@@ -1124,7 +1124,7 @@ internal class PreferenceManagerImpl(
         const val KEY_DESIGN_DARK_TOKEN = "key_design_dark_color_token_theme"
 
         /**
-         * Stable storage key for the opt-in generation resource overlay.
+         * Stable storage key for the generation resource overlay preference.
          *
          * @author Dmitriy Moroz
          */

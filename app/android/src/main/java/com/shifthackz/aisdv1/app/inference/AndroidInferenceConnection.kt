@@ -165,7 +165,7 @@ internal class AndroidInferenceConnection(private val context: Context) : Infere
     }
 
     /**
-     * Serializes opt-in resource requests on the control dispatcher. A short read deadline affects
+     * Serializes on-demand resource requests on the control dispatcher. A short read deadline affects
      * only the overlay; it never interrupts native generation or its heartbeat.
      * @author Dmitriy Moroz
      */

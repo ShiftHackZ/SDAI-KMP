@@ -84,7 +84,7 @@ data class Settings(
      * @author Dmitriy Moroz
      */
     val shouldDimScreen: Boolean = false,
-    val shouldShowPerformanceOverlay: Boolean = false,
+    val shouldShowPerformanceOverlay: Boolean = true,
     /**
      * Whether completed images are automatically persisted to the gallery.
      *

@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 
 /**
- * Samples only during visible opt-in collection, with bounded history and explicit unavailable
- * points on transient platform failures. Cancellation always propagates.
+ * Samples only during visible enabled collection, with bounded history and explicit unavailable
+ * points on transient platform failures. Cancellation stops sampling without a fallback point.
  *
  * @param preferences Persisted overlay flag and its invalidation stream.
  * @param gateway Platform counters, including Android inference children.

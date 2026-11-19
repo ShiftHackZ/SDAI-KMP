@@ -362,6 +362,39 @@ class SettingsViewModelTest {
 
         }
 
+    @Test
+    fun `given performance overlay settings, preference snapshots change, expected switch follows saved choice`() =
+        runTest {
+            // Given
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+            assertTrue(viewModel.state.value.shouldShowPerformanceOverlay)
+
+            // When
+            settings.value = settings.value.copy(shouldShowPerformanceOverlay = false)
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(false, viewModel.state.value.shouldShowPerformanceOverlay)
+        }
+
+    @Test
+    fun `given performance overlay settings, switch is disabled then enabled, expected exact choices persisted`() =
+        runTest {
+            // Given
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            // When
+            viewModel.processIntent(SettingsIntent.UpdateFlag.PerformanceOverlay(false))
+            viewModel.processIntent(SettingsIntent.UpdateFlag.PerformanceOverlay(true))
+            advanceUntilIdle()
+
+            // Then
+            verify(exactly = 1) { preferenceManager.shouldShowPerformanceOverlay = false }
+            verify(exactly = 1) { preferenceManager.shouldShowPerformanceOverlay = true }
+        }
+
     private fun TestScope.createViewModel(
         buildInfoProvider: BuildInfoProvider = TestBuildInfoProvider,
     ): SettingsViewModel {
