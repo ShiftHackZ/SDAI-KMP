@@ -7,35 +7,24 @@ import com.shifthackz.aisdv1.domain.repository.ServerConfigurationRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionModelsRepository
 
 /**
- * Implements `GetStableDiffusionModelsUseCase` behavior in the SDAI domain layer.
+ * Loads Automatic1111 checkpoints and marks the server-selected checkpoint.
+ *
+ * @param preferenceManager Identifies whether Automatic1111 is the selected provider.
+ * @param serverConfigurationRepository Reads the refreshed server checkpoint selection.
+ * @param sdModelsRepository Refreshes and reads available checkpoint descriptors.
  *
  * @author Dmitriy Moroz
  */
-class GetStableDiffusionModelsUseCaseImpl(
-    /**
-     * Exposes the `preferenceManager` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class GetStableDiffusionModelsUseCaseImpl(
     private val preferenceManager: PreferenceManager,
-    /**
-     * Exposes the `serverConfigurationRepository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val serverConfigurationRepository: ServerConfigurationRepository,
-    /**
-     * Exposes the `sdModelsRepository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val sdModelsRepository: StableDiffusionModelsRepository,
 ) : GetStableDiffusionModelsUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns checkpoints paired with their selected state, or an empty list for another provider.
      *
-     * @return Result produced by `invoke`.
+     * @return The catalog available for the current provider.
      * @author Dmitriy Moroz
      */
     override suspend operator fun invoke(): List<Pair<StableDiffusionModel, Boolean>> {

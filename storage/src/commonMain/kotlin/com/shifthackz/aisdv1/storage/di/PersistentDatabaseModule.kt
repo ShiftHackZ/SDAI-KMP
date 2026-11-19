@@ -5,6 +5,8 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.shifthackz.aisdv1.storage.db.persistent.PersistentDatabase
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.Module
+import com.shifthackz.aisdv1.storage.gateway.BackupStorage
+import com.shifthackz.aisdv1.storage.gateway.RoomBackupStorage
 import org.koin.dsl.module
 
 /**
@@ -22,6 +24,7 @@ expect val persistentDatabasePlatformModule: Module
  * @author Dmitriy Moroz
  */
 val persistentDatabaseModule = module {
+    single<BackupStorage> { RoomBackupStorage(get()) }
     includes(persistentDatabasePlatformModule)
     single {
         getPersistentDatabase(builder = get())

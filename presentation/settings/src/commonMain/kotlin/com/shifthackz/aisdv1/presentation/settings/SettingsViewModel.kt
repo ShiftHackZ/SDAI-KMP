@@ -214,6 +214,8 @@ class SettingsViewModel(
                 it.copy(screenModal = SettingsModal.None)
             }
 
+            SettingsIntent.NavigateBackup -> router.navigateToBackup()
+
             SettingsIntent.NavigateConfiguration -> router.navigateToServerSetup(
                 LaunchSource.SETTINGS,
             )

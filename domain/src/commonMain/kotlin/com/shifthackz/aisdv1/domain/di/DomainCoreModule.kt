@@ -410,7 +410,14 @@ val coreDomainModule = module {
             timeProvider = get(),
         )
     }
-    factory<SplashNavigationUseCase> { SplashNavigationUseCaseImpl(preferenceManager = get()) }
+    factory<SplashNavigationUseCase> {
+        SplashNavigationUseCaseImpl(
+            preferenceManager = get(),
+            getBackupStartupStage = get(),
+            loadPendingBackup = get(),
+            getPendingExport = get()
+        )
+    }
     factory<ObserveLocalOnnxModelsUseCase> {
         ObserveLocalOnnxModelsUseCaseImpl(repository = get())
     }
@@ -450,6 +457,7 @@ val coreDomainModule = module {
     }
     factory<TextToImageUseCase> {
         TextToImageUseCaseImpl(
+            generationRestoreGate = get(),
             generateEasyDiffusionUseCase = get(),
             captureEasyDiffusionConnectionUseCase = get(),
             stableDiffusionGenerationRepository = get(),
@@ -473,6 +481,7 @@ val coreDomainModule = module {
     }
     factory<ImageToImageUseCase> {
         ImageToImageUseCaseImpl(
+            generationRestoreGate = get(),
             generateEasyDiffusionUseCase = get(),
             captureEasyDiffusionConnectionUseCase = get(),
             stableDiffusionGenerationRepository = get(),
@@ -603,6 +612,7 @@ val coreDomainModule = module {
     }
     factory<SetServerConfigurationUseCase> {
         DefaultSetServerConfigurationUseCaseImpl(
+            backupPreferences = get(),
             dispatchersProvider = get(),
             providerSelectionGuard = get(),
             configurationStore = get(),

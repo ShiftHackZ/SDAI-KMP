@@ -25,7 +25,7 @@ fun interface ObserveNetworkUsageUseCase {
  *
  * @author Dmitriy Moroz
  */
-class ObserveNetworkUsageUseCaseImpl(
+internal class ObserveNetworkUsageUseCaseImpl(
     private val repository: NetworkUsageRepository,
 ) : ObserveNetworkUsageUseCase {
     override fun invoke(): Flow<NetworkUsage> = repository.observe()
@@ -52,7 +52,7 @@ fun interface ResetNetworkUsageUseCase {
  *
  * @author Dmitriy Moroz
  */
-class ResetNetworkUsageUseCaseImpl(
+internal class ResetNetworkUsageUseCaseImpl(
     private val repository: NetworkUsageRepository,
 ) : ResetNetworkUsageUseCase {
     override suspend fun invoke() = repository.reset()

@@ -7,6 +7,8 @@ package com.shifthackz.aisdv1.core.navigation.router
  * @author Dmitriy Moroz
  */
 object NoOpOnBoardingRouter : OnBoardingRouter {
+    override fun navigateToBackupWelcome() = Unit
+
     /**
      * Ignores this action because no navigation host is attached.
      *
@@ -14,17 +16,5 @@ object NoOpOnBoardingRouter : OnBoardingRouter {
      */
     override fun navigateBack() = Unit
 
-    /**
-     * Ignores this action because no navigation host is attached.
-     *
-     * @author Dmitriy Moroz
-     */
-    override fun navigateToServerSetupAfterOnBoarding() = Unit
 
-    /**
-     * Ignores this action because no navigation host is attached.
-     *
-     * @author Dmitriy Moroz
-     */
-    override fun navigateToPostOnBoardingConfigLoader() = Unit
 }

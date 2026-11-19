@@ -9,6 +9,12 @@ import com.shifthackz.aisdv1.core.navigation.LaunchSource
  */
 interface SettingsRouter {
     /**
+     * Opens the standalone Create/Restore backup tabs.
+     * @author Dmitriy Moroz
+     */
+    fun navigateToBackup()
+
+    /**
      * Opens the application drawer without changing the active route.
      *
      * @author Dmitriy Moroz

@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.mocks.ImmediateGenerationRestoreGate
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
 import com.shifthackz.aisdv1.domain.mocks.mockAiGenerationResult
@@ -50,6 +51,7 @@ class MnnTextToImageUseCaseTest {
         mnnProfile = "sd15-512-general-int8-v1"
     )
     private val useCase = TextToImageUseCaseImpl(
+        generationRestoreGate = ImmediateGenerationRestoreGate(),
         stableDiffusionGenerationRepository = mockk(), hordeGenerationRepository = mockk(),
         huggingFaceGenerationRepository = mockk(), openAiGenerationRepository = mockk(),
         openAiCompatibleGenerationRepository = mockk(), openAiOAuthGenerationRepository = mockk(),

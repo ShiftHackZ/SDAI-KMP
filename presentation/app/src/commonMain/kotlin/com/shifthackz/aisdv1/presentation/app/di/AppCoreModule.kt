@@ -43,6 +43,8 @@ import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
 import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
 import com.shifthackz.aisdv1.core.navigation.router.WebUiRouter
 import com.shifthackz.aisdv1.core.mvi.diagnostics.uiDiagnosticsModule
+import com.shifthackz.aisdv1.core.navigation.router.BackupRouter
+import com.shifthackz.aisdv1.core.navigation.router.NoOpBackupRouter
 import org.koin.dsl.module
 
 /**
@@ -52,6 +54,7 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val appCoreModule = module {
+    single<BackupRouter> { NoOpBackupRouter }
     includes(uiDiagnosticsModule(isEnabled = false))
     single<LinksProvider> { DefaultLinksProvider }
     single<BuildInfoProvider> { createPlatformBuildInfoProvider() }

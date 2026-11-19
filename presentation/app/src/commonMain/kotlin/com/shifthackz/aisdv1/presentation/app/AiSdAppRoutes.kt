@@ -1,6 +1,13 @@
 package com.shifthackz.aisdv1.presentation.app
 
 import com.shifthackz.aisdv1.presentation.home.AppScaffold
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.presentation.backup.BackupScreen
+import com.shifthackz.aisdv1.presentation.backup.BackupScreenMode
+import com.shifthackz.aisdv1.presentation.backup.BackupViewModel
+import com.shifthackz.aisdv1.presentation.backup.BackupIntent
+import com.shifthackz.aisdv1.presentation.backup.BackupEffect
+import com.shifthackz.aisdv1.presentation.backup.platform.rememberBackupDocumentLauncher
 
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.Box
@@ -225,6 +232,50 @@ internal fun OverlayRouteContent(
         AppRoute.Gallery,
         AppRoute.Settings,
             -> Unit
+
+        AppRoute.BackupWelcome, is AppRoute.Backup -> {
+            val mode = when (route) {
+                AppRoute.BackupWelcome -> BackupScreenMode.WELCOME
+                is AppRoute.Backup -> if (route.source == LaunchSource.SPLASH) BackupScreenMode.FIRST_LAUNCH else BackupScreenMode.SETTINGS
+            }
+            val viewModel = remember(koin, router, mode) {
+                koin.get<BackupViewModel> {
+                    parametersOf(
+                        mode,
+                        router
+                    )
+                }
+            }
+            val launcher = rememberBackupDocumentLauncher(
+                onPicked = { viewModel.processIntent(BackupIntent.DocumentSelected(it)) },
+                onExported = { destination, hasExported, handle ->
+                    viewModel.processIntent(
+                        BackupIntent.ExportFinished(
+                            destination,
+                            hasExported,
+                            handle
+                        )
+                    )
+                },
+            )
+            DisposableEffect(viewModel) { onDispose { viewModel.onRouteDisposed() } }
+            RootBackHandler(enabled = true) {
+                if (mode != BackupScreenMode.WELCOME) viewModel.processIntent(BackupIntent.NavigateBack)
+            }
+            MviComponent(viewModel = viewModel, processEffect = { effect ->
+                when (effect) {
+                    BackupEffect.OpenDocument -> launcher.open()
+                    is BackupEffect.ExportDocument -> launcher.export(effect.backup)
+                }
+            }) { state, processIntent ->
+                BackupScreen(
+                    mode,
+                    state,
+                    processIntent,
+                    Modifier.fillMaxSize()
+                )
+            }
+        }
 
         AppRoute.StorageUsage -> {
             StorageUsageScreen(

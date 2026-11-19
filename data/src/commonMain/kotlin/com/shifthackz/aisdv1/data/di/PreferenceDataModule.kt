@@ -11,14 +11,25 @@ import com.shifthackz.aisdv1.domain.preference.SessionPreference
 import com.shifthackz.aisdv1.network.client.ConnectionTimeoutProvider
 import com.shifthackz.aisdv1.network.client.GenerationTimeoutProvider
 import org.koin.core.qualifier.named
+import com.shifthackz.aisdv1.data.preference.backup.BackupPreferencesGatewayImpl
+import com.shifthackz.aisdv1.domain.gateway.backup.BackupPreferencesGateway
+import com.shifthackz.aisdv1.domain.gateway.backup.BackupExportStateStore
+import com.shifthackz.aisdv1.data.preference.backup.BackupExportStateStoreImpl
 import org.koin.dsl.module
 
 /**
- * Exposes the `preferenceDataModule` value used by the SDAI data layer.
+ * Shares one checked preference owner across provider settings, portable backup adapters and live timeout readers.
  *
  * @author Dmitriy Moroz
  */
 val preferenceDataModule = module {
+    single<BackupExportStateStore> { BackupExportStateStoreImpl(createKeyValueStore("aisdv1_backup_operations")) }
+    single<BackupPreferencesGateway> {
+        BackupPreferencesGatewayImpl(
+            get(named(KEY_PREFERENCE_MANAGER)),
+            get()
+        )
+    }
     single<KeyValueStore>(named(KEY_PREFERENCE_MANAGER)) {
         createKeyValueStore(
             KEY_PREFERENCE_MANAGER
@@ -48,7 +59,7 @@ val preferenceDataModule = module {
 }
 
 /**
- * Exposes the `KEY_PREFERENCE_MANAGER` value used by the SDAI data layer.
+ * Installed preference-suite name; preserving it retains settings across app updates.
  *
  * @author Dmitriy Moroz
  */

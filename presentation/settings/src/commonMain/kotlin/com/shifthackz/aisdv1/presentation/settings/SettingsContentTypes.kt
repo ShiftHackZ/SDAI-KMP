@@ -38,6 +38,7 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
     SettingsListItem.VERSION -> SettingsContentType.FOOTER
 
     SettingsListItem.CONFIGURATION,
+    SettingsListItem.BACKUP,
     SettingsListItem.BENCHMARK,
     SettingsListItem.CREDITS,
     SettingsListItem.CONNECTION_TIMEOUT,

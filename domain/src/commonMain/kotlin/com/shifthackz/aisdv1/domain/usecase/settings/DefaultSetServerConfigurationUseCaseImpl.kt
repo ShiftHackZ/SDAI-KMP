@@ -2,6 +2,8 @@ package com.shifthackz.aisdv1.domain.usecase.settings
 
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.domain.entity.AuthorizationStorageFailure
+import com.shifthackz.aisdv1.domain.entity.backup.BackupStartupStage
+import com.shifthackz.aisdv1.domain.gateway.backup.BackupPreferencesGateway
 import com.shifthackz.aisdv1.domain.entity.Configuration
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
@@ -23,6 +25,7 @@ import kotlinx.coroutines.withContext
  * @param authorizationStore Commits protected Basic Auth before publishing its provider settings.
  * @param preferenceManager Refreshes observers after the complete transition.
  * @param providerSelectionGuard Serializes source changes and identity-sensitive publication.
+ * @param backupPreferences Completes first-launch recovery only after a real provider configuration commit.
  * @author Dmitriy Moroz
  */
 internal class DefaultSetServerConfigurationUseCaseImpl(
@@ -31,6 +34,7 @@ internal class DefaultSetServerConfigurationUseCaseImpl(
     private val authorizationStore: AuthorizationStore,
     private val preferenceManager: PreferenceManager,
     private val providerSelectionGuard: ProviderSelectionGuard,
+    private val backupPreferences: BackupPreferencesGateway,
 ) : SetServerConfigurationUseCase {
     /**
      * Commits Basic Auth only for providers that use it, preserving stored credentials otherwise.
@@ -59,6 +63,9 @@ internal class DefaultSetServerConfigurationUseCaseImpl(
                             configuration,
                             configurationStore.getAuthorizationCommitId()
                         )
+                    }
+                    if (backupPreferences.readStartupStage() == BackupStartupStage.CONFIGURATION) {
+                        backupPreferences.writeStartupStage(BackupStartupStage.COMPLETE)
                     }
                     preferenceManager.refresh()
                 }

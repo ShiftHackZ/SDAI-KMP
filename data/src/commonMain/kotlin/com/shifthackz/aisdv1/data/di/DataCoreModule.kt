@@ -1,5 +1,11 @@
 package com.shifthackz.aisdv1.data.di
 
+import com.shifthackz.aisdv1.data.image.BackupImageValidatorImpl
+import com.shifthackz.aisdv1.data.image.BackupImageDecoder
+import com.shifthackz.aisdv1.data.image.PlatformBackupImageDecoder
+import com.shifthackz.aisdv1.domain.entity.backup.BackupImageBudget
+import com.shifthackz.aisdv1.domain.gateway.backup.BackupImageValidator
+
 import com.shifthackz.aisdv1.domain.datasource.EasyDiffusionRemoteDataSource
 import com.shifthackz.aisdv1.data.remote.KtorEasyDiffusionRemoteDataSource
 
@@ -181,6 +187,16 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDataModule = module {
+    single {
+        BackupImageBudget(
+            maxEncodedBytes = 24 * 1024 * 1024,
+            maxPixels = 16_777_216L,
+            maxDecodedBytes = 128L * 1024 * 1024,
+            validationEdge = 256
+        )
+    }
+    single<BackupImageDecoder> { PlatformBackupImageDecoder() }
+    single<BackupImageValidator> { BackupImageValidatorImpl(get(), get()) }
     single<GalleryReadGateway> { GalleryReadGatewayImpl(get()) }
     single<AuthenticatedConnectionProvider> {
         AuthenticatedConnectionProviderImpl(

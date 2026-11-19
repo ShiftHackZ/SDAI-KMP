@@ -5,30 +5,32 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
- * Executes the `function` step in the SDAI domain layer.
+ * Observes connectivity of the configured generation server.
  *
  * @author Dmitriy Moroz
  */
 fun interface ObserveSeverConnectivityUseCase {
+    /**
+     * Emits the current connectivity state and later distinct changes.
+     *
+     * @author Dmitriy Moroz
+     */
     operator fun invoke(): Flow<Boolean>
 }
 
 /**
- * Implements `ObserveSeverConnectivityUseCase` behavior in the SDAI domain layer.
+ * Observes server connectivity while suppressing consecutive duplicate states.
+ *
+ * @param serverConnectivityGateway Supplies connectivity changes for the configured server.
  *
  * @author Dmitriy Moroz
  */
-class ObserveSeverConnectivityUseCaseImpl(
-    /**
-     * Exposes the `serverConnectivityGateway` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class ObserveSeverConnectivityUseCaseImpl(
     private val serverConnectivityGateway: ServerConnectivityGateway,
 ) : ObserveSeverConnectivityUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Emits the current connectivity state and subsequent distinct changes.
      *
      * @author Dmitriy Moroz
      */

@@ -65,4 +65,17 @@ class RootAppRouterTest {
 
         assertEquals(AppRoute.Gallery, router.route.value)
     }
+
+    @Test
+    fun `given cold start pending backup, startup opens recovery and user returns, expected Settings context restored`() {
+        // Given
+        val router = RootAppRouter()
+        // When
+        router.navigateToBackupRestore()
+        // Then
+        assertEquals(AppRoute.Backup(LaunchSource.SETTINGS), router.route.value)
+        router.navigateBack()
+        assertEquals(AppRoute.Settings, router.route.value)
+    }
+
 }

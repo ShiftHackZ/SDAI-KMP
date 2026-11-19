@@ -66,6 +66,7 @@ internal fun ContentSettingsState(
                 when (row) {
                     SettingsListItem.SERVER_HEADER,
                     SettingsListItem.CONFIGURATION,
+                    SettingsListItem.BACKUP,
                     SettingsListItem.BENCHMARK,
                     SettingsListItem.CREDITS,
                     SettingsListItem.CONNECTION_TIMEOUT,

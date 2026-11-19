@@ -5,19 +5,19 @@ import com.shifthackz.aisdv1.domain.entity.SwarmUiModel
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 
 /**
- * Defines the `FetchSwarmUiModelsUseCase` contract for the SDAI domain layer.
+ * Loads model descriptors from an authenticated Swarm UI session.
  *
  * @author Dmitriy Moroz
  */
 interface FetchSwarmUiModelsUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns models reported by the selected Swarm UI session.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param sessionId session id value consumed by the API.
-     * @param credentials credentials value consumed by the API.
-     * @return Result produced by `invoke`.
+     * @param baseUrl Full API base URL of the selected Swarm UI server.
+     * @param sessionId Active Swarm UI session identifier.
+     * @param credentials Optional transport authorization for the server.
+     * @return The catalog available for the current provider.
      * @author Dmitriy Moroz
      */
     suspend operator fun invoke(
@@ -28,26 +28,23 @@ interface FetchSwarmUiModelsUseCase {
 }
 
 /**
- * Implements `FetchSwarmUiModelsUseCase` behavior in the SDAI domain layer.
+ * Loads models from the selected Swarm UI server session.
+ *
+ * @param remoteDataSource Requests model descriptors with server session and transport credentials.
  *
  * @author Dmitriy Moroz
  */
-class FetchSwarmUiModelsUseCaseImpl(
-    /**
-     * Exposes the `remoteDataSource` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class FetchSwarmUiModelsUseCaseImpl(
     private val remoteDataSource: SwarmUiModelsRemoteDataSource,
 ) : FetchSwarmUiModelsUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns models reported by the selected Swarm UI session.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param sessionId session id value consumed by the API.
-     * @param credentials credentials value consumed by the API.
-     * @return Result produced by `invoke`.
+     * @param baseUrl Full API base URL of the selected Swarm UI server.
+     * @param sessionId Active Swarm UI session identifier.
+     * @param credentials Optional transport authorization for the server.
+     * @return The catalog available for the current provider.
      * @author Dmitriy Moroz
      */
     override suspend fun invoke(

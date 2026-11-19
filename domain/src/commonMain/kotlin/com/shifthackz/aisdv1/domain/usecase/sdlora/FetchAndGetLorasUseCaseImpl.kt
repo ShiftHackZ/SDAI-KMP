@@ -3,21 +3,18 @@ package com.shifthackz.aisdv1.domain.usecase.sdlora
 import com.shifthackz.aisdv1.domain.repository.LorasRepository
 
 /**
- * Implements `FetchAndGetLorasUseCase` behavior in the SDAI domain layer.
+ * Refreshes and reads the configured server LoRA catalog.
+ *
+ * @param lorasRepository Refreshes LoRA descriptors and reads the resulting catalog.
  *
  * @author Dmitriy Moroz
  */
-class FetchAndGetLorasUseCaseImpl(
-    /**
-     * Exposes the `lorasRepository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class FetchAndGetLorasUseCaseImpl(
     private val lorasRepository: LorasRepository,
 ) : FetchAndGetLorasUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns the LoRA catalog after its repository refresh.
      *
      * @author Dmitriy Moroz
      */

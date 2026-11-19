@@ -19,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -55,7 +56,7 @@ fun AiSdApp(
     val preferenceManager = remember(koin) {
         koin.get<PreferenceManager>()
     }
-    val router = remember { RootAppRouter() }
+    val router = rememberSaveable(saver = backupRouterSaver) { RootAppRouter() }
     val route by router.route.collectAsState()
     val isDrawerOpen by router.drawerOpen.collectAsState()
     val canNavigateBack by router.canNavigateBack.collectAsState()

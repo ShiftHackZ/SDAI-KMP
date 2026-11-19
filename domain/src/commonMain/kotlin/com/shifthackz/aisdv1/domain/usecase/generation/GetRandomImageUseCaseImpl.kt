@@ -3,21 +3,18 @@ package com.shifthackz.aisdv1.domain.usecase.generation
 import com.shifthackz.aisdv1.domain.repository.RandomImageRepository
 
 /**
- * Implements `GetRandomImageUseCase` behavior in the SDAI domain layer.
+ * Loads a random reference image for the generation input.
+ *
+ * @param randomImageRepository Fetches and stores the random reference image.
  *
  * @author Dmitriy Moroz
  */
-class GetRandomImageUseCaseImpl(
-    /**
-     * Exposes the `randomImageRepository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class GetRandomImageUseCaseImpl(
     private val randomImageRepository: RandomImageRepository,
 ) : GetRandomImageUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns the reference image supplied by the repository.
      *
      * @author Dmitriy Moroz
      */

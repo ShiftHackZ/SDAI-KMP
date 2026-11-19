@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.core.navigation
 
+import com.shifthackz.aisdv1.core.navigation.router.BackupRouter
 import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
 import com.shifthackz.aisdv1.core.navigation.router.ConfigurationLoaderRouter
 import com.shifthackz.aisdv1.core.navigation.router.DebugMenuRouter
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class RootAppRouter(
     initialRoute: AppRoute = AppRoute.Splash,
 ) : ServerSetupRouter,
+    BackupRouter,
     ConfigurationLoaderRouter,
     SplashRouter,
     DonateRouter,
@@ -49,6 +51,28 @@ class RootAppRouter(
     NetworkUsageRouter,
     WebUiRouter,
     OnBoardingRouter {
+
+    /** Opens reusable backup tabs from Settings. @author Dmitriy Moroz */
+    override fun navigateToBackup() = navigateTo(AppRoute.Backup(LaunchSource.SETTINGS))
+
+    /** Consumes onboarding so Back cannot reopen it. @author Dmitriy Moroz */
+    override fun navigateToBackupWelcome() = replaceRoute(AppRoute.BackupWelcome)
+
+    /**
+     * Rebuilds Settings as the return destination before opening a cold-start pending backup operation.
+     * @author Dmitriy Moroz
+     */
+    override fun navigateToBackupRestore() {
+        replaceRoute(AppRoute.Settings)
+        navigateTo(AppRoute.Backup(LaunchSource.SETTINGS))
+    }
+
+    /** Opens restore-only content during first launch. @author Dmitriy Moroz */
+    override fun navigateToInitialRestore() = replaceRoute(AppRoute.Backup(LaunchSource.SPLASH))
+
+    /** Consumes first-launch backup before mandatory provider setup. @author Dmitriy Moroz */
+    override fun navigateToInitialConfiguration() =
+        replaceRoute(AppRoute.Setup(LaunchSource.SPLASH))
 
     private val routeState = MutableStateFlow(initialRoute)
 
@@ -162,14 +186,6 @@ class RootAppRouter(
         navigateTo(AppRoute.Setup(source))
     }
 
-    /**
-     * Replaces completed onboarding with initial-launch server setup.
-     *
-     * @author Dmitriy Moroz
-     */
-    override fun navigateToServerSetupAfterOnBoarding() {
-        replaceRoute(AppRoute.Setup(LaunchSource.SPLASH))
-    }
 
     /**
      * Selects text-to-image, replacing the active home tab or consumed gallery-detail route.
@@ -298,14 +314,6 @@ class RootAppRouter(
         navigateTo(AppRoute.OnBoarding(source))
     }
 
-    /**
-     * Replaces completed onboarding with configuration loading.
-     *
-     * @author Dmitriy Moroz
-     */
-    override fun navigateToPostOnBoardingConfigLoader() {
-        replaceRoute(AppRoute.ConfigurationLoader)
-    }
 
     /**
      * Opens the gallery result identified by its persisted item ID.
@@ -403,6 +411,8 @@ fun AppRoute.isHomeRoute(): Boolean = when (this) {
     AppRoute.Settings,
         -> true
 
+    AppRoute.BackupWelcome,
+    is AppRoute.Backup,
     AppRoute.Splash,
     is AppRoute.OnBoarding,
     is AppRoute.Setup,
@@ -427,6 +437,7 @@ fun AppRoute.isHomeRoute(): Boolean = when (this) {
  * @author Dmitriy Moroz
  */
 private fun AppRoute.canFallBackToTextToImage(): Boolean = when (this) {
+    is AppRoute.Backup -> source == LaunchSource.SETTINGS
     AppRoute.ImageToImage,
     AppRoute.ImageInPaint,
     AppRoute.Gallery,
@@ -445,6 +456,7 @@ private fun AppRoute.canFallBackToTextToImage(): Boolean = when (this) {
 
     AppRoute.Home,
     AppRoute.TextToImage,
+    AppRoute.BackupWelcome,
     AppRoute.Splash,
     is AppRoute.OnBoarding,
     is AppRoute.Setup,

@@ -4,25 +4,22 @@ import com.shifthackz.aisdv1.domain.entity.ReportReason
 import com.shifthackz.aisdv1.domain.repository.ReportRepository
 
 /**
- * Implements `SendReportUseCase` behavior in the SDAI domain layer.
+ * Submits a user report with its reason and attached image.
+ *
+ * @param repository Delivers the report to the configured reporting destination.
  *
  * @author Dmitriy Moroz
  */
-class SendReportUseCaseImpl(
-    /**
-     * Exposes the `repository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class SendReportUseCaseImpl(
     private val repository: ReportRepository,
 ) : SendReportUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Sends the supplied report and propagates delivery failures.
      *
-     * @param text text value consumed by the API.
-     * @param reason reason value consumed by the API.
-     * @param image image value consumed by the API.
+     * @param text User-provided description of the issue.
+     * @param reason Report category selected by the user.
+     * @param image Image attachment passed to the reporting repository.
      * @author Dmitriy Moroz
      */
     override suspend fun invoke(text: String, reason: ReportReason, image: String) =

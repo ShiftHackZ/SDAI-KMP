@@ -20,6 +20,9 @@ sealed interface SettingsIntent : MviIntent {
      */
     data object NavigateConfiguration : SettingsIntent
 
+    /** Opens portable selective backup and restore. @author Dmitriy Moroz */
+    data object NavigateBackup : SettingsIntent
+
     /**
      * Opens the generation waiting-limit picker.
      *
@@ -174,6 +177,7 @@ sealed interface SettingsIntent : MviIntent {
 
         data class DarkTheme(override val flag: Boolean) : UpdateFlag
     }
+
     data class NewColorToken(val token: ColorToken) : SettingsIntent
     data class NewDarkThemeToken(val token: DarkThemeToken) : SettingsIntent
 

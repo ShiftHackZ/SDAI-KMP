@@ -10,7 +10,7 @@ import kotlinx.coroutines.CancellationException
  * @param repository Fetches samplers from the configured server and reads their cache.
  * @author Dmitriy Moroz
  */
-class GetStableDiffusionSamplersUseCaseImpl(
+internal class GetStableDiffusionSamplersUseCaseImpl(
     private val repository: StableDiffusionSamplersRepository,
 ) : GetStableDiffusionSamplersUseCase {
 

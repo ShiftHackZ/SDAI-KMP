@@ -8,6 +8,7 @@ import com.shifthackz.aisdv1.demo.di.demoModule
 import com.shifthackz.aisdv1.domain.di.coreDomainModule
 import com.shifthackz.aisdv1.domain.di.benchmarkUseCaseModule
 import com.shifthackz.aisdv1.feature.auth.di.authModule
+import com.shifthackz.aisdv1.feature.backup.di.backupModule
 import com.shifthackz.aisdv1.feature.benchmark.di.benchmarkModule
 import com.shifthackz.aisdv1.feature.bonsai.di.bonsaiModule
 import com.shifthackz.aisdv1.feature.coreml.di.coreMlModule
@@ -26,9 +27,22 @@ import com.shifthackz.aisdv1.domain.preference.PreferenceManager
  * @author Dmitriy Moroz
  */
 internal val commonApplicationModules = listOf(
-    coreNetworkModule, networkModule, validatorsModule, coreDomainModule, benchmarkUseCaseModule,
-    coreDataModule, *dataModule, demoModule, authModule, benchmarkModule, bonsaiModule,
-    coreMlModule, mnnHostRuntimeModule, backgroundWorkModule, corePresentationModule,
+    coreNetworkModule,
+    networkModule,
+    validatorsModule,
+    coreDomainModule,
+    benchmarkUseCaseModule,
+    coreDataModule,
+    *dataModule,
+    demoModule,
+    authModule,
+    backupModule,
+    benchmarkModule,
+    bonsaiModule,
+    coreMlModule,
+    mnnHostRuntimeModule,
+    backgroundWorkModule,
+    corePresentationModule,
 )
 
 /**

@@ -4,41 +4,38 @@ import com.shifthackz.aisdv1.domain.entity.StabilityAiEngine
 import com.shifthackz.aisdv1.domain.repository.StabilityAiEnginesRepository
 
 /**
- * Defines the `FetchStabilityAiEnginesUseCase` contract for the SDAI domain layer.
+ * Loads the engines available to a Stability AI account.
  *
  * @author Dmitriy Moroz
  */
 interface FetchStabilityAiEnginesUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns the engines available to the authenticated account.
      *
-     * @param apiKey api key value consumed by the API.
-     * @return Result produced by `invoke`.
+     * @param apiKey Account API key used to authenticate the engine request.
+     * @return The catalog available for the current provider.
      * @author Dmitriy Moroz
      */
     suspend operator fun invoke(apiKey: String): List<StabilityAiEngine>
 }
 
 /**
- * Implements `FetchStabilityAiEnginesUseCase` behavior in the SDAI domain layer.
+ * Loads the Stability AI engines available to the supplied account.
+ *
+ * @param repository Fetches engine descriptors using the supplied API key.
  *
  * @author Dmitriy Moroz
  */
-class FetchStabilityAiEnginesUseCaseImpl(
-    /**
-     * Exposes the `repository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class FetchStabilityAiEnginesUseCaseImpl(
     private val repository: StabilityAiEnginesRepository,
 ) : FetchStabilityAiEnginesUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns the engines available to the authenticated account.
      *
-     * @param apiKey api key value consumed by the API.
-     * @return Result produced by `invoke`.
+     * @param apiKey Account API key used to authenticate the engine request.
+     * @return The catalog available for the current provider.
      * @author Dmitriy Moroz
      */
     override suspend fun invoke(apiKey: String): List<StabilityAiEngine> =

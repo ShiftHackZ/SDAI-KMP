@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.domain.usecase.easydiffusion.toEasyDiffusionRequest
 
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.coroutineContext
+import com.shifthackz.aisdv1.domain.gateway.GenerationRestoreGate
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ImageToImagePayload
 import com.shifthackz.aisdv1.domain.entity.ServerSource
@@ -32,6 +33,7 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
  * @param falAiGenerationRepository Generation and result persistence for Fal.ai.
  * @param arliAiGenerationRepository Generation and result persistence for ArliAI.
  * @param preferenceManager Current provider selection and independent generation preferences.
+ * @param generationRestoreGate Serializes generation against portable backup restoration.
  * @param captureEasyDiffusionConnectionUseCase Captures endpoint/checkpoint under the provider-selection lock, retaining the submitted revision.
  * @param generateEasyDiffusionUseCase Owns captured-task batching, stream recovery, cancellation and deadlines.
  * @author Dmitriy Moroz
@@ -55,6 +57,7 @@ internal class ImageToImageUseCaseImpl(
     private val arliAiGenerationRepository: ArliAiGenerationRepository,
 
     private val preferenceManager: PreferenceManager,
+    private val generationRestoreGate: GenerationRestoreGate,
     private val generateEasyDiffusionUseCase: GenerateEasyDiffusionUseCase,
     private val captureEasyDiffusionConnectionUseCase: CaptureEasyDiffusionConnectionUseCase,
 ) : ImageToImageUseCase {
@@ -65,7 +68,15 @@ internal class ImageToImageUseCaseImpl(
      * @param payload Immutable supported generation inputs and captured provider identity.
      * @author Dmitriy Moroz
      */
-    override suspend fun invoke(payload: ImageToImagePayload): List<AiGenerationResult> {
+    override suspend fun invoke(payload: ImageToImagePayload): List<AiGenerationResult> =
+        generationRestoreGate.generating { generate(payload) }
+
+    /**
+     * Executes a captured image request while this operation owns generation admission.
+     * @param payload Immutable provider generation inputs and source image.
+     * @author Dmitriy Moroz
+     */
+    private suspend fun generate(payload: ImageToImagePayload): List<AiGenerationResult> {
         coroutineContext.ensureActive()
         val source = payload.sourceSnapshot ?: preferenceManager.source
         check(source == preferenceManager.source) { "Generation source changed" }

@@ -4,21 +4,18 @@ import com.shifthackz.aisdv1.domain.entity.Embedding
 import com.shifthackz.aisdv1.domain.repository.EmbeddingsRepository
 
 /**
- * Implements `FetchAndGetEmbeddingsUseCase` behavior in the SDAI domain layer.
+ * Refreshes and reads the configured server embedding catalog.
+ *
+ * @param repository Refreshes embedding descriptors and reads the resulting catalog.
  *
  * @author Dmitriy Moroz
  */
-class FetchAndGetEmbeddingsUseCaseImpl(
-    /**
-     * Exposes the `repository` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
+internal class FetchAndGetEmbeddingsUseCaseImpl(
     private val repository: EmbeddingsRepository,
 ) : FetchAndGetEmbeddingsUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Returns the embedding catalog after its repository refresh.
      *
      * @author Dmitriy Moroz
      */

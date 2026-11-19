@@ -409,6 +409,8 @@ private object TestBuildInfoProvider : BuildInfoProvider {
 }
 
 private class TestSettingsRouter : SettingsRouter {
+    override fun navigateToBackup() = Unit
+
     var serverSetupSource: LaunchSource? = null
     var storageUsageOpened = false
     var networkUsageOpened = false

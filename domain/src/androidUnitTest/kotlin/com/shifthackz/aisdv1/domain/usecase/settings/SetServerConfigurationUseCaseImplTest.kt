@@ -6,6 +6,8 @@ import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
 import com.shifthackz.aisdv1.domain.mocks.ConfigurationStoreStub
 import com.shifthackz.aisdv1.domain.mocks.mockConfiguration
+import com.shifthackz.aisdv1.domain.gateway.backup.BackupPreferencesGateway
+import com.shifthackz.aisdv1.domain.entity.backup.BackupStartupStage
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -27,27 +29,32 @@ class DefaultSetServerConfigurationUseCaseImplTest {
         providerSelectionGuard = ProviderSelectionGuard(),
         authorizationStore = stubAuthorizationStore,
         preferenceManager = stubPreferenceManager,
+        backupPreferences = mockk<BackupPreferencesGateway> { every { readStartupStage() } returns BackupStartupStage.COMPLETE },
     )
 
     @Test
-    fun `given configuration apply success, expected complete value`() = runTest {
-        coEvery {
-            stubAuthorizationStore.storeAuthorizationCredentials(any(), any())
-        } coAnswers {
-            secondArg<suspend (String) -> Unit>().invoke("configuration-test")
-        }
-        coEvery {
-            stubPreferenceManager.refresh()
-        } returns Unit
+    fun `given provider configuration, checked apply succeeds, expected complete saved value`() =
+        runTest {
+            // Given
+            coEvery {
+                stubAuthorizationStore.storeAuthorizationCredentials(any(), any())
+            } coAnswers {
+                secondArg<suspend (String) -> Unit>().invoke("configuration-test")
+            }
+            coEvery {
+                stubPreferenceManager.refresh()
+            } returns Unit
 
-        useCase(mockConfiguration)
+            // When
+            useCase(mockConfiguration)
 
-        assertEquals(
-            mockConfiguration,
-            stubConfigurationStore.getConfiguration(mockConfiguration.authCredentials)
-        )
-        coVerify {
-            stubPreferenceManager.refresh()
+            // Then
+            assertEquals(
+                mockConfiguration,
+                stubConfigurationStore.getConfiguration(mockConfiguration.authCredentials)
+            )
+            coVerify {
+                stubPreferenceManager.refresh()
+            }
         }
-    }
 }

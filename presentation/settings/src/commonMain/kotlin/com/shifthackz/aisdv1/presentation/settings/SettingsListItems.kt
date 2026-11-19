@@ -23,6 +23,7 @@ internal fun settingsListItems(
     if (!state.onBoardingDemo) {
         add(SettingsListItem.SERVER_HEADER)
         add(SettingsListItem.CONFIGURATION)
+        add(SettingsListItem.BACKUP)
         add(SettingsListItem.BENCHMARK)
         if (state.showStabilityAiCredits) add(SettingsListItem.CREDITS)
         if (state.showNetworkTimeoutSettings) {
