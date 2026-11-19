@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -12,7 +13,7 @@ import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
 
 /**
- * Lists supported languages and highlights the current application locale.
+ * Lists supported languages alphabetically by their native display names and highlights the active locale.
  * Selecting a row reports its language code and then requests dismissal.
  *
  * @param modifier Layout modifiers for the language list.
@@ -27,6 +28,7 @@ fun LanguageBottomSheet(
     onLanguageSelected: (String) -> Unit = { applyAppLanguage(it) },
     onDismissRequest: () -> Unit = {},
 ) {
+    val languages = remember { Localization.entries.sortedBy { it.name.lowercase() } }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -34,7 +36,7 @@ fun LanguageBottomSheet(
             .navigationBarsPadding()
             .padding(bottom = 16.dp),
     ) {
-        Localization.entries.forEach { language ->
+        languages.forEach { language ->
             val locale = language.code
             SettingsItem(
                 modifier = Modifier
@@ -63,14 +65,3 @@ fun LanguageBottomSheet(
  * @author Dmitriy Moroz
  */
 expect fun applyAppLanguage(languageCode: String)
-
-/**
- * Draws the bundled flag corresponding to a supported localization code.
- *
- * @param languageCode Code identifying the language's bundled flag.
- * @param modifier Size and placement of the flag within its row.
- *
- * @author Dmitriy Moroz
- */
-@Composable
-internal expect fun LanguageFlagIcon(languageCode: String, modifier: Modifier = Modifier)

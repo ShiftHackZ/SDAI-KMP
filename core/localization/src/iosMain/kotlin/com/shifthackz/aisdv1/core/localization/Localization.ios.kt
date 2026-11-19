@@ -3,18 +3,9 @@ package com.shifthackz.aisdv1.core.localization
 import platform.Foundation.NSUserDefaults
 
 /**
- * Executes the `countryFlagDrawableResId` step in the SDAI localization layer.
+ * Reads the preferred language reported by the native host.
  *
- * @param code code value consumed by the API.
- * @return Result produced by `countryFlagDrawableResId`.
- * @author Dmitriy Moroz
- */
-internal actual fun countryFlagDrawableResId(code: String): Int? = null
-
-/**
- * Executes the `platformLanguageCode` step in the SDAI localization layer.
- *
- * @return Result produced by `platformLanguageCode`.
+ * @return Native language code, or null when the host has no preferred language.
  * @author Dmitriy Moroz
  */
 internal actual fun platformLanguageCode(): String? =
