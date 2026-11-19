@@ -14,7 +14,7 @@ import platform.UIKit.UIScreen
  * @author Dmitriy Moroz
  */
 @Composable
-internal actual fun GenerationScreenProtection(isGenerating: Boolean, shouldDimScreen: Boolean) {
+internal actual fun GenerationScreenEffect(isGenerating: Boolean, shouldDimScreen: Boolean) {
     LifecycleResumeEffect(isGenerating, shouldDimScreen) {
         val application = UIApplication.sharedApplication
         val screen = UIScreen.mainScreen

@@ -17,14 +17,14 @@ import android.content.ContextWrapper
  * @author Dmitriy Moroz
  */
 @Composable
-internal actual fun GenerationScreenProtection(isGenerating: Boolean, shouldDimScreen: Boolean) {
+internal actual fun GenerationScreenEffect(isGenerating: Boolean, shouldDimScreen: Boolean) {
     val view = LocalView.current
     val window = view.context.findActivity()?.window
     LifecycleResumeEffect(window, isGenerating, shouldDimScreen) {
         val previousBrightness = window?.attributes?.screenBrightness
         val wasScreenKeptOn = window?.attributes?.flags?.and(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-        ) != 0
+        ) == WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         if (isGenerating && window != null) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             if (shouldDimScreen) {
