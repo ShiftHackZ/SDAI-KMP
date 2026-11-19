@@ -333,21 +333,16 @@ jobs:
               --verify-tag
           fi
 
-      - name: Announce nightly on Discord
+      - name: Prepare nightly announcements
+        id: announcement
         if: steps.plan.outputs.should_build == 'true' && env.PUBLISH_NIGHTLY == 'true'
         shell: bash
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK_URL }}
           NIGHTLY_VERSION_NAME: ${{ steps.version.outputs.version_name }}
           NIGHTLY_BUILD_DATE: ${{ steps.version.outputs.build_date }}
           NIGHTLY_COMMIT: ${{ steps.plan.outputs.target_sha }}
         run: |
           set -euo pipefail
-
-          if [[ -z "${DISCORD_WEBHOOK_URL}" ]]; then
-            echo "::notice::Discord notification skipped: DISCORD_NIGHTLY_WEBHOOK_URL is not configured."
-            exit 0
-          fi
 
           output_dir="${RUNNER_TEMP}/nightly-output"
           release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${NIGHTLY_TAG}"
@@ -362,16 +357,49 @@ jobs:
             --arg run_url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
             --arg feedback_url "https://github.com/${GITHUB_REPOSITORY}/issues" \
             --rawfile changes "${output_dir}/changes.txt" \
-            '{allowed_mentions: {parse: []}, embeds: [{
+            '{
               title: ("SDAI Dev · Nightly · " + $date),
-              url: $release_url,
-              color: 7684269,
-              description: ("**" + $version + "**\nInstalls alongside stable SDAI with separate app data.\n\n" +
-                $changes[:1000] + "\n[Download latest APK](" + $download_url + ") · [Release details](" + $release_url +
-                ")\n[Commit " + $commit[:8] + "](" + $commit_url + ") · [Build](" + $run_url +
-                ") · [Report an issue](" + $feedback_url + ")"),
-              footer: {text: "Preview build for testing. The download link always serves the latest nightly."}
-            }]}' > "${output_dir}/discord.json"
+              version: $version,
+              installation_note: "Installs alongside stable SDAI with separate app data.",
+              changes: $changes[:1000],
+              links: [
+                [{text: "Download latest APK", url: $download_url}, {text: "Release details", url: $release_url}],
+                [{text: ("Commit " + $commit[:8]), url: $commit_url}, {text: "Build", url: $run_url},
+                 {text: "Report an issue", url: $feedback_url}]
+              ],
+              footer: "Preview build for testing. The download link always serves the latest nightly."
+            }' > "${output_dir}/announcement.json"
+
+          jq '{allowed_mentions: {parse: []}, embeds: [{
+            title: .title,
+            url: .links[0][1].url,
+            color: 7684269,
+            description: ("**" + .version + "**\n" + .installation_note + "\n\n" + .changes + "\n" +
+              (.links | map(map("[" + .text + "](" + .url + ")") | join(" · ")) | join("\n"))),
+            footer: {text: .footer}
+          }]}' "${output_dir}/announcement.json" > "${output_dir}/discord.json"
+
+          # Escape all dynamic content for Telegram HTML, including commit subjects.
+          jq -r '"<b>" + (.title | @html) + "</b>\n\n<b>" + (.version | @html) + "</b>\n" +
+            (.installation_note | @html) + "\n\n" + (.changes | @html) + "\n" +
+            (.links | map(map("<a href=\"" + (.url | @html) + "\">" + (.text | @html) + "</a>") |
+              join(" · ")) | join("\n")) + "\n\n" + (.footer | @html)' \
+            "${output_dir}/announcement.json" > "${output_dir}/telegram.html"
+
+      - name: Announce nightly on Discord
+        if: steps.plan.outputs.should_build == 'true' && env.PUBLISH_NIGHTLY == 'true'
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${DISCORD_WEBHOOK_URL}" ]]; then
+            echo "::notice::Discord notification skipped: DISCORD_NIGHTLY_WEBHOOK_URL is not configured."
+            exit 0
+          fi
+
+          output_dir="${RUNNER_TEMP}/nightly-output"
 
           # Do not retry POST automatically: a lost response could duplicate the announcement.
           curl --fail --silent --show-error --connect-timeout 15 --max-time 60 \
@@ -380,3 +408,49 @@ jobs:
             --output "${output_dir}/discord-response.json" \
             --url-query 'wait=true' \
             "${DISCORD_WEBHOOK_URL}"
+
+      - name: Announce nightly in Telegram comments
+        # Attempt both destinations even if Discord delivery fails.
+        if: ${{ !cancelled() && steps.announcement.outcome == 'success' && steps.plan.outputs.should_build == 'true' && env.PUBLISH_NIGHTLY == 'true' }}
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_NIGHTLY_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_NIGHTLY_CHAT_ID || secrets.TELEGRAM_NIGHTLY_CHAT_ID }}
+          TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ vars.TELEGRAM_NIGHTLY_REPLY_TO_MESSAGE_ID || secrets.TELEGRAM_NIGHTLY_REPLY_TO_MESSAGE_ID }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${TELEGRAM_BOT_TOKEN}${TELEGRAM_CHAT_ID}${TELEGRAM_REPLY_TO_MESSAGE_ID}" ]]; then
+            echo "::notice::Telegram notification skipped: nightly Telegram settings are not configured."
+            exit 0
+          fi
+
+          : "${TELEGRAM_BOT_TOKEN:?Missing TELEGRAM_NIGHTLY_BOT_TOKEN secret.}"
+          : "${TELEGRAM_CHAT_ID:?Missing TELEGRAM_NIGHTLY_CHAT_ID variable or secret.}"
+          : "${TELEGRAM_REPLY_TO_MESSAGE_ID:?Missing TELEGRAM_NIGHTLY_REPLY_TO_MESSAGE_ID variable or secret.}"
+          if [[ ! "${TELEGRAM_CHAT_ID}" =~ ^-[0-9]+$ || ! "${TELEGRAM_REPLY_TO_MESSAGE_ID}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::Telegram requires a negative discussion group ID and a positive reply message ID."
+            exit 1
+          fi
+
+          output_dir="${RUNNER_TEMP}/nightly-output"
+          jq -n \
+            --arg chat_id "${TELEGRAM_CHAT_ID}" \
+            --argjson reply_id "${TELEGRAM_REPLY_TO_MESSAGE_ID}" \
+            --rawfile text "${output_dir}/telegram.html" \
+            '{chat_id: $chat_id, text: $text, parse_mode: "HTML",
+              link_preview_options: {is_disabled: true},
+              reply_parameters: {message_id: $reply_id, allow_sending_without_reply: false}}' \
+            > "${output_dir}/telegram.json"
+
+          # Do not retry POST automatically: a lost response could duplicate the comment.
+          curl --fail --silent --show-error --connect-timeout 15 --max-time 60 \
+            --header 'Content-Type: application/json' \
+            --data-binary "@${output_dir}/telegram.json" \
+            --output "${output_dir}/telegram-response.json" \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
+
+          if ! jq -e '.ok == true' "${output_dir}/telegram-response.json" >/dev/null; then
+            echo "::error::Telegram did not confirm the nightly comment."
+            exit 1
+          fi
