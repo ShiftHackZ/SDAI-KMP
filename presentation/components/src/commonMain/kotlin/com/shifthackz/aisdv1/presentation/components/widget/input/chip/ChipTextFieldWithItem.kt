@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.components.widget.input.chip
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -18,6 +19,7 @@ import com.shifthackz.aisdv1.presentation.components.utils.ExtrasFormatter
  * @param modifier Layout modifiers for the prompt-tag field.
  * @param textFieldValueState Caller-owned pending text and selection.
  * @param label Localized field caption.
+ * @param trailingIcon Optional action content at the outlined field’s trailing edge.
  * @param list Ordered prompt tags currently shown as chips.
  * @param onItemClick Opens the tag editor with the clicked zero-based index and tag text.
  * @param onEvent Receives requested additions, batch additions, edits or removals.
@@ -30,14 +32,16 @@ fun ChipTextFieldWithItem(
     textFieldValueState: MutableState<TextFieldValue>,
     label: UiText,
     list: List<String>,
+    trailingIcon: @Composable (() -> Unit)? = null,
     onItemClick: (type: Int, item: String) -> Unit = { _, _ -> },
     onEvent: (event: ChipTextFieldEvent<String>) -> Unit,
 ) {
     ChipTextField(
         modifier = modifier,
         label = { Text(label.asString()) },
+        trailingIcon = trailingIcon,
         textFieldValueState = textFieldValueState,
-        textStyle = LocalTextStyle.current,
+        textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
         chips = list,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
