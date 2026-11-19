@@ -159,6 +159,13 @@ sealed interface SettingsIntent : MviIntent {
 
         data class NNAPI(override val flag: Boolean) : UpdateFlag
 
+        /**
+         * Persists foreground generation display dimming.
+         * @param flag Whether dimming is enabled.
+         * @author Dmitriy Moroz
+         */
+        data class DimScreen(override val flag: Boolean) : UpdateFlag
+
         data class MonitorConnection(override val flag: Boolean) : UpdateFlag
 
         data class AutoSaveResult(override val flag: Boolean) : UpdateFlag

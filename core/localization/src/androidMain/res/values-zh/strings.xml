@@ -791,4 +791,6 @@
     <string name="backup_replace_providers">替换提供商设置</string>
     <string name="backup_cancel">取消</string>
     <string name="backup_shared_credentials_retained">为保留未选提供商的设置，共用凭据未更改：%1$s。</string>
+    <string name="settings_item_dim_screen">调暗屏幕</string>
+    <string name="settings_item_dim_screen_warning">*仅在关闭后台生成时才会调暗屏幕。</string>
 </resources>

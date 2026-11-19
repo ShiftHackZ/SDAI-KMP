@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.settings.section
 
+import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
@@ -208,6 +209,26 @@ internal fun SettingsServerSection(
                 modifier = headerModifier,
                 loading = isLoading,
                 text = text("settings_header_app"),
+            )
+        }
+
+        SettingsListItem.DIM_SCREEN -> {
+            SettingsToggleItem(
+                modifier = itemModifier,
+                isLoading = isLoading,
+                startIcon = Icons.Default.BrightnessLow,
+                text = (Localization.string("settings_item_dim_screen") +
+                        if (isBackgroundGenerationEnabled) "*" else "").asUiText(),
+                isChecked = state.shouldDimScreen,
+                onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.DimScreen(it)) },
+            )
+        }
+
+        SettingsListItem.DIM_SCREEN_WARNING -> {
+            Text(
+                modifier = warningModifier,
+                text = Localization.string("settings_item_dim_screen_warning"),
+                style = MaterialTheme.typography.labelMedium,
             )
         }
 

@@ -430,6 +430,12 @@ interface PreferenceManager {
     var backgroundGeneration: Boolean
 
     /**
+     * Whether foreground generation lowers display brightness while the app is active.
+     * @author Dmitriy Moroz
+     */
+    var shouldDimScreen: Boolean
+
+    /**
      * Number of background processes tracked by the existing work UI.
      *
      * @author Dmitriy Moroz

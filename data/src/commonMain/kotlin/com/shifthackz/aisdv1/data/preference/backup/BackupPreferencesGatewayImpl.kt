@@ -101,6 +101,7 @@ internal class BackupPreferencesGatewayImpl(
             "taggedInput" to BackupValue.Flag(preferences.formPromptTaggedInput),
             "connectionTimeout" to BackupValue.Integer(preferences.connectionTimeout.seconds),
             "generationTimeout" to BackupValue.Integer(preferences.generationRequestTimeout.seconds),
+            "dimScreen" to BackupValue.Flag(preferences.shouldDimScreen),
             "backgroundGeneration" to BackupValue.Flag(preferences.backgroundGeneration),
             "monitorConnection" to BackupValue.Flag(preferences.monitorConnectivity),
             "textToImageSteps" to BackupValue.Integer(preferences.textToImageSamplingSteps),

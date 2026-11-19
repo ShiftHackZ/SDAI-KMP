@@ -739,4 +739,6 @@
     <string name="backup_replace_providers">Замінити налаштування</string>
     <string name="backup_cancel">Скасувати</string>
     <string name="backup_shared_credentials_retained">Спільні облікові дані збережено для невибраних провайдерів: %1$s.</string>
+    <string name="settings_item_dim_screen">Затемнювати екран</string>
+    <string name="settings_item_dim_screen_warning">*Затемнення екрана працює лише за вимкненої фонової генерації.</string>
 </resources>
