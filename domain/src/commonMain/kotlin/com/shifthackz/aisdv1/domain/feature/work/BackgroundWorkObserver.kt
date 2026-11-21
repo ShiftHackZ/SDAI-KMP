@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 /**
- * Defines the `BackgroundWorkObserver` contract for the SDAI domain layer.
+ * Shares owner-scoped generation status and retained outcomes between workers and UI.
  *
  * @author Dmitriy Moroz
  */
@@ -32,7 +32,7 @@ interface BackgroundWorkObserver {
     }
 
     /**
-     * Loads SDAI data through `observeStatus`.
+     * Observes active work headings and measured progress.
      *
      * @return Result produced by `observeStatus`.
      * @author Dmitriy Moroz
@@ -40,7 +40,7 @@ interface BackgroundWorkObserver {
     fun observeStatus(): Flow<BackgroundWorkStatus>
 
     /**
-     * Loads SDAI data through `observeResult`.
+     * Observes the retained generation outcome until acknowledgment.
      *
      * @return Result produced by `observeResult`.
      * @author Dmitriy Moroz
@@ -48,53 +48,65 @@ interface BackgroundWorkObserver {
     fun observeResult(): Flow<BackgroundWorkResult>
 
     /**
-     * Executes the `dismissResult` step in the SDAI domain layer.
+     * Clears the acknowledged generation outcome.
      *
      * @author Dmitriy Moroz
      */
     fun dismissResult()
 
     /**
-     * Executes the `refreshStatus` step in the SDAI domain layer.
+     * Refreshes running state from scheduled generation work.
      *
      * @author Dmitriy Moroz
      */
     fun refreshStatus()
 
     /**
-     * Executes the `postStatusMessage` step in the SDAI domain layer.
+     * Publishes an indeterminate active stage and clears the previous outcome.
      *
-     * @param title title value consumed by the API.
-     * @param subTitle sub title value consumed by the API.
+     * @param title Localized operation heading.
+     * @param subTitle Localized stage description.
      * @author Dmitriy Moroz
      */
     fun postStatusMessage(title: String, subTitle: String)
 
     /**
-     * Executes the `postSuccessSignal` step in the SDAI domain layer.
+     * Publishes measured generation progress, retaining null for queue/loading stages.
      *
-     * @param result result value consumed by the API.
+     * @param title Localized operation heading.
+     * @param subTitle Stage description or sampling counters.
+     * @param percentage Bounded completion, or null when unavailable.
+     * @author Dmitriy Moroz
+     */
+    fun postProgressMessage(title: String, subTitle: String, percentage: Int?) {
+        postStatusMessage(title, subTitle)
+    }
+
+    /**
+     * Ends active work and retains successful results for display.
+     *
+     * @param result Completed images retained for the result UI.
      * @author Dmitriy Moroz
      */
     fun postSuccessSignal(result: List<AiGenerationResult>)
 
     /**
-     * Executes the `postCancelSignal` step in the SDAI domain layer.
+     * Ends active work without publishing a successful result.
      *
      * @author Dmitriy Moroz
      */
     fun postCancelSignal()
 
     /**
-     * Executes the `postFailedSignal` step in the SDAI domain layer.
+     * Ends active work and retains its failure for display.
      *
-     * @param t t value consumed by the API.
+     * @param t Failure retained for the error UI.
      * @author Dmitriy Moroz
      */
     fun postFailedSignal(t: Throwable)
 
     /**
-     * Executes the `hasActiveTasks` step in the SDAI domain layer.
+     * Reports whether generation is scheduled or running.
      *
      * @return Result produced by `hasActiveTasks`.
      * @author Dmitriy Moroz
@@ -109,7 +121,7 @@ interface BackgroundWorkObserver {
  */
 object NoOpBackgroundWorkObserver : BackgroundWorkObserver {
     /**
-     * Loads SDAI data through `observeStatus`.
+     * Observes active work headings and measured progress.
      *
      * @author Dmitriy Moroz
      */
@@ -117,60 +129,60 @@ object NoOpBackgroundWorkObserver : BackgroundWorkObserver {
         flowOf(BackgroundWorkStatus(false, "", ""))
 
     /**
-     * Loads SDAI data through `observeResult`.
+     * Observes the retained generation outcome until acknowledgment.
      *
      * @author Dmitriy Moroz
      */
     override fun observeResult(): Flow<BackgroundWorkResult> = flowOf(BackgroundWorkResult.None)
 
     /**
-     * Executes the `dismissResult` step in the SDAI domain layer.
+     * Clears the acknowledged generation outcome.
      *
      * @author Dmitriy Moroz
      */
     override fun dismissResult() = Unit
 
     /**
-     * Executes the `refreshStatus` step in the SDAI domain layer.
+     * Refreshes running state from scheduled generation work.
      *
      * @author Dmitriy Moroz
      */
     override fun refreshStatus() = Unit
 
     /**
-     * Executes the `postStatusMessage` step in the SDAI domain layer.
+     * Publishes an indeterminate active stage and clears the previous outcome.
      *
-     * @param title title value consumed by the API.
-     * @param subTitle sub title value consumed by the API.
+     * @param title Localized operation heading.
+     * @param subTitle Localized stage description.
      * @author Dmitriy Moroz
      */
     override fun postStatusMessage(title: String, subTitle: String) = Unit
 
     /**
-     * Executes the `postSuccessSignal` step in the SDAI domain layer.
+     * Ends active work and retains successful results for display.
      *
-     * @param result result value consumed by the API.
+     * @param result Completed images retained for the result UI.
      * @author Dmitriy Moroz
      */
     override fun postSuccessSignal(result: List<AiGenerationResult>) = Unit
 
     /**
-     * Executes the `postCancelSignal` step in the SDAI domain layer.
+     * Ends active work without publishing a successful result.
      *
      * @author Dmitriy Moroz
      */
     override fun postCancelSignal() = Unit
 
     /**
-     * Executes the `postFailedSignal` step in the SDAI domain layer.
+     * Ends active work and retains its failure for display.
      *
-     * @param t t value consumed by the API.
+     * @param t Failure retained for the error UI.
      * @author Dmitriy Moroz
      */
     override fun postFailedSignal(t: Throwable) = Unit
 
     /**
-     * Executes the `hasActiveTasks` step in the SDAI domain layer.
+     * Reports whether generation is scheduled or running.
      *
      * @return Result produced by `hasActiveTasks`.
      * @author Dmitriy Moroz

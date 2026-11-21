@@ -57,41 +57,41 @@ internal class BackgroundWorkObserverImpl(
 
 
     /**
-     * Exposes the `stateFlow` value used by the SDAI background work feature layer.
+     * Whether scheduled or running generation should remain visible.
      *
      * @author Dmitriy Moroz
      */
     private val stateFlow = MutableStateFlow(false)
 
     /**
-     * Exposes the `messageFlow` value used by the SDAI background work feature layer.
+     * Latest localized stage and measured completion, published together.
      *
      * @author Dmitriy Moroz
      */
-    private val messageFlow = MutableStateFlow("" to "")
+    private val messageFlow = MutableStateFlow(BackgroundWorkStatus(false, "", ""))
 
     /**
-     * Exposes the `resultFlow` value used by the SDAI background work feature layer.
+     * Latest generation outcome retained until acknowledged.
      *
      * @author Dmitriy Moroz
      */
     private val resultFlow = MutableStateFlow<BackgroundWorkResult>(BackgroundWorkResult.None)
 
     /**
-     * Loads SDAI data through `observeStatus`.
+     * Observes active work headings and measured progress.
      *
      * @return Result produced by `observeStatus`.
      * @author Dmitriy Moroz
      */
     override fun observeStatus(): Flow<BackgroundWorkStatus> {
         refreshStatus()
-        return combine(stateFlow, messageFlow) { running, (title, subTitle) ->
-            BackgroundWorkStatus(running, title, subTitle)
+        return combine(stateFlow, messageFlow) { running, message ->
+            message.copy(running = running)
         }
     }
 
     /**
-     * Loads SDAI data through `observeResult`.
+     * Observes the retained generation outcome until acknowledgment.
      *
      * @return Result produced by `observeResult`.
      * @author Dmitriy Moroz
@@ -99,7 +99,7 @@ internal class BackgroundWorkObserverImpl(
     override fun observeResult(): Flow<BackgroundWorkResult> = resultFlow
 
     /**
-     * Executes the `dismissResult` step in the SDAI background work feature layer.
+     * Clears the acknowledged generation outcome.
      *
      * @author Dmitriy Moroz
      */
@@ -108,7 +108,7 @@ internal class BackgroundWorkObserverImpl(
     }
 
     /**
-     * Executes the `refreshStatus` step in the SDAI background work feature layer.
+     * Refreshes running state from scheduled generation work.
      *
      * @author Dmitriy Moroz
      */
@@ -124,58 +124,73 @@ internal class BackgroundWorkObserverImpl(
     }
 
     /**
-     * Executes the `postStatusMessage` step in the SDAI background work feature layer.
+     * Publishes stage and completion together so subscribers never mix different measurements.
      *
-     * @param title title value consumed by the API.
-     * @param subTitle sub title value consumed by the API.
+     * @param title Localized operation heading.
+     * @param subTitle Stage description or sampling counters.
+     * @param percentage Completion fraction expressed as a percentage, or null when unknown.
      * @author Dmitriy Moroz
      */
-    override fun postStatusMessage(title: String, subTitle: String) {
+    override fun postProgressMessage(title: String, subTitle: String, percentage: Int?) {
         stateFlow.value = true
-        messageFlow.value = title to subTitle
+        messageFlow.value =
+            BackgroundWorkStatus(true, title, subTitle, percentage?.coerceIn(0, 100))
         resultFlow.value = BackgroundWorkResult.None
     }
 
     /**
-     * Executes the `postSuccessSignal` step in the SDAI background work feature layer.
+     * Publishes an indeterminate active stage and clears the previous outcome.
      *
-     * @param result result value consumed by the API.
+     * @param title Localized operation heading.
+     * @param subTitle Localized stage description.
+     * @author Dmitriy Moroz
+     */
+    override fun postStatusMessage(title: String, subTitle: String) {
+        stateFlow.value = true
+        messageFlow.value = BackgroundWorkStatus(true, title, subTitle)
+        resultFlow.value = BackgroundWorkResult.None
+    }
+
+    /**
+     * Ends active work and retains successful results for display.
+     *
+     * @param result Completed images retained for the result UI.
      * @author Dmitriy Moroz
      */
     override fun postSuccessSignal(result: List<AiGenerationResult>) {
         hasOwnerTerminated = true
         stateFlow.value = false
-        messageFlow.value = "" to ""
+        messageFlow.value = BackgroundWorkStatus(false, "", "")
         resultFlow.value = BackgroundWorkResult.Success(result)
     }
 
     /**
-     * Executes the `postCancelSignal` step in the SDAI background work feature layer.
+     * Ends active work without publishing a successful result.
      *
      * @author Dmitriy Moroz
      */
     override fun postCancelSignal() {
         hasOwnerTerminated = true
         stateFlow.value = false
-        messageFlow.value = "" to ""
+        messageFlow.value = BackgroundWorkStatus(false, "", "")
         resultFlow.value = BackgroundWorkResult.None
     }
 
     /**
-     * Executes the `postFailedSignal` step in the SDAI background work feature layer.
+     * Ends active work and retains its failure for display.
      *
-     * @param t t value consumed by the API.
+     * @param t Failure retained for the error UI.
      * @author Dmitriy Moroz
      */
     override fun postFailedSignal(t: Throwable) {
         hasOwnerTerminated = true
         stateFlow.value = false
-        messageFlow.value = "" to ""
+        messageFlow.value = BackgroundWorkStatus(false, "", "")
         resultFlow.value = BackgroundWorkResult.Error(t)
     }
 
     /**
-     * Executes the `hasActiveTasks` step in the SDAI background work feature layer.
+     * Reports whether generation is scheduled or running.
      *
      * @return Result produced by `hasActiveTasks`.
      * @author Dmitriy Moroz

@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
+import kotlinx.coroutines.withContext
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.CaptureEasyDiffusionConnectionUseCase
 
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.GenerateEasyDiffusionUseCase
@@ -50,6 +53,7 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
  * @param bonsaiGenerationRepository Generation and result persistence for Bonsai.
  * @param mnnGenerationRepository Isolated MNN request execution after fixed-profile and seed admission.
  * @param preferenceManager Current provider selection and independent generation preferences.
+ * @param trackRemoteGenerationUseCase Owns request-correlated remote telemetry and its cleanup.
  * @param generationRestoreGate Serializes generation against portable backup restoration.
  * @param generateEasyDiffusionUseCase Owns captured-task batching, stream recovery, cancellation and deadlines.
  * @param captureEasyDiffusionConnectionUseCase Captures endpoint/checkpoint under the provider-selection lock, retaining the submitted revision.
@@ -88,6 +92,7 @@ internal class TextToImageUseCaseImpl(
     private val mnnGenerationRepository: MnnGenerationRepository,
 
     private val preferenceManager: PreferenceManager,
+    private val trackRemoteGenerationUseCase: TrackRemoteGenerationUseCase,
     private val generationRestoreGate: GenerationRestoreGate,
     private val generateEasyDiffusionUseCase: GenerateEasyDiffusionUseCase,
     private val captureEasyDiffusionConnectionUseCase: CaptureEasyDiffusionConnectionUseCase,
@@ -105,10 +110,16 @@ internal class TextToImageUseCaseImpl(
      * @author Dmitriy Moroz
      */
     override suspend operator fun invoke(payload: TextToImagePayload): List<AiGenerationResult> =
-        generationRestoreGate.generating { generate(payload) }
+        generationRestoreGate.generating {
+            val source = payload.sourceSnapshot ?: preferenceManager.source
+            if (source == ServerSource.AUTOMATIC1111 || source == ServerSource.SWARM_UI) {
+                trackRemoteGenerationUseCase(source) { generate(payload) }
+            } else generate(payload)
+        }
 
     /**
      * Executes a captured text request while this operation owns generation admission.
+     *
      * @param payload Immutable provider generation inputs.
      * @author Dmitriy Moroz
      */
@@ -137,9 +148,18 @@ internal class TextToImageUseCaseImpl(
 
             ServerSource.FAL_AI -> falAiGenerationRepository.generateFromText(payload)
             ServerSource.ARLI_AI -> arliAiGenerationRepository.generateFromText(payload)
-            else -> List(payload.batchCount.coerceAtLeast(1)) {
+            else -> List(payload.batchCount.coerceAtLeast(1)) { index ->
                 coroutineContext.ensureActive()
-                generateSingle(payload)
+                val context = coroutineContext[RemoteGenerationProgressContext]
+                if (context == null) generateSingle(payload) else withContext(
+                    RemoteGenerationProgressContext(context.taskId) { fraction ->
+                        context.report(fraction?.let {
+                            (index + it) / payload.batchCount.coerceAtLeast(
+                                1
+                            )
+                        })
+                    }
+                ) { generateSingle(payload) }
             }
         }
     }

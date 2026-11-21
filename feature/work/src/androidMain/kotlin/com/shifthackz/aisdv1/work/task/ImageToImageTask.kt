@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.work.task
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
@@ -40,6 +42,7 @@ import kotlinx.coroutines.CancellationException
  * @param pushNotificationManager Publishes foreground and terminal notifications.
  * @param activityIntentProvider Opens the app from notifications.
  * @param preferenceManager Supplies the source for legacy work.
+ * @param remoteGenerationProgressGateway Owner-scoped remote job/workflow measurements.
  * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
  * @param interruptWorkerGenerationUseCase Cancels captured source work for this worker.
@@ -57,6 +60,7 @@ internal class ImageToImageTask(
     activityIntentProvider: ActivityIntentProvider,
     preferenceManager: PreferenceManager,
     observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
+    remoteGenerationProgressGateway: RemoteGenerationProgressGateway,
     observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val backgroundWorkObserver: BackgroundWorkObserver,
@@ -73,6 +77,7 @@ internal class ImageToImageTask(
     preferenceManager = preferenceManager,
     backgroundWorkObserver = backgroundWorkObserver,
     observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
+    remoteGenerationProgressGateway = remoteGenerationProgressGateway,
     observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
 ) {
@@ -81,9 +86,11 @@ internal class ImageToImageTask(
 
     override val genericNotificationId = NOTIFICATION_IMAGE_TO_IMAGE_GENERIC
 
-    /** Decodes the durable image payload, dispatches it with this exact worker UUID and reports completion or failure.
-     * @author Dmitriy Moroz */
-
+    /**
+     * Decodes the durable image payload, dispatches it with this exact worker UUID and reports completion or failure.
+     *
+     * @author Dmitriy Moroz
+     */
     override suspend fun doWork(): Result {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {
                 backgroundWorkObserver.refreshStatus()

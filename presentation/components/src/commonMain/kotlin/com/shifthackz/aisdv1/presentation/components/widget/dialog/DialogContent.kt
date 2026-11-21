@@ -163,13 +163,14 @@ fun DecisionInteractiveDialogContent(
 }
 
 /**
- * Shows indeterminate operation progress with optional status and caller-owned actions.
+ * Shows measured operation progress when available, otherwise an indeterminate indicator.
  *
  * @param title Operation heading.
  * @param subTitle Explanatory progress text.
  * @param modifier Layout modifiers for the progress surface.
  * @param waitTimeText Optional queue/wait estimate; null reserves an empty status line.
  * @param statusText Optional current stage text.
+ * @param progress Measured completion fraction from zero to one, or null when unknown.
  * @param content Optional controls rendered below the progress indicator.
  *
  * @author Dmitriy Moroz
@@ -181,6 +182,7 @@ fun ProgressDialogContent(
     modifier: Modifier = Modifier,
     waitTimeText: String? = null,
     statusText: String? = null,
+    progress: Float? = null,
     content: (@Composable () -> Unit)? = null,
 ) {
     Surface(
@@ -204,12 +206,20 @@ fun ProgressDialogContent(
                 waitTimeText = waitTimeText,
                 statusText = statusText,
             )
-            LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                color = MaterialTheme.colorScheme.primary,
-            )
+            if (progress != null) {
+                LinearProgressIndicator(
+                    progress = { progress.coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    color = AlertDialogDefaults.iconContentColor,
+                )
+            } else {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             content?.invoke()
         }
     }

@@ -51,6 +51,10 @@ class MnnTextToImageUseCaseTest {
         mnnProfile = "sd15-512-general-int8-v1"
     )
     private val useCase = TextToImageUseCaseImpl(
+        trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
+            mockk(relaxed = true),
+            mockk(relaxed = true)
+        ),
         generationRestoreGate = ImmediateGenerationRestoreGate(),
         stableDiffusionGenerationRepository = mockk(), hordeGenerationRepository = mockk(),
         huggingFaceGenerationRepository = mockk(), openAiGenerationRepository = mockk(),

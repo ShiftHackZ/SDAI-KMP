@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.data.remote
 
+import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
+import kotlin.coroutines.coroutineContext
+
 import com.shifthackz.aisdv1.data.mappers.mapStableDiffusionImageToImageResult
 import com.shifthackz.aisdv1.data.mappers.mapStableDiffusionTextToImageResult
 import com.shifthackz.aisdv1.data.mappers.mapToBasicHttpAuthorization
@@ -13,14 +16,16 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
- * Coordinates `KtorStableDiffusionGenerationRemoteDataSource` behavior in the SDAI data layer.
+ * Maps domain generation payloads to authenticated AUTOMATIC1111 calls and normalizes returned images.
+ *
+ * @param api Provider generation and cancellation transport.
  *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalTime::class)
 class KtorStableDiffusionGenerationRemoteDataSource(
     /**
-     * Exposes the `api` value used by the SDAI data layer.
+     * Provider transport used for generation, cancellation and progress reads.
      *
      * @author Dmitriy Moroz
      */
@@ -28,10 +33,10 @@ class KtorStableDiffusionGenerationRemoteDataSource(
 ) : StableDiffusionGenerationDataSource.Remote {
 
     /**
-     * Executes the `checkAvailability` step in the SDAI data layer.
+     * Checks whether the captured server connection can be reached; transport failures propagate.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param credentials credentials value consumed by the API.
+     * @param baseUrl Captured provider server root.
+     * @param credentials Captured credentials for this provider connection.
      * @author Dmitriy Moroz
      */
     override suspend fun checkAvailability(
@@ -42,11 +47,11 @@ class KtorStableDiffusionGenerationRemoteDataSource(
     }
 
     /**
-     * Executes the `textToImage` step in the SDAI data layer.
+     * Submits one text generation request and returns the provider results.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param credentials credentials value consumed by the API.
-     * @param payload generation payload used by the operation.
+     * @param baseUrl Captured provider server root.
+     * @param credentials Captured credentials for this provider connection.
+     * @param payload Immutable generation inputs mapped to the provider request.
      * @author Dmitriy Moroz
      */
     override suspend fun textToImage(
@@ -57,7 +62,8 @@ class KtorStableDiffusionGenerationRemoteDataSource(
         .textToImage(
             baseUrl = baseUrl,
             authorization = credentials.mapToBasicHttpAuthorization(),
-            request = payload.mapToStableDiffusionRequest(),
+            request = payload.mapToStableDiffusionRequest()
+                .copy(forceTaskId = coroutineContext[RemoteGenerationProgressContext]?.taskId),
         )
         .let { response -> payload to response }
         .mapStableDiffusionTextToImageResult(
@@ -65,11 +71,11 @@ class KtorStableDiffusionGenerationRemoteDataSource(
         )
 
     /**
-     * Executes the `imageToImage` step in the SDAI data layer.
+     * Submits one image transformation request and returns the provider results.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param credentials credentials value consumed by the API.
-     * @param payload generation payload used by the operation.
+     * @param baseUrl Captured provider server root.
+     * @param credentials Captured credentials for this provider connection.
+     * @param payload Immutable generation inputs mapped to the provider request.
      * @author Dmitriy Moroz
      */
     override suspend fun imageToImage(
@@ -80,7 +86,8 @@ class KtorStableDiffusionGenerationRemoteDataSource(
         .imageToImage(
             baseUrl = baseUrl,
             authorization = credentials.mapToBasicHttpAuthorization(),
-            request = payload.mapToStableDiffusionRequest(),
+            request = payload.mapToStableDiffusionRequest()
+                .copy(forceTaskId = coroutineContext[RemoteGenerationProgressContext]?.taskId),
         )
         .let { response -> payload to response }
         .mapStableDiffusionImageToImageResult(
@@ -90,8 +97,8 @@ class KtorStableDiffusionGenerationRemoteDataSource(
     /**
      * Performs the SDAI side effect handled by `interruptGeneration`.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param credentials credentials value consumed by the API.
+     * @param baseUrl Captured provider server root.
+     * @param credentials Captured credentials for this provider connection.
      * @author Dmitriy Moroz
      */
     override suspend fun interruptGeneration(

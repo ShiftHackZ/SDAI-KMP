@@ -12,6 +12,7 @@ android {
             )
         }
         isReturnDefaultValues = true
+        isIncludeAndroidResources = true
     }
 }
 
@@ -48,6 +49,8 @@ kotlin {
             implementation(libs.test.junit)
             implementation(libs.test.mockk)
             implementation(libs.test.coroutines)
+            implementation(libs.test.roboelectric)
+            implementation(libs.test.compose.junit)
         }
     }
 }
@@ -58,4 +61,8 @@ composeCompiler {
         metricsDestination.set(layout.buildDirectory.dir("compose-metrics"))
         reportsDestination.set(layout.buildDirectory.dir("compose-reports"))
     }
+}
+
+dependencies {
+    debugImplementation(libs.test.compose.manifest)
 }

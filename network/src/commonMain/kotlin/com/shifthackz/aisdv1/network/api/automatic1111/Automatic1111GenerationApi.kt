@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.network.api.automatic1111
 
+import com.shifthackz.aisdv1.network.response.Automatic1111ProgressResponse
+
 import com.shifthackz.aisdv1.network.auth.BasicHttpAuthorization
 import com.shifthackz.aisdv1.network.request.ImageToImageRequest
 import com.shifthackz.aisdv1.network.request.TextToImageRequest
@@ -7,17 +9,30 @@ import com.shifthackz.aisdv1.network.response.SdGenerationResponse
 
 
 /**
- * Defines the `Automatic1111GenerationApi` contract for the SDAI network layer.
+ * Authenticated AUTOMATIC1111 generation, cancellation and request-correlated progress transport.
  *
  * @author Dmitriy Moroz
  */
 interface Automatic1111GenerationApi {
+    /**
+     * Reads job progress without requesting an expensive preview image.
+     *
+     * @param baseUrl Captured server root.
+     * @param authorization Optional server Basic authentication.
+     * @return Progress plus active task identity when supported by the server.
+     * @author Dmitriy Moroz
+     */
+    suspend fun progress(
+        baseUrl: String,
+        authorization: BasicHttpAuthorization?
+    ): Automatic1111ProgressResponse
+
 
     /**
-     * Executes the `healthCheck` step in the SDAI network layer.
+     * Checks server reachability using the captured authentication.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param authorization authorization value consumed by the API.
+     * @param baseUrl Captured provider server root.
+     * @param authorization Optional Basic authentication for this server.
      * @author Dmitriy Moroz
      */
     suspend fun healthCheck(
@@ -26,11 +41,11 @@ interface Automatic1111GenerationApi {
     )
 
     /**
-     * Executes the `textToImage` step in the SDAI network layer.
+     * Submits one text generation request and returns the provider results.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param authorization authorization value consumed by the API.
-     * @param request request value consumed by the API.
+     * @param baseUrl Captured provider server root.
+     * @param authorization Optional Basic authentication for this server.
+     * @param request Serialized generation parameters and submission identity.
      * @return Result produced by `textToImage`.
      * @author Dmitriy Moroz
      */
@@ -41,11 +56,11 @@ interface Automatic1111GenerationApi {
     ): SdGenerationResponse
 
     /**
-     * Executes the `imageToImage` step in the SDAI network layer.
+     * Submits one image transformation request and returns the provider results.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param authorization authorization value consumed by the API.
-     * @param request request value consumed by the API.
+     * @param baseUrl Captured provider server root.
+     * @param authorization Optional Basic authentication for this server.
+     * @param request Serialized generation parameters and submission identity.
      * @return Result produced by `imageToImage`.
      * @author Dmitriy Moroz
      */
@@ -58,8 +73,8 @@ interface Automatic1111GenerationApi {
     /**
      * Performs the SDAI side effect handled by `interrupt`.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param authorization authorization value consumed by the API.
+     * @param baseUrl Captured provider server root.
+     * @param authorization Optional Basic authentication for this server.
      * @author Dmitriy Moroz
      */
     suspend fun interrupt(

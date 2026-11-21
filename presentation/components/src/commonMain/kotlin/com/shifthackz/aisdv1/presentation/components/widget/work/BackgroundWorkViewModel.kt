@@ -49,6 +49,7 @@ class BackgroundWorkViewModel(
                                 dismissible = false,
                                 title = work.statusTitle,
                                 subTitle = work.statusSubTitle,
+                                percentage = work.percentage,
                                 isError = false,
                                 image = null,
                                 imageBase64 = null,
@@ -71,6 +72,7 @@ class BackgroundWorkViewModel(
                         it.copy(
                             visible = result !is BackgroundWorkResult.None,
                             running = false,
+                            percentage = null,
                             dismissible = result !is BackgroundWorkResult.None,
                             title = resultTitle,
                             subTitle = resultSubTitle,
@@ -90,6 +92,7 @@ class BackgroundWorkViewModel(
                     it.copy(
                         visible = false,
                         running = false,
+                        percentage = null,
                         dismissible = false,
                         title = "",
                         subTitle = "",

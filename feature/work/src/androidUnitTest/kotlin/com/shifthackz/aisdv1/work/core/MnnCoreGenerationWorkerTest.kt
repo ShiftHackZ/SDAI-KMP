@@ -147,6 +147,7 @@ private class TestWorker(
     gateway,
     observer,
     horde,
+    mockk(relaxed = true),
     easyDiffusion,
     interrupt
 ) {

@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.presentation.generation.txt2img
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
+
 import com.shifthackz.aisdv1.presentation.components.image.ImageSaver
 import com.shifthackz.aisdv1.presentation.components.image.ImageSharer
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
@@ -24,7 +27,6 @@ import com.shifthackz.aisdv1.domain.entity.ForgeModule
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
 import kotlinx.coroutines.flow.combine
-import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.openaioauth.OpenAiOAuthGateway
 import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
@@ -86,6 +88,7 @@ import kotlinx.coroutines.withContext
  * @param observeEasyDiffusionProgressUseCase Shared hot queued/sampling progress, reset when its owning operation finishes.
  * @param nativeGenerationGateway Engine-specific progress/stages for the captured generation modal.
  * @param mnnBackendPolicy Supplies supported choices and normalizes restored foreign backend values.
+ * @param remoteGenerationProgressGateway Observes measurements correlated with foreground remote submissions.
  * @param observeMnnProcessStatusUseCase Reports iOS MNN overall percentage after native admission.
  * @param observeHordeProcessStatusUseCase Observes remote AI Horde queue position and wait estimates.
  * @param observeLocalDiffusionProcessStatusUseCase Observes legacy ONNX inference progress.
@@ -131,6 +134,7 @@ class TextToImageViewModel(
     private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val nativeGenerationGateway: NativeGenerationGateway,
     private val mnnBackendPolicy: MnnBackendPolicy,
+    private val remoteGenerationProgressGateway: RemoteGenerationProgressGateway,
     private val observeMnnProcessStatusUseCase: ObserveMnnProcessStatusUseCase,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
@@ -396,7 +400,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeGenerationFormUpdate() {
         launch(dispatchersProvider.immediate) {
             generationFormUpdateEvent.observeTxt2ImgForm().collect { payload ->
@@ -412,7 +415,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun consumePendingGenerationFormUpdate() {
         generationFormUpdateEvent.consumeTxt2ImgForm()?.let { payload ->
             applyGenerationResult(payload.ai)
@@ -424,7 +426,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeGenerationProgress() {
         launch(dispatchersProvider.immediate) {
             observeEasyDiffusionProgressUseCase().collect { progress ->
@@ -433,6 +434,23 @@ class TextToImageViewModel(
                         (state.screenModal is GenerationModal.Communicating || state.screenModal is GenerationModal.Generating)
                     ) {
                         state.copy(screenModal = progress.toGenerationModal())
+                    } else state
+                }
+            }
+        }
+        launch(dispatchersProvider.immediate) {
+            remoteGenerationProgressGateway.observe().collect { progress ->
+                updateFormState { state ->
+                    val modal = state.screenModal
+                    val active =
+                        progress.lastOrNull { it.ownerId == null && it.source == state.mode }
+                    if (modal is GenerationModal.Generating &&
+                        state.mode in setOf(ServerSource.AUTOMATIC1111, ServerSource.SWARM_UI)
+                    ) {
+                        state.copy(
+                            screenModal = modal.copy(
+                                status = active?.percentage?.let { LocalDiffusionStatus(it, 100) }
+                            ))
                     } else state
                 }
             }
@@ -482,22 +500,22 @@ class TextToImageViewModel(
         }
         launch(dispatchersProvider.immediate) {
             observeLocalDiffusionProcessStatusUseCase().collect { status ->
-                updateLocalGenerationStatus(status)
+                updateLocalGenerationStatus(status, ServerSource.LOCAL_MICROSOFT_ONNX)
             }
         }
         launch(dispatchersProvider.immediate) {
             observeStableDiffusionCppProcessStatusUseCase().collect { status ->
-                updateLocalGenerationStatus(status)
+                updateLocalGenerationStatus(status, ServerSource.LOCAL_STABLE_DIFFUSION_CPP)
             }
         }
         launch(dispatchersProvider.immediate) {
             observeCoreMlProcessStatusUseCase().collect { status ->
-                updateLocalGenerationStatus(status)
+                updateLocalGenerationStatus(status, ServerSource.LOCAL_APPLE_CORE_ML)
             }
         }
         launch(dispatchersProvider.immediate) {
             observeBonsaiProcessStatusUseCase().collect { status ->
-                updateLocalGenerationStatus(status)
+                updateLocalGenerationStatus(status, ServerSource.LOCAL_APPLE_BONSAI)
             }
         }
     }
@@ -506,14 +524,14 @@ class TextToImageViewModel(
      * Updates sampling progress only while a local generation modal is active.
      *
      * @param status Native sampling step and total for the active local operation.
+     * @param source Provider whose progress stream produced these counters.
      *
      * @author Dmitriy Moroz
      */
-
-    private fun updateLocalGenerationStatus(status: LocalDiffusionStatus) {
+    private fun updateLocalGenerationStatus(status: LocalDiffusionStatus, source: ServerSource) {
         updateFormState { state ->
             val modal = state.screenModal
-            if (modal is GenerationModal.Generating && modal.nativeEngine == null) {
+            if (modal is GenerationModal.Generating && modal.nativeEngine == null && state.mode == source) {
                 state.copy(screenModal = modal.copy(status = status))
             } else {
                 state
@@ -526,7 +544,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadConfiguration() {
         updateFormState { it.copy(loadingConfiguration = true, error = null) }
         launch(dispatchersProvider.io) {
@@ -570,7 +587,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeSettings() {
         launch(dispatchersProvider.immediate) {
             preferenceManager
@@ -696,7 +712,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadForgeModules() {
         launch(dispatchersProvider.io) {
             runCatching { getForgeModulesUseCase() }
@@ -739,7 +754,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadADetailerAvailability(force: Boolean = false) {
         if (!force && aDetailerAvailable != null) return
         updateFormState { it.copy(aDetailerRefreshing = true) }
@@ -779,7 +793,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun refreshArliAiModelsIfNeeded(settings: Settings) {
         if (settings.source != ServerSource.ARLI_AI) {
             arliAiModelsKey = null
@@ -807,7 +820,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadArliAiModels() {
         launch(dispatchersProvider.io) {
             runCatching {

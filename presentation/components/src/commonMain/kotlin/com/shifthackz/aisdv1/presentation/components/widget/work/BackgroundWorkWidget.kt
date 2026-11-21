@@ -65,6 +65,14 @@ fun BackgroundWorkWidget(
 }
 
 
+/**
+ * Shows measured generation as a status/percentage row and bar, or the current queue/result card.
+ *
+ * @param modifier Layout modifiers for the animated status card.
+ * @param state Current work stage, measured completion or retained outcome.
+ * @param processIntent Acknowledges completed or failed work through the owning view model.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun BackgroundWorkWidgetContent(
     modifier: Modifier = Modifier,
@@ -83,7 +91,18 @@ private fun BackgroundWorkWidgetContent(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center,
             ) {
-                Row(
+                if (state.running && state.percentage != null) {
+                    BackgroundGenerationProgressContent(
+                        status = state.subTitle,
+                        percentage = state.percentage,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(MaterialTheme.colorScheme.surfaceTint, shape)
+                            .clip(shape)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                    )
+                } else Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)

@@ -118,6 +118,11 @@ fun GeneratingProgressDialogContent(
         subTitle = subTitle.asString(),
         waitTimeText = waitTimeText(waitTimeSeconds),
         statusText = progressStatusText(positionInQueue, step, overallPercentage),
+        progress = if (positionInQueue != null) null else overallPercentage?.coerceIn(0, 100)
+            ?.div(100f)
+            ?: step?.takeIf { it.second > 0 }?.let { (current, total) ->
+                (current.toFloat() / total).coerceIn(0f, 1f)
+            },
         content = content,
         modifier = modifier,
     )
@@ -160,6 +165,7 @@ fun progressStatusText(
     return positionInQueue?.let { position ->
         Localization.string("communicating_status_queue", position)
     } ?: overallPercentage?.let { "${it.coerceIn(0, 100)}%" } ?: step?.let { (current, total) ->
-        Localization.string("communicating_status_steps", current, total)
+        Localization.string("communicating_status_steps", current, total) +
+                if (total > 0) " · ${(current.toLong() * 100 / total).coerceIn(0, 100)}%" else ""
     }
 }

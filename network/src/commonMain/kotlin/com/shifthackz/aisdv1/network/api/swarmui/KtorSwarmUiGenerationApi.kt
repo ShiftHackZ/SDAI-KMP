@@ -1,5 +1,23 @@
 package com.shifthackz.aisdv1.network.api.swarmui
 
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
+
+import com.shifthackz.aisdv1.network.client.defaultNetworkJson
+import com.shifthackz.aisdv1.network.client.recordUsageBytes
+import com.shifthackz.aisdv1.network.client.utf8Size
+import com.shifthackz.aisdv1.network.response.SwarmUiProgressFrame
+import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.http.URLProtocol
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
+import io.ktor.websocket.send
+import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
 import com.shifthackz.aisdv1.network.auth.BasicHttpAuthorization
 import com.shifthackz.aisdv1.network.client.GenerationTimeoutProvider
 import com.shifthackz.aisdv1.network.client.applyGenerationTimeout
@@ -32,13 +50,72 @@ import io.ktor.http.takeFrom
  */
 class KtorSwarmUiGenerationApi(
     /**
-     * Exposes the `httpClient` value used by the SDAI network layer.
+     * Configured Ktor client used for authenticated provider traffic.
      *
      * @author Dmitriy Moroz
      */
     private val httpClient: HttpClient = createConfiguredHttpClient(),
     private val generationTimeoutProvider: GenerationTimeoutProvider = GenerationTimeoutProvider.Default,
 ) : SwarmUiGenerationApi {
+
+    /**
+     * Receives workflow progress and final images without replaying a failed generation.
+     *
+     * @param baseUrl Captured server root, retaining any reverse-proxy path.
+     * @param request Generation parameters and session.
+     * @param authorization Optional Basic authentication.
+     * @param onProgress Finite overall workflow fraction.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun generateWithProgress(
+        baseUrl: String,
+        request: SwarmUiGenerationRequest,
+        authorization: BasicHttpAuthorization?,
+        onProgress: (Float) -> Unit,
+    ): KtorSwarmUiGenerationResponse = mapSessionError {
+        val limit = generationTimeoutProvider.timeoutMillis()
+        try {
+            withTimeout(if (limit > 0) limit.milliseconds else Duration.INFINITE) {
+                val images = linkedMapOf<Int, String>()
+                var hasCompleted = false
+                httpClient.webSocket(request = {
+                    url.takeFrom(baseUrl)
+                    url.protocol =
+                        if (url.protocol == URLProtocol.HTTPS) URLProtocol.WSS else URLProtocol.WS
+                    url.appendPathSegments(PATH_API, "GenerateText2ImageWS")
+                    applyAuthorization(authorization)
+                }) {
+                    val body = defaultNetworkJson.encodeToString(request)
+                    recordUsageBytes(NetworkUsageCategory.INFERENCE, body.utf8Size())
+                    send(body)
+                    for (frame in incoming) {
+                        recordUsageBytes(NetworkUsageCategory.INFERENCE, frame.data.size.toLong())
+                        if (frame !is Frame.Text) continue
+                        val update =
+                            defaultNetworkJson.decodeFromString<SwarmUiProgressFrame>(frame.readText())
+                        if (update.errorId == "invalid_session_id") throw SwarmUiBadSessionException()
+                        check(update.error == null) { update.error.orEmpty() }
+                        update.progress?.overallPercentage?.takeIf { it.isFinite() }?.let {
+                            onProgress(it.coerceIn(0f, 1f))
+                        }
+                        val index = update.batchIndex?.toIntOrNull()
+                        if (index != null && index >= 0) update.image?.let { images[index] = it }
+                        update.discardIndices.forEach(images::remove)
+                        if (update.socketIntention == "close") {
+                            hasCompleted = true
+                            break
+                        }
+                    }
+                }
+                check(hasCompleted) { "SwarmUI generation stream ended before completion" }
+                check(images.isNotEmpty()) { "SwarmUI returned no images" }
+                KtorSwarmUiGenerationResponse(images.values.toList())
+            }
+        } catch (failure: TimeoutCancellationException) {
+            coroutineContext.ensureActive()
+            throw HttpRequestTimeoutException(baseUrl, limit, failure)
+        }
+    }
 
     override suspend fun generate(
         baseUrl: String,

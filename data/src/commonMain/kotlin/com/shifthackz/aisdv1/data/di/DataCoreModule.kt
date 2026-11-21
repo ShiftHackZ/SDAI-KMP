@@ -1,5 +1,10 @@
 package com.shifthackz.aisdv1.data.di
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+import com.shifthackz.aisdv1.domain.repository.Automatic1111ProgressRepository
+import com.shifthackz.aisdv1.data.repository.RemoteGenerationProgressGatewayImpl
+import com.shifthackz.aisdv1.data.repository.Automatic1111ProgressRepositoryImpl
+
 import com.shifthackz.aisdv1.data.image.BackupImageValidatorImpl
 import com.shifthackz.aisdv1.data.image.BackupImageDecoder
 import com.shifthackz.aisdv1.data.image.PlatformBackupImageDecoder
@@ -187,6 +192,8 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDataModule = module {
+    single<RemoteGenerationProgressGateway> { RemoteGenerationProgressGatewayImpl() }
+    factory<Automatic1111ProgressRepository> { Automatic1111ProgressRepositoryImpl(get(), get()) }
     single {
         BackupImageBudget(
             maxEncodedBytes = 24 * 1024 * 1024,

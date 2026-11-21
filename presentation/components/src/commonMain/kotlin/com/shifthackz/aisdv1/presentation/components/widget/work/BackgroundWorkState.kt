@@ -13,6 +13,7 @@ import com.shifthackz.aisdv1.core.mvi.MviState
  * @param dismissible Whether a completed/error result may be acknowledged.
  * @param image Optional already decoded result preview.
  * @param imageBase64 One original result sampled only by the visible preview slot.
+ * @param percentage Measured active completion, or null during queue/loading.
  * @param isError Whether failure styling replaces completion imagery.
  *
  * @author Dmitriy Moroz
@@ -25,5 +26,6 @@ data class BackgroundWorkState(
     val dismissible: Boolean = false,
     val image: ImageBitmap? = null,
     val imageBase64: String? = null,
+    val percentage: Int? = null,
     val isError: Boolean = false,
 ) : MviState

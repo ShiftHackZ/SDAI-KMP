@@ -66,6 +66,7 @@ val generationViewModelModule = module {
     }
     factory { (router: TextToImageRouter) ->
         TextToImageViewModel(
+            remoteGenerationProgressGateway = get(),
             observeEasyDiffusionProgressUseCase = get(),
             nativeGenerationGateway = get(),
             mnnBackendPolicy = get(),
@@ -110,6 +111,7 @@ val generationViewModelModule = module {
     }
     factory { (router: ImageToImageRouter, platformActions: ImageToImagePlatformActions) ->
         ImageToImageViewModel(
+            remoteGenerationProgressGateway = get(),
             observeEasyDiffusionProgressUseCase = get(),
             originalImageBudget = get(),
             diagnostics = get(),
@@ -125,6 +127,7 @@ val generationViewModelModule = module {
             saveLastResultToCacheUseCase = get(),
             interruptSourceGenerationUseCase = get(),
             observeHordeProcessStatusUseCase = get(),
+            observeCoreMlProcessStatusUseCase = get(),
             observeLocalDiffusionProcessStatusUseCase = get(),
             preferenceManager = get(),
             backgroundTaskManager = get(),

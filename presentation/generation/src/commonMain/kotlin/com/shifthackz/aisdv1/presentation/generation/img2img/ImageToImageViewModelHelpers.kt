@@ -122,7 +122,12 @@ internal data class StableDiffusionSamplersKey(
  */
 internal fun ImageToImageState.progressModal(
     canCancelLocalGeneration: Boolean,
-): GenerationModal = if (mode == ServerSource.EASY_DIFFUSION) {
+): GenerationModal = if (mode == ServerSource.AUTOMATIC1111 || mode == ServerSource.SWARM_UI) {
+    GenerationModal.Generating(
+        title = Localization.string("communicating_progress_title").asUiText(),
+        isOverallProgress = true,
+    )
+} else if (mode == ServerSource.EASY_DIFFUSION) {
     GenerationModal.Generating(
         title = Localization.string("srv_type_easy_diffusion").asUiText(),
         canCancel = true

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.network.client
 
+import io.ktor.client.plugins.websocket.WebSockets
+
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
@@ -13,7 +15,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 /**
- * Executes the `platformHttpClientEngine` step in the SDAI network layer.
+ * Selects the native HTTP engine for the current platform.
  *
  * @return Result produced by `platformHttpClientEngine`.
  * @author Dmitriy Moroz
@@ -36,6 +38,7 @@ fun createConfiguredHttpClient(
     configure: HttpClientConfig<HttpClientEngineConfig>.() -> Unit = {},
 ): HttpClient = HttpClient(platformHttpClientEngine()) {
     expectSuccess = true
+    install(WebSockets) { maxFrameSize = 64L * 1024 * 1024 }
 
     if (installContentNegotiation) {
         install(ContentNegotiation) {
@@ -61,7 +64,7 @@ fun createConfiguredHttpClient(
 }
 
 /**
- * Exposes the `defaultNetworkJson` value used by the SDAI network layer.
+ * Lenient provider JSON codec that ignores unsupported response fields.
  *
  * @author Dmitriy Moroz
  */
@@ -73,7 +76,7 @@ val defaultNetworkJson = Json {
 }
 
 /**
- * Exposes the `DEFAULT_TIMEOUT_MILLIS` value used by the SDAI network layer.
+ * Default two-minute transport waiting limit in milliseconds.
  *
  * @author Dmitriy Moroz
  */

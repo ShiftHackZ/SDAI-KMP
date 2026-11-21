@@ -132,6 +132,11 @@ internal data class StableDiffusionSamplersKey(
 internal fun TextToImageState.progressModal(
     canCancelLocalGeneration: Boolean,
 ): GenerationModal = when {
+    mode == ServerSource.AUTOMATIC1111 || mode == ServerSource.SWARM_UI -> GenerationModal.Generating(
+        title = Localization.string("communicating_progress_title").asUiText(),
+        isOverallProgress = true,
+    )
+
     mode == ServerSource.EASY_DIFFUSION -> GenerationModal.Generating(
         title = Localization.string("srv_type_easy_diffusion").asUiText(), canCancel = true,
     )
@@ -153,6 +158,7 @@ internal fun TextToImageState.progressModal(
     )
 
     localSourceSelected -> GenerationModal.Generating(
+        isOverallProgress = mode == ServerSource.LOCAL_MNN,
         canCancel = canCancelLocalGeneration || (platform == Platform.ANDROID && mode in setOf(
             ServerSource.LOCAL_MNN,
             ServerSource.LOCAL_MICROSOFT_ONNX,
@@ -277,7 +283,6 @@ internal fun ValidationResult<DimensionValidator.Error>.errorMessage(): UiText? 
  *
  * @author Dmitriy Moroz
  */
-
 private fun String.bonsaiSizeError(): UiText? {
     val size = toIntOrNull() ?: return null
     if (size % BONSAI_SIZE_MULTIPLE == 0) return null
