@@ -5,22 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +28,12 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
+import com.shifthackz.aisdv1.presentation.components.widget.input.SearchField
+import com.shifthackz.aisdv1.presentation.components.widget.action.CircleIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
+
+/** Height of the fixed 48dp actions plus the search row's vertical padding. @author Dmitriy Moroz */
+internal val SourceSelectionToolbarHeight = 58.dp
 
 /**
  * Compact toolbar for provider search, filter, and sort actions.
@@ -54,15 +54,15 @@ internal fun SourceSelectionToolbar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(if (isPlatformToolbarNative) Color.Transparent else MaterialTheme.colorScheme.surface)
             .padding(start = 16.dp, top = 2.dp, end = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CompactSourceSearchField(
+        SearchField(
             modifier = Modifier
                 .weight(1f)
-                .height(40.dp),
+                .height(if (isPlatformToolbarNative) 48.dp else 40.dp),
             value = state.sourceSearchQuery,
             placeholder = strings.sourceSearchHint,
             onValueChange = { query ->
@@ -73,7 +73,7 @@ internal fun SourceSelectionToolbar(
             SourceToolbarActionButton(
                 icon = Icons.Default.Close,
                 contentDescription = strings.clear,
-                showDot = false,
+                shouldShowDot = false,
                 onClick = {
                     processIntent(ServerSetupIntent.UpdateSourceSearchQuery(""))
                 },
@@ -82,67 +82,15 @@ internal fun SourceSelectionToolbar(
         SourceToolbarActionButton(
             icon = Icons.Default.FilterList,
             contentDescription = strings.sourceFilterAction,
-            showDot = state.sourceFiltersActive,
+            shouldShowDot = state.hasActiveSourceFilters,
             onClick = { processIntent(ServerSetupIntent.ShowSourceFilters) },
         )
         SourceToolbarActionButton(
             contentDescription = strings.sourceSortAction,
-            showDot = false,
-            iconContent = { SourceSortToolbarIcon() },
+            shouldShowDot = false,
+            icon = MobileDataArrowsIcon,
             onClick = { processIntent(ServerSetupIntent.ShowSourceSort) },
         )
-    }
-}
-
-@Composable
-private fun CompactSourceSearchField(
-    value: String,
-    placeholder: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 12.dp, end = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Icon(
-                modifier = Modifier.size(18.dp),
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            BasicTextField(
-                modifier = Modifier.weight(1f),
-                value = value,
-                onValueChange = onValueChange,
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                decorationBox = { innerTextField ->
-                    Box(contentAlignment = Alignment.CenterStart) {
-                        if (value.isBlank()) {
-                            Text(
-                                text = placeholder,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                            )
-                        }
-                        innerTextField()
-                    }
-                },
-            )
-        }
     }
 }
 
@@ -150,34 +98,42 @@ private fun CompactSourceSearchField(
  * Keeps provider search/filter commands compact and marks active filters beside their icon.
  *
  * @param contentDescription Localized command label.
- * @param showDot Whether an accent indicator marks an active filter.
+ * @param shouldShowDot Whether an accent indicator marks an active filter.
  * @param onClick Requests the existing setup action.
  * @param modifier Button placement.
- * @param icon Shared vector when no custom glyph is supplied.
- * @param iconContent Optional custom sort glyph.
+ * @param icon Shared command vector rendered by the platform control.
  * @author Dmitriy Moroz
  */
 @Composable
 private fun SourceToolbarActionButton(
     contentDescription: String,
-    showDot: Boolean,
+    shouldShowDot: Boolean,
     onClick: () -> Unit,
+    icon: ImageVector,
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    iconContent: (@Composable () -> Unit)? = null,
 ) {
+    if (isPlatformToolbarNative) {
+        Box(modifier) {
+            CircleIconButton(onClick, icon, contentDescription)
+            if (shouldShowDot) {
+                Box(
+                    Modifier.align(Alignment.TopEnd)
+                        .size(8.dp).background(MaterialTheme.colorScheme.primary, CircleShape)
+                )
+            }
+        }
+        return
+    }
     ToolbarIconButton(
         onClick = onClick,
         modifier = modifier,
     ) {
         Box(contentAlignment = Alignment.TopEnd) {
-            iconContent?.invoke() ?: icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = contentDescription,
-                )
-            }
-            if (showDot) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+            )
+            if (shouldShowDot) {
                 Box(
                     modifier = Modifier
                         .size(8.dp)
@@ -191,18 +147,7 @@ private fun SourceToolbarActionButton(
     }
 }
 
-@Composable
-private fun SourceSortToolbarIcon(
-    modifier: Modifier = Modifier,
-) {
-    Icon(
-        modifier = modifier.size(24.dp),
-        imageVector = MobileDataArrowsIcon,
-        contentDescription = null,
-    )
-}
-
-private val ServerSetupState.sourceFiltersActive: Boolean
+private val ServerSetupState.hasActiveSourceFilters: Boolean
     get() = sourceTypeFilter != null || sourceReadinessFilters.isNotEmpty() || sourceTagFilters.isNotEmpty()
 
 private val MobileDataArrowsIcon: ImageVector

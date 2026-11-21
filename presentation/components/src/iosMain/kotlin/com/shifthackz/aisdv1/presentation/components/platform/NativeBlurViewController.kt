@@ -60,9 +60,18 @@ internal class NativeBlurViewController(content: @Composable () -> Unit) :
      * @param background App background color for the resting surface and translucent tint.
      * @param isDark App appearance, including manual theme overrides.
      * @param tintAlpha Additional background tint above the native material.
+     * @param cornerRadius Native clipping radius in points; zero retains square route chrome.
      * @author Dmitriy Moroz
      */
-    fun update(isBlurred: Boolean, background: UIColor, isDark: Boolean, tintAlpha: Double) {
+    fun update(
+        isBlurred: Boolean,
+        background: UIColor,
+        isDark: Boolean,
+        tintAlpha: Double,
+        cornerRadius: Double = 0.0,
+    ) {
+        view.layer.cornerRadius = cornerRadius
+        view.clipsToBounds = cornerRadius > 0.0
         view.overrideUserInterfaceStyle =
             if (isDark) UIUserInterfaceStyleDark else UIUserInterfaceStyleLight
         if (wasBlurred != isBlurred) {

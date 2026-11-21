@@ -26,7 +26,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 /**
  * Renders system Liquid Glass underneath shared Compose button content on iOS 26 and newer.
  * Native hit testing and accessibility are disabled; the enclosing Compose button owns both.
- * A separate themed backing fills the interop cutout while UIKit owns the glass edge and corners.
+ * The resolved parent background fills the interop cutout while UIKit owns the glass edge and corners.
+ * Standalone buttons use the screen background to avoid a rectangular surface-colored patch.
  *
  * @param isOutlined Selects regular secondary glass instead of prominent accent glass.
  * @param isEnabled Drives UIKit's disabled appearance.
@@ -45,7 +46,7 @@ internal fun GlassButtonSurface(
 ) {
     val accent = MaterialTheme.colorScheme.primary.toUIColor()
     val backingColor = (LocalPlatformControlBackgroundColor.current
-        ?: MaterialTheme.colorScheme.surface).toUIColor()
+        ?: MaterialTheme.colorScheme.background).toUIColor()
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current

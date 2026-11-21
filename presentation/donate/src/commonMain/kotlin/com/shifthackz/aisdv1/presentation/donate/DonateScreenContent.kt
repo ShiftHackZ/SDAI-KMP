@@ -6,7 +6,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformTool
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +31,6 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -102,14 +101,10 @@ fun DonateScreenContent(
                     )
                 },
                 navigationIcon = {
-                    ToolbarIconButton(
+                    ToolbarBackButton(
                         onClick = { processIntent(DonateIntent.NavigateBack) },
-                        content = {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = strings.backContentDescription,
-                            )
-                        },
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = strings.backContentDescription,
                     )
                 },
                 windowInsets = persistentTopAppBarWindowInsets(),

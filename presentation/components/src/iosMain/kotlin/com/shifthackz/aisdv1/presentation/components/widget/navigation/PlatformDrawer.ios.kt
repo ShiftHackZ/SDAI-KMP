@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -41,6 +43,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 /**
  * Keeps Material drawer gestures and sizing with a native blur sampling Compose and UIKit content.
  * Cooperative touch delivery lets the parent drawer retain its swipe-to-close gesture.
+ * The child composition uses the app's foreground color for header text in both appearances.
  * @param modifier Sheet placement and measured width.
  * @param content Header and destination rows above the backdrop.
  * @author Dmitriy Moroz
@@ -50,7 +53,9 @@ actual fun PlatformDrawerSheet(modifier: Modifier, content: @Composable ColumnSc
     val colors = MaterialTheme.colorScheme
     val safePadding = WindowInsets.safeDrawing.asPaddingValues()
     val nativeContent = rememberThemedNativeContent {
-        Column(Modifier.fillMaxSize().padding(safePadding), content = content)
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+            Column(Modifier.fillMaxSize().padding(safePadding), content = content)
+        }
     }
     ModalDrawerSheet(
         modifier,

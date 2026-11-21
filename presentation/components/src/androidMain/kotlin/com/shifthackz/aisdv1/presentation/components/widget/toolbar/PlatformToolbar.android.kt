@@ -3,6 +3,7 @@
 package com.shifthackz.aisdv1.presentation.components.widget.toolbar
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -11,6 +12,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 /** Keeps status-area ownership in the existing Android app scaffold. @author Dmitriy Moroz */
 actual val isPlatformToolbarNative: Boolean = false
@@ -53,6 +56,8 @@ actual fun PlatformScaffold(
  * @param navigationIcon Existing leading control.
  * @param actions Existing trailing controls.
  * @param windowInsets Existing status-area inset handling.
+ * @param bottomContentHeight Positive native height enabling an attached strip; Android measures it normally.
+ * @param bottomContent Attached shared content retaining its ordinary Android layout.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -62,8 +67,28 @@ actual fun PlatformTopAppBar(
     navigationIcon: @Composable () -> Unit,
     actions: @Composable RowScope.() -> Unit,
     windowInsets: WindowInsets,
+    bottomContentHeight: Dp,
+    bottomContent: @Composable () -> Unit,
 ) {
-    CenterAlignedTopAppBar(title, modifier, navigationIcon, actions, windowInsets = windowInsets)
+    if (bottomContentHeight > 0.dp) {
+        Column(modifier) {
+            CenterAlignedTopAppBar(
+                title,
+                navigationIcon = navigationIcon,
+                actions = actions,
+                windowInsets = windowInsets
+            )
+            bottomContent()
+        }
+    } else {
+        CenterAlignedTopAppBar(
+            title,
+            modifier,
+            navigationIcon,
+            actions,
+            windowInsets = windowInsets
+        )
+    }
 }
 
 /**

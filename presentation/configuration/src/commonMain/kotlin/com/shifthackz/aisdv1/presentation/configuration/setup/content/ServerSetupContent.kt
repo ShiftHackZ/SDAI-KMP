@@ -3,6 +3,8 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.content
 
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionToolbar
+import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionToolbarHeight
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
@@ -26,11 +28,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.RectangleShape
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.LocalModelDownloadAction
 import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.ConfigurationStepBar
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.configurationStepBarHeight
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.OpenAiOAuthActionBar
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.ServerSetupLoading
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.ServerSetupModal
@@ -91,12 +95,18 @@ fun ServerSetupContent(
                             }
                         },
                         windowInsets = persistentTopAppBarWindowInsets(),
+                        bottomContentHeight = configurationStepBarHeight() +
+                                if (isPlatformToolbarNative && state.step == ServerSetupState.Step.SOURCE) SourceSelectionToolbarHeight else 0.dp,
+                        bottomContent = {
+                            Column {
+                                ConfigurationStepBar(currentStep = state.step, strings = strings)
+                                if (isPlatformToolbarNative && state.step == ServerSetupState.Step.SOURCE) {
+                                    SourceSelectionToolbar(state, strings, processIntent)
+                                }
+                            }
+                        },
                     )
-                    ConfigurationStepBar(
-                        currentStep = state.step,
-                        strings = strings,
-                    )
-                    if (state.step == ServerSetupState.Step.SOURCE) SourceSelectionToolbar(
+                    if (!isPlatformToolbarNative && state.step == ServerSetupState.Step.SOURCE) SourceSelectionToolbar(
                         state,
                         strings,
                         processIntent

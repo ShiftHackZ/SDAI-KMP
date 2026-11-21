@@ -229,7 +229,12 @@ fun GalleryScreenContent(
                         start = 16.dp,
                         top = 16.dp + LocalToolbarContentInset.current,
                         end = 16.dp,
-                        bottom = 16.dp + LocalFloatingNavigationBarInset.current
+                        bottom = 16.dp + if (LocalFloatingNavigationBarInset.current > 0.dp) {
+                            maxOf(
+                                LocalFloatingNavigationBarInset.current,
+                                paddingValues.calculateBottomPadding()
+                            )
+                        } else 0.dp
                     ),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),

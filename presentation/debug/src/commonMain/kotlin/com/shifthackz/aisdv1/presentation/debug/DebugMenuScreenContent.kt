@@ -6,7 +6,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformTool
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -186,14 +186,10 @@ fun DebugMenuScreenContent(
                     )
                 },
                 navigationIcon = {
-                    ToolbarIconButton(
+                    ToolbarBackButton(
                         onClick = { processAction(DebugMenuAction.NavigateBack) },
-                        content = {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = strings.backContentDescription,
-                            )
-                        },
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = strings.backContentDescription,
                     )
                 },
                 windowInsets = persistentTopAppBarWindowInsets(),

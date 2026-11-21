@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.IconButton
@@ -29,18 +30,21 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlPreview
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlVisibility
 import com.shifthackz.aisdv1.presentation.components.platform.toUIColor
 import platform.UIKit.UIColor
 import com.shifthackz.aisdv1.presentation.components.platform.rememberNativeIconImage
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.Foundation.NSProcessInfo
+import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
 
 /**
  * Gives toolbar, generation and gallery actions one native glass circle and a 48-point touch target.
  * Transparent backing avoids rectangular patches and lets UIKit render the same secondary material.
  * Compose owns activation, semantics and enclosing contextual-help gestures.
  * Older systems and tutorial illustrations keep the Material control.
+ * Retained hidden routes reserve their layout bounds without keeping a native overlay mounted.
  *
  * @param onClick Enabled short-tap action.
  * @param modifier Placement of the circular control.
@@ -66,6 +70,10 @@ internal fun PlatformCircleButton(
     }
     if (!hasGlassSupport || LocalPlatformControlPreview.current) {
         IconButton(onClick, modifier.size(48.dp), enabled = isEnabled, content = content)
+        return
+    }
+    if (!LocalMviVisibility.current || !LocalPlatformControlVisibility.current) {
+        Spacer(modifier.size(48.dp))
         return
     }
     val interaction = remember { MutableInteractionSource() }

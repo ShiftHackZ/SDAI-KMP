@@ -23,8 +23,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.LocalDensity
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
+
+private val StepCircleSize = 36.dp
+private val StepCaptionPadding = 8.dp
+private val StepBottomPadding = 8.dp
+
+/**
+ * Calculates the progress strip's circle, caption line and padding height for the native toolbar host.
+ * @return Height including the current font scale.
+ * @author Dmitriy Moroz
+ */
+@Composable
+internal fun configurationStepBarHeight(): Dp = with(LocalDensity.current) {
+    StepCircleSize + StepCaptionPadding + MaterialTheme.typography.labelSmall.lineHeight.toDp() + StepBottomPadding
+}
 
 /**
  * Shows the two-step provider setup progress indicator.
@@ -41,16 +58,16 @@ internal fun ConfigurationStepBar(
     strings: ServerSetupStrings,
     modifier: Modifier = Modifier,
 ) {
-    val circleSize = 36.dp
+    val circleSize = StepCircleSize
     val circleBorder = 2.dp
     val lineHeight = 4.dp
     val colorBg = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.34f)
     val colorAccent = MaterialTheme.colorScheme.primary
     Box(
         modifier = modifier
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = if (isPlatformToolbarNative) Color.Transparent else MaterialTheme.colorScheme.surface)
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
+            .padding(bottom = StepBottomPadding),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -116,7 +133,7 @@ internal fun ConfigurationStepBar(
                         }
                     }
                     Text(
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = StepCaptionPadding),
                         text = when (step) {
                             ServerSetupState.Step.SOURCE -> strings.sourceTitle
                             ServerSetupState.Step.CONFIGURE -> strings.configureTitle

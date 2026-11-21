@@ -12,10 +12,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformTabBar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.backup.dialog.BackupDialogs
 import com.shifthackz.aisdv1.presentation.backup.welcome.RestoreWelcomeScreen
@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.drop
  * @param modifier Root screen placement.
  * @author Dmitriy Moroz
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupScreen(
     mode: BackupScreenMode,
@@ -85,42 +84,37 @@ fun BackupScreen(
         PlatformScaffold(
             canUnderlapToolbar = true, modifier = modifier,
             topBar = {
-                Column {
-                    PlatformTopAppBar(
-                        title = {
-                            Text(
-                                Localization.string("backup_title"),
-                                style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium)
-                            )
-                        },
-                        navigationIcon = {
-                            ToolbarBackButton(
-                                onClick = { processIntent(BackupIntent.NavigateBack) },
-                                isEnabled = isEnabled, icon = Icons.AutoMirrored.Outlined.ArrowBack
-                            )
-                        },
-                        windowInsets = persistentTopAppBarWindowInsets(),
-                    )
-                    if (mode == BackupScreenMode.SETTINGS) {
-                        SecondaryTabRow(
-                            selectedTabIndex = selectedPage,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                        ) {
-                            Tab(
-                                selected = !state.isRestoreTab,
-                                onClick = { processIntent(BackupIntent.SelectTab(false)) },
-                                enabled = isEnabled,
-                                text = { Text(Localization.string("backup_create_tab")) },
-                            )
-                            Tab(
-                                selected = state.isRestoreTab,
-                                onClick = { processIntent(BackupIntent.SelectTab(true)) },
-                                enabled = isEnabled,
-                                text = { Text(Localization.string("backup_restore_tab")) },
+                PlatformTopAppBar(
+                    title = {
+                        Text(
+                            Localization.string("backup_title"),
+                            style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium)
+                        )
+                    },
+                    navigationIcon = {
+                        ToolbarBackButton(
+                            onClick = { processIntent(BackupIntent.NavigateBack) },
+                            isEnabled = isEnabled, icon = Icons.AutoMirrored.Outlined.ArrowBack
+                        )
+                    },
+                    windowInsets = persistentTopAppBarWindowInsets(),
+                    bottomContentHeight = if (mode == BackupScreenMode.SETTINGS) {
+                        if (isPlatformToolbarNative) 56.dp else 48.dp
+                    } else 0.dp,
+                    bottomContent = {
+                        if (mode == BackupScreenMode.SETTINGS) {
+                            PlatformTabBar(
+                                labels = listOf(
+                                    Localization.string("backup_create_tab"),
+                                    Localization.string("backup_restore_tab"),
+                                ),
+                                selectedIndex = selectedPage,
+                                onSelect = { processIntent(BackupIntent.SelectTab(it == 1)) },
+                                isEnabled = isEnabled,
                             )
                         }
-                    }
-                }
+                    },
+                )
             },
             bottomBar = {
                 ScreenActionBar {

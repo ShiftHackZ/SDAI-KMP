@@ -137,8 +137,7 @@ internal class NativeNavigationBarView : UIView(frame = CGRectMake(0.0, 0.0, 0.0
 
     override fun tabBar(tabBar: UITabBar, didSelectItem: UITabBarItem) {
         if (isHandlingLongPress) {
-            val index = items.indexOfFirst { it.isSelected }
-            bar.selectedItem = bar.items?.getOrNull(index) as? UITabBarItem
+            restoreSelection()
         } else {
             items.getOrNull(didSelectItem.tag.toInt())?.onClick?.invoke()
         }
@@ -155,14 +154,18 @@ internal class NativeNavigationBarView : UIView(frame = CGRectMake(0.0, 0.0, 0.0
 
     /**
      * Resolves a held tab from its equal-width native touch area and opens help once per gesture.
+     * Restores caller-owned selection after release, when UIKit has finished its simultaneous drag.
      *
-     * @param recognizer Native long press, which cancels the pending tab activation after recognition.
+     * @param recognizer Held native gesture whose help activation must not change destinations.
      * @author Dmitriy Moroz
      */
     @ObjCAction
     fun showHelp(recognizer: UILongPressGestureRecognizer) {
         if (recognizer.state == UIGestureRecognizerStateEnded || recognizer.state == UIGestureRecognizerStateCancelled) {
-            NSOperationQueue.mainQueue.addOperationWithBlock { isHandlingLongPress = false }
+            NSOperationQueue.mainQueue.addOperationWithBlock {
+                restoreSelection()
+                isHandlingLongPress = false
+            }
             return
         }
         if (recognizer.state != UIGestureRecognizerStateBegan || items.isEmpty()) return
@@ -173,6 +176,15 @@ internal class NativeNavigationBarView : UIView(frame = CGRectMake(0.0, 0.0, 0.0
         val visualIndex = floor(x / width * items.size).toInt()
         val index = if (isRtl) items.lastIndex - visualIndex else visualIndex
         if (index in items.indices) onLongPress?.invoke(index)
+    }
+
+    /**
+     * Reconciles UIKit's drag highlight with the destination still displayed by the caller.
+     * @author Dmitriy Moroz
+     */
+    private fun restoreSelection() {
+        val index = items.indexOfFirst { it.isSelected }
+        bar.selectedItem = bar.items?.getOrNull(index) as? UITabBarItem
     }
 
     /**

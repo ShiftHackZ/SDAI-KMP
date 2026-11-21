@@ -7,6 +7,7 @@
 package com.shifthackz.aisdv1.presentation.components.widget.toolbar
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -37,10 +39,14 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.UIKitInteropInteractionMode
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
 import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlPreview
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlVisibility
+import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
 import com.shifthackz.aisdv1.presentation.components.platform.toUIColor
 import com.shifthackz.aisdv1.presentation.components.platform.NativeBlurViewController
 import com.shifthackz.aisdv1.presentation.components.platform.rememberThemedNativeContent
@@ -118,6 +124,8 @@ actual fun PlatformScaffold(
  * @param navigationIcon Leading circular toolbar action.
  * @param actions Trailing circular toolbar actions.
  * @param windowInsets Insets retained for embedded tutorial previews.
+ * @param bottomContentHeight Height reserved below the title row in the same native backdrop.
+ * @param bottomContent Attached controls sharing the title row's blur and scroll state.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -127,35 +135,49 @@ actual fun PlatformTopAppBar(
     navigationIcon: @Composable () -> Unit,
     actions: @Composable RowScope.() -> Unit,
     windowInsets: WindowInsets,
+    bottomContentHeight: Dp,
+    bottomContent: @Composable () -> Unit,
 ) {
     if (LocalPlatformControlPreview.current) {
-        CenterAlignedTopAppBar(
-            title,
-            modifier,
-            navigationIcon,
-            actions,
-            windowInsets = windowInsets
-        )
+        Column(modifier) {
+            CenterAlignedTopAppBar(
+                title,
+                navigationIcon = navigationIcon,
+                actions = actions,
+                windowInsets = windowInsets
+            )
+            if (bottomContentHeight > 0.dp) bottomContent()
+        }
         return
     }
     val topPixels = WindowInsets.statusBars.getTop(LocalDensity.current)
-    val height = 64.dp + with(LocalDensity.current) { topPixels.toDp() }
+    val height = 64.dp + with(LocalDensity.current) { topPixels.toDp() } + bottomContentHeight
     val bounds = modifier.fillMaxWidth().height(height)
-    if (LocalToolbarObscured.current) {
+    if (LocalToolbarObscured.current || !LocalMviVisibility.current || !LocalPlatformControlVisibility.current) {
         Spacer(bounds)
         return
     }
     val isScrolled = LocalToolbarUnderlap.current && LocalToolbarOverlap.current?.value == true
     val colors = MaterialTheme.colorScheme
     val nativeContent = rememberThemedNativeContent {
-        CenterAlignedTopAppBar(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            title = title,
-            navigationIcon = navigationIcon,
-            actions = actions,
-            windowInsets = WindowInsets(0, topPixels, 0, 0),
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-        )
+        Column {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                title = title,
+                navigationIcon = navigationIcon,
+                actions = actions,
+                windowInsets = WindowInsets(0, topPixels, 0, 0),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+            )
+            if (bottomContentHeight > 0.dp) {
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurface,
+                    LocalPlatformControlBackgroundColor provides Color.Transparent,
+                ) {
+                    bottomContent()
+                }
+            }
+        }
     }
     UIKitViewController(
         modifier = bounds,

@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.extensions.clearFocusOnTap
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.core.navigation.AppRoute
 import com.shifthackz.aisdv1.presentation.components.extensions.generationBrightnessInteraction
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlVisibility
 import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
 
 /**
@@ -72,7 +74,9 @@ private fun AiSdAppShellContent(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             state.homeRoute?.let { homeRoute ->
-                homeContent(homeRoute, state.renderedHomeRoutes, state.shouldShowHomeChrome)
+                CompositionLocalProvider(LocalPlatformControlVisibility provides state.shouldShowHomeChrome) {
+                    homeContent(homeRoute, state.renderedHomeRoutes, state.shouldShowHomeChrome)
+                }
             }
             if (!state.shouldShowHomeChrome) {
                 overlayContent(state.route)

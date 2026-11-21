@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 
 /**
  * Scrollable content's initial top inset. On iOS it belongs inside the scroll container so
@@ -82,6 +83,8 @@ expect fun PlatformScaffold(
  * @param navigationIcon Back or drawer action.
  * @param actions Trailing route actions.
  * @param windowInsets Status-area insets owned by this toolbar.
+ * @param bottomContentHeight Height reserved for the attached content in the native iOS host.
+ * @param bottomContent Attached controls sharing the toolbar's backdrop and scroll behavior.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -91,6 +94,8 @@ expect fun PlatformTopAppBar(
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    bottomContentHeight: Dp = 0.dp,
+    bottomContent: @Composable () -> Unit = {},
 )
 
 /**

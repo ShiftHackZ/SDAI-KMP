@@ -6,6 +6,7 @@
 package com.shifthackz.aisdv1.presentation.components.widget.navigation
 
 import com.shifthackz.aisdv1.presentation.components.platform.rememberNativeIconImage
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 
 import androidx.compose.foundation.background
 import androidx.compose.animation.core.animateDpAsState
@@ -45,6 +46,7 @@ import kotlinx.coroutines.launch
  * Native accessibility preserves the system's tab hit areas, selection and help actions.
  * Floating native content slides down below the screen while the drawer covers it and back up
  * after dismissal. The reserved height stays fixed and no opaque underlay is introduced.
+ * Embedded bars use the resolved parent background when one is provided.
  *
  * @param items Caller-owned destinations, selected state and short-tap actions.
  * @param modifier Bounds of the bar and its bottom safe area.
@@ -61,6 +63,7 @@ actual fun PlatformNavigationBar(
 ) {
     if (items.isEmpty()) return
     val colors = MaterialTheme.colorScheme
+    val backingColor = LocalPlatformControlBackgroundColor.current ?: colors.surface
     val states = items.map { rememberTooltipState(isPersistent = true) }
     val scope = rememberCoroutineScope()
     val images = items.map { rememberNativeIconImage(it.icon) }
@@ -78,7 +81,7 @@ actual fun PlatformNavigationBar(
     val canInteractWithNativeBar = !isObscured && verticalOffset == 0.dp
     Box(
         modifier = modifier.fillMaxWidth()
-            .background(if (hasBackground) colors.surface else Color.Transparent),
+            .background(if (hasBackground) backingColor else Color.Transparent),
     ) {
         if (!shouldShowNativeBar) {
             Spacer(Modifier.fillMaxWidth().height(nativeHeight))
@@ -94,7 +97,7 @@ actual fun PlatformNavigationBar(
                         isRtl = isRtl,
                         accent = colors.primary.toUIColor(),
                         foreground = colors.onSurface.toUIColor(),
-                        backingColor = colors.surface.toUIColor(),
+                        backingColor = backingColor.toUIColor(),
                         hasOpaqueBacking = !shouldOverlayContent,
                         onHeightChanged = { height ->
                             if (!shouldConcealNativeBar && verticalOffset == 0.dp) {
