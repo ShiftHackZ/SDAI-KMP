@@ -191,7 +191,7 @@ internal abstract class CoreGenerationWorker(
                 val title =
                     applicationContext.getString(LocalizationR.string.notification_running_title)
                 val percentage =
-                    status.takeIf { (stage == NativeGenerationStage.DENOISING || (engine == NativeGenerationEngine.MNN && stage == NativeGenerationStage.RUNNING)) && it.total > 0 }
+                    status.takeIf { engine != NativeGenerationEngine.MEDIA_PIPE && (stage == NativeGenerationStage.DENOISING || (engine == NativeGenerationEngine.MNN && stage == NativeGenerationStage.RUNNING)) && it.total > 0 }
                         ?.let { (it.current.toLong() * 100 / it.total).coerceIn(0, 100).toInt() }
                 val subtitle =
                     stageText(stage) + if (engine == NativeGenerationEngine.MNN) ""

@@ -94,12 +94,13 @@ sealed interface GenerationModal {
         val isOverallProgress: Boolean = false,
     ) : GenerationModal {
         /**
-         * Sampling counters shown only when the provider actually reports denoising steps.
+         * Sampling counters shown during denoising when the provider reports intermediate steps.
+         * MediaPipe only reports initial/completed counts, so its indicator remains indeterminate.
          *
          * @author Dmitriy Moroz
          */
         val pair: Pair<Int, Int>?
-            get() = status?.takeIf { !isOverallProgress && it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.RUNNING) && (nativeStage == null || nativeStage == NativeGenerationStage.DENOISING) }
+            get() = status?.takeIf { !isOverallProgress && nativeEngine != NativeGenerationEngine.MEDIA_PIPE && it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.DENOISING) }
                 ?.let { (current, total) -> current to total }
 
         /**

@@ -79,6 +79,8 @@ google-material = { group = "com.google.android.material", name = "material", ve
 google-mediapipe-image-generator = { group = "com.google.mediapipe", name = "tasks-vision-image-generator", version.ref = "mediaPipeGenerator" }
 google-protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version.ref = "protobuf" }
 okhttp-core = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+ktor-server-test-host = { group = "io.ktor", name = "ktor-server-test-host", version.ref = "ktor" }
+ktor-server-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.ref = "ktor" }
 ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", version.ref = "ktor" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }

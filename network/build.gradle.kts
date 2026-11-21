@@ -52,6 +52,8 @@ kotlin {
             implementation(libs.test.junit)
             implementation(libs.test.mockk)
             implementation(libs.ktor.client.mock)
+            implementation(libs.ktor.server.test.host)
+            implementation(libs.ktor.server.websockets)
         }
     }
 }

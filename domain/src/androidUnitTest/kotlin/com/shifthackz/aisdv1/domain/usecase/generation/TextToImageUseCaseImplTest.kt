@@ -1,5 +1,11 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgress
+import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.CancellationException
+
 import com.shifthackz.aisdv1.domain.mocks.ImmediateGenerationRestoreGate
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.EasyDiffusionConnection
@@ -29,6 +35,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertSame
 import org.junit.Test
 
@@ -59,9 +66,14 @@ class TextToImageUseCaseImplTest {
 
     private val generateEasyDiffusion = mockk<GenerateEasyDiffusionUseCase>()
     private val captureEasyDiffusion = mockk<CaptureEasyDiffusionConnectionUseCase>()
+    private val progressUpdates = mutableListOf<RemoteGenerationProgress?>()
+    private val progressGateway = mockk<RemoteGenerationProgressGateway> {
+        every { update(any(), any()) } answers { progressUpdates.add(secondArg()); Unit }
+    }
+
     private val useCase = TextToImageUseCaseImpl(
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
-            mockk(relaxed = true),
+            progressGateway,
             mockk(relaxed = true)
         ),
         generationRestoreGate = ImmediateGenerationRestoreGate(),
@@ -128,7 +140,10 @@ class TextToImageUseCaseImplTest {
                 )
             }
             // Then
-            assertSame(stubException, actual.exceptionOrNull())
+            assertSame(
+                stubException,
+                generateSequence(actual.exceptionOrNull()) { it.cause }.last()
+            )
             coVerify(exactly = 0) { generateEasyDiffusion(any()) }
         }
 
@@ -439,6 +454,106 @@ class TextToImageUseCaseImplTest {
 
         // Then
 
-        assertSame(stubException, actual.exceptionOrNull())
+        assertSame(stubException, generateSequence(actual.exceptionOrNull()) { it.cause }.last())
     }
+
+    @Test
+    fun `given SwarmUI TextToImage batch, each image reports half workflow completion, expected percentages span the entire batch`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.SWARM_UI
+            coEvery { stubSwarmUiGenerationRepository.generateFromText(any()) } coAnswers {
+                currentCoroutineContext()[RemoteGenerationProgressContext]!!.report(0.5f)
+                mockAiGenerationResult
+            }
+            val payload =
+                mockTextToImagePayload.copy(sourceSnapshot = ServerSource.SWARM_UI, batchCount = 3)
+            // When
+            val result = useCase(payload)
+            // Then
+            assertEquals(3, result.size)
+            assertEquals(listOf(16, 50, 83), progressUpdates.mapNotNull { it?.percentage })
+            assertEquals(null, progressUpdates.last())
+            coVerify(exactly = 3) { stubSwarmUiGenerationRepository.generateFromText(any()) }
+        }
+
+    @Test
+    fun `given SwarmUI TextToImage batch, second image fails, expected no third submission and progress cleanup`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.SWARM_UI
+            var submissions = 0
+            val failure = IllegalArgumentException("second image failed")
+            coEvery { stubSwarmUiGenerationRepository.generateFromText(any()) } coAnswers {
+                submissions++
+                if (submissions == 2) throw failure
+                currentCoroutineContext()[RemoteGenerationProgressContext]!!.report(1f)
+                mockAiGenerationResult
+            }
+            // When
+            val result = runCatching {
+                useCase(
+                    mockTextToImagePayload.copy(
+                        sourceSnapshot = ServerSource.SWARM_UI,
+                        batchCount = 3
+                    )
+                )
+            }
+            // Then
+            assertEquals(2, submissions)
+            assertSame(failure, generateSequence(result.exceptionOrNull()) { it.cause }.last())
+            assertEquals(null, progressUpdates.last())
+        }
+
+    @Test
+    fun `given SwarmUI TextToImage batch, next image is cancelled, expected cancellation without remaining submissions`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.SWARM_UI
+            var submissions = 0
+            coEvery { stubSwarmUiGenerationRepository.generateFromText(any()) } coAnswers {
+                submissions++
+                if (submissions == 2) throw CancellationException("cancelled")
+                mockAiGenerationResult
+            }
+            // When
+            val result = runCatching {
+                useCase(
+                    mockTextToImagePayload.copy(
+                        sourceSnapshot = ServerSource.SWARM_UI,
+                        batchCount = 3
+                    )
+                )
+            }
+            // Then
+            assertTrue(result.exceptionOrNull() is CancellationException)
+            assertEquals(2, submissions)
+            assertEquals(null, progressUpdates.last())
+        }
+
+    @Test
+    fun `given AUTOMATIC1111 TextToImage batch, provider accepts the submission, expected shared progress task identity and one provider batch call`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
+            val identities = mutableListOf<String>()
+            coEvery { stubStableDiffusionGenerationRepository.generateFromText(any()) } coAnswers {
+                identities += currentCoroutineContext()[RemoteGenerationProgressContext]!!.taskId
+                listOf(mockAiGenerationResult, mockAiGenerationResult)
+            }
+            // When
+            val result = useCase(
+                mockTextToImagePayload.copy(
+                    sourceSnapshot = ServerSource.AUTOMATIC1111,
+                    batchCount = 2
+                )
+            )
+            // Then
+            assertEquals(2, result.size)
+            assertEquals(1, identities.size)
+            assertTrue(identities.single().startsWith("task(sdai-"))
+            coVerify(exactly = 1) { stubStableDiffusionGenerationRepository.generateFromText(any()) }
+            assertEquals(null, progressUpdates.last())
+        }
+
 }
