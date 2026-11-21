@@ -1,51 +1,43 @@
 package com.shifthackz.aisdv1.data.core
 
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
+import kotlin.coroutines.coroutineContext
+import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 
 /**
- * Coordinates `CoreGenerationRepository` behavior in the SDAI data layer.
+ * Freezes request provenance before optional gallery persistence and original-image export.
  *
+ * @param mediaStoreGateway Platform original-image export adapter.
+ * @param localDataSource Gallery writer used for autosave and background work.
+ * @param preferenceManager Autosave preferences.
+ * @param backgroundWorkObserver Determines whether a background task requires durable output.
  * @author Dmitriy Moroz
  */
 internal abstract class CoreGenerationRepository(
     mediaStoreGateway: MediaStoreGateway,
-    /**
-     * Exposes the `localDataSource` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val localDataSource: GenerationResultDataSource.Local,
-    /**
-     * Exposes the `preferenceManager` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val preferenceManager: PreferenceManager,
-    /**
-     * Exposes the `backgroundWorkObserver` value used by the SDAI data layer.
-     *
-     * @author Dmitriy Moroz
-     */
     private val backgroundWorkObserver: BackgroundWorkObserver,
 ) : CoreMediaStoreRepository(preferenceManager, mediaStoreGateway) {
 
     /**
-     * Performs the SDAI side effect handled by `insertGenerationResult`.
+     * Attaches request metadata to every result, including unsaved foreground images, before optional writes.
      *
-     * @param ai ai value consumed by the API.
-     * @return Result produced by `insertGenerationResult`.
+     * @param ai Completed provider image, retaining its account guards.
+     * @return Provenance-bearing image with the saved identity when autosave is active.
      * @author Dmitriy Moroz
      */
     protected suspend fun insertGenerationResult(ai: AiGenerationResult): AiGenerationResult {
+        val result = coroutineContext[GenerationMetadataContext]?.completed(ai) ?: ai
         if (backgroundWorkObserver.hasActiveTasks() || preferenceManager.autoSaveAiResults) {
-            val id = localDataSource.insert(ai)
-            exportToMediaStoreAsync(ai)
-            return ai.copy(id = id)
+            val id = localDataSource.insert(result)
+            exportToMediaStoreAsync(result)
+            return result.copy(id = id)
         }
-        return ai
+        return result
     }
 }

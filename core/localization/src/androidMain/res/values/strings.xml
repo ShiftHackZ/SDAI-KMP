@@ -785,4 +785,10 @@
     <string name="performance_memory_value">%1$s / %2$s MiB</string>
     <string name="performance_this_app">This app</string>
     <string name="performance_total">Total</string>
+    <string name="gallery_info_field_provider">Provider</string>
+    <string name="gallery_info_field_acceleration">Acceleration</string>
+    <string name="gallery_info_field_duration">Generation time</string>
+    <string name="gallery_info_acceleration_none">None</string>
+    <string name="gallery_info_field_device">Device</string>
+    <string name="gallery_info_field_os">OS</string>
 </resources>

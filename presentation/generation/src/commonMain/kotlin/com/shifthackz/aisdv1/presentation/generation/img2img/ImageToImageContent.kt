@@ -62,7 +62,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkW
  * @param openAiUnsupportedSubtitle2 Additional official OpenAI capability explanation.
  * @param localUnsupportedSubtitle First explanation of local-provider limitations.
  * @param localUnsupportedSubtitle2 Additional local-provider capability explanation.
- *
  * @author Dmitriy Moroz
  */
 data class ImageToImageStrings(
@@ -94,7 +93,6 @@ data class ImageToImageStrings(
  * @param strings Localized labels and provider capability explanations.
  * @param performanceOverlay Optional live resource panel supplied by the application root.
  * @param useDrawerNavigation Whether the toolbar opens the home drawer instead of navigating back.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -291,6 +289,7 @@ fun ImageToImageContent(
         )
     }
     GenerationModalRenderer(
+        generationStartedAt = state.generationStartedAt,
         performanceOverlay = performanceOverlay,
         screenModal = state.screenModal,
         onDismissRequest = { processIntent(ImageToImageIntent.DismissModal) },

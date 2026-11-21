@@ -24,6 +24,11 @@ import androidx.room.ColumnInfo
  * @param isHidden Whether grid/detail output is obscured.
  * @param isLiked Whether the gallery result is liked.
  * @param modelName Recorded model display name.
+ * @param providerKey Captured provider catalog key; null for images created before provenance was recorded.
+ * @param acceleration Execution mode used for this image; null when unknown, "None" for remote providers.
+ * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
+ * @param osVersion Originating OS version, including Android API level; null for legacy images.
+ * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
  * @author Dmitriy Moroz
  */
 data class GenerationResultMetadataEntity(
@@ -46,4 +51,9 @@ data class GenerationResultMetadataEntity(
     @ColumnInfo(name = "hidden") val isHidden: Boolean,
     @ColumnInfo(name = "liked") val isLiked: Boolean,
     @ColumnInfo(name = "model_name") val modelName: String,
+    @ColumnInfo(name = "provider_key") val providerKey: String? = null,
+    @ColumnInfo(name = "acceleration") val acceleration: String? = null,
+    @ColumnInfo(name = "device_name") val deviceName: String? = null,
+    @ColumnInfo(name = "os_version") val osVersion: String? = null,
+    @ColumnInfo(name = "generation_duration_millis") val generationDurationMillis: Long? = null,
 )

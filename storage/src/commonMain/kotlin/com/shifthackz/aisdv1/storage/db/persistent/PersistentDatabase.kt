@@ -28,8 +28,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 
 /**
  * Main Room database containing generated images, downloaded models, and app statistics.
- *
- * Schema version 15 retains first-launch restore handoffs and typed omission metadata across interruptions.
+ * Schema version 17 retains generation provenance, originating device and elapsed time without inventing legacy values.
  *
  * @author Dmitriy Moroz
  */
@@ -47,8 +46,6 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
         RestoreSectionEntity::class,
     ],
     autoMigrations = [
-        AutoMigration(from = 13, to = 14),
-        AutoMigration(from = 14, to = 15),
         /**
          * Added 3 fields to [GenerationResultEntity]:
          * - [GenerationResultContract.SUB_SEED]
@@ -123,7 +120,46 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
          * @author Dmitriy Moroz
          */
         AutoMigration(from = 11, to = 12),
+        /**
+         * Added image content revisions used to invalidate gallery previews:
+         * - [GenerationResultContract.IMAGE_REVISION]
+         *
+         * @author Dmitriy Moroz
+         */
         AutoMigration(from = 12, to = 13),
+        /**
+         * Added durable restore progress tables:
+         * - [RestoreSessionEntity]
+         * - [RestoreSectionEntity]
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 13, to = 14),
+        /**
+         * Added restore handoff and retained-credential metadata:
+         * - [RestoreSessionEntity.requiresConfiguration]
+         * - [RestoreSectionEntity.retainedCredentialProviders]
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 14, to = 15),
+        /**
+         * Added nullable generation provenance; existing gallery rows retain unknown values:
+         * - [GenerationResultEntity.providerKey]
+         * - [GenerationResultEntity.acceleration]
+         * - [GenerationResultEntity.generationDurationMillis]
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 15, to = 16),
+        /**
+         * Added nullable originating-device metadata without inferring it for existing images:
+         * - [GenerationResultEntity.deviceName]
+         * - [GenerationResultEntity.osVersion]
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 16, to = 17),
     ],
 )
 @TypeConverters(
@@ -179,12 +215,8 @@ internal abstract class PersistentDatabase : RoomDatabase() {
     abstract fun networkUsageDao(): NetworkUsageDao
 
     /**
-     * Stable database filename and current migration target.
-     *
-     * @author Dmitriy Moroz
-     */
-    /**
      * Returns durable restore intent and category-commit records.
+     *
      * @author Dmitriy Moroz
      */
     abstract fun restoreSessionDao(): RestoreSessionDao
@@ -198,11 +230,11 @@ internal abstract class PersistentDatabase : RoomDatabase() {
         const val DB_NAME = "ai_sd_v1_storage_db"
 
         /**
-         * Schema target including durable restore session and section ledgers.
+         * Schema target including nullable image provenance, device information and elapsed time.
          *
          * @author Dmitriy Moroz
          */
-        const val DB_VERSION = 15
+        const val DB_VERSION = 17
     }
 }
 

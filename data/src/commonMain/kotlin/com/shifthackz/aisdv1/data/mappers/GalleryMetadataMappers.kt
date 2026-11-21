@@ -30,4 +30,9 @@ internal fun GenerationResultMetadataEntity.mapMetadataToDomain() = GalleryItemM
     isHidden = isHidden,
     isLiked = isLiked,
     modelName = modelName,
+    providerKey = providerKey,
+    acceleration = acceleration,
+    generationDurationMillis = generationDurationMillis,
+    deviceName = deviceName,
+    osVersion = osVersion,
 )

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.generation.txt2img
 
+import kotlin.time.TimeSource
+
 import com.shifthackz.aisdv1.presentation.components.image.ImageSaveResult
 import com.shifthackz.aisdv1.presentation.components.image.ImageSaver
 import com.shifthackz.aisdv1.presentation.components.image.ImageShareResult
@@ -71,7 +73,6 @@ import kotlin.coroutines.coroutineContext
  * @param updateState Atomically transforms current presentation state after asynchronous actions.
  * @param launch Starts coroutines in the owning view model lifecycle.
  * @param onError Reports generation, persistence, picker and export failures to the application error sink.
- *
  * @author Dmitriy Moroz
  */
 internal class TextToImageActionHandler(
@@ -109,20 +110,32 @@ internal class TextToImageActionHandler(
      */
     private var generationJob: Job? = null
 
-    /** Per-operation dispatch marker; a cancelled replacement still awaiting cleanup owns no legacy task.
-     * @author Dmitriy Moroz */
+    /**
+     * Per-operation dispatch marker; a cancelled replacement still awaiting cleanup owns no legacy task.
+     *
+     * @author Dmitriy Moroz
+     */
     private var generationDispatchState: MutableStateFlow<Boolean>? = null
 
-    /** Provider identity captured from the launched request, retained independently of later form edits.
-     * @author Dmitriy Moroz */
+    /**
+     * Provider identity captured from the launched request, retained independently of later form edits.
+     *
+     * @author Dmitriy Moroz
+     */
     private var generationSource: ServerSource? = null
 
-    /** Selection revision captured with the launched request and used only for its cancellation ownership.
-     * @author Dmitriy Moroz */
+    /**
+     * Selection revision captured with the launched request and used only for its cancellation ownership.
+     *
+     * @author Dmitriy Moroz
+     */
     private var generationSelectionRevision: Long? = null
 
-    /** Independent join barrier retaining every cancelled predecessor until its provider cleanup finishes.
-     * @author Dmitriy Moroz */
+    /**
+     * Independent join barrier retaining every cancelled predecessor until its provider cleanup finishes.
+     *
+     * @author Dmitriy Moroz
+     */
     private var cleanupJob: Job? = null
 
     private var pendingGeneration: PendingGeneration? = null
@@ -153,8 +166,11 @@ internal class TextToImageActionHandler(
         startGeneration(validatedState, payload)
     }
 
-    /** Records the benchmark prompt response and navigates to the local performance benchmark.
-     * @author Dmitriy Moroz */
+    /**
+     * Records the benchmark prompt response and navigates to the local performance benchmark.
+     *
+     * @author Dmitriy Moroz
+     */
     fun runBenchmarkFromPrompt() {
         recordBenchmarkPromptAnswerUseCase()()
         pendingGeneration = null
@@ -162,8 +178,11 @@ internal class TextToImageActionHandler(
         router.navigateToBenchmark()
     }
 
-    /** Records the skipped benchmark and resumes the captured pending generation request.
-     * @author Dmitriy Moroz */
+    /**
+     * Records the skipped benchmark and resumes the captured pending generation request.
+     *
+     * @author Dmitriy Moroz
+     */
     fun skipBenchmarkPrompt() {
         recordBenchmarkPromptAnswerUseCase()()
         val pending =
@@ -173,9 +192,12 @@ internal class TextToImageActionHandler(
         startGeneration(pending.state, pending.payload)
     }
 
-    /** Resumes the captured generation after a local performance warning.
+    /**
+     * Resumes the captured generation after a local performance warning.
+     *
      * @param suppressFutureWarnings Whether future recommendation warnings should be disabled.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     fun continueAfterBenchmarkWarning(suppressFutureWarnings: Boolean) {
         if (suppressFutureWarnings) {
             suppressBenchmarkWarningsUseCase()()
@@ -187,8 +209,11 @@ internal class TextToImageActionHandler(
         startGeneration(pending.state, pending.payload)
     }
 
-    /** Discards the pending generation and closes the local performance recommendation.
-     * @author Dmitriy Moroz */
+    /**
+     * Discards the pending generation and closes the local performance recommendation.
+     *
+     * @author Dmitriy Moroz
+     */
     fun dismissBenchmarkDialog() {
         pendingGeneration = null
         updateState { it.copy(screenModal = GenerationModal.None) }
@@ -390,10 +415,13 @@ internal class TextToImageActionHandler(
         }
     }
 
-    /** Evaluates the captured local request and either resumes generation or shows a benchmark recommendation.
+    /**
+     * Evaluates the captured local request and either resumes generation or shows a benchmark recommendation.
+     *
      * @param validatedState Validated form snapshot retained while the recommendation is visible.
      * @param payload Immutable request associated with the validated form.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun evaluateBenchmarkGate(
         validatedState: TextToImageState,
         payload: TextToImagePayload,
@@ -441,10 +469,13 @@ internal class TextToImageActionHandler(
         }
     }
 
-    /** Schedules the immutable background payload or runs a captured foreground coroutine and publishes only active results.
+    /**
+     * Schedules the immutable background payload or runs a captured foreground coroutine and publishes only active results.
+     *
      * @param validatedState Validated form snapshot used to generate this operation.
      * @param payload Immutable text request with provider identity captured at submission.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun startGeneration(
         validatedState: TextToImageState,
         payload: TextToImagePayload,
@@ -459,6 +490,7 @@ internal class TextToImageActionHandler(
         updateState {
             it.copy(
                 generating = true,
+                generationStartedAt = TimeSource.Monotonic.markNow(),
                 error = null,
                 message = null,
                 screenModal = validatedState.progressModal(preferenceManager.localOnnxAllowCancel),
@@ -525,12 +557,15 @@ internal class TextToImageActionHandler(
         }
     }
 
-    /** Retains cleanup outside generation jobs so cancelling a replacement cannot skip earlier remote cleanup.
+    /**
+     * Retains cleanup outside generation jobs so cancelling a replacement cannot skip earlier remote cleanup.
+     *
      * @param job Cancelled foreground job that may still own a remote task.
      * @param source Captured provider requiring legacy interruption; null retains coroutine cleanup only.
      * @param selectionRevision Captured revision that must still own the provider before legacy interruption.
      * @return Barrier joining every outstanding predecessor, or null when no cleanup is retained.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun retainCleanup(
         job: Job?,
         source: ServerSource? = null,
@@ -598,6 +633,7 @@ internal class TextToImageActionHandler(
     /**
      * Checks the submitted account and durable source revision on main immediately before publishing.
      * No suspension separates the final checks from the state update while both guards are held.
+     *
      * @param payload Immutable source/account/revision captured at submission.
      * @param results Completed generation results; never reused across identities.
      * @author Dmitriy Moroz
@@ -644,7 +680,6 @@ internal class TextToImageActionHandler(
  *
  * @param state Form snapshot retained while a benchmark or validation decision is pending.
  * @param payload Immutable generation request captured from that form snapshot.
- *
  * @author Dmitriy Moroz
  */
 private data class PendingGeneration(
@@ -656,7 +691,6 @@ private data class PendingGeneration(
  * Maps supported local-generation controls into a performance admission request without changing form state.
  *
  * @param payload Captured generation inputs or history transfer being applied to this form.
- *
  * @author Dmitriy Moroz
  */
 private fun TextToImageState.toBenchmarkRequest(payload: TextToImagePayload): LocalGenerationRequest =

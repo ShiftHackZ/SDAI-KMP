@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import kotlin.time.TimeSource
+
 import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageBudget
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
@@ -70,7 +72,6 @@ import kotlin.io.encoding.Base64
  * @param updateState Atomically transforms current presentation state after asynchronous actions.
  * @param launch Starts coroutines in the owning view model lifecycle.
  * @param onError Reports generation, persistence, picker and export failures to the application error sink.
- *
  * @author Dmitriy Moroz
  */
 internal class ImageToImageActionHandler(
@@ -143,7 +144,6 @@ internal class ImageToImageActionHandler(
      * Opens the requested platform input source and resets obsolete mask/results when a new image is selected.
      *
      * @param source Platform input source to open.
-     *
      * @author Dmitriy Moroz
      */
     fun pickImage(source: ImageToImagePickSource) {
@@ -238,7 +238,6 @@ internal class ImageToImageActionHandler(
      * Validates the current form, rejects overlapping work and starts or schedules the captured generation request.
      *
      * @throws IllegalStateException when the current state is invalid.
-     *
      * @author Dmitriy Moroz
      */
     fun generate() {
@@ -292,7 +291,6 @@ internal class ImageToImageActionHandler(
      * Resumes the captured generation after a local performance warning.
      *
      * @param suppressFutureWarnings Whether future recommendation warnings should be disabled.
-     *
      * @author Dmitriy Moroz
      */
     fun continueAfterBenchmarkWarning(suppressFutureWarnings: Boolean) {
@@ -343,7 +341,6 @@ internal class ImageToImageActionHandler(
      * Persists completed results and updates the result modal with durable gallery identities.
      *
      * @param results Completed images whose gallery identities should be retained or created.
-     *
      * @author Dmitriy Moroz
      */
     fun saveGenerationResults(results: List<AiGenerationResult>) {
@@ -373,7 +370,6 @@ internal class ImageToImageActionHandler(
      * Ensures the result is persisted and cached before opening its normal preview.
      *
      * @param result Completed image selected by the user.
-     *
      * @author Dmitriy Moroz
      */
     fun viewGenerationResult(result: AiGenerationResult) {
@@ -399,7 +395,6 @@ internal class ImageToImageActionHandler(
      * Persists and caches the selected result before opening the report workflow.
      *
      * @param result Completed image selected by the user.
-     *
      * @author Dmitriy Moroz
      */
     fun reportGenerationResult(result: AiGenerationResult) {
@@ -425,7 +420,6 @@ internal class ImageToImageActionHandler(
      * Exports the supplied encoded image through the platform media saver and reports completion or failure.
      *
      * @param base64 Base64 image payload used by the operation.
-     *
      * @author Dmitriy Moroz
      */
     fun saveImage(base64: String) {
@@ -466,7 +460,6 @@ internal class ImageToImageActionHandler(
      * Shares the supplied encoded image through the platform share surface and restores presentation state afterward.
      *
      * @param base64 Base64 image payload used by the operation.
-     *
      * @author Dmitriy Moroz
      */
     fun shareImage(base64: String) {
@@ -507,8 +500,8 @@ internal class ImageToImageActionHandler(
      * Evaluates the captured local request and either resumes generation or shows a benchmark recommendation.
      *
      * @param validatedState Validated form snapshot retained while the recommendation is visible.
-     *
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun evaluateBenchmarkGate(validatedState: ImageToImageState) {
         pendingGenerationState = validatedState
         launch(dispatchersProvider.io, CoroutineStart.DEFAULT) {
@@ -558,7 +551,6 @@ internal class ImageToImageActionHandler(
      * Schedules the immutable background payload or runs a captured foreground coroutine and publishes only active results.
      *
      * @param validatedState Validated form snapshot used to generate this operation.
-     *
      * @author Dmitriy Moroz
      */
     private fun startGeneration(validatedState: ImageToImageState) {
@@ -573,6 +565,7 @@ internal class ImageToImageActionHandler(
         updateState {
             it.copy(
                 generating = true,
+                generationStartedAt = TimeSource.Monotonic.markNow(),
                 error = null,
                 message = null,
                 screenModal = validatedState.progressModal(preferenceManager.localOnnxAllowCancel),
@@ -678,10 +671,9 @@ internal class ImageToImageActionHandler(
      * @param job Cancelled foreground job that may still own a remote task.
      * @param source Captured provider requiring legacy interruption; null retains coroutine cleanup only.
      * @param selectionRevision Captured revision that must still own the provider before legacy interruption.
-     *
      * @return Barrier joining every outstanding predecessor, or null when no cleanup is retained.
-     *
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun retainCleanup(
         job: Job?,
         source: ServerSource? = null,
@@ -716,9 +708,7 @@ internal class ImageToImageActionHandler(
      * Preserves existing gallery identities and persists only newly generated results.
      *
      * @param results Completed images whose gallery identities should be retained or created.
-     *
      * @return Results carrying their existing or newly created gallery identities.
-     *
      * @author Dmitriy Moroz
      */
     private suspend fun persistResultsIfNeeded(results: List<AiGenerationResult>): List<AiGenerationResult> =
@@ -728,9 +718,7 @@ internal class ImageToImageActionHandler(
      * Returns an existing durable result unchanged or stores it and attaches the new gallery identity.
      *
      * @param result Completed image selected by the user.
-     *
      * @return Result with a durable gallery identity.
-     *
      * @author Dmitriy Moroz
      */
     private suspend fun persistResultIfNeeded(result: AiGenerationResult): AiGenerationResult =
@@ -744,9 +732,7 @@ internal class ImageToImageActionHandler(
      * Caches a result for downstream preview, reporting or sharing and returns the cached result.
      *
      * @param result Completed image selected by the user.
-     *
      * @return Cached result used by downstream presentation workflows.
-     *
      * @author Dmitriy Moroz
      */
     private suspend fun cacheResultIfNeeded(result: AiGenerationResult): AiGenerationResult =
@@ -757,8 +743,8 @@ internal class ImageToImageActionHandler(
  * Maps captured image-generation controls into a local performance admission request.
  *
  * @param payload Captured generation inputs or history transfer being applied to this form.
- *
- * @author Dmitriy Moroz */
+ * @author Dmitriy Moroz
+ */
 private fun ImageToImageState.toBenchmarkRequest(payload: ImageToImagePayload): LocalGenerationRequest =
     LocalGenerationRequest(
         source = mode,

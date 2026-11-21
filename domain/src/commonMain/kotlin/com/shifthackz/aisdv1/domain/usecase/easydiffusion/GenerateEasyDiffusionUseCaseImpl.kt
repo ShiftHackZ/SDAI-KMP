@@ -27,12 +27,15 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration
+import com.shifthackz.aisdv1.domain.usecase.generation.withGenerationMetadata
+import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
 import kotlin.time.TimeSource
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
  * Owns remote queue/stream recovery and bounded task cleanup. A render POST is never replayed.
+ *
  * @param repository Strict transport, endpoint-scoped catalog and normal result storage.
  * @param registry Serializes ownership across screen and worker callers.
  * @param preferences Deadline and source revision used to invalidate replaced work.
@@ -46,6 +49,7 @@ internal class GenerateEasyDiffusionUseCaseImpl(
     /**
      * Owns one sequential batch under a shared deadline, rejecting replaced connections and late results.
      * Caller cancellation remains cancellation; this operation's deadline is reported as a typed failure.
+     *
      * @param request Immutable provider identity, model and supported generation inputs for this batch.
      * @return Completed results persisted through the application's normal gallery/export workflow.
      * @author Dmitriy Moroz
@@ -86,10 +90,19 @@ internal class GenerateEasyDiffusionUseCaseImpl(
                         List(request.batchCount) { index ->
                             val seed =
                                 if (index == 0) request.seed else (request.seed + index) % 4294967296L
-                            generateSingle(
-                                request.copy(seed = seed, batchCount = 1),
-                                (limit - started.elapsedNow()).coerceAtLeast(1.milliseconds)
-                            )
+                            withGenerationMetadata(
+                                GenerationMetadataContext(
+                                    ServerSource.EASY_DIFFUSION.key,
+                                    "None",
+                                    deviceName = coroutineContext[GenerationMetadataContext]?.deviceName,
+                                    osVersion = coroutineContext[GenerationMetadataContext]?.osVersion,
+                                )
+                            ) {
+                                generateSingle(
+                                    request.copy(seed = seed, batchCount = 1),
+                                    (limit - started.elapsedNow()).coerceAtLeast(1.milliseconds)
+                                )
+                            }
                         }
                     } finally {
                         watcher.cancel()
@@ -104,10 +117,13 @@ internal class GenerateEasyDiffusionUseCaseImpl(
         }
     }
 
-    /** Waits for one task without replaying its POST and stops its captured identity on failure.
+    /**
+     * Waits for one task without replaying its POST and stops its captured identity on failure.
+     *
      * @param request One image from the captured batch.
      * @param remaining Time left under the batch deadline, including candidate validation and queue waits.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private suspend fun generateSingle(
         request: EasyDiffusionRequest,
         remaining: Duration
@@ -203,9 +219,12 @@ internal class GenerateEasyDiffusionUseCaseImpl(
         }
     }
 
-    /** Prevents dispatch or publication after source replacement or cancellation.
+    /**
+     * Prevents dispatch or publication after source replacement or cancellation.
+     *
      * @param request Submitted snapshot whose revision must still be selected.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private suspend fun requireOwner(request: EasyDiffusionRequest) {
         coroutineContext.ensureActive()
         check(

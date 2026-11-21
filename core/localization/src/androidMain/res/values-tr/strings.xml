@@ -748,4 +748,10 @@
     <string name="performance_memory_value">%1$s / %2$s MiB</string>
     <string name="performance_this_app">Bu uygulama</string>
     <string name="performance_total">Toplam</string>
+    <string name="gallery_info_field_provider">Sağlayıcı</string>
+    <string name="gallery_info_field_acceleration">Hızlandırma</string>
+    <string name="gallery_info_field_duration">Üretim süresi</string>
+    <string name="gallery_info_acceleration_none">Yok</string>
+    <string name="gallery_info_field_device">Cihaz</string>
+    <string name="gallery_info_field_os">İşletim sistemi</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.sp
  * @param subTitle Explanatory body text.
  * @param okText Acknowledgement button label.
  * @param onDismissRequest Requests removal after acknowledgement or outside dismissal.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -71,7 +71,6 @@ fun InfoDialogContent(
  * @param text Error details.
  * @param okText Acknowledgement button label.
  * @param onDismissRequest Requests removal after acknowledgement or outside dismissal.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -117,7 +116,6 @@ fun ErrorDialogContent(
  * @param onConfirmAction Requests the affirmative operation without dismissing state automatically.
  * @param onDismissRequest Requests cancellation or outside dismissal.
  * @param content Additional interactive controls inside the body.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -170,9 +168,9 @@ fun DecisionInteractiveDialogContent(
  * @param modifier Layout modifiers for the progress surface.
  * @param waitTimeText Optional queue/wait estimate; null reserves an empty status line.
  * @param statusText Optional current stage text.
+ * @param elapsedText Captured generation clock text directly below the title.
  * @param progress Measured completion fraction from zero to one, or null when unknown.
  * @param content Optional controls rendered below the progress indicator.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -183,6 +181,7 @@ fun ProgressDialogContent(
     waitTimeText: String? = null,
     statusText: String? = null,
     progress: Float? = null,
+    elapsedText: String? = null,
     content: (@Composable () -> Unit)? = null,
 ) {
     Surface(
@@ -196,6 +195,14 @@ fun ProgressDialogContent(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
+            elapsedText?.let { text ->
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
             Text(
                 modifier = Modifier.padding(top = 14.dp),
                 text = subTitle,
@@ -231,7 +238,6 @@ fun ProgressDialogContent(
  * @param modifier Layout modifiers for the status group.
  * @param waitTimeText Optional already localized queue/wait estimate.
  * @param statusText Optional already localized stage description.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -260,7 +266,6 @@ fun ProgressDialogStatusContent(
  * @param cancelText Localized cancellation button label.
  * @param onClick Requests cooperative cancellation through the operation owner.
  * @param modifier Layout modifiers for the button container.
- *
  * @author Dmitriy Moroz
  */
 @Composable

@@ -22,6 +22,11 @@ package com.shifthackz.aisdv1.domain.entity
  * @param isHidden Whether grid/detail output is obscured.
  * @param isLiked Whether the gallery result is liked.
  * @param modelName Recorded model display name.
+ * @param providerKey Captured provider catalog key; null for images created before provenance was recorded.
+ * @param acceleration Execution mode used for this image; null when unknown, "None" for remote providers.
+ * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
+ * @param osVersion Originating OS version, including Android API level; null for legacy images.
+ * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
  * @author Dmitriy Moroz
  */
 data class GalleryItemMetadata(
@@ -44,6 +49,11 @@ data class GalleryItemMetadata(
     val isHidden: Boolean,
     val isLiked: Boolean,
     val modelName: String,
+    val providerKey: String? = null,
+    val acceleration: String? = null,
+    val deviceName: String? = null,
+    val osVersion: String? = null,
+    val generationDurationMillis: Long? = null,
 ) {
     /**
      * Validated layout ratio for history thumbnails.

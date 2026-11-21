@@ -748,4 +748,10 @@
     <string name="performance_memory_value">%1$s / %2$s МіБ</string>
     <string name="performance_this_app">Цей застосунок</string>
     <string name="performance_total">Загалом</string>
+    <string name="gallery_info_field_provider">Провайдер</string>
+    <string name="gallery_info_field_acceleration">Прискорення</string>
+    <string name="gallery_info_field_duration">Час генерації</string>
+    <string name="gallery_info_acceleration_none">Немає</string>
+    <string name="gallery_info_field_device">Пристрій</string>
+    <string name="gallery_info_field_os">ОС</string>
 </resources>

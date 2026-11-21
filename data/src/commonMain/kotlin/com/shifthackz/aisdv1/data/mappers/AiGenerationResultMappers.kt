@@ -7,16 +7,16 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.GenerationResultPrevie
 
 //region DOMAIN --> ENTITY
 /**
- * Converts SDAI data with `mapDomainToEntity`.
+ * Converts completed gallery results to storage rows, preserving provenance and omitting transient account guards.
  *
- * @return Result produced by `mapDomainToEntity`.
+ * @return Storage rows in the original order.
  * @author Dmitriy Moroz
  */
 fun List<AiGenerationResult>.mapDomainToEntity(): List<GenerationResultEntity> =
     map(AiGenerationResult::mapDomainToEntity)
 
 /**
- * Converts SDAI data with `mapDomainToEntity`.
+ * Converts completed gallery results to storage rows, preserving provenance and omitting transient account guards.
  *
  * @author Dmitriy Moroz
  */
@@ -42,6 +42,11 @@ fun AiGenerationResult.mapDomainToEntity(): GenerationResultEntity = with(this) 
         hidden = hidden,
         liked = liked,
         modelName = modelName,
+        providerKey = providerKey,
+        acceleration = acceleration,
+        generationDurationMillis = generationDurationMillis,
+        deviceName = deviceName,
+        osVersion = osVersion,
         imageRevision = imageRevision,
     )
 }
@@ -49,16 +54,16 @@ fun AiGenerationResult.mapDomainToEntity(): GenerationResultEntity = with(this) 
 
 //region ENTITY --> DOMAIN
 /**
- * Converts SDAI data with `mapEntityToDomain`.
+ * Restores saved image parameters and provenance without recreating transient account guards.
  *
- * @return Result produced by `mapEntityToDomain`.
+ * @return Gallery results in database query order.
  * @author Dmitriy Moroz
  */
 fun List<GenerationResultEntity>.mapEntityToDomain(): List<AiGenerationResult> =
     map(GenerationResultEntity::mapEntityToDomain)
 
 /**
- * Converts SDAI data with `mapEntityToDomain`.
+ * Restores saved image parameters and provenance without recreating transient account guards.
  *
  * @author Dmitriy Moroz
  */
@@ -84,21 +89,26 @@ fun GenerationResultEntity.mapEntityToDomain(): AiGenerationResult = with(this) 
         hidden = hidden,
         liked = liked,
         modelName = modelName,
+        providerKey = providerKey,
+        acceleration = acceleration,
+        generationDurationMillis = generationDurationMillis,
+        deviceName = deviceName,
+        osVersion = osVersion,
         imageRevision = imageRevision,
     )
 }
 
 /**
- * Converts SDAI data with `mapPreviewEntityToDomain`.
+ * Builds lightweight gallery previews from identity and flags without loading image payloads.
  *
- * @return Result produced by `mapPreviewEntityToDomain`.
+ * @return Preview identities and flags in query order.
  * @author Dmitriy Moroz
  */
 fun List<GenerationResultPreviewEntity>.mapPreviewEntityToDomain(): List<AiGenerationResultPreview> =
     map(GenerationResultPreviewEntity::mapPreviewEntityToDomain)
 
 /**
- * Converts SDAI data with `mapPreviewEntityToDomain`.
+ * Builds lightweight gallery previews from identity and flags without loading image payloads.
  *
  * @author Dmitriy Moroz
  */

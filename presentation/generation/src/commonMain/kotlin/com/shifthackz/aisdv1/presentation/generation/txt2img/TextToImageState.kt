@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.generation.txt2img
 
+import kotlin.time.TimeMark
 import androidx.compose.runtime.Immutable
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.model.UiText
@@ -28,12 +29,12 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
 
 /**
  * Complete render state for txt2img.
- *
  * The state combines screen lifecycle flags, generated results, validation
  * feedback, current platform metadata, and the shared generation form contract
  * used by provider-specific controls such as Android Bonsai backend selection.
  *
  * @param loadingConfiguration Whether provider configuration is still being loaded into the screen.
+ * @param generationStartedAt Monotonic foreground start retained across dialog stages and composition recreation.
  * @param generating Whether a generation request is currently in progress.
  * @param savingImage Whether an image export is running.
  * @param sharingImage Whether an image is being prepared for the platform share flow.
@@ -98,12 +99,12 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  * @param aDetailer AUTOMATIC1111 detail-refinement configuration; disabled for providers without this extension.
  * @param aDetailerAvailable Whether the configured server advertises ADetailer support.
  * @param aDetailerRefreshing Whether ADetailer extension availability is being refreshed.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
 data class TextToImageState(
     val loadingConfiguration: Boolean = true,
+    val generationStartedAt: TimeMark? = null,
     val generating: Boolean = false,
     val savingImage: Boolean = false,
     val sharingImage: Boolean = false,

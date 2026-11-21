@@ -13,6 +13,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * Encodes one gallery row at a time without loading the whole gallery.
+ *
  * @param archive Length-prefixed metadata codec.
  * @param json Forward-compatible typed metadata serializer.
  * @param imageValidator Budgeted native probe and sampled content validator.
@@ -46,6 +47,11 @@ internal class DefaultGalleryBackupCodec(
             isHidden = row.hidden,
             isLiked = row.liked,
             modelName = row.modelName,
+            providerKey = row.providerKey,
+            acceleration = row.acceleration,
+            generationDurationMillis = row.generationDurationMillis,
+            deviceName = row.deviceName,
+            osVersion = row.osVersion,
         )
         archive.writeJson(sink, json.encodeToString(record))
         val outputBytes = writeImage(sink, row.imageBase64, false, budget.maxEncodedBytes)
@@ -59,6 +65,7 @@ internal class DefaultGalleryBackupCodec(
         if (record.generationType !in setOf("txt2img", "img2img")) return null
         require(record.width > 0 && record.height > 0 && record.samplingSteps >= 0 && record.cfgScale.isFinite()) { "Invalid gallery metadata" }
         require(record.subSeedStrength.isFinite() && record.denoisingStrength.isFinite()) { "Invalid gallery metadata" }
+        require(record.generationDurationMillis == null || record.generationDurationMillis >= 0) { "Invalid generation duration" }
         return GenerationResultEntity(
             id = 0,
             imageBase64 = image,
@@ -81,11 +88,17 @@ internal class DefaultGalleryBackupCodec(
             hidden = record.isHidden,
             liked = record.isLiked,
             modelName = record.modelName,
+            providerKey = record.providerKey,
+            acceleration = record.acceleration,
+            generationDurationMillis = record.generationDurationMillis,
+            deviceName = record.deviceName,
+            osVersion = record.osVersion,
         )
     }
 
     /**
      * Admits encoded text before allocating binary bytes and emits one validated image frame.
+     *
      * @param sink Current gallery section writer.
      * @param value Saved Base64 image text, including supported alternate alphabet or whitespace.
      * @param canBeEmpty Whether this is the optional original input image.
@@ -123,6 +136,7 @@ internal class DefaultGalleryBackupCodec(
 
     /**
      * Checks the frame length before allocation and returns Base64 text with its consumed binary byte count.
+     *
      * @param source Bounded gallery section reader.
      * @param canBeEmpty Whether the optional original input may be absent.
      * @param remainingBytes Encoded-byte allowance left after preceding image frames.
@@ -142,6 +156,7 @@ internal class DefaultGalleryBackupCodec(
 
     /**
      * Requires supported encoded formats and native budgeted content validation before accepting a frame.
+     *
      * @param bytes Already-admitted encoded image bytes.
      * @param canBeEmpty Whether a missing original input is allowed.
      * @author Dmitriy Moroz

@@ -748,4 +748,10 @@
     <string name="performance_memory_value">%1$s / %2$s МиБ</string>
     <string name="performance_this_app">Это приложение</string>
     <string name="performance_total">Всего</string>
+    <string name="gallery_info_field_provider">Провайдер</string>
+    <string name="gallery_info_field_acceleration">Ускорение</string>
+    <string name="gallery_info_field_duration">Время генерации</string>
+    <string name="gallery_info_acceleration_none">Нет</string>
+    <string name="gallery_info_field_device">Устройство</string>
+    <string name="gallery_info_field_os">ОС</string>
 </resources>

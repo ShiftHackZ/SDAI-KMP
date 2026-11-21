@@ -9,6 +9,7 @@ import com.shifthackz.aisdv1.domain.repository.MnnGenerationRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.CancellationException
@@ -51,6 +52,7 @@ class MnnTextToImageUseCaseTest {
         mnnProfile = "sd15-512-general-int8-v1"
     )
     private val useCase = TextToImageUseCaseImpl(
+        deviceProbe = mockk<BenchmarkDeviceProbe>(relaxed = true),
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
             mockk(relaxed = true),
             mockk(relaxed = true)

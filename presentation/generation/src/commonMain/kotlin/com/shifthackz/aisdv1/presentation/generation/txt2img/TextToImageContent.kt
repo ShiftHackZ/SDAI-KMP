@@ -63,7 +63,6 @@ data class TextToImageStrings(
 
 /**
  * Screen content for text-to-image generation.
- *
  * The composable owns transient modal selection and pending prompt-chip text,
  * while all durable state changes are sent back through [processIntent].
  *
@@ -73,7 +72,6 @@ data class TextToImageStrings(
  * @param strings Localized screen labels that previews and tests can override.
  * @param performanceOverlay Optional live resource panel supplied by the application root.
  * @param useDrawerNavigation Whether the top app bar opens the app drawer instead of navigating back.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -254,6 +252,7 @@ fun TextToImageContent(
         )
     }
     GenerationModalRenderer(
+        generationStartedAt = state.generationStartedAt,
         performanceOverlay = performanceOverlay,
         screenModal = state.screenModal,
         onDismissRequest = { processIntent(TextToImageIntent.DismissModal) },
@@ -272,7 +271,6 @@ fun TextToImageContent(
  * Maps shared generation form events into txt2img intents.
  *
  * @return The corresponding screen action, or null for controls unsupported by txt2img.
- *
  * @author Dmitriy Moroz
  */
 internal fun GenerationInputFormEvent.toTextToImageIntent(): TextToImageIntent? = when (this) {

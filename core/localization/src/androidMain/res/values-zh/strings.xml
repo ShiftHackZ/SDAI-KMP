@@ -800,4 +800,10 @@
     <string name="performance_memory_value">%1$s / %2$s MiB</string>
     <string name="performance_this_app">此应用</string>
     <string name="performance_total">总计</string>
+    <string name="gallery_info_field_provider">提供商</string>
+    <string name="gallery_info_field_acceleration">加速模式</string>
+    <string name="gallery_info_field_duration">生成时间</string>
+    <string name="gallery_info_acceleration_none">无</string>
+    <string name="gallery_info_field_device">设备</string>
+    <string name="gallery_info_field_os">操作系统</string>
 </resources>

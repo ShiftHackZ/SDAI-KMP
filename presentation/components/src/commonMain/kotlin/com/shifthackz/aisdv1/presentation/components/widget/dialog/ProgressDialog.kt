@@ -26,9 +26,9 @@ import com.shifthackz.aisdv1.core.model.asUiText
  * @param waitTimeSeconds Optional server estimate, measured in seconds.
  * @param positionInQueue Optional queue position, taking precedence over generation progress.
  * @param step Completed and total denoising iterations, absent for overall progress.
+ * @param elapsedText Captured generation clock text, shown at a fixed position directly below the title.
  * @param overallPercentage Overall completion from zero to one hundred, never a sampling count.
  * @param content Optional actions rendered below the progress status.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -41,6 +41,7 @@ fun ProgressDialog(
     positionInQueue: Int? = null,
     step: Pair<Int, Int>? = null,
     overallPercentage: Int? = null,
+    elapsedText: String? = null,
     content: (@Composable () -> Unit)? = null,
 ) {
     val onBrightnessInteraction = LocalGenerationBrightnessInteraction.current
@@ -63,6 +64,7 @@ fun ProgressDialog(
             positionInQueue = positionInQueue,
             step = step,
             overallPercentage = overallPercentage,
+            elapsedText = elapsedText,
             content = content,
         )
     }
@@ -73,7 +75,6 @@ fun ProgressDialog(
  *
  * @param onClick Requests cancellation of the captured generation.
  * @param modifier Layout modifiers for the cancellation-action container.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -96,10 +97,10 @@ fun ProgressDialogCancelButton(
  * @param waitTimeSeconds Optional server estimate, measured in seconds.
  * @param positionInQueue Optional queue position, taking precedence over generation progress.
  * @param step Completed and total denoising iterations, absent for overall progress.
+ * @param elapsedText Captured generation clock text, shown at a fixed position directly below the title.
  * @param overallPercentage Overall completion from zero to one hundred, never a sampling count.
  * @param content Optional actions rendered below the progress status.
  * @param modifier Layout modifiers for the progress dialog surface.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -111,12 +112,14 @@ fun GeneratingProgressDialogContent(
     positionInQueue: Int? = null,
     step: Pair<Int, Int>? = null,
     overallPercentage: Int? = null,
+    elapsedText: String? = null,
     content: (@Composable () -> Unit)? = null,
 ) {
     ProgressDialogContent(
         title = title.asString(),
         subTitle = subTitle.asString(),
         waitTimeText = waitTimeText(waitTimeSeconds),
+        elapsedText = elapsedText,
         statusText = progressStatusText(positionInQueue, step, overallPercentage),
         progress = if (positionInQueue != null) null else overallPercentage?.coerceIn(0, 100)
             ?.div(100f)
@@ -132,9 +135,7 @@ fun GeneratingProgressDialogContent(
  * Formats an available server wait estimate using the current locale.
  *
  * @param waitTimeSeconds Optional server estimate, measured in seconds.
- *
  * @return Localized wait estimate, or null when the server provides none.
- *
  * @author Dmitriy Moroz
  */
 private fun waitTimeText(waitTimeSeconds: Int?): String? {
@@ -152,9 +153,7 @@ private fun waitTimeText(waitTimeSeconds: Int?): String? {
  * @param positionInQueue Optional queue position, taking precedence over generation progress.
  * @param step Completed and total denoising iterations, absent for overall progress.
  * @param overallPercentage Overall completion from zero to one hundred, never a sampling count.
- *
  * @return Status text in the provider's unit, or null before counters arrive.
- *
  * @author Dmitriy Moroz
  */
 fun progressStatusText(
