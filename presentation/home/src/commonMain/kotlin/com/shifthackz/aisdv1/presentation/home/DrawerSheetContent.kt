@@ -1,15 +1,11 @@
 package com.shifthackz.aisdv1.presentation.home
 
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformDrawerItem
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformDrawerSheet
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -50,8 +46,7 @@ fun DrawerSheetContent(
     header: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ModalDrawerSheet(
-        drawerContainerColor = MaterialTheme.colorScheme.background,
+    PlatformDrawerSheet(
         modifier = modifier,
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -66,15 +61,10 @@ fun DrawerSheetContent(
                 titleStartIcon = item.icon,
                 modifier = itemModifier.padding(bottom = 4.dp),
             ) {
-                NavigationDrawerItem(
-                    selected = item.selected,
-                    label = {
-                        Text(
-                            text = item.label,
-                            color = LocalContentColor.current,
-                        )
-                    },
-                    icon = { Icon(item.icon, contentDescription = null) },
+                PlatformDrawerItem(
+                    label = item.label,
+                    icon = item.icon,
+                    isSelected = item.selected,
                     onClick = item.onClick,
                 )
             }

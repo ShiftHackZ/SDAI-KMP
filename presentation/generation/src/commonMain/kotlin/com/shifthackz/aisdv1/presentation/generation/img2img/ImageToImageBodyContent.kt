@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -139,12 +141,18 @@ internal fun ImageToImageBody(
     val afterSlidersSection: @Composable () -> Unit = remember(denoisingStrength, processIntent) {
         { DenoisingStrengthSlider(denoisingStrength, processIntent) }
     }
+    ToolbarScrollObserver(listState.canScrollBackward)
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .verticalScrollbar(listState),
+            .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
         state = listState,
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp + LocalToolbarContentInset.current,
+            bottom = 16.dp
+        ),
     ) {
         item(key = "generation-provider") {
             CurrentProviderCard(

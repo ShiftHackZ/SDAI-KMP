@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.source
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -70,7 +70,7 @@ internal fun SourceSelectionToolbar(
             },
         )
         if (state.sourceSearchQuery.isNotBlank()) {
-            ToolbarIconButton(
+            SourceToolbarActionButton(
                 icon = Icons.Default.Close,
                 contentDescription = strings.clear,
                 showDot = false,
@@ -79,13 +79,13 @@ internal fun SourceSelectionToolbar(
                 },
             )
         }
-        ToolbarIconButton(
+        SourceToolbarActionButton(
             icon = Icons.Default.FilterList,
             contentDescription = strings.sourceFilterAction,
             showDot = state.sourceFiltersActive,
             onClick = { processIntent(ServerSetupIntent.ShowSourceFilters) },
         )
-        ToolbarIconButton(
+        SourceToolbarActionButton(
             contentDescription = strings.sourceSortAction,
             showDot = false,
             iconContent = { SourceSortToolbarIcon() },
@@ -146,8 +146,19 @@ private fun CompactSourceSearchField(
     }
 }
 
+/**
+ * Keeps provider search/filter commands compact and marks active filters beside their icon.
+ *
+ * @param contentDescription Localized command label.
+ * @param showDot Whether an accent indicator marks an active filter.
+ * @param onClick Requests the existing setup action.
+ * @param modifier Button placement.
+ * @param icon Shared vector when no custom glyph is supplied.
+ * @param iconContent Optional custom sort glyph.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun ToolbarIconButton(
+private fun SourceToolbarActionButton(
     contentDescription: String,
     showDot: Boolean,
     onClick: () -> Unit,
@@ -155,7 +166,7 @@ private fun ToolbarIconButton(
     icon: ImageVector? = null,
     iconContent: (@Composable () -> Unit)? = null,
 ) {
-    IconButton(
+    ToolbarIconButton(
         onClick = onClick,
         modifier = modifier,
     ) {

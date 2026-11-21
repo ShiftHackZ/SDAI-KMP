@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.source
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,11 +51,17 @@ internal fun SourceSelectionStep(
     val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = modifier) {
-        SourceSelectionToolbar(state = state, strings = strings, processIntent = processIntent)
+        ToolbarScrollObserver(listState.canScrollBackward)
         LazyColumn(
-            modifier = Modifier.weight(1f).verticalScrollbar(listState),
+            modifier = Modifier.weight(1f)
+                .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
             state = listState,
-            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                top = 16.dp + LocalToolbarContentInset.current,
+                end = 16.dp,
+                bottom = 32.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (filteredSources.isEmpty()) {

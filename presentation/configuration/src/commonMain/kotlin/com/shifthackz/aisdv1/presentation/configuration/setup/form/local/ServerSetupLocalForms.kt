@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.form.local
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -72,10 +74,19 @@ internal fun ConfigurationStep(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    ToolbarScrollObserver(listState.canScrollBackward)
     LazyColumn(
-        modifier = modifier.verticalScrollbar(listState),
+        modifier = modifier.verticalScrollbar(
+            listState,
+            topInset = LocalToolbarContentInset.current
+        ),
         state = listState,
-        contentPadding = PaddingValues(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 32.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            top = 24.dp + LocalToolbarContentInset.current,
+            end = 16.dp,
+            bottom = 32.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {

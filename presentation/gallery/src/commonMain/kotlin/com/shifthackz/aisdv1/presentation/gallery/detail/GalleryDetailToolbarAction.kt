@@ -1,12 +1,12 @@
 package com.shifthackz.aisdv1.presentation.gallery.detail
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -44,9 +44,9 @@ internal fun GalleryDetailToolbarAction(
         titleStartIcon = Icons.Default.Share,
         modifier = modifier,
     ) {
-        IconButton(
+        ToolbarIconButton(
             modifier = Modifier.semantics { contentDescription = title },
-            enabled = isEnabled,
+            isEnabled = isEnabled,
             onClick = {
                 processIntent(if (isSharingParams) GalleryDetailIntent.Share.Params else GalleryDetailIntent.Share.Image)
             },

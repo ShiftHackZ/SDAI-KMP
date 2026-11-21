@@ -2,6 +2,11 @@
 
 package com.shifthackz.aisdv1.presentation.configuration.setup.content
 
+import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionToolbar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
 import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
 import androidx.compose.foundation.layout.Arrangement
@@ -12,14 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -70,26 +71,23 @@ fun ServerSetupContent(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        Scaffold(
+        PlatformScaffold(
+            canUnderlapToolbar = true,
             topBar = {
                 Column {
-                    CenterAlignedTopAppBar(
+                    PlatformTopAppBar(
                         title = {
                             Text(
                                 text = strings.title,
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                             )
                         },
                         navigationIcon = {
                             if (state.showBackNavArrow || state.step != ServerSetupState.Step.SOURCE) {
-                                IconButton(
+                                ToolbarBackButton(
                                     onClick = { processIntent(ServerSetupIntent.NavigateBack) },
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                        contentDescription = strings.backContentDescription,
-                                    )
-                                }
+                                    icon = Icons.AutoMirrored.Outlined.ArrowBack
+                                )
                             }
                         },
                         windowInsets = persistentTopAppBarWindowInsets(),
@@ -97,6 +95,11 @@ fun ServerSetupContent(
                     ConfigurationStepBar(
                         currentStep = state.step,
                         strings = strings,
+                    )
+                    if (state.step == ServerSetupState.Step.SOURCE) SourceSelectionToolbar(
+                        state,
+                        strings,
+                        processIntent
                     )
                 }
             },

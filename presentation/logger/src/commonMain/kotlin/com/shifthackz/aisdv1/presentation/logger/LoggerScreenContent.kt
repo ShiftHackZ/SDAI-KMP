@@ -2,6 +2,13 @@
 
 package com.shifthackz.aisdv1.presentation.logger
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -26,13 +33,11 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -144,26 +149,22 @@ fun LoggerScreenContent(
 ) {
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 navigationIcon = {
-                    IconButton(
+                    ToolbarBackButton(
                         onClick = { processAction(LoggerScreenAction.NavigateBack) },
-                        content = {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = strings.backContentDescription,
-                            )
-                        },
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack
                     )
                 },
                 title = {
                     Text(
                         text = strings.title,
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                     )
                 },
                 actions = {
@@ -179,7 +180,7 @@ fun LoggerScreenContent(
                                 exit = fadeOut(),
                             ) {
                                 Row {
-                                    IconButton(
+                                    ToolbarIconButton(
                                         onClick = { processAction(LoggerScreenAction.CopyLogs) },
                                         content = {
                                             Icon(
@@ -188,7 +189,7 @@ fun LoggerScreenContent(
                                             )
                                         },
                                     )
-                                    IconButton(
+                                    ToolbarIconButton(
                                         onClick = { processAction(LoggerScreenAction.ShareLogs) },
                                         content = {
                                             Icon(
@@ -199,7 +200,7 @@ fun LoggerScreenContent(
                                     )
                                 }
                             }
-                            IconButton(
+                            ToolbarIconButton(
                                 onClick = { processAction(LoggerScreenAction.ReadLogs) },
                                 content = {
                                     Icon(
@@ -256,6 +257,7 @@ fun LoggerScreenContent(
             }
         },
     ) { paddingValues ->
+        ToolbarScrollObserver(scrollState.canScrollBackward)
         val text = if (!state.loading) state.text else ""
         val scrollStateHorizontal = rememberScrollState()
         if (!state.loading && state.text.isBlank()) {
@@ -275,8 +277,9 @@ fun LoggerScreenContent(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .verticalScrollbar(scrollState)
-                .verticalScroll(scrollState),
+                .verticalScrollbar(scrollState, topInset = LocalToolbarContentInset.current)
+                .verticalScroll(scrollState)
+                .padding(top = LocalToolbarContentInset.current),
         ) {
             AnimatedVisibility(
                 visible = state.loading,

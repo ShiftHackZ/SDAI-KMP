@@ -2,6 +2,10 @@
 
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarNavigationButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,17 +16,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixNormal
-import androidx.compose.material.icons.filled.Menu
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import androidx.compose.runtime.Composable
@@ -102,38 +101,23 @@ fun ImageToImageContent(
     val negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     var activeModal by remember { mutableStateOf<ImageToImagePanel?>(null) }
 
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier.fillMaxSize(),
         topBar = {
             Column {
-                CenterAlignedTopAppBar(
+                PlatformTopAppBar(
                     windowInsets = WindowInsets(0, 0, 0, 0),
                     navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                processIntent(
-                                    if (useDrawerNavigation) {
-                                        ImageToImageIntent.OpenDrawer
-                                    } else {
-                                        ImageToImageIntent.NavigateBack
-                                    },
-                                )
-                            },
-                        ) {
-                            Icon(
-                                imageVector = if (useDrawerNavigation) {
-                                    Icons.Default.Menu
-                                } else {
-                                    Icons.AutoMirrored.Filled.ArrowBack
-                                },
-                                contentDescription = null,
-                            )
-                        }
+                        ToolbarNavigationButton(
+                            canNavigateBack = !useDrawerNavigation,
+                            onClick = { processIntent(if (useDrawerNavigation) ImageToImageIntent.OpenDrawer else ImageToImageIntent.NavigateBack) },
+                        )
                     },
                     title = {
                         Text(
                             text = strings.title,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = platformToolbarTitleStyle(MaterialTheme.typography.titleLarge),
                         )
                     },
                     actions = {

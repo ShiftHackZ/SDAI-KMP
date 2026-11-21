@@ -1,6 +1,6 @@
-@file:OptIn(ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 
-package com.shifthackz.aisdv1.presentation.components.widget.navigation
+package com.shifthackz.aisdv1.presentation.components.platform
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import org.jetbrains.skia.EncodedImageFormat
@@ -30,12 +31,12 @@ import kotlin.math.roundToInt
  * Rasterizes a shared vector once per icon, density and layout direction for UIKit template tinting.
  * The native image retains a 24pt logical size with display-density pixels and mirrored RTL paths.
  *
- * @param icon Shared navigation vector used by both platform implementations.
+ * @param icon Shared action or navigation vector used by both platform implementations.
  * @return Native template image, or null if the system cannot decode the encoded vector raster.
  * @author Dmitriy Moroz
  */
 @Composable
-internal fun rememberNavigationImage(icon: ImageVector): UIImage? {
+internal fun rememberNativeIconImage(icon: ImageVector): UIImage? {
     val density = LocalDensity.current
     val direction = LocalLayoutDirection.current
     val painter = rememberVectorPainter(icon)

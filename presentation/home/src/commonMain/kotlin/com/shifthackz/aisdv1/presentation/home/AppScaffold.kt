@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.presentation.home
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarObscured
+
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.core.navigation.isHomeRoute
 import com.shifthackz.aisdv1.core.navigation.RootAppRouter
 import com.shifthackz.aisdv1.core.navigation.AppRoute
@@ -35,10 +38,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.displayString
@@ -55,15 +63,14 @@ import com.shifthackz.aisdv1.presentation.components.widget.navigation.isPlatfor
 
 /**
  * Owns drawer synchronization, connectivity status and persistent home navigation around a content slot.
- *
- *  System-bar handling in this scaffold is intentionally explicit. Material `Scaffold` defaults and
- *  raw Compose `WindowInsets.statusBars`/`navigationBars` are not stable enough for the app's release
- *  matrix because Android has two layout contracts in the wild: legacy windows that are already
- *  resized away from system bars, and Android 15+ edge-to-edge windows where the app must reserve safe
- *  space itself. The Pixel 3a XL/API 32 release regression came from applying a Compose system-bar
- *  inset on top of a window that had already consumed it, which moved toolbars and persistent bottom
- *  controls by exactly one system-bar height. Keep the platform-specific inset helpers in this scaffold
- *  path so future SDK or CI/Docker build changes do not silently reintroduce duplicated padding.
+ * System-bar handling in this scaffold is intentionally explicit. Material `Scaffold` defaults and
+ * raw Compose `WindowInsets.statusBars`/`navigationBars` are not stable enough for the app's release
+ * matrix because Android has two layout contracts in the wild: legacy windows that are already
+ * resized away from system bars, and Android 15+ edge-to-edge windows where the app must reserve safe
+ * space itself. The Pixel 3a XL/API 32 release regression came from applying a Compose system-bar
+ * inset on top of a window that had already consumed it, which moved toolbars and persistent bottom
+ * controls by exactly one system-bar height. Keep the platform-specific inset helpers in this scaffold
+ * path so future SDK or CI/Docker build changes do not silently reintroduce duplicated padding.
  *
  * @param currentRoute Active route controlling drawer selection and home navigation visibility.
  * @param router Shared owner of drawer visibility and destination navigation.
@@ -72,7 +79,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.navigation.isPlatfor
  * @param content Route content receiving a modifier sized inside the scaffold padding.
  * @param modifier Layout modifiers for the outer drawer/scaffold.
  * @param shouldShowHomeChrome Whether the retained shell displays tabs and connectivity chrome.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -87,10 +93,18 @@ fun AppScaffold(
 ) {
     val isDrawerOpen by router.drawerOpen.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var drawerWidth by remember { mutableIntStateOf(0) }
     val settings by preferenceManager.observe().collectAsState(Settings())
     val shouldShowHomeNavigation = shouldShowHomeChrome && currentRoute.isHomeRoute()
     val shouldFloatNavigation = isPlatformNavigationBarFloating &&
             (currentRoute == AppRoute.Settings || currentRoute == AppRoute.Gallery)
+    val isDrawerObscuringContent by remember(drawerState, shouldFloatNavigation, drawerWidth) {
+        derivedStateOf {
+            !drawerState.isClosed || drawerState.targetValue != DrawerValue.Closed ||
+                    (shouldFloatNavigation && drawerWidth > 0 &&
+                            drawerState.currentOffset > -drawerWidth.toFloat() + 0.5f)
+        }
+    }
 
     LaunchedEffect(isDrawerOpen) {
         when {
@@ -111,6 +125,7 @@ fun AppScaffold(
         gesturesEnabled = drawerState.isOpen || shouldShowHomeNavigation,
         drawerContent = {
             DrawerSheetContent(
+                modifier = Modifier.onSizeChanged { drawerWidth = it.width },
                 items = appDrawerItems(
                     currentRoute = currentRoute,
                     settings = settings,
@@ -134,13 +149,12 @@ fun AppScaffold(
                             router = router,
                         ),
                         hasBackground = !shouldFloatNavigation,
-                        isObscured = !drawerState.isClosed || drawerState.targetValue != DrawerValue.Closed,
+                        isObscured = isDrawerObscuringContent,
                     )
                 }
             },
             topBar = {
-                // This is a workaround to apply the top app bar container color as the status bar color
-                Spacer(
+                if (!isPlatformToolbarNative) Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
                         .windowInsetsTopHeight(persistentTopAppBarWindowInsets())
@@ -150,7 +164,10 @@ fun AppScaffold(
         ) { paddingValues ->
             val floatingInset =
                 if (shouldFloatNavigation) paddingValues.calculateBottomPadding() else 0.dp
-            CompositionLocalProvider(LocalFloatingNavigationBarInset provides floatingInset) {
+            CompositionLocalProvider(
+                LocalFloatingNavigationBarInset provides floatingInset,
+                LocalToolbarObscured provides isDrawerObscuringContent,
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()

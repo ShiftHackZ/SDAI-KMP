@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.settings.content
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
@@ -55,10 +57,17 @@ internal fun ContentSettingsState(
         platformActions.supportsConnectionTimeout,
         platformActions.isNnapiAvailable,
     )
+    ToolbarScrollObserver(listState.canScrollBackward)
     LazyColumn(
-        modifier = modifier.verticalScrollbar(listState).padding(horizontal = 16.dp),
+        modifier = modifier.verticalScrollbar(
+            listState,
+            topInset = LocalToolbarContentInset.current
+        ).padding(horizontal = 16.dp),
         state = listState,
-        contentPadding = PaddingValues(bottom = LocalFloatingNavigationBarInset.current),
+        contentPadding = PaddingValues(
+            top = LocalToolbarContentInset.current,
+            bottom = LocalFloatingNavigationBarInset.current
+        ),
     ) {
         items(items = rows, key = { it.name }, contentType = { it.contentType() }) { row ->
             SettingsItemHelp(

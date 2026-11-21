@@ -14,11 +14,11 @@ kotlin {
             implementation(project(":core:ui"))
             implementation(project(":domain"))
             implementation(project(":presentation:components"))
-            implementation(compose.runtime)
-            implementation(compose.ui)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.material.icons.extended)
         }
     }
 }

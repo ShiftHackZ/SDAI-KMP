@@ -2,6 +2,13 @@
 
 package com.shifthackz.aisdv1.presentation.history
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -21,14 +28,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixNormal
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
@@ -98,26 +102,25 @@ fun HistoryScreenContent(
     imageLoader: GalleryImageLoader? = null,
     strings: HistoryStrings = HistoryStrings(),
 ) {
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { processIntent(HistoryIntent.NavigateBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                        )
-                    }
+                    ToolbarBackButton(
+                        onClick = { processIntent(HistoryIntent.NavigateBack) },
+                        icon = Icons.AutoMirrored.Filled.ArrowBack
+                    )
                 },
                 title = {
                     Text(
                         text = strings.title,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = platformToolbarTitleStyle(MaterialTheme.typography.titleLarge),
                     )
                 },
                 actions = {
-                    IconButton(onClick = { processIntent(HistoryIntent.Refresh) }) {
+                    ToolbarIconButton(onClick = { processIntent(HistoryIntent.Refresh) }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = null,
@@ -151,12 +154,21 @@ fun HistoryScreenContent(
 
                 else -> {
                     val listState = rememberLazyListState()
+                    ToolbarScrollObserver(listState.canScrollBackward)
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScrollbar(listState),
+                            .verticalScrollbar(
+                                listState,
+                                topInset = LocalToolbarContentInset.current
+                            ),
                         state = listState,
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp + LocalToolbarContentInset.current,
+                            bottom = 16.dp
+                        ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         items(

@@ -2,6 +2,10 @@
 
 package com.shifthackz.aisdv1.presentation.settings
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,12 +14,9 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -90,12 +91,13 @@ fun SettingsScreenContent(
     processIntent: (SettingsIntent) -> Unit = {},
 ) {
     Box(modifier) {
-        Scaffold(
+        PlatformScaffold(
+            canUnderlapToolbar = true,
             topBar = {
                 Column {
-                    CenterAlignedTopAppBar(
+                    PlatformTopAppBar(
                         navigationIcon = {
-                            IconButton(onClick = {
+                            ToolbarIconButton(onClick = {
                                 processIntent(SettingsIntent.OpenDrawer)
                             }) {
                                 Icon(
@@ -107,7 +109,7 @@ fun SettingsScreenContent(
                         title = {
                             Text(
                                 text = Localization.string("title_settings"),
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                             )
                         },
                         windowInsets = WindowInsets(0, 0, 0, 0),

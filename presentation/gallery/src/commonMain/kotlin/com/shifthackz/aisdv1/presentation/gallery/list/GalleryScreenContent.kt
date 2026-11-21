@@ -5,6 +5,12 @@
 
 package com.shifthackz.aisdv1.presentation.gallery.list
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -33,15 +39,11 @@ import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
 import androidx.compose.runtime.snapshotFlow
@@ -82,18 +84,19 @@ fun GalleryScreenContent(
     }
 
     Box(modifier) {
-        Scaffold(
+        PlatformScaffold(
+            canUnderlapToolbar = true,
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 Column {
-                    CenterAlignedTopAppBar(
+                    PlatformTopAppBar(
                         navigationIcon = {
                             AnimatedContent(
                                 targetState = state.selectionMode,
                                 transitionSpec = { fadeIn() togetherWith fadeOut() },
                                 label = "main_nav_icon_animation",
                             ) { isInSelectionMode ->
-                                IconButton(
+                                ToolbarIconButton(
                                     onClick = {
                                         val intent = if (isInSelectionMode) {
                                             GalleryIntent.ChangeSelectionMode(false)
@@ -117,7 +120,7 @@ fun GalleryScreenContent(
                         title = {
                             Text(
                                 text = Localization.string("title_gallery"),
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                             )
                         },
                         actions = {
@@ -132,7 +135,7 @@ fun GalleryScreenContent(
                                         enter = fadeIn(),
                                         exit = fadeOut(),
                                     ) {
-                                        IconButton(
+                                        ToolbarIconButton(
                                             onClick = {
                                                 processIntent(GalleryIntent.Dropdown.Toggle)
                                             },
@@ -206,6 +209,7 @@ fun GalleryScreenContent(
                 )
             },
         ) { paddingValues ->
+            ToolbarScrollObserver(!state.loading && state.itemIds.isNotEmpty() && listState.canScrollBackward)
             when {
                 state.loading -> GalleryLoadingGrid(
                     modifier = Modifier
@@ -219,11 +223,11 @@ fun GalleryScreenContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = paddingValues.calculateTopPadding())
-                        .verticalScrollbar(listState),
+                        .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
                     columns = GridCells.Fixed(state.grid.size),
                     contentPadding = PaddingValues(
                         start = 16.dp,
-                        top = 16.dp,
+                        top = 16.dp + LocalToolbarContentInset.current,
                         end = 16.dp,
                         bottom = 16.dp + LocalFloatingNavigationBarInset.current
                     ),

@@ -2,6 +2,12 @@
 
 package com.shifthackz.aisdv1.presentation.debug
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,13 +34,10 @@ import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SettingsEthernet
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -171,18 +174,19 @@ fun DebugMenuScreenContent(
     processAction: (DebugMenuAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier,
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 title = {
                     Text(
                         text = strings.title,
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                     )
                 },
                 navigationIcon = {
-                    IconButton(
+                    ToolbarIconButton(
                         onClick = { processAction(DebugMenuAction.NavigateBack) },
                         content = {
                             Icon(
@@ -197,10 +201,12 @@ fun DebugMenuScreenContent(
         },
     ) { paddingValues ->
         val scrollState = rememberScrollState()
+        ToolbarScrollObserver(scrollState.canScrollBackward)
         Column(
             modifier = Modifier
-                .verticalScrollbar(scrollState)
+                .verticalScrollbar(scrollState, topInset = LocalToolbarContentInset.current)
                 .verticalScroll(scrollState)
+                .padding(top = LocalToolbarContentInset.current)
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
         ) {

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.generation.txt2img
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -60,10 +61,17 @@ internal fun TextToImageBody(
             } else event.toTextToImageIntent()?.let(processIntent)
         }
     }
+    ToolbarScrollObserver(listState.canScrollBackward)
     LazyColumn(
-        modifier = modifier.fillMaxSize().verticalScrollbar(listState),
+        modifier = modifier.fillMaxSize()
+            .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
         state = listState,
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp + LocalToolbarContentInset.current,
+            bottom = 16.dp
+        ),
     ) {
         item(key = "generation-provider") {
             CurrentProviderCard(

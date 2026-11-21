@@ -16,7 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -40,6 +39,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.textFieldColors
  * Displays a bounded numeric editor and slider. The float editor saves its draft by the owning
  * lazy item key, while actual parameter values remain owned by the generation screen.
  * Losing focus discards unapplied edits; external values synchronize when the editor is unfocused.
+ * Only typed edits expose Apply; slider and step-button changes apply immediately.
  *
  * @param value Current applied numeric parameter supplied by the owning screen.
  * @param onValueChange Receives a clamped, rounded value from the slider, step buttons or Apply action.
@@ -77,6 +77,7 @@ fun SliderTextInputField(
  * Displays a bounded numeric editor and slider. The float editor saves its draft by the owning
  * lazy item key, while actual parameter values remain owned by the generation screen.
  * Losing focus discards unapplied edits; external values synchronize when the editor is unfocused.
+ * Only typed edits expose Apply; slider and step-button changes apply immediately.
  *
  * @param value Current applied numeric parameter supplied by the owning screen.
  * @param onValueChange Receives a clamped, rounded value from the slider, step buttons or Apply action.
@@ -103,8 +104,10 @@ fun SliderTextInputField(
     val stateText = value.roundTo(fractionDigits).toString()
     var text by rememberSaveable { mutableStateOf(stateText) }
     var lastStateText by rememberSaveable { mutableStateOf(stateText) }
+    var hasTypedEdit by rememberSaveable { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
     val callback: (Float) -> Unit = { newValue ->
+        hasTypedEdit = false
         newValue
             .coerceIn(valueRange)
             .roundTo(fractionDigits)
@@ -112,12 +115,15 @@ fun SliderTextInputField(
             .let(onValueChange::invoke)
     }
     val isNotApplied =
-        text.toFloatOrNull()?.roundTo(fractionDigits) != value.roundTo(fractionDigits)
+        hasTypedEdit && text.toFloatOrNull()?.roundTo(fractionDigits) != value.roundTo(
+            fractionDigits
+        )
     val isValid = text.isNotBlank() && (text.toFloatOrNull()?.let { it in valueRange } ?: false)
     LaunchedEffect(isFocused, stateText) {
         if (!isFocused && lastStateText != stateText) {
             text = stateText
             lastStateText = stateText
+            hasTypedEdit = false
         }
     }
     Column(modifier = modifier) {
@@ -126,12 +132,16 @@ fun SliderTextInputField(
                 .fillMaxWidth()
                 .padding(top = 8.dp)
                 .onFocusChanged { focusState ->
-                    if (isFocused && !focusState.isFocused) text = stateText
+                    if (isFocused && !focusState.isFocused) {
+                        text = stateText
+                        hasTypedEdit = false
+                    }
                     isFocused = focusState.isFocused
                 },
             value = if (fractionDigits != 0) text else text.replace(".0", ""),
             onValueChange = { newText ->
                 text = newText
+                hasTypedEdit = true
             },
             enabled = true,
             singleLine = true,
@@ -193,7 +203,7 @@ fun SliderTextInputField(
             },
             colors = textFieldColors,
         )
-        Slider(
+        PlatformSlider(
             value = value,
             valueRange = valueRange,
             steps = steps,

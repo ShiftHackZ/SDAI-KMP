@@ -2,6 +2,9 @@
 
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -25,7 +28,6 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +37,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableFloatStateOf
@@ -85,20 +86,18 @@ fun ImageInPaintScreenContent(
         isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f,
     )
 
-    Scaffold(
+    PlatformScaffold(
         modifier = modifier,
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 title = {
                     Text(text = Localization.string("in_paint_title"))
                 },
                 navigationIcon = {
-                    IconButton(onClick = onClose) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = null,
-                        )
-                    }
+                    ToolbarBackButton(
+                        onClick = onClose,
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack
+                    )
                 },
                 windowInsets = persistentTopAppBarWindowInsets(),
             )
@@ -123,10 +122,10 @@ fun ImageInPaintScreenContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            val enabled = state.strokes.isNotEmpty()
+                            val isEnabled = state.strokes.isNotEmpty()
                             OutlinedButton(
                                 modifier = Modifier.weight(1f),
-                                isEnabled = enabled,
+                                isEnabled = isEnabled,
                                 onClick = { processIntent(ImageToImageIntent.UndoInPaintStroke) },
                             ) {
                                 Icon(
@@ -141,7 +140,7 @@ fun ImageInPaintScreenContent(
                             }
                             OutlinedButton(
                                 modifier = Modifier.weight(1f),
-                                isEnabled = enabled,
+                                isEnabled = isEnabled,
                                 onClick = { processIntent(ImageToImageIntent.ClearInPaintMask) },
                             ) {
                                 Icon(
@@ -318,7 +317,7 @@ private fun ZoomSlider(
                 contentDescription = Localization.string("action_reset"),
             )
         }
-        Slider(
+        PlatformSlider(
             modifier = Modifier.weight(1f),
             value = zoom,
             valueRange = MIN_IN_PAINT_ZOOM..MAX_IN_PAINT_ZOOM,

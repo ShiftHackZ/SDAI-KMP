@@ -9,6 +9,7 @@ import platform.UIKit.UIButton
 import platform.UIKit.UIButtonConfiguration
 import platform.UIKit.UIButtonConfigurationCornerStyleFixed
 import platform.UIKit.UIColor
+import platform.UIKit.UIImage
 import platform.UIKit.UIUserInterfaceStyle.UIUserInterfaceStyleDark
 import platform.UIKit.UIUserInterfaceStyle.UIUserInterfaceStyleLight
 import platform.UIKit.UIView
@@ -50,6 +51,8 @@ internal class NativeGlassButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 
      * @param accent Tint for prominent glass.
      * @param backingColor Parent surface color filling the rectangular interop cutout.
      * @param cornerRadius Shared shape radius in UIKit points, rendered with UIKit's continuous curve.
+     * @param image Optional native glyph when the entire circular control is above the Compose canvas.
+     * @param foreground Tint of that native glyph; null retains the configuration's default foreground.
      * @author Dmitriy Moroz
      */
     fun update(
@@ -60,6 +63,8 @@ internal class NativeGlassButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 
         accent: UIColor,
         backingColor: UIColor,
         cornerRadius: Double,
+        image: UIImage? = null,
+        foreground: UIColor? = null,
     ) {
         backgroundColor = backingColor
         overrideUserInterfaceStyle =
@@ -70,6 +75,8 @@ internal class NativeGlassButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 
         } else {
             UIButtonConfiguration.prominentGlassButtonConfiguration()
         }).apply {
+            this.image = image
+            if (foreground != null) baseForegroundColor = foreground
             cornerStyle = UIButtonConfigurationCornerStyleFixed
             background =
                 background.apply { this.cornerRadius = (cornerRadius - 2.0).coerceAtLeast(0.0) }

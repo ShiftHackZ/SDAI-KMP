@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.presentation.backup
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,12 +12,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Text
@@ -82,29 +82,45 @@ fun BackupScreen(
         }
         val isFinished =
             if (state.isRestoreTab) state.result?.hasFailed == false else state.hasExported
-        Scaffold(
-            modifier = modifier,
+        PlatformScaffold(
+            canUnderlapToolbar = true, modifier = modifier,
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            Localization.string("backup_title"),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { processIntent(BackupIntent.NavigateBack) },
-                            enabled = isEnabled
+                Column {
+                    PlatformTopAppBar(
+                        title = {
+                            Text(
+                                Localization.string("backup_title"),
+                                style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium)
+                            )
+                        },
+                        navigationIcon = {
+                            ToolbarBackButton(
+                                onClick = { processIntent(BackupIntent.NavigateBack) },
+                                isEnabled = isEnabled, icon = Icons.AutoMirrored.Outlined.ArrowBack
+                            )
+                        },
+                        windowInsets = persistentTopAppBarWindowInsets(),
+                    )
+                    if (mode == BackupScreenMode.SETTINGS) {
+                        SecondaryTabRow(
+                            selectedTabIndex = selectedPage,
+                            contentColor = MaterialTheme.colorScheme.primary,
                         ) {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                Localization.string("action_back")
+                            Tab(
+                                selected = !state.isRestoreTab,
+                                onClick = { processIntent(BackupIntent.SelectTab(false)) },
+                                enabled = isEnabled,
+                                text = { Text(Localization.string("backup_create_tab")) },
+                            )
+                            Tab(
+                                selected = state.isRestoreTab,
+                                onClick = { processIntent(BackupIntent.SelectTab(true)) },
+                                enabled = isEnabled,
+                                text = { Text(Localization.string("backup_restore_tab")) },
                             )
                         }
-                    },
-                    windowInsets = persistentTopAppBarWindowInsets(),
-                )
+                    }
+                }
             },
             bottomBar = {
                 ScreenActionBar {
@@ -119,23 +135,6 @@ fun BackupScreen(
         ) { padding ->
             Column(Modifier.padding(padding).fillMaxSize()) {
                 if (mode == BackupScreenMode.SETTINGS) {
-                    SecondaryTabRow(
-                        selectedTabIndex = selectedPage,
-                        contentColor = MaterialTheme.colorScheme.primary,
-                    ) {
-                        Tab(
-                            selected = !state.isRestoreTab,
-                            onClick = { processIntent(BackupIntent.SelectTab(false)) },
-                            enabled = isEnabled,
-                            text = { Text(Localization.string("backup_create_tab")) },
-                        )
-                        Tab(
-                            selected = state.isRestoreTab,
-                            onClick = { processIntent(BackupIntent.SelectTab(true)) },
-                            enabled = isEnabled,
-                            text = { Text(Localization.string("backup_restore_tab")) },
-                        )
-                    }
                     HorizontalPager(
                         state = pager,
                         modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -145,6 +144,7 @@ fun BackupScreen(
                         val isRestorePage = pageIndex == 1
                         BackupPageContent(
                             isRestore = isRestorePage,
+                            canReportToolbarScroll = isRestorePage == state.isRestoreTab,
                             page = if (isRestorePage) state.restore else state.create,
                             isEnabled = isEnabled && canInteractWithPage && isRestorePage == state.isRestoreTab,
                             canEditSelection = if (isRestorePage) !state.isRestoreSelectionLocked else !state.hasPendingExport,

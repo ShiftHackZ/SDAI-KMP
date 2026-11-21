@@ -2,6 +2,9 @@
 
 package com.shifthackz.aisdv1.presentation.gallery.detail
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,13 +15,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSubtree
@@ -31,7 +29,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.extensions.shimmer
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
@@ -59,22 +56,19 @@ fun GalleryDetailScreenContent(
     processIntent: (GalleryDetailIntent) -> Unit = {},
 ) {
     Box(modifier = modifier) {
-        Scaffold(
+        PlatformScaffold(
+            canUnderlapToolbar = state.selectedTab == GalleryDetailTab.INFO,
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
+                PlatformTopAppBar(
                     title = {
                         Text(Localization.string("title_gallery_details"))
                     },
                     navigationIcon = {
-                        IconButton(
+                        ToolbarBackButton(
                             onClick = { processIntent(GalleryDetailIntent.NavigateBack) },
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = Localization.string("action_back"),
-                            )
-                        }
+                            icon = Icons.AutoMirrored.Outlined.ArrowBack
+                        )
                     },
                     actions = {
                         GalleryDetailToolbarAction(

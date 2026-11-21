@@ -2,6 +2,13 @@
 
 package com.shifthackz.aisdv1.presentation.benchmark
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -30,14 +37,11 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -121,27 +125,26 @@ fun BenchmarkScreenContent(
     processIntent: (BenchmarkIntent) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier,
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { processIntent(BenchmarkIntent.NavigateBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = Localization.string("action_back"),
-                        )
-                    }
+                    ToolbarBackButton(
+                        onClick = { processIntent(BenchmarkIntent.NavigateBack) },
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack
+                    )
                 },
                 title = {
                     Text(
                         text = Localization.string("title_benchmark"),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                     )
                 },
                 actions = {
-                    IconButton(
-                        enabled = state.latestResult != null && !state.running,
+                    ToolbarIconButton(
+                        isEnabled = state.latestResult != null && !state.running,
                         onClick = { processIntent(BenchmarkIntent.ShareResults) },
                     ) {
                         Icon(
@@ -185,14 +188,15 @@ fun BenchmarkScreenContent(
                 .padding(paddingValues)
                 .fillMaxSize(),
         ) {
+            ToolbarScrollObserver(listState.canScrollBackward)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScrollbar(listState),
+                    .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
                 state = listState,
                 contentPadding = PaddingValues(
                     start = 16.dp,
-                    top = 16.dp,
+                    top = 16.dp + LocalToolbarContentInset.current,
                     end = 16.dp,
                     bottom = 32.dp,
                 ),
