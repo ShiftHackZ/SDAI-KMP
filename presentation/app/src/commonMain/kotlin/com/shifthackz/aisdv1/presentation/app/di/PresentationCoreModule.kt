@@ -32,6 +32,7 @@ import org.koin.dsl.module
  */
 val corePresentationModule = module {
     includes(
+        appViewModelModule,
         backupViewModelModule,
         benchmarkCoreModule,
         benchmarkViewModelModule,

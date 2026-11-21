@@ -1,54 +1,42 @@
 package com.shifthackz.aisdv1.presentation.app
 
-import com.shifthackz.aisdv1.core.navigation.asHomeTabRoute
-import com.shifthackz.aisdv1.core.navigation.RootAppRouter
-import com.shifthackz.aisdv1.core.navigation.AppRoute
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.compose.LifecycleEventEffect
+import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
+import com.shifthackz.aisdv1.core.navigation.RootAppRouter
+import com.shifthackz.aisdv1.domain.preference.PreferenceManager
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
+import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
+import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
+import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.LocalOriginalImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageBudget
 import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageLoader
-import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
-import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
-import androidx.compose.runtime.Composable
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.distinctUntilChanged
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
-import com.shifthackz.aisdv1.presentation.components.extensions.generationBrightnessInteraction
-import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
-import com.shifthackz.aisdv1.core.extensions.clearFocusOnTap
-import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
-import org.koin.mp.KoinPlatform.getKoin
-import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageIntent
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageViewModel
 import com.shifthackz.aisdv1.presentation.generation.img2img.rememberImageToImagePlatformActions
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageIntent
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageViewModel
-import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import org.koin.core.parameter.parametersOf
+import org.koin.mp.KoinPlatform.getKoin
 
 /**
- * Composes the shared application from the graph initialized by its native host.
- * Retains visited home tabs and their generation ViewModels across overlay navigation; inpaint
- * uses the same image-to-image ViewModel. Resuming the host retries sampler loading for both forms.
+ * Wires the shared application to the graph initialized by its native host.
+ * Retains generation ViewModels across tab and overlay navigation; inpaint shares image-to-image.
+ * Owns router restoration and composition-bound platform actions, retries samplers on resume,
+ * and releases the shell observer when this host leaves composition.
  *
- * @param modifier Layout and input modifiers applied to the application surface.
- *
+ * @param modifier Layout and input modifiers forwarded to the application surface.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -56,105 +44,66 @@ fun AiSdApp(
     modifier: Modifier = Modifier,
 ) {
     val koin = remember { getKoin() }
-    val preferenceManager = remember(koin) {
-        koin.get<PreferenceManager>()
-    }
     val router = rememberSaveable(saver = backupRouterSaver) { RootAppRouter() }
-    val route by router.route.collectAsState()
-    val isDrawerOpen by router.drawerOpen.collectAsState()
-    val canNavigateBack by router.canNavigateBack.collectAsState()
     val urlLauncher = rememberExternalUrlLauncher()
     val imageToImagePlatformActions =
         rememberImageToImagePlatformActions(remember(koin) { koin.get<OriginalImageBudget>() })
     val textToImageViewModel = remember(koin, router) {
-        koin.get<TextToImageViewModel> {
-            parametersOf(router)
-        }
+        koin.get<TextToImageViewModel> { parametersOf(router) }
     }
     val imageToImageViewModel = remember(koin, router, imageToImagePlatformActions) {
-        koin.get<ImageToImageViewModel> {
-            parametersOf(router, imageToImagePlatformActions)
-        }
+        koin.get<ImageToImageViewModel> { parametersOf(router, imageToImagePlatformActions) }
     }
-    val isTextGenerating by remember(textToImageViewModel) {
-        textToImageViewModel.state.map { it.generating }.distinctUntilChanged()
-    }.collectAsState(false)
-    val isImageGenerating by remember(imageToImageViewModel) {
-        imageToImageViewModel.state.map { it.generating }.distinctUntilChanged()
-    }.collectAsState(false)
-    val displaySettings by remember(preferenceManager) {
-        preferenceManager.observe().map { it.backgroundGeneration to it.shouldDimScreen }
-            .distinctUntilChanged()
-    }.collectAsState(preferenceManager.backgroundGeneration to preferenceManager.shouldDimScreen)
-    val visitedHomeRoutes = remember { mutableStateListOf<AppRoute>() }
+    val generationActivity = remember(textToImageViewModel, imageToImageViewModel) {
+        combine(
+            textToImageViewModel.state.map { it.generating }.distinctUntilChanged(),
+            imageToImageViewModel.state.map { it.generating }.distinctUntilChanged(),
+        ) { isTextGenerating, isImageGenerating -> isTextGenerating || isImageGenerating }
+    }
+    val viewModel = remember(koin, router, generationActivity) {
+        koin.get<AiSdAppViewModel> { parametersOf(router, generationActivity) }
+    }
+    DisposableEffect(viewModel) {
+        val store = ViewModelStore()
+        store.put("AiSdApp", viewModel)
+        onDispose { store.clear() }
+    }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         textToImageViewModel.processIntent(TextToImageIntent.RetrySamplers)
         imageToImageViewModel.processIntent(ImageToImageIntent.RetrySamplers)
     }
-    var lastHomeRoute by remember { mutableStateOf<AppRoute?>(null) }
-    val currentRoute = route
-    val selectedHomeRoute = currentRoute.asHomeTabRoute()
-
-    LaunchedEffect(selectedHomeRoute) {
-        selectedHomeRoute?.let { homeRoute ->
-            lastHomeRoute = homeRoute
-            if (!visitedHomeRoutes.contains(homeRoute)) {
-                visitedHomeRoutes.add(homeRoute)
-            }
-        }
-    }
-
-    RootBackHandler(
-        enabled = isDrawerOpen || canNavigateBack,
-        onBack = router::navigateBack,
-    )
-
-    GenerationScreenProtection(
-        isGenerating = (isTextGenerating || isImageGenerating) && !displaySettings.first,
-        shouldDimScreen = displaySettings.second,
+    val preferenceManager = remember(koin) { koin.get<PreferenceManager>() }
+    val buildInfoProvider = remember(koin) { koin.get<BuildInfoProvider>() }
+    val observePerformance = remember(koin) { koin.get<ObserveGenerationPerformanceUseCase>() }
+    CompositionLocalProvider(
+        LocalGalleryImageLoader provides remember(koin) { koin.get<GalleryImageLoader>() },
+        LocalOriginalImageLoader provides remember(koin) { koin.get<OriginalImageLoader>() },
     ) {
-        CompositionLocalProvider(
-            LocalGalleryImageLoader provides remember(koin) { koin.get<GalleryImageLoader>() },
-            LocalOriginalImageLoader provides remember(koin) { koin.get<OriginalImageLoader>() }) {
-            AiSdAppTheme {
-                Surface(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .generationBrightnessInteraction()
-                        .clearFocusOnTap(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        val shellHomeRoute = selectedHomeRoute ?: lastHomeRoute
-                        val renderedHomeRoutes =
-                            (visitedHomeRoutes + listOfNotNull(shellHomeRoute)).distinct()
-
-                        if (shellHomeRoute != null) {
-                            HomeRoutesScaffold(
-                                activeRoute = shellHomeRoute,
-                                renderedRoutes = renderedHomeRoutes,
-                                router = router,
-                                buildInfoProvider = koin.get<BuildInfoProvider>(),
-                                preferenceManager = preferenceManager,
-                                shouldShowHomeChrome = selectedHomeRoute != null,
-                                observePerformance = remember(koin) { koin.get<ObserveGenerationPerformanceUseCase>() },
-                                textToImageViewModel = textToImageViewModel,
-                                imageToImageViewModel = imageToImageViewModel,
-                            )
-                        }
-
-                        if (selectedHomeRoute == null) {
-                            OverlayRouteContent(
-                                route = currentRoute,
-                                koin = koin,
-                                router = router,
-                                urlLauncher = urlLauncher,
-                                imageToImageViewModel = imageToImageViewModel,
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        AiSdAppShell(
+            modifier = modifier,
+            viewModel = viewModel,
+            homeContent = { homeRoute, renderedRoutes, shouldShowHomeChrome ->
+                HomeRoutesScaffold(
+                    activeRoute = homeRoute,
+                    renderedRoutes = renderedRoutes,
+                    router = router,
+                    buildInfoProvider = buildInfoProvider,
+                    preferenceManager = preferenceManager,
+                    shouldShowHomeChrome = shouldShowHomeChrome,
+                    observePerformance = observePerformance,
+                    textToImageViewModel = textToImageViewModel,
+                    imageToImageViewModel = imageToImageViewModel,
+                )
+            },
+            overlayContent = { route ->
+                OverlayRouteContent(
+                    route = route,
+                    koin = koin,
+                    router = router,
+                    urlLauncher = urlLauncher,
+                    imageToImageViewModel = imageToImageViewModel,
+                )
+            },
+        )
     }
 }
