@@ -1,6 +1,8 @@
 package com.shifthackz.aisdv1.presentation.backup.dialog
 
 import androidx.compose.runtime.Composable
+import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationInputEnabled
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.presentation.backup.BackupIntent
@@ -20,6 +22,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialo
  */
 @Composable
 internal fun BackupDialogs(state: BackupState, processIntent: (BackupIntent) -> Unit) {
+    if (state.isLeaving || !LocalMviVisibility.current || !LocalNavigationInputEnabled.current) return
     val dismiss = { processIntent(BackupIntent.DismissFeedback) }
     when {
         state.isBusy || state.isExporting -> {

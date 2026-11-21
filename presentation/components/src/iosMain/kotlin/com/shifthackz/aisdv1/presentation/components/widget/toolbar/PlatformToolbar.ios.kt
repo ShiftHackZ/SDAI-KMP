@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,9 +29,11 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationInputEnabled
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -40,6 +45,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.ui.viewinterop.UIKitInteropInteractionMode
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
@@ -51,6 +58,7 @@ import com.shifthackz.aisdv1.presentation.components.platform.toUIColor
 import com.shifthackz.aisdv1.presentation.components.platform.NativeBlurViewController
 import com.shifthackz.aisdv1.presentation.components.platform.rememberThemedNativeContent
 import kotlinx.cinterop.ExperimentalForeignApi
+import platform.UIKit.accessibilityElementsHidden
 
 private val LocalToolbarOverlap = staticCompositionLocalOf<MutableState<Boolean>?> { null }
 private val LocalToolbarUnderlap = staticCompositionLocalOf { false }
@@ -117,7 +125,7 @@ actual fun PlatformScaffold(
 /**
  * Hosts shared route chrome above native system material, including the status area.
  * UIKit inputs and Compose content both contribute to the blur. The resting background matches
- * the app color. The native overlay is removed while the modal drawer covers the app.
+ * the app color. Drawer changes slide the overlay above the viewport while retaining body placement.
  *
  * @param title Localized title content.
  * @param modifier Toolbar placement.
@@ -153,7 +161,13 @@ actual fun PlatformTopAppBar(
     val topPixels = WindowInsets.statusBars.getTop(LocalDensity.current)
     val height = 64.dp + with(LocalDensity.current) { topPixels.toDp() } + bottomContentHeight
     val bounds = modifier.fillMaxWidth().height(height)
-    if (LocalToolbarObscured.current || !LocalMviVisibility.current || !LocalPlatformControlVisibility.current) {
+    val isObscured = LocalToolbarObscured.current
+    val hiddenFraction by animateFloatAsState(
+        targetValue = if (isObscured) 1f else 0f,
+        animationSpec = tween(220),
+        label = "toolbar-drawer-offset",
+    )
+    if (!LocalMviVisibility.current || !LocalPlatformControlVisibility.current || (isObscured && hiddenFraction >= 1f)) {
         Spacer(bounds)
         return
     }
@@ -180,7 +194,9 @@ actual fun PlatformTopAppBar(
         }
     }
     UIKitViewController(
-        modifier = bounds,
+        modifier = bounds.offset {
+            IntOffset(0, (-height.toPx() * hiddenFraction).roundToInt())
+        },
         factory = { NativeBlurViewController(nativeContent) },
         update = {
             it.update(
@@ -189,6 +205,9 @@ actual fun PlatformTopAppBar(
                 colors.background.luminance() < 0.5f,
                 tintAlpha = 0.08,
             )
+            it.view.clipsToBounds = true
+            it.view.userInteractionEnabled = !isObscured
+            it.view.accessibilityElementsHidden = isObscured
         },
         properties = UIKitInteropProperties(
             interactionMode = UIKitInteropInteractionMode.NonCooperative,
@@ -199,12 +218,14 @@ actual fun PlatformTopAppBar(
 }
 
 /**
- * Synchronizes toolbar overlap with actual scroll state, including restored list positions.
+ * Synchronizes toolbar overlap from the foreground scroll owner, including restored positions.
+ * Retained pager previews cannot replace the active page's blur state.
  * @param isScrolled Whether the owning scroll container can move toward its start.
  * @author Dmitriy Moroz
  */
 @Composable
 actual fun ToolbarScrollObserver(isScrolled: Boolean) {
     val overlap = LocalToolbarOverlap.current
-    SideEffect { overlap?.value = isScrolled }
+    val canReportScroll = LocalMviVisibility.current && LocalNavigationInputEnabled.current
+    SideEffect { if (canReportScroll) overlap?.value = isScrolled }
 }

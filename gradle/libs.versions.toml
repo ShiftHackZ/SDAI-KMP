@@ -17,6 +17,7 @@ composeActivity = "1.13.0"
 composeJunit = "1.11.2"
 lifecycleViewModel = "2.10.0"
 navigation = "2.9.8"
+navigationEvent = "1.1.0"
 gson = "2.15.0"
 okhttp = "5.4.0"
 okio = "3.17.0"
@@ -69,6 +70,7 @@ androidx-lifecycle-viewmodel-core = { group = "androidx.lifecycle", name = "life
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewModel" }
 androidx-lifecycle-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleViewModel" }
 androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+navigation-event-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationEvent" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }

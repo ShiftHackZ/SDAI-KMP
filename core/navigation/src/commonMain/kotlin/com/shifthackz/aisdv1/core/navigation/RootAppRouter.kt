@@ -92,7 +92,33 @@ class RootAppRouter(
      */
     val drawerOpen = drawerOpenState.asStateFlow()
 
-    private val routeStack = mutableListOf(initialRoute)
+    private var nextEntryId = 1L
+    private val routeStack = mutableListOf(NavigationEntry(0L, initialRoute))
+    private val backStackState = MutableStateFlow(routeStack.toList())
+
+    /**
+     * Immutable history snapshots for rendering retained screens and cancellable Back previews.
+     * Entry IDs are stable across pushes and pops; replacement starts a new screen lifetime.
+     *
+     * @author Dmitriy Moroz
+     */
+    val backStack = backStackState.asStateFlow()
+
+    private val beforeCoverObservers = mutableSetOf<(NavigationEntry) -> Unit>()
+
+    /**
+     * Observes the still-visible entry before a drawer or standalone screen covers it.
+     * Used by the host to retain a visual Back preview; observers must not mutate navigation.
+     *
+     * @param observer Receives the outgoing entry on the host UI thread.
+     * @return Detaches this observer when the host leaves composition.
+     * @author Dmitriy Moroz
+     */
+    fun observeBeforeCover(observer: (NavigationEntry) -> Unit): () -> Unit {
+        beforeCoverObservers.add(observer)
+        return { beforeCoverObservers.remove(observer) }
+    }
+
     private val canNavigateBackState = MutableStateFlow(canNavigateBackFrom(initialRoute))
 
     /**
@@ -116,8 +142,8 @@ class RootAppRouter(
         closeDrawer()
         if (routeStack.size > 1) {
             routeStack.removeAt(routeStack.lastIndex)
-            setRoute(routeStack.last())
-        } else if (routeStack.lastOrNull()?.canFallBackToTextToImage() == true) {
+            setRoute(routeStack.last().route)
+        } else if (routeStack.lastOrNull()?.route?.canFallBackToTextToImage() == true) {
             replaceRoute(AppRoute.TextToImage)
         }
     }
@@ -274,6 +300,7 @@ class RootAppRouter(
      * @author Dmitriy Moroz
      */
     override fun openDrawer() {
+        if (!drawerOpenState.value) beforeCoverObservers.toList().forEach { it(routeStack.last()) }
         drawerOpenState.value = true
     }
 
@@ -354,16 +381,18 @@ class RootAppRouter(
     }
 
     private fun navigateTo(route: AppRoute) {
+        val wasDrawerOpen = drawerOpenState.value
         closeDrawer()
         if (routeState.value == route) return
-        routeStack.add(route)
+        if (!wasDrawerOpen) beforeCoverObservers.toList().forEach { it(routeStack.last()) }
+        routeStack.add(NavigationEntry(nextEntryId++, route))
         setRoute(route)
     }
 
     private fun navigateToHomeRoute(route: AppRoute) {
         closeDrawer()
         if (routeState.value == route) return
-        if (routeStack.lastOrNull()?.isHomeRoute() == true) {
+        if (routeStack.lastOrNull()?.route?.isHomeRoute() == true) {
             replaceRoute(route)
         } else {
             navigateTo(route)
@@ -371,7 +400,7 @@ class RootAppRouter(
     }
 
     private fun navigateToGenerationHomeRoute(route: AppRoute) {
-        if (routeStack.lastOrNull() is AppRoute.GalleryDetail) {
+        if (routeStack.lastOrNull()?.route is AppRoute.GalleryDetail) {
             replaceRoute(route)
         } else {
             navigateToHomeRoute(route)
@@ -381,9 +410,9 @@ class RootAppRouter(
     private fun replaceRoute(route: AppRoute) {
         closeDrawer()
         if (routeStack.isEmpty()) {
-            routeStack.add(route)
+            routeStack.add(NavigationEntry(nextEntryId++, route))
         } else {
-            routeStack[routeStack.lastIndex] = route
+            routeStack[routeStack.lastIndex] = NavigationEntry(nextEntryId++, route)
         }
         setRoute(route)
     }
@@ -391,6 +420,7 @@ class RootAppRouter(
     private fun setRoute(route: AppRoute) {
         routeState.value = route
         canNavigateBackState.value = canNavigateBackFrom(route)
+        backStackState.value = routeStack.toList()
     }
 
     private fun canNavigateBackFrom(route: AppRoute): Boolean {

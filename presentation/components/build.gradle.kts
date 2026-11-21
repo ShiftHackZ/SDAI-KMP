@@ -40,9 +40,14 @@ kotlin {
         }
 
         androidMain.dependencies {
+            implementation(libs.androidx.compose.activity)
             implementation(project(":core:notification"))
             implementation(libs.androidx.core)
             implementation(libs.koin.android)
+        }
+
+        iosMain.dependencies {
+            implementation(libs.navigation.event.compose)
         }
 
         androidUnitTest.dependencies {

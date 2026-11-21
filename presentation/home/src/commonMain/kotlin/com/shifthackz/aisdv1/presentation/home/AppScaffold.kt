@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationInputEnabled
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -122,7 +123,7 @@ fun AppScaffold(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = drawerState.isOpen || shouldShowHomeNavigation,
+        gesturesEnabled = LocalNavigationInputEnabled.current && (drawerState.isOpen || shouldShowHomeNavigation),
         drawerContent = {
             DrawerSheetContent(
                 modifier = Modifier.onSizeChanged { drawerWidth = it.width },

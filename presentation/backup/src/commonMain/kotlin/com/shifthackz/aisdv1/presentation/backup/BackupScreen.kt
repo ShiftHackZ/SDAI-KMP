@@ -22,6 +22,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformTabBar
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformBackHandler
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.backup.dialog.BackupDialogs
@@ -47,6 +48,14 @@ fun BackupScreen(
     modifier: Modifier = Modifier,
 ) {
     val isEnabled = !state.isBusy && !state.isPicking && !state.isExporting
+    PlatformBackHandler(
+        isEnabled = true,
+        canStartGesture = isEnabled && mode == BackupScreenMode.SETTINGS &&
+                !state.isFeedbackVisible && state.conflict == null,
+        onBack = {
+            if (mode != BackupScreenMode.WELCOME) processIntent(BackupIntent.NavigateBack)
+        },
+    )
     if (mode == BackupScreenMode.WELCOME) {
         RestoreWelcomeScreen(
             isEnabled = isEnabled,

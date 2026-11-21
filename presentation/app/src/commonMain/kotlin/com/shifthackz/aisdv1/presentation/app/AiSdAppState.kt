@@ -2,12 +2,15 @@ package com.shifthackz.aisdv1.presentation.app
 
 import com.shifthackz.aisdv1.core.mvi.MviState
 import com.shifthackz.aisdv1.core.navigation.AppRoute
+import com.shifthackz.aisdv1.core.navigation.NavigationEntry
 
 /**
  * Snapshot rendered by the application shell; the router remains the navigation authority.
  * Previously visited home tabs stay composed underneath standalone overlay routes.
  *
  * @param route Current destination, including any overlay arguments.
+ * @param backStack Stable screen lifetimes retained by the navigation host.
+ * @param isDrawerOpen Whether the drawer owns Back instead of a screen transition.
  * @param homeRoute Home tab displayed beneath the current destination, if one has been visited.
  * @param renderedHomeRoutes Home tabs whose compositions must remain alive.
  * @param shouldShowHomeChrome Whether the destination belongs to the home scaffold.
@@ -18,6 +21,8 @@ import com.shifthackz.aisdv1.core.navigation.AppRoute
  */
 internal data class AiSdAppState(
     val route: AppRoute = AppRoute.Splash,
+    val backStack: List<NavigationEntry> = emptyList(),
+    val isDrawerOpen: Boolean = false,
     val homeRoute: AppRoute? = null,
     val renderedHomeRoutes: List<AppRoute> = emptyList(),
     val shouldShowHomeChrome: Boolean = false,
