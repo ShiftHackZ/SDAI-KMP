@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeviceUnknown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -273,7 +273,7 @@ internal fun SelectedImageInput(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                    enabled = enabled,
+                    isEnabled = enabled,
                     onClick = onInPaintClick,
                 ) {
                     Icon(
@@ -292,7 +292,7 @@ internal fun SelectedImageInput(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
-                enabled = enabled,
+                isEnabled = enabled,
                 onClick = onClearClick,
             ) {
                 Icon(

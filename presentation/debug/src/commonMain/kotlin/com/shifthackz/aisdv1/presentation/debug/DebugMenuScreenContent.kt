@@ -35,7 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -261,7 +261,10 @@ fun DebugMenuScreenContent(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.weight(1f)
                         )
-                        Switch(checked = state.isUiDiagnosticsCapturing, onCheckedChange = null)
+                        PlatformSwitch(
+                            isChecked = state.isUiDiagnosticsCapturing,
+                            onCheckedChange = null
+                        )
                     }
                 }
                 DebugMenuItem(
@@ -319,9 +322,9 @@ fun DebugMenuScreenContent(
                     onClick = { processAction(DebugMenuAction.ToggleLocalDiffusionCancel) },
                     showChevron = false,
                     endValueContent = {
-                        Switch(
+                        PlatformSwitch(
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            checked = state.localDiffusionAllowCancel,
+                            isChecked = state.localDiffusionAllowCancel,
                             onCheckedChange = {
                                 processAction(DebugMenuAction.ToggleLocalDiffusionCancel)
                             },

@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -143,10 +143,10 @@ fun SliderTextInputField(
             label = { Text(Localization.string("hint_value")) },
             trailingIcon = {
                 if (isNotApplied) {
-                    Button(
+                    PrimaryButton(
                         modifier = Modifier.padding(end = 6.dp),
                         onClick = { text.toFloatOrNull()?.let(callback::invoke) },
-                        enabled = isValid,
+                        isEnabled = isValid,
                         contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                     ) {
                         Icon(

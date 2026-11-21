@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,7 +51,7 @@ internal fun ImagePickerTileButton(
         ) {
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth().height(112.dp),
-                enabled = isEnabled,
+                isEnabled = isEnabled,
                 shape = RoundedCornerShape(size = 28.dp),
                 contentPadding = PaddingValues(8.dp),
                 onClick = onClick,

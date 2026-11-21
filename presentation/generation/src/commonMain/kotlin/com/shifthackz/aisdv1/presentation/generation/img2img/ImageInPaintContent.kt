@@ -24,7 +24,7 @@ import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,7 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -126,7 +126,7 @@ fun ImageInPaintScreenContent(
                             val enabled = state.strokes.isNotEmpty()
                             OutlinedButton(
                                 modifier = Modifier.weight(1f),
-                                enabled = enabled,
+                                isEnabled = enabled,
                                 onClick = { processIntent(ImageToImageIntent.UndoInPaintStroke) },
                             ) {
                                 Icon(
@@ -141,7 +141,7 @@ fun ImageInPaintScreenContent(
                             }
                             OutlinedButton(
                                 modifier = Modifier.weight(1f),
-                                enabled = enabled,
+                                isEnabled = enabled,
                                 onClick = { processIntent(ImageToImageIntent.ClearInPaintMask) },
                             ) {
                                 Icon(
@@ -268,7 +268,7 @@ private fun DrawModeButton(
     onClick: () -> Unit,
 ) {
     if (selected) {
-        Button(
+        PrimaryButton(
             modifier = modifier,
             onClick = onClick,
         ) {

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,7 +41,7 @@ internal fun AuthorizationStorageRecovery(
             style = MaterialTheme.typography.bodyMedium,
         )
         OutlinedButton(
-            enabled = !state.isAuthorizationStorageBusy,
+            isEnabled = !state.isAuthorizationStorageBusy,
             onClick = { processIntent(ServerSetupIntent.RetryAuthorizationStorage) },
         ) { Text(Localization.string("retry")) }
         TextButton(

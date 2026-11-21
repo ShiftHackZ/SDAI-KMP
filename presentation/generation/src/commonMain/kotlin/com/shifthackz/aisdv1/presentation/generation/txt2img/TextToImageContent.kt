@@ -15,7 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixNormal
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -154,13 +154,13 @@ fun TextToImageContent(
                     titleStartIcon = Icons.Default.AutoFixNormal,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Button(
+                    PrimaryButton(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(60.dp)
                             .padding(horizontal = 16.dp)
                             .padding(bottom = 16.dp),
-                        enabled = !state.generating && !state.hasValidationErrors,
+                        isEnabled = !state.generating && !state.hasValidationErrors,
                         onClick = {
                             flushPendingTaggedText(
                                 state = state,

@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -155,7 +155,7 @@ internal fun SourceFiltersBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = horizontalItemSpacing),
-            enabled = state.sourceTypeFilter != null ||
+            isEnabled = state.sourceTypeFilter != null ||
                     state.sourceReadinessFilters.isNotEmpty() ||
                     state.sourceTagFilters.isNotEmpty(),
             onClick = {

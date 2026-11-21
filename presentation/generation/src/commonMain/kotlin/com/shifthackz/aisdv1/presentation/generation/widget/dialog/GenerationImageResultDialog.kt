@@ -22,11 +22,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -92,7 +92,7 @@ fun GenerationImageResultDialog(
                 }
 
                 if (showSaveButton) {
-                    Button(
+                    PrimaryButton(
                         modifier = Modifier
                             .padding(top = 16.dp)
                             .align(Alignment.CenterHorizontally)
@@ -107,7 +107,7 @@ fun GenerationImageResultDialog(
                 }
 
                 if (showReportButton) {
-                    Button(
+                    PrimaryButton(
                         modifier = Modifier
                             .padding(top = 16.dp)
                             .align(Alignment.CenterHorizontally)
@@ -156,7 +156,7 @@ fun ColumnScope.GenerationImageBatchResultModal(
     onViewDetailRequest: (AiGenerationResult) -> Unit = {},
 ) {
     if (showSaveButton) {
-        Button(
+        PrimaryButton(
             modifier = Modifier
                 .padding(top = 16.dp)
                 .align(Alignment.CenterHorizontally)

@@ -1,6 +1,6 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.platform
 
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

@@ -1,7 +1,7 @@
 package com.shifthackz.aisdv1.presentation.components.widget.item
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Switch
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -41,9 +41,9 @@ fun SettingsToggleItem(
         textSuffixContent = textSuffixContent,
         onClick = { onCheckedChange(!isChecked) },
         endValueContent = {
-            Switch(
+            PlatformSwitch(
                 modifier = Modifier.padding(horizontal = 8.dp),
-                checked = isChecked,
+                isChecked = isChecked,
                 onCheckedChange = onCheckedChange,
             )
         },

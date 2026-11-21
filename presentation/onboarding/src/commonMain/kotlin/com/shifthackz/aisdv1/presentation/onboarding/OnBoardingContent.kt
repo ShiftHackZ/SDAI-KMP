@@ -20,10 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DoubleArrow
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -157,7 +157,7 @@ fun OnBoardingContent(
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    Button(
+                    PrimaryButton(
                         modifier = Modifier.size(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(0.dp),

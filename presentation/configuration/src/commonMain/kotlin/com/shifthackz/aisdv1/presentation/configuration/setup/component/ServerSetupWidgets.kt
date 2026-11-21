@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
@@ -62,9 +62,9 @@ internal fun SwitchRow(
             showChevron = false,
             onClick = { onCheckedChange(!checked) },
             endValueContent = {
-                Switch(
+                PlatformSwitch(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    checked = checked,
+                    isChecked = checked,
                     onCheckedChange = onCheckedChange,
                 )
             },

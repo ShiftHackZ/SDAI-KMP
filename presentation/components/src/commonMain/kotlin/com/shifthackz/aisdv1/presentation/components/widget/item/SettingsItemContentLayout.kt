@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,10 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.extensions.shimmer
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import kotlinx.coroutines.delay
 
 /**
@@ -101,16 +104,17 @@ fun SettingsItem(
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
+        val rowColor =
+            if (animateBackground) colorState.value else MaterialTheme.colorScheme.surfaceTint.copy(
+                alpha = 0.8f
+            )
+        val backingColor = rowColor.compositeOver(
+            LocalPlatformControlBackgroundColor.current ?: MaterialTheme.colorScheme.background
+        )
         Row(
             modifier = modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(
-                    color = if (animateBackground) {
-                        colorState.value
-                    } else {
-                        MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f)
-                    },
-                )
+                .background(color = rowColor)
                 .defaultMinSize(minHeight = 50.dp)
                 .clickable(enabled = enabled) { onClick() }
                 .border(
@@ -132,23 +136,25 @@ fun SettingsItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                endValueContent?.invoke() ?: run {
-                    if (endValueText.isNotEmpty()) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(0.5f),
-                            text = endValueText,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Right,
-                        )
-                    }
-                    if (showChevron) {
-                        Icon(
-                            modifier = Modifier.padding(horizontal = 6.dp),
-                            imageVector = Icons.Default.ChevronRight,
-                            contentDescription = null,
-                        )
+                CompositionLocalProvider(LocalPlatformControlBackgroundColor provides backingColor) {
+                    endValueContent?.invoke() ?: run {
+                        if (endValueText.isNotEmpty()) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(0.5f),
+                                text = endValueText,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Right,
+                            )
+                        }
+                        if (showChevron) {
+                            Icon(
+                                modifier = Modifier.padding(horizontal = 6.dp),
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                            )
+                        }
                     }
                 }
             }

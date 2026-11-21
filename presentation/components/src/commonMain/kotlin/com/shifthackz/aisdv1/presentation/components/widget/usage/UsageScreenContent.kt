@@ -28,7 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -118,7 +118,7 @@ fun UsageScreenContent(
             )
         },
         bottomBar = {
-            Button(
+            PrimaryButton(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .fillMaxWidth()
@@ -126,7 +126,7 @@ fun UsageScreenContent(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp, top = 8.dp),
-                enabled = !usage.loading && (usage.totalBytes > 0L || screen == UsageScreenKind.NETWORK),
+                isEnabled = !usage.loading && (usage.totalBytes > 0L || screen == UsageScreenKind.NETWORK),
                 onClick = onPrimaryAction,
             ) {
                 Text(

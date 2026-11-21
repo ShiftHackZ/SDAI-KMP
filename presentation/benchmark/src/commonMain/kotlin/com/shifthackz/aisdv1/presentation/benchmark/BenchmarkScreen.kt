@@ -29,14 +29,14 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -77,7 +77,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
 import org.koin.core.parameter.parametersOf
 
 /**
- * Renders the benchmark screen with its Koin-provided ViewModel.
+ * Connects device benchmark results and run/cancel actions to the retained benchmark ViewModel.
  *
  * @param modifier Compose modifier applied to the rendered UI.
  * @param router navigation router used by the screen.
@@ -107,11 +107,11 @@ fun BenchmarkScreen(
 }
 
 /**
- * Renders benchmark screen content.
+ * Presents device capabilities, provider recommendations and benchmark progress with run/cancel actions.
  *
  * @param modifier Compose modifier applied to the rendered UI.
- * @param state state rendered or processed by the component.
- * @param processIntent callback for benchmark actions.
+ * @param state Device information, measured results, progress and any benchmark failure.
+ * @param processIntent Requests benchmark execution, cancellation, retry or navigation.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -154,7 +154,7 @@ fun BenchmarkScreenContent(
             )
         },
         bottomBar = {
-            Button(
+            PrimaryButton(
                 modifier = Modifier
                     .windowInsetsPadding(persistentBottomBarWindowInsets())
                     .fillMaxWidth()
@@ -162,7 +162,7 @@ fun BenchmarkScreenContent(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp, top = 8.dp),
-                enabled = !state.running,
+                isEnabled = !state.running,
                 onClick = { processIntent(BenchmarkIntent.RunBenchmark) },
             ) {
                 Icon(

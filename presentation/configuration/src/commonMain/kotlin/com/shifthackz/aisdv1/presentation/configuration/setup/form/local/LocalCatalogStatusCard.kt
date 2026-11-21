@@ -15,7 +15,7 @@ import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,7 +87,7 @@ internal fun LocalCatalogStatusCard(
             )
             OutlinedButton(
                 onClick = onRetry,
-                enabled = !isRefreshing,
+                isEnabled = !isRefreshing,
                 modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 144.dp)
                     .heightIn(min = 48.dp),
             ) {

@@ -26,7 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -154,7 +154,7 @@ fun ReportScreenContent(
             )
         },
         bottomBar = {
-            Button(
+            PrimaryButton(
                 modifier = Modifier
                     .windowInsetsPadding(persistentBottomBarWindowInsets())
                     .height(height = 60.dp)
@@ -164,7 +164,7 @@ fun ReportScreenContent(
                 onClick = {
                     if (state.reportSent) onNavigateBack() else onSubmit()
                 },
-                enabled = !state.loading,
+                isEnabled = !state.loading,
             ) {
                 Icon(
                     modifier = Modifier.size(18.dp),

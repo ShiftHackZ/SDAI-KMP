@@ -24,7 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -159,7 +159,7 @@ private fun ProviderPreviewScreen(
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
-            Button(
+            PrimaryButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(42.dp),
