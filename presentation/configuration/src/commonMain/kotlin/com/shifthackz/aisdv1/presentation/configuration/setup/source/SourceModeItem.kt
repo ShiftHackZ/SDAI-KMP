@@ -25,8 +25,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.presentation.components.model.providerIcon
 import com.shifthackz.aisdv1.presentation.components.model.readinessFor
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.icon
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.subtitle
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.title
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
@@ -76,7 +76,7 @@ internal fun SourceModeItem(
                     modifier = Modifier
                         .size(42.dp)
                         .padding(top = 8.dp, bottom = 8.dp),
-                    imageVector = source.icon(platform),
+                    imageVector = source.providerIcon(platform),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                 )

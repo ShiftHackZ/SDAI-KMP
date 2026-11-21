@@ -11,6 +11,7 @@ import com.shifthackz.aisdv1.presentation.components.model.readinessFor
 import com.shifthackz.aisdv1.presentation.configuration.setup.HORDE_DEFAULT_API_KEY
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupEffect
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
+import com.shifthackz.aisdv1.presentation.configuration.setup.requiresDemoExplanation
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 import com.shifthackz.aisdv1.presentation.configuration.setup.viewmodel.url
 
@@ -50,7 +51,6 @@ internal class ServerSetupIntentProcessor(
      *
      * @author Dmitriy Moroz
      */
-
     fun process(intent: ServerSetupIntent) {
         when (intent) {
             ServerSetupIntent.ConfirmModelDownloadSwitch,
@@ -275,19 +275,66 @@ internal class ServerSetupIntentProcessor(
                     it.copy(step = ServerSetupState.Step.CONFIGURE)
                 }
 
-                ServerSetupState.Step.CONFIGURE -> validateAndConnectToServer()
+                ServerSetupState.Step.CONFIGURE -> {
+                    val state = currentState()
+                    if (state.requiresDemoExplanation) {
+                        emitEffect(ServerSetupEffect.HideKeyboard)
+                        updateState { it.copy(modal = ServerSetupState.Modal.DemoExplanation()) }
+                    } else validateAndConnectToServer()
+                }
+            }
+
+            is ServerSetupIntent.AcknowledgeDemoBehavior -> updateState { state ->
+                val dialog = state.modal as? ServerSetupState.Modal.DemoExplanation
+                if (dialog == null) state else state.copy(modal = dialog.copy(hasUnderstoodDemo = intent.isChecked))
+            }
+
+            is ServerSetupIntent.AgreeToDemoFeedback -> updateState { state ->
+                val dialog = state.modal as? ServerSetupState.Modal.DemoExplanation
+                if (dialog == null) state else state.copy(
+                    modal = dialog.copy(
+                        hasAgreedToAccurateFeedback = intent.isChecked
+                    )
+                )
+            }
+
+            ServerSetupIntent.ConfirmDemoExplanation -> {
+                val state = currentState()
+                val dialog = state.modal as? ServerSetupState.Modal.DemoExplanation
+                if (dialog != null && dialog.hasUnderstoodDemo && dialog.hasAgreedToAccurateFeedback &&
+                    state.requiresDemoExplanation &&
+                    state.step == ServerSetupState.Step.CONFIGURE
+                ) {
+                    updateState {
+                        it.copy(
+                            modal = ServerSetupState.Modal.None,
+                            demoMode = true,
+                            authType = ServerSetupState.AuthType.ANONYMOUS,
+                            serverUrlValidationError = null,
+                        )
+                    }
+                    validateAndConnectToServer()
+                }
+            }
+
+            ServerSetupIntent.CloseDemoExplanation -> updateState { state ->
+                if (state.modal !is ServerSetupState.Modal.DemoExplanation) state else state.copy(
+                    demoMode = false,
+                    modal = ServerSetupState.Modal.None,
+                    serverUrlValidationError = null,
+                )
             }
 
             ServerSetupIntent.DismissDialog -> updateState {
-                it.copy(modal = ServerSetupState.Modal.None)
+                if (it.modal is ServerSetupState.Modal.DemoExplanation) it else it.copy(modal = ServerSetupState.Modal.None)
             }
 
-            ServerSetupIntent.NavigateBack -> if (currentState().step == ServerSetupState.Step.SOURCE) {
-                router.navigateBack()
-            } else {
-                emitEffect(ServerSetupEffect.HideKeyboard)
-                updateState {
-                    it.copy(step = ServerSetupState.Step.SOURCE)
+            ServerSetupIntent.NavigateBack -> when {
+                currentState().modal is ServerSetupState.Modal.DemoExplanation -> Unit
+                currentState().step == ServerSetupState.Step.SOURCE -> router.navigateBack()
+                else -> {
+                    emitEffect(ServerSetupEffect.HideKeyboard)
+                    updateState { it.copy(step = ServerSetupState.Step.SOURCE) }
                 }
             }
 

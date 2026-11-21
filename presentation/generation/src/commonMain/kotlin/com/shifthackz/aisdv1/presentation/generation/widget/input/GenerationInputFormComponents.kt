@@ -12,11 +12,10 @@ import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -141,23 +140,19 @@ internal fun RowScope.GenerationSizeTextFieldsComponent(
         colors = textFieldColors,
     )
     Row(modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)) {
-        IconButton(
+        ContextualHelpIconButton(
+            title = Localization.string("action_swap_dimensions"),
+            message = Localization.string("help_swap_dimensions"),
+            icon = Icons.Default.SwapHoriz,
             onClick = { onEvent(GenerationInputFormEvent.SwapDimensions) },
-        ) {
-            Icon(
-                imageVector = Icons.Default.SwapHoriz,
-                contentDescription = Localization.string("action_swap_dimensions"),
-            )
-        }
+        )
         Box {
-            IconButton(
+            ContextualHelpIconButton(
+                title = Localization.string("action_aspect_ratio"),
+                message = Localization.string("help_aspect_ratio"),
+                icon = Icons.Default.AspectRatio,
                 onClick = { isRatioMenuExpanded = true },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AspectRatio,
-                    contentDescription = Localization.string("action_aspect_ratio"),
-                )
-            }
+            )
             DropdownMenu(
                 expanded = isRatioMenuExpanded,
                 onDismissRequest = { isRatioMenuExpanded = false },

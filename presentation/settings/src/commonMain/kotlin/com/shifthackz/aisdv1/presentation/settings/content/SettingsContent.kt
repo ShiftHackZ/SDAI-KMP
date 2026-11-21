@@ -1,7 +1,6 @@
 package com.shifthackz.aisdv1.presentation.settings.content
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,11 +9,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
 import com.shifthackz.aisdv1.presentation.settings.SettingsState
 import com.shifthackz.aisdv1.presentation.settings.contentType
-import com.shifthackz.aisdv1.presentation.settings.settingsListItems
 import com.shifthackz.aisdv1.presentation.settings.platform.NoOpSettingsPlatformActions
 import com.shifthackz.aisdv1.presentation.settings.platform.SettingsPlatformActions
 import com.shifthackz.aisdv1.presentation.settings.section.SettingsCommunitySection
@@ -22,7 +21,7 @@ import com.shifthackz.aisdv1.presentation.settings.section.SettingsInfoSection
 import com.shifthackz.aisdv1.presentation.settings.section.SettingsLookAndFeelSection
 import com.shifthackz.aisdv1.presentation.settings.section.SettingsServerSection
 import com.shifthackz.aisdv1.presentation.settings.section.SettingsVersionFooter
-import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.settings.settingsListItems
 
 /**
  * Renders visible Settings rows in one lazy list. Provider, appearance, community, information
@@ -59,7 +58,11 @@ internal fun ContentSettingsState(
         state = listState,
     ) {
         items(items = rows, key = { it.name }, contentType = { it.contentType() }) { row ->
-            Box(Modifier.animateItem()) {
+            SettingsItemHelp(
+                row = row,
+                isLoading = state.loading,
+                modifier = Modifier.animateItem()
+            ) {
                 val headerModifier = Modifier.padding(top = 28.dp, bottom = 8.dp)
                 val itemModifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 val warningModifier = Modifier.fillMaxWidth().padding(top = 4.dp, start = 4.dp)

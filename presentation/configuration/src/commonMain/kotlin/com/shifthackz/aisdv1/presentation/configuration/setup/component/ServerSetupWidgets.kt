@@ -4,16 +4,13 @@ package com.shifthackz.aisdv1.presentation.configuration.setup.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,19 +22,19 @@ import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.feature.bonsai.BonsaiModelSupport
 import com.shifthackz.aisdv1.domain.feature.coreml.CoreMlModelSupport
-import com.shifthackz.aisdv1.presentation.configuration.modal.download.DownloadDialog
-import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
-import com.shifthackz.aisdv1.presentation.components.widget.icon.BrandIcons
 import com.shifthackz.aisdv1.presentation.components.widget.dialog.ErrorDialogContent
 import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialog
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
+import com.shifthackz.aisdv1.presentation.configuration.modal.download.DownloadDialog
+import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
+import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
+import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 
 /**
  * Displays a setup toggle and reports the requested checked state to its owner.
  *
  * @param text Localized visible label for the setup control.
+ * @param helpMessage Localized explanation of the enabled and disabled states.
  * @param icon Icon rendered alongside the action or switch label.
  * @param checked Current toggle value owned by the setup state.
  * @param onCheckedChange Receives the requested toggle state; persistence remains with its owner.
@@ -47,26 +44,32 @@ import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
 @Composable
 internal fun SwitchRow(
     text: String,
+    helpMessage: String,
     icon: ImageVector,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    SettingsItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        startIcon = icon,
-        text = text.asUiText(),
-        showChevron = false,
-        onClick = { onCheckedChange(!checked) },
-        endValueContent = {
-            Switch(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-            )
-        },
-    )
+    ContextualHelp(
+        title = text,
+        message = helpMessage,
+        titleStartIcon = icon,
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+    ) {
+        SettingsItem(
+            modifier = Modifier.fillMaxWidth(),
+            startIcon = icon,
+            text = text.asUiText(),
+            showChevron = false,
+            onClick = { onCheckedChange(!checked) },
+            endValueContent = {
+                Switch(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    checked = checked,
+                    onCheckedChange = onCheckedChange,
+                )
+            },
+        )
+    }
 }
 
 
@@ -86,6 +89,11 @@ internal fun ServerSetupModal(
     processIntent: (ServerSetupIntent) -> Unit,
 ) {
     when (modal) {
+        is ServerSetupState.Modal.DemoExplanation -> DemoModeExplanationDialog(
+            state = modal,
+            processIntent = processIntent,
+        )
+
         is ServerSetupState.Modal.SwitchModelDownloads -> AlertDialog(
             onDismissRequest = { processIntent(ServerSetupIntent.DismissDialog) },
             title = { Text(Localization.string("download_switch_title")) },
@@ -214,40 +222,6 @@ internal fun ServerSetupModal(
 }
 
 /**
- * Chooses the setup icon, branding local providers with the current platform.
- *
- * @param platform Platform whose provider availability and readiness apply.
- *
- * @author Dmitriy Moroz
- */
-internal fun ServerSource.icon(platform: Platform): ImageVector = when (this) {
-    ServerSource.AUTOMATIC1111,
-    ServerSource.SWARM_UI,
-    ServerSource.EASY_DIFFUSION,
-    ServerSource.OPEN_AI_COMPATIBLE,
-        -> Icons.Default.Computer
-
-    ServerSource.HORDE,
-    ServerSource.HUGGING_FACE,
-    ServerSource.OPEN_AI,
-    ServerSource.OPEN_AI_OAUTH,
-    ServerSource.STABILITY_AI,
-    ServerSource.FAL_AI,
-    ServerSource.ARLI_AI,
-        -> Icons.Default.Cloud
-
-    ServerSource.LOCAL_MNN,
-    ServerSource.LOCAL_MICROSOFT_ONNX,
-    ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
-    ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
-    ServerSource.LOCAL_APPLE_CORE_ML,
-    ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
-        Platform.ANDROID -> Icons.Default.Android
-        Platform.IOS -> BrandIcons.Apple
-    }
-}
-
-/**
  * Returns the localized provider title used by setup.
  *
  * @param strings Localized strings supplied by the setup composition root.
@@ -316,13 +290,9 @@ internal fun ServerSource.subtitle(strings: ServerSetupStrings, platform: Platfo
 /**
  * Returns localized inline feedback for this setup validation failure.
  *
- * @param strings Localized strings supplied by the setup composition root.
- *
  * @author Dmitriy Moroz
  */
-internal fun ServerSetupState.ValidationError.message(
-    strings: ServerSetupStrings,
-): String = when (this) {
+internal fun ServerSetupState.ValidationError.message(): String = when (this) {
     ServerSetupState.ValidationError.EmptyField -> Localization.string("error_empty_field")
     ServerSetupState.ValidationError.EmptyUrl -> Localization.string("error_empty_url")
     ServerSetupState.ValidationError.InvalidScheme -> Localization.string("error_invalid_scheme")
@@ -333,6 +303,7 @@ internal fun ServerSetupState.ValidationError.message(
 /**
  * Enables setup only for the selected usable model; allowing custom paths does not bypass catalog downloads.
  * Authorization recovery and provider-specific account requirements remain authoritative.
+ *
  * @author Dmitriy Moroz
  */
 internal val ServerSetupState.mainButtonEnabled: Boolean
@@ -371,6 +342,7 @@ internal val ServerSetupState.mainButtonEnabled: Boolean
 
 /**
  * Identifies the platform-neutral custom entry, whose source files are selected separately from catalog downloads.
+ *
  * @author Dmitriy Moroz
  */
 internal val ServerSetupState.LocalModel.isCustom: Boolean

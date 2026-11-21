@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
  * padding without gaps or an inner scrolling container.
  *
  * @param isImg2Img Whether to use the elevated image-to-image form surface.
+ * @param isHeader Whether the segment supplies its own header padding and touch area.
  * @param isFirst Whether this is the card header and base-input segment.
  * @param isLast Whether this is the status and bottom-padding segment.
  * @param modifier Item placement and appearance animation supplied by the parent lazy list.
@@ -29,6 +30,7 @@ internal fun GenerationFormCardSegment(
     isImg2Img: Boolean,
     modifier: Modifier = Modifier,
     isFirst: Boolean = false,
+    isHeader: Boolean = false,
     isLast: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -45,7 +47,15 @@ internal fun GenerationFormCardSegment(
         color = if (isImg2Img) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = if (isImg2Img) 1.dp else 0.dp,
     ) {
-        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = top, bottom = bottom)) {
+        val horizontal = if (isHeader) 0.dp else 16.dp
+        Column(
+            Modifier.padding(
+                start = horizontal,
+                end = horizontal,
+                top = if (isHeader) 0.dp else top,
+                bottom = if (isHeader) 0.dp else bottom
+            )
+        ) {
             content()
         }
     }

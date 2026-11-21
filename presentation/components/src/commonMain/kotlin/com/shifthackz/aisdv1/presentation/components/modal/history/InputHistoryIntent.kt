@@ -1,4 +1,4 @@
-package com.shifthackz.aisdv1.presentation.generation.modal.history
+package com.shifthackz.aisdv1.presentation.components.modal.history
 
 import com.shifthackz.aisdv1.core.mvi.MviIntent
 

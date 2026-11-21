@@ -1,7 +1,5 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.form.local
 
-import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.EasyDiffusionForm
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import com.shifthackz.aisdv1.core.localization.Localization
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,10 +23,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.file.LOCAL_DIFFUSION_CUSTOM_PATH
-import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.DownloadState
+import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 import com.shifthackz.aisdv1.presentation.configuration.setup.LocalCatalogStatus
-import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
+import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
+import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.SwitchRow
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.isCustom
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
@@ -36,6 +37,7 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.component.title
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.ArliAiForm
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.Automatic1111Form
+import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.EasyDiffusionForm
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.FalAiForm
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.FormTitle
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.HintText
@@ -47,11 +49,9 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.OpenAi
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.SetupTextField
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.StabilityAiForm
 import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.SwarmUiForm
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
+import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
 import com.shifthackz.aisdv1.presentation.configuration.setup.platform.ServerSetupLocalPathPickerButton
 import com.shifthackz.aisdv1.presentation.configuration.setup.platform.isLocalGenerationSetupAvailable
-import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 
 /**
  * Scrolls the selected provider's configuration form above the wizard's pinned actions.
@@ -184,6 +184,7 @@ internal fun LocalGenerationForm(
             SwitchRow(
                 icon = Icons.Outlined.Landslide,
                 text = strings.localCustomSwitch,
+                helpMessage = Localization.string("help_setup_custom_model"),
                 checked = state.localCustomModel,
                 onCheckedChange = { processIntent(ServerSetupIntent.AllowLocalCustomModel(it)) },
             )
@@ -282,7 +283,7 @@ internal fun LocalCustomModelPathForm(
             value = state.localCustomModelPath,
             onValueChange = { processIntent(ServerSetupIntent.SelectLocalModelPath(it)) },
             label = strings.localPathTitle,
-            error = state.localCustomModelPathValidationError?.message(strings),
+            error = state.localCustomModelPathValidationError?.message(),
             trailingIcon = {
                 IconButton(
                     onClick = {

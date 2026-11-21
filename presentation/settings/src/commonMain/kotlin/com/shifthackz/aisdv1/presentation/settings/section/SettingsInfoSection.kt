@@ -1,15 +1,9 @@
 package com.shifthackz.aisdv1.presentation.settings.section
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AllInclusive
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Policy
-import androidx.compose.material.icons.filled.Report
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
+import com.shifthackz.aisdv1.presentation.settings.startIcon
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
 import com.shifthackz.aisdv1.presentation.settings.text
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsHeader
@@ -47,7 +41,7 @@ internal fun SettingsInfoSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.MonetizationOn,
+                startIcon = row.startIcon,
                 text = text("settings_item_donate"),
                 onClick = { processIntent(SettingsIntent.Action.Donate) },
             )
@@ -57,7 +51,7 @@ internal fun SettingsInfoSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.AllInclusive,
+                startIcon = row.startIcon,
                 text = text("settings_item_on_boarding"),
                 onClick = { processIntent(SettingsIntent.Action.OnBoarding) },
             )
@@ -67,7 +61,7 @@ internal fun SettingsInfoSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Report,
+                startIcon = row.startIcon,
                 text = text("settings_item_report_problem"),
                 onClick = { processIntent(SettingsIntent.Action.ReportProblem) },
             )
@@ -77,7 +71,7 @@ internal fun SettingsInfoSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Policy,
+                startIcon = row.startIcon,
                 text = text("settings_item_policy"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenPolicy) },
             )
@@ -87,7 +81,7 @@ internal fun SettingsInfoSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Gavel,
+                startIcon = row.startIcon,
                 text = text("settings_item_license"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenLicense) },
             )
@@ -97,7 +91,7 @@ internal fun SettingsInfoSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Code,
+                startIcon = row.startIcon,
                 text = text("settings_item_source"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenSourceCode) },
             )

@@ -48,6 +48,14 @@ sealed interface ImageToImageIntent : MviIntent {
 
     data object PickRandom : ImageToImageIntent
 
+    /**
+     * Replaces only the source pixels, clearing masks and results tied to the old source.
+     *
+     * @param base64 Original output image selected from the in-app gallery.
+     * @author Dmitriy Moroz
+     */
+    data class ApplyImageInput(val base64: String) : ImageToImageIntent
+
 
     data object ClearImageInput : ImageToImageIntent
 

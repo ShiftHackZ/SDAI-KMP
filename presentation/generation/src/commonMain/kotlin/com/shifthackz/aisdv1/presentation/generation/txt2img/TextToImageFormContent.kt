@@ -14,17 +14,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.model.asString
-import com.shifthackz.aisdv1.presentation.components.model.compactDisplayName
 import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
+import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.source.CurrentProviderCard
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInputFormItems
-import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 
 /**
  * Displays the text-to-image card as independently composed list items. Advanced fields below
@@ -47,6 +50,7 @@ internal fun TextToImageBody(
     processIntent: (TextToImageIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isFormExpanded by rememberSaveable { mutableStateOf(true) }
     val listState = rememberLazyListState()
     val urlLauncher = rememberExternalUrlLauncher()
     val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
@@ -61,22 +65,23 @@ internal fun TextToImageBody(
         state = listState,
         contentPadding = PaddingValues(16.dp),
     ) {
+        item(key = "generation-provider") {
+            CurrentProviderCard(
+                source = state.mode,
+                platform = state.platform,
+                onClick = { processIntent(TextToImageIntent.ConfigureProvider) },
+                modifier = Modifier.padding(bottom = 16.dp),
+            )
+        }
         generationInputFormItems(
             state = state,
             isImg2Img = false,
+            isExpanded = isFormExpanded,
+            onToggleExpanded = { isFormExpanded = !isFormExpanded },
             promptChipTextFieldState = promptChipTextFieldState,
             negativePromptChipTextFieldState = negativePromptChipTextFieldState,
             onEvent = onEvent,
-            header = {
-                Text(
-                    modifier = Modifier.padding(bottom = 14.dp),
-                    text = state.mode.compactDisplayName(state.platform),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
+            hasFooter = state.error != null || state.message != null || state.generating,
             footer = {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     state.error?.let { message ->

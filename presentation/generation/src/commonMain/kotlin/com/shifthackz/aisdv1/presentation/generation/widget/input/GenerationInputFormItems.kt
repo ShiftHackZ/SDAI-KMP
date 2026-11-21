@@ -7,12 +7,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
+import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.components.widget.section.ExpandableSectionHeader
 
 /**
  * Emits each basic and advanced control as its own lazy item, followed by the status footer.
  * Stable provider-qualified keys preserve each field's saveable state while scrolling.
  * Expansion uses lazy-item fade and placement transitions rather than measuring an entire
  * offscreen Column before the first expansion frame.
+ * The advanced toggle and its fields remain independent when the provider offers that toggle.
+ * Otherwise the generation-options disclosure owns the complete form. Status feedback stays visible in either state.
  *
  * @receiver The screen's existing vertical lazy list; no nested scrolling list is created.
  *
@@ -21,8 +25,10 @@ import androidx.compose.ui.text.input.TextFieldValue
  * @param promptChipTextFieldState Caller-owned prompt selection and chip editing state.
  * @param negativePromptChipTextFieldState Caller-owned negative-prompt selection and chip state.
  * @param onEvent Receives generation field edits and provider extension actions.
- * @param header Optional provider heading above the base fields.
+ * @param isExpanded Whether generation options are visible.
+ * @param onToggleExpanded Toggles generation options without changing the independent advanced state.
  * @param afterSlidersSection Image-to-image denoising controls inserted at their existing position.
+ * @param hasFooter Whether validation, status or progress content needs its own segment when fields are collapsed.
  * @param footer Validation, status and progress content beneath all form fields.
  *
  * @author Dmitriy Moroz
@@ -33,22 +39,40 @@ internal fun LazyListScope.generationInputFormItems(
     promptChipTextFieldState: MutableState<TextFieldValue>,
     negativePromptChipTextFieldState: MutableState<TextFieldValue>,
     onEvent: (GenerationInputFormEvent) -> Unit,
-    header: @Composable () -> Unit = {},
+    isExpanded: Boolean,
+    onToggleExpanded: () -> Unit,
     afterSlidersSection: @Composable () -> Unit = {},
+    hasFooter: Boolean = false,
     footer: @Composable () -> Unit = {},
 ) {
+    val baseFields = generationInputBaseFields(state)
+    val hasIndependentAdvancedToggle = GenerationBaseFormField.ADVANCED_TOGGLE in baseFields
+    val hasVisibleBody = isExpanded || hasIndependentAdvancedToggle
     item(
         key = "generation-${state.mode.name}-header",
         contentType = GenerationFormContentType.HEADER
     ) {
-        GenerationFormCardSegment(isImg2Img = isImg2Img, isFirst = true) { header() }
+        GenerationFormCardSegment(
+            isImg2Img = isImg2Img,
+            isFirst = true,
+            isHeader = true,
+            isLast = !hasVisibleBody && !hasFooter,
+        ) {
+            ExpandableSectionHeader(
+                title = Localization.string("title_generation_options"),
+                isExpanded = isExpanded,
+                onToggleExpanded = onToggleExpanded,
+            )
+        }
     }
-    generationInputBaseFields(state).forEach { field ->
+    baseFields.filter { field ->
+        isExpanded || field == GenerationBaseFormField.ADVANCED_TOGGLE
+    }.forEach { field ->
         item(
             key = "generation-${state.mode.name}-base-${field.name}",
             contentType = field.contentType()
         ) {
-            GenerationFormCardSegment(isImg2Img = isImg2Img) {
+            GenerationFormCardSegment(isImg2Img = isImg2Img, modifier = Modifier.animateItem()) {
                 GenerationInputBaseOption(
                     field = field,
                     state = state,
@@ -63,13 +87,16 @@ internal fun LazyListScope.generationInputFormItems(
             }
         }
     }
-    generationInputAdvancedItems(
+    if (isExpanded || hasIndependentAdvancedToggle) generationInputAdvancedItems(
         state = state.toAdvancedOptionsState(),
         isImg2Img = isImg2Img,
         onEvent = onEvent,
         afterSlidersSection = afterSlidersSection,
     )
-    item(key = "generation-footer", contentType = GenerationFormContentType.FOOTER) {
+    if (hasVisibleBody || hasFooter) item(
+        key = "generation-footer",
+        contentType = GenerationFormContentType.FOOTER
+    ) {
         GenerationFormCardSegment(
             isImg2Img = isImg2Img,
             isLast = true,

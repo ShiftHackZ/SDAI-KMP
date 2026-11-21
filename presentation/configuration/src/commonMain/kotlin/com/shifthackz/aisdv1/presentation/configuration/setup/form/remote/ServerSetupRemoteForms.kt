@@ -13,14 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.model.asUiText
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.SwitchRow
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
-import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
+import com.shifthackz.aisdv1.presentation.components.widget.input.DropdownTextField
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.SetupHelpItem
+import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupLink
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
-import com.shifthackz.aisdv1.presentation.components.widget.input.DropdownTextField
-import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.SwitchRow
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
+import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 
 @Composable
 internal fun Automatic1111Form(
@@ -39,24 +40,26 @@ internal fun Automatic1111Form(
             onValueChange = { processIntent(ServerSetupIntent.UpdateServerUrl(it)) },
             label = strings.serverUrl,
             enabled = !state.demoMode,
-            error = state.serverUrlValidationError?.message(strings),
+            error = state.serverUrlValidationError?.message(),
         )
         AuthFields(
             state = state,
             strings = strings,
             processIntent = processIntent,
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.AutoMirrored.Filled.Help,
             text = strings.instructions.asUiText(),
+            helpMessage = Localization.string("help_setup_instructions"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.A1111Instructions)) },
         )
         SwitchRow(
             icon = Icons.Default.Api,
             text = strings.demoMode,
+            helpMessage = Localization.string("help_setup_demo"),
             checked = state.demoMode,
             onCheckedChange = { processIntent(ServerSetupIntent.UpdateDemoMode(it)) },
         )
@@ -80,19 +83,20 @@ internal fun SwarmUiForm(
             value = state.swarmUiUrl,
             onValueChange = { processIntent(ServerSetupIntent.UpdateSwarmUiUrl(it)) },
             label = strings.serverUrl,
-            error = state.swarmUiUrlValidationError?.message(strings),
+            error = state.swarmUiUrlValidationError?.message(),
         )
         AuthFields(
             state = state,
             strings = strings,
             processIntent = processIntent,
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.AutoMirrored.Filled.Help,
             text = strings.instructions.asUiText(),
+            helpMessage = Localization.string("help_setup_instructions"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.SwarmUiInstructions)) },
         )
         HintText(text = strings.swarmHint)
@@ -117,28 +121,31 @@ internal fun HordeForm(
             label = strings.apiKey,
             enabled = !state.hordeDefaultApiKey,
             keyboardType = KeyboardType.Password,
-            error = state.hordeApiKeyValidationError?.message(strings),
+            error = state.hordeApiKeyValidationError?.message(),
         )
         SwitchRow(
             icon = Icons.Default.Api,
             text = strings.useDefaultHordeKey,
+            helpMessage = Localization.string("help_setup_default_key"),
             checked = state.hordeDefaultApiKey,
             onCheckedChange = { processIntent(ServerSetupIntent.UpdateHordeDefaultApiKey(it)) },
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.Default.Cloud,
             text = strings.hordeAbout.asUiText(),
+            helpMessage = Localization.string("help_setup_about"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.HordeInfo)) },
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.Default.Api,
             text = strings.hordeGetKey.asUiText(),
+            helpMessage = Localization.string("help_setup_get_key"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.HordeSignUp)) },
         )
         HintText(text = strings.hordeUsage)
@@ -162,7 +169,7 @@ internal fun HuggingFaceForm(
             onValueChange = { processIntent(ServerSetupIntent.UpdateHuggingFaceApiKey(it)) },
             label = strings.apiKey,
             keyboardType = KeyboardType.Password,
-            error = state.huggingFaceApiKeyValidationError?.message(strings),
+            error = state.huggingFaceApiKeyValidationError?.message(),
         )
         DropdownTextField(
             modifier = Modifier
@@ -173,12 +180,13 @@ internal fun HuggingFaceForm(
             items = state.huggingFaceModels,
             onItemSelected = { processIntent(ServerSetupIntent.UpdateHuggingFaceModel(it)) },
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.Default.Cloud,
             text = strings.huggingFaceAbout.asUiText(),
+            helpMessage = Localization.string("help_setup_about"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.HuggingFaceInfo)) },
         )
     }
@@ -201,14 +209,15 @@ internal fun OpenAiForm(
             onValueChange = { processIntent(ServerSetupIntent.UpdateOpenAiApiKey(it)) },
             label = strings.apiKey,
             keyboardType = KeyboardType.Password,
-            error = state.openAiApiKeyValidationError?.message(strings),
+            error = state.openAiApiKeyValidationError?.message(),
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.Default.Cloud,
             text = strings.openAiAbout.asUiText(),
+            helpMessage = Localization.string("help_setup_about"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.OpenAiInfo)) },
         )
     }
@@ -231,14 +240,15 @@ internal fun FalAiForm(
             onValueChange = { processIntent(ServerSetupIntent.UpdateFalAiApiKey(it)) },
             label = strings.apiKey,
             keyboardType = KeyboardType.Password,
-            error = state.falAiApiKeyValidationError?.message(strings),
+            error = state.falAiApiKeyValidationError?.message(),
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.Default.Cloud,
             text = strings.falAiAbout.asUiText(),
+            helpMessage = Localization.string("help_setup_about"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.FalAiInfo)) },
         )
     }
@@ -261,14 +271,15 @@ internal fun ArliAiForm(
             onValueChange = { processIntent(ServerSetupIntent.UpdateArliAiApiKey(it)) },
             label = strings.apiKey,
             keyboardType = KeyboardType.Password,
-            error = state.arliAiApiKeyValidationError?.message(strings),
+            error = state.arliAiApiKeyValidationError?.message(),
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.Default.Cloud,
             text = strings.arliAiAbout.asUiText(),
+            helpMessage = Localization.string("help_setup_about"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.ArliAiInfo)) },
         )
     }
@@ -291,14 +302,15 @@ internal fun StabilityAiForm(
             onValueChange = { processIntent(ServerSetupIntent.UpdateStabilityAiApiKey(it)) },
             label = strings.apiKey,
             keyboardType = KeyboardType.Password,
-            error = state.stabilityAiApiKeyValidationError?.message(strings),
+            error = state.stabilityAiApiKeyValidationError?.message(),
         )
-        SettingsItem(
+        SetupHelpItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             startIcon = Icons.Default.Cloud,
             text = strings.stabilityAbout.asUiText(),
+            helpMessage = Localization.string("help_setup_about"),
             onClick = { processIntent(ServerSetupIntent.LaunchUrl(ServerSetupLink.StabilityAiInfo)) },
         )
     }

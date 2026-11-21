@@ -14,14 +14,13 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.StabilityAiSampler
+import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
+import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppThemeState
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageContent
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageState
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageContent
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageState
-import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
-import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppThemeState
 import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInputFormItems
-
 
 @Preview(name = "Txt2Img screen", widthDp = 360, heightDp = 740, showBackground = true)
 @Composable
@@ -57,6 +56,8 @@ private fun GenerationInputFormPreview() {
             generationInputFormItems(
                 state = previewTextToImageState(),
                 isImg2Img = false,
+                isExpanded = true,
+                onToggleExpanded = {},
                 promptChipTextFieldState = promptState,
                 negativePromptChipTextFieldState = negativePromptState,
                 onEvent = {},

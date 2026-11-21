@@ -1,15 +1,14 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.form.remote
 
-import androidx.compose.ui.Modifier
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
-import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
+import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 
 /**
  * Configures a complete image API prefix and optional bearer token.
@@ -35,7 +34,7 @@ internal fun OpenAiCompatibleForm(
             onValueChange = { processIntent(ServerSetupIntent.UpdateOpenAiCompatibleUrl(it)) },
             label = strings.openAiCompatibleUrl,
             keyboardType = KeyboardType.Uri,
-            error = state.openAiCompatibleUrlValidationError?.message(strings),
+            error = state.openAiCompatibleUrlValidationError?.message(),
         )
         SetupTextField(
             value = state.openAiCompatibleApiKey,

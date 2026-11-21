@@ -35,7 +35,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -149,66 +149,39 @@ fun GalleryScreenContent(
                                 onDismissRequest = { processIntent(GalleryIntent.Dropdown.Close) },
                                 containerColor = MaterialTheme.colorScheme.background,
                             ) {
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Checklist,
-                                            contentDescription = null,
-                                            tint = LocalContentColor.current,
-                                        )
-                                    },
-                                    text = {
-                                        Text(text = Localization.string("gallery_menu_selection_mode"))
-                                    },
+                                ContextualHelpMenuItem(
+                                    title = Localization.string("gallery_menu_selection_mode"),
+                                    message = Localization.string("help_gallery_selection"),
+                                    icon = Icons.Default.Checklist,
                                     onClick = {
                                         processIntent(GalleryIntent.Dropdown.Close)
                                         processIntent(GalleryIntent.ChangeSelectionMode(true))
                                     },
                                 )
                                 if (state.mediaStoreInfo.isNotEmpty) {
-                                    DropdownMenuItem(
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.FileOpen,
-                                                contentDescription = null,
-                                                tint = LocalContentColor.current,
-                                            )
-                                        },
-                                        text = {
-                                            Text(text = Localization.string("browse"))
-                                        },
+                                    ContextualHelpMenuItem(
+                                        title = Localization.string("browse"),
+                                        message = Localization.string("help_gallery_browse"),
+                                        icon = Icons.Default.FileOpen,
                                         onClick = {
                                             processIntent(GalleryIntent.Dropdown.Close)
                                             processIntent(GalleryIntent.OpenMediaStoreFolder)
                                         },
                                     )
                                 }
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Share,
-                                            contentDescription = null,
-                                            tint = LocalContentColor.current,
-                                        )
-                                    },
-                                    text = {
-                                        Text(text = Localization.string("gallery_menu_export_all"))
-                                    },
+                                ContextualHelpMenuItem(
+                                    title = Localization.string("gallery_menu_export_all"),
+                                    message = Localization.string("help_gallery_export_all"),
+                                    icon = Icons.Default.Share,
                                     onClick = {
                                         processIntent(GalleryIntent.Dropdown.Close)
                                         processIntent(GalleryIntent.Export.All.Request)
                                     },
                                 )
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = {
-                                        Text(text = Localization.string("gallery_menu_delete_all"))
-                                    },
+                                ContextualHelpMenuItem(
+                                    title = Localization.string("gallery_menu_delete_all"),
+                                    message = Localization.string("help_gallery_delete_all"),
+                                    icon = Icons.Default.Delete,
                                     onClick = {
                                         processIntent(GalleryIntent.Dropdown.Close)
                                         processIntent(GalleryIntent.Delete.All.Request)

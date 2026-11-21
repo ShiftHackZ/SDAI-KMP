@@ -231,7 +231,6 @@ data class ServerSetupState(
      *
      * @author Dmitriy Moroz
      */
-
     fun withCredentials(value: AuthorizationCredentials): ServerSetupState = when (value) {
         is AuthorizationCredentials.HttpBasic -> copy(
             authType = AuthType.HTTP_BASIC,
@@ -247,7 +246,6 @@ data class ServerSetupState(
      *
      * @author Dmitriy Moroz
      */
-
     fun credentialsDomain(): AuthorizationCredentials = when (authType) {
         AuthType.ANONYMOUS -> AuthorizationCredentials.None
         AuthType.HTTP_BASIC -> AuthorizationCredentials.HttpBasic(login, password)
@@ -260,7 +258,6 @@ data class ServerSetupState(
      *
      * @author Dmitriy Moroz
      */
-
     fun withLocalCustomModelPath(value: String): ServerSetupState = when (mode) {
         ServerSource.LOCAL_MNN -> copy(
             localMnnCustomModelPath = value,
@@ -395,7 +392,6 @@ data class ServerSetupState(
      *
      * @author Dmitriy Moroz
      */
-
     fun withAllowCustomModel(value: Boolean): ServerSetupState {
 
         /**
@@ -474,10 +470,24 @@ data class ServerSetupState(
     sealed interface Modal {
         /**
          * Retains the destination provider until a conflicting batch replacement is confirmed.
+         *
          * @param type Provider whose missing models should replace current download work.
          * @author Dmitriy Moroz
          */
         data class SwitchModelDownloads(val type: LocalAiModel.Type) : Modal
+
+        /**
+         * Requires fresh understanding of sample-image behavior before a demo connection proceeds.
+         * Both acknowledgements belong to this dialog instance and are never persisted.
+         *
+         * @param hasUnderstoodDemo Whether sample-image behavior has been acknowledged.
+         * @param hasAgreedToAccurateFeedback Whether the demo-specific feedback request has been acknowledged.
+         * @author Dmitriy Moroz
+         */
+        data class DemoExplanation(
+            val hasUnderstoodDemo: Boolean = false,
+            val hasAgreedToAccurateFeedback: Boolean = false,
+        ) : Modal
 
         data object ConnectionUnverified : Modal
         data object None : Modal
@@ -676,7 +686,6 @@ internal fun List<LocalAiModel>.mapToCommonSetupModels(): List<ServerSetupState.
  *
  * @author Dmitriy Moroz
  */
-
 private fun List<ServerSetupState.LocalModel>.withCommonNewState(
     model: ServerSetupState.LocalModel?,
 ): List<ServerSetupState.LocalModel> =

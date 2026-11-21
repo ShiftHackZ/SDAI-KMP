@@ -46,6 +46,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsHeaderContent
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
@@ -100,8 +102,8 @@ data class DebugMenuScreenStrings(
  *
  * @param isUiDiagnosticsSupported Whether bounded UI capture is available in this build.
  * @param isUiDiagnosticsCapturing Whether diagnostic capture is currently active.
- * @param localDiffusionAllowCancel Current local ONNX cancellation preference.
- * @param localDiffusionSchedulerThread Localized name of the current scheduler.
+ * @param localDiffusionAllowCancel Saved legacy cancellation preference for local generation.
+ * @param localDiffusionSchedulerThread Localized saved legacy scheduler selection.
  * @param showWorkManagerSection Whether background-work controls are supported.
  * @param showLocalDiffusionSection Whether local ONNX preferences are supported.
  * @param showQualityAssuranceSection Whether malformed-data insertion controls are visible.
@@ -207,92 +209,113 @@ fun DebugMenuScreenContent(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
 
-            SettingsHeaderContent(
+            DebugMenuHeader(
                 modifier = headerModifier,
                 text = strings.mainSection,
+                helpMessage = Localization.string("debug_help_section_logs"),
             )
             DebugMenuItem(
                 modifier = itemModifier,
                 startIcon = Icons.AutoMirrored.Filled.TextSnippet,
                 text = strings.actionLogger,
+                helpMessage = Localization.string("debug_help_logs_view"),
                 onClick = { processAction(DebugMenuAction.ViewLogs) },
             )
             DebugMenuItem(
                 modifier = itemModifier,
                 startIcon = Icons.Default.CleaningServices,
                 text = strings.actionLoggerClear,
+                helpMessage = Localization.string("debug_help_logs_clear"),
                 onClick = { processAction(DebugMenuAction.ClearLogs) },
             )
 
             if (state.isUiDiagnosticsSupported) {
-                SettingsHeaderContent(text = strings.diagnosticSection, modifier = headerModifier)
-                Row(
-                    modifier = itemModifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-                        .defaultMinSize(minHeight = 50.dp)
-                        .toggleable(
-                            value = state.isUiDiagnosticsCapturing,
-                            role = Role.Switch,
-                            onValueChange = { shouldCapture ->
-                                processAction(if (shouldCapture) DebugMenuAction.StartUiCapture else DebugMenuAction.StopUiCapture)
-                            },
-                        )
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                DebugMenuHeader(
+                    text = strings.diagnosticSection, modifier = headerModifier,
+                    helpMessage = Localization.string("debug_help_section_diagnostics")
+                )
+                ContextualHelp(
+                    title = strings.diagnosticCapture,
+                    message = Localization.string("debug_help_capture"),
+                    modifier = itemModifier,
                 ) {
-                    Text(
-                        text = strings.diagnosticCapture,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(checked = state.isUiDiagnosticsCapturing, onCheckedChange = null)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
+                            .defaultMinSize(minHeight = 50.dp)
+                            .toggleable(
+                                value = state.isUiDiagnosticsCapturing,
+                                role = Role.Switch,
+                                onValueChange = { shouldCapture ->
+                                    processAction(if (shouldCapture) DebugMenuAction.StartUiCapture else DebugMenuAction.StopUiCapture)
+                                },
+                            )
+                            .padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = strings.diagnosticCapture,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(checked = state.isUiDiagnosticsCapturing, onCheckedChange = null)
+                    }
                 }
                 DebugMenuItem(
                     text = strings.diagnosticReset,
+                    helpMessage = Localization.string("debug_help_capture_reset"),
                     modifier = itemModifier,
                     onClick = { processAction(DebugMenuAction.ResetUiCapture) })
                 DebugMenuItem(
                     text = strings.diagnosticShare,
+                    helpMessage = Localization.string("debug_help_capture_share"),
                     modifier = itemModifier,
                     onClick = { processAction(DebugMenuAction.ShareUiCapture) })
             }
 
             if (state.showWorkManagerSection) {
-                SettingsHeaderContent(
+                DebugMenuHeader(
                     modifier = headerModifier,
                     text = strings.workManagerSection,
+                    helpMessage = Localization.string("debug_help_section_work"),
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Refresh,
                     text = strings.actionWorkRestartTxt2Img,
+                    helpMessage = Localization.string("debug_help_retry_txt"),
                     onClick = { processAction(DebugMenuAction.RestartTxt2Img) },
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Refresh,
                     text = strings.actionWorkRestartImg2Img,
+                    helpMessage = Localization.string("debug_help_retry_img"),
                     onClick = { processAction(DebugMenuAction.RestartImg2Img) },
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Cancel,
                     text = strings.actionWorkCancelAll,
+                    helpMessage = Localization.string("debug_help_cancel_work"),
                     onClick = { processAction(DebugMenuAction.CancelAllWork) },
                 )
             }
 
             if (state.showLocalDiffusionSection) {
-                SettingsHeaderContent(
+                DebugMenuHeader(
                     modifier = headerModifier,
                     text = strings.localDiffusionSection,
+                    helpMessage = Localization.string("debug_help_section_local"),
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.CancelScheduleSend,
                     text = strings.actionLocalDiffusionAllowCancel,
+                    helpMessage = Localization.string("debug_help_allow_cancel"),
                     onClick = { processAction(DebugMenuAction.ToggleLocalDiffusionCancel) },
                     showChevron = false,
                     endValueContent = {
@@ -309,20 +332,23 @@ fun DebugMenuScreenContent(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Construction,
                     text = strings.actionLocalDiffusionScheduler,
+                    helpMessage = Localization.string("debug_help_scheduler"),
                     onClick = { processAction(DebugMenuAction.RequestLocalDiffusionScheduler) },
                     endValueText = state.localDiffusionSchedulerThread,
                 )
             }
 
             if (state.showQualityAssuranceSection) {
-                SettingsHeaderContent(
+                DebugMenuHeader(
                     modifier = headerModifier,
                     text = strings.qualityAssuranceSection,
+                    helpMessage = Localization.string("debug_help_section_qa"),
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.SettingsEthernet,
                     text = strings.actionBadBase64,
+                    helpMessage = Localization.string("debug_help_bad_image"),
                     onClick = { processAction(DebugMenuAction.InsertBadBase64) },
                 )
             }
@@ -331,9 +357,23 @@ fun DebugMenuScreenContent(
 }
 
 
+/**
+ * Keeps developer help on the whole row while preserving its short-tap action.
+ *
+ * @param text Localized action title shared by the row and tooltip.
+ * @param helpMessage Localized description including any side effects.
+ * @param modifier Placement of the complete row and help anchor.
+ * @param startIcon Optional action icon, also shown in the tooltip title.
+ * @param showChevron Whether this action displays a navigation indicator.
+ * @param endValueText Current preference value displayed after the title.
+ * @param endValueContent Optional trailing control replacing the value and chevron.
+ * @param onClick Primary action performed only on a short tap.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun DebugMenuItem(
     text: String,
+    helpMessage: String,
     modifier: Modifier = Modifier,
     startIcon: ImageVector? = null,
     showChevron: Boolean = true,
@@ -341,62 +381,89 @@ private fun DebugMenuItem(
     endValueContent: (@Composable () -> Unit)? = null,
     onClick: () -> Unit = {},
 ) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-            .defaultMinSize(minHeight = 50.dp)
-            .clickable { onClick() }
-            .border(
-                width = 2.dp,
-                shape = RoundedCornerShape(16.dp),
-                color = Color.Transparent,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+    ContextualHelp(
+        title = text,
+        message = helpMessage,
+        titleStartIcon = startIcon,
+        modifier = modifier,
     ) {
         Row(
-            modifier = endValueContent
-                ?.let { Modifier.fillMaxWidth(0.8f) }
-                ?: Modifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
+                .defaultMinSize(minHeight = 50.dp)
+                .clickable { onClick() }
+                .border(
+                    width = 2.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.Transparent,
+                ),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Spacer(modifier = Modifier.width(8.dp))
-            startIcon?.let {
-                Icon(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    imageVector = it,
-                    contentDescription = null,
-                )
-            }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            endValueContent?.invoke() ?: run {
-                if (endValueText.isNotEmpty()) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(0.5f),
-                        text = endValueText,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Right,
-                    )
-                }
-                if (showChevron) {
+            Row(
+                modifier = endValueContent
+                    ?.let { Modifier.fillMaxWidth(0.8f) }
+                    ?: Modifier,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Spacer(modifier = Modifier.width(8.dp))
+                startIcon?.let {
                     Icon(
-                        modifier = Modifier.padding(horizontal = 6.dp),
-                        imageVector = Icons.Default.ChevronRight,
-                        tint = LocalContentColor.current,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        imageVector = it,
                         contentDescription = null,
                     )
                 }
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                endValueContent?.invoke() ?: run {
+                    if (endValueText.isNotEmpty()) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(0.5f),
+                            text = endValueText,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Right,
+                        )
+                    }
+                    if (showChevron) {
+                        Icon(
+                            modifier = Modifier.padding(horizontal = 6.dp),
+                            imageVector = Icons.Default.ChevronRight,
+                            tint = LocalContentColor.current,
+                            contentDescription = null,
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+/**
+ * Explains a developer-tool group without triggering any operation in that group.
+ *
+ * @param text Localized section title.
+ * @param helpMessage Localized purpose of this group of tools.
+ * @param modifier Placement of the heading and its help anchor.
+ * @author Dmitriy Moroz
+ */
+@Composable
+private fun DebugMenuHeader(
+    text: String,
+    helpMessage: String,
+    modifier: Modifier = Modifier,
+) {
+    ContextualHelp(title = text, message = helpMessage, modifier = modifier.fillMaxWidth()) {
+        SettingsHeaderContent(text = text)
     }
 }

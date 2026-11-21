@@ -1,18 +1,17 @@
-package com.shifthackz.aisdv1.presentation.generation.modal.history
+package com.shifthackz.aisdv1.presentation.components.modal.history
 
-import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
-import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultUseCase
-import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticComponent
+import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
+import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
+import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-
 
 private const val INPUT_HISTORY_FIRST_PAGE = 0
 

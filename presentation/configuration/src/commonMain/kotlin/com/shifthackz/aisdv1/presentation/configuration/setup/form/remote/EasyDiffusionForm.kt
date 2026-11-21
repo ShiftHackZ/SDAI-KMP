@@ -1,14 +1,14 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.form.remote
 
-import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
-import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
+import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 
 /**
  * Anonymous LAN setup with sharing/restart guidance and no unsupported authentication controls.
@@ -37,7 +37,7 @@ internal fun EasyDiffusionForm(
             onValueChange = { processIntent(ServerSetupIntent.UpdateEasyDiffusionUrl(it)) },
             label = strings.serverUrl,
             keyboardType = KeyboardType.Uri,
-            error = state.easyDiffusionUrlValidationError?.message(strings),
+            error = state.easyDiffusionUrlValidationError?.message(),
         )
     }
 }

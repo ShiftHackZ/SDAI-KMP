@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 
-package com.shifthackz.aisdv1.presentation.generation.modal.history
+package com.shifthackz.aisdv1.presentation.components.modal.history
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -35,20 +35,17 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
-import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
-import com.shifthackz.aisdv1.presentation.components.widget.image.rememberGalleryImage
-import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -60,9 +57,12 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
-import org.koin.mp.KoinPlatform.getKoin
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
+import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
+import com.shifthackz.aisdv1.presentation.components.widget.image.rememberGalleryImage
+import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * Hosts input-history selection in a fully expanded sheet while keeping dismissal caller-owned.

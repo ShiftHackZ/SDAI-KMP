@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -62,15 +61,15 @@ import com.shifthackz.aisdv1.presentation.components.widget.source.getName
  *  controls by exactly one system-bar height. Keep the platform-specific inset helpers in this scaffold
  *  path so future SDK or CI/Docker build changes do not silently reintroduce duplicated padding.
  *
- *  @param currentRoute Active route controlling drawer selection and home navigation visibility.
- *  @param router Shared owner of drawer visibility and destination navigation.
- *  @param buildInfoProvider Platform/build metadata shown in branding and provider labels.
- *  @param preferenceManager Observed settings controlling provider and developer destinations.
- *  @param content Route content receiving a modifier sized inside the scaffold padding.
- *  @param modifier Layout modifiers for the outer drawer/scaffold.
- *  @param shouldShowHomeChrome Whether the retained shell displays tabs and connectivity chrome.
+ * @param currentRoute Active route controlling drawer selection and home navigation visibility.
+ * @param router Shared owner of drawer visibility and destination navigation.
+ * @param buildInfoProvider Platform/build metadata shown in branding and provider labels.
+ * @param preferenceManager Observed settings controlling provider and developer destinations.
+ * @param content Route content receiving a modifier sized inside the scaffold padding.
+ * @param modifier Layout modifiers for the outer drawer/scaffold.
+ * @param shouldShowHomeChrome Whether the retained shell displays tabs and connectivity chrome.
  *
- *  @author Dmitriy Moroz
+ * @author Dmitriy Moroz
  */
 @Composable
 fun AppScaffold(
@@ -202,25 +201,29 @@ private fun appBottomNavigationItems(
     HomeNavigationBarItem(
         label = Localization.string("home_tab_txt_to_img"),
         selected = currentRoute == AppRoute.Home || currentRoute == AppRoute.TextToImage,
-        icon = { Icon(Icons.Default.TextFields, contentDescription = null) },
+        icon = Icons.Default.TextFields,
+        helpMessage = Localization.string("home_help_txt_to_img"),
         onClick = router::navigateToTextToImage,
     ),
     HomeNavigationBarItem(
         label = Localization.string("home_tab_img_to_img"),
         selected = currentRoute == AppRoute.ImageToImage,
-        icon = { Icon(Icons.Default.Image, contentDescription = null) },
+        icon = Icons.Default.Image,
+        helpMessage = Localization.string("home_help_img_to_img"),
         onClick = router::navigateToImageToImage,
     ),
     HomeNavigationBarItem(
         label = Localization.string("home_tab_gallery"),
         selected = currentRoute == AppRoute.Gallery,
-        icon = { Icon(Icons.Default.PhotoLibrary, contentDescription = null) },
+        icon = Icons.Default.PhotoLibrary,
+        helpMessage = Localization.string("home_help_gallery"),
         onClick = router::navigateToGallery,
     ),
     HomeNavigationBarItem(
         label = Localization.string("home_tab_settings"),
         selected = currentRoute == AppRoute.Settings,
-        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+        icon = Icons.Default.Settings,
+        helpMessage = Localization.string("home_help_settings"),
         onClick = router::navigateToSettings,
     ),
 )
@@ -238,7 +241,8 @@ private fun appDrawerItems(
             DrawerSheetItem(
                 label = Localization.string("title_text_to_image"),
                 selected = currentRoute == AppRoute.Home || currentRoute == AppRoute.TextToImage,
-                icon = { Icon(Icons.Default.TextFields, contentDescription = null) },
+                icon = Icons.Default.TextFields,
+                helpMessage = Localization.string("home_help_txt_to_img"),
                 onClick = { router.navigateToTextToImage() },
             ),
         )
@@ -246,7 +250,8 @@ private fun appDrawerItems(
             DrawerSheetItem(
                 label = Localization.string("title_image_to_image"),
                 selected = currentRoute == AppRoute.ImageToImage,
-                icon = { Icon(Icons.Default.Image, contentDescription = null) },
+                icon = Icons.Default.Image,
+                helpMessage = Localization.string("home_help_img_to_img"),
                 onClick = { router.navigateToImageToImage() },
             ),
         )
@@ -254,7 +259,8 @@ private fun appDrawerItems(
             DrawerSheetItem(
                 label = Localization.string("title_gallery"),
                 selected = currentRoute == AppRoute.Gallery || currentRoute is AppRoute.GalleryDetail,
-                icon = { Icon(Icons.Default.PhotoLibrary, contentDescription = null) },
+                icon = Icons.Default.PhotoLibrary,
+                helpMessage = Localization.string("home_help_gallery"),
                 onClick = { router.navigateToGallery() },
             ),
         )
@@ -263,7 +269,8 @@ private fun appDrawerItems(
                 DrawerSheetItem(
                     label = "${Localization.string("drawer_web_ui")} ($sourceName)",
                     selected = currentRoute == AppRoute.WebUi,
-                    icon = { Icon(Icons.Default.Web, contentDescription = null) },
+                    icon = Icons.Default.Web,
+                    helpMessage = Localization.string("home_help_web_ui"),
                     onClick = { router.navigateToWebUi() },
                 ),
             )
@@ -272,7 +279,8 @@ private fun appDrawerItems(
             DrawerSheetItem(
                 label = Localization.string("title_settings"),
                 selected = currentRoute == AppRoute.Settings,
-                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                icon = Icons.Default.Settings,
+                helpMessage = Localization.string("home_help_settings"),
                 onClick = { router.navigateToSettings() },
             ),
         )
@@ -280,7 +288,8 @@ private fun appDrawerItems(
             DrawerSheetItem(
                 label = Localization.string("settings_item_config"),
                 selected = currentRoute is AppRoute.Setup,
-                icon = { Icon(Icons.Default.SettingsEthernet, contentDescription = null) },
+                icon = Icons.Default.SettingsEthernet,
+                helpMessage = Localization.string("settings_help_configuration"),
                 onClick = { router.navigateToServerSetup(LaunchSource.SETTINGS) },
             ),
         )
@@ -289,7 +298,8 @@ private fun appDrawerItems(
                 DrawerSheetItem(
                     label = Localization.string("title_debug_menu"),
                     selected = currentRoute == AppRoute.Debug,
-                    icon = { Icon(Icons.Default.DeveloperMode, contentDescription = null) },
+                    icon = Icons.Default.DeveloperMode,
+                    helpMessage = Localization.string("settings_help_debug_menu"),
                     onClick = { router.navigateToDebugMenu() },
                 ),
             )

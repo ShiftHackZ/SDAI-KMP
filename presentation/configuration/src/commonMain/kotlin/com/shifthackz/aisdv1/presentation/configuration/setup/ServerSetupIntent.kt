@@ -16,13 +16,25 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceType
  * @author Dmitriy Moroz
  */
 sealed interface ServerSetupIntent : MviIntent {
-    /** Downloads missing models of the visible provider in catalog order. */
+    /**
+     * Downloads missing models of the visible provider in catalog order.
+     *
+     * @author Dmitriy Moroz
+     */
     data object DownloadAllModels : ServerSetupIntent
 
-    /** Replaces current provider downloads with the destination captured by the confirmation dialog. */
+    /**
+     * Replaces current provider downloads with the destination captured by the confirmation dialog.
+     *
+     * @author Dmitriy Moroz
+     */
     data object ConfirmModelDownloadSwitch : ServerSetupIntent
 
-    /** Stops the background batch while retaining completed models. */
+    /**
+     * Stops the background batch while retaining completed models.
+     *
+     * @author Dmitriy Moroz
+     */
     data object CancelModelDownloads : ServerSetupIntent
 
     /**
@@ -344,6 +356,37 @@ sealed interface ServerSetupIntent : MviIntent {
      * @author Dmitriy Moroz
      */
     data class LaunchUrl(val link: ServerSetupLink) : ServerSetupIntent
+
+    /**
+     * Updates understanding of the sample-image behavior in the current demo dialog only.
+     *
+     * @param isChecked Whether the first acknowledgement is checked.
+     * @author Dmitriy Moroz
+     */
+    data class AcknowledgeDemoBehavior(val isChecked: Boolean) : ServerSetupIntent
+
+    /**
+     * Updates agreement to keep feedback accurate about demo-mode sample images.
+     *
+     * @param isChecked Whether the second acknowledgement is checked.
+     * @author Dmitriy Moroz
+     */
+    data class AgreeToDemoFeedback(val isChecked: Boolean) : ServerSetupIntent
+
+    /**
+     * Continues configuration only when both acknowledgements are checked in the current dialog.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object ConfirmDemoExplanation : ServerSetupIntent
+
+    /**
+     * Closes the demo explanation and disables demo mode in the candidate configuration.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object CloseDemoExplanation : ServerSetupIntent
+
     data object MainButtonClick : ServerSetupIntent
     data object DismissDialog : ServerSetupIntent
     data object ShowSourceFilters : ServerSetupIntent

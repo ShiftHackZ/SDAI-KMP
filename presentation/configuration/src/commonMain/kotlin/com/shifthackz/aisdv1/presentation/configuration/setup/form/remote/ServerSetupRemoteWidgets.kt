@@ -20,12 +20,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformOutlinedTextField
+import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
+import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.AuthorizationStorageRecovery
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.message
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
-import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformOutlinedTextField
 
 @Composable
 internal fun FormTitle(
@@ -102,13 +102,13 @@ internal fun AuthFields(
             value = state.login,
             onValueChange = { processIntent(ServerSetupIntent.UpdateLogin(it)) },
             label = strings.login,
-            error = state.loginValidationError?.message(strings),
+            error = state.loginValidationError?.message(),
         )
         SetupTextField(
             value = state.password,
             onValueChange = { processIntent(ServerSetupIntent.UpdatePassword(it)) },
             label = strings.password,
-            error = state.passwordValidationError?.message(strings),
+            error = state.passwordValidationError?.message(),
             keyboardType = KeyboardType.Password,
             visualTransformation = if (state.passwordVisible) {
                 VisualTransformation.None

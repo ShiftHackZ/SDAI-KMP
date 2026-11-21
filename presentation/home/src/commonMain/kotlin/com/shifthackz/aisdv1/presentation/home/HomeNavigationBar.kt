@@ -1,15 +1,12 @@
 package com.shifthackz.aisdv1.presentation.home
 
-import androidx.compose.ui.Modifier
-
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpNavigationBarItem
 
 /**
  * Carries bottom navigation item data used by [AppScaffold].
@@ -17,6 +14,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBott
  * @param label Text displayed under the item icon.
  * @param selected Whether this item represents the current route.
  * @param icon Icon displayed above the item label.
+ * @param helpMessage Localized explanation of what this destination offers.
  * @param onClick Action invoked when the item is selected.
  *
  * @author Dmitriy Moroz
@@ -24,7 +22,8 @@ import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBott
 internal data class HomeNavigationBarItem(
     val label: String,
     val selected: Boolean,
-    val icon: @Composable () -> Unit,
+    val icon: ImageVector,
+    val helpMessage: String,
     val onClick: () -> Unit,
 )
 
@@ -55,18 +54,11 @@ internal fun HomeNavigationBar(
         modifier = modifier,
     ) {
         items.forEach { item ->
-            NavigationBarItem(
-                selected = item.selected,
-                label = {
-                    Text(
-                        text = item.label,
-                        color = LocalContentColor.current,
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors().copy(
-                    selectedIndicatorColor = MaterialTheme.colorScheme.primary,
-                ),
+            ContextualHelpNavigationBarItem(
+                title = item.label,
+                message = item.helpMessage,
                 icon = item.icon,
+                isSelected = item.selected,
                 onClick = item.onClick,
             )
         }

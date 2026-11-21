@@ -6,6 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.ui.graphics.Color
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -135,25 +138,13 @@ private fun GenerationBottomToolbarBottomLayer(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        fun localModifier(click: () -> Unit) = Modifier
-            .fillMaxWidth()
-            .align(Alignment.CenterVertically)
-            .clickable { click() }
-            .weight(1f)
-            .padding(vertical = 8.dp)
-            .padding(bottom = 26.dp)
-
         val localColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
-        val localStyle = MaterialTheme.typography.labelLarge
 
-        Text(
-            modifier = localModifier {
-                onExtraSelected(prompt, negativePrompt, ExtraType.Lora)
-            },
-            text = Localization.string("title_lora"),
-            textAlign = TextAlign.Center,
+        GenerationExtraShortcut(
+            title = Localization.string("title_lora"),
+            message = Localization.string("help_lora"),
             color = localColor,
-            style = localStyle,
+            onClick = { onExtraSelected(prompt, negativePrompt, ExtraType.Lora) },
         )
         Spacer(
             modifier = Modifier
@@ -161,14 +152,11 @@ private fun GenerationBottomToolbarBottomLayer(
                 .height(with(LocalDensity.current) { dividerHeight.toDp() })
                 .background(color = accentColor),
         )
-        Text(
-            modifier = localModifier {
-                onEmbeddingsSelected(prompt, negativePrompt)
-            },
-            text = Localization.string("title_txt_inversion_short"),
-            textAlign = TextAlign.Center,
+        GenerationExtraShortcut(
+            title = Localization.string("title_txt_inversion_short"),
+            message = Localization.string("help_inversion"),
             color = localColor,
-            style = localStyle,
+            onClick = { onEmbeddingsSelected(prompt, negativePrompt) },
         )
         if (mode == ServerSource.AUTOMATIC1111) {
             Spacer(
@@ -177,14 +165,43 @@ private fun GenerationBottomToolbarBottomLayer(
                     .height(with(LocalDensity.current) { dividerHeight.toDp() })
                     .background(color = accentColor),
             )
-            Text(
-                modifier = localModifier {
-                    onExtraSelected(prompt, negativePrompt, ExtraType.HyperNet)
-                },
-                text = Localization.string("title_hyper_net_short"),
-                textAlign = TextAlign.Center,
+            GenerationExtraShortcut(
+                title = Localization.string("title_hyper_net_short"),
+                message = Localization.string("help_hypernetwork"),
                 color = localColor,
-                style = localStyle,
+                onClick = { onExtraSelected(prompt, negativePrompt, ExtraType.HyperNet) },
+            )
+        }
+    }
+}
+
+/**
+ * Gives each prompt-extension shortcut an equal share of the row and explanatory long-press help.
+ *
+ * @param title Localized compact name of the extension.
+ * @param message Friendly explanation of the extension and selector.
+ * @param color Existing toolbar label color.
+ * @param onClick Opens the corresponding extension selector.
+ * @param modifier Placement of the weighted shortcut.
+ * @author Dmitriy Moroz
+ */
+@Composable
+private fun RowScope.GenerationExtraShortcut(
+    title: String,
+    message: String,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier.weight(1f)) {
+        ContextualHelp(title = title, message = message, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = title,
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+                    .padding(top = 8.dp, bottom = 34.dp),
+                textAlign = TextAlign.Center,
+                color = color,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }

@@ -1,20 +1,30 @@
 package com.shifthackz.aisdv1.presentation.components.di
 
+import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryViewModel
+import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserver
+import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserverImpl
 import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppThemeViewModel
 import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityViewModel
 import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionViewModel
 import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkViewModel
-import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserver
-import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserverImpl
 import org.koin.dsl.module
 
 /**
  * Owns the single storage-invalidation observer shared by configuration, settings and statistics.
- * Creates separate theme, engine-selection, connectivity and background-work widget ViewModels on demand.
+ * Creates separate history-selector, theme, engine-selection, connectivity and background-work ViewModels on demand.
  *
  * @author Dmitriy Moroz
  */
 val componentsViewModelModule = module {
+    factory {
+        InputHistoryViewModel(
+            diagnostics = get(),
+            dispatchersProvider = get(),
+            galleryReads = get(),
+            getGenerationResultUseCase = get(),
+        )
+    }
+
     single<StorageUsageObserver> {
         StorageUsageObserverImpl()
     }
