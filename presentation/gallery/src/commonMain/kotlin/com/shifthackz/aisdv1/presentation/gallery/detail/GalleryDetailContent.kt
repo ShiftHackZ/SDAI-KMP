@@ -2,9 +2,6 @@
 
 package com.shifthackz.aisdv1.presentation.gallery.detail
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,14 +17,11 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSubtree
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,15 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.extensions.shimmer
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.presentation.gallery.generated.resources.Res
-import com.shifthackz.aisdv1.presentation.gallery.generated.resources.ic_share
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.rememberGalleryImage
 import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
 import com.shifthackz.aisdv1.presentation.components.widget.image.ZoomableImage
 import com.shifthackz.aisdv1.presentation.components.widget.image.ZoomableImageSource
-import org.jetbrains.compose.resources.painterResource
 
 /**
  * Renders detail tabs, sampled image paging, metadata and caller-owned operation dialogs.
@@ -86,28 +77,11 @@ fun GalleryDetailScreenContent(
                         }
                     },
                     actions = {
-                        AnimatedVisibility(
-                            visible = state.content != null && state.selectedTab != GalleryDetailTab.INFO,
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                        ) {
-                            ContextualHelp(
-                                title = Localization.string("action_share_image"),
-                                message = Localization.string("help_detail_export"),
-                                titleStartIcon = Icons.Default.Share,
-                            ) {
-                                IconButton(
-                                    onClick = { processIntent(GalleryDetailIntent.Share.Image) },
-                                ) {
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        painter = painterResource(Res.drawable.ic_share),
-                                        contentDescription = Localization.string("action_share_image"),
-                                        tint = LocalContentColor.current,
-                                    )
-                                }
-                            }
-                        }
+                        GalleryDetailToolbarAction(
+                            selectedTab = state.selectedTab,
+                            isEnabled = state.content != null,
+                            processIntent = processIntent,
+                        )
                     },
                     windowInsets = persistentTopAppBarWindowInsets(),
                 )

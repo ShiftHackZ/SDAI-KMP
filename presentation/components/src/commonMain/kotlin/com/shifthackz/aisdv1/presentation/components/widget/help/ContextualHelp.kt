@@ -1,7 +1,5 @@
 package com.shifthackz.aisdv1.presentation.components.widget.help
 
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -20,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.TooltipState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,7 +39,6 @@ import kotlinx.coroutines.launch
  * @param message Natural-language explanation of the action or its enabled/disabled behavior.
  * @param modifier Placement and accessibility of the tooltip anchor.
  * @param titleStartIcon Optional decorative vector preceding the title at a smaller size than list-row icons.
- * @param canOpenOnClick Whether tapping the anchor opens help instead of a separate primary action.
  * @param content Original control retaining its normal short-tap behavior when help is long-press only.
  * @author Dmitriy Moroz
  */
@@ -51,20 +49,55 @@ fun ContextualHelp(
     message: String,
     modifier: Modifier = Modifier,
     titleStartIcon: ImageVector? = null,
-    canOpenOnClick: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val state = rememberTooltipState(isPersistent = true)
+    ContextualHelpAnchor(
+        title = title,
+        message = message,
+        modifier = modifier,
+        titleStartIcon = titleStartIcon,
+        state = rememberTooltipState(isPersistent = true),
+        content = content,
+    )
+}
+
+/**
+ * Shares tooltip rendering between Compose gestures and native controls that request help themselves.
+ *
+ * @param title Localized destination or setting name.
+ * @param message Localized explanation shown in the persistent popup.
+ * @param modifier Bounds and accessibility of the anchor.
+ * @param titleStartIcon Optional decorative icon beside the help title.
+ * @param state Popup lifecycle owned by the Compose wrapper or native-control adapter.
+ * @param shouldHandleGestures Whether Compose recognizes long press and hover on this anchor.
+ * @param shouldExposeAccessibilityAction Whether Compose supplies help or the native control owns it.
+ * @param content Anchor content, which may be an empty native-control accessibility placeholder.
+ * @author Dmitriy Moroz
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ContextualHelpAnchor(
+    title: String,
+    message: String,
+    modifier: Modifier = Modifier,
+    titleStartIcon: ImageVector? = null,
+    state: TooltipState = rememberTooltipState(isPersistent = true),
+    shouldHandleGestures: Boolean = true,
+    shouldExposeAccessibilityAction: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     val scope = rememberCoroutineScope()
     val showHelp = { scope.launch { state.show() }; Unit }
     val helpLabel = Localization.string("action_show_help", title)
     TooltipBox(
         modifier = modifier.semantics {
-            customActions = listOf(CustomAccessibilityAction(helpLabel) { showHelp(); true })
+            if (shouldExposeAccessibilityAction) {
+                customActions = listOf(CustomAccessibilityAction(helpLabel) { showHelp(); true })
+            }
         },
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         state = state,
-        enableUserInput = !canOpenOnClick,
+        enableUserInput = shouldHandleGestures,
         hasAction = true,
         onDismissRequest = { state.dismiss() },
         tooltip = {
@@ -103,13 +136,6 @@ fun ContextualHelp(
             }
         },
     ) {
-        if (canOpenOnClick) {
-            Box(
-                Modifier.combinedClickable(
-                    onClick = showHelp,
-                    onLongClick = showHelp
-                )
-            ) { content() }
-        } else content()
+        content()
     }
 }

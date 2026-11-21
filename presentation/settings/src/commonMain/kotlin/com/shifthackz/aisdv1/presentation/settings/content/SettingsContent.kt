@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.settings.content
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
 import com.shifthackz.aisdv1.presentation.settings.SettingsState
@@ -56,6 +58,7 @@ internal fun ContentSettingsState(
     LazyColumn(
         modifier = modifier.verticalScrollbar(listState).padding(horizontal = 16.dp),
         state = listState,
+        contentPadding = PaddingValues(bottom = LocalFloatingNavigationBarInset.current),
     ) {
         items(items = rows, key = { it.name }, contentType = { it.contentType() }) { row ->
             SettingsItemHelp(

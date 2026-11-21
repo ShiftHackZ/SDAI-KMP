@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlPreview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -21,6 +23,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Frames preview content inside a clipped portrait phone illustration.
+ * Controls inside the illustration use Compose rendering to follow its density and clipping.
  *
  * @param modifier Size, aspect ratio and placement supplied by the preview page.
  * @param content UI demonstration drawn inside the decorative phone bezel.
@@ -82,7 +85,9 @@ fun PhoneFrame(
                     )
                     .padding(6.dp),
             ) {
-                content()
+                CompositionLocalProvider(LocalPlatformControlPreview provides true) {
+                    content()
+                }
             }
         }
         Box(

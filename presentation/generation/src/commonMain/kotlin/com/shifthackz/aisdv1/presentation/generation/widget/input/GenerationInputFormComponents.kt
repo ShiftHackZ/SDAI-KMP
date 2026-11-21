@@ -15,7 +15,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpCircleIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -140,14 +140,14 @@ internal fun RowScope.GenerationSizeTextFieldsComponent(
         colors = textFieldColors,
     )
     Row(modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)) {
-        ContextualHelpIconButton(
+        ContextualHelpCircleIconButton(
             title = Localization.string("action_swap_dimensions"),
             message = Localization.string("help_swap_dimensions"),
             icon = Icons.Default.SwapHoriz,
             onClick = { onEvent(GenerationInputFormEvent.SwapDimensions) },
         )
         Box {
-            ContextualHelpIconButton(
+            ContextualHelpCircleIconButton(
                 title = Localization.string("action_aspect_ratio"),
                 message = Localization.string("help_aspect_ratio"),
                 icon = Icons.Default.AspectRatio,

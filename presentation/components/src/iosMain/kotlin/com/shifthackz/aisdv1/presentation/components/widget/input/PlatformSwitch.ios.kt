@@ -5,6 +5,8 @@ package com.shifthackz.aisdv1.presentation.components.widget.input
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlPreview
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
@@ -27,6 +29,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 /**
  * Uses UIKit switch gestures with shared state and Compose accessibility in scrollable settings rows.
  * The native view stays below the Compose canvas, so drawers, navigation and viewport clips cover it.
+ * Tutorial phone illustrations use a Compose switch to stay within their scaled preview bounds.
  *
  * @param isChecked Caller-owned value synchronized into UIKit on updates.
  * @param onCheckedChange Requested-value callback, or null when the parent row owns activation.
@@ -41,6 +44,15 @@ actual fun PlatformSwitch(
     modifier: Modifier,
     isEnabled: Boolean,
 ) {
+    if (LocalPlatformControlPreview.current) {
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            modifier = modifier,
+            enabled = isEnabled,
+        )
+        return
+    }
     if (!LocalMviVisibility.current) {
         Spacer(modifier.size(width = 52.dp, height = 48.dp))
         return

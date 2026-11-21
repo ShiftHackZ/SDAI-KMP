@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.core.navigation.AppRoute
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,6 +50,8 @@ import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityComposable
 import com.shifthackz.aisdv1.presentation.components.widget.source.getName
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.isPlatformNavigationBarFloating
 
 /**
  * Owns drawer synchronization, connectivity status and persistent home navigation around a content slot.
@@ -85,6 +89,8 @@ fun AppScaffold(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val settings by preferenceManager.observe().collectAsState(Settings())
     val shouldShowHomeNavigation = shouldShowHomeChrome && currentRoute.isHomeRoute()
+    val shouldFloatNavigation = isPlatformNavigationBarFloating &&
+            (currentRoute == AppRoute.Settings || currentRoute == AppRoute.Gallery)
 
     LaunchedEffect(isDrawerOpen) {
         when {
@@ -127,6 +133,8 @@ fun AppScaffold(
                             currentRoute = currentRoute,
                             router = router,
                         ),
+                        hasBackground = !shouldFloatNavigation,
+                        isObscured = !drawerState.isClosed || drawerState.targetValue != DrawerValue.Closed,
                     )
                 }
             },
@@ -140,22 +148,26 @@ fun AppScaffold(
                 )
             },
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-            ) {
-                if (shouldShowHomeNavigation) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        ConnectivityComposable()
+            val floatingInset =
+                if (shouldFloatNavigation) paddingValues.calculateBottomPadding() else 0.dp
+            CompositionLocalProvider(LocalFloatingNavigationBarInset provides floatingInset) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(if (shouldFloatNavigation) PaddingValues(top = paddingValues.calculateTopPadding()) else paddingValues),
+                ) {
+                    if (shouldShowHomeNavigation) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surface),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            ConnectivityComposable()
+                        }
                     }
+                    content(Modifier.fillMaxSize())
                 }
-                content(Modifier.fillMaxSize())
             }
         }
     }

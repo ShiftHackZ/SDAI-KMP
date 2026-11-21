@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
 import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkWidget
 import kotlin.random.Random
 
@@ -220,7 +221,12 @@ fun GalleryScreenContent(
                         .padding(top = paddingValues.calculateTopPadding())
                         .verticalScrollbar(listState),
                     columns = GridCells.Fixed(state.grid.size),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        top = 16.dp,
+                        end = 16.dp,
+                        bottom = 16.dp + LocalFloatingNavigationBarInset.current
+                    ),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     state = listState,

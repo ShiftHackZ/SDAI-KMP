@@ -1,31 +1,21 @@
 package com.shifthackz.aisdv1.presentation.gallery.detail
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
+import androidx.compose.ui.graphics.Color
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpCircleIconButton
 
 /**
- * Keeps compact gallery-action geometry with persistent help and caller-owned primary behavior.
+ * Wraps a platform circular icon action with persistent long-press help and an accessible name.
  *
  * @param icon Vector shared by the action and help title.
- * @param label Localized compact action name.
+ * @param label Localized action name used by accessibility and help.
  * @param helpMessage Localized explanation including any data changes.
  * @param onClick Requests the operation on a short tap.
  * @param modifier Size and placement of the complete action anchor.
+ * @param tint Icon color for normal, selected or destructive actions.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -35,32 +25,14 @@ internal fun GalleryDetailActionButton(
     helpMessage: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    Box(modifier) {
-        ContextualHelp(
-            title = label,
-            message = helpMessage,
-            titleStartIcon = icon,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            OutlinedButton(
-                modifier = Modifier.fillMaxWidth().height(42.dp),
-                contentPadding = PaddingValues(horizontal = 8.dp),
-                onClick = onClick,
-            ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                )
-                Text(
-                    modifier = Modifier.padding(start = 6.dp),
-                    text = label,
-                    color = LocalContentColor.current,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-    }
+    ContextualHelpCircleIconButton(
+        title = label,
+        message = helpMessage,
+        icon = icon,
+        onClick = onClick,
+        modifier = modifier,
+        tint = tint,
+    )
 }

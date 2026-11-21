@@ -1,12 +1,10 @@
 package com.shifthackz.aisdv1.presentation.home
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpNavigationBarItem
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformNavigationBar
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformNavigationBarItem
 
 /**
  * Carries bottom navigation item data used by [AppScaffold].
@@ -30,7 +28,7 @@ internal data class HomeNavigationBarItem(
 /**
  * Renders the app bottom navigation bar.
  *
- * The `windowInsets` value is routed through `persistentBottomBarWindowInsets()` on purpose. A plain
+ * Platform rendering retains the persistent system-inset policy. A plain
  * `WindowInsets.navigationBars` value looks correct on Android 15+ edge-to-edge devices and on iOS,
  * but it is wrong on older Android devices whose content window is already laid out above the system
  * navigation bar. That mismatch made release builds on a Pixel 3a XL with three-button navigation show
@@ -40,6 +38,8 @@ internal data class HomeNavigationBarItem(
  *
  * @param items Route destinations with caller-owned selection and click handling.
  * @param modifier Layout modifiers for the persistent navigation bar.
+ * @param hasBackground Whether the native bar reserves an opaque background for fixed screen actions.
+ * @param isObscured Whether the drawer covers the native navigation surface.
  *
  * @author Dmitriy Moroz
  */
@@ -47,20 +47,21 @@ internal data class HomeNavigationBarItem(
 internal fun HomeNavigationBar(
     items: List<HomeNavigationBarItem>,
     modifier: Modifier = Modifier,
+    hasBackground: Boolean = true,
+    isObscured: Boolean = false,
 ) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        windowInsets = persistentBottomBarWindowInsets(),
-        modifier = modifier,
-    ) {
-        items.forEach { item ->
-            ContextualHelpNavigationBarItem(
-                title = item.label,
-                message = item.helpMessage,
+    PlatformNavigationBar(
+        items = items.map { item ->
+            PlatformNavigationBarItem(
+                label = item.label,
                 icon = item.icon,
                 isSelected = item.selected,
+                helpMessage = item.helpMessage,
                 onClick = item.onClick,
             )
-        }
-    }
+        },
+        modifier = modifier,
+        hasBackground = hasBackground,
+        isObscured = isObscured,
+    )
 }

@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Shape
  * @param onClick Receives a single activation when the action is enabled.
  * @param modifier Layout and accessibility modifiers for the entire button.
  * @param isEnabled Whether pointer and accessibility activation are available.
- * @param shape Shared outline used to clip the platform surface.
+ * @param shape Button outline; UIKit uses its corner radius with a native continuous curve.
  * @param contentPadding Shared spacing around the label and icons.
  * @param content Compose label, icons or progress content with the shared label text style.
  * @author Dmitriy Moroz

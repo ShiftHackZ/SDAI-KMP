@@ -2,7 +2,6 @@
 
 package com.shifthackz.aisdv1.presentation.components.widget.action
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -26,23 +25,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.Foundation.NSProcessInfo
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlPreview
 
 /**
  * Keeps Compose content, measurement, activation and accessibility above a decorative UIKit surface.
  * Older iOS releases use the existing Material renderer without calling unavailable glass APIs.
+ * Density-scaled tutorial illustrations also use that renderer so native cutouts cannot obscure them.
  *
  * @param onClick Receives enabled button activation, including accessibility activation.
  * @param modifier Layout and semantics for the complete button.
  * @param isEnabled Whether this action may be activated.
- * @param shape Shared button outline for native surface clipping.
+ * @param shape Supplies the corner radius of the native button surface.
  * @param contentPadding Shared label/icon spacing.
- * @param isOutlined Whether to use the secondary glass appearance and shared outline.
+ * @param isOutlined Whether to use the secondary glass appearance.
  * @param content Shared label, icon or progress composition.
  * @author Dmitriy Moroz
  */
@@ -59,7 +59,7 @@ internal fun IosActionButton(
     val hasGlassSupport = remember {
         NSProcessInfo.processInfo.operatingSystemVersion.useContents { majorVersion >= 26 }
     }
-    if (!hasGlassSupport) {
+    if (!hasGlassSupport || LocalPlatformControlPreview.current) {
         if (isOutlined) {
             MaterialOutlinedButton(
                 onClick,
@@ -86,10 +86,8 @@ internal fun IosActionButton(
     val colors =
         if (isOutlined) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors()
     val contentColor = if (isEnabled) colors.contentColor else colors.disabledContentColor
-    val border = if (isOutlined) ButtonDefaults.outlinedButtonBorder(isEnabled) else null
     Box(
-        modifier = modifier.minimumInteractiveComponentSize().clip(shape)
-            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+        modifier = modifier.minimumInteractiveComponentSize()
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

@@ -18,7 +18,8 @@ import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 
 /**
- * Explains the Beta status through a compact badge with tap, long-press and accessible help.
+ * Explains Beta status on long press while short taps reach the containing setting's action.
+ * The 48dp help target has no separate click indication around the smaller visual badge.
  *
  * @param modifier Compose modifier applied to the badge.
  *
@@ -32,7 +33,6 @@ fun BetaBadge(
         title = Localization.string("provider_readiness_beta"),
         message = Localization.string("settings_help_beta"),
         modifier = modifier,
-        canOpenOnClick = true,
     ) {
         Box(
             Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
