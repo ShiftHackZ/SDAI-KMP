@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.data.remote
 
+import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
+import kotlin.coroutines.coroutineContext
+
 import com.shifthackz.aisdv1.core.common.extensions.fixUrlSlashes
 import com.shifthackz.aisdv1.data.mappers.encodeBase64NoWrap
 import com.shifthackz.aisdv1.data.mappers.mapKtorImageToImageCloudResult
@@ -17,14 +20,15 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
- * Coordinates `KtorSwarmUiGenerationRemoteDataSource` behavior in the SDAI data layer.
+ * Submits captured SwarmUI requests and maps downloaded results to domain generation records.
+ * @param api Provider generation and image download transport.
  *
  * @throws IllegalStateException when the delegated operation cannot complete.
  * @author Dmitriy Moroz
  */
 class KtorSwarmUiGenerationRemoteDataSource(
     /**
-     * Exposes the `api` value used by the SDAI data layer.
+     * Provider transport used for generation, cancellation and progress reads.
      *
      * @throws IllegalStateException when the delegated operation cannot complete.
      * @author Dmitriy Moroz
@@ -33,13 +37,13 @@ class KtorSwarmUiGenerationRemoteDataSource(
 ) : SwarmUiGenerationDataSource.Remote {
 
     /**
-     * Executes the `textToImage` step in the SDAI data layer.
+     * Submits one text generation request and returns the provider results.
      *
-     * @param baseUrl base url value consumed by the API.
+     * @param baseUrl Captured provider server root.
      * @param sessionId session id value consumed by the API.
      * @param model model value consumed by the API.
-     * @param credentials credentials value consumed by the API.
-     * @param payload generation payload used by the operation.
+     * @param credentials Captured credentials for this provider connection.
+     * @param payload Immutable generation inputs mapped to the provider request.
      * @author Dmitriy Moroz
      */
     override suspend fun textToImage(
@@ -58,13 +62,13 @@ class KtorSwarmUiGenerationRemoteDataSource(
     }
 
     /**
-     * Executes the `imageToImage` step in the SDAI data layer.
+     * Submits one image transformation request and returns the provider results.
      *
-     * @param baseUrl base url value consumed by the API.
+     * @param baseUrl Captured provider server root.
      * @param sessionId session id value consumed by the API.
      * @param model model value consumed by the API.
-     * @param credentials credentials value consumed by the API.
-     * @param payload generation payload used by the operation.
+     * @param credentials Captured credentials for this provider connection.
+     * @param payload Immutable generation inputs mapped to the provider request.
      * @author Dmitriy Moroz
      */
     override suspend fun imageToImage(
@@ -83,12 +87,12 @@ class KtorSwarmUiGenerationRemoteDataSource(
     }
 
     /**
-     * Executes the `generate` step in the SDAI data layer.
+     * Submits one SwarmUI image, then downloads its final output through the normal result path.
      *
-     * @param baseUrl base url value consumed by the API.
-     * @param credentials credentials value consumed by the API.
-     * @param payload generation payload used by the operation.
-     * @param request request value consumed by the API.
+     * @param baseUrl Captured provider server root.
+     * @param credentials Captured credentials for this provider connection.
+     * @param payload Immutable generation inputs mapped to the provider request.
+     * @param request Serialized generation parameters and submission identity.
      * @return Result produced by `generate`.
      * @throws IllegalStateException when the delegated operation cannot complete.
      * @author Dmitriy Moroz
@@ -100,7 +104,10 @@ class KtorSwarmUiGenerationRemoteDataSource(
         request: SwarmUiGenerationRequest,
     ): Pair<T, String> {
         val authorization = credentials.mapToBasicHttpAuthorization()
-        val response = api.generate(baseUrl, request, authorization)
+        val context = coroutineContext[RemoteGenerationProgressContext]
+        context?.report?.invoke(null)
+        val response = if (context == null) api.generate(baseUrl, request, authorization)
+        else api.generateWithProgress(baseUrl, request, authorization) { context.report(it) }
         val imageUrl = response.images
             ?.firstOrNull()
             ?.let { endpoint -> "$baseUrl/$endpoint".fixUrlSlashes() }
@@ -112,7 +119,7 @@ class KtorSwarmUiGenerationRemoteDataSource(
     }
 
     /**
-     * Executes the `currentTimeMillis` step in the SDAI data layer.
+     * Timestamps the completed generation using epoch milliseconds.
      *
      * @author Dmitriy Moroz
      */

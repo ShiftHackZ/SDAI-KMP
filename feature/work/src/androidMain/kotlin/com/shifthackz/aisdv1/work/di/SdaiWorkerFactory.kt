@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.work.di
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
 
 import android.content.Context
@@ -34,6 +36,7 @@ import com.shifthackz.aisdv1.work.task.TextToImageTask
  * @param preferenceManager Supplies legacy source and cancellation settings.
  * @param textToImageUseCase Executes captured text-to-image requests.
  * @param imageToImageUseCase Executes existing image-to-image requests.
+ * @param remoteGenerationProgressGateway Owner-scoped remote job/workflow measurements.
  * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
  * @param interruptWorkerGenerationUseCase Cancels only work owned by the requested worker.
@@ -51,6 +54,7 @@ class SdaiWorkerFactory(
     private val textToImageUseCase: TextToImageUseCase,
     private val imageToImageUseCase: ImageToImageUseCase,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
+    private val remoteGenerationProgressGateway: RemoteGenerationProgressGateway,
     private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val activityIntentProvider: ActivityIntentProvider,
@@ -94,6 +98,7 @@ class SdaiWorkerFactory(
                 preferenceManager = preferenceManager,
                 textToImageUseCase = textToImageUseCase,
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
+                remoteGenerationProgressGateway = remoteGenerationProgressGateway,
                 observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
                 interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
             )
@@ -110,6 +115,7 @@ class SdaiWorkerFactory(
                 preferenceManager = preferenceManager,
                 imageToImageUseCase = imageToImageUseCase,
                 observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
+                remoteGenerationProgressGateway = remoteGenerationProgressGateway,
                 observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
                 interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
             )

@@ -1,0 +1,220 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SDAI generation progress integration",
+    "version": "1.0.0",
+    "description": "Consumed remote progress contracts and task identity extension. Unconsumed upstream fields remain optional."
+  },
+  "paths": {
+    "/sdapi/v1/progress": {
+      "get": {
+        "summary": "Read AUTOMATIC1111 job progress",
+        "description": "Only measurements whose current_task matches this submission may be displayed.",
+        "parameters": [
+          {
+            "name": "skip_current_image",
+            "in": "query",
+            "description": "Avoid preview encoding and transfer.",
+            "schema": {
+              "type": "boolean",
+              "description": "Whether previews are omitted.",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current job progress metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Automatic1111ProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/API/GenerateText2ImageWS": {
+      "get": {
+        "summary": "Generate with SwarmUI workflow progress",
+        "description": "Upgrade to WebSocket, send one SwarmUiGenerationRequest and receive SwarmUiProgressFrame messages until socket_intention close. Generation is never replayed after submission.",
+        "x-websocket-request": {
+          "$ref": "#/components/schemas/SwarmUiGenerationRequest"
+        },
+        "x-websocket-message": {
+          "$ref": "#/components/schemas/SwarmUiProgressFrame"
+        },
+        "responses": {
+          "101": {
+            "description": "WebSocket connection established."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Automatic1111ProgressResponse": {
+        "type": "object",
+        "description": "Progress metadata consumed by SDAI. Unconsumed upstream state and preview fields are ignored.",
+        "properties": {
+          "progress": {
+            "type": "number",
+            "description": "Server job completion fraction including batch iterations.",
+            "nullable": true
+          },
+          "current_task": {
+            "type": "string",
+            "description": "Active task identity echoed from force_task_id; absent on older servers.",
+            "nullable": true
+          }
+        }
+      },
+      "Automatic1111TaskIdentity": {
+        "type": "object",
+        "description": "Additional field on existing text-to-image and image-to-image request contracts.",
+        "properties": {
+          "force_task_id": {
+            "type": "string",
+            "description": "Unique client task identity for correlating job progress.",
+            "nullable": true
+          }
+        }
+      },
+      "SwarmUiWorkflowProgress": {
+        "type": "object",
+        "description": "Workflow completion independent of node-local sampling progress.",
+        "properties": {
+          "overall_percent": {
+            "type": "number",
+            "description": "Server workflow completion fraction from zero to one.",
+            "nullable": true
+          }
+        }
+      },
+      "SwarmUiProgressFrame": {
+        "type": "object",
+        "description": "WebSocket fields consumed during generation. Other upstream status fields are ignored.",
+        "properties": {
+          "gen_progress": {
+            "description": "Current workflow measurement.",
+            "$ref": "#/components/schemas/SwarmUiWorkflowProgress"
+          },
+          "image": {
+            "type": "string",
+            "description": "Final generated image path or data URL.",
+            "nullable": true
+          },
+          "batch_index": {
+            "type": "string",
+            "description": "Image identity; negative indices identify grids and previews.",
+            "nullable": true
+          },
+          "discard_indices": {
+            "type": "array",
+            "description": "Image identities discarded during postprocessing.",
+            "items": {
+              "type": "integer",
+              "description": "Discarded image identity."
+            }
+          },
+          "error": {
+            "type": "string",
+            "description": "Server-reported generation failure message.",
+            "nullable": true
+          },
+          "error_id": {
+            "type": "string",
+            "description": "Machine-readable error, including invalid_session_id.",
+            "nullable": true
+          },
+          "socket_intention": {
+            "type": "string",
+            "description": "The value close marks completion of generation and postprocessing.",
+            "nullable": true
+          }
+        }
+      },
+      "SwarmUiGenerationRequest": {
+        "type": "object",
+        "description": "Generation input sent once after WebSocket upgrade.",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Session identity returned by GetNewSession."
+          },
+          "model": {
+            "type": "string",
+            "description": "Selected checkpoint identifier."
+          },
+          "initimage": {
+            "type": "string",
+            "description": "Input image data URL for image-to-image.",
+            "nullable": true
+          },
+          "initimagecreativity": {
+            "type": "string",
+            "description": "Image-to-image denoising strength as a decimal string.",
+            "nullable": true
+          },
+          "images": {
+            "type": "integer",
+            "description": "Number of images in one submission."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Positive generation prompt."
+          },
+          "negativeprompt": {
+            "type": "string",
+            "description": "Negative generation prompt."
+          },
+          "width": {
+            "type": "integer",
+            "description": "Output width in pixels."
+          },
+          "height": {
+            "type": "integer",
+            "description": "Output height in pixels."
+          },
+          "seed": {
+            "type": "string",
+            "description": "Random seed as a decimal string.",
+            "nullable": true
+          },
+          "variationseed": {
+            "type": "string",
+            "description": "Variation seed as a decimal string.",
+            "nullable": true
+          },
+          "variationseedstrength": {
+            "type": "string",
+            "description": "Variation blending strength as a decimal string.",
+            "nullable": true
+          },
+          "cfgscale": {
+            "type": "number",
+            "description": "Classifier-free guidance scale.",
+            "nullable": true
+          },
+          "steps": {
+            "type": "integer",
+            "description": "Requested denoising iterations."
+          }
+        },
+        "required": [
+          "session_id",
+          "model",
+          "images",
+          "prompt",
+          "negativeprompt",
+          "width",
+          "height",
+          "steps"
+        ]
+      }
+    }
+  }
+}

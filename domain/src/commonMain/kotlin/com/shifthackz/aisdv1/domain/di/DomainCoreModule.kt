@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.domain.di
 
+import com.shifthackz.aisdv1.domain.usecase.generation.TrackRemoteGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.TrackRemoteGenerationUseCaseImpl
+
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCaseImpl
@@ -283,6 +286,7 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDomainModule = module {
+    factory<TrackRemoteGenerationUseCase> { TrackRemoteGenerationUseCaseImpl(get(), get()) }
     factory<ObserveGenerationPerformanceUseCase> {
         ObserveGenerationPerformanceUseCaseImpl(get(), get(), get())
     }
@@ -462,6 +466,7 @@ val coreDomainModule = module {
     }
     factory<TextToImageUseCase> {
         TextToImageUseCaseImpl(
+            trackRemoteGenerationUseCase = get(),
             generationRestoreGate = get(),
             generateEasyDiffusionUseCase = get(),
             captureEasyDiffusionConnectionUseCase = get(),
@@ -486,6 +491,7 @@ val coreDomainModule = module {
     }
     factory<ImageToImageUseCase> {
         ImageToImageUseCaseImpl(
+            trackRemoteGenerationUseCase = get(),
             generationRestoreGate = get(),
             generateEasyDiffusionUseCase = get(),
             captureEasyDiffusionConnectionUseCase = get(),

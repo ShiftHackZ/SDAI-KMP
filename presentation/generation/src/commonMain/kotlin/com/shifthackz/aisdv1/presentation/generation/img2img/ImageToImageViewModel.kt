@@ -1,5 +1,8 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+import com.shifthackz.aisdv1.domain.entity.LocalDiffusionStatus
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
 import com.shifthackz.aisdv1.presentation.generation.model.toGenerationModal
 import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
@@ -32,6 +35,7 @@ import com.shifthackz.aisdv1.domain.usecase.generation.GetRandomImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.SaveGenerationResultUseCase
 import com.shifthackz.aisdv1.domain.usecase.sdscript.IsADetailerAvailableUseCase
@@ -71,8 +75,10 @@ import kotlinx.coroutines.withContext
  * @param saveGenerationResultUseCase Gives unsaved outputs durable gallery identities when saving is requested.
  * @param saveLastResultToCacheUseCase Retains unsaved selected outputs for detail and report navigation.
  * @param interruptSourceGenerationUseCase Requests cancellation of the source captured by a dispatched foreground operation.
+ * @param remoteGenerationProgressGateway Request-correlated remote job/workflow measurements.
  * @param observeEasyDiffusionProgressUseCase Supplies queue and sampling progress for Easy Diffusion progress dialogs.
  * @param observeHordeProcessStatusUseCase Supplies Horde queue status displayed by communicating dialogs.
+ * @param observeCoreMlProcessStatusUseCase Reports native Core ML sampling counters.
  * @param observeLocalDiffusionProcessStatusUseCase Supplies local-diffusion status displayed by non-Easy-Diffusion generating dialogs.
  * @param preferenceManager Observes provider and form settings and persists steps, guidance scale and edited ArliAI model selection.
  * @param backgroundTaskManager Schedules the captured request when background generation is selected and supported.
@@ -110,8 +116,10 @@ class ImageToImageViewModel(
     private val saveGenerationResultUseCase: SaveGenerationResultUseCase,
     private val saveLastResultToCacheUseCase: SaveLastResultToCacheUseCase,
     private val interruptSourceGenerationUseCase: InterruptSourceGenerationUseCase,
+    private val remoteGenerationProgressGateway: RemoteGenerationProgressGateway,
     private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
+    private val observeCoreMlProcessStatusUseCase: ObserveCoreMlProcessStatusUseCase,
     private val observeLocalDiffusionProcessStatusUseCase: ObserveLocalDiffusionProcessStatusUseCase,
     private val preferenceManager: PreferenceManager,
     private val backgroundTaskManager: BackgroundTaskManager,
@@ -413,6 +421,23 @@ class ImageToImageViewModel(
 
     private fun observeGenerationProgress() {
         launch(dispatchersProvider.immediate) {
+            remoteGenerationProgressGateway.observe().collect { progress ->
+                updateFormState { state ->
+                    val modal = state.screenModal
+                    val active =
+                        progress.lastOrNull { it.ownerId == null && it.source == state.mode }
+                    if (modal is GenerationModal.Generating &&
+                        state.mode in setOf(ServerSource.AUTOMATIC1111, ServerSource.SWARM_UI)
+                    ) {
+                        state.copy(
+                            screenModal = modal.copy(
+                                status = active?.percentage?.let { LocalDiffusionStatus(it, 100) }
+                            ))
+                    } else state
+                }
+            }
+        }
+        launch(dispatchersProvider.immediate) {
             observeEasyDiffusionProgressUseCase().collect { progress ->
                 updateFormState { state ->
                     if (state.mode == ServerSource.EASY_DIFFUSION && progress.isRunning &&
@@ -436,10 +461,20 @@ class ImageToImageViewModel(
             }
         }
         launch(dispatchersProvider.immediate) {
+            observeCoreMlProcessStatusUseCase().collect { status ->
+                updateFormState { state ->
+                    val modal = state.screenModal
+                    if (modal is GenerationModal.Generating && state.mode == ServerSource.LOCAL_APPLE_CORE_ML)
+                        state.copy(screenModal = modal.copy(status = status))
+                    else state
+                }
+            }
+        }
+        launch(dispatchersProvider.immediate) {
             observeLocalDiffusionProcessStatusUseCase().collect { status ->
                 updateFormState { state ->
                     val modal = state.screenModal
-                    if (modal is GenerationModal.Generating && state.mode != ServerSource.EASY_DIFFUSION) {
+                    if (modal is GenerationModal.Generating && state.mode == ServerSource.LOCAL_MICROSOFT_ONNX) {
                         state.copy(screenModal = modal.copy(status = status))
                     } else {
                         state

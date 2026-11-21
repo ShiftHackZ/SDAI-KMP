@@ -49,6 +49,10 @@ class ImageToImageUseCaseImplTest {
     private val generateEasyDiffusion = mockk<GenerateEasyDiffusionUseCase>()
     private val captureEasyDiffusion = mockk<CaptureEasyDiffusionConnectionUseCase>()
     private val useCase = ImageToImageUseCaseImpl(
+        trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
+            mockk(relaxed = true),
+            mockk(relaxed = true)
+        ),
         generationRestoreGate = ImmediateGenerationRestoreGate(),
         generateEasyDiffusionUseCase = generateEasyDiffusion,
         captureEasyDiffusionConnectionUseCase = captureEasyDiffusion,

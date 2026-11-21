@@ -5,168 +5,173 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 /**
- * Carries `ImageToImageRequest` data through the SDAI network layer.
+ * AUTOMATIC1111 image transformation parameters, including a client identity for progress correlation.
  *
  * @author Dmitriy Moroz
  */
 @Serializable
 data class ImageToImageRequest(
     /**
-     * Exposes the `initImages` value used by the SDAI network layer.
+     * Client task identity echoed by request-correlated progress on supported servers.
+     * @author Dmitriy Moroz
+     */
+    @SerialName("force_task_id") val forceTaskId: String? = null,
+    /**
+     * Base64 input images for the image-to-image request.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("init_images")
     val initImages: List<String>,
     /**
-     * Exposes the `includeInitImages` value used by the SDAI network layer.
+     * Whether the response includes the original input images.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("include_init_images")
     val includeInitImages: Boolean,
     /**
-     * Exposes the `mask` value used by the SDAI network layer.
+     * Optional base64 inpainting mask.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("mask")
     val mask: String?,
     /**
-     * Exposes the `inPaintingMaskInvert` value used by the SDAI network layer.
+     * Mask inversion mode interpreted by the server.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("inpainting_mask_invert")
     val inPaintingMaskInvert: Int?,
     /**
-     * Exposes the `inPaintFullResPadding` value used by the SDAI network layer.
+     * Extra pixels surrounding the selected inpainting region.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("inpaint_full_res_padding")
     val inPaintFullResPadding: Int?,
     /**
-     * Exposes the `inPaintingFill` value used by the SDAI network layer.
+     * Server inpainting fill mode.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("inpainting_fill")
     val inPaintingFill: Int?,
     /**
-     * Exposes the `inPaintFullRes` value used by the SDAI network layer.
+     * Whether inpainting uses the full-resolution masked region.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("inpaint_full_res")
     val inPaintFullRes: Boolean?,
     /**
-     * Exposes the `maskBlur` value used by the SDAI network layer.
+     * Blur radius applied to the inpainting mask.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("mask_blur")
     val maskBlur: Int?,
     /**
-     * Exposes the `denoisingStrength` value used by the SDAI network layer.
+     * Amount of input image noise replaced during image-to-image sampling.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("denoising_strength")
     val denoisingStrength: Float,
     /**
-     * Exposes the `prompt` value used by the SDAI network layer.
+     * Positive generation prompt sent to the provider.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("prompt")
     val prompt: String,
     /**
-     * Exposes the `negativePrompt` value used by the SDAI network layer.
+     * Negative prompt describing content to avoid.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("negative_prompt")
     val negativePrompt: String,
     /**
-     * Exposes the `steps` value used by the SDAI network layer.
+     * Requested denoising iteration count.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("steps")
     val steps: Int,
     /**
-     * Exposes the `cfgScale` value used by the SDAI network layer.
+     * Classifier-free guidance scale.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("cfg_scale")
     val cfgScale: Float,
     /**
-     * Exposes the `width` value used by the SDAI network layer.
+     * Output image width in pixels.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("width")
     val width: Int,
     /**
-     * Exposes the `height` value used by the SDAI network layer.
+     * Output image height in pixels.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("height")
     val height: Int,
     /**
-     * Exposes the `batchSize` value used by the SDAI network layer.
+     * Number of images generated concurrently in the server batch.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("batch_size")
     val batchSize: Int,
     /**
-     * Exposes the `restoreFaces` value used by the SDAI network layer.
+     * Whether the server applies face restoration after sampling.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("restore_faces")
     val restoreFaces: Boolean,
     /**
-     * Exposes the `seed` value used by the SDAI network layer.
+     * Primary random seed in the provider request format.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("seed")
     val seed: String?,
     /**
-     * Exposes the `subSeed` value used by the SDAI network layer.
+     * Variation seed in the provider request format.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("subseed")
     val subSeed: String?,
     /**
-     * Exposes the `subSeedStrength` value used by the SDAI network layer.
+     * Blend strength between the primary and variation seeds.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("subseed_strength")
     val subSeedStrength: Float?,
     /**
-     * Exposes the `samplerIndex` value used by the SDAI network layer.
+     * Server sampler identifier retained for compatibility with older AUTOMATIC1111 versions.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("sampler_index")
     val samplerIndex: String,
     /**
-     * Exposes the `scheduler` value used by the SDAI network layer.
+     * Server noise scheduler identifier.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("scheduler")
     val scheduler: String? = null,
     /**
-     * Exposes the `alwaysOnScripts` value used by the SDAI network layer.
+     * Extension inputs keyed by server script identifier.
      *
      * @author Dmitriy Moroz
      */

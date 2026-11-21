@@ -1,27 +1,16 @@
 package com.shifthackz.aisdv1.domain.entity
 
 /**
- * Carries `BackgroundWorkStatus` data through the SDAI domain layer.
- *
+ * Active background generation heading, stage and measured completion.
+ * @param running Whether generation is active.
+ * @param statusTitle Localized operation heading.
+ * @param statusSubTitle Localized queue, stage or sampling counters.
+ * @param percentage Measured completion from zero to one hundred, or null when unknown.
  * @author Dmitriy Moroz
  */
 data class BackgroundWorkStatus(
-    /**
-     * Exposes the `running` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val running: Boolean,
-    /**
-     * Exposes the `statusTitle` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val statusTitle: String,
-    /**
-     * Exposes the `statusSubTitle` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val statusSubTitle: String,
+    val percentage: Int? = null,
 )

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.network.api.automatic1111
 
+import com.shifthackz.aisdv1.network.response.Automatic1111ProgressResponse
+
 import com.shifthackz.aisdv1.network.auth.BasicHttpAuthorization
 import com.shifthackz.aisdv1.network.client.GenerationTimeoutProvider
 import com.shifthackz.aisdv1.network.client.applyGenerationTimeout
@@ -28,13 +30,30 @@ import io.ktor.http.takeFrom
  */
 class KtorAutomatic1111GenerationApi(
     /**
-     * Exposes the `httpClient` value used by the SDAI network layer.
+     * Configured Ktor client used for authenticated provider traffic.
      *
      * @author Dmitriy Moroz
      */
     private val httpClient: HttpClient = createConfiguredHttpClient(),
     private val generationTimeoutProvider: GenerationTimeoutProvider = GenerationTimeoutProvider.Default,
 ) : Automatic1111GenerationApi {
+
+    /**
+     * Fetches only progress metadata; transport errors remain visible to the domain observer.
+     * @param baseUrl Captured server root.
+     * @param authorization Optional Basic authentication.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun progress(
+        baseUrl: String,
+        authorization: BasicHttpAuthorization?
+    ): Automatic1111ProgressResponse =
+        httpClient.boundedGet {
+            url.takeFrom(baseUrl)
+            url.appendPathSegments(PATH_SD_API, PATH_V1, "progress")
+            url.parameters.append("skip_current_image", "true")
+            applyAuthorization(authorization)
+        }.trackedJsonBody(NetworkUsageCategory.INFERENCE)
 
     override suspend fun healthCheck(
         baseUrl: String,

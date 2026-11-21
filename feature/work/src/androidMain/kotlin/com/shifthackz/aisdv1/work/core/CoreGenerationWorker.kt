@@ -2,6 +2,8 @@
 
 package com.shifthackz.aisdv1.work.core
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
 
 import android.content.Context
@@ -43,6 +45,7 @@ import com.shifthackz.aisdv1.core.localization.R as LocalizationR
  * @param nativeGateway Observes and cancels isolated native attempts without loading engines.
  * @param backgroundWorkObserver Publishes state only for the current worker owner.
  * @param observeHordeProcessStatusUseCase Supplies remote Horde queue progress.
+ * @param remoteGenerationProgressGateway Owner-scoped remote job/workflow measurements.
  * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param interruptWorkerGenerationUseCase Cancels the captured source for this exact worker.
  *
@@ -57,6 +60,7 @@ internal abstract class CoreGenerationWorker(
     private val nativeGateway: NativeGenerationGateway,
     private val backgroundWorkObserver: BackgroundWorkObserver,
     private val observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
+    private val remoteGenerationProgressGateway: RemoteGenerationProgressGateway,
     private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     private val interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
 ) : NotificationWorker(
@@ -108,6 +112,7 @@ internal abstract class CoreGenerationWorker(
      */
     protected fun listenSourceStatus() {
         when (source) {
+            ServerSource.AUTOMATIC1111, ServerSource.SWARM_UI -> listenRemoteProgress()
             ServerSource.EASY_DIFFUSION -> listenEasyDiffusionStatus()
             ServerSource.HORDE -> listenHordeStatus()
             ServerSource.LOCAL_MNN -> listenNativeStatus(NativeGenerationEngine.MNN)
@@ -124,6 +129,29 @@ internal abstract class CoreGenerationWorker(
      *
      * @author Dmitriy Moroz
      */
+    /**
+     * Publishes only this worker's remote measurement; unknown progress retains an indeterminate bar.
+     * @author Dmitriy Moroz
+     */
+    private fun listenRemoteProgress() {
+        coroutineScope.launch {
+            remoteGenerationProgressGateway.observe().collect { progress ->
+                val status =
+                    progress.lastOrNull { it.ownerId == id.toString() && it.source == source }
+                val title =
+                    applicationContext.getString(LocalizationR.string.notification_running_title)
+                val percentage = status?.percentage
+                val subtitle =
+                    applicationContext.getString(LocalizationR.string.communicating_progress_sub_title)
+                if (backgroundWorkObserver.publishForOwner(id.toString()) {
+                        backgroundWorkObserver.postProgressMessage(title, subtitle, percentage)
+                    }) setForegroundNotification(
+                    title, percentage?.let { "$subtitle\n$it%" } ?: subtitle, silent = true,
+                    progress = percentage?.let { it to 100 })
+            }
+        }
+    }
+
     private fun listenEasyDiffusionStatus() {
         coroutineScope.launch {
             observeEasyDiffusionProgressUseCase().collect { status ->
@@ -136,7 +164,10 @@ internal abstract class CoreGenerationWorker(
                     status.totalSteps.toString()
                 ) else applicationContext.getString(LocalizationR.string.srv_type_easy_diffusion)
                 if (backgroundWorkObserver.publishForOwner(id.toString()) {
-                        backgroundWorkObserver.postStatusMessage(title, subtitle)
+                        backgroundWorkObserver.postProgressMessage(
+                            title, subtitle,
+                            (status.step.toLong() * 100 / status.totalSteps.coerceAtLeast(1)).toInt()
+                                .coerceIn(0, 100).takeIf { status.totalSteps > 0 })
                     }) setForegroundNotification(
                     title, subtitle, silent = true, canCancel = true,
                     progress = (status.step to status.totalSteps).takeIf { status.totalSteps > 0 })
@@ -159,24 +190,29 @@ internal abstract class CoreGenerationWorker(
             ) { stage, status -> stage to status }.collect { (stage, status) ->
                 val title =
                     applicationContext.getString(LocalizationR.string.notification_running_title)
+                val percentage =
+                    status.takeIf { (stage == NativeGenerationStage.DENOISING || (engine == NativeGenerationEngine.MNN && stage == NativeGenerationStage.RUNNING)) && it.total > 0 }
+                        ?.let { (it.current.toLong() * 100 / it.total).coerceIn(0, 100).toInt() }
                 val subtitle =
-                    stageText(stage) + if (stage == NativeGenerationStage.DENOISING && status.total > 0) "\n" + applicationContext.getString(
+                    stageText(stage) + if (engine == NativeGenerationEngine.MNN) ""
+                    else if (stage == NativeGenerationStage.DENOISING && status.total > 0) "\n" + applicationContext.getString(
                         LocalizationR.string.communicating_status_steps,
                         status.current.toString(),
                         status.total.toString()
                     ) else ""
                 backgroundWorkObserver.publishForOwner(id.toString()) {
-                    backgroundWorkObserver.postStatusMessage(
+                    backgroundWorkObserver.postProgressMessage(
                         title,
-                        subtitle
+                        subtitle,
+                        percentage
                     )
                 }
                 if (backgroundWorkObserver.publishForOwner(id.toString()) {}) setForegroundNotification(
                     title,
-                    subtitle,
+                    percentage?.let { "$subtitle\n$it%" } ?: subtitle,
                     silent = true,
                     canCancel = true,
-                    progress = (status.current to status.total).takeIf { stage == NativeGenerationStage.DENOISING && status.total > 0 })
+                    progress = percentage?.let { it to 100 })
             }
         }
     }

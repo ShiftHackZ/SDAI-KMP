@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.work.task
 
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
+
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase
 
 import android.content.Context
@@ -39,6 +41,7 @@ import kotlinx.coroutines.CancellationException
  * @param workerParameters Durable task identity and retry count.
  * @param pushNotificationManager Publishes foreground and terminal notifications.
  * @param activityIntentProvider Opens the app from notifications.
+ * @param remoteGenerationProgressGateway Owner-scoped remote job/workflow measurements.
  * @param observeEasyDiffusionProgressUseCase Hot queued/sampling progress for this remote generation owner.
  * @param observeHordeProcessStatusUseCase Supplies remote queue progress.
  * @param interruptWorkerGenerationUseCase Cancels only native work owned by this UUID.
@@ -56,6 +59,7 @@ internal class TextToImageTask(
     pushNotificationManager: PushNotificationManager,
     activityIntentProvider: ActivityIntentProvider,
     observeHordeProcessStatusUseCase: ObserveHordeProcessStatusUseCase,
+    remoteGenerationProgressGateway: RemoteGenerationProgressGateway,
     observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase: InterruptWorkerGenerationUseCase,
     private val preferenceManager: PreferenceManager,
@@ -73,6 +77,7 @@ internal class TextToImageTask(
     preferenceManager = preferenceManager,
     backgroundWorkObserver = backgroundWorkObserver,
     observeHordeProcessStatusUseCase = observeHordeProcessStatusUseCase,
+    remoteGenerationProgressGateway = remoteGenerationProgressGateway,
     observeEasyDiffusionProgressUseCase = observeEasyDiffusionProgressUseCase,
     interruptWorkerGenerationUseCase = interruptWorkerGenerationUseCase,
 ) {

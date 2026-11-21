@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.generation.samplers
 
+import kotlinx.coroutines.flow.flowOf
+
 import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageBudget
 import androidx.lifecycle.viewModelScope
@@ -103,6 +105,11 @@ internal class SamplerRecoveryViewModelFixture(
                     )
                 },
                 observeMnnProcessStatusUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
+                remoteGenerationProgressGateway = mockk {
+                    every { observe() } returns flowOf(
+                        emptyList()
+                    )
+                },
                 observeEasyDiffusionProgressUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 nativeGenerationGateway = mockk {
                     every { observeStage(any()) } returns emptyFlow()
@@ -159,6 +166,11 @@ internal class SamplerRecoveryViewModelFixture(
         } else {
             textToImage = null
             imageToImage = ImageToImageViewModel(
+                remoteGenerationProgressGateway = mockk {
+                    every { observe() } returns flowOf(
+                        emptyList()
+                    )
+                },
                 observeEasyDiffusionProgressUseCase = mockk { every { this@mockk.invoke() } returns emptyFlow() },
                 originalImageBudget = OriginalImageBudget(32 * 1024 * 1024, 16_777_216L),
                 diagnostics = mockk(relaxed = true),
@@ -174,6 +186,7 @@ internal class SamplerRecoveryViewModelFixture(
                 saveLastResultToCacheUseCase = mockk(),
                 interruptSourceGenerationUseCase = mockk(),
                 observeHordeProcessStatusUseCase = hordeStatus,
+                observeCoreMlProcessStatusUseCase = mockk<ObserveCoreMlProcessStatusUseCase> { every { this@mockk.invoke() } returns emptyFlow() },
                 observeLocalDiffusionProcessStatusUseCase = localStatus,
                 preferenceManager = preferences,
                 backgroundTaskManager = mockk(),

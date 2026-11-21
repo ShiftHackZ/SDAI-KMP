@@ -99,7 +99,7 @@ sealed interface GenerationModal {
          * @author Dmitriy Moroz
          */
         val pair: Pair<Int, Int>?
-            get() = status?.takeIf { !isOverallProgress && it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.DENOISING) }
+            get() = status?.takeIf { !isOverallProgress && it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.RUNNING) && (nativeStage == null || nativeStage == NativeGenerationStage.DENOISING) }
                 ?.let { (current, total) -> current to total }
 
         /**
@@ -108,7 +108,7 @@ sealed interface GenerationModal {
          * @author Dmitriy Moroz
          */
         val overallPercentage: Int?
-            get() = status?.takeIf { isOverallProgress && it.total > 0 }
+            get() = status?.takeIf { isOverallProgress && it.total > 0 && (nativeStage == null || nativeStage == NativeGenerationStage.RUNNING) }
                 ?.let { (it.current.toLong() * 100 / it.total).coerceIn(0, 100).toInt() }
     }
 

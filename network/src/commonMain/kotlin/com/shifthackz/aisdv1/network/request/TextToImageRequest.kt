@@ -5,161 +5,166 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 /**
- * Carries `TextToImageRequest` data through the SDAI network layer.
+ * AUTOMATIC1111 text generation parameters, including a client identity for progress correlation.
  *
  * @author Dmitriy Moroz
  */
 @Serializable
 data class TextToImageRequest(
     /**
-     * Exposes the `prompt` value used by the SDAI network layer.
+     * Client task identity echoed by request-correlated progress on supported servers.
+     * @author Dmitriy Moroz
+     */
+    @SerialName("force_task_id") val forceTaskId: String? = null,
+    /**
+     * Positive generation prompt sent to the provider.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("prompt")
     val prompt: String,
     /**
-     * Exposes the `negativePrompt` value used by the SDAI network layer.
+     * Negative prompt describing content to avoid.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("negative_prompt")
     val negativePrompt: String,
     /**
-     * Exposes the `steps` value used by the SDAI network layer.
+     * Requested denoising iteration count.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("steps")
     val steps: Int,
     /**
-     * Exposes the `cfgScale` value used by the SDAI network layer.
+     * Classifier-free guidance scale.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("cfg_scale")
     val cfgScale: Float,
     /**
-     * Exposes the `width` value used by the SDAI network layer.
+     * Output image width in pixels.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("width")
     val width: Int,
     /**
-     * Exposes the `height` value used by the SDAI network layer.
+     * Output image height in pixels.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("height")
     val height: Int,
     /**
-     * Exposes the `batchSize` value used by the SDAI network layer.
+     * Number of images generated concurrently in the server batch.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("batch_size")
     val batchSize: Int,
     /**
-     * Exposes the `restoreFaces` value used by the SDAI network layer.
+     * Whether the server applies face restoration after sampling.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("restore_faces")
     val restoreFaces: Boolean,
     /**
-     * Exposes the `seed` value used by the SDAI network layer.
+     * Primary random seed in the provider request format.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("seed")
     val seed: String?,
     /**
-     * Exposes the `subSeed` value used by the SDAI network layer.
+     * Variation seed in the provider request format.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("subseed")
     val subSeed: String?,
     /**
-     * Exposes the `subSeedStrength` value used by the SDAI network layer.
+     * Blend strength between the primary and variation seeds.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("subseed_strength")
     val subSeedStrength: Float?,
     /**
-     * Exposes the `samplerIndex` value used by the SDAI network layer.
+     * Server sampler identifier retained for compatibility with older AUTOMATIC1111 versions.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("sampler_index")
     val samplerIndex: String,
     /**
-     * Exposes the `scheduler` value used by the SDAI network layer.
+     * Server noise scheduler identifier.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("scheduler")
     val scheduler: String? = null,
     /**
-     * Exposes the `alwaysOnScripts` value used by the SDAI network layer.
+     * Extension inputs keyed by server script identifier.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("alwayson_scripts")
     val alwaysOnScripts: JsonObject? = null,
     /**
-     * Exposes the `enableHr` value used by the SDAI network layer.
+     * Whether the server performs a second high-resolution sampling pass.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("enable_hr")
     val enableHr: Boolean? = null,
     /**
-     * Exposes the `hrUpscaler` value used by the SDAI network layer.
+     * Server upscaler identifier for the high-resolution pass.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("hr_upscaler")
     val hrUpscaler: String? = null,
     /**
-     * Exposes the `hrScale` value used by the SDAI network layer.
+     * Scale factor for the high-resolution pass.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("hr_scale")
     val hrScale: Float? = null,
     /**
-     * Exposes the `hrSecondPassSteps` value used by the SDAI network layer.
+     * Iteration count for the high-resolution sampling pass.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("hr_second_pass_steps")
     val hrSecondPassSteps: Int? = null,
     /**
-     * Exposes the `hrCfg` value used by the SDAI network layer.
+     * Guidance scale for the high-resolution sampling pass.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("hr_cfg")
     val hrCfg: Float? = null,
     /**
-     * Exposes the `hrDistilledCfg` value used by the SDAI network layer.
+     * Distilled guidance scale for the high-resolution sampling pass.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("hr_distilled_cfg")
     val hrDistilledCfg: Float? = null,
     /**
-     * Exposes the `denoisingStrength` value used by the SDAI network layer.
+     * Amount of input image noise replaced during image-to-image sampling.
      *
      * @author Dmitriy Moroz
      */
     @SerialName("denoising_strength")
     val denoisingStrength: Float? = null,
     /**
-     * Exposes the `overrideSettings` value used by the SDAI network layer.
+     * Per-request server settings applied for this generation.
      *
      * @author Dmitriy Moroz
      */
