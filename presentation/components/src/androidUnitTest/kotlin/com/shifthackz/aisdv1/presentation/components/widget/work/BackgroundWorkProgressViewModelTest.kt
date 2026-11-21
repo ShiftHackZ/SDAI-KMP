@@ -20,7 +20,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Verifies measured progress reaches the card and cannot survive queue, terminal or dismissal transitions. @author Dmitriy Moroz */
+/**
+ * Verifies measured progress reaches the card and cannot survive queue, terminal or dismissal transitions.
+ *
+ * @author Dmitriy Moroz
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class BackgroundWorkProgressViewModelTest {
     private val dispatcher = StandardTestDispatcher()
@@ -41,7 +45,11 @@ class BackgroundWorkProgressViewModelTest {
         Localization.setLanguageCode("en")
     }
 
-    /** Creates the production retained-state owner with deterministic UI publication. @author Dmitriy Moroz */
+    /**
+     * Creates the production retained-state owner with deterministic UI publication.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun viewModel() = BackgroundWorkViewModel(mockk(relaxed = true), dispatchers, observer)
 
     @Test

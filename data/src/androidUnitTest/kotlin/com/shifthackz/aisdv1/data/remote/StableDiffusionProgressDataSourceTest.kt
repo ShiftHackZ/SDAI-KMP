@@ -14,7 +14,11 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Test
 
-/** Verifies the submitted generation payload carries the exact task used by progress polling. @author Dmitriy Moroz */
+/**
+ * Verifies the submitted generation payload carries the exact task used by progress polling.
+ *
+ * @author Dmitriy Moroz
+ */
 class StableDiffusionProgressDataSourceTest {
     private val api = mockk<Automatic1111GenerationApi>()
     private val source = KtorStableDiffusionGenerationRemoteDataSource(api)

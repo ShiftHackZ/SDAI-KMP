@@ -20,7 +20,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Renders the production card to verify text alignment, available width and measured progress semantics. @author Dmitriy Moroz */
+/**
+ * Renders the production card to verify text alignment, available width and measured progress semantics.
+ *
+ * @author Dmitriy Moroz
+ */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], qualifiers = "w360dp-h640dp")
 class BackgroundGenerationProgressContentTest {
@@ -29,6 +33,7 @@ class BackgroundGenerationProgressContentTest {
 
     /**
      * Composes the production progress surface at a fixed phone-card width.
+     *
      * @param status Provider text including absent and whitespace-only cases.
      * @param percentage Measured percentage used by both text and accessibility.
      * @author Dmitriy Moroz

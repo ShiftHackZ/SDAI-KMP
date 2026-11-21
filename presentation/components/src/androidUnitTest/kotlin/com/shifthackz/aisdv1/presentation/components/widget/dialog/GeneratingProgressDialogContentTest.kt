@@ -16,7 +16,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Verifies the foreground dialog's actual indicator and text use the reported unit and queue precedence. @author Dmitriy Moroz */
+/**
+ * Verifies the foreground dialog's actual indicator and text use the reported unit and queue precedence.
+ *
+ * @author Dmitriy Moroz
+ */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], qualifiers = "w360dp-h640dp")
 class GeneratingProgressDialogContentTest {
@@ -25,6 +29,7 @@ class GeneratingProgressDialogContentTest {
 
     /**
      * Renders production dialog content with provider counters rather than a copied progress formula.
+     *
      * @param step Sampling counters, or null while no counters are available.
      * @param overall Overall percentage reported by a provider.
      * @param queue Current queue position, taking precedence over generation measurements.
@@ -42,7 +47,11 @@ class GeneratingProgressDialogContentTest {
         }
     }
 
-    /** Returns the indicator's production accessibility contract. @author Dmitriy Moroz */
+    /**
+     * Returns the indicator's production accessibility contract.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun progress() = compose.onNode(
         SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
     ).fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo]

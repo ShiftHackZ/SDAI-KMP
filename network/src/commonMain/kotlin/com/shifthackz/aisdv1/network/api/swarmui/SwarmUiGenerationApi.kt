@@ -12,6 +12,7 @@ import com.shifthackz.aisdv1.network.response.KtorSwarmUiGenerationResponse
 interface SwarmUiGenerationApi {
     /**
      * Generates once over the server's WebSocket API, receiving workflow measurements as they arrive.
+     *
      * @param baseUrl Captured server root.
      * @param request Single-image inputs and session identity.
      * @param authorization Optional server Basic authentication.

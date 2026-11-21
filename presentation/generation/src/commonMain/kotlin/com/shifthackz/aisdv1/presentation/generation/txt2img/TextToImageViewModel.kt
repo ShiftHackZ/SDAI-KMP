@@ -400,7 +400,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeGenerationFormUpdate() {
         launch(dispatchersProvider.immediate) {
             generationFormUpdateEvent.observeTxt2ImgForm().collect { payload ->
@@ -416,7 +415,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun consumePendingGenerationFormUpdate() {
         generationFormUpdateEvent.consumeTxt2ImgForm()?.let { payload ->
             applyGenerationResult(payload.ai)
@@ -428,7 +426,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeGenerationProgress() {
         launch(dispatchersProvider.immediate) {
             observeEasyDiffusionProgressUseCase().collect { progress ->
@@ -531,7 +528,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun updateLocalGenerationStatus(status: LocalDiffusionStatus, source: ServerSource) {
         updateFormState { state ->
             val modal = state.screenModal
@@ -548,7 +544,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadConfiguration() {
         updateFormState { it.copy(loadingConfiguration = true, error = null) }
         launch(dispatchersProvider.io) {
@@ -592,7 +587,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeSettings() {
         launch(dispatchersProvider.immediate) {
             preferenceManager
@@ -718,7 +712,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadForgeModules() {
         launch(dispatchersProvider.io) {
             runCatching { getForgeModulesUseCase() }
@@ -761,7 +754,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadADetailerAvailability(force: Boolean = false) {
         if (!force && aDetailerAvailable != null) return
         updateFormState { it.copy(aDetailerRefreshing = true) }
@@ -801,7 +793,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun refreshArliAiModelsIfNeeded(settings: Settings) {
         if (settings.source != ServerSource.ARLI_AI) {
             arliAiModelsKey = null
@@ -829,7 +820,6 @@ class TextToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun loadArliAiModels() {
         launch(dispatchersProvider.io) {
             runCatching {

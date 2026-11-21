@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Consumed fields from the public progress endpoint; older servers may omit request correlation.
+ *
  * @param progress Job completion fraction including server-side batch iterations.
  * @param currentTask Identity of the active job, absent on unsupported versions.
  * @author Dmitriy Moroz

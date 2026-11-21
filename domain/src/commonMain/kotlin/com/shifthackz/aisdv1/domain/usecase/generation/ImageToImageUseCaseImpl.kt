@@ -83,6 +83,7 @@ internal class ImageToImageUseCaseImpl(
 
     /**
      * Executes a captured image request while this operation owns generation admission.
+     *
      * @param payload Immutable provider generation inputs and source image.
      * @author Dmitriy Moroz
      */

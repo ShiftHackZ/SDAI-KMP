@@ -16,6 +16,7 @@ import com.shifthackz.aisdv1.network.response.SdGenerationResponse
 interface Automatic1111GenerationApi {
     /**
      * Reads job progress without requesting an expensive preview image.
+     *
      * @param baseUrl Captured server root.
      * @param authorization Optional server Basic authentication.
      * @return Progress plus active task identity when supported by the server.

@@ -21,6 +21,7 @@ import kotlin.time.ExperimentalTime
 
 /**
  * Submits captured SwarmUI requests and maps downloaded results to domain generation records.
+ *
  * @param api Provider generation and image download transport.
  *
  * @throws IllegalStateException when the delegated operation cannot complete.

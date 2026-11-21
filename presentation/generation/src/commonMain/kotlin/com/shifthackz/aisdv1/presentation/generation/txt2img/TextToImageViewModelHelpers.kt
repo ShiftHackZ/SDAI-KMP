@@ -283,7 +283,6 @@ internal fun ValidationResult<DimensionValidator.Error>.errorMessage(): UiText? 
  *
  * @author Dmitriy Moroz
  */
-
 private fun String.bonsaiSizeError(): UiText? {
     val size = toIntOrNull() ?: return null
     if (size % BONSAI_SIZE_MULTIPLE == 0) return null

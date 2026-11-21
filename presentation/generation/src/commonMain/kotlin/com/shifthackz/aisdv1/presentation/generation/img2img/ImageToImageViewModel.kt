@@ -370,7 +370,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeGenerationFormUpdate() {
         launch(dispatchersProvider.immediate) {
             generationFormUpdateEvent.observeImg2ImgForm().collect { payload ->
@@ -387,7 +386,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun consumePendingGenerationFormUpdate() {
         generationFormUpdateEvent.consumeImg2ImgForm()?.let(::applyGenerationResult)
     }
@@ -399,7 +397,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun applyGenerationResult(payload: GenerationFormUpdateEvent.Payload.I2IForm) {
         applyGenerationResult(
             ai = payload.ai,
@@ -418,7 +415,6 @@ class ImageToImageViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun observeGenerationProgress() {
         launch(dispatchersProvider.immediate) {
             remoteGenerationProgressGateway.observe().collect { progress ->

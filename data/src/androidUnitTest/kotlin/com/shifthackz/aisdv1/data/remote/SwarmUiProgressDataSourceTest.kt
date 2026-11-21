@@ -15,7 +15,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
 
-/** Verifies workflow measurements are forwarded while result download and failures keep their normal path. @author Dmitriy Moroz */
+/**
+ * Verifies workflow measurements are forwarded while result download and failures keep their normal path.
+ *
+ * @author Dmitriy Moroz
+ */
 class SwarmUiProgressDataSourceTest {
     private val api = mockk<SwarmUiGenerationApi>()
     private val source = KtorSwarmUiGenerationRemoteDataSource(api)

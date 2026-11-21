@@ -119,6 +119,7 @@ internal class TextToImageUseCaseImpl(
 
     /**
      * Executes a captured text request while this operation owns generation admission.
+     *
      * @param payload Immutable provider generation inputs.
      * @author Dmitriy Moroz
      */

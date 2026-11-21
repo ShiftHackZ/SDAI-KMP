@@ -16,6 +16,7 @@ import io.ktor.websocket.send
 
 /**
  * Exercises the production WebSocket transport against Ktor's in-memory server engine.
+ *
  * @param messages Ordered upstream frames, including terminal and postprocessing messages.
  * @param shouldHoldOpen Whether the server stays active until caller cancellation or deadline.
  * @param timeoutMillis Generation deadline; zero disables it.
@@ -35,6 +36,7 @@ internal class SwarmUiProgressTransportFixture(
 
     /**
      * Starts one isolated server and passes its production client to the scenario.
+     *
      * @param block Scenario operation and observable assertions.
      * @author Dmitriy Moroz
      */

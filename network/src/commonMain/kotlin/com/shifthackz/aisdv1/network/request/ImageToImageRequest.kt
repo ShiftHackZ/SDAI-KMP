@@ -13,6 +13,7 @@ import kotlinx.serialization.json.JsonObject
 data class ImageToImageRequest(
     /**
      * Client task identity echoed by request-correlated progress on supported servers.
+     *
      * @author Dmitriy Moroz
      */
     @SerialName("force_task_id") val forceTaskId: String? = null,

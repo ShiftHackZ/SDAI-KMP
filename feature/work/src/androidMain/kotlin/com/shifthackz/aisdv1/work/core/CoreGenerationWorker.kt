@@ -125,12 +125,9 @@ internal abstract class CoreGenerationWorker(
     }
 
     /**
-     * Publishes only this worker’s current remote progress to observer and foreground notification.
+     * Publishes only this worker's remote progress to observer and foreground notification.
+     * Unknown progress retains an indeterminate bar.
      *
-     * @author Dmitriy Moroz
-     */
-    /**
-     * Publishes only this worker's remote measurement; unknown progress retains an indeterminate bar.
      * @author Dmitriy Moroz
      */
     private fun listenRemoteProgress() {

@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.domain.entity
 
 /**
  * Active background generation heading, stage and measured completion.
+ *
  * @param running Whether generation is active.
  * @param statusTitle Localized operation heading.
  * @param statusSubTitle Localized queue, stage or sampling counters.

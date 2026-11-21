@@ -8,7 +8,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Verifies independent worker measurements and removal of terminal owners. @author Dmitriy Moroz */
+/**
+ * Verifies independent worker measurements and removal of terminal owners.
+ *
+ * @author Dmitriy Moroz
+ */
 class RemoteGenerationProgressGatewayImplTest {
     private val gateway = RemoteGenerationProgressGatewayImpl()
     private val first = RemoteGenerationProgress(ServerSource.SWARM_UI, "first", 10)

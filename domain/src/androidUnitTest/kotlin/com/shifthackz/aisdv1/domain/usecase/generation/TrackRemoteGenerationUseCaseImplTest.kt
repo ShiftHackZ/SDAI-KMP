@@ -33,6 +33,7 @@ import kotlinx.coroutines.currentCoroutineContext
 
 /**
  * Verifies optional telemetry against the production generation lifetime, including cancellation and owner isolation.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)

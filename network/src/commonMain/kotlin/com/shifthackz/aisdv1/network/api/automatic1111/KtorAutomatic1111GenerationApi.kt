@@ -40,6 +40,7 @@ class KtorAutomatic1111GenerationApi(
 
     /**
      * Fetches only progress metadata; transport errors remain visible to the domain observer.
+     *
      * @param baseUrl Captured server root.
      * @param authorization Optional Basic authentication.
      * @author Dmitriy Moroz

@@ -17,7 +17,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Verifies workflow progress and terminal/error frames through the production WebSocket client. @author Dmitriy Moroz */
+/**
+ * Verifies workflow progress and terminal/error frames through the production WebSocket client.
+ *
+ * @author Dmitriy Moroz
+ */
 class KtorSwarmUiGenerationProgressApiTest {
     @Test
     fun `given SwarmUI generation, workflow and node percentages differ, expected only workflow measurement and final image`() {

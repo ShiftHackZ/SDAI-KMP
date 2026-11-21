@@ -17,7 +17,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Verifies atomic percentage publication and exact worker ownership in the production background observer. @author Dmitriy Moroz */
+/**
+ * Verifies atomic percentage publication and exact worker ownership in the production background observer.
+ *
+ * @author Dmitriy Moroz
+ */
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [28])
 @OptIn(ExperimentalCoroutinesApi::class)

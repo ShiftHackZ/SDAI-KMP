@@ -17,7 +17,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Verifies preview-free authenticated polling through the production request builder and decoder. @author Dmitriy Moroz */
+/**
+ * Verifies preview-free authenticated polling through the production request builder and decoder.
+ *
+ * @author Dmitriy Moroz
+ */
 class KtorAutomatic1111ProgressApiTest {
     @Test
     fun `given AUTOMATIC1111 progress, proxy and Basic credentials are configured, expected authenticated metadata-only GET`() =

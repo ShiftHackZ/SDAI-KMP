@@ -17,6 +17,7 @@ import kotlin.time.ExperimentalTime
 
 /**
  * Maps domain generation payloads to authenticated AUTOMATIC1111 calls and normalizes returned images.
+ *
  * @param api Provider generation and cancellation transport.
  *
  * @author Dmitriy Moroz

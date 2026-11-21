@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.network.api.automatic1111.Automatic1111GenerationAp
 
 /**
  * Fetches strict progress responses using the same authenticated connection provider as generation.
+ *
  * @param api AUTOMATIC1111 transport with preview images disabled.
  * @param connections Captures the selected server and credentials.
  * @author Dmitriy Moroz
@@ -17,6 +18,7 @@ internal class Automatic1111ProgressRepositoryImpl(
 ) : Automatic1111ProgressRepository {
     /**
      * Returns only a finite measurement correlated with this submission.
+     *
      * @param taskId Identity sent with the generation request.
      * @author Dmitriy Moroz
      */

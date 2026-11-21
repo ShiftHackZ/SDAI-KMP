@@ -5,7 +5,6 @@ import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgress
 import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.CancellationException
-
 import com.shifthackz.aisdv1.domain.mocks.ImmediateGenerationRestoreGate
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.EasyDiffusionConnection
@@ -36,6 +35,7 @@ import org.junit.Test
 
 /**
  * Verifies provider dispatch using application payloads, including captured Easy Diffusion batches.
+ *
  * @author Dmitriy Moroz
  */
 class ImageToImageUseCaseImplTest {

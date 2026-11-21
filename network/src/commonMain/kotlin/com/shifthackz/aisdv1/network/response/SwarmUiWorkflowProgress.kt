@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Server workflow completion; node-local current_percent is deliberately not treated as total progress.
+ *
  * @param overallPercentage Fraction of workflow execution reported by the active backend.
  * @author Dmitriy Moroz
  */

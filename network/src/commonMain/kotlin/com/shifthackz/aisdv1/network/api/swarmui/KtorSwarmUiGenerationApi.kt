@@ -60,6 +60,7 @@ class KtorSwarmUiGenerationApi(
 
     /**
      * Receives workflow progress and final images without replaying a failed generation.
+     *
      * @param baseUrl Captured server root, retaining any reverse-proxy path.
      * @param request Generation parameters and session.
      * @param authorization Optional Basic authentication.

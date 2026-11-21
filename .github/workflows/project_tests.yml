@@ -219,11 +219,20 @@ jobs:
     steps:
       - name: Describe main checks
         run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Checkout code
         uses: actions/checkout@v4.1.0
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Test KDoc formatting on the complete change range
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 -m unittest discover -s scripts/kdoc -p 'test_kdoc_*.py'
+          python3 scripts/kdoc/test_kdoc_formatting.py --event "$GITHUB_EVENT_PATH"
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3.13.0
         with:

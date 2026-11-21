@@ -20,6 +20,7 @@ import kotlin.uuid.Uuid
 
 /**
  * Keeps telemetry optional while generation failures and caller cancellation retain their normal semantics.
+ *
  * @param gateway Shared owner-scoped measurements for foreground and worker UI.
  * @param repository Strict AUTOMATIC1111 progress reads.
  * @author Dmitriy Moroz
@@ -32,6 +33,7 @@ internal class TrackRemoteGenerationUseCaseImpl(
     /**
      * Polls AUTOMATIC1111 at one-second intervals or accepts request-scoped SwarmUI workflow updates.
      * A failed telemetry request clears the measurement and stops polling without replaying generation.
+     *
      * @param source Captured remote provider.
      * @param block Normal generation operation.
      * @author Dmitriy Moroz

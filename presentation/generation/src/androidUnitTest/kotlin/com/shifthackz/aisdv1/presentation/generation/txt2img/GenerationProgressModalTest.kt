@@ -17,7 +17,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Covers progress units and stage gating without inventing measurements during queue or model preparation. @author Dmitriy Moroz */
+/**
+ * Covers progress units and stage gating without inventing measurements during queue or model preparation.
+ *
+ * @author Dmitriy Moroz
+ */
 class GenerationProgressModalTest {
     @Before
     fun initializeLocalization() {

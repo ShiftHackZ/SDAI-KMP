@@ -11,6 +11,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 interface TrackRemoteGenerationUseCase {
     /**
      * Runs generation once and removes its progress on success, failure or cancellation.
+     *
      * @param source Captured remote provider.
      * @param block Normal generation and persistence operation; never replayed.
      * @author Dmitriy Moroz

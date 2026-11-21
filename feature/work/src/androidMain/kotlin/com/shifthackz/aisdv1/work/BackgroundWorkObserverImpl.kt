@@ -124,14 +124,8 @@ internal class BackgroundWorkObserverImpl(
     }
 
     /**
-     * Publishes an indeterminate active stage and clears the previous outcome.
-     *
-     * @param title Localized operation heading.
-     * @param subTitle Localized stage description.
-     * @author Dmitriy Moroz
-     */
-    /**
      * Publishes stage and completion together so subscribers never mix different measurements.
+     *
      * @param title Localized operation heading.
      * @param subTitle Stage description or sampling counters.
      * @param percentage Completion fraction expressed as a percentage, or null when unknown.
@@ -144,6 +138,13 @@ internal class BackgroundWorkObserverImpl(
         resultFlow.value = BackgroundWorkResult.None
     }
 
+    /**
+     * Publishes an indeterminate active stage and clears the previous outcome.
+     *
+     * @param title Localized operation heading.
+     * @param subTitle Localized stage description.
+     * @author Dmitriy Moroz
+     */
     override fun postStatusMessage(title: String, subTitle: String) {
         stateFlow.value = true
         messageFlow.value = BackgroundWorkStatus(true, title, subTitle)

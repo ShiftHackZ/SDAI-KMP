@@ -15,7 +15,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
 
-/** Tests strict request correlation and preserves transport failures for domain recovery policy. @author Dmitriy Moroz */
+/**
+ * Tests strict request correlation and preserves transport failures for domain recovery policy.
+ *
+ * @author Dmitriy Moroz
+ */
 class Automatic1111ProgressRepositoryImplTest {
     private val api = mockk<Automatic1111GenerationApi>()
     private val connections = mockk<AuthenticatedConnectionProvider>()

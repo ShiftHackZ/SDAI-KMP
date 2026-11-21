@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Consumed WebSocket fields; unrelated status and preview messages are ignored.
+ *
  * @param progress Workflow completion for the generated image.
  * @param image Generated image path or data URL.
  * @param batchIndex Image identity, with negative indices reserved for previews/grids.

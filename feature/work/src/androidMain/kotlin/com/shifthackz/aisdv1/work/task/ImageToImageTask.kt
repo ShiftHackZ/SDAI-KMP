@@ -86,9 +86,11 @@ internal class ImageToImageTask(
 
     override val genericNotificationId = NOTIFICATION_IMAGE_TO_IMAGE_GENERIC
 
-    /** Decodes the durable image payload, dispatches it with this exact worker UUID and reports completion or failure.
-     * @author Dmitriy Moroz */
-
+    /**
+     * Decodes the durable image payload, dispatches it with this exact worker UUID and reports completion or failure.
+     *
+     * @author Dmitriy Moroz
+     */
     override suspend fun doWork(): Result {
         if (!backgroundWorkObserver.publishForOwner(id.toString()) {
                 backgroundWorkObserver.refreshStatus()

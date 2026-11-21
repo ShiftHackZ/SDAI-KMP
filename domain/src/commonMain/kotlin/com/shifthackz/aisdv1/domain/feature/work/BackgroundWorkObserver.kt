@@ -72,6 +72,7 @@ interface BackgroundWorkObserver {
 
     /**
      * Publishes measured generation progress, retaining null for queue/loading stages.
+     *
      * @param title Localized operation heading.
      * @param subTitle Stage description or sampling counters.
      * @param percentage Bounded completion, or null when unavailable.
