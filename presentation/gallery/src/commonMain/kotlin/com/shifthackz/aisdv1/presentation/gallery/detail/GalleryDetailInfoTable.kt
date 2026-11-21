@@ -5,6 +5,7 @@ package com.shifthackz.aisdv1.presentation.gallery.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,7 +33,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
  * @param modifier Layout modifiers for the scrollable metadata table.
  * @param content Already formatted generation metadata.
  * @param onCopyTextClick Requests native copying of the activated nonblank value.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -66,16 +66,15 @@ internal fun GalleryDetailsTable(
 }
 
 /**
- * Shows one named metadata value with an optional clipboard action.
+ * Shows one named metadata value, reserving the clipboard-action width on every row so values align.
  *
  * @param modifier Background and placement of the table row.
  * @param column1Weight Relative width allocated to the parameter name.
  * @param column2Weight Relative width allocated to the parameter value.
  * @param name Localized parameter label.
- * @param value Formatted recorded value.
+ * @param value Recorded value; empty and whitespace-only values display a dash without a copy action.
  * @param color Text color for both cells.
  * @param onCopyTextClick Receives the nonblank value when its copy action is activated.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -95,7 +94,7 @@ internal fun GalleryDetailRow(
             color = color,
         )
         GalleryDetailCell(
-            text = value,
+            text = value.ifBlank { "-" },
             modifier = Modifier.weight(column2Weight),
             color = color,
         )
@@ -110,6 +109,8 @@ internal fun GalleryDetailRow(
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
+        } else {
+            Spacer(Modifier.size(48.dp))
         }
     }
 }
@@ -120,7 +121,6 @@ internal fun GalleryDetailRow(
  * @param modifier Column sizing and placement supplied by the row.
  * @param text Already localized/formatted cell text.
  * @param color Foreground color for the cell text.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -152,14 +152,32 @@ private fun GalleryDetailContent.detailRows(): List<GalleryDetailField> =
                 value = type,
             )
         )
-        if (modelName.isNotBlank()) {
-            add(
-                GalleryDetailField(
-                    name = Localization.string("gallery_info_field_model"),
-                    value = modelName,
-                )
+        add(
+            GalleryDetailField(
+                Localization.string("gallery_info_field_provider"),
+                provider.orEmpty()
             )
-        }
+        )
+        add(GalleryDetailField(Localization.string("gallery_info_field_model"), modelName))
+        add(
+            GalleryDetailField(
+                Localization.string("gallery_info_field_acceleration"),
+                acceleration.orEmpty()
+            )
+        )
+        add(
+            GalleryDetailField(
+                Localization.string("gallery_info_field_duration"),
+                generationDuration.orEmpty()
+            )
+        )
+        add(
+            GalleryDetailField(
+                Localization.string("gallery_info_field_device"),
+                deviceName.orEmpty()
+            )
+        )
+        add(GalleryDetailField(Localization.string("gallery_info_field_os"), osVersion.orEmpty()))
         add(
             GalleryDetailField(
                 name = Localization.string("gallery_info_field_prompt"),

@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
+import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
 import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
 import kotlinx.coroutines.withContext
 
@@ -35,6 +37,7 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
  * @param coreMlGenerationRepository Generation and result persistence for Core ML.
  * @param falAiGenerationRepository Generation and result persistence for Fal.ai.
  * @param arliAiGenerationRepository Generation and result persistence for ArliAI.
+ * @param deviceProbe Captures originating hardware and OS without loading model runtimes.
  * @param preferenceManager Current provider selection and independent generation preferences.
  * @param trackRemoteGenerationUseCase Owns request-correlated remote telemetry and its cleanup.
  * @param generationRestoreGate Serializes generation against portable backup restoration.
@@ -60,6 +63,7 @@ internal class ImageToImageUseCaseImpl(
 
     private val arliAiGenerationRepository: ArliAiGenerationRepository,
 
+    private val deviceProbe: BenchmarkDeviceProbe,
     private val preferenceManager: PreferenceManager,
     private val trackRemoteGenerationUseCase: TrackRemoteGenerationUseCase,
     private val generationRestoreGate: GenerationRestoreGate,
@@ -76,9 +80,19 @@ internal class ImageToImageUseCaseImpl(
     override suspend fun invoke(payload: ImageToImagePayload): List<AiGenerationResult> =
         generationRestoreGate.generating {
             val source = payload.sourceSnapshot ?: preferenceManager.source
-            if (source == ServerSource.AUTOMATIC1111 || source == ServerSource.SWARM_UI) {
-                trackRemoteGenerationUseCase(source) { generate(payload) }
-            } else generate(payload)
+            val device = deviceProbe.capture()
+            withGenerationMetadata(
+                GenerationMetadataContext(
+                    source.key,
+                    if (source == ServerSource.LOCAL_APPLE_CORE_ML) coreMlAcceleration() else "None",
+                    deviceName = device.generationDeviceName(),
+                    osVersion = device.generationOsVersion(),
+                )
+            ) {
+                if (source == ServerSource.AUTOMATIC1111 || source == ServerSource.SWARM_UI) {
+                    trackRemoteGenerationUseCase(source) { generate(payload) }
+                } else generate(payload)
+            }
         }
 
     /**
@@ -106,7 +120,7 @@ internal class ImageToImageUseCaseImpl(
                 coroutineContext.ensureActive()
                 check(source == preferenceManager.source) { "Generation source changed" }
                 val context = coroutineContext[RemoteGenerationProgressContext]
-                if (context == null) generateSingle(payload) else withContext(
+                if (context == null) generateTimedSingle(payload) else withContext(
                     RemoteGenerationProgressContext(context.taskId) { fraction ->
                         context.report(fraction?.let {
                             (index + it) / payload.batchCount.coerceAtLeast(
@@ -114,10 +128,28 @@ internal class ImageToImageUseCaseImpl(
                             )
                         })
                     }
-                ) { generateSingle(payload) }
+                ) { generateTimedSingle(payload) }
             }
         }
 
+    }
+
+    /**
+     * Starts an independent duration for a sequential image, retaining the submitted provenance.
+     *
+     * @param payload Captured image inputs.
+     * @author Dmitriy Moroz
+     */
+    private suspend fun generateTimedSingle(payload: ImageToImagePayload): AiGenerationResult {
+        val metadata = requireNotNull(coroutineContext[GenerationMetadataContext])
+        return withGenerationMetadata(
+            GenerationMetadataContext(
+                metadata.providerKey,
+                metadata.acceleration,
+                deviceName = metadata.deviceName,
+                osVersion = metadata.osVersion
+            )
+        ) { generateSingle(payload) }
     }
 
     /**

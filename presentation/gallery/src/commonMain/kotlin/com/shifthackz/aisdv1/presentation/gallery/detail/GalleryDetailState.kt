@@ -4,6 +4,9 @@ import kotlin.uuid.Uuid
 import kotlin.uuid.ExperimentalUuidApi
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageBitmap
+import com.shifthackz.aisdv1.core.localization.formatter.formatGenerationDuration
+import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.presentation.components.model.shortDisplayName
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.mvi.MviState
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
@@ -20,7 +23,6 @@ import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
  * @param pagerContents Bounded metadata window around the current detail item.
  * @param pagerContentStartIndex Global gallery index represented by the first window entry.
  * @param pagerCurrentIndex Global gallery index of the currently displayed item.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -50,6 +52,11 @@ data class GalleryDetailState(
  * @param inputImage Optional already decoded source preview.
  * @param createdAt Formatted creation timestamp for display.
  * @param type Serialized generation-kind label displayed/exported as metadata.
+ * @param provider Recorded provider display name; null for legacy images.
+ * @param acceleration Recorded execution configuration; null when unavailable.
+ * @param deviceName Originating device vendor and model; null for legacy images.
+ * @param osVersion Originating OS release and Android API level; null for legacy images.
+ * @param generationDuration Formatted elapsed time; null for legacy images.
  * @param modelName Recorded checkpoint/model display name.
  * @param prompt Recorded positive prompt.
  * @param negativePrompt Recorded negative prompt.
@@ -64,7 +71,6 @@ data class GalleryDetailState(
  * @param denoisingStrength Formatted image-to-image denoising strength.
  * @param hidden Whether preview pixels should be obscured.
  * @param liked Whether the generation is a favorite.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -80,6 +86,11 @@ data class GalleryDetailContent(
     val createdAt: String,
     val type: String,
     val modelName: String = "",
+    val provider: String? = null,
+    val acceleration: String? = null,
+    val generationDuration: String? = null,
+    val deviceName: String? = null,
+    val osVersion: String? = null,
     val prompt: String,
     val negativePrompt: String,
     val size: String,
@@ -111,7 +122,6 @@ sealed interface GalleryDetailDialog {
      * A gallery-detail operation failed with public details.
      *
      * @param message User-visible failure explanation.
-     *
      * @author Dmitriy Moroz
      */
     data class Error(val message: String) : GalleryDetailDialog
@@ -133,7 +143,6 @@ enum class GalleryDetailTab {
          *
          * @param type Recorded text-to-image or image-to-image generation kind.
          * @return Output/info tabs, plus original-source tab for image-to-image.
-         *
          * @author Dmitriy Moroz
          */
         fun consume(type: AiGenerationResult.Type): List<GalleryDetailTab> = when (type) {
@@ -147,11 +156,8 @@ enum class GalleryDetailTab {
  * Formats a transient generation result for detail without eagerly decoding original pixels.
  *
  * @param showReportButton Whether the current distribution exposes reporting.
- *
  * @receiver Generation result and its encoded images.
- *
  * @return Display metadata retaining transient original bytes for explicit actions.
- *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalUuidApi::class)
@@ -170,6 +176,13 @@ internal fun AiGenerationResult.toGalleryDetailContent(
         createdAt = formatGalleryCreatedAt(createdAt),
         type = type.key,
         modelName = modelName,
+        provider = providerKey?.let { key ->
+            ServerSource.entries.find { it.key == key }?.shortDisplayName() ?: key
+        },
+        acceleration = acceleration?.let { if (it == "None") Localization.string("gallery_info_acceleration_none") else it },
+        generationDuration = generationDurationMillis?.let(::formatGenerationDuration),
+        deviceName = deviceName,
+        osVersion = osVersion,
         prompt = prompt,
         negativePrompt = negativePrompt,
         size = "$width X $height",
@@ -189,17 +202,20 @@ internal fun AiGenerationResult.toGalleryDetailContent(
  * Formats the current generation parameters into localized text for copy/share operations.
  *
  * @receiver Current detail metadata.
- *
  * @return Localized lines containing the recorded prompt and main generation settings.
- *
  * @author Dmitriy Moroz
  */
 internal fun GalleryDetailContent.paramsText(): String = buildString {
     appendLine("${Localization.string("gallery_info_field_type")}: $type")
 
+    provider?.let { appendLine("${Localization.string("gallery_info_field_provider")}: $it") }
     if (modelName.isNotBlank()) {
         appendLine("${Localization.string("gallery_info_field_model")}: $modelName")
     }
+    acceleration?.let { appendLine("${Localization.string("gallery_info_field_acceleration")}: $it") }
+    deviceName?.let { appendLine("${Localization.string("gallery_info_field_device")}: $it") }
+    osVersion?.let { appendLine("${Localization.string("gallery_info_field_os")}: $it") }
+    generationDuration?.let { appendLine("${Localization.string("gallery_info_field_duration")}: $it") }
 
     if (prompt.isNotEmpty()) {
         appendLine("${Localization.string("gallery_info_field_prompt")}: $prompt")

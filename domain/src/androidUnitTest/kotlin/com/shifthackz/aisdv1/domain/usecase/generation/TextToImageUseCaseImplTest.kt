@@ -32,12 +32,17 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertSame
 import org.junit.Test
+import org.junit.Assert.assertNotSame
+import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform
 
 /**
  * Verifies provider dispatch using application payloads, including captured Easy Diffusion batches.
@@ -71,7 +76,10 @@ class TextToImageUseCaseImplTest {
         every { update(any(), any()) } answers { progressUpdates.add(secondArg()); Unit }
     }
 
+    private val deviceProbe = mockk<BenchmarkDeviceProbe>(relaxed = true)
+
     private val useCase = TextToImageUseCaseImpl(
+        deviceProbe = deviceProbe,
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
             progressGateway,
             mockk(relaxed = true)
@@ -554,6 +562,42 @@ class TextToImageUseCaseImplTest {
             assertTrue(identities.single().startsWith("task(sdai-"))
             coVerify(exactly = 1) { stubStableDiffusionGenerationRepository.generateFromText(any()) }
             assertEquals(null, progressUpdates.last())
+        }
+
+    @Test
+    fun `given sequential text batch, provider dispatch captures metadata, expected one device snapshot and independent image timing contexts`() =
+        runTest {
+            // Given
+            every { stubPreferenceManager.source } returns ServerSource.HORDE
+            val device = mockk<BenchmarkDeviceInfo> {
+                every { manufacturer } returns "Google"
+                every { model } returns "Pixel 7 Pro"
+                every { osVersion } returns "Android 17 (37)"
+                every { platform } returns BenchmarkPlatform.ANDROID
+            }
+            coEvery { deviceProbe.capture() } returns device
+            val contexts = mutableListOf<GenerationMetadataContext>()
+            coEvery { stubHordeGenerationRepository.generateFromText(any()) } coAnswers {
+                contexts += requireNotNull(currentCoroutineContext()[GenerationMetadataContext])
+                mockAiGenerationResult
+            }
+            // When
+            useCase(
+                mockTextToImagePayload.copy(
+                    sourceSnapshot = ServerSource.HORDE,
+                    batchCount = 2
+                )
+            )
+            // Then
+            assertEquals(2, contexts.size)
+            assertNotSame(contexts[0], contexts[1])
+            contexts.forEach { context ->
+                assertEquals(ServerSource.HORDE.key, context.providerKey)
+                assertEquals("None", context.acceleration)
+                assertEquals("Google Pixel 7 Pro", context.deviceName)
+                assertEquals("Android 17 (API 37)", context.osVersion)
+            }
+            coVerify(exactly = 1) { deviceProbe.capture() }
         }
 
 }

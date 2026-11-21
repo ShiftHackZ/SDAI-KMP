@@ -5,153 +5,67 @@ package com.shifthackz.aisdv1.domain.entity
  *
  * @param openAiOAuthIdentity Original OAuth account/revision for an unsaved result; not persisted in gallery rows.
  * @param providerSelectionRevision Source-selection revision captured during OAuth generation; null for other providers.
- *
+ * @param providerKey Captured provider catalog key; null for images created before provenance was recorded.
+ * @param acceleration Execution mode used for this image; null when unknown, "None" for remote providers.
+ * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
+ * @param osVersion Originating OS version, including Android API level; null for legacy images.
+ * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
+ * @param id Persistent gallery identity, or zero before insertion.
+ * @param image Original encoded output image as Base64.
+ * @param inputImage Optional encoded source image as Base64, empty for text generation.
+ * @param createdAt Creation timestamp in epoch milliseconds.
+ * @param type Text-to-image or image-to-image operation.
+ * @param prompt Positive generation prompt.
+ * @param negativePrompt Negative generation prompt.
+ * @param width Output width in pixels.
+ * @param height Output height in pixels.
+ * @param samplingSteps Requested sampling iteration count.
+ * @param cfgScale Classifier-free guidance scale.
+ * @param restoreFaces Whether face restoration was requested.
+ * @param sampler Sampling algorithm identifier.
+ * @param seed Resolved provider seed text.
+ * @param subSeed Variation seed text.
+ * @param subSeedStrength Variation seed influence.
+ * @param denoisingStrength Image-to-image denoising influence.
+ * @param hidden Whether the output is obscured in the gallery.
+ * @param liked Whether the output is a favorite.
+ * @param modelName Recorded model name, independent of currently selected model.
  * @author Dmitriy Moroz
  */
 data class AiGenerationResult(
-    /**
-     * Exposes the `id` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val id: Long,
-    /**
-     * Exposes the `image` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val image: String,
-    /**
-     * Exposes the `inputImage` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val inputImage: String,
-    /**
-     * Exposes the `createdAt` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val createdAt: Long,
-    /**
-     * Exposes the `type` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val type: Type,
-    /**
-     * Exposes the `prompt` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val prompt: String,
-    /**
-     * Exposes the `negativePrompt` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val negativePrompt: String,
-    /**
-     * Exposes the `width` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val width: Int,
-    /**
-     * Exposes the `height` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val height: Int,
-    /**
-     * Exposes the `samplingSteps` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val samplingSteps: Int,
-    /**
-     * Exposes the `cfgScale` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val cfgScale: Float,
-    /**
-     * Exposes the `restoreFaces` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val restoreFaces: Boolean,
-    /**
-     * Exposes the `sampler` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val sampler: String,
-    /**
-     * Exposes the `seed` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val seed: String,
-    /**
-     * Exposes the `subSeed` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val subSeed: String,
-    /**
-     * Exposes the `subSeedStrength` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val subSeedStrength: Float,
-    /**
-     * Exposes the `denoisingStrength` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val denoisingStrength: Float,
-    /**
-     * Exposes the `hidden` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val hidden: Boolean,
-    /**
-     * Exposes the `liked` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val liked: Boolean = false,
-    /**
-     * Exposes the `modelName` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
     val modelName: String = "",
-    /**
-     * Transient identity guard for unsaved OAuth results. Gallery storage deliberately omits it.
-     *
-     * @author Dmitriy Moroz
-     */
     val openAiOAuthIdentity: OpenAiOAuthIdentity? = null,
-    /**
-     * Transient source-selection guard for an unsaved OAuth result; gallery rows omit this field.
-     *
-     * @author Dmitriy Moroz
-     */
     val providerSelectionRevision: Long? = null,
-    /**
-     * Persisted image identity, independent of flags and payload size.
-     *
-     * @author Dmitriy Moroz
-     */
     val imageRevision: String = "",
+    val providerKey: String? = null,
+    val acceleration: String? = null,
+    val deviceName: String? = null,
+    val osVersion: String? = null,
+    val generationDurationMillis: Long? = null,
 ) {
     /**
-     * Coordinates `Type` behavior in the SDAI domain layer.
+     * Stable gallery operation discriminator.
      *
-     * @param key key value consumed by the API.
+     * @param key Portable operation identifier.
      * @author Dmitriy Moroz
      */
     enum class Type(val key: String) {
@@ -159,15 +73,15 @@ data class AiGenerationResult(
         IMAGE_TO_IMAGE("img2img");
 
         /**
-         * Provides the `companion object` singleton used by the SDAI domain layer.
+         * Resolves stored operation identifiers for older gallery rows.
          *
          * @author Dmitriy Moroz
          */
         companion object {
             /**
-             * Executes the `parse` step in the SDAI domain layer.
+             * Resolves a stored operation key, using text-to-image for legacy unknown values.
              *
-             * @param input input value consumed by the API.
+             * @param input Persisted operation identifier, possibly absent in old records.
              * @author Dmitriy Moroz
              */
             fun parse(input: String?) = entries

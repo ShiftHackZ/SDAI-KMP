@@ -5,6 +5,10 @@ plugins {
 android {
     namespace = "com.shifthackz.aisdv1.presentation.gallery"
     testOptions.unitTests {
+        isReturnDefaultValues = true
+        isIncludeAndroidResources = true
+    }
+    testOptions.unitTests {
         all { test ->
             test.jvmArgs(
                 "--add-opens", "java.base/java.lang=ALL-UNNAMED",
@@ -49,12 +53,15 @@ kotlin {
             implementation(libs.test.junit)
             implementation(libs.test.mockk)
             implementation(libs.test.coroutines)
+            implementation(libs.test.roboelectric)
+            implementation(libs.test.compose.junit)
         }
     }
 }
 
 dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.test.compose.manifest)
 }
 
 // Reports describe compiler stability/skipping decisions; they do not measure frame performance.

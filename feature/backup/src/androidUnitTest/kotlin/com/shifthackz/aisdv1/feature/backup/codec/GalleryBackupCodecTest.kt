@@ -45,8 +45,39 @@ class GalleryBackupCodecTest {
         true,
         true,
         "model",
-        "old revision"
+        "old revision",
+        deviceName = "Google Pixel 7 Pro",
+        osVersion = "Android 17 (API 37)",
+        providerKey = "local_mnn",
+        acceleration = "OpenCL",
+        generationDurationMillis = 3_661_002,
     )
+
+    @Test
+    fun `given legacy gallery metadata, optional provenance fields are absent, expected unknown values remain null`() {
+        // Given
+        val metadata = "{}"
+        // When
+        val record = Json.decodeFromString<GalleryBackupRecord>(metadata)
+        // Then
+        assertNull(record.deviceName)
+        assertNull(record.osVersion)
+        assertNull(record.providerKey)
+        assertNull(record.acceleration)
+        assertNull(record.generationDurationMillis)
+    }
+
+    @Test
+    fun `given negative generation duration, archive is restored, expected invalid metadata rejection`() {
+        // Given
+        val source = Buffer()
+        codec.write(source, row.copy(generationDurationMillis = -1))
+        // When
+        val failure =
+            assertThrows(IllegalArgumentException::class.java) { codec.read(source, "new") }
+        // Then
+        assertEquals("Invalid generation duration", failure.message)
+    }
 
     @Test
     fun `given saved gallery row, binary record round trips, expected fresh identity and preserved history flags`() {

@@ -279,7 +279,6 @@ import org.koin.dsl.module
 
 /**
  * Domain-layer Koin module that provides default repositories and use case implementations.
- *
  * Network usage receives a no-op repository here so common presentation can resolve its contracts
  * before platform data modules override the binding with a persistent implementation.
  *
@@ -466,6 +465,7 @@ val coreDomainModule = module {
     }
     factory<TextToImageUseCase> {
         TextToImageUseCaseImpl(
+            deviceProbe = get(),
             trackRemoteGenerationUseCase = get(),
             generationRestoreGate = get(),
             generateEasyDiffusionUseCase = get(),
@@ -491,6 +491,7 @@ val coreDomainModule = module {
     }
     factory<ImageToImageUseCase> {
         ImageToImageUseCaseImpl(
+            deviceProbe = get(),
             trackRemoteGenerationUseCase = get(),
             generationRestoreGate = get(),
             generateEasyDiffusionUseCase = get(),

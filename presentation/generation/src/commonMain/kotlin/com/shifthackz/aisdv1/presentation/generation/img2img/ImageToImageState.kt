@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import kotlin.time.TimeMark
 import androidx.compose.runtime.Immutable
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.model.UiText
@@ -27,7 +28,6 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
 
 /**
  * Render state for the retained image-to-image form and its inpaint editor.
- *
  * Implements the shared generation-control contract without making every provider or control
  * applicable to img2img. [mapToPayload] selects request fields; shared-form compatibility values
  * such as OpenAI options, local backend selectors and hires do not enable unsupported sources.
@@ -36,6 +36,7 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  * @param imageBase64 Encoded source image used for generation and mask editing; blank means no input.
  * @param denoisingStrength Source-to-output transformation strength edited by the form, normally zero through one.
  * @param pickingImage Whether native input acquisition or random-image loading is in progress.
+ * @param generationStartedAt Monotonic foreground start retained across dialog stages and composition recreation.
  * @param generating Whether a started generation or background-scheduling operation is active.
  * @param savingImage Whether the platform image-save operation is active.
  * @param sharingImage Whether output is being prepared for a platform share handoff; does not imply delivery.
@@ -94,7 +95,6 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  * @param aDetailer Extension configuration forwarded only for AUTOMATIC1111 when enabled and available.
  * @param aDetailerAvailable Whether the active AUTOMATIC1111 endpoint advertises ADetailer.
  * @param aDetailerRefreshing Whether ADetailer availability is being refreshed.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -103,6 +103,7 @@ data class ImageToImageState(
     val imageBase64: String = "",
     val denoisingStrength: Float = DEFAULT_DENOISING_STRENGTH,
     val pickingImage: Boolean = false,
+    val generationStartedAt: TimeMark? = null,
     val generating: Boolean = false,
     val savingImage: Boolean = false,
     val sharingImage: Boolean = false,

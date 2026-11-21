@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import kotlin.time.TimeMark
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialo
 /**
  * Renders the active generation decision, progress or result dialog and forwards its actions.
  *
+ * @param generationStartedAt Monotonic operation start; retained while progress stages change.
  * @param performanceOverlay Optional resource panel, composed only during generation progress.
  * @param screenModal Captured dialog state, including provider progress units.
  * @param onDismissRequest Closes a dismissible dialog.
@@ -44,12 +46,12 @@ import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialo
  * @param onSkipBenchmarkRequest callback invoked when the user skips first-run benchmark.
  * @param onBenchmarkContinueRequest callback invoked when the user accepts recommendation risk.
  * @param onBenchmarkDoNotAskRequest callback invoked when the user suppresses future recommendation warnings.
- *
  * @author Dmitriy Moroz
  */
 @Composable
 fun GenerationModalRenderer(
     screenModal: GenerationModal,
+    generationStartedAt: TimeMark? = null,
     onDismissRequest: () -> Unit,
     onCancelGeneration: () -> Unit,
     onSaveRequest: (List<AiGenerationResult>) -> Unit,
@@ -65,6 +67,7 @@ fun GenerationModalRenderer(
         GenerationModal.None -> Unit
 
         is GenerationModal.Communicating -> ProgressDialog(
+            elapsedText = generationStartedAt?.let { generationElapsedText(it) },
             canDismiss = false,
             waitTimeSeconds = screenModal.hordeProcessStatus?.waitTimeSeconds,
             positionInQueue = screenModal.hordeProcessStatus?.queuePosition,
@@ -75,6 +78,7 @@ fun GenerationModalRenderer(
         )
 
         is GenerationModal.Generating -> ProgressDialog(
+            elapsedText = generationStartedAt?.let { generationElapsedText(it) },
             title = screenModal.title ?: Localization.string("communicating_local_title")
                 .asUiText(),
             canDismiss = false,

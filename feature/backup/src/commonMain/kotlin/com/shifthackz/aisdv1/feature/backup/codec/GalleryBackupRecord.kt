@@ -5,6 +5,7 @@ import kotlinx.serialization.SerialName
 
 /**
  * Portable image metadata. Images are separate binary frames; local IDs, revisions and transient guards are never serialized.
+ *
  * @param createdAt Original creation time in epoch milliseconds.
  * @param generationType Stable txt2img/img2img discriminator; future values are skipped.
  * @param prompt Original positive generation prompt.
@@ -22,6 +23,11 @@ import kotlinx.serialization.SerialName
  * @param isHidden Whether the history item is hidden from the gallery.
  * @param isLiked Whether the history item is marked as a favorite.
  * @param modelName Original generation model name without requiring that model on the destination.
+ * @param providerKey Captured provider catalog key; null for images created before provenance was recorded.
+ * @param acceleration Execution mode used for this image; null when unknown, "None" for remote providers.
+ * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
+ * @param osVersion Originating OS version, including Android API level; null for legacy images.
+ * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
  * @author Dmitriy Moroz
  */
 @Serializable
@@ -43,4 +49,9 @@ internal data class GalleryBackupRecord(
     @SerialName("hidden") val isHidden: Boolean = false,
     @SerialName("liked") val isLiked: Boolean = false,
     val modelName: String = "",
+    val providerKey: String? = null,
+    val acceleration: String? = null,
+    val deviceName: String? = null,
+    val osVersion: String? = null,
+    val generationDurationMillis: Long? = null,
 )

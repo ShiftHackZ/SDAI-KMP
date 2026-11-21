@@ -11,6 +11,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import com.shifthackz.aisdv1.core.localization.formatter.formatGenerationDuration
 import org.json.JSONObject
 
 /**
@@ -22,7 +23,6 @@ import org.json.JSONObject
  * @param getAllGalleryIdsUseCase Ordered lightweight IDs.
  * @param originals Streaming original file writer.
  * @param budget Maximum single encoded image admitted for export.
- *
  * @author Dmitriy Moroz
  */
 internal class GalleryExporter(
@@ -38,7 +38,6 @@ internal class GalleryExporter(
      * Failure or cancellation removes the partial archive and temporary image files.
      *
      * @param ids Selected IDs, or all existing gallery IDs when null.
-     *
      * @author Dmitriy Moroz
      */
     override suspend fun export(ids: List<Long>?): GalleryExportResult {
@@ -71,6 +70,19 @@ internal class GalleryExporter(
                         image.delete()
                     }
                     val metadata = JSONObject().put("id", item.id).put("created_at", item.createdAt)
+                        .put("device_name", item.deviceName ?: JSONObject.NULL)
+                        .put("os_version", item.osVersion ?: JSONObject.NULL)
+                        .put("provider_key", item.providerKey ?: JSONObject.NULL)
+                        .put("acceleration", item.acceleration ?: JSONObject.NULL)
+                        .put(
+                            "generation_duration_millis",
+                            item.generationDurationMillis ?: JSONObject.NULL
+                        )
+                        .put(
+                            "generation_duration",
+                            item.generationDurationMillis?.let(::formatGenerationDuration)
+                                ?: JSONObject.NULL
+                        )
                         .put("generation_type", item.type.key).put("model_name", item.modelName)
                         .put("prompt", item.prompt).put("negative_prompt", item.negativePrompt)
                         .put("width", item.width).put("height", item.height)

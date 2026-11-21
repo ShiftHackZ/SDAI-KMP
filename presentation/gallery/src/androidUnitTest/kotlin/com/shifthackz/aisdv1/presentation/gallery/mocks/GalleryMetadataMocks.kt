@@ -47,4 +47,9 @@ fun AiGenerationResult.toGalleryMetadata() = GalleryItemMetadata(
     isHidden = hidden,
     isLiked = liked,
     modelName = modelName,
+    providerKey = providerKey,
+    acceleration = acceleration,
+    generationDurationMillis = generationDurationMillis,
+    deviceName = deviceName,
+    osVersion = osVersion,
 )

@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 interface GenerationResultDao {
     /**
      * Advances through a stable backup snapshot by primary key without repeated OFFSET scans.
+     *
      * @param afterId Exclusive ID cursor from the previous page, or zero for the first page.
      * @param limit Maximum number of full image rows held at once.
      * @author Dmitriy Moroz
@@ -29,6 +30,7 @@ interface GenerationResultDao {
 
     /**
      * Pages every saved image identity, including hidden history, without materializing image payloads.
+     *
      * @param afterId Exclusive primary-key cursor, or zero for the first page.
      * @param limit Maximum IDs read for duplicate checking at once.
      * @author Dmitriy Moroz
@@ -38,6 +40,7 @@ interface GenerationResultDao {
 
     /**
      * Admits one output-only image string before materialization for a single-pass duplicate check.
+     *
      * @param id Saved gallery or hidden-history identity.
      * @param maxBytes Maximum stored UTF8 bytes allowed in the admitted text.
      * @return Base64 text, or null for an oversized representation or missing row.
@@ -49,6 +52,7 @@ interface GenerationResultDao {
     /**
      * Reads a bounded Kotlin chunk from an oversized legacy representation.
      * Used only when the single-read admission rejects the text; SQLite may materialize its value natively.
+     *
      * @param id Saved gallery or hidden-history identity.
      * @param offset One-based byte position in the stored UTF8 Base64 representation.
      * @param maxBytes Maximum UTF8 bytes materialized in the result; BLOB slicing avoids repeated text-prefix scans.
@@ -232,7 +236,7 @@ interface GenerationResultDao {
      * @param offset Global starting position.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset")
     fun observeMetadata(limit: Int, offset: Int): Flow<List<GenerationResultMetadataEntity>>
 
     /**
@@ -241,7 +245,7 @@ interface GenerationResultDao {
      * @param ids Selected IDs, chunked by the caller.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results WHERE id IN (:ids)")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results WHERE id IN (:ids)")
     suspend fun queryMetadata(ids: List<Long>): List<GenerationResultMetadataEntity>
 
     /**
@@ -259,7 +263,7 @@ interface GenerationResultDao {
      * @param id Persisted identity.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results WHERE id = :id LIMIT 1")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results WHERE id = :id LIMIT 1")
     fun observeMetadataItem(id: Long): Flow<GenerationResultMetadataEntity?>
 
     /**
@@ -267,7 +271,7 @@ interface GenerationResultDao {
      *
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision FROM generation_results WHERE hidden = 0 ORDER BY created_at DESC, id DESC")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results WHERE hidden = 0 ORDER BY created_at DESC, id DESC")
     suspend fun queryHistoryMetadata(): List<GenerationResultMetadataEntity>
 
     /**
