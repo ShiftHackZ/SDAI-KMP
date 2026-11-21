@@ -158,7 +158,9 @@ actual fun PlatformTopAppBar(
         }
         return
     }
-    val topPixels = WindowInsets.statusBars.getTop(LocalDensity.current)
+    val density = LocalDensity.current
+    val topPixels = LocalToolbarStatusBarInset.current?.let { with(density) { it.roundToPx() } }
+        ?: WindowInsets.statusBars.getTop(density)
     val height = 64.dp + with(LocalDensity.current) { topPixels.toDp() } + bottomContentHeight
     val bounds = modifier.fillMaxWidth().height(height)
     val isObscured = LocalToolbarObscured.current

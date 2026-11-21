@@ -62,7 +62,8 @@ fun ProgrammaticPager(
         key = { it },
     ) { page ->
         val isVisible = abs(page - pager.currentPage - pager.currentPageOffsetFraction) < 1f
-        val isInteractive = page == selectedPage && !pager.isScrollInProgress
+        val isInteractive =
+            page == selectedPage && !pager.isScrollInProgress && backProgress == null
         CompositionLocalProvider(
             LocalMviVisibility provides (isParentVisible && isVisible),
             LocalPlatformControlVisibility provides (areParentControlsVisible && isVisible),

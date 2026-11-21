@@ -80,7 +80,7 @@ class BackTransitionState internal constructor(private val scope: CoroutineScope
      * @author Dmitriy Moroz
      */
     fun complete(canCommit: () -> Boolean, onBack: () -> Unit) {
-        if (settling?.isActive == true) return
+        if (hasCommittedGesture || settling?.isActive == true) return
         if (!canCommit()) {
             cancel()
             return

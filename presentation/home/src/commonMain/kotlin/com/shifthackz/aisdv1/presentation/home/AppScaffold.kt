@@ -169,21 +169,25 @@ fun AppScaffold(
                 LocalFloatingNavigationBarInset provides floatingInset,
                 LocalToolbarObscured provides isDrawerObscuringContent,
             ) {
-                Column(
+                HomeContentLayout(
+                    shouldReserveTopInset = isPlatformToolbarNative && shouldShowHomeNavigation,
+                    topWindowInsets = persistentTopAppBarWindowInsets(),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(if (shouldFloatNavigation) PaddingValues(top = paddingValues.calculateTopPadding()) else paddingValues),
-                ) {
-                    if (shouldShowHomeNavigation) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surface),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            ConnectivityComposable()
+                    status = {
+                        if (shouldShowHomeNavigation) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surface),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                ConnectivityComposable()
+                            }
                         }
-                    }
+                    },
+                ) {
                     content(Modifier.fillMaxSize())
                 }
             }

@@ -77,7 +77,11 @@ kotlin {
             implementation(libs.koin.android)
         }
 
-        androidUnitTest.dependencies { implementation(libs.test.junit) }
+        androidUnitTest.dependencies {
+            implementation(libs.test.junit)
+            implementation(libs.test.mockk)
+            implementation(libs.test.coroutines)
+        }
 
         iosMain.dependencies {
             implementation(project(":feature:sdxl"))

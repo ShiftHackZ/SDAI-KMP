@@ -28,6 +28,13 @@ import androidx.compose.ui.unit.Dp
 val LocalToolbarContentInset = staticCompositionLocalOf { 0.dp }
 
 /**
+ * Overrides the native toolbar's status-area inset when an enclosing home shell already reserves it.
+ * Null leaves safe-area ownership with the route toolbar.
+ * @author Dmitriy Moroz
+ */
+val LocalToolbarStatusBarInset = staticCompositionLocalOf<Dp?> { null }
+
+/**
  * Prevents floating native toolbar content from drawing above the app's modal drawer.
  * @author Dmitriy Moroz
  */
