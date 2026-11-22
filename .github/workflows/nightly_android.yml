@@ -31,6 +31,7 @@ env:
   APK_NAME: sdai-full-nightly.apk
   NIGHTLY_TAG: nightly
   NIGHTLY_RELEASE_NAME: Android Full Nightly
+  TELEGRAM_BOT_API_REVISION: 7232881b39dfcd048a0d569f1983c5184249ee05
 
 jobs:
   nightly:
@@ -86,7 +87,7 @@ jobs:
 
           git diff --name-only "${NIGHTLY_TAG}..HEAD" > "${RUNNER_TEMP}/nightly-changed-files.txt"
 
-          functional_pattern='^(app/|core/|data/|demo/|domain/|feature/|network/|presentation/|storage/|build-logic/|gradle/|build\.gradle\.kts$|settings\.gradle\.kts$|gradle\.properties$|gradlew$|gradlew\.bat$|\.github/workflows/nightly_android\.yml$)'
+          functional_pattern='^(app/|core/|data/|demo/|domain/|feature/|network/|presentation/|storage/|build-logic/|gradle/|scripts/nightly/|build\.gradle\.kts$|settings\.gradle\.kts$|gradle\.properties$|gradlew$|gradlew\.bat$|\.github/workflows/nightly_android\.yml$)'
           if grep -Eq "${functional_pattern}" "${RUNNER_TEMP}/nightly-changed-files.txt"; then
             echo "should_build=true" >> "${GITHUB_OUTPUT}"
             echo "reason=Functional files changed since the previous nightly." >> "${GITHUB_OUTPUT}"
@@ -333,21 +334,16 @@ jobs:
               --verify-tag
           fi
 
-      - name: Announce nightly on Discord
+      - name: Prepare nightly announcements
+        id: announcement
         if: steps.plan.outputs.should_build == 'true' && env.PUBLISH_NIGHTLY == 'true'
         shell: bash
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK_URL }}
           NIGHTLY_VERSION_NAME: ${{ steps.version.outputs.version_name }}
           NIGHTLY_BUILD_DATE: ${{ steps.version.outputs.build_date }}
           NIGHTLY_COMMIT: ${{ steps.plan.outputs.target_sha }}
         run: |
           set -euo pipefail
-
-          if [[ -z "${DISCORD_WEBHOOK_URL}" ]]; then
-            echo "::notice::Discord notification skipped: DISCORD_NIGHTLY_WEBHOOK_URL is not configured."
-            exit 0
-          fi
 
           output_dir="${RUNNER_TEMP}/nightly-output"
           release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${NIGHTLY_TAG}"
@@ -362,16 +358,49 @@ jobs:
             --arg run_url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
             --arg feedback_url "https://github.com/${GITHUB_REPOSITORY}/issues" \
             --rawfile changes "${output_dir}/changes.txt" \
-            '{allowed_mentions: {parse: []}, embeds: [{
+            '{
               title: ("SDAI Dev · Nightly · " + $date),
-              url: $release_url,
-              color: 7684269,
-              description: ("**" + $version + "**\nInstalls alongside stable SDAI with separate app data.\n\n" +
-                $changes[:1000] + "\n[Download latest APK](" + $download_url + ") · [Release details](" + $release_url +
-                ")\n[Commit " + $commit[:8] + "](" + $commit_url + ") · [Build](" + $run_url +
-                ") · [Report an issue](" + $feedback_url + ")"),
-              footer: {text: "Preview build for testing. The download link always serves the latest nightly."}
-            }]}' > "${output_dir}/discord.json"
+              version: $version,
+              installation_note: "Installs alongside stable SDAI with separate app data.",
+              changes: $changes[:1000],
+              links: [
+                [{text: "Download latest APK", url: $download_url}, {text: "Release details", url: $release_url}],
+                [{text: ("Commit " + $commit[:8]), url: $commit_url}, {text: "Build", url: $run_url},
+                 {text: "Report an issue", url: $feedback_url}]
+              ],
+              footer: "Preview build for testing. The download link always serves the latest nightly."
+            }' > "${output_dir}/announcement.json"
+
+          jq '{allowed_mentions: {parse: []}, embeds: [{
+            title: .title,
+            url: .links[0][1].url,
+            color: 7684269,
+            description: ("**" + .version + "**\n" + .installation_note + "\n\n" + .changes + "\n" +
+              (.links | map(map("[" + .text + "](" + .url + ")") | join(" · ")) | join("\n"))),
+            footer: {text: .footer}
+          }]}' "${output_dir}/announcement.json" > "${output_dir}/discord.json"
+
+          # Escape all dynamic content for Telegram HTML, including commit subjects.
+          jq -r '"<b>" + (.title | @html) + "</b>\n\n<b>" + (.version | @html) + "</b>\n" +
+            (.installation_note | @html) + "\n\n" + (.changes | @html) + "\n" +
+            (.links | map(map("<a href=\"" + (.url | @html) + "\">" + (.text | @html) + "</a>") |
+              join(" · ")) | join("\n")) + "\n\n" + (.footer | @html)' \
+            "${output_dir}/announcement.json" > "${output_dir}/telegram.html"
+
+      - name: Announce nightly on Discord
+        if: steps.plan.outputs.should_build == 'true' && env.PUBLISH_NIGHTLY == 'true'
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_NIGHTLY_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${DISCORD_WEBHOOK_URL}" ]]; then
+            echo "::notice::Discord notification skipped: DISCORD_NIGHTLY_WEBHOOK_URL is not configured."
+            exit 0
+          fi
+
+          output_dir="${RUNNER_TEMP}/nightly-output"
 
           # Do not retry POST automatically: a lost response could duplicate the announcement.
           curl --fail --silent --show-error --connect-timeout 15 --max-time 60 \
@@ -380,3 +409,37 @@ jobs:
             --output "${output_dir}/discord-response.json" \
             --url-query 'wait=true' \
             "${DISCORD_WEBHOOK_URL}"
+
+      - name: Checkout nightly notification tools
+        id: telegram_tools
+        # Attempt both destinations even if Discord delivery fails.
+        if: ${{ !cancelled() && steps.announcement.outcome == 'success' && steps.plan.outputs.should_build == 'true' && env.PUBLISH_NIGHTLY == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          # Notification tools belong to the workflow revision, not the APK's target_ref.
+          ref: ${{ github.workflow_sha }}
+          path: .nightly-ci
+          sparse-checkout: scripts/nightly
+          persist-credentials: false
+
+      - name: Cache Telegram Bot API binary
+        id: telegram_cache
+        if: ${{ !cancelled() && steps.telegram_tools.outcome == 'success' }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/telegram-bot-api/bin
+          key: telegram-bot-api-ubuntu24-${{ runner.arch }}-${{ env.TELEGRAM_BOT_API_REVISION }}-${{ hashFiles('.nightly-ci/scripts/nightly/build_telegram_bot_api.sh') }}
+
+      - name: Announce nightly and attach APK in Telegram comments
+        if: ${{ !cancelled() && steps.telegram_tools.outcome == 'success' && steps.telegram_cache.outcome == 'success' }}
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_NIGHTLY_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_NIGHTLY_CHAT_ID || secrets.TELEGRAM_NIGHTLY_CHAT_ID }}
+          TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ vars.TELEGRAM_NIGHTLY_REPLY_TO_MESSAGE_ID || secrets.TELEGRAM_NIGHTLY_REPLY_TO_MESSAGE_ID }}
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          NIGHTLY_SIGNED_APK: ${{ steps.sign.outputs.signed_apk }}
+        run: |
+          set -euo pipefail
+          python3 .nightly-ci/scripts/nightly/telegram_announce.py
