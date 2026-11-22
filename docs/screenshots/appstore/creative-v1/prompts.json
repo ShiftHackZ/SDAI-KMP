@@ -1,0 +1,46 @@
+{
+  "generator": "built-in imagegen",
+  "creativeBrief": "Premium SDAI AI image creation artwork: deep ink-navy atmosphere, warm orange, violet, cyan and teal light. A compact central floating emerald landscape with a sun, violet cloud, waterfall and two alternate-style image planes. Keep all headline text and essential artwork within Apple art-safe rectangles. Surround the center with atmospheric expendable artwork. No invented app UI, devices, logos, badges, prices, URLs, awards or watermark. Fully opaque full-bleed PNG.",
+  "placements": {
+    "product-page-header": {
+      "width": 3840,
+      "height": 1646,
+      "artSafeArea": {
+        "x": 1097,
+        "y": 493,
+        "width": 1646,
+        "height": 661
+      }
+    },
+    "search-results": {
+      "width": 1920,
+      "height": 1280,
+      "artSafeArea": {
+        "x": 418,
+        "y": 382.5,
+        "width": 1084,
+        "height": 515
+      }
+    }
+  },
+  "localizedHeadlines": {
+    "en-US": {
+      "product-page-header": "Imagine. Create.",
+      "search-results": "Create AI images"
+    },
+    "ru": {
+      "product-page-header": "Воображай. Создавай.",
+      "search-results": "Создавай изображения с ИИ"
+    },
+    "uk": {
+      "product-page-header": "Уявляй. Створюй.",
+      "search-results": "Створюй зображення з ШІ"
+    }
+  },
+  "localizationPrompt": "Edit image: Replace only the headline with the exact localized copy. Preserve the artwork, canvas aspect ratio, compact central composition, colors, lighting and safe-area positions. Keep the headline on one line with the same sans-serif family, reducing size only to fit. Header: first word white, second orange-to-violet gradient. Search: white text with AI / ИИ / ШІ in orange. No extra text or elements.",
+  "generationPrompts": {
+    "header-uk": "Edit image: Text-localization ONLY. Replace the English headline with this EXACT Ukrainian text: \"Уявляй. Створюй.\". Keep the same single-line centered headline in the exact same vertical position, same clean sans-serif family. First word white, second word orange-to-violet gradient. Keep wide21:9canvas and ALL essential content within central42%width and38%height. Headline width≤650px on1915x821canvas. Preserve all existing artwork, compact central grouping, landscape details, atmospheric margins, colors, lighting, and crop-safe position. Do not enlarge or reposition the group. No new words, logos, badges, devices, UI, guides or elements. Fully opaque PNG.",
+    "header-ru": "Edit image: Text-localization ONLY. Replace the English headline with this EXACT Russian text: \"Воображай. Создавай.\". Keep the same single-line centered headline in the exact same vertical position, same clean sans-serif family. First word white, second word orange-to-violet gradient. Keep wide21:9canvas and ALL essential content within central42%width and38%height. Headline width≤650px on1915x821canvas. Preserve all existing artwork, compact central grouping, landscape details, atmospheric margins, colors, lighting, and crop-safe position. Do not enlarge or reposition the group. No new words, logos, badges, devices, UI, guides or elements. Fully opaque PNG.",
+    "search-uk": "Edit image: Text-localization ONLY. Replace the English headline with this EXACT Ukrainian text: \"Створюй зображення з ШІ\". Keep the same single-line centered headline in the exact same vertical position, same clean sans-serif family. All words white except ШІ in orange. Keep3:2canvas and ALL essential content within central54%width and38%height. Headline width≤800px on1536x1024canvas. Preserve all existing artwork, compact central grouping, landscape details, atmospheric margins, colors, lighting, and crop-safe position. Do not enlarge or reposition the group. No new words, logos, badges, devices, UI, guides or elements. Fully opaque PNG."
+  }
+}
