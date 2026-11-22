@@ -19,11 +19,13 @@ internal fun List<NetworkUsageEntity>.toDomain(): NetworkUsage {
     var modelDownloadBytes = 0L
     var configBytes = 0L
     var inferenceBytes = 0L
+    var civitaiBytes = 0L
     forEach { entity ->
         when (NetworkUsageBucket.parse(entity.category)) {
             NetworkUsageBucket.MODEL_DOWNLOADS -> modelDownloadBytes = entity.bytes
             NetworkUsageBucket.CONFIGS -> configBytes = entity.bytes
             NetworkUsageBucket.INFERENCE -> inferenceBytes = entity.bytes
+            NetworkUsageBucket.CIVITAI -> civitaiBytes = entity.bytes
             null -> Unit
         }
     }
@@ -31,6 +33,7 @@ internal fun List<NetworkUsageEntity>.toDomain(): NetworkUsage {
         modelDownloadBytes = modelDownloadBytes.coerceAtLeast(0L),
         configBytes = configBytes.coerceAtLeast(0L),
         inferenceBytes = inferenceBytes.coerceAtLeast(0L),
+        civitaiBytes = civitaiBytes.coerceAtLeast(0L),
     )
 }
 
@@ -47,4 +50,5 @@ internal fun List<NetworkUsageEntity>.toDomain(): NetworkUsage {
 internal fun NetworkUsageCategory.toDomain(): NetworkUsageBucket = when (this) {
     NetworkUsageCategory.CONFIGS -> NetworkUsageBucket.CONFIGS
     NetworkUsageCategory.INFERENCE -> NetworkUsageBucket.INFERENCE
+    NetworkUsageCategory.CIVITAI -> NetworkUsageBucket.CIVITAI
 }

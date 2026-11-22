@@ -75,7 +75,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
             val progress = mutableListOf<BackupProgress>()
             var hasFailed = false
@@ -111,7 +112,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
             val progress = mutableListOf<BackupProgress>()
             // When
@@ -139,7 +141,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
 
             // When
@@ -167,7 +170,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
             writer.gallery("first-session", archive) {}
 
@@ -203,7 +207,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
 
             // When
@@ -231,7 +236,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
 
             // When
@@ -254,7 +260,7 @@ class RoomBackupRestoreWriterTest {
             every { gallery.read(any(), any()) } returns row("AQIDBA==")
             val writer = RoomBackupRestoreWriter(
                 database, codec, gallery, files, Json,
-                DefaultBackupImageFingerprint(), budget.copy(maxEncodedBytes = 4)
+                DefaultBackupImageFingerprint(), budget.copy(maxEncodedBytes = 4), mockk()
             )
 
             // When
@@ -285,7 +291,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
             // When
             writer.gallery("session", archive) {}
@@ -312,7 +319,8 @@ class RoomBackupRestoreWriterTest {
                 files,
                 Json,
                 DefaultBackupImageFingerprint(),
-                budget
+                budget,
+                mockk(),
             )
             val progress = mutableListOf<BackupProgress>()
             // When
@@ -331,6 +339,7 @@ class RoomBackupRestoreWriterTest {
 
     /**
      * Supplies the production writer with a paged image store and an observed commit ledger.
+     *
      * @param rows Mutable persisted rows; fresh insert identities are assigned independently of the archive.
      * @param outcomes Committed category reports recorded by the fake transaction boundary.
      * @author Dmitriy Moroz
@@ -369,6 +378,7 @@ class RoomBackupRestoreWriterTest {
 
     /**
      * Builds gallery rows with different output-byte identities while keeping generation metadata usable.
+     *
      * @param image Output Base64 content used by the duplicate-checking unit under test.
      * @param id Existing identity, or zero for an archive-decoded row.
      * @param isHidden Whether the existing image belongs only to generation history.

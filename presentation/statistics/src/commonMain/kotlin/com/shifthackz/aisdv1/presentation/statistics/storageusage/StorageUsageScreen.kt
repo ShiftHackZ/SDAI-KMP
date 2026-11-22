@@ -146,6 +146,7 @@ private fun UsageItem.deleteDescription(): String = when (category) {
     UsageCategory.TRAFFIC_MODELS,
     UsageCategory.TRAFFIC_CONFIGS,
     UsageCategory.TRAFFIC_INFERENCE,
+    UsageCategory.TRAFFIC_CIVITAI,
         -> ""
 }
 

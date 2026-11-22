@@ -29,6 +29,7 @@ internal fun GalleryItemMetadata.toGalleryDetailContent(
         createdAt = formatGalleryCreatedAt(createdAt),
         type = type.key,
         modelName = modelName,
+        civitaiUrl = civitaiUrl,
         provider = providerKey?.let { key ->
             ServerSource.entries.find { it.key == key }?.shortDisplayName() ?: key
         },

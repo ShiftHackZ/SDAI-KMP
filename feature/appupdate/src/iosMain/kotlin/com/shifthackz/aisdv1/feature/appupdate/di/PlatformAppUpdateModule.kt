@@ -2,7 +2,7 @@ package com.shifthackz.aisdv1.feature.appupdate.di
 
 import com.shifthackz.aisdv1.feature.appupdate.ReleaseAppUpdateGateway
 import com.shifthackz.aisdv1.feature.appupdate.configureAppUpdateClient
-import com.shifthackz.aisdv1.feature.appupdate.domain.AppUpdateGateway
+import com.shifthackz.aisdv1.domain.gateway.AppUpdateGateway
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import org.koin.core.module.Module

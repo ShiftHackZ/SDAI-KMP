@@ -56,6 +56,49 @@ class NetworkUsageViewModelTest {
     }
 
     @Test
+    fun `given Civitai traffic, usage screen observes counters, expected dedicated row included in total`() =
+        runTest {
+            // Given
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+            // When
+            networkUsage.value = NetworkUsage(inferenceBytes = 100, civitaiBytes = 250)
+            advanceUntilIdle()
+            // Then
+            val usage = viewModel.state.value.usage
+            assertEquals(350L, usage.totalBytes)
+            assertEquals(
+                250L,
+                usage.items.single { it.category == UsageCategory.TRAFFIC_CIVITAI }.bytes
+            )
+            assertEquals(
+                100L,
+                usage.items.single { it.category == UsageCategory.TRAFFIC_INFERENCE }.bytes
+            )
+        }
+
+    @Test
+    fun `given selected Civitai traffic, statistics are reset, expected zero counter and total selection restored`() =
+        runTest {
+            // Given
+            val viewModel = createViewModel()
+            networkUsage.value = NetworkUsage(civitaiBytes = 250)
+            advanceUntilIdle()
+            viewModel.processIntent(NetworkUsageIntent.SelectCategory(UsageCategory.TRAFFIC_CIVITAI))
+            // When
+            viewModel.processIntent(NetworkUsageIntent.ResetStatistics)
+            advanceUntilIdle()
+            // Then
+            val usage = viewModel.state.value.usage
+            assertEquals(0L, usage.totalBytes)
+            assertEquals(
+                0L,
+                usage.items.single { it.category == UsageCategory.TRAFFIC_CIVITAI }.bytes
+            )
+            assertEquals(null, usage.selectedCategory)
+        }
+
+    @Test
     fun `given network usage, network usage changes, expected usage items update`() = runTest {
         // Given
 

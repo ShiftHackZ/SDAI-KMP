@@ -20,8 +20,6 @@ import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.appbuild.BuildVersion
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
-import com.shifthackz.aisdv1.core.common.links.DefaultLinksProvider
-import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.common.time.TimeProvider
@@ -29,35 +27,13 @@ import com.shifthackz.aisdv1.presentation.activity.AiStableDiffusionActivity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-/** Supplies native configuration and lazy process transport to the shared composition root.
+/**
+ * Supplies native configuration and lazy process transport to the shared composition root.
+ *
  * @param context Native application context.
  * @author Dmitriy Moroz
  */
 internal class NativeHostBindings(private val context: Context) : AndroidHostBindings {
-
-    override val linksProvider: LinksProvider by lazy {
-        object : LinksProvider {
-            override val hordeUrl: String = BuildConfig.HORDE_AI_URL
-            override val hordeSignUpUrl: String = BuildConfig.HORDE_AI_SIGN_UP_URL
-            override val huggingFaceUrl: String = BuildConfig.HUGGING_FACE_INFO_URL
-            override val openAiInfoUrl: String = BuildConfig.OPEN_AI_INFO_URL
-            override val stabilityAiInfoUrl: String = BuildConfig.STABILITY_AI_INFO_URL
-            override val falAiInfoUrl: String = BuildConfig.FAL_AI_INFO_URL
-            override val arliAiInfoUrl: String = BuildConfig.ARLI_AI_INFO_URL
-            override val privacyPolicyUrl: String = BuildConfig.POLICY_URL
-            override val donateUrl: String = BuildConfig.DONATE_URL
-            override val projectWebsiteUrl: String = BuildConfig.PROJECT_WEBSITE_URL
-            override val developerWebsiteUrl: String = BuildConfig.DEVELOPER_WEBSITE_URL
-            override val gitHubSourceUrl: String = BuildConfig.GITHUB_SOURCE_URL
-            override val licenseUrl: String = BuildConfig.LICENSE_URL
-            override val setupInstructionsUrl: String = BuildConfig.SETUP_INSTRUCTIONS_URL
-            override val swarmUiInfoUrl: String = BuildConfig.SWARM_UI_INFO_URL
-            override val demoModeUrl: String = BuildConfig.DEMO_MODE_API_URL
-            override val telegramCommunityUrl: String = "https://t.me/sdai_app"
-            override val discordCommunityUrl: String = "https://discord.gg/jzdR9m8Ves"
-            override val linkedInCommunityUrl: String = DefaultLinksProvider.linkedInCommunityUrl
-        }
-    }
 
     override val buildInfoProvider: BuildInfoProvider by lazy {
         object : BuildInfoProvider {

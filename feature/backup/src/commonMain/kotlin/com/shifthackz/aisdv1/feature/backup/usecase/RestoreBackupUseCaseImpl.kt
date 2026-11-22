@@ -31,6 +31,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Applies explicitly selected categories with guarded provider consent and durable category-level retries.
+ *
  * @param archives Immutable staged archive reader.
  * @param preferences Strict selective preference writer.
  * @param configuration Existing checked configuration quarantine owner.
@@ -152,7 +153,8 @@ internal class RestoreBackupUseCaseImpl(
                         for (category in listOf(
                             BackupCategory.SETTINGS,
                             BackupCategory.GALLERY,
-                            BackupCategory.NETWORK
+                            BackupCategory.NETWORK,
+                            BackupCategory.CIVITAI
                         )) {
                             if (category !in request.selection.categories || category.key in ledger.completed(
                                     request.sessionId
@@ -188,6 +190,12 @@ internal class RestoreBackupUseCaseImpl(
                                     BackupCategory.NETWORK -> writer.network(
                                         request.sessionId,
                                         archive
+                                    )
+
+                                    BackupCategory.CIVITAI -> writer.civitai(
+                                        request.sessionId,
+                                        archive,
+                                        onProgress
                                     )
 
                                     BackupCategory.PROVIDERS -> Unit

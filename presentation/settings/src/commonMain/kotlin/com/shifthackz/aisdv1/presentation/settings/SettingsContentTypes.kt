@@ -5,12 +5,11 @@ package com.shifthackz.aisdv1.presentation.settings
  * Distinct stable row keys still isolate remembered state and user actions between preferences.
  *
  * @receiver Logical Settings item selected by current provider and appearance visibility.
- *
  * @return Structural category of the row's rendered content.
- *
  * @author Dmitriy Moroz
  */
 internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
+    SettingsListItem.INTEGRATIONS_HEADER,
     SettingsListItem.SERVER_HEADER,
     SettingsListItem.APP_HEADER,
     SettingsListItem.LOOK_HEADER,
@@ -40,6 +39,8 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
 
     SettingsListItem.VERSION -> SettingsContentType.FOOTER
 
+    SettingsListItem.CIVITAI,
+    SettingsListItem.WEB_UI,
     SettingsListItem.CONFIGURATION,
     SettingsListItem.BACKUP,
     SettingsListItem.BENCHMARK,

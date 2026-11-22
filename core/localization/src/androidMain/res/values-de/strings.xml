@@ -392,7 +392,7 @@
     <string name="settings_usage_delete_models_text">Heruntergeladene %2$s (%1$s) werden von diesem Gerät gelöscht. Du kannst sie später über die Anbietereinrichtung erneut herunterladen.</string>
     <string name="settings_usage_delete_all_text">Alle hier angezeigten Daten (%1$s) werden gelöscht: %2$s.</string>
     <string name="settings_usage_storage_note">Galerieelemente werden aus der Galerie in der App entfernt. Lokale Modelle kannst du über die Anbietereinrichtung erneut herunterladen.</string>
-    <string name="settings_usage_network_note">Enthält Modell-Downloads, Konfigurationsabgleich und Inferenzanfragen.</string>
+    <string name="settings_usage_network_note">Umfasst Modelldownloads, Konfigurationsabgleiche, Inferenzanfragen und Civitai-Uploads.</string>
 
     <string name="settings_item_lf_lang">Sprache</string>
     <string name="settings_item_lf_gallery_grid">Galerierastergröße</string>
@@ -902,4 +902,31 @@
     <string name="app_update_message">Version %1$s ist verfügbar. Möchtest du die Downloadseite öffnen?</string>
     <string name="app_update_action">Aktualisieren</string>
     <string name="app_update_later">Später</string>
+
+    <string name="civitai_title">Civitai</string>
+    <string name="civitai_account">Konto</string>
+    <string name="civitai_key_help">Alternativ können Sie einen Civitai-API-Schlüssel verwenden, der Ihr Profil lesen und Medien veröffentlichen darf.</string>
+    <string name="civitai_api_key">API-Schlüssel</string>
+    <string name="civitai_connect">Mit API-Schlüssel verbinden</string>
+    <string name="civitai_get_key">API-Schlüssel auf Civitai verwalten</string>
+    <string name="civitai_disconnect">Konto trennen</string>
+    <string name="civitai_enable">Aktivieren</string>
+    <string name="civitai_auto_upload">Erzeugte Bilder automatisch hochladen</string>
+    <string name="civitai_public_notice">Neu erzeugte Bilder, Prompts, Generierungseinstellungen und gespeicherte Geräteinformationen werden mit SDAI-Hinweis öffentlich auf Civitai veröffentlicht. Vorhandene Galeriebilder und Eingabebilder werden nicht automatisch hochgeladen.</string>
+    <string name="civitai_history">Upload-Verlauf</string>
+    <string name="civitai_history_empty">Noch keine Bilder aus SDAI hochgeladen.</string>
+    <string name="civitai_failure">Die Civitai-Aktion konnte nicht abgeschlossen werden. Prüfen Sie Verbindung und Kontoberechtigungen. Falls ein Beitrag erstellt worden sein könnte, prüfen Sie Civitai vor einem erneuten Versuch.</string>
+    <string name="civitai_sign_in">Mit Civitai anmelden</string>
+    <string name="civitai_action_help">Dieses erzeugte Bild mit Einstellungen und SDAI-Hinweis auf Civitai veröffentlichen. Nach dem Upload erneut tippen, um den Beitrag zu öffnen.</string>
+    <string name="civitai_login_required">Sie sind nicht bei Civitai angemeldet. Möchten Sie die Civitai-Einstellungen öffnen und Ihr Konto verbinden?</string>
+    <string name="civitai_success">Bild auf Civitai hochgeladen. Während der Verarbeitung kann es verborgen bleiben. Tippen Sie erneut auf die Civitai-Aktion, um den Beitrag zu öffnen.</string>
+    <string name="settings_header_integrations">Integrationen</string>
+    <string name="settings_help_integrations_header">Verbinde externe Dienste und öffne die Weboberfläche deines konfigurierten Servers.</string>
+    <string name="settings_help_web_ui">Öffne die Weboberfläche deines konfigurierten Servers in der App. Der Server bestimmt die verfügbaren Funktionen und ihre Verfügbarkeit.</string>
+    <string name="settings_help_civitai">Verwalte dein Civitai-Konto, automatische Uploads und den Upload-Verlauf.</string>
+    <string name="civitai_upload_uploading">Wird hochgeladen…</string>
+    <string name="civitai_upload_published">Veröffentlicht</string>
+    <string name="civitai_upload_failed">Upload fehlgeschlagen — Civitai öffnen</string>
+    <string name="civitai_upload_uncertain">Upload nicht bestätigt — Civitai prüfen</string>
+    <string name="backup_category_civitai">Civitai</string>
 </resources>

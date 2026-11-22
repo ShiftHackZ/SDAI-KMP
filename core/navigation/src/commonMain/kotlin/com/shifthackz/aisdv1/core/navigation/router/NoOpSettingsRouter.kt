@@ -8,6 +8,15 @@ import com.shifthackz.aisdv1.core.navigation.LaunchSource
  * @author Dmitriy Moroz
  */
 object NoOpSettingsRouter : SettingsRouter {
+    /**
+     * Ignores Web UI navigation when no host is attached.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun navigateToWebUi() = Unit
+
+    override fun navigateToCivitai() = Unit
+
     override fun navigateToBackup() = Unit
 
     /**

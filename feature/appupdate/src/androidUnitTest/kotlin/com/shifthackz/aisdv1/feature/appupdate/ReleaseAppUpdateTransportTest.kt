@@ -1,6 +1,6 @@
 package com.shifthackz.aisdv1.feature.appupdate
 
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.plugins.HttpTimeoutCapability

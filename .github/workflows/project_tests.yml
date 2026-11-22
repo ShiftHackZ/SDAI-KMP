@@ -154,7 +154,7 @@ jobs:
           if-no-files-found: warn
 
   test-cloud-contracts:
-    name: ${{ matrix.name }} — current upstream schemas
+    name: ${{ matrix.name }} — API contracts
     strategy:
       fail-fast: false
       matrix:
@@ -169,14 +169,16 @@ jobs:
             provider: STABILITY_AI
           - name: Fal AI
             provider: FAL_AI
+          - name: Civitai
+            provider: CIVITAI
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       JOB_DESCRIPTION: >-
-        Fetches current official ${{ matrix.name }} schemas and checks consumed routes
-        and wire types against the compiled application serializers.
+        Checks consumed routes and wire types against compiled application serializers.
+        Cloud providers use current official schemas; Civitai uses the application API document.
     steps:
-      - name: Describe upstream checks
+      - name: Describe API contract checks
         run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
       - name: Checkout code
         uses: actions/checkout@v4.1.0
@@ -197,9 +199,9 @@ jobs:
         run: python3 scripts/test_provider_contract_checker.py
       - name: Export compiled provider wire contracts
         run: ./gradlew :network:exportProviderContracts --no-daemon
-      - name: Check current upstream provider schemas
-        run: python3 scripts/check_provider_contracts.py --provider "${{ matrix.provider }}"
-      - name: Upload upstream contract report
+      - name: Test provider and integration API contracts
+        run: python3 scripts/test_provider_contracts.py --provider "${{ matrix.provider }}"
+      - name: Upload API contract report
         if: always()
         uses: actions/upload-artifact@v4
         with:

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Web
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.shifthackz.aisdv1.presentation.components.widget.icon.BrandIcons
 
@@ -42,6 +43,8 @@ import com.shifthackz.aisdv1.presentation.components.widget.icon.BrandIcons
  */
 internal val SettingsListItem.startIcon: ImageVector?
     get() = when (this) {
+        SettingsListItem.CIVITAI -> BrandIcons.Civitai
+        SettingsListItem.WEB_UI -> Icons.Default.Web
         SettingsListItem.CONFIGURATION -> Icons.Default.SettingsEthernet
         SettingsListItem.BACKUP -> Icons.Default.Backup
         SettingsListItem.BENCHMARK -> Icons.Default.Speed
@@ -77,6 +80,7 @@ internal val SettingsListItem.startIcon: ImageVector?
         SettingsListItem.PRIVACY -> Icons.Default.Policy
         SettingsListItem.LICENSE -> Icons.Default.Gavel
         SettingsListItem.SOURCE_CODE -> Icons.Default.Code
+        SettingsListItem.INTEGRATIONS_HEADER,
         SettingsListItem.SERVER_HEADER,
         SettingsListItem.NNAPI_WARNING,
         SettingsListItem.BACKGROUND_WARNING,

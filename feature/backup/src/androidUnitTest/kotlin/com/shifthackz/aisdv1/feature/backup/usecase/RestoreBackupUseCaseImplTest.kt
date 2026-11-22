@@ -544,4 +544,24 @@ class RestoreBackupUseCaseImplTest {
             coVerify(exactly = 0) { writer.gallery(any(), any(), any()); ledger.finish(any()) }
             assertFalse(intents.getValue(request.sessionId).isComplete)
         }
+
+    @Test
+    fun `given Civitai-only archive selection, restore runs, expected history writer invoked without credential publication`() =
+        runTest {
+            // Given
+            val selected = request.copy(selection = BackupSelection(setOf(BackupCategory.CIVITAI)))
+            coEvery { writer.civitai(any(), any(), any()) } coAnswers {
+                ledger.mark(RestoreSectionEntity(firstArg(), "civitai", 3, 1))
+            }
+            // When
+            val result = useCase(selected) {} as BackupRestoreResult.Finished
+            // Then
+            assertEquals(setOf(BackupCategory.CIVITAI), result.completed)
+            assertEquals(3L, result.importedCounts[BackupCategory.CIVITAI])
+            coVerify(exactly = 1) { writer.civitai(selected.sessionId, archive, any()) }
+            coVerify(exactly = 0) { writer.gallery(any(), any(), any()) }
+            coVerify(exactly = 0) { writer.network(any(), any()) }
+            coVerify(exactly = 0) { authorization.getAuthorizationCredentials() }
+        }
+
 }

@@ -53,11 +53,7 @@ tasks.register("checkPresentationArchitecture") {
                 path.startsWith(":core:") || path == ":presentation:components"
 
         leaves.forEach { leaf ->
-            // App update presentation consumes its feature-owned domain contracts.
-            val forbidden = reachable(leaf.path).filterNot { dependency ->
-                isPermitted(dependency) ||
-                        (leaf.path == ":presentation:appupdate" && dependency == ":feature:appupdate")
-            }
+            val forbidden = reachable(leaf.path).filterNot(::isPermitted)
             check(forbidden.isEmpty()) { "${leaf.path} reaches forbidden modules: $forbidden" }
             leaf.fileTree("src").matching {
                 include("**/*.kt")

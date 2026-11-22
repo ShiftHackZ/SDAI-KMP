@@ -7,6 +7,13 @@ package com.shifthackz.aisdv1.core.navigation.router
  */
 interface GalleryDetailRouter {
     /**
+     * Opens account authorization, automatic publishing and Civitai upload history.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToCivitai()
+
+    /**
      * Closes the drawer first, otherwise returns to the previous route or the generation-home fallback.
      *
      * @author Dmitriy Moroz

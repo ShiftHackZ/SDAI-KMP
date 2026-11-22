@@ -1,0 +1,923 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SDAI Civitai account and image publication client",
+    "version": "1.0.0",
+    "description": "Consumed Civitai API contracts. Credentials are restricted to fixed Civitai origins; presigned object PUTs never carry them. Unknown upstream response fields are ignored. Native PKCE callbacks use the registered cc.moroz.sdai scheme."
+  },
+  "security": [
+    {
+      "CivitaiBearer": []
+    }
+  ],
+  "paths": {
+    "/api/auth/oauth/authorize": {
+      "get": {
+        "operationId": "authorizeCivitai",
+        "description": "Native system browser authorization. AppAuth on Android or ASWebAuthenticationSession on iOS validates callback state and retains the PKCE verifier.",
+        "servers": [
+          {
+            "url": "https://auth.civitai.com",
+            "description": "Fixed upstream origin."
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to hosted sign-in, consent or the registered native callback.",
+            "headers": {
+              "Location": {
+                "description": "Authorization continuation or native callback URI with code/state or error.",
+                "schema": {
+                  "type": "string",
+                  "description": "Redirect URI.",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Non-success response; strict transport failure with no automatic retry."
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "description": "Registered public client identifier.",
+            "schema": {
+              "type": "string",
+              "description": "Registered public client identifier."
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "description": "Exact registered native callback URI.",
+            "schema": {
+              "type": "string",
+              "description": "Exact registered native callback URI."
+            }
+          },
+          {
+            "name": "response_type",
+            "in": "query",
+            "required": true,
+            "description": "code, requesting an authorization code.",
+            "schema": {
+              "type": "string",
+              "description": "code, requesting an authorization code."
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": true,
+            "description": "UserRead MediaRead MediaWrite.",
+            "schema": {
+              "type": "string",
+              "description": "UserRead MediaRead MediaWrite."
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "description": "Unpredictable native-session CSRF state.",
+            "schema": {
+              "type": "string",
+              "description": "Unpredictable native-session CSRF state."
+            }
+          },
+          {
+            "name": "code_challenge",
+            "in": "query",
+            "required": true,
+            "description": "Unpadded base64url SHA-256 digest of the verifier.",
+            "schema": {
+              "type": "string",
+              "description": "Unpadded base64url SHA-256 digest of the verifier."
+            }
+          },
+          {
+            "name": "code_challenge_method",
+            "in": "query",
+            "required": true,
+            "description": "S256.",
+            "schema": {
+              "type": "string",
+              "description": "S256."
+            }
+          }
+        ]
+      }
+    },
+    "/api/auth/oauth/token": {
+      "post": {
+        "operationId": "exchangeOrRefreshCivitaiTokens",
+        "description": "Exchanges a PKCE authorization code or rotates the current refresh token; no client secret exists.",
+        "servers": [
+          {
+            "url": "https://auth.civitai.com",
+            "description": "Fixed upstream origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CivitaiTokenResponse",
+                  "description": "Typed consumed response."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Non-success response; strict transport failure with no automatic retry."
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "description": "Grant-specific form fields.",
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "description": "Public-client token grant.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AuthorizationCodeGrant",
+                    "description": "Authorization-code exchange."
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshGrant",
+                    "description": "Refresh-token rotation."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/oauth/revoke": {
+      "post": {
+        "operationId": "revokeCivitaiSession",
+        "description": "Requests revocation of the current application session. A 200 alone does not prove whether the token previously existed.",
+        "servers": [
+          {
+            "url": "https://auth.civitai.com",
+            "description": "Fixed upstream origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revocation request accepted; response body is not consumed."
+          },
+          "default": {
+            "description": "Non-success response; strict transport failure with no automatic retry."
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "description": "Complete typed request.",
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeRequest",
+                "description": "Typed request fields."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/image-upload": {
+      "post": {
+        "operationId": "presignCivitaiImage",
+        "description": "Allocates a short-lived HTTPS object-upload destination.",
+        "servers": [
+          {
+            "url": "https://civitai.com",
+            "description": "Fixed upstream origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CivitaiUploadResponse",
+                  "description": "Typed consumed response."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Non-success response; strict transport failure with no automatic retry."
+          }
+        },
+        "requestBody": {
+          "description": "Complete typed request.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyRequest",
+                "description": "Typed request fields."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trpc/user.getSelfStatus": {
+      "get": {
+        "operationId": "getCivitaiAccount",
+        "description": "Reads the bearer credential owner identity without reading unrelated account data.",
+        "servers": [
+          {
+            "url": "https://civitai.com",
+            "description": "Fixed upstream origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResult",
+                  "description": "Typed consumed response."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Non-success response; strict transport failure with no automatic retry."
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "description": "URL-encoded Superjson no-argument query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountQuery",
+                  "description": "No-argument query wrapper."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/api/trpc/post.createWithImages": {
+      "post": {
+        "operationId": "createCivitaiPost",
+        "description": "Atomically creates, attaches and publishes the uploaded output. SDAI records an uncertain-publication guard before this non-idempotent request; it is never automatically retried. New images can remain hidden until Civitai scanning completes.",
+        "servers": [
+          {
+            "url": "https://civitai.com",
+            "description": "Fixed upstream origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostResult",
+                  "description": "Typed consumed response."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Non-success response; strict transport failure with no automatic retry."
+          }
+        },
+        "requestBody": {
+          "description": "Complete typed request.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostMutation",
+                "description": "Typed request fields."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/presigned-object": {
+      "put": {
+        "operationId": "putCivitaiObject",
+        "description": "Uses the complete opaque uploadURL returned by presign; this illustrative path is never reconstructed. No Authorization header is sent to the object host.",
+        "servers": [
+          {
+            "url": "https://{uploadHost}",
+            "description": "Fixed upstream origin.",
+            "variables": {
+              "uploadHost": {
+                "default": "upload.example.com",
+                "description": "Opaque HTTPS storage authority supplied by Civitai."
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Object bytes accepted; response body is not consumed."
+          },
+          "default": {
+            "description": "Non-success response; strict transport failure with no automatic retry."
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "description": "Original encoded output bytes, at most 50 MiB. Input images are never uploaded.",
+          "content": {
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "description": "Original encoded output bytes.",
+                "format": "binary"
+              }
+            },
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "description": "Original encoded output bytes.",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "description": "Original encoded output bytes.",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "CivitaiBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A user API key or scoped OAuth access token."
+      }
+    },
+    "schemas": {
+      "CivitaiPostRequest": {
+        "type": "object",
+        "description": "Atomic public image-post request.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Visible post title."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Escaped HTML attribution and generation details."
+          },
+          "publish": {
+            "type": "boolean",
+            "description": "Whether to publish immediately."
+          },
+          "images": {
+            "type": "array",
+            "description": "Ordered uploaded images and their metadata.",
+            "items": {
+              "$ref": "#/components/schemas/CivitaiPostImage",
+              "description": "Ordered image attachment."
+            }
+          }
+        },
+        "required": ["title", "detail", "publish", "images"],
+        "additionalProperties": false
+      },
+      "CivitaiAccountResponse": {
+        "type": "object",
+        "description": "Validated identity fields consumed from user.getSelfStatus.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Civitai account identity."
+          },
+          "username": {
+            "type": "string",
+            "description": "Public account name."
+          }
+        },
+        "required": ["id", "username"],
+        "additionalProperties": false
+      },
+      "CivitaiUploadResponse": {
+        "type": "object",
+        "description": "Presigned object-upload destination returned by the Civitai site API.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Uploaded object UUID used by post creation."
+          },
+          "uploadURL": {
+            "type": "string",
+            "description": "Short-lived HTTPS object upload URL."
+          }
+        },
+        "required": ["id", "uploadURL"],
+        "additionalProperties": false
+      },
+      "CivitaiExternalSource": {
+        "type": "object",
+        "description": "Application identity displayed with the Civitai image.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "SDAI application name."
+          },
+          "homepage": {
+            "type": "string",
+            "description": "Canonical SDAI homepage."
+          }
+        },
+        "required": ["name", "homepage"],
+        "additionalProperties": false
+      },
+      "CivitaiExternalDetails": {
+        "type": "object",
+        "description": "Known SDAI external metadata, limited to ten documented properties.",
+        "properties": {
+          "Provider": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Recorded generation provider."
+              },
+              {
+                "type": "null",
+                "description": "Unknown or unavailable value."
+              }
+            ],
+            "description": "Recorded generation provider."
+          },
+          "Model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Recorded model, absent when unknown."
+              },
+              {
+                "type": "null",
+                "description": "Unknown or unavailable value."
+              }
+            ],
+            "description": "Recorded model, absent when unknown."
+          },
+          "Device": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Originating device, absent for legacy images."
+              },
+              {
+                "type": "null",
+                "description": "Unknown or unavailable value."
+              }
+            ],
+            "description": "Originating device, absent for legacy images."
+          },
+          "Platform / OS": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Originating platform and OS, absent for legacy images."
+              },
+              {
+                "type": "null",
+                "description": "Unknown or unavailable value."
+              }
+            ],
+            "description": "Originating platform and OS, absent for legacy images."
+          },
+          "Acceleration": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Captured execution mode."
+              },
+              {
+                "type": "null",
+                "description": "Unknown or unavailable value."
+              }
+            ],
+            "description": "Captured execution mode."
+          },
+          "Duration (ms)": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64",
+                "description": "Recorded elapsed generation milliseconds."
+              },
+              {
+                "type": "null",
+                "description": "Unknown or unavailable value."
+              }
+            ],
+            "description": "Recorded elapsed generation milliseconds."
+          },
+          "Type": {
+            "type": "string",
+            "description": "Generation operation discriminator."
+          },
+          "Restore faces": {
+            "type": "boolean",
+            "description": "Whether face restoration was requested."
+          },
+          "Variation seed": {
+            "type": "string",
+            "description": "Recorded variation seed."
+          },
+          "Denoising strength": {
+            "type": "number",
+            "format": "float",
+            "description": "Recorded image-to-image denoising strength."
+          }
+        },
+        "required": [
+          "Type",
+          "Restore faces",
+          "Variation seed",
+          "Denoising strength"
+        ],
+        "additionalProperties": false
+      },
+      "CivitaiTokenResponse": {
+        "type": "object",
+        "description": "OAuth token endpoint response. This object contains secrets and is never logged.",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "Opaque scoped bearer token."
+          },
+          "refresh_token": {
+            "description": "Rotating renewal token. Omitted or null when offline access was not granted; reauthorization is then required after access-token expiry.",
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Granted rotating renewal token."
+              },
+              {
+                "type": "null",
+                "description": "Offline access was not granted."
+              }
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Access-token lifetime in seconds."
+          }
+        },
+        "required": ["access_token", "expires_in"],
+        "additionalProperties": false
+      },
+      "CivitaiPostResponse": {
+        "type": "object",
+        "description": "Identity returned by the atomic create-with-images mutation.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Created Civitai post identity."
+          }
+        },
+        "required": ["id"],
+        "additionalProperties": false
+      },
+      "CivitaiImageMetadata": {
+        "type": "object",
+        "description": "Generation fields accepted by Civitai image metadata.",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Positive prompt."
+          },
+          "negativePrompt": {
+            "type": "string",
+            "description": "Negative prompt."
+          },
+          "steps": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Sampling steps."
+          },
+          "cfgScale": {
+            "type": "number",
+            "format": "float",
+            "description": "Guidance scale."
+          },
+          "sampler": {
+            "type": "string",
+            "description": "Sampling algorithm."
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64",
+                "description": "Resolved numeric seed, absent when unknown or nonnumeric."
+              },
+              {
+                "type": "null",
+                "description": "Unknown or unavailable value."
+              }
+            ],
+            "description": "Resolved numeric seed, absent when unknown or nonnumeric."
+          },
+          "external": {
+            "$ref": "#/components/schemas/CivitaiExternalMetadata",
+            "description": "SDAI source and captured provider/device details."
+          }
+        },
+        "required": [
+          "prompt",
+          "negativePrompt",
+          "steps",
+          "cfgScale",
+          "sampler",
+          "external"
+        ],
+        "additionalProperties": false
+      },
+      "CivitaiPostImage": {
+        "type": "object",
+        "description": "An uploaded object attached to one post.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Upload UUID, not an HTTP URL."
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Zero-based image position."
+          },
+          "type": {
+            "type": "string",
+            "description": "Media discriminator, image for SDAI output."
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Recorded output width in pixels."
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Recorded output height in pixels."
+          },
+          "meta": {
+            "$ref": "#/components/schemas/CivitaiImageMetadata",
+            "description": "Generation parameters and external app attribution."
+          }
+        },
+        "required": ["url", "index", "type", "width", "height", "meta"],
+        "additionalProperties": false
+      },
+      "CivitaiExternalMetadata": {
+        "type": "object",
+        "description": "External application attribution supported by Civitai.",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/CivitaiExternalSource",
+            "description": "Name and canonical app homepage."
+          },
+          "details": {
+            "$ref": "#/components/schemas/CivitaiExternalDetails",
+            "description": "At most ten known captured generation details."
+          }
+        },
+        "required": ["source", "details"],
+        "additionalProperties": false
+      },
+      "EmptyRequest": {
+        "type": "object",
+        "description": "Empty presign request; no upload bytes or credentials are included in the JSON body.",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "AuthorizationCodeGrant": {
+        "type": "object",
+        "description": "Public-client authorization-code exchange with S256 PKCE.",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Registered public SDAI OAuth client identifier."
+          },
+          "grant_type": {
+            "type": "string",
+            "description": "OAuth grant discriminator.",
+            "const": "authorization_code"
+          },
+          "code": {
+            "type": "string",
+            "description": "One-time authorization code returned by Civitai."
+          },
+          "code_verifier": {
+            "type": "string",
+            "description": "Original native-session PKCE verifier."
+          },
+          "redirect_uri": {
+            "type": "string",
+            "description": "Exact registered native callback.",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "client_id",
+          "grant_type",
+          "code",
+          "code_verifier",
+          "redirect_uri"
+        ],
+        "additionalProperties": false
+      },
+      "RefreshGrant": {
+        "type": "object",
+        "description": "Single-flight OAuth refresh-token rotation.",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Registered public SDAI OAuth client identifier."
+          },
+          "grant_type": {
+            "type": "string",
+            "description": "OAuth grant discriminator.",
+            "const": "refresh_token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "description": "Most recently committed refresh token."
+          }
+        },
+        "required": ["client_id", "grant_type", "refresh_token"],
+        "additionalProperties": false
+      },
+      "RevokeRequest": {
+        "type": "object",
+        "description": "Revokes this public client session.",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Registered public SDAI OAuth client identifier."
+          },
+          "token": {
+            "type": "string",
+            "description": "Current refresh token."
+          },
+          "token_type_hint": {
+            "type": "string",
+            "description": "Token kind.",
+            "const": "refresh_token"
+          }
+        },
+        "required": ["client_id", "token", "token_type_hint"],
+        "additionalProperties": false
+      },
+      "AccountSuperjson": {
+        "type": "object",
+        "description": "Superjson response wrapper for consumed account fields.",
+        "properties": {
+          "json": {
+            "$ref": "#/components/schemas/CivitaiAccountResponse",
+            "description": "Consumed response value."
+          }
+        },
+        "required": ["json"],
+        "additionalProperties": false
+      },
+      "AccountResult": {
+        "type": "object",
+        "description": "tRPC response envelope; unknown upstream fields are ignored.",
+        "properties": {
+          "result": {
+            "type": "object",
+            "description": "Successful tRPC operation result.",
+            "properties": {
+              "data": {
+                "description": "Superjson object, plain object or devalue-encoded response depending on the upstream pool.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AccountSuperjson",
+                    "description": "Superjson wrapper."
+                  },
+                  {
+                    "$ref": "#/components/schemas/CivitaiAccountResponse",
+                    "description": "Plain response value."
+                  },
+                  {
+                    "type": "string",
+                    "description": "Devalue flattened graph encoded as a JSON string."
+                  }
+                ]
+              }
+            },
+            "required": ["data"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["result"],
+        "additionalProperties": false
+      },
+      "PostSuperjson": {
+        "type": "object",
+        "description": "Superjson response wrapper for consumed post fields.",
+        "properties": {
+          "json": {
+            "$ref": "#/components/schemas/CivitaiPostResponse",
+            "description": "Consumed response value."
+          }
+        },
+        "required": ["json"],
+        "additionalProperties": false
+      },
+      "PostResult": {
+        "type": "object",
+        "description": "tRPC response envelope; unknown upstream fields are ignored.",
+        "properties": {
+          "result": {
+            "type": "object",
+            "description": "Successful tRPC operation result.",
+            "properties": {
+              "data": {
+                "description": "Superjson object, plain object or devalue-encoded response depending on the upstream pool.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/PostSuperjson",
+                    "description": "Superjson wrapper."
+                  },
+                  {
+                    "$ref": "#/components/schemas/CivitaiPostResponse",
+                    "description": "Plain response value."
+                  },
+                  {
+                    "type": "string",
+                    "description": "Devalue flattened graph encoded as a JSON string."
+                  }
+                ]
+              }
+            },
+            "required": ["data"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["result"],
+        "additionalProperties": false
+      },
+      "PostMutation": {
+        "type": "object",
+        "description": "Superjson-encoded atomic create-with-images input.",
+        "properties": {
+          "json": {
+            "$ref": "#/components/schemas/CivitaiPostRequest",
+            "description": "Typed post request."
+          }
+        },
+        "required": ["json"],
+        "additionalProperties": false
+      },
+      "AccountQuery": {
+        "type": "object",
+        "description": "Superjson-encoded no-argument identity query.",
+        "properties": {
+          "json": {
+            "type": "null",
+            "description": "This query has no input parameters."
+          }
+        },
+        "required": ["json"],
+        "additionalProperties": false
+      }
+    }
+  }
+}

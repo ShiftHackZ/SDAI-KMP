@@ -8,6 +8,7 @@ import com.shifthackz.aisdv1.domain.entity.NetworkTimeout
 import com.shifthackz.aisdv1.domain.entity.Grid
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.ServerSourceType
+import com.shifthackz.aisdv1.core.common.platform.Platform
 
 /**
  * Immutable UI model for the Settings screen.
@@ -20,6 +21,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceType
  * @param onBoardingDemo Whether demo onboarding mode hides provider configuration actions.
  * @param screenModal Modal currently shown above Settings.
  * @param serverSource Current generation provider.
+ * @param platform Native host used for the same provider labels as the app drawer.
  * @param generationRequestTimeout Persisted waiting limit for network image generation requests.
  * @param connectionTimeout Persisted limit for establishing network provider connections.
  * @param sdModels Provider model names shown in the Settings picker.
@@ -27,9 +29,9 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceType
  * @param stabilityAiCredits Current Stability AI balance shown in Settings.
  * @param localUseNNAPI Whether ONNX local diffusion should use NNAPI acceleration.
  * @param backgroundGenerationAvailable Whether background generation is supported by this target.
- * @param shouldShowPerformanceOverlay Whether generation dialogs display live app CPU and RAM history.
- * @param shouldDimScreen Whether active foreground generation dims the screen.
  * @param backgroundGeneration Whether background generation is currently enabled.
+ * @param shouldDimScreen Whether active foreground generation dims the screen.
+ * @param shouldShowPerformanceOverlay Whether generation dialogs display live app CPU and RAM history.
  * @param monitorConnectivity Whether server connectivity monitoring is enabled.
  * @param autoSaveAiResults Whether generated images should be saved automatically.
  * @param saveToMediaStore Whether generated images should be saved to the public gallery.
@@ -54,6 +56,7 @@ data class SettingsState(
     val onBoardingDemo: Boolean = false,
     val screenModal: SettingsModal = SettingsModal.None,
     val serverSource: ServerSource = ServerSource.AUTOMATIC1111,
+    val platform: Platform = Platform.ANDROID,
     val generationRequestTimeout: NetworkTimeout = NetworkTimeout.TWO_MINUTES,
     val connectionTimeout: NetworkTimeout = NetworkTimeout.TWO_MINUTES,
     val sdModels: List<String> = emptyList(),

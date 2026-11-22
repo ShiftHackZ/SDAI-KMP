@@ -46,7 +46,8 @@ class NetworkBackupRestoreWriterTest {
         mockk(),
         json,
         DefaultBackupImageFingerprint(),
-        BackupImageBudget(1024, 100, 4096, 16)
+        BackupImageBudget(1024, 100, 4096, 16),
+        mockk(),
     )
 
     @Before
@@ -60,6 +61,7 @@ class NetworkBackupRestoreWriterTest {
 
     /**
      * Builds real framing around network counters without involving native document transport.
+     *
      * @param values Incoming typed network buckets, including future bucket names in compatibility cases.
      * @param hasTrailingData Whether an extra byte follows the declared JSON record.
      * @author Dmitriy Moroz
@@ -84,6 +86,18 @@ class NetworkBackupRestoreWriterTest {
         codec.write(path, manifest, listOf(payload))
         return StagedBackup("handle", path, manifest)
     }
+
+    @Test
+    fun `given Civitai counter in statistics backup, restore completes, expected additive persisted Civitai traffic`() =
+        runTest {
+            // Given
+            val archive = archive(mapOf(NetworkUsageBucket.CIVITAI.key to 4096))
+            // When
+            writer.network("session", archive)
+            // Then
+            coVerify(exactly = 1) { network.addBytes("civitai", 4096) }
+            coVerify { ledger.mark(RestoreSectionEntity("session", "network", 1, 0)) }
+        }
 
     @Test
     fun `given existing traffic bucket, backup contains additional bytes, expected additive write with category ledger`() =

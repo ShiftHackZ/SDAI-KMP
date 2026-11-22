@@ -17,6 +17,7 @@ import com.shifthackz.aisdv1.core.navigation.router.ReportRouter
 import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
 import com.shifthackz.aisdv1.core.navigation.router.SettingsRouter
 import com.shifthackz.aisdv1.core.navigation.router.SplashRouter
+import com.shifthackz.aisdv1.core.navigation.router.CivitaiRouter
 import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
 import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
 import com.shifthackz.aisdv1.core.navigation.router.WebUiRouter
@@ -47,6 +48,7 @@ class RootAppRouter(
     ReportRouter,
     SettingsRouter,
     BenchmarkRouter,
+    CivitaiRouter,
     StorageUsageRouter,
     NetworkUsageRouter,
     WebUiRouter,
@@ -285,6 +287,20 @@ class RootAppRouter(
     }
 
     /**
+     * Opens Civitai account settings and upload history from the invoking route.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun navigateToCivitai() = navigateTo(AppRoute.Civitai)
+
+    /**
+     * Opens the account-independent receipt history above Civitai settings.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun navigateToCivitaiHistory() = navigateTo(AppRoute.CivitaiHistory)
+
+    /**
      * Opens the standalone storage usage destination.
      *
      * @author Dmitriy Moroz
@@ -393,7 +409,7 @@ class RootAppRouter(
      *
      * @author Dmitriy Moroz
      */
-    fun navigateToWebUi() {
+    override fun navigateToWebUi() {
         navigateTo(AppRoute.WebUi)
     }
 
@@ -468,6 +484,8 @@ fun AppRoute.isHomeRoute(): Boolean = when (this) {
     AppRoute.ImageInPaint,
     AppRoute.History,
     AppRoute.Benchmark,
+    AppRoute.Civitai,
+    AppRoute.CivitaiHistory,
     AppRoute.StorageUsage,
     AppRoute.NetworkUsage,
     is AppRoute.Report,
@@ -491,6 +509,8 @@ private fun AppRoute.canFallBackToTextToImage(): Boolean = when (this) {
     AppRoute.Settings,
     AppRoute.History,
     AppRoute.Benchmark,
+    AppRoute.Civitai,
+    AppRoute.CivitaiHistory,
     AppRoute.StorageUsage,
     AppRoute.NetworkUsage,
     is AppRoute.GalleryDetail,

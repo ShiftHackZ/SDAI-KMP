@@ -33,6 +33,7 @@ internal fun GenerationResultMetadataEntity.mapMetadataToDomain() = GalleryItemM
     providerKey = providerKey,
     acceleration = acceleration,
     generationDurationMillis = generationDurationMillis,
+    civitaiUrl = civitaiUrl,
     deviceName = deviceName,
     osVersion = osVersion,
 )

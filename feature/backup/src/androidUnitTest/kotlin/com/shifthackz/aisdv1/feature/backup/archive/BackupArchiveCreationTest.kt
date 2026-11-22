@@ -114,6 +114,21 @@ class BackupArchiveCreationTest {
         }
 
     @Test
+    fun `given saved Civitai traffic counter, statistics backup is inspected, expected portable Civitai bucket retained`() =
+        runTest {
+            // Given
+            fixture.counters = listOf(NetworkUsageEntity(NetworkUsageBucket.CIVITAI.key, 4096))
+            // When
+            val export = fixture.store.create(BackupSelection(setOf(BackupCategory.NETWORK))) {}
+            val staged = fixture.store.staged(export.handle)
+            val text = fixture.codec.openSection(staged.path, staged.manifest, "network")
+                .use(fixture.codec::readJson)
+            // Then
+            assertEquals("{\"civitai\":4096}", text)
+            assertEquals(1L, staged.manifest.sections.single().itemCount)
+        }
+
+    @Test
     fun `given supported and removed network buckets, snapshot is exported, expected only portable counters`() =
         runTest {
             // Given
@@ -159,7 +174,7 @@ class BackupArchiveCreationTest {
         }
 
     @Test
-    fun `given inventory with no gallery or network, selectable entries are loaded, expected zero categories disabled and no secrets read`() =
+    fun `given inventory with no gallery or network, selectable entries are loaded, expected empty Civitai selectable and no secrets read`() =
         runTest {
             // Given
             fixture.snapshot = fixture.snapshot.copy(providers = mapOf("removed" to emptyMap()))
@@ -168,7 +183,7 @@ class BackupArchiveCreationTest {
             // Then
             assertTrue(inventory.providers.isEmpty())
             assertEquals(
-                setOf(BackupCategory.SETTINGS),
+                setOf(BackupCategory.SETTINGS, BackupCategory.CIVITAI),
                 inventory.entries.filter { it.isAvailable }.map { it.category }.toSet()
             )
             coVerify(exactly = 0) { fixture.authorization.getAuthorizationCredentials() }

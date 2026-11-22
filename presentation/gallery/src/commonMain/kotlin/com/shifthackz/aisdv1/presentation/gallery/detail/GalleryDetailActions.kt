@@ -26,6 +26,7 @@ import com.shifthackz.aisdv1.core.localization.Localization
  * @param content Current persisted image flags and reporting capability.
  * @param processIntent Requests the existing gallery operations without changing their semantics.
  * @param modifier Placement of the action row above detail navigation.
+ * @param civitaiAction App-supplied Civitai publishing action, retaining independent screen-module ownership.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -33,6 +34,7 @@ internal fun GalleryDetailActions(
     content: GalleryDetailContent,
     processIntent: (GalleryDetailIntent) -> Unit,
     modifier: Modifier = Modifier,
+    civitaiAction: @Composable () -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
     Row(
@@ -73,6 +75,7 @@ internal fun GalleryDetailActions(
                 onClick = { processIntent(GalleryDetailIntent.Report) },
             )
         }
+        civitaiAction()
         GalleryDetailActionButton(
             icon = Icons.Default.Delete,
             label = Localization.string("gallery_action_delete"),

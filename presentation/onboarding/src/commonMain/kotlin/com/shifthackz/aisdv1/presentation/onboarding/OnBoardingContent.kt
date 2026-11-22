@@ -26,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -100,83 +102,85 @@ fun OnBoardingContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
-            Column(
-                modifier = Modifier
-                    .windowInsetsPadding(persistentBottomBarWindowInsets())
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Row(
+            CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surface) {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(onBoardingPhoneWidthFraction)
-                        .padding(bottom = 32.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                        .windowInsetsPadding(persistentBottomBarWindowInsets())
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    val backAlpha by animateFloatAsState(
-                        targetValue = if (pagerState.currentPage > 0 || launchSource == LaunchSource.SETTINGS) {
-                            1f
-                        } else {
-                            0f
-                        },
-                        label = "back_button_animation",
-                    )
-                    OutlinedButton(
+                    Row(
                         modifier = Modifier
-                            .alpha(backAlpha)
-                            .size(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(0.dp),
-                        onClick = {
-                            if (pagerState.currentPage > 0) {
-                                scrollToPage(pagerState.currentPage - 1)
-                            } else if (launchSource == LaunchSource.SETTINGS && !pagerState.isScrollInProgress) {
-                                processIntent(OnBoardingIntent.Navigate)
-                            }
-                        },
+                            .fillMaxWidth(onBoardingPhoneWidthFraction)
+                            .padding(bottom = 32.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(
-                            modifier = Modifier.rotate(180f),
-                            imageVector = Icons.Default.DoubleArrow,
-                            contentDescription = Localization.string("action_back"),
-                        )
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        repeat(pages.size) { index ->
-                            val color = if (index == pagerState.currentPage) {
-                                MaterialTheme.colorScheme.primary
+                        val backAlpha by animateFloatAsState(
+                            targetValue = if (pagerState.currentPage > 0 || launchSource == LaunchSource.SETTINGS) {
+                                1f
                             } else {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .drawBehind { drawCircle(color = color) }
+                                0f
+                            },
+                            label = "back_button_animation",
+                        )
+                        OutlinedButton(
+                            modifier = Modifier
+                                .alpha(backAlpha)
+                                .size(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(0.dp),
+                            onClick = {
+                                if (pagerState.currentPage > 0) {
+                                    scrollToPage(pagerState.currentPage - 1)
+                                } else if (launchSource == LaunchSource.SETTINGS && !pagerState.isScrollInProgress) {
+                                    processIntent(OnBoardingIntent.Navigate)
+                                }
+                            },
+                        ) {
+                            Icon(
+                                modifier = Modifier.rotate(180f),
+                                imageVector = Icons.Default.DoubleArrow,
+                                contentDescription = Localization.string("action_back"),
                             )
                         }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    PrimaryButton(
-                        modifier = Modifier.size(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(0.dp),
-                        onClick = {
-                            if (pagerState.currentPage == pages.lastIndex && !pagerState.isScrollInProgress) {
-                                processIntent(OnBoardingIntent.Navigate)
-                            } else {
-                                scrollToPage(pagerState.currentPage + 1)
+                        Spacer(modifier = Modifier.weight(1f))
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            repeat(pages.size) { index ->
+                                val color = if (index == pagerState.currentPage) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .drawBehind { drawCircle(color = color) }
+                                )
                             }
-                        },
-                    ) {
-                        Icon(
-                            imageVector = if (pagerState.currentPage == pages.lastIndex) {
-                                Icons.Default.Check
-                            } else {
-                                Icons.Default.DoubleArrow
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        PrimaryButton(
+                            modifier = Modifier.size(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(0.dp),
+                            onClick = {
+                                if (pagerState.currentPage == pages.lastIndex && !pagerState.isScrollInProgress) {
+                                    processIntent(OnBoardingIntent.Navigate)
+                                } else {
+                                    scrollToPage(pagerState.currentPage + 1)
+                                }
                             },
-                            contentDescription = Localization.string("next"),
-                        )
+                        ) {
+                            Icon(
+                                imageVector = if (pagerState.currentPage == pages.lastIndex) {
+                                    Icons.Default.Check
+                                } else {
+                                    Icons.Default.DoubleArrow
+                                },
+                                contentDescription = Localization.string("next"),
+                            )
+                        }
                     }
                 }
             }

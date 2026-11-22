@@ -26,6 +26,7 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import com.shifthackz.aisdv1.domain.usecase.civitai.AutoUploadToCivitaiUseCase
 import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -68,6 +69,7 @@ class ImageToImageUseCaseImplTest {
 
     private val useCase = ImageToImageUseCaseImpl(
         deviceProbe = deviceProbe,
+        autoUploadToCivitaiUseCase = AutoUploadToCivitaiUseCase { it },
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
             progressGateway,
             mockk(relaxed = true)
@@ -87,7 +89,7 @@ class ImageToImageUseCaseImplTest {
     )
 
     @Test
-    fun `given Easy Diffusion generation, complete batch is submitted, generation is requested, expected one immutable connection capture`() =
+    fun `given Easy Diffusion generation, complete batch is requested, expected one immutable connection capture`() =
         runTest {
             // Given
             every { stubPreferenceManager.source } returns ServerSource.EASY_DIFFUSION
@@ -103,7 +105,7 @@ class ImageToImageUseCaseImplTest {
             // When
             val actual = useCase(payload)
             // Then
-            assertSame(results, actual)
+            assertEquals(results, actual)
             assertEquals(connection.url, request.captured.url)
             assertEquals(connection.model, request.captured.model)
             assertEquals(7L, request.captured.selectionRevision)

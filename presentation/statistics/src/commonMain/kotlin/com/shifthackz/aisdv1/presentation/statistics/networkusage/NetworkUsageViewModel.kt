@@ -135,6 +135,10 @@ private fun NetworkUsage.toUsageState(
             category = UsageCategory.TRAFFIC_INFERENCE,
             bytes = inferenceBytes,
         ),
+        UsageItem(
+            category = UsageCategory.TRAFFIC_CIVITAI,
+            bytes = civitaiBytes,
+        ),
     )
     return UsageState(
         loading = false,

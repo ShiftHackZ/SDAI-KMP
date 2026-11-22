@@ -48,6 +48,7 @@ fun AiGenerationResult.mapDomainToEntity(): GenerationResultEntity = with(this) 
         deviceName = deviceName,
         osVersion = osVersion,
         imageRevision = imageRevision,
+        civitaiUrl = civitaiUrl,
     )
 }
 //endregion
@@ -95,6 +96,7 @@ fun GenerationResultEntity.mapEntityToDomain(): AiGenerationResult = with(this) 
         deviceName = deviceName,
         osVersion = osVersion,
         imageRevision = imageRevision,
+        civitaiUrl = civitaiUrl,
     )
 }
 

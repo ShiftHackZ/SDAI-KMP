@@ -36,6 +36,7 @@ kotlin {
             implementation(project(":storage"))
             implementation(libs.koin.core)
             implementation(libs.koin.android)
+            implementation(libs.androidx.security.crypto)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.google.gson)
             implementation(libs.okhttp.core)

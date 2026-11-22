@@ -10,6 +10,9 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationStore
 import com.shifthackz.aisdv1.domain.gateway.ProviderSelectionGuard
 import com.shifthackz.aisdv1.domain.gateway.backup.BackupPreferencesGateway
 import com.shifthackz.aisdv1.domain.gateway.backup.BackupImageValidator
+import com.shifthackz.aisdv1.feature.backup.codec.DefaultCivitaiBackupCodec
+import com.shifthackz.aisdv1.storage.db.persistent.dao.CivitaiUploadDao
+import com.shifthackz.aisdv1.storage.db.persistent.entity.CivitaiUploadEntity
 import com.shifthackz.aisdv1.feature.backup.codec.BinaryBackupArchiveCodec
 import com.shifthackz.aisdv1.feature.backup.codec.BackupManifest
 import com.shifthackz.aisdv1.feature.backup.codec.BackupSection
@@ -33,6 +36,7 @@ import okio.buffer
 
 /**
  * Exercises real archive framing, codecs and private files with isolated persistence/transport collaborators.
+ *
  * @param root Private temporary directory owned by one unit-test case.
  * @author Dmitriy Moroz
  */
@@ -43,6 +47,8 @@ internal class BackupArchiveFixture(val root: Path) {
     val preferences = mockk<BackupPreferencesGateway>()
     val authorization = mockk<AuthorizationStore>()
     val images = mockk<GenerationResultDao>()
+    val receipts = mockk<CivitaiUploadDao>()
+    var uploads = emptyList<CivitaiUploadEntity>()
     val network = mockk<NetworkUsageDao>()
     val database = mockk<BackupStorage>()
     val staging = mockk<BackupStagingCleaner>(relaxed = true)
@@ -88,6 +94,11 @@ internal class BackupArchiveFixture(val root: Path) {
         coEvery { authorization.getAuthorizationCredentials() } returns AuthorizationCredentials.None
         every { database.generationResultDao() } returns images
         every { database.networkUsageDao() } returns network
+        every { database.civitaiUploadDao() } returns receipts
+        coEvery { receipts.count() } answers { uploads.size.toLong() }
+        coEvery { receipts.queryBackupPage(any(), any()) } answers {
+            uploads.filter { it.id > firstArg<Long>() }.sortedBy { it.id }.take(secondArg())
+        }
         coEvery { database.readSnapshot<Unit>(any()) } coAnswers { firstArg<suspend () -> Unit>()() }
         every { images.observeCount() } answers { flowOf(rows.size) }
         coEvery {
@@ -118,10 +129,12 @@ internal class BackupArchiveFixture(val root: Path) {
         mockk<TimeProvider> { every { currentTimeMillis() } returns 123L },
         json,
         staging,
+        DefaultCivitaiBackupCodec(codec, json),
     )
 
     /**
      * Creates a checksum-valid archive with one framed JSON section for compatibility/admission cases.
+     *
      * @param id Stable or future section identifier.
      * @param text JSON payload consumed by the section codec.
      * @param transform Descriptor mutation for versions or record-count mismatches.
@@ -146,6 +159,7 @@ internal class BackupArchiveFixture(val root: Path) {
 
     /**
      * Supplies portable gallery metadata; native image validation is isolated by the fixture collaborator.
+     *
      * @param id Existing row identity, deliberately excluded by the portable codec.
      * @author Dmitriy Moroz
      */
@@ -156,6 +170,7 @@ internal class BackupArchiveFixture(val root: Path) {
 
     /**
      * Writes one valid gallery record while allowing an inconsistent declared count for admission testing.
+     *
      * @param declaredCount Number of gallery records advertised in the checked manifest.
      * @author Dmitriy Moroz
      */

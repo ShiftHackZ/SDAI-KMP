@@ -214,3 +214,67 @@ def payload(document, endpoint, direction, status="200", media="application/json
         if "swagger" in document:
             return value["schema"]
     return value["content"][media]["schema"]
+
+
+def validate_documentation(document):
+    """Require complete types and descriptions throughout an application-owned OpenAPI document."""
+    if document.get("openapi") != "3.1.0":
+        raise ValueError("Expected OpenAPI 3.1.0")
+    schemas = document["components"]["schemas"]
+
+    def validate_schema(schema, location):
+        if not isinstance(schema, dict) or not schema:
+            raise ValueError(f"Untyped schema: {location}")
+        if not schema.get("description"):
+            raise ValueError(f"Missing description: {location}")
+        if "$ref" in schema:
+            reference = schema["$ref"]
+            if not reference.startswith("#/components/schemas/") or reference.rsplit("/", 1)[1] not in schemas:
+                raise ValueError(f"Unknown schema reference: {location}")
+            return
+        if "oneOf" in schema or "anyOf" in schema:
+            for index, branch in enumerate(schema.get("oneOf", schema.get("anyOf"))):
+                validate_schema(branch, f"{location}/{index}")
+            return
+        if "type" not in schema:
+            raise ValueError(f"Missing type: {location}")
+        if schema["type"] == "object":
+            if "properties" not in schema or schema.get("additionalProperties") is not False:
+                raise ValueError(f"Free-form object: {location}")
+            if not set(schema.get("required", [])) <= set(schema["properties"]):
+                raise ValueError(f"Unknown required field: {location}")
+            for name, field in schema["properties"].items():
+                validate_schema(field, f"{location}.{name}")
+        elif schema["type"] == "array":
+            validate_schema(schema["items"], location + "[]")
+
+    for name, schema in schemas.items():
+        validate_schema(schema, name)
+    operation_ids = set()
+    for path, operations in document["paths"].items():
+        for method, endpoint in operations.items():
+            identifier = endpoint.get("operationId")
+            if not endpoint.get("description") or not identifier or identifier in operation_ids:
+                raise ValueError(f"Missing or duplicate operation documentation: {method} {path}")
+            operation_ids.add(identifier)
+            if not endpoint.get("responses"):
+                raise ValueError(f"Missing responses: {identifier}")
+            for parameter in endpoint.get("parameters", []):
+                if not parameter.get("description"):
+                    raise ValueError(f"Missing parameter description: {identifier}")
+                if "schema" in parameter:
+                    validate_schema(parameter["schema"], identifier)
+                for media in parameter.get("content", {}).values():
+                    validate_schema(media["schema"], identifier)
+            bodies = list(endpoint["responses"].values())
+            if "requestBody" in endpoint:
+                bodies.append(endpoint["requestBody"])
+            for body in bodies:
+                if not body.get("description"):
+                    raise ValueError(f"Missing body description: {identifier}")
+                for media in body.get("content", {}).values():
+                    validate_schema(media["schema"], identifier)
+                for header in body.get("headers", {}).values():
+                    if not header.get("description"):
+                        raise ValueError(f"Missing header description: {identifier}")
+                    validate_schema(header["schema"], identifier)

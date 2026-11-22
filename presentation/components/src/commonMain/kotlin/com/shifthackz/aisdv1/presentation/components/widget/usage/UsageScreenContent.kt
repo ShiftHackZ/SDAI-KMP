@@ -842,6 +842,7 @@ fun UsageCategory.title(): String = Localization.string(
         UsageCategory.TRAFFIC_MODELS -> "settings_usage_category_traffic_models"
         UsageCategory.TRAFFIC_CONFIGS -> "settings_usage_category_traffic_configs"
         UsageCategory.TRAFFIC_INFERENCE -> "settings_usage_category_traffic_inference"
+        UsageCategory.TRAFFIC_CIVITAI -> "civitai_title"
     },
 )
 
@@ -863,6 +864,7 @@ fun UsageCategory.summaryTitle(): String = Localization.string(
         UsageCategory.TRAFFIC_MODELS -> "settings_usage_category_traffic_models"
         UsageCategory.TRAFFIC_CONFIGS -> "settings_usage_category_traffic_configs"
         UsageCategory.TRAFFIC_INFERENCE -> "settings_usage_category_traffic_inference"
+        UsageCategory.TRAFFIC_CIVITAI -> "civitai_title"
     },
 )
 
@@ -878,6 +880,7 @@ private fun UsageCategory.color(): Color = when (this) {
     UsageCategory.TRAFFIC_MODELS -> Color(0xFF3D8BFF)
     UsageCategory.TRAFFIC_CONFIGS -> Color(0xFF65C96F)
     UsageCategory.TRAFFIC_INFERENCE -> Color(0xFFF0A13A)
+    UsageCategory.TRAFFIC_CIVITAI -> Color(0xFF8B7FE8)
 }
 
 private fun Long.formatBytes(): String {

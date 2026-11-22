@@ -47,7 +47,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * ViewModel for the Settings tab.
- *
  * It owns the lightweight settings summaries, including observed storage and network usage byte
  * totals, and delegates detailed cleanup/statistics flows to standalone usage screens.
  *
@@ -73,7 +72,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param router Settings navigation contract.
  * @param platformActions Platform permission and settings bridge.
  * @param onError Error callback forwarded to the app-level error handling pipeline.
- *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -103,7 +101,7 @@ class SettingsViewModel(
 ) : BaseMviViewModel<SettingsState, SettingsIntent, EmptyEffect>(
     diagnostics = diagnostics,
     diagnosticScreen = NavigationDestination.SETTINGS.asDiagnosticScreen(),
-    initialState = SettingsState(),
+    initialState = SettingsState(platform = buildInfoProvider.platform),
     effectDispatcher = dispatchersProvider.immediate,
 ) {
 
@@ -247,6 +245,8 @@ class SettingsViewModel(
                 updateState { it.copy(screenModal = SettingsModal.None) }
             }
 
+            SettingsIntent.NavigateCivitai -> router.navigateToCivitai()
+            SettingsIntent.NavigateWebUi -> router.navigateToWebUi()
             SettingsIntent.NavigateStorageUsage -> router.navigateToStorageUsage()
 
             SettingsIntent.NavigateNetworkUsage -> router.navigateToNetworkUsage()
@@ -562,7 +562,6 @@ class SettingsViewModel(
  * @param serverUrl Provider URL whose changes require a model-list refresh.
  * @param demoMode Whether demo mode is active and remote refreshes should be skipped.
  * @param sdModel Currently selected model name used to keep list state stable.
- *
  * @author Dmitriy Moroz
  */
 private data class SdModelsRefreshKey(

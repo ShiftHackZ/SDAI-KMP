@@ -35,6 +35,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.contract.GenerationResultCont
  * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
  * @param osVersion Originating OS version, including Android API level; null for legacy images.
  * @param generationDurationMillis Nonnegative elapsed generation time before persistence/export, or null for legacy images.
+ * @param civitaiUrl Public Civitai post URL after publication, absent for unpublished images.
  * @author Dmitriy Moroz
  */
 @Entity(
@@ -88,26 +89,18 @@ data class GenerationResultEntity(
     val liked: Boolean = false,
     @ColumnInfo(name = GenerationResultContract.MODEL_NAME, defaultValue = "")
     val modelName: String = "",
-    /**
-     * Content revision; legacy rows retain an empty value until replaced.
-     *
-     * @author Dmitriy Moroz
-     */
     @ColumnInfo(name = GenerationResultContract.IMAGE_REVISION, defaultValue = "''")
     val imageRevision: String = "",
-    /**
-     * Recorded provider, absent for legacy rows.
-     *
-     * @author Dmitriy Moroz
-     */
-    @ColumnInfo(name = "provider_key") val providerKey: String? = null,
-    /**
-     * Recorded execution mode, absent when unavailable.
-     *
-     * @author Dmitriy Moroz
-     */
-    @ColumnInfo(name = "acceleration") val acceleration: String? = null,
-    @ColumnInfo(name = "device_name") val deviceName: String? = null,
-    @ColumnInfo(name = "os_version") val osVersion: String? = null,
-    @ColumnInfo(name = "generation_duration_millis") val generationDurationMillis: Long? = null,
+    @ColumnInfo(name = GenerationResultContract.PROVIDER_KEY)
+    val providerKey: String? = null,
+    @ColumnInfo(name = GenerationResultContract.ACCELERATION)
+    val acceleration: String? = null,
+    @ColumnInfo(name = GenerationResultContract.DEVICE_NAME)
+    val deviceName: String? = null,
+    @ColumnInfo(name = GenerationResultContract.OS_VERSION)
+    val osVersion: String? = null,
+    @ColumnInfo(name = GenerationResultContract.GENERATION_DURATION_MILLIS)
+    val generationDurationMillis: Long? = null,
+    @ColumnInfo(name = GenerationResultContract.CIVITAI_URL)
+    val civitaiUrl: String? = null,
 )

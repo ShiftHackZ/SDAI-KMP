@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.feature.backup.restore
 
+import com.shifthackz.aisdv1.feature.backup.codec.CivitaiBackupCodec
 import okio.use
 import com.shifthackz.aisdv1.domain.entity.NetworkUsageBucket
 import com.shifthackz.aisdv1.domain.entity.backup.BackupImageBudget
@@ -17,6 +18,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Imports unique output images directly into Room, preserving existing rows and avoiding generation-save auto-export.
+ *
  * @param database Destination database and category commit ledger.
  * @param codec Validated length-delimited section reader.
  * @param galleryCodec Per-image metadata and binary image decoder.
@@ -24,6 +26,7 @@ import kotlinx.serialization.json.Json
  * @param json Typed network counter decoder.
  * @param fingerprint Streams saved output-image identities for exact duplicate suppression.
  * @param budget Admits one ordinary image text before hashing; oversized legacy representations use chunked reads.
+ * @param civitaiCodec Public receipt framing with no protected-session access.
  * @author Dmitriy Moroz
  */
 internal class RoomBackupRestoreWriter(
@@ -34,6 +37,7 @@ internal class RoomBackupRestoreWriter(
     private val json: Json,
     private val fingerprint: BackupImageFingerprint,
     private val budget: BackupImageBudget,
+    private val civitaiCodec: CivitaiBackupCodec,
 ) : BackupRestoreWriter {
 
     override suspend fun gallery(
@@ -96,6 +100,7 @@ internal class RoomBackupRestoreWriter(
 
     /**
      * Reads ordinary images once; exceptionally long wrapped text retains the exact-comparison fallback.
+     *
      * @param id Existing gallery/history identity inside the category transaction.
      * @author Dmitriy Moroz
      */
@@ -110,6 +115,7 @@ internal class RoomBackupRestoreWriter(
 
     /**
      * Encodes an admitted string into small UTF8 chunks without allocating another full-image byte array.
+     *
      * @param text Existing admitted image or canonical Base64 returned by the validated archive decoder.
      * @author Dmitriy Moroz
      */
@@ -123,6 +129,56 @@ internal class RoomBackupRestoreWriter(
             characterOffset = end
             byteOffset += bytes.size
             bytes
+        }
+    }
+
+    override suspend fun civitai(
+        sessionId: String,
+        archive: StagedBackup,
+        progress: (BackupProgress) -> Unit
+    ) {
+        val descriptor = archive.manifest.sections.single { it.id == "civitai" }
+        var committed: Long? = null
+        database.writeTransaction {
+            if ("civitai" in database.restoreSessionDao()
+                    .completed(sessionId)
+            ) return@writeTransaction
+            val receipts = database.civitaiUploadDao()
+            var count = 0L
+            var skipped = 0L
+            codec.openSection(archive.path, archive.manifest, "civitai").use { source ->
+                var index = 0L
+                while (index < descriptor.itemCount) {
+                    currentCoroutineContext().ensureActive()
+                    val row = civitaiCodec.read(source)
+                    if (row == null || receipts.find(
+                            row.imageId,
+                            row.imageCreatedAt,
+                            row.imageRevision,
+                            row.accountId
+                        ) != null
+                    ) {
+                        skipped++
+                    } else {
+                        receipts.insert(row)
+                        count++
+                    }
+                    index++
+                }
+                require(source.exhausted()) { "Unexpected Civitai payload" }
+            }
+            database.restoreSessionDao()
+                .mark(RestoreSectionEntity(sessionId, "civitai", count, skipped))
+            committed = count
+        }
+        committed?.let {
+            progress(
+                BackupProgress(
+                    BackupCategory.CIVITAI,
+                    it,
+                    descriptor.itemCount
+                )
+            )
         }
     }
 

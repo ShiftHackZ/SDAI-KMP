@@ -3,13 +3,6 @@ package com.shifthackz.aisdv1.domain.entity
 /**
  * Generated image, metadata and transient guards used by gallery persistence.
  *
- * @param openAiOAuthIdentity Original OAuth account/revision for an unsaved result; not persisted in gallery rows.
- * @param providerSelectionRevision Source-selection revision captured during OAuth generation; null for other providers.
- * @param providerKey Captured provider catalog key; null for images created before provenance was recorded.
- * @param acceleration Execution mode used for this image; null when unknown, "None" for remote providers.
- * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
- * @param osVersion Originating OS version, including Android API level; null for legacy images.
- * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
  * @param id Persistent gallery identity, or zero before insertion.
  * @param image Original encoded output image as Base64.
  * @param inputImage Optional encoded source image as Base64, empty for text generation.
@@ -30,6 +23,15 @@ package com.shifthackz.aisdv1.domain.entity
  * @param hidden Whether the output is obscured in the gallery.
  * @param liked Whether the output is a favorite.
  * @param modelName Recorded model name, independent of currently selected model.
+ * @param openAiOAuthIdentity Original OAuth account/revision for an unsaved result; not persisted in gallery rows.
+ * @param providerSelectionRevision Source-selection revision captured during OAuth generation; null for other providers.
+ * @param imageRevision Content identity used to invalidate cached gallery previews.
+ * @param providerKey Captured provider catalog key; null for images created before provenance was recorded.
+ * @param acceleration Execution mode used for this image; null when unknown, "None" for remote providers.
+ * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
+ * @param osVersion Originating OS version, including Android API level; null for legacy images.
+ * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
+ * @param civitaiUrl Public Civitai post URL after publication, absent for unpublished images.
  * @author Dmitriy Moroz
  */
 data class AiGenerationResult(
@@ -61,6 +63,7 @@ data class AiGenerationResult(
     val deviceName: String? = null,
     val osVersion: String? = null,
     val generationDurationMillis: Long? = null,
+    val civitaiUrl: String? = null,
 ) {
     /**
      * Stable gallery operation discriminator.

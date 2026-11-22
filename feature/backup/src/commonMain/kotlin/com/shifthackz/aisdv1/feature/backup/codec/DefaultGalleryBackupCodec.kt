@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.feature.backup.codec
 import com.shifthackz.aisdv1.storage.db.persistent.entity.GenerationResultEntity
 import com.shifthackz.aisdv1.domain.gateway.backup.BackupImageValidator
 import com.shifthackz.aisdv1.domain.entity.backup.BackupImageBudget
+import com.shifthackz.aisdv1.domain.entity.isCivitaiPostUrl
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.BufferedSink
@@ -52,6 +53,7 @@ internal class DefaultGalleryBackupCodec(
             generationDurationMillis = row.generationDurationMillis,
             deviceName = row.deviceName,
             osVersion = row.osVersion,
+            civitaiUrl = row.civitaiUrl,
         )
         archive.writeJson(sink, json.encodeToString(record))
         val outputBytes = writeImage(sink, row.imageBase64, false, budget.maxEncodedBytes)
@@ -66,6 +68,7 @@ internal class DefaultGalleryBackupCodec(
         require(record.width > 0 && record.height > 0 && record.samplingSteps >= 0 && record.cfgScale.isFinite()) { "Invalid gallery metadata" }
         require(record.subSeedStrength.isFinite() && record.denoisingStrength.isFinite()) { "Invalid gallery metadata" }
         require(record.generationDurationMillis == null || record.generationDurationMillis >= 0) { "Invalid generation duration" }
+        require(record.civitaiUrl == null || record.civitaiUrl.isCivitaiPostUrl()) { "Invalid Civitai post URL" }
         return GenerationResultEntity(
             id = 0,
             imageBase64 = image,
@@ -93,6 +96,7 @@ internal class DefaultGalleryBackupCodec(
             generationDurationMillis = record.generationDurationMillis,
             deviceName = record.deviceName,
             osVersion = record.osVersion,
+            civitaiUrl = record.civitaiUrl,
         )
     }
 

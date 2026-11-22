@@ -46,7 +46,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.image.ZoomableImageS
  * @param state Current detail item, tab and bounded neighbor window.
  * @param imageLoader Revision-aware sampled loader; null renders static-preview fallback content.
  * @param processIntent Requests detail navigation, native actions or metadata mutations.
- *
+ * @param civitaiAction App-supplied Civitai publishing action, retaining independent screen-module ownership.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -55,6 +55,7 @@ fun GalleryDetailScreenContent(
     state: GalleryDetailState,
     imageLoader: GalleryImageLoader? = null,
     processIntent: (GalleryDetailIntent) -> Unit = {},
+    civitaiAction: @Composable () -> Unit = {},
 ) {
     Box(modifier = modifier) {
         PlatformScaffold(
@@ -107,6 +108,7 @@ fun GalleryDetailScreenContent(
             bottomBar = {
                 GalleryDetailNavigationBar(
                     state = state,
+                    civitaiAction = civitaiAction,
                     processIntent = processIntent,
                 )
             },
@@ -127,7 +129,6 @@ fun GalleryDetailScreenContent(
  * @param imageLoader Revision-aware sampled loader for persistent image identities.
  * @param onCopyTextClick Requests native clipboard copying of one metadata value.
  * @param onPageSelected Reports a newly selected global gallery page index.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -193,7 +194,6 @@ internal fun GalleryDetailContentState(
  * @param pagerCurrentIndex Current global gallery index.
  * @param pagerPageCount Total number of gallery identities available for navigation.
  * @param onPageSelected Requests a different global gallery index after a page change.
- *
  * @author Dmitriy Moroz
  */
 @Composable

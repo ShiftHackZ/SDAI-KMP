@@ -1,18 +1,21 @@
 package com.shifthackz.aisdv1.presentation.settings.content
 
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsHeader
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsList
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsListDefaults
+import com.shifthackz.aisdv1.core.model.asUiText
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.components.widget.icon.BrandIcons
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
@@ -26,6 +29,8 @@ import com.shifthackz.aisdv1.presentation.settings.section.SettingsLookAndFeelSe
 import com.shifthackz.aisdv1.presentation.settings.section.SettingsServerSection
 import com.shifthackz.aisdv1.presentation.settings.section.SettingsVersionFooter
 import com.shifthackz.aisdv1.presentation.settings.settingsListItems
+import com.shifthackz.aisdv1.presentation.settings.startIcon
+import com.shifthackz.aisdv1.presentation.components.widget.source.getName
 
 /**
  * Renders visible Settings rows in one lazy list. Provider, appearance, community, information
@@ -35,7 +40,6 @@ import com.shifthackz.aisdv1.presentation.settings.settingsListItems
  * @param modifier Layout applied to the scrollable Settings body.
  * @param platformActions platform capabilities needed by settings rows.
  * @param processIntent sends user actions back to the Settings MVI pipeline.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -50,24 +54,15 @@ internal fun ContentSettingsState(
     } else {
         state.darkTheme
     }
-    val listState = rememberLazyListState()
     val rows = settingsListItems(
         state,
         isDark,
         platformActions.supportsConnectionTimeout,
         platformActions.isNnapiAvailable,
     )
-    ToolbarScrollObserver(listState.canScrollBackward)
-    LazyColumn(
-        modifier = modifier.verticalScrollbar(
-            listState,
-            topInset = LocalToolbarContentInset.current
-        ).padding(horizontal = 16.dp),
-        state = listState,
-        contentPadding = PaddingValues(
-            top = LocalToolbarContentInset.current,
-            bottom = LocalFloatingNavigationBarInset.current
-        ),
+    SettingsList(
+        modifier = modifier,
+        bottomPadding = LocalFloatingNavigationBarInset.current,
     ) {
         items(items = rows, key = { it.name }, contentType = { it.contentType() }) { row ->
             SettingsItemHelp(
@@ -75,10 +70,40 @@ internal fun ContentSettingsState(
                 isLoading = state.loading,
                 modifier = Modifier.animateItem()
             ) {
-                val headerModifier = Modifier.padding(top = 28.dp, bottom = 8.dp)
-                val itemModifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                val warningModifier = Modifier.fillMaxWidth().padding(top = 4.dp, start = 4.dp)
+                val headerModifier = Modifier.padding(SettingsListDefaults.headerPadding)
+                val itemModifier = Modifier.fillMaxWidth().padding(SettingsListDefaults.itemPadding)
+                val warningModifier =
+                    Modifier.fillMaxWidth().padding(SettingsListDefaults.supportingTextPadding)
                 when (row) {
+                    SettingsListItem.INTEGRATIONS_HEADER -> SettingsHeader(
+                        text = Localization.string("settings_header_integrations").asUiText(),
+                        modifier = headerModifier,
+                    )
+
+                    SettingsListItem.CIVITAI -> SettingsItem(
+                        text = Localization.string("civitai_title").asUiText(),
+                        startIconContent = {
+                            Image(
+                                BrandIcons.Civitai,
+                                contentDescription = null,
+                                modifier = Modifier.padding(horizontal = 8.dp).size(24.dp)
+                            )
+                        },
+                        modifier = itemModifier,
+                        onClick = { processIntent(SettingsIntent.NavigateCivitai) },
+                    )
+
+                    SettingsListItem.WEB_UI -> SettingsItem(
+                        text = "${Localization.string("drawer_web_ui")} (${
+                            state.serverSource.getName(
+                                state.platform
+                            )
+                        })".asUiText(),
+                        startIcon = row.startIcon,
+                        modifier = itemModifier,
+                        onClick = { processIntent(SettingsIntent.NavigateWebUi) },
+                    )
+
                     SettingsListItem.SERVER_HEADER,
                     SettingsListItem.CONFIGURATION,
                     SettingsListItem.BACKUP,

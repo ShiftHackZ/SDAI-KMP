@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.feature.backup.archive
 
+import com.shifthackz.aisdv1.feature.backup.codec.CivitaiBackupCodec
 import okio.use
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.time.TimeProvider
@@ -38,6 +39,7 @@ import okio.buffer
 
 /**
  * Creates consistent paged snapshots and validates immutable staged files before restore.
+ *
  * @param files Platform document transport and durable private directory.
  * @param codec Bounded binary framing and section integrity.
  * @param galleryCodec Portable gallery record codec.
@@ -50,6 +52,7 @@ import okio.buffer
  * @param clock UTC archive timestamp.
  * @param json Forward-compatible metadata serializer.
  * @param staging Admits file creation only after one-time orphan cleanup has preserved pending restores.
+ * @param civitaiCodec Public receipt framing with no protected-session access.
  * @author Dmitriy Moroz
  */
 internal class DefaultBackupArchiveStore(
@@ -65,6 +68,7 @@ internal class DefaultBackupArchiveStore(
     private val clock: TimeProvider,
     private val json: Json,
     private val staging: BackupStagingCleaner,
+    private val civitaiCodec: CivitaiBackupCodec,
 ) : BackupArchiveStore {
 
     override fun preparedExport(handle: String, filename: String): BackupExport {
@@ -94,12 +98,17 @@ internal class DefaultBackupArchiveStore(
                     BackupCategory.NETWORK,
                     database.networkUsageDao().query().size.toLong()
                 ),
+                BackupEntry(BackupCategory.CIVITAI, database.civitaiUploadDao().count()),
                 BackupEntry(
                     BackupCategory.SETTINGS,
                     preferences.settings.size.toLong(),
                     preferences.settings.isNotEmpty()
                 ),
-            ).map { if (it.itemCount == 0L) it.copy(isAvailable = false) else it },
+            ).map {
+                if (it.itemCount == 0L && it.category != BackupCategory.CIVITAI) it.copy(
+                    isAvailable = false
+                ) else it
+            },
             preferences.providers.keys
         )
     }
@@ -123,6 +132,10 @@ internal class DefaultBackupArchiveStore(
                 currentCoroutineContext().ensureActive()
                 val path = directory / category.key
                 val count = block(path)
+                if (category == BackupCategory.CIVITAI && count == 0L) {
+                    FileSystem.SYSTEM.delete(path)
+                    return
+                }
                 sections += codec.describe(path, category.key, count)
                 payloads += path
             }
@@ -154,6 +167,21 @@ internal class DefaultBackupArchiveStore(
                         }
                     }
                     offset
+                }
+                payload(BackupCategory.CIVITAI) { path ->
+                    var count = 0L
+                    var afterId = 0L
+                    FileSystem.SYSTEM.sink(path).buffer().use { sink ->
+                        while (true) {
+                            currentCoroutineContext().ensureActive()
+                            val rows = database.civitaiUploadDao().queryBackupPage(afterId, 64)
+                            if (rows.isEmpty()) break
+                            rows.forEach { row -> civitaiCodec.write(sink, row); count++ }
+                            afterId = rows.last().id
+                            progress(BackupProgress(BackupCategory.CIVITAI, count, 0))
+                        }
+                    }
+                    count
                 }
                 payload(BackupCategory.NETWORK) { path ->
                     val values = database.networkUsageDao().query()
@@ -376,6 +404,22 @@ internal class DefaultBackupArchiveStore(
                             )
                         }
                         require(source.exhausted()) { "Unexpected gallery payload" }
+                    }
+
+                "civitai" -> codec.openSection(archive.path, archive.manifest, section.id)
+                    .use { source ->
+                        repeatCount(section.itemCount) { index ->
+                            currentCoroutineContext().ensureActive()
+                            civitaiCodec.read(source)
+                            progress(
+                                BackupProgress(
+                                    BackupCategory.CIVITAI,
+                                    index + 1,
+                                    section.itemCount
+                                )
+                            )
+                        }
+                        require(source.exhausted()) { "Unexpected Civitai payload" }
                     }
 
                 "network" -> codec.openSection(archive.path, archive.manifest, section.id)

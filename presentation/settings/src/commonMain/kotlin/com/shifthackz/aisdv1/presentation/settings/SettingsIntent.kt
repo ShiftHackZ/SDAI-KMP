@@ -20,7 +20,11 @@ sealed interface SettingsIntent : MviIntent {
      */
     data object NavigateConfiguration : SettingsIntent
 
-    /** Opens portable selective backup and restore. @author Dmitriy Moroz */
+    /**
+     * Opens portable selective backup and restore.
+     *
+     * @author Dmitriy Moroz
+     */
     data object NavigateBackup : SettingsIntent
 
     /**
@@ -60,6 +64,20 @@ sealed interface SettingsIntent : MviIntent {
      */
     data object NavigateBenchmark : SettingsIntent
 
+    /**
+     * Opens Civitai account and publication preferences.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object NavigateCivitai : SettingsIntent
+
+    /**
+     * Opens the configured server's web interface inside SDAI.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object NavigateWebUi : SettingsIntent
+
     data object NavigateStorageUsage : SettingsIntent
 
     data object NavigateNetworkUsage : SettingsIntent
@@ -84,6 +102,12 @@ sealed interface SettingsIntent : MviIntent {
          */
         data object OpenChooser : SdModel
 
+        /**
+         * Selects one model from the current remote model catalog.
+         *
+         * @param model Exact provider model identifier chosen in the picker.
+         * @author Dmitriy Moroz
+         */
         data class Select(val model: String) : SdModel
     }
 
@@ -157,10 +181,17 @@ sealed interface SettingsIntent : MviIntent {
          */
         val flag: Boolean
 
+        /**
+         * Persists use of the Android NNAPI acceleration backend for ONNX generation.
+         *
+         * @param flag Whether NNAPI should be enabled for subsequent requests.
+         * @author Dmitriy Moroz
+         */
         data class NNAPI(override val flag: Boolean) : UpdateFlag
 
         /**
          * Persists foreground generation display dimming.
+         *
          * @param flag Whether dimming is enabled.
          * @author Dmitriy Moroz
          */
@@ -168,6 +199,7 @@ sealed interface SettingsIntent : MviIntent {
 
         /**
          * Persists visibility of resource graphs in generation dialogs.
+         *
          * @param flag Whether the overlay is enabled.
          * @author Dmitriy Moroz
          */

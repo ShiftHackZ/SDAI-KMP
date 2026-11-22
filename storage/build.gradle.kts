@@ -37,6 +37,11 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.androidx.room.runtime)
         }
+        androidUnitTest.dependencies {
+            implementation(libs.test.junit)
+            implementation(libs.test.roboelectric)
+            implementation(libs.test.coroutines)
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 package com.shifthackz.aisdv1.core.common.links
 
 /**
- * Supplies the standard web destinations used by the shared app when no platform override is installed.
+ * Supplies shared web destinations for the Android and iOS application graphs.
  *
  * @author Dmitriy Moroz
  */

@@ -12,6 +12,7 @@ android {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":domain"))
             implementation(project(":core:common"))
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)

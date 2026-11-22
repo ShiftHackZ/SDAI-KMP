@@ -20,7 +20,7 @@ android {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":feature:appupdate"))
+            implementation(project(":domain"))
             implementation(project(":core:common"))
             implementation(project(":core:ui"))
             implementation(project(":core:localization"))
@@ -38,7 +38,6 @@ kotlin {
             implementation(libs.test.compose.junit)
         }
         androidMain.dependencies {
-            implementation(project(":domain"))
             implementation(libs.compose.material3)
             implementation(libs.androidx.compose.ui.tooling.preview)
             implementation(libs.androidx.compose.ui.tooling)
@@ -48,7 +47,9 @@ kotlin {
     }
 }
 
-dependencies { "playstoreImplementation"(libs.google.play.app.update) }
+dependencies {
+    "playstoreImplementation"(libs.google.play.app.update)
+}
 
 dependencies {
     "debugImplementation"(libs.test.compose.manifest)

@@ -52,6 +52,7 @@ detekt = "2.0.0-alpha.3"
 
 [libraries]
 google-play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playAppUpdate" }
+appauth = { group = "net.openid", name = "appauth", version = "0.11.1" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }

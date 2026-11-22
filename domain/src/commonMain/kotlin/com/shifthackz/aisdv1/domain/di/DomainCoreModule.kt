@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.domain.di
 
+import com.shifthackz.aisdv1.domain.usecase.appupdate.CheckAppUpdateUseCase
+import com.shifthackz.aisdv1.domain.usecase.appupdate.CheckAppUpdateUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.TrackRemoteGenerationUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.TrackRemoteGenerationUseCaseImpl
 
@@ -285,6 +287,7 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDomainModule = module {
+    factory<CheckAppUpdateUseCase> { CheckAppUpdateUseCaseImpl(get()) }
     factory<TrackRemoteGenerationUseCase> { TrackRemoteGenerationUseCaseImpl(get(), get()) }
     factory<ObserveGenerationPerformanceUseCase> {
         ObserveGenerationPerformanceUseCaseImpl(get(), get(), get())
@@ -487,6 +490,7 @@ val coreDomainModule = module {
             bonsaiGenerationRepository = get(),
             mnnGenerationRepository = get(),
             preferenceManager = get(),
+            autoUploadToCivitaiUseCase = get(),
         )
     }
     factory<ImageToImageUseCase> {
@@ -505,6 +509,7 @@ val coreDomainModule = module {
             falAiGenerationRepository = get(),
             arliAiGenerationRepository = get(),
             preferenceManager = get(),
+            autoUploadToCivitaiUseCase = get(),
         )
     }
     factory<GetRandomImageUseCase> {

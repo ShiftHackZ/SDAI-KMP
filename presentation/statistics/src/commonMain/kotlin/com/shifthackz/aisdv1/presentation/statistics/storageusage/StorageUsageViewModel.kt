@@ -344,6 +344,7 @@ class StorageUsageViewModel(
             UsageCategory.TRAFFIC_MODELS,
             UsageCategory.TRAFFIC_CONFIGS,
             UsageCategory.TRAFFIC_INFERENCE,
+            UsageCategory.TRAFFIC_CIVITAI,
                 -> Unit
         }
     }

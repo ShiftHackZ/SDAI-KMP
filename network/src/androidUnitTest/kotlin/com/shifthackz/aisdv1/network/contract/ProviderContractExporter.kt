@@ -3,6 +3,16 @@
 
 package com.shifthackz.aisdv1.network.contract
 
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiAccountResponse
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiExternalDetails
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiExternalMetadata
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiExternalSource
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiImageMetadata
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiPostImage
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiPostRequest
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiPostResponse
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiTokenResponse
+import com.shifthackz.aisdv1.network.api.civitai.model.CivitaiUploadResponse
 import com.shifthackz.aisdv1.network.client.defaultNetworkJson
 import com.shifthackz.aisdv1.network.model.HuggingFaceModelRaw
 import com.shifthackz.aisdv1.network.model.StabilityAiEngineRaw
@@ -37,8 +47,9 @@ import kotlinx.serialization.json.put
 
 /**
  * Writes wire names, types, nullability and required fields from the compiled application serializers.
- * The upstream checker consumes this generated metadata instead of guessing Kotlin types from source text.
- * Provider specifications are fetched independently during each check; this output contains no vendor schema.
+ * Contract validation consumes this metadata instead of guessing Kotlin types from source text.
+ * Provider schemas are fetched independently; Civitai uses the application-owned OpenAPI document.
+ * This output contains serializer metadata without vendor specifications or credential values.
  *
  * @param args Exactly one path for the generated descriptor document, normally under the module build directory.
  *
@@ -47,6 +58,16 @@ import kotlinx.serialization.json.put
 fun main(args: Array<String>) {
     require(args.size == 1) { "Expected one output file path." }
     val descriptors = linkedMapOf(
+        "CivitaiAccountResponse" to CivitaiAccountResponse.serializer().descriptor,
+        "CivitaiExternalDetails" to CivitaiExternalDetails.serializer().descriptor,
+        "CivitaiExternalMetadata" to CivitaiExternalMetadata.serializer().descriptor,
+        "CivitaiExternalSource" to CivitaiExternalSource.serializer().descriptor,
+        "CivitaiImageMetadata" to CivitaiImageMetadata.serializer().descriptor,
+        "CivitaiPostImage" to CivitaiPostImage.serializer().descriptor,
+        "CivitaiPostRequest" to CivitaiPostRequest.serializer().descriptor,
+        "CivitaiPostResponse" to CivitaiPostResponse.serializer().descriptor,
+        "CivitaiTokenResponse" to CivitaiTokenResponse.serializer().descriptor,
+        "CivitaiUploadResponse" to CivitaiUploadResponse.serializer().descriptor,
         "OpenAiRequest" to OpenAiRequest.serializer().descriptor,
         "HordeGenerationAsyncRequest" to HordeGenerationAsyncRequest.serializer().descriptor,
         "StabilityTextToImageRequest" to StabilityTextToImageRequest.serializer().descriptor,

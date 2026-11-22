@@ -3,8 +3,17 @@ package com.shifthackz.aisdv1.presentation.gallery.detail
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -81,4 +90,40 @@ class GalleryMetadataLayoutTest {
         assertTrue(provider < model)
         assertTrue(model < acceleration)
     }
+
+    @Test
+    fun `given a Civitai gallery URL, its value is tapped, expected native browser launch and copy action retained`() {
+        // Given
+        val url = "https://civitai.com/posts/123"
+        val opened = mutableListOf<String>()
+        compose.setContent {
+            CompositionLocalProvider(LocalUriHandler provides object : UriHandler {
+                override fun openUri(uri: String) {
+                    opened += uri
+                }
+            }) {
+                MaterialTheme {
+                    GalleryDetailRow(
+                        name = "Civitai", value = url, isLink = true,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+        // When
+        val node = compose.onNodeWithText(url)
+        val text = node.fetchSemanticsNode().config[SemanticsProperties.Text].single()
+        compose.onAllNodes(hasClickAction(), useUnmergedTree = true).onFirst()
+            .performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.waitForIdle()
+        // Then
+        assertEquals(
+            url,
+            (text.getLinkAnnotations(0, text.length).single().item as LinkAnnotation.Url).url
+        )
+        assertEquals(listOf(url), opened)
+        compose.onAllNodesWithContentDescription(Localization.string("action_copy"))
+            .assertCountEquals(1)
+    }
+
 }

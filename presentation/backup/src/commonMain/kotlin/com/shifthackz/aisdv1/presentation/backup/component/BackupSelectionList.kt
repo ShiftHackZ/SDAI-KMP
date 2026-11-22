@@ -35,6 +35,7 @@ import com.shifthackz.aisdv1.presentation.backup.BackupIntent
 
 /**
  * Shared category and nested-provider selection for create and restore. Selection is always caller-owned.
+ *
  * @param state Current page inventory and choices; contains no credential values.
  * @param isEnabled Whether selection can change during this operation.
  * @param processIntent Receives selection and disclosure actions.
@@ -65,7 +66,7 @@ internal fun BackupSelectionList(
             ) {
                 BackupCategoryHeader(
                     title = Localization.string("backup_category_" + category.key),
-                    subtitle = if (entry.isAvailable) Localization.string(
+                    subtitle = if (entry.isAvailable || entry.itemCount == 0L) Localization.string(
                         "backup_items",
                         entry.itemCount
                     ) else Localization.string("backup_unavailable"),

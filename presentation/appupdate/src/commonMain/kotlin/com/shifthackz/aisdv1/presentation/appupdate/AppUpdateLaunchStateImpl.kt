@@ -1,7 +1,7 @@
 package com.shifthackz.aisdv1.presentation.appupdate
 
-import com.shifthackz.aisdv1.feature.appupdate.domain.CheckAppUpdateUseCase
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.usecase.appupdate.CheckAppUpdateUseCase
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

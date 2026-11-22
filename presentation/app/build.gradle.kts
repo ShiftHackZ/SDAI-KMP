@@ -39,6 +39,8 @@ kotlin {
             implementation(project(":presentation:onboarding"))
             implementation(project(":presentation:report"))
             implementation(project(":presentation:settings"))
+            implementation(project(":presentation:civitai"))
+            implementation(project(":feature:civitai"))
             implementation(project(":presentation:splash"))
             implementation(project(":presentation:statistics"))
             implementation(project(":presentation:web"))
