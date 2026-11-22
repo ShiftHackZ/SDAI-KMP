@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Length-delimited manifest descriptor; digest covers the exact stored payload bytes.
+ *
  * @param id Stable section key.
  * @param schemaVersion Writer section schema.
  * @param requiredReaderVersion Minimum compatible section reader.

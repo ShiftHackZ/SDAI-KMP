@@ -98,6 +98,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.plan.outputs.source_sha }}
+          fetch-depth: 0
           token: ${{ secrets.DOKKA_PUSH_TOKEN }}
 
       # Use the same planner version even if master advanced while the job queued.
@@ -113,12 +114,28 @@ jobs:
         id: current
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin refs/heads/master
+          git fetch --no-tags origin refs/heads/master
           if [[ "$(git rev-parse FETCH_HEAD)" == "${SOURCE_SHA}" ]]; then
             echo "should_generate=true" >> "${GITHUB_OUTPUT}"
           else
             echo "::notice::Master advanced; the next check will inspect its latest inputs."
           fi
+
+      - name: Test KDoc formatting on the complete change range
+        if: steps.current.outputs.should_generate == 'true'
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .dokka-automation/scripts/kdoc -p 'test_kdoc_*.py'
+          base_sha="${PUSH_BASE_SHA}"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            base_sha="$(git log -1 --format=%H "${SOURCE_SHA}" -- docs/docs/.dokka-inputs.sha256)"
+          fi
+          python3 .dokka-automation/scripts/kdoc/test_kdoc_formatting.py \
+            --base "${base_sha}" --head "${SOURCE_SHA}"
 
       - uses: actions/setup-java@v4
         if: steps.current.outputs.should_generate == 'true'

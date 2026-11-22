@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupExportOperation
 
 /**
  * Shares export progress and completion with each recreated screen without transferring job ownership.
+ *
  * @param coordinator Owns durable export association independently from screen lifetimes.
  * @author Dmitriy Moroz
  */

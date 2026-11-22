@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.domain.entity.ProcessPerformanceReading
 /**
  * Reads the current process's proportional resident memory through the public Android API.
  * Shared pages are apportioned so summing host and worker readings avoids counting them twice.
+ *
  * @author Dmitriy Moroz
  */
 internal class AndroidCurrentProcessPerformanceReader : CurrentProcessPerformanceReader {

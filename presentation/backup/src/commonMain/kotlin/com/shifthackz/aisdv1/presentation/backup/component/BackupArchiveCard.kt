@@ -21,6 +21,7 @@ import com.shifthackz.aisdv1.presentation.backup.platform.formatBackupCreatedAt
 
 /**
  * Groups the selected archive identity, available source location and creation details before restore choices.
+ *
  * @param archive Validated summary with no provider credentials or decoded image data.
  * @param modifier Card placement within the scrolling restore content.
  * @author Dmitriy Moroz

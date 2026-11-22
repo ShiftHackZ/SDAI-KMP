@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Encodes journal selection IDs only; no credentials or application payloads enter the restore ledger.
+ *
  * @param json Serializer for nonsecret selection lists.
  * @author Dmitriy Moroz
  */

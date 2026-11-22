@@ -6,10 +6,18 @@ package com.shifthackz.aisdv1.presentation.components.image
  * @author Dmitriy Moroz
  */
 sealed interface ImageSaveResult {
-    /** The native media library accepted the image write. */
+    /**
+     * The native media library accepted the image write.
+     *
+     * @author Dmitriy Moroz
+     */
     data object Saved : ImageSaveResult
 
-    /** The current platform adapter cannot perform this operation. */
+    /**
+     * The current platform adapter cannot perform this operation.
+     *
+     * @author Dmitriy Moroz
+     */
     data object Unsupported : ImageSaveResult
 
     /**

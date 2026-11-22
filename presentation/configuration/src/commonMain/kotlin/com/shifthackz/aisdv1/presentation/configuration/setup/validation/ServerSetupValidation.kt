@@ -164,10 +164,8 @@ internal fun ServerSetupState.validateServerSetup(
  * @param stringValidator Injected nonempty credential/key validator.
  * @param useDefault Whether the user explicitly selected the provider’s supported anonymous default.
  * @param update Updates the active field’s validation feedback in setup state.
- *
  * @author Dmitriy Moroz
  */
-
 private fun ServerSetupState.validateApiKey(
     key: String,
     stringValidator: CommonStringValidator,
@@ -188,10 +186,8 @@ private fun ServerSetupState.validateApiKey(
  * @param hasDownloadedSelection Whether a downloaded model is selected for the active local provider.
  * @param filePathValidator Injected local filesystem path validation contract.
  * @param update Updates the active field’s validation feedback in setup state.
- *
  * @author Dmitriy Moroz
  */
-
 private fun ServerSetupState.validateLocalModel(
     customModel: Boolean,
     customModelPath: String,
@@ -211,10 +207,8 @@ private fun ServerSetupState.validateLocalModel(
  * @param url Candidate self-hosted endpoint, including any reverse-proxy prefix.
  * @param urlValidator Injected URL validation contract.
  * @param stringValidator Injected nonempty credential/key validator.
- *
  * @author Dmitriy Moroz
  */
-
 private fun ServerSetupState.validateServerUrlAndCredentials(
     url: String,
     urlValidator: UrlValidator,

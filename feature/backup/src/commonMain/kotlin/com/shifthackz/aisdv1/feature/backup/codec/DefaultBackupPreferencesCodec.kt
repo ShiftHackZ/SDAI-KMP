@@ -9,6 +9,7 @@ import kotlinx.serialization.json.intOrNull
 
 /**
  * Serializes portable scalar fields without leaking preference storage keys or inventing absent values.
+ *
  * @param json Forward-compatible JSON parser.
  * @author Dmitriy Moroz
  */

@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Abandons an unfinished operation only after checked configuration/credentials are trusted; removes private staging only.
+ *
  * @param archives Owns generated private archive paths.
  * @param preferences Recovers an already-started checked typed settings batch before startup or abandonment.
  * @param database Durable pending intent records.

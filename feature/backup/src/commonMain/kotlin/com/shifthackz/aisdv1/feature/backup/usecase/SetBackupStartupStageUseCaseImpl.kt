@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.domain.usecase.backup.SetBackupStartupStageUseCase
 
 /**
  * Advances durable recovery progression so a stale screen cannot reopen completed provider setup.
+ *
  * @param preferences Checked stage persistence shared with startup routing.
  * @author Dmitriy Moroz
  */

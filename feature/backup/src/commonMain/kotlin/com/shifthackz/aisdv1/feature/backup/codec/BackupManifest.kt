@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Versioned archive metadata independent of Room entities and application versions.
+ *
  * @param archiveId Unique exported snapshot identity.
  * @param createdAt UTC epoch milliseconds.
  * @param appVersion Display-only source version.

@@ -2,7 +2,9 @@ package com.shifthackz.aisdv1.domain.usecase.benchmark
 
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
 
-/** Captures device capabilities without loading an inference runtime.
+/**
+ * Captures device capabilities without loading an inference runtime.
+ *
  * @author Dmitriy Moroz
  */
 interface InspectBenchmarkDeviceUseCase {

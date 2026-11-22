@@ -6,11 +6,13 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupRestoreResult
 
 /**
  * Merges selected data with category-atomic commits and durable retry identity; cancellation propagates.
+ *
  * @author Dmitriy Moroz
  */
 interface RestoreBackupUseCase {
     /**
      * Merges selected data with category-atomic commits and durable retry identity; cancellation propagates.
+     *
      * @param request Validated archive, selection and conflict consent.
      * @param onProgress Receives current import stage progress.
      * @author Dmitriy Moroz

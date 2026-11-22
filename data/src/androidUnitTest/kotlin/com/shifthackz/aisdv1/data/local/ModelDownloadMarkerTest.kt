@@ -15,6 +15,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Protects every legacy provider from treating interrupted app-owned payloads as installed models.
+ *
  * @param type Provider whose complete layout is checked before and after activation.
  * @author Dmitriy Moroz
  */
@@ -70,7 +71,11 @@ class ModelDownloadMarkerTest(private val type: LocalAiModel.Type) {
     }
 
     companion object {
-        /** Supplies providers that activate their downloads in the shared app-private model directory. */
+        /**
+         * Supplies providers that activate their downloads in the shared app-private model directory.
+         *
+         * @author Dmitriy Moroz
+         */
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun providers() =

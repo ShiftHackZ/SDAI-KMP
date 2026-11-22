@@ -6,6 +6,7 @@ import org.junit.Test
 
 /**
  * Guards the difference between unused RAM and reclaimable file cache in Linux counters.
+ *
  * @author Dmitriy Moroz
  */
 class ProcMemoryInfoTest {

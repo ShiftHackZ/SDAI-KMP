@@ -41,6 +41,7 @@ import platform.posix.timespec
 /**
  * Reads iOS resident app memory and cumulative CPU time using public Mach/POSIX APIs.
  * Counters cover the in-process native inference engines as well as the UI runtime.
+ *
  * @author Dmitriy Moroz
  */
 internal class IosPerformanceGateway : PerformanceGateway {

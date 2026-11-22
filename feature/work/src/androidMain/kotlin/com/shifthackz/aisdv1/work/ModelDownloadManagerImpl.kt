@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 /**
  * Persists independent single downloads or one exclusive sequential provider batch.
  * Each model has its own unique work and notification; duplicates retain the running transfer.
+ *
  * @param workManager Application WorkManager bridge.
  * @param dispatchersProvider Keeps durable scheduling and cancellation waits off the main thread.
  * @author Dmitriy Moroz
@@ -91,6 +92,7 @@ internal class ModelDownloadManagerImpl(
 
     /**
      * Admits distinct single models concurrently or replaces all transfers with a confirmed batch.
+     *
      * @param request Provider and optional model mirror captured by setup.
      * @param shouldReplace Whether to cancel previous work before admitting this request.
      * @author Dmitriy Moroz
@@ -132,6 +134,7 @@ internal class ModelDownloadManagerImpl(
 
     /**
      * Cancels only matching requests; other concurrent model workers keep their progress.
+     *
      * @param type Provider to cancel, or null to stop every model request.
      * @param modelId Single model within that provider, or null for all its requests.
      * @author Dmitriy Moroz

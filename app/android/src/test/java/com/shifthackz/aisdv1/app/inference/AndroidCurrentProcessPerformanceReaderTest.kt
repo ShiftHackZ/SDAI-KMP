@@ -18,6 +18,7 @@ import org.robolectric.util.ReflectionHelpers
 
 /**
  * Checks the worker's public OS-counter conversion without reading a sibling process.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)

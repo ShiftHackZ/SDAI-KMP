@@ -10,8 +10,8 @@ import com.shifthackz.aisdv1.presentation.components.model.displayName
 
 /**
  * Resolves the localized provider label for composables that need a plain string.
- * @param platform Current host platform selecting local-provider labels and branding conventions.
  *
+ * @param platform Current host platform selecting local-provider labels and branding conventions.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -20,8 +20,8 @@ fun ServerSource.getName(platform: Platform = Platform.ANDROID): String =
 
 /**
  * Resolves the provider label as [UiText] for non-composable consumers.
- * @param platform Current host platform selecting local-provider labels and branding conventions.
  *
+ * @param platform Current host platform selecting local-provider labels and branding conventions.
  * @author Dmitriy Moroz
  */
 fun ServerSource.getNameUiText(platform: Platform = Platform.ANDROID): UiText =

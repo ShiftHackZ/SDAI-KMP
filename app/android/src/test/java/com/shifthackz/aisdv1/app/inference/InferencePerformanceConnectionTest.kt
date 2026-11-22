@@ -43,6 +43,7 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Exercises the production host connection with controlled protocol envelopes. These unit tests
  * check telemetry isolation; Binder transport and native inference are covered by application QA.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)

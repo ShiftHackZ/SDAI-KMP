@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 
 /**
  * Uses bounds-only Android probing followed by power-of-two sampling; original pixels are never decoded.
+ *
  * @author Dmitriy Moroz
  */
 internal actual class PlatformBackupImageDecoder actual constructor() : BackupImageDecoder {

@@ -18,6 +18,7 @@ import com.shifthackz.aisdv1.domain.gateway.backup.BackupPreferencesGateway
 
 /**
  * Reads and checks portable preference batches without publishing partial or untrusted writes.
+ *
  * @param store Shared typed preference owner, also used by normal settings/configuration.
  * @param preferences Effective user settings, including defaults that have never been explicitly saved.
  * @author Dmitriy Moroz
@@ -167,6 +168,7 @@ internal class BackupPreferencesGatewayImpl(
      * Distinguishes legacy complete-snapshot defaults from saved provider or partial setup data.
      * Normal configuration commits materialize every provider's empty/default fields; those alone
      * cannot make a provider configured or consume the shared Basic Auth association.
+     *
      * @param provider Stable provider wire identifier.
      * @param fields Persisted portable values, retaining explicit defaults for an existing configuration.
      * @author Dmitriy Moroz

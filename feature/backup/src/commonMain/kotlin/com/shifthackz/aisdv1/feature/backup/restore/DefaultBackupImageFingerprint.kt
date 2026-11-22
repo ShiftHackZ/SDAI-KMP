@@ -13,6 +13,7 @@ import kotlin.io.encoding.Base64.PaddingOption
 /**
  * Hashes decoded Base64 chunks so alternate valid text representations still identify the same saved image.
  * At most one 64KiB UTF8 chunk and its decoded bytes are held in addition to the caller's data.
+ *
  * @author Dmitriy Moroz
  */
 internal class DefaultBackupImageFingerprint : BackupImageFingerprint {
@@ -75,6 +76,7 @@ internal class DefaultBackupImageFingerprint : BackupImageFingerprint {
 
     /**
      * Treats malformed image text as unidentifiable without masking storage or cancellation failures.
+     *
      * @param value Complete Base64 quartets or the final optionally padded group.
      * @author Dmitriy Moroz
      */

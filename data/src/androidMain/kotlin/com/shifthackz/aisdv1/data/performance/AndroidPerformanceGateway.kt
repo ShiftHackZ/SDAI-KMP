@@ -16,6 +16,7 @@ import java.io.File
  * reads even for the app's inference process; those reads must never stand in for worker telemetry.
  * Proportional resident memory apportions shared pages between their processes. Device usage
  * includes reclaimable file caches, so file-backed model pages remain in both accounting scopes.
+ *
  * @param context Application context used to read device physical memory capacity.
  * @param nativeGateway Current inference connection, queried without starting a worker.
  * @author Dmitriy Moroz

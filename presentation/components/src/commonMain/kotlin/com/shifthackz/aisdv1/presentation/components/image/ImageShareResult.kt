@@ -6,10 +6,18 @@ package com.shifthackz.aisdv1.presentation.components.image
  * @author Dmitriy Moroz
  */
 sealed interface ImageShareResult {
-    /** Native sharing accepted the handoff; recipient delivery is not guaranteed. */
+    /**
+     * Native sharing accepted the handoff; recipient delivery is not guaranteed.
+     *
+     * @author Dmitriy Moroz
+     */
     data object Sent : ImageShareResult
 
-    /** The current platform adapter cannot perform this operation. */
+    /**
+     * The current platform adapter cannot perform this operation.
+     *
+     * @author Dmitriy Moroz
+     */
     data object Unsupported : ImageShareResult
 
     /**

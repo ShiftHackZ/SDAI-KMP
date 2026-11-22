@@ -24,6 +24,7 @@ import com.shifthackz.aisdv1.core.localization.Localization
 /**
  * Displays two resource series on a fixed 60-sample, zero-to-capacity scale. The app uses the
  * theme accent; device totals use foreground color. Both series use solid traces.
+ *
  * @param label Localized resource name.
  * @param appValue Current app reading with its unit; null hides an unavailable value.
  * @param totalValue Current device-wide reading with its unit; null hides an unavailable value.
@@ -98,6 +99,7 @@ internal fun PerformanceResourceGraph(
 /**
  * Draws a translucent area beneath known points and a crisp trace above it.
  * Each contiguous segment closes to the baseline separately, preserving gaps for missing readings.
+ *
  * @param values Normalized series within the fixed 60-point viewport.
  * @param color Theme role shared with the numeric value and legend.
  * @author Dmitriy Moroz

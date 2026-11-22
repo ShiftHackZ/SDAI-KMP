@@ -23,6 +23,7 @@ import platform.Foundation.NSUUID
 /**
  * Owns concurrent single downloads or an exclusive batch across setup navigation.
  * Each job receives finite iOS execution time, without durable background transfers.
+ *
  * @param downloadModels Sequential policy within each batch or single model.
  * @param scope Application-owned scope that outlives setup view models.
  * @author Dmitriy Moroz
@@ -38,6 +39,7 @@ internal class ModelDownloadManagerImpl(
 
     /**
      * Starts independent model work or joins cancelled jobs before a confirmed provider replacement.
+     *
      * @param request Captured provider and optional single-model mirror.
      * @param shouldReplace Whether the user confirmed stopping existing transfers.
      * @author Dmitriy Moroz
@@ -106,6 +108,7 @@ internal class ModelDownloadManagerImpl(
 
     /**
      * Cancels matching jobs without affecting other models' transfers or installed files.
+     *
      * @param type Provider to cancel, or null for every model request.
      * @param modelId Model within that provider, or null for all its requests.
      * @author Dmitriy Moroz

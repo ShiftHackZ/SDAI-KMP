@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.withLock
 /**
  * Allows existing concurrent generation while admitting restore only when every generation owner is idle.
  * New generation waits cancellably while restore owns the exclusive transition.
+ *
  * @author Dmitriy Moroz
  */
 internal class DefaultGenerationRestoreGate : GenerationRestoreGate {

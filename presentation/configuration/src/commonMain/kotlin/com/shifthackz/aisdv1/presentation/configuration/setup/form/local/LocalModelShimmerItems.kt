@@ -14,6 +14,7 @@ import com.shifthackz.aisdv1.core.extensions.shimmer
 
 /**
  * Reserves three rounded model rows while an initially empty catalog is loading.
+ *
  * @param modifier Layout modifiers for the placeholder list.
  * @author Dmitriy Moroz
  */

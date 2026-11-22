@@ -29,6 +29,7 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
  * Animates the batch action and its footer gap together, keeping Setup at a fixed bottom position.
  * Hides the start action during single-model work of this provider and when no catalog models are missing.
  * The current batch always retains its cancellation action until work terminates.
+ *
  * @param state Current provider catalog and application-owned batch status.
  * @param processIntent Dispatches start, replacement confirmation or cancellation through MVI.
  * @param modifier Layout modifiers for the secondary action.
@@ -69,6 +70,7 @@ internal fun LocalModelDownloadAction(
 /**
  * Maps current catalogs and worker ownership to the footer's visibility and click behavior.
  * Keeps another provider's action enabled so it can open the switch confirmation.
+ *
  * @author Dmitriy Moroz
  */
 internal fun ServerSetupState.toLocalModelDownloadActionState(): LocalModelDownloadActionState {

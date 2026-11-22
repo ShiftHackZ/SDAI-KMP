@@ -6,6 +6,7 @@ import okio.Timeout
 
 /**
  * Prevents a section decoder from consuming adjacent binary sections.
+ *
  * @param source Owned archive source positioned at a section boundary.
  * @param remaining Validated length of the selected section.
  * @author Dmitriy Moroz

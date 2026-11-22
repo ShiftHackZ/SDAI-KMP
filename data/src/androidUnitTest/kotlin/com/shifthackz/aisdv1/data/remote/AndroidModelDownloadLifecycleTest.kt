@@ -27,6 +27,7 @@ import org.junit.rules.TemporaryFolder
 
 /**
  * Exercises real file activation and cleanup while isolating HTTP transport at the downloader boundary.
+ *
  * @author Dmitriy Moroz
  */
 class AndroidModelDownloadLifecycleTest {
@@ -96,7 +97,11 @@ class AndroidModelDownloadLifecycleTest {
             assertEquals("original", source.readText())
         }
 
-    /** Builds the real downloader with a private temporary model root and isolated accounting. */
+    /**
+     * Builds the real downloader with a private temporary model root and isolated accounting.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun downloader() = AndroidDownloadableModelFileDownloader(
         mockk<FileProviderDescriptor> { every { localModelDirPath } returns folder.root.path },
         mockk(relaxed = true), mockk(relaxed = true),
@@ -104,6 +109,7 @@ class AndroidModelDownloadLifecycleTest {
 
     /**
      * Creates a bounded unit transport response; no network server or app flow is substituted.
+     *
      * @param code HTTP outcome supplied by the isolated transport boundary.
      * @author Dmitriy Moroz
      */

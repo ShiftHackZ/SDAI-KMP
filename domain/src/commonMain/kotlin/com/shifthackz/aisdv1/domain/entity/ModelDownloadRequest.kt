@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.domain.entity
 
 /**
  * Selects one confirmed archive or all missing models from a provider catalog.
+ *
  * @param type Provider owning the requested model files.
  * @param modelId Confirmed single-model identity; null downloads the provider's missing catalog models.
  * @param sourceUrl Mirror chosen for the single model; null lets batch downloads use their first mirror.
@@ -18,6 +19,7 @@ data class ModelDownloadRequest(
 
     /**
      * Whether the request covers all missing catalog models rather than one confirmed archive.
+     *
      * @author Dmitriy Moroz
      */
     val isBatch: Boolean get() = modelId == null

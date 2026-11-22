@@ -39,6 +39,7 @@ import com.shifthackz.aisdv1.core.localization.Localization
  * Expandable headers reserve the physical left half for selection and the right half for disclosure;
  * other headers use their entire width for selection. Both regions expose separate accessible actions.
  * Their shared indication covers the full header, including hover and held presses.
+ *
  * @param title Localized category name announced with its selection control.
  * @param subtitle Localized inventory count or availability message.
  * @param selectionState Current category selection, including partial provider selection.

@@ -15,6 +15,7 @@ import com.shifthackz.aisdv1.core.localization.Localization
 
 /**
  * Shares one accessible legend across CPU and RAM, using the same colors and stroke styles.
+ *
  * @param modifier Layout applied to the legend row.
  * @author Dmitriy Moroz
  */

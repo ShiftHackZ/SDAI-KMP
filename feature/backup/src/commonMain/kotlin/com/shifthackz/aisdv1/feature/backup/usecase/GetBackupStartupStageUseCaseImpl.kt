@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.domain.usecase.backup.GetBackupStartupStageUseCase
 
 /**
  * Persists or reads the durable post-onboarding recovery stage.
+ *
  * @param preferences Checked stage persistence shared with startup routing.
  * @author Dmitriy Moroz
  */

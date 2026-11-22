@@ -5,6 +5,7 @@ import com.shifthackz.aisdv1.feature.backup.export.BackupExportCoordinator
 
 /**
  * Acknowledges export state before releasing private source ownership.
+ *
  * @param coordinator Process-owned serialized export lifecycle.
  * @author Dmitriy Moroz
  */

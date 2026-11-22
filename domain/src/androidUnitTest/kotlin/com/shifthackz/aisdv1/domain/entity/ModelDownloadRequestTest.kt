@@ -6,6 +6,7 @@ import org.junit.Test
 
 /**
  * Prevents ambiguous persisted requests that identify a single model without its selected archive.
+ *
  * @author Dmitriy Moroz
  */
 class ModelDownloadRequestTest {

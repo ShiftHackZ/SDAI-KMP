@@ -8,6 +8,7 @@ import org.koin.android.ext.koin.androidContext
 
 /**
  * Binds native document transport while retaining the shared backup API.
+ *
  * @author Dmitriy Moroz
  */
 internal actual val backupPlatformModule: Module =

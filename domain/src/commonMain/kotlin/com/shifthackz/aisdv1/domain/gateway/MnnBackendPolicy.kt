@@ -8,7 +8,8 @@ import com.shifthackz.aisdv1.domain.entity.MnnBackend
  * @author Dmitriy Moroz
  */
 interface MnnBackendPolicy {
-    /** Ordered platform-supported choices; device admission still checks actual runtime availability.
+    /**
+     * Ordered platform-supported choices; device admission still checks actual runtime availability.
      *
      * @author Dmitriy Moroz
      */

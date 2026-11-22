@@ -5,6 +5,7 @@ import kotlinx.coroutines.sync.withLock
 
 /**
  * Owns one process-wide restore lock; no user-data work escapes its operation scope.
+ *
  * @author Dmitriy Moroz
  */
 internal class DefaultBackupRestoreGuard : BackupRestoreGuard {

@@ -12,6 +12,7 @@ import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Stores only export handles and result association in a separate checked preference suite.
+ *
  * @param store Dedicated backup-operation preference owner; never the provider/settings suite.
  * @author Dmitriy Moroz
  */

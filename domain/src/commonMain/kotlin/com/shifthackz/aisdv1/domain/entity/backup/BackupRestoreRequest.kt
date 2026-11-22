@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.domain.entity.backup
 
 /**
  * Immutable restore submission; retries retain the same session ID to avoid duplicate additive imports.
+ *
  * @param handle Validated staged archive identity.
  * @param selection Categories and providers explicitly selected by the user.
  * @param sessionId Stable operation identity retained across retries and process recovery.

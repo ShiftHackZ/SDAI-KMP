@@ -33,6 +33,7 @@ import org.jetbrains.compose.resources.painterResource
 
 /**
  * Invites first-launch recovery with branded artwork and the same pinned action geometry as setup.
+ *
  * @param isEnabled Whether a durable navigation transition can start.
  * @param onRestore Opens restore-only recovery.
  * @param onContinue Continues through mandatory provider setup.

@@ -7,6 +7,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Verifies aggregate progress at model handoff, activation and empty-catalog boundaries.
+ *
  * @param snapshot Work snapshot whose visible aggregate progress is evaluated.
  * @param expected Whole-download percentage expected in the notification.
  * @author Dmitriy Moroz
@@ -24,7 +25,11 @@ class ModelDownloadBatchTest(private val snapshot: ModelDownloadBatch, private v
     }
 
     companion object {
-        /** Supplies initial, mid-model, handoff, final and out-of-range progress boundaries. */
+        /**
+         * Supplies initial, mid-model, handoff, final and out-of-range progress boundaries.
+         *
+         * @author Dmitriy Moroz
+         */
         @JvmStatic
         @Parameterized.Parameters(name = "{0} -> {1}")
         fun snapshots(): List<Array<Any>> {

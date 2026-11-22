@@ -5,6 +5,7 @@ import com.shifthackz.aisdv1.domain.feature.auth.AuthorizationCredentials
 
 /**
  * Immutable selective provider merge prepared under the provider transition guard.
+ *
  * @param providers Portable independent field replacements.
  * @param credentials Shared Basic Auth replacement, or null to retain destination credentials.
  * @param conflicts Configured providers whose existing values would change.

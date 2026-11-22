@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.emptyFlow
 internal object NoOpNativeGenerationGateway : NativeGenerationGateway {
     /**
      * No inference child exists on this platform.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun readProcessPerformance(): ProcessPerformanceReading? = null

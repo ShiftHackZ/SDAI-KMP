@@ -28,6 +28,7 @@ private class AndroidPreferencesKeyValueStore(
 
     /**
      * Reports trusted persisted presence, including explicitly saved default values.
+     *
      * @param key Existing preference key.
      * @author Dmitriy Moroz
      */
@@ -41,7 +42,11 @@ private class AndroidPreferencesKeyValueStore(
         }
     }
 
-    /** Finishes the exact quarantined write before a restore session may be abandoned. @author Dmitriy Moroz */
+    /**
+     * Finishes the exact quarantined write before a restore session may be abandoned.
+     *
+     * @author Dmitriy Moroz
+     */
     override fun retryPendingWrite(): Boolean {
         val batch = withMemoryLock { configurationMask } ?: return false
         putSettingsDurably(batch.candidateStrings, batch.candidateBooleans, batch.candidateIntegers)
@@ -102,6 +107,7 @@ private class AndroidPreferencesKeyValueStore(
 
     /**
      * Persists a complete typed backup settings batch with the same quarantine as configuration.
+     *
      * @param strings String replacements.
      * @param booleans Boolean replacements.
      * @param integers Integer replacements.

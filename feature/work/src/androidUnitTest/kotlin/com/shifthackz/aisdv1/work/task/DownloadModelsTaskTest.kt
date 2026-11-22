@@ -33,6 +33,7 @@ import org.robolectric.annotation.Config
 /**
  * Exercises production worker inputs, progress and terminal decisions with notification delivery isolated.
  * Android notification appearance is verified separately through the real application.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -198,6 +199,7 @@ class DownloadModelsTaskTest {
 
     /**
      * Supplies normal WorkManager request data while preventing platform service/notification side effects.
+     *
      * @param request Captured provider and optional model/mirror to place in worker input.
      * @author Dmitriy Moroz
      */

@@ -31,6 +31,7 @@ import org.junit.Test
 
 /**
  * Verifies durable admission, targeted cancellation and progress reconstruction at the WorkManager boundary.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -327,6 +328,7 @@ class ModelDownloadManagerImplTest {
 
     /**
      * Binds scheduling to virtual time while retaining production request construction and admission policy.
+     *
      * @param dispatcher Scheduler shared with the owning coroutine test.
      * @author Dmitriy Moroz
      */
@@ -338,6 +340,7 @@ class ModelDownloadManagerImplTest {
 
     /**
      * Supplies a persisted WorkInfo record with real worker tags and independent progress/output data.
+     *
      * @param state Persisted scheduler lifecycle.
      * @param model Single-model identity, or null for an exclusive provider batch.
      * @param timestamp Enqueue ordering used to choose terminal history.

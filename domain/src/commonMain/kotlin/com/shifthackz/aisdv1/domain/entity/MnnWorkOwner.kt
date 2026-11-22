@@ -11,7 +11,8 @@ import kotlin.coroutines.CoroutineContext
  * @author Dmitriy Moroz
  */
 class MnnWorkOwner(val id: String) : AbstractCoroutineContextElement(Key) {
-    /** Lookup key retained across the non-cancellable native drain.
+    /**
+     * Lookup key retained across the non-cancellable native drain.
      *
      * @author Dmitriy Moroz
      */

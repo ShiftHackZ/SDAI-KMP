@@ -9,12 +9,14 @@ package com.shifthackz.aisdv1.presentation.components.platform
 interface StorageUsageFileSystem {
     /**
      * Measures the app cache directory in bytes using the platform's existing accounting rules.
+     *
      * @author Dmitriy Moroz
      */
     fun getAppCacheBytes(): Long
 
     /**
      * Converts filesystem residue to the amount displayed by the platform's usage UI.
+     *
      * @param bytes Raw measured byte count.
      * @author Dmitriy Moroz
      */
@@ -22,12 +24,14 @@ interface StorageUsageFileSystem {
 
     /**
      * Removes app-private cache children while retaining the cache directory itself.
+     *
      * @author Dmitriy Moroz
      */
     fun clearAppCache()
 
     /**
      * Measures the distinct app-private catalog model directories selected by the caller.
+     *
      * @param modelIds Catalog model directory identifiers, excluding custom models.
      * @author Dmitriy Moroz
      */

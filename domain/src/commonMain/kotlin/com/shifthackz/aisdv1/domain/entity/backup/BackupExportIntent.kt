@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.domain.entity.backup
 
 /**
  * Durable export/result association written before the native document picker opens.
+ *
  * @param handle Generated app-owned staging identity, without a platform path.
  * @param filename Suggested public binary backup filename.
  * @param status Last durably acknowledged export stage.

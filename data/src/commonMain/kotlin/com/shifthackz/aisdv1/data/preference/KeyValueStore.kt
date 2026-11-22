@@ -7,11 +7,16 @@ package com.shifthackz.aisdv1.data.preference
  * @author Dmitriy Moroz
  */
 internal interface KeyValueStore {
-    /** Retries only an existing quarantined typed batch; false means no write was pending. @author Dmitriy Moroz */
+    /**
+     * Retries only an existing quarantined typed batch; false means no write was pending.
+     *
+     * @author Dmitriy Moroz
+     */
     fun retryPendingWrite(): Boolean
 
     /**
      * Distinguishes explicitly saved defaults from missing portable fields.
+     *
      * @param key Existing preference key.
      * @author Dmitriy Moroz
      */
@@ -19,6 +24,7 @@ internal interface KeyValueStore {
 
     /**
      * Checks one atomic typed settings batch before acknowledging restore.
+     *
      * @param strings String replacements.
      * @param booleans Boolean replacements.
      * @param integers Integer replacements.

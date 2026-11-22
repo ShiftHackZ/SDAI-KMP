@@ -26,6 +26,7 @@ import org.junit.Test
 
 /**
  * Verifies faithful repository streaming and per-model ownership through cancellation cleanup.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -42,6 +42,7 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 
 /**
  * Shows model selection, ownership and the active archive transfer in one catalog row.
+ *
  * @param model Current catalog metadata and transfer progress.
  * @param selected Whether the setup candidate uses this model.
  * @param strings Localized row actions and feedback.

@@ -13,6 +13,7 @@ import org.junit.Test
 
 /**
  * Protects footer visibility and enabled click semantics without asserting animation implementation details.
+ *
  * @author Dmitriy Moroz
  */
 class LocalModelDownloadActionStateTest {

@@ -16,6 +16,7 @@ import platform.darwin.NSObject
 
 /**
  * Retains UIKit delegate callbacks for import/export and treats picker cancellation as neutral.
+ *
  * @param onPicked Receives a sandbox-copy URL; no persistent security-scoped grant is retained.
  * @param onExported Receives true only after UIKit confirms completed export.
  * @author Dmitriy Moroz
@@ -39,6 +40,7 @@ actual fun rememberBackupDocumentLauncher(
 
 /**
  * Owns the native modal and delegate until its result is delivered.
+ *
  * @param onPicked Import result callback receiving only a sandbox-copy document reference.
  * @param onExported Export success callback, false for cancellation.
  * @author Dmitriy Moroz
@@ -112,6 +114,7 @@ private class IosBackupDocumentLauncher(
 
 /**
  * Bridges Objective-C picker events without mixing Objective-C and Kotlin interface inheritance.
+ *
  * @param onPicked Selected sandbox document URLs or completed export destinations.
  * @param onCanceled Neutral picker cancellation.
  * @author Dmitriy Moroz

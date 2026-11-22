@@ -49,6 +49,7 @@ internal class NativeGenerationGatewayImpl(
 
     /**
      * Requests counters through the owned connection without starting or binding a service.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun readProcessPerformance(): ProcessPerformanceReading? =

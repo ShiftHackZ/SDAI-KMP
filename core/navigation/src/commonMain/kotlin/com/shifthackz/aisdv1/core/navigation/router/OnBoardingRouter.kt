@@ -9,6 +9,7 @@ package com.shifthackz.aisdv1.core.navigation.router
 interface OnBoardingRouter {
     /**
      * Replaces completed onboarding with the first-launch recovery invitation.
+     *
      * @author Dmitriy Moroz
      */
     fun navigateToBackupWelcome()

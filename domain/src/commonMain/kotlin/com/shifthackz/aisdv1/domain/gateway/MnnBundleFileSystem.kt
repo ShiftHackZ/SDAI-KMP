@@ -21,9 +21,9 @@ interface MnnBundleFileSystem {
 
     /**
      * Reads the bounded UTF-8 integrity manifest.
+     *
      * @param path Absolute owned manifest path.
      * @return Complete JSON text; missing, linked or oversized files fail.
-     *
      * @author Dmitriy Moroz
      */
     @Throws(Exception::class)
@@ -31,9 +31,9 @@ interface MnnBundleFileSystem {
 
     /**
      * Computes the complete file digest.
+     *
      * @param path Absolute regular payload path.
      * @return Lowercase SHA256; IO failures propagate.
-     *
      * @author Dmitriy Moroz
      */
     @Throws(Exception::class)
@@ -41,18 +41,18 @@ interface MnnBundleFileSystem {
 
     /**
      * Rejects links, directories and missing paths.
+     *
      * @param path Absolute payload path.
      * @return Whether this path is a regular unlinked file.
-     *
      * @author Dmitriy Moroz
      */
     fun isRegularFile(path: String): Boolean
 
     /**
      * Inspects a regular file and returns its exact byte length.
+     *
      * @param path Absolute regular payload path.
      * @return File metadata; missing files and IO errors fail.
-     *
      * @author Dmitriy Moroz
      */
     @Throws(Exception::class)
@@ -60,9 +60,9 @@ interface MnnBundleFileSystem {
 
     /**
      * Enumerates immediate children without recursion.
+     *
      * @param path Absolute bundle root.
      * @return Every child filename; listing failures propagate.
-     *
      * @author Dmitriy Moroz
      */
     @Throws(Exception::class)

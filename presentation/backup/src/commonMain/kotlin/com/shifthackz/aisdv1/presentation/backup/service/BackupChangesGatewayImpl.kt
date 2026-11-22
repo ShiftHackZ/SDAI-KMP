@@ -8,6 +8,7 @@ import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsag
 
 /**
  * Keeps retained UI snapshots consistent with committed portable data without feature-to-presentation dependencies.
+ *
  * @param preferences Current checked settings and their shared invalidation flow.
  * @param storage Shared storage usage revision observed by Settings and storage screens.
  * @author Dmitriy Moroz

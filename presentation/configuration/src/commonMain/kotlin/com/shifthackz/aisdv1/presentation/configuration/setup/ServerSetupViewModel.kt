@@ -301,10 +301,8 @@ class ServerSetupViewModel(
      * Routes a user intent to its state transition or authorized side-effect handler.
      *
      * @param intent User event emitted by this screen’s production controls.
-     *
      * @author Dmitriy Moroz
      */
-
     override fun processIntent(intent: ServerSetupIntent) {
         when (intent) {
             ServerSetupIntent.DownloadAllModels -> {
@@ -485,6 +483,7 @@ class ServerSetupViewModel(
 
     /**
      * Reads installed files after work stops without restarting network refresh or loading UI.
+     *
      * @param type Provider whose ownership may have changed during activation or cleanup.
      * @author Dmitriy Moroz
      */
@@ -616,7 +615,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun validate(): Boolean {
         val result = currentState.validateServerSetup(
             urlValidator = urlValidator,
@@ -632,7 +630,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun connectToServer() {
         emitEffect(ServerSetupEffect.HideKeyboard)
         updateState { it.copy(modal = ServerSetupState.Modal.Communicating) }
@@ -717,7 +714,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private fun finishConnection() {
         preferenceManager.forceSetupAfterUpdate = false
         updateState { it.copy(modal = ServerSetupState.Modal.None) }
@@ -729,7 +725,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToAutomaticInstance(): Result<Unit> {
         val isDemo = currentState.demoMode
         val url = if (isDemo) linksProvider.demoModeUrl else currentState.serverUrl
@@ -745,7 +740,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToSwarmUi(): Result<Unit> = connectToSwarmUiUseCase(
         url = currentState.swarmUiUrl,
         credentials = currentState.credentialsDomain(),
@@ -756,7 +750,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToHorde(): Result<Unit> = connectToHordeUseCase(
         apiKey = if (currentState.hordeDefaultApiKey) {
             HORDE_DEFAULT_API_KEY
@@ -770,7 +763,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToHuggingFace(): Result<Unit> = connectToHuggingFaceUseCase(
         apiKey = currentState.huggingFaceApiKey,
         model = currentState.huggingFaceModel,
@@ -781,7 +773,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToOpenAi(): Result<Unit> = connectToOpenAiUseCase(
         apiKey = currentState.openAiApiKey,
     )
@@ -791,7 +782,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToStabilityAi(): Result<Unit> = connectToStabilityAiUseCase(
         apiKey = currentState.stabilityAiApiKey,
     )
@@ -801,7 +791,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToFalAi(): Result<Unit> = connectToFalAiUseCase(
         apiKey = currentState.falAiApiKey,
     )
@@ -811,7 +800,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToArliAi(): Result<Unit> = connectToArliAiUseCase(
         apiKey = currentState.arliAiApiKey,
     )
@@ -821,7 +809,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToLocalDiffusion(): Result<Unit> = connectToLocalDiffusionUseCase(
         modelId = currentState.localOnnxModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localOnnxCustomModelPath,
@@ -832,7 +819,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToMediaPipe(): Result<Unit> = connectToMediaPipeUseCase(
         modelId = currentState.localMediaPipeModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localMediaPipeCustomModelPath,
@@ -843,7 +829,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToSdxl(): Result<Unit> = connectToSdxlUseCase(
         modelId = currentState.localSdxlModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localSdxlCustomModelPath,
@@ -854,7 +839,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToCoreMl(): Result<Unit> = connectToCoreMlUseCase(
         modelId = currentState.localCoreMlModels.find { it.selected }?.id.orEmpty(),
         modelPath = currentState.localCoreMlCustomModelPath,
@@ -865,7 +849,6 @@ class ServerSetupViewModel(
      *
      * @author Dmitriy Moroz
      */
-
     private suspend fun connectToBonsai(): Result<Unit> {
         return connectToBonsaiUseCase(
             modelId = currentState.localBonsaiModels.find { it.selected }?.id.orEmpty(),
@@ -919,6 +902,7 @@ class ServerSetupViewModel(
 
     /**
      * Schedules the selected archive in platform work, retaining ownership after setup closes.
+     *
      * @param modelId Stable identity of the model selected in the source picker.
      * @param url Confirmed catalog mirror for that single model.
      * @param type Provider captured when the source picker opened.

@@ -596,6 +596,7 @@ internal class PreferenceManagerImpl(
 
     /**
      * Whether active foreground generation lowers display brightness.
+     *
      * @author Dmitriy Moroz
      */
     override var shouldDimScreen: Boolean
@@ -1132,12 +1133,16 @@ internal class PreferenceManagerImpl(
 
         /**
          * Stable storage key for the opt-in foreground display dimming preference.
+         *
          * @author Dmitriy Moroz
          */
         const val KEY_DIM_SCREEN = "key_dim_screen"
 
-        /** Stable storage key for background generation scheduling.
-         * @author Dmitriy Moroz */
+        /**
+         * Stable storage key for background generation scheduling.
+         *
+         * @author Dmitriy Moroz
+         */
         const val KEY_BACKGROUND_GENERATION = "key_background_generation"
 
         /**

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * Applies sequential download and fail-fast policy without hiding repository failures.
+ *
  * @param catalog Reads current file-backed completion state.
  * @param download Streams one model through the normal archive activation path.
  * @author Dmitriy Moroz
@@ -18,6 +19,7 @@ internal class DownloadModelsUseCaseImpl(
 ) : DownloadModelsUseCase {
     /**
      * Skips installed models, activates missing archives serially and stops at the first failure.
+     *
      * @param request Provider-wide selection or one confirmed model mirror.
      * @author Dmitriy Moroz
      */

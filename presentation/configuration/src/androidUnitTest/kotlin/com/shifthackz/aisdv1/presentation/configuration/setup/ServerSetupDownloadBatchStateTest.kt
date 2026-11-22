@@ -13,6 +13,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Verifies independent row ownership and conservative terminal replay for every local catalog family.
+ *
  * @param type Owning provider to update even when setup displays a remote provider.
  * @author Dmitriy Moroz
  */
@@ -137,7 +138,11 @@ class ServerSetupDownloadBatchStateTest(private val type: LocalAiModel.Type) {
     }
 
     companion object {
-        /** Supplies all common catalog families, including those unavailable on the current host platform. */
+        /**
+         * Supplies all common catalog families, including those unavailable on the current host platform.
+         *
+         * @author Dmitriy Moroz
+         */
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun providers() = LocalAiModel.Type.entries.map { arrayOf(it) }

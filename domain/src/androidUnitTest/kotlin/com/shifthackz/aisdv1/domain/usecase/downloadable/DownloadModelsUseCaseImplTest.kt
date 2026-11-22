@@ -30,6 +30,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Applies selection, sequencing and failure contracts to every supported local model family.
+ *
  * @param type Provider whose cached catalog and download ownership must be retained.
  * @author Dmitriy Moroz
  */
@@ -312,7 +313,11 @@ class DownloadModelsUseCaseImplTest(private val type: LocalAiModel.Type) {
         }
 
     companion object {
-        /** Supplies each provider family to the same shared download contracts. */
+        /**
+         * Supplies each provider family to the same shared download contracts.
+         *
+         * @author Dmitriy Moroz
+         */
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun providers() = LocalAiModel.Type.entries.map { arrayOf(it) }

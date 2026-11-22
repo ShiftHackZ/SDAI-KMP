@@ -27,6 +27,7 @@ data class ModelDownloadBatch(
 ) {
     /**
      * Whole-batch percent; completed installs plus the active model's fraction of an equal share.
+     *
      * @author Dmitriy Moroz
      */
     val totalProgress: Int

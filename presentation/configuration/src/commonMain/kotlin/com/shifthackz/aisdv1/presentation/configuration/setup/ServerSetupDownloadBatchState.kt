@@ -5,6 +5,7 @@ import com.shifthackz.aisdv1.domain.entity.ModelDownloadBatch
 
 /**
  * Restores worker progress without replaying old successful installs over current file state.
+ *
  * @param batches Worker snapshots, including terminal work retained for transition detection.
  * @author Dmitriy Moroz
  */

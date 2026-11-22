@@ -18,6 +18,7 @@ import kotlinx.coroutines.ensureActive
 
 /**
  * Runs catalog downloads serially as long-running foreground work with durable UI progress.
+ *
  * @param context Application context owned by WorkManager.
  * @param parameters Persisted provider identity and worker lifetime.
  * @param notifications Existing app notification channel and appearance.
@@ -38,6 +39,7 @@ internal class DownloadModelsTask(
     /**
      * Downloads the captured selection and posts the generation-style result notification.
      * Cancellation propagates without publishing a success or failure notification.
+     *
      * @author Dmitriy Moroz
      */
     override suspend fun doWork(): Result {

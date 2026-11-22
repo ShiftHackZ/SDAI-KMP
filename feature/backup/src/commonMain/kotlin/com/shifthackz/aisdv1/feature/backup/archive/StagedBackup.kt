@@ -5,6 +5,7 @@ import okio.Path
 
 /**
  * Verified immutable archive reference owned by private staging.
+ *
  * @param handle Private generated directory name.
  * @param path Private binary archive path.
  * @param manifest Verified framing and integrity summary.

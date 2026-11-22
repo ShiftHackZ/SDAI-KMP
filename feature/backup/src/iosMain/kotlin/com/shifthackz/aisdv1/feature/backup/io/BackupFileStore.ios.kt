@@ -14,6 +14,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 
 /**
  * Stages archives in Application Support; imported picker documents are copied by UIKit into the sandbox.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalForeignApi::class)

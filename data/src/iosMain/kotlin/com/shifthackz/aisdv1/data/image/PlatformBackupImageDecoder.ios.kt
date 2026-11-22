@@ -47,6 +47,7 @@ import platform.ImageIO.kCGImageStatusComplete
 
 /**
  * Reads uncached ImageIO properties before creating only a bounded thumbnail for content validation.
+ *
  * @author Dmitriy Moroz
  */
 internal actual class PlatformBackupImageDecoder actual constructor() : BackupImageDecoder {
@@ -100,6 +101,7 @@ internal actual class PlatformBackupImageDecoder actual constructor() : BackupIm
 
     /**
      * Creates an owned CF dictionary with native CFString keys and retained CFBoolean/CFNumber values.
+     *
      * @param maxEdge Thumbnail edge, or null for metadata-only source options with pixel caching disabled.
      * @author Dmitriy Moroz
      */
@@ -141,6 +143,7 @@ internal actual class PlatformBackupImageDecoder actual constructor() : BackupIm
 
     /**
      * Extracts an integral native dimension without rasterizing the encoded image.
+     *
      * @param properties ImageIO metadata dictionary retained by the caller.
      * @param key Native pixel width or height property identifier.
      * @author Dmitriy Moroz
@@ -165,6 +168,7 @@ internal actual class PlatformBackupImageDecoder actual constructor() : BackupIm
 
     /**
      * Creates a metadata-only source with deferred pixel caching, releasing every native owner on failure.
+     *
      * @param bytes Bounded encoded image retained by the caller.
      * @param block Metadata probing or sampled validation before native source release.
      * @author Dmitriy Moroz

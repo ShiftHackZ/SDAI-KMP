@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Recovers checked credential association before exposing the staged unfinished operation.
+ *
  * @param preferences Recovers an already-started checked typed settings batch before startup or abandonment.
  * @param database Restore intent ledger.
  * @param archives Revalidates retained private archive bytes.

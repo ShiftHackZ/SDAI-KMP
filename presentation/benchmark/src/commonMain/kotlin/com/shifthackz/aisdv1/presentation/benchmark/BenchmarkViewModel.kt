@@ -26,20 +26,20 @@ import kotlinx.coroutines.withContext
 
 
 /**
- * Coordinates benchmark screen state and safe benchmark execution.
+ * Publishes benchmark device details, saved results and synthetic workload progress.
  *
  * The ViewModel never invokes model inference. It delegates to the injected benchmark operations,
  * which only read hardware metadata and runs bounded synthetic CPU/memory work.
  *
  * @param dispatchersProvider Dispatchers used for UI updates and background work.
- * @param observeLatestBenchmarkUseCase Injected operation for observe latest benchmark.
- * @param inspectBenchmarkDeviceUseCase Injected operation for inspect benchmark device.
- * @param runBenchmarkUseCase Injected operation for run benchmark.
+ * @param observeLatestBenchmarkUseCase Streams the latest saved benchmark result into screen state.
+ * @param inspectBenchmarkDeviceUseCase Reads hardware metadata for the device summary.
+ * @param runBenchmarkUseCase Runs and saves bounded CPU/memory measurements without model inference.
  * @param router Navigation contract for this screen.
  * @param platformActions Native actions delegated outside common UI code.
- * @param onError Callback for on error.
- * @author Dmitriy Moroz
+ * @param onError Receives failures while loading benchmark data or running measurements.
  * @param diagnostics Injected fixed-capacity opt-in state/composition observer.
+ * @author Dmitriy Moroz
  */
 class BenchmarkViewModel(
     diagnostics: UiDiagnostics,

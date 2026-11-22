@@ -3,7 +3,9 @@ package com.shifthackz.aisdv1.domain.usecase.benchmark
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkResult
 import kotlinx.coroutines.flow.Flow
 
-/** Observes the persisted latest synthetic benchmark without starting a workload.
+/**
+ * Observes the persisted latest synthetic benchmark without starting a workload.
+ *
  * @author Dmitriy Moroz
  */
 interface ObserveLatestBenchmarkUseCase {

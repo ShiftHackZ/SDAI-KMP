@@ -9,6 +9,7 @@ import okio.ByteString.Companion.encodeUtf8
 
 /**
  * Preserves absent fields and every unselected provider, including shared Basic Auth consumers.
+ *
  * @param codec Deterministic portable preference encoding for opaque consent fingerprints.
  * @author Dmitriy Moroz
  */

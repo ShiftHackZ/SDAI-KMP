@@ -1,7 +1,9 @@
 package com.shifthackz.aisdv1.domain.usecase.benchmark
 
 
-/** Records that the initial benchmark question has been answered.
+/**
+ * Records that the initial benchmark question has been answered.
+ *
  * @author Dmitriy Moroz
  */
 interface RecordBenchmarkPromptAnswerUseCase {

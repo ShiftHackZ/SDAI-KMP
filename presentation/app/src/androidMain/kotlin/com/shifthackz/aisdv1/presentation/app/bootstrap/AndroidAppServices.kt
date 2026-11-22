@@ -9,9 +9,17 @@ import com.shifthackz.aisdv1.domain.preference.PreferenceManager
  * @author Dmitriy Moroz
  */
 interface AndroidAppServices {
-    /** Lazily resolves the registered native worker factory after logging initialization. */
+    /**
+     * Lazily resolves the registered native worker factory after logging initialization.
+     *
+     * @author Dmitriy Moroz
+     */
     val workerFactory: WorkerFactory
 
-    /** Lazily resolves persisted settings when native permission callbacks need them. */
+    /**
+     * Lazily resolves persisted settings when native permission callbacks need them.
+     *
+     * @author Dmitriy Moroz
+     */
     val preferenceManager: PreferenceManager
 }

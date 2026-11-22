@@ -8,6 +8,7 @@ import com.shifthackz.aisdv1.core.navigation.RootAppRouter
 /**
  * Retains only nonsecret backup launch context so native document results reconnect after host recreation.
  * Other routes retain the existing cold-start behavior and are rebuilt through startup validation.
+ *
  * @author Dmitriy Moroz
  */
 internal val backupRouterSaver = Saver<RootAppRouter, String>(

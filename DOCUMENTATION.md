@@ -352,6 +352,12 @@ generated HTML and vendored sources do not. Unchanged inputs skip the expensive
 generation job. Each successful build records its input fingerprint in
 `docs/docs/.dokka-inputs.sha256`; the first run establishes this marker.
 
+Before generation, the workflow runs the same KDoc formatting validation as
+Project Tests against the exact planned source commit. Pushes check the complete
+before/after range; manual runs check changes since the last recorded Dokka
+publication. Missing range history or invalid KDoc stops generation and publication,
+including forced runs.
+
 To update **master immediately**, open **Actions → Update Dokka → Run
 workflow** and select `master`. Runs dispatched from other branches are skipped.
 Manual runs skip the quiet period and check for changed inputs immediately.

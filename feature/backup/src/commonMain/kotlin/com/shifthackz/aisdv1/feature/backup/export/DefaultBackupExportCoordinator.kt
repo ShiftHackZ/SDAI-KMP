@@ -30,6 +30,7 @@ import kotlinx.coroutines.sync.withLock
 
 /**
  * Keeps destination copying and its durable association alive when a screen/activity is recreated.
+ *
  * @param archives Strict app-owned archive creation, source resolution and cleanup.
  * @param records Dedicated checked nonsecret operation persistence.
  * @param export Strict complete-byte destination writer.

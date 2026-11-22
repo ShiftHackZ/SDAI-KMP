@@ -73,6 +73,7 @@ fun GenerationPerformanceOverlay(
 
 /**
  * Formats a known used/capacity pair in binary megabytes, preserving unavailable samples.
+ *
  * @param used Resident app bytes or device-wide used bytes.
  * @param total Device physical capacity, not a per-process allocation limit.
  * @author Dmitriy Moroz
@@ -84,6 +85,7 @@ private fun memoryValue(used: Long?, total: Long?): String? =
 
 /**
  * Maps byte counters to the graph's shared physical-capacity scale.
+ *
  * @param used RAM in use for one series, or null for an unavailable reading.
  * @param total Device capacity in bytes.
  * @author Dmitriy Moroz

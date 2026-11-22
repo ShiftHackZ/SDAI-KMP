@@ -5,6 +5,7 @@ import com.shifthackz.aisdv1.domain.gateway.backup.BackupImageValidator
 
 /**
  * Admits native header dimensions before any content bitmap is allocated, then validates a small sample.
+ *
  * @param decoder Backup-specific metadata probe and bounded platform content decoder.
  * @param budget Shared encoded, original-pixel and sampled-allocation admission limits.
  * @author Dmitriy Moroz

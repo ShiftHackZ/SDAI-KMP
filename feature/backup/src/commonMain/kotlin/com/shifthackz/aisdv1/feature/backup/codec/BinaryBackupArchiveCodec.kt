@@ -17,6 +17,7 @@ import okio.buffer
 
 /**
  * Streams bounded, length-delimited sections with independently verified SHA-256 checksums.
+ *
  * @param json Forward-compatible JSON metadata decoder; binary payloads never become one JSON document.
  * @author Dmitriy Moroz
  */

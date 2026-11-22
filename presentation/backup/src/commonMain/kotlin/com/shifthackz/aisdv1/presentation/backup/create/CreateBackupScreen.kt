@@ -15,6 +15,7 @@ import com.shifthackz.aisdv1.presentation.backup.component.BackupSelectionList
 
 /**
  * Dedicated reusable create content with a visible portable-credential disclosure.
+ *
  * @param state Create inventory and independent selection.
  * @param isEnabled Whether the checklist can be edited.
  * @param processIntent Selection and navigation actions.

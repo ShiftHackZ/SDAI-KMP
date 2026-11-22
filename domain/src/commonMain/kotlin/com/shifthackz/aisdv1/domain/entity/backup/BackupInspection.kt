@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.domain.entity.backup
 
 /**
  * Validated archive summary; handle refers only to an app-owned staged copy.
+ *
  * @param handle Opaque private archive identity; never a user-managed file path.
  * @param createdAt Creation timestamp in UTC epoch milliseconds.
  * @param appVersion Originating application version for display only.

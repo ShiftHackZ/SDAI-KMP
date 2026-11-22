@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.presentation.backup.component.providerName
 
 /**
  * Formats the committed category counts and skipped-data notices for the shared result dialog.
+ *
  * @param result Durable outcome of the submitted restore session.
  * @author Dmitriy Moroz
  */

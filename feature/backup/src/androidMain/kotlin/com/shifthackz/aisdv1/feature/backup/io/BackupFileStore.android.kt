@@ -16,6 +16,7 @@ import okio.sink
 
 /**
  * Stages archives in app-private durable files and streams Storage Access Framework documents.
+ *
  * @param context Application context used only for private files and document resolver access.
  * @author Dmitriy Moroz
  */

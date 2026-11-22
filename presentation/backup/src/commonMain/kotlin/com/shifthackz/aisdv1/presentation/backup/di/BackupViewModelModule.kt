@@ -9,6 +9,7 @@ import org.koin.dsl.module
 
 /**
  * Creates caller-owned backup state holders with shared domain operations.
+ *
  * @author Dmitriy Moroz
  */
 val backupViewModelModule = module {

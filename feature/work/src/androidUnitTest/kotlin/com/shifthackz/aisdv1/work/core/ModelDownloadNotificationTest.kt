@@ -37,6 +37,7 @@ import org.robolectric.annotation.Config
 
 /**
  * Inspects real Android notification objects built by the helper shared with generation workers.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -141,6 +142,7 @@ class ModelDownloadNotificationTest {
 
     /**
      * Applies the production customization block to an actual platform-compatible notification builder.
+     *
      * @param title Notification title supplied by the worker.
      * @param body Notification detail supplied by the worker.
      * @param block Production helper's appearance, navigation and cancellation customization.

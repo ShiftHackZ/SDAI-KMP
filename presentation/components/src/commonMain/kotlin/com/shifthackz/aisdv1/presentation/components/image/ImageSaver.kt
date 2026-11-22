@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.components.image
 
 /**
  * Saves original encoded image content to the platform media library.
+ *
  * @author Dmitriy Moroz
  */
 interface ImageSaver {

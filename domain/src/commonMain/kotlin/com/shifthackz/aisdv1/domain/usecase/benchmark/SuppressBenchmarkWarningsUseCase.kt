@@ -1,7 +1,9 @@
 package com.shifthackz.aisdv1.domain.usecase.benchmark
 
 
-/** Suppresses recommendation warnings until the next benchmark.
+/**
+ * Suppresses recommendation warnings until the next benchmark.
+ *
  * @author Dmitriy Moroz
  */
 interface SuppressBenchmarkWarningsUseCase {

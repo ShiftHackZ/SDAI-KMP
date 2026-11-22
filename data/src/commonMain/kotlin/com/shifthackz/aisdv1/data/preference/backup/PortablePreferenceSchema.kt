@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.data.preference.backup
 
 /**
  * Wire-to-storage allowlist. Keys outside these maps can never be imported from a backup.
+ *
  * @author Dmitriy Moroz
  */
 internal object PortablePreferenceSchema {

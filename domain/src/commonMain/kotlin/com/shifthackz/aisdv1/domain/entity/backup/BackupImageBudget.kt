@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.domain.entity.backup
 
 /**
  * Shared gallery-backup admission applied before encoded allocation and native pixel decoding.
+ *
  * @param maxEncodedBytes Maximum combined output/input encoded image bytes in one gallery record.
  * @param maxPixels Maximum original pixel count accepted from native metadata.
  * @param maxDecodedBytes Maximum conservative original decoded size, calculated with eight bytes per pixel.

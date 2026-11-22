@@ -45,6 +45,7 @@ internal actual fun GenerationScreenEffect(isGenerating: Boolean, shouldDimScree
 
 /**
  * Resolves the Activity behind Compose context wrappers without retaining it beyond composition.
+ *
  * @receiver Context belonging to the application's Compose view.
  * @author Dmitriy Moroz
  */

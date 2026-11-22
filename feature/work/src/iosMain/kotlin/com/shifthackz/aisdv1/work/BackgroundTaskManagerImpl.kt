@@ -38,6 +38,7 @@ import kotlin.coroutines.coroutineContext
 
 /**
  * Runs one captured iOS background request and suppresses results/status after its job is replaced.
+ *
  * @param backgroundWorkObserver Publishes lifecycle and progress to shared application UI.
  * @param textToImageUseCase Dispatches captured text inputs through the selected provider.
  * @param imageToImageUseCase Dispatches captured image inputs through the selected provider.
@@ -49,7 +50,6 @@ import kotlin.coroutines.coroutineContext
  * @param observeMnnProcessStatusUseCase Observes overall MNN percentage for the captured job.
  * @param observeEasyDiffusionProgressUseCase Observes remote progress tagged with the exact background job UUID.
  * @param preferenceManager Supplies source defaults only for legacy payloads without captured source identity.
- *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalUuidApi::class)
@@ -72,22 +72,28 @@ internal class BackgroundTaskManagerImpl(
 
     private var activeJob: Job? = null
 
-    /** Independent join barrier retaining cancelled work even when its replacement is also cancelled.
-     * @author Dmitriy Moroz */
+    /**
+     * Independent join barrier retaining cancelled work even when its replacement is also cancelled.
+     *
+     * @author Dmitriy Moroz
+     */
     private var cleanupJob: Job? = null
     private var activeSource: ServerSource? = null
     private var activeSelectionRevision: Long? = null
 
-    /** Per-job dispatch marker preventing duplicate legacy stop calls for work cancelled while awaiting cleanup.
-     * @author Dmitriy Moroz */
+    /**
+     * Per-job dispatch marker preventing duplicate legacy stop calls for work cancelled while awaiting cleanup.
+     *
+     * @author Dmitriy Moroz
+     */
     private var activeDispatchState: MutableStateFlow<Boolean>? = null
     private var lastTextToImagePayload: TextToImagePayload? = null
     private var lastImageToImagePayload: ImageToImagePayload? = null
 
     /**
      * Captures and schedules text generation, replacing older work after its cleanup.
-     * @param payload Immutable form inputs and provider revision captured at submission.
      *
+     * @param payload Immutable form inputs and provider revision captured at submission.
      * @author Dmitriy Moroz
      */
     override fun scheduleTextToImageTask(payload: TextToImagePayload) {
@@ -102,8 +108,8 @@ internal class BackgroundTaskManagerImpl(
 
     /**
      * Captures and schedules image generation, retaining the original request image and provider.
-     * @param payload Immutable image inputs and provider revision captured at submission.
      *
+     * @param payload Immutable image inputs and provider revision captured at submission.
      * @author Dmitriy Moroz
      */
     override fun scheduleImageToImageTask(payload: ImageToImagePayload) {
@@ -160,11 +166,14 @@ internal class BackgroundTaskManagerImpl(
         backgroundWorkObserver.postCancelSignal()
     }
 
-    /** Replaces the previous captured job, waiting for task-scoped cleanup before starting another render.
+    /**
+     * Replaces the previous captured job, waiting for task-scoped cleanup before starting another render.
+     *
      * @param source Provider captured by this work request, never reread for progress dispatch.
      * @param selectionRevision Provider revision captured by this work request, including legacy-interruption ownership.
      * @param block Generation operation producing application results through normal persistence.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun runGenerationTask(
         source: ServerSource,
         selectionRevision: Long,
@@ -219,12 +228,15 @@ internal class BackgroundTaskManagerImpl(
         generationJob.start()
     }
 
-    /** Retains a join barrier outside cancelled generation jobs so cancellation chains cannot skip earlier cleanup.
+    /**
+     * Retains a join barrier outside cancelled generation jobs so cancellation chains cannot skip earlier cleanup.
+     *
      * @param job Recently cancelled generation whose finally block may still own a remote task.
      * @param source Captured provider requiring legacy interruption; null retains coroutine cleanup only.
      * @param selectionRevision Captured revision that must still own the provider before legacy interruption.
      * @return Barrier joining every outstanding predecessor, or null when there is no retained cleanup.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun retainCleanup(
         job: Job?,
         source: ServerSource? = null,
@@ -247,16 +259,22 @@ internal class BackgroundTaskManagerImpl(
         }.also { cleanupJob = it }
     }
 
-    /** Checks object identity rather than the current provider preference before publishing.
+    /**
+     * Checks object identity rather than the current provider preference before publishing.
+     *
      * @param job Captured generation coroutine associated with a callback.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun isActiveJob(job: Job): Boolean = activeJob === job
 
-    /** Attaches status only for the provider captured by the active job.
+    /**
+     * Attaches status only for the provider captured by the active job.
+     *
      * @param source Immutable provider selection for this request.
      * @param job Job identity used to reject delayed status callbacks.
      * @param ownerId Exact UUID carried by Easy Diffusion progress.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun listenSourceStatus(source: ServerSource, job: Job, ownerId: String) {
         when (source) {
             ServerSource.EASY_DIFFUSION -> listenEasyDiffusionStatus(job, ownerId)
@@ -269,10 +287,13 @@ internal class BackgroundTaskManagerImpl(
         }
     }
 
-    /** Maps only the matching remote job's queued/sampling progress into iOS status.
+    /**
+     * Maps only the matching remote job's queued/sampling progress into iOS status.
+     *
      * @param job Captured generation coroutine; replacement invalidates every callback.
      * @param ownerId Exact UUID attached when the domain operation registered this background job.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun listenEasyDiffusionStatus(job: Job, ownerId: String) {
         statusScope.launch {
             observeEasyDiffusionProgressUseCase().collect { status ->
@@ -283,9 +304,12 @@ internal class BackgroundTaskManagerImpl(
         }
     }
 
-    /** Observes queue position and wait estimates only while this job remains active.
+    /**
+     * Observes queue position and wait estimates only while this job remains active.
+     *
      * @param job Captured job whose status may update the observer.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun listenHordeStatus(job: Job) {
         statusScope.launch {
             observeHordeProcessStatusUseCase()
@@ -312,9 +336,12 @@ internal class BackgroundTaskManagerImpl(
         }
     }
 
-    /** Observes ONNX sampling steps only while this job remains active.
+    /**
+     * Observes ONNX sampling steps only while this job remains active.
+     *
      * @param job Captured job whose status may update the observer.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun listenLocalDiffusionStatus(job: Job) {
         statusScope.launch {
             observeLocalDiffusionProcessStatusUseCase()
@@ -326,9 +353,12 @@ internal class BackgroundTaskManagerImpl(
         }
     }
 
-    /** Observes Core ML sampling steps only while this job remains active.
+    /**
+     * Observes Core ML sampling steps only while this job remains active.
+     *
      * @param job Captured job whose status may update the observer.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun listenCoreMlStatus(job: Job) {
         statusScope.launch {
             observeCoreMlProcessStatusUseCase()
@@ -340,9 +370,12 @@ internal class BackgroundTaskManagerImpl(
         }
     }
 
-    /** Observes Bonsai sampling steps only while this job remains active.
+    /**
+     * Observes Bonsai sampling steps only while this job remains active.
+     *
      * @param job Captured job whose status may update the observer.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun listenBonsaiStatus(job: Job) {
         statusScope.launch {
             observeBonsaiProcessStatusUseCase()
@@ -373,8 +406,11 @@ internal class BackgroundTaskManagerImpl(
         }
     }
 
-    /** Publishes indeterminate queued/loading status for the captured active job.
-     * @author Dmitriy Moroz */
+    /**
+     * Publishes indeterminate queued/loading status for the captured active job.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun postRunningMessage() {
         backgroundWorkObserver.postStatusMessage(
             title = Localization.string("notification_running_title"),
@@ -382,10 +418,13 @@ internal class BackgroundTaskManagerImpl(
         )
     }
 
-    /** Publishes determinate sampling progress using the shared localized status contract.
+    /**
+     * Publishes determinate sampling progress using the shared localized status contract.
+     *
      * @param current Completed sampling step.
      * @param total Total requested sampling steps.
-     * @author Dmitriy Moroz */
+     * @author Dmitriy Moroz
+     */
     private fun postStepMessage(current: Int, total: Int) {
         backgroundWorkObserver.postStatusMessage(
             title = Localization.string("notification_running_title"),
@@ -397,8 +436,11 @@ internal class BackgroundTaskManagerImpl(
         )
     }
 
-    /** Cancels all old subscriptions before replacement or completion; the generation job owns remote cleanup.
-     * @author Dmitriy Moroz */
+    /**
+     * Cancels all old subscriptions before replacement or completion; the generation job owns remote cleanup.
+     *
+     * @author Dmitriy Moroz
+     */
     private fun clearStatusSubscriptions() {
         statusScope.coroutineContext.cancelChildren()
     }

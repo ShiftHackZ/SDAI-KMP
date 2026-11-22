@@ -26,6 +26,7 @@ import org.junit.Test
 
 /**
  * Checks counter discontinuities and preference changes at the sampler's public flow boundary.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)

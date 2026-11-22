@@ -18,6 +18,7 @@ interface NativeGenerationGateway {
      * Requests resource counters from the currently owned child without starting a process.
      * Returns null before submission or after teardown; transport/read failures propagate.
      * Cancelling the read must not cancel inference or the connection's heartbeat.
+     *
      * @author Dmitriy Moroz
      */
     suspend fun readProcessPerformance(): ProcessPerformanceReading?

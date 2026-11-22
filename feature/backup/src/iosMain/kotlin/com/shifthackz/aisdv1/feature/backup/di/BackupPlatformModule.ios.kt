@@ -7,6 +7,7 @@ import org.koin.dsl.module
 
 /**
  * Binds native document transport while retaining the shared backup API.
+ *
  * @author Dmitriy Moroz
  */
 internal actual val backupPlatformModule: Module =

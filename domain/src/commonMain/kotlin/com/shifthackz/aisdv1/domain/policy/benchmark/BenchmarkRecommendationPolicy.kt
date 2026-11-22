@@ -15,12 +15,14 @@ import kotlin.math.roundToInt
 /**
  * Derives conservative local-provider settings from the captured device and synthetic scores.
  * This pure policy never probes hardware, reads storage or initializes a runtime.
+ *
  * @author Dmitriy Moroz
  */
 object BenchmarkRecommendationPolicy {
 
     /**
      * Ranks supported local providers and derives safe initial generation limits.
+     *
      * @param deviceInfo Captured hardware snapshot; no new device access occurs.
      * @param totalScore Combined synthetic benchmark score.
      * @param cpuScore Synthetic CPU score.
@@ -49,6 +51,7 @@ object BenchmarkRecommendationPolicy {
 
     /**
      * Selects the first usable provider recommendation, retaining conservative defaults if none qualify.
+     *
      * @param providerRecommendations Provider results in their existing preference order.
      * @author Dmitriy Moroz
      */
@@ -75,6 +78,7 @@ object BenchmarkRecommendationPolicy {
 
     /**
      * Estimates warm generation duration from provider, dimensions and synthetic scores.
+     *
      * @param provider Local generation provider being assessed.
      * @param width Requested output width in pixels.
      * @param height Requested output height in pixels.
@@ -131,6 +135,7 @@ object BenchmarkRecommendationPolicy {
 
     /**
      * Uses installed RAM when reported, otherwise the available-memory snapshot.
+     *
      * @param deviceInfo Captured hardware snapshot; no new device access occurs.
      * @author Dmitriy Moroz
      */
@@ -142,6 +147,7 @@ object BenchmarkRecommendationPolicy {
 
     /**
      * Identifies the low-memory Pixel 3a device family used by conservative Android limits.
+     *
      * @param deviceInfo Captured hardware snapshot; no new device access occurs.
      * @author Dmitriy Moroz
      */

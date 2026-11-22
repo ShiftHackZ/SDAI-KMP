@@ -21,6 +21,7 @@ internal interface InferenceConnection {
     /**
      * Reads child-owned counters on demand. Returns null before submission or after completion;
      * timeout, child death and malformed responses fail this read without cancelling inference.
+     *
      * @author Dmitriy Moroz
      */
     suspend fun readPerformance(): ProcessPerformanceReading?

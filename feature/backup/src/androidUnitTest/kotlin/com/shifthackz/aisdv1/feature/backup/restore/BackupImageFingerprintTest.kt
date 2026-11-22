@@ -112,6 +112,7 @@ class BackupImageFingerprintTest {
 
     /**
      * Feeds text at controlled boundaries to exercise Base64 groups and multibyte UTF8 whitespace split across reads.
+     *
      * @param text Encoded image text, including supported presentation whitespace.
      * @param chunkSize Maximum UTF8 bytes returned per read, never exceeding the production request.
      * @author Dmitriy Moroz

@@ -9,7 +9,9 @@ import com.shifthackz.aisdv1.domain.entity.benchmark.LocalGenerationGateResult
  * @author Dmitriy Moroz
  */
 interface LocalGenerationBenchmarkGate {
-    /** Assesses admission without starting generation.
+    /**
+     * Assesses admission without starting generation.
+     *
      * @param request Generation parameters to compare with the saved recommendation.
      * @author Dmitriy Moroz
      */

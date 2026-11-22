@@ -9,8 +9,11 @@ import com.shifthackz.aisdv1.presentation.generation.img2img.progressModal
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Verifies Core ML cancellation remains available without the legacy local debug switch.
- * @author Dmitriy Moroz */
+/**
+ * Verifies Core ML cancellation remains available without the legacy local debug switch.
+ *
+ * @author Dmitriy Moroz
+ */
 class CoreMlProgressModalTest {
     @Test
     fun `given iOS Core ML text generation, legacy cancellation flag is off, expected cancel remains available`() {
