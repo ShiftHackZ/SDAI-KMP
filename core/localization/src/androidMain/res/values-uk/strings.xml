@@ -452,6 +452,9 @@
     <string name="notification_running_title">Виконується генерація…</string>
     <string name="notification_running_sub_title">Зачекайте, завершення генерації.</string>
 
+    <string name="notification_cancel_title">Генерацію скасовано</string>
+    <string name="generation_background_gpu_unavailable">Фонова генерація на GPU недоступна на цьому пристрої. Вимкніть фонову генерацію, щоб запускати цю модель, поки SDAI відкрито.</string>
+
     <string name="notification_finish_title">Генерування завершено 🤩</string>
     <string name="notification_finish_sub_title">Натисніть щоб відкрити додаток.</string>
 
@@ -704,6 +707,7 @@
     <string name="loading">Завантаження</string>
     <string name="notification_download_finish_title">Завантаження завершено 🤩</string>
     <string name="notification_download_fail_title">Не вдалося завантажити 😞</string>
+    <string name="notification_download_cancel_title">Завантаження скасовано</string>
     <string name="backup_title">Резервне копіювання</string>
     <string name="backup_category_providers">Налаштування провайдерів</string>
     <string name="backup_category_gallery">Галерея та історія</string>

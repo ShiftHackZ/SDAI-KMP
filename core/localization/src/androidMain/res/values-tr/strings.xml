@@ -452,6 +452,9 @@
     <string name="notification_running_title">Üretim süreci çalışıyor…</string>
     <string name="notification_running_sub_title">Lütfen üretim tamamlanana kadar bekleyin.</string>
 
+    <string name="notification_cancel_title">Oluşturma iptal edildi</string>
+    <string name="generation_background_gpu_unavailable">Bu cihazda arka planda GPU ile görsel oluşturma kullanılamıyor. Bu modeli SDAI açıkken çalıştırmak için arka planda oluşturmayı kapatın.</string>
+
     <string name="notification_finish_title">Nesil tamamlandı 🤩</string>
     <string name="notification_finish_sub_title">Uygulamayı açmak için buraya tıklayın.</string>
 
@@ -704,6 +707,7 @@
     <string name="loading">Yükleniyor</string>
     <string name="notification_download_finish_title">İndirme tamamlandı 🤩</string>
     <string name="notification_download_fail_title">İndirme başarısız 😞</string>
+    <string name="notification_download_cancel_title">İndirme iptal edildi</string>
     <string name="backup_title">Yedekleme ve geri yükleme</string>
     <string name="backup_category_providers">Sağlayıcı yapılandırması</string>
     <string name="backup_category_gallery">Galeri ve geçmiş</string>

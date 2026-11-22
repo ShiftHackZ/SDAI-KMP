@@ -5,6 +5,7 @@ import kotlin.time.TimeSource
 import com.shifthackz.aisdv1.presentation.components.widget.image.OriginalImageBudget
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
+import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidator
@@ -609,7 +610,11 @@ internal class ImageToImageActionHandler(
                         updateState {
                             it.copy(
                                 generating = false,
-                                screenModal = GenerationModal.Background.Scheduled,
+                                screenModal = if (buildInfoProvider.platform == Platform.ANDROID) {
+                                    GenerationModal.Background.Scheduled
+                                } else {
+                                    GenerationModal.None
+                                },
                             )
                         }
                     }

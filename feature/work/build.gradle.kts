@@ -9,6 +9,10 @@ android {
 
 kotlin {
     sourceSets {
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.test.coroutines)
+        }
         commonMain.dependencies {
             implementation(project(":core:localization"))
             implementation(project(":domain"))
