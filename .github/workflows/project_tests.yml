@@ -23,6 +23,8 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Test MNN change detection
+        run: python3 scripts/test_mnn_change_detection.py
       - name: Check the complete change range
         id: changes
         env:
@@ -36,6 +38,8 @@ jobs:
           # PRs include every branch commit; pushes include every commit in the push.
           # If history is unavailable (e.g. a force push), run the checks conservatively.
           has_mnn_changes=true
+          reasons="$RUNNER_TEMP/mnn-change-reasons"
+          : > "$reasons"
           if [[ "$EVENT_NAME" == pull_request ]]; then
             head="$PR_HEAD_SHA"
             base=$(git merge-base "$PR_BASE_SHA" "$head") || base=''
@@ -49,24 +53,35 @@ jobs:
             has_mnn_changes=false
             while IFS= read -r -d '' path; do
               case "$path" in
-                *[Mm][Nn][Nn]*|app/ios/*|build.gradle.kts|settings.gradle.kts|gradle.properties|gradlew|gradlew.bat|gradle/*|build-logic/*|*/build.gradle.kts|*/DownloadableModelResponse.kt)
+                scripts/test_mnn_change_detection.py)
+                  ;;
+                feature/mnn/*|scripts/mnn/*|scripts/*[Mm][Nn][Nn]*.py|docs/mnn.json|network/mnn-catalog.openapi.json)
                   has_mnn_changes=true
-                  break
+                  printf '%s\n' "$path (MNN-owned file)" >> "$reasons"
+                  ;;
+                */src/*Test*/*|*/src/test*/*)
+                  # Shared Kotlin tests run in the main job, including MNN-named fixtures.
+                  ;;
+                */src/*Main/*[Mm][Nn][Nn]*|app/ios/*[Mm][Nn][Nn]*)
+                  has_mnn_changes=true
+                  printf '%s\n' "$path (MNN production source)" >> "$reasons"
+                  ;;
+                *.kt|*.kts|*.swift|*.toml|*.properties|*.pbxproj|*.plist|*/CMakeLists.txt|*.cmake)
+                  # Shared code/build files count only when changed lines refer to MNN.
+                  # Generic Gradle edits and unrelated iOS configuration do not rebuild MNN.
+                  if ! git diff --quiet --no-renames -G '[Mm][Nn][Nn]' "$base" "$head" -- "$path"; then
+                    has_mnn_changes=true
+                    printf '%s\n' "$path (changed MNN reference)" >> "$reasons"
+                  fi
                   ;;
               esac
             done < "$RUNNER_TEMP/mnn-changed-paths"
-
-            # Shared DI and provider files can contain MNN code without MNN in their paths.
-            if [[ "$has_mnn_changes" == false ]]; then
-              # Editing this gate must not trigger the native builds itself.
-              git diff --name-only --no-renames -G '[Mm][Nn][Nn]' "$base" "$head" -- . ':(exclude).github/workflows/project_tests.yml' > "$RUNNER_TEMP/mnn-changed-code"
-              if [[ -s "$RUNNER_TEMP/mnn-changed-code" ]]; then
-                has_mnn_changes=true
-              fi
-            fi
+          else
+            printf '%s\n' 'Change history unavailable; running MNN checks conservatively.' >> "$reasons"
           fi
           echo "has-mnn-changes=$has_mnn_changes" >> "$GITHUB_OUTPUT"
           echo "MNN changes in $base..$head: $has_mnn_changes" >> "$GITHUB_STEP_SUMMARY"
+          cat "$reasons" >> "$GITHUB_STEP_SUMMARY"
 
   test-mnn:
     name: MNN — ${{ matrix.platform }} contracts and native tests
