@@ -898,4 +898,8 @@
     <string name="demo_explanation_feedback">Ich stimme zu, keine irreführenden Rezensionen oder Fehlermeldungen zu veröffentlichen, die die App als defekt bezeichnen, weil Demo-Bilder nicht zu meinem Prompt passen.</string>
     <string name="demo_explanation_continue">Zustimmen und fortfahren</string>
     <string name="demo_explanation_close">Schließen und Demo-Modus ausschalten</string>
+    <string name="app_update_title">Update verfügbar</string>
+    <string name="app_update_message">Version %1$s ist verfügbar. Möchtest du die Downloadseite öffnen?</string>
+    <string name="app_update_action">Aktualisieren</string>
+    <string name="app_update_later">Später</string>
 </resources>

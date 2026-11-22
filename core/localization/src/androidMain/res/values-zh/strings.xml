@@ -913,4 +913,8 @@
     <string name="demo_explanation_feedback">我同意不因演示图像与提示词不符，就发布误称应用无法正常工作的评论或问题报告。</string>
     <string name="demo_explanation_continue">同意并继续</string>
     <string name="demo_explanation_close">关闭对话框并停用演示模式</string>
+    <string name="app_update_title">有可用更新</string>
+    <string name="app_update_message">版本 %1$s 已发布。是否打开下载页面？</string>
+    <string name="app_update_action">更新</string>
+    <string name="app_update_later">稍后</string>
 </resources>

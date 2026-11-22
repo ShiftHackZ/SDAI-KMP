@@ -16,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -127,17 +129,21 @@ fun DecisionInteractiveDialogContent(
     onDismissRequest: () -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
+    // Layoutlib focuses the first dialog action; render both actions in their resting state.
+    val actionModifier = if (LocalInspectionMode.current) {
+        Modifier.focusProperties { canFocus = false }
+    } else Modifier
     AlertDialog(
         shape = RoundedCornerShape(24.dp),
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            TextButton(onClick = onConfirmAction) {
+            TextButton(onClick = onConfirmAction, modifier = actionModifier) {
                 Text(text = confirmActionText)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) {
+            TextButton(onClick = onDismissRequest, modifier = actionModifier) {
                 Text(text = dismissActionText)
             }
         },

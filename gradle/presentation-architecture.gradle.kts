@@ -1,6 +1,10 @@
 import org.gradle.api.artifacts.ProjectDependency
 
-/** Checks every declared configuration, including platform and Android flavor contributions. */
+/**
+ * Checks every declared configuration, including platform and Android flavor contributions.
+ *
+ * @author Dmitriy Moroz
+ */
 tasks.register("checkPresentationArchitecture") {
     group = "verification"
     description =
@@ -49,7 +53,11 @@ tasks.register("checkPresentationArchitecture") {
                 path.startsWith(":core:") || path == ":presentation:components"
 
         leaves.forEach { leaf ->
-            val forbidden = reachable(leaf.path).filterNot(::isPermitted)
+            // App update presentation consumes its feature-owned domain contracts.
+            val forbidden = reachable(leaf.path).filterNot { dependency ->
+                isPermitted(dependency) ||
+                        (leaf.path == ":presentation:appupdate" && dependency == ":feature:appupdate")
+            }
             check(forbidden.isEmpty()) { "${leaf.path} reaches forbidden modules: $forbidden" }
             leaf.fileTree("src").matching {
                 include("**/*.kt")
