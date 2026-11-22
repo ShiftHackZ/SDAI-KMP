@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -21,6 +22,7 @@ import kotlin.math.roundToInt
  * Animates externally selected peer pages without accepting swipe navigation or changing history.
  * Retains page compositions; only intersecting pages mount native controls and collect visible state.
  * The selected, settled page owns input and accessibility.
+ * Resizing snaps to the selected page so an interrupted animation cannot leave content offset.
  *
  * @param selectedPage Index selected by the screen's existing state owner.
  * @param pageCount Fixed number of peer pages.
@@ -56,7 +58,7 @@ fun ProgrammaticPager(
     }
     HorizontalPager(
         state = pager,
-        modifier = modifier,
+        modifier = modifier.onSizeChanged { pager.requestScrollToPage(selectedPage) },
         userScrollEnabled = false,
         beyondViewportPageCount = pageCount - 1,
         key = { it },

@@ -125,6 +125,13 @@ android {
 }
 
 androidComponents {
+    beforeVariants { variant ->
+        // FOSS keeps the unminified release pipeline used for reproducible builds.
+        val isOptimizedBuild = variant.buildType in listOf("release", "dev", "profile") &&
+                variant.productFlavors.none { (_, flavor) -> flavor == "foss" }
+        variant.isMinifyEnabled = isOptimizedBuild
+        variant.shrinkResources = isOptimizedBuild
+    }
     beforeVariants(selector().withBuildType("dev")) { variant ->
         variant.enable = variant.productFlavors.any { (_, flavor) -> flavor == "full" }
     }

@@ -1,23 +1,16 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.kts.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ONNX Runtime's JNI implementation requires its Java API names and members.
+# https://onnxruntime.ai/docs/build/android.html
+-keep class ai.onnxruntime.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
 # JNI entry points and synchronous callback must retain their names.
 -keep class com.shifthackz.aisdv1.feature.mnn.MnnNativeBridgeImpl { *; }
+
+# RegisterNatives and FindClass use these literal binary names.
+-keep class com.shifthackz.aisdv1.feature.sdxl.StableDiffusionCppNativeBridge { *; }
+-keep interface com.shifthackz.aisdv1.feature.sdxl.StableDiffusionCppNativeBridge$ProgressCallback {
+    public void onProgress(int, int);
+}
+-keep class com.shifthackz.aisdv1.feature.bonsai.BonsaiNativeBridge { *; }
+-keep interface com.shifthackz.aisdv1.feature.bonsai.BonsaiNativeBridge$ProgressCallback {
+    public void onProgress(int, int);
+}
