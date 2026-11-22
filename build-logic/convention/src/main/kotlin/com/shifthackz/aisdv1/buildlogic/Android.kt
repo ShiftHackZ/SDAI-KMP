@@ -7,11 +7,17 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+/**
+ * Applies shared Android toolchains and configures Robolectric's runtime downloads for unit tests.
+ *
+ * @param commonExtension Android application or library receiving the shared build configuration.
+ * @author Dmitriy Moroz
+ */
 internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk =  libs.findVersion("compileSdk").get().toString().toInt()
+        compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
 
         defaultConfig {
             minSdk = libs.findVersion("minSdk").get().toString().toInt()
@@ -38,10 +44,23 @@ internal fun Project.configureKotlinAndroid(
             targetCompatibility = JavaVersion.VERSION_17
         }
 
+        testOptions.unitTests.all { test ->
+            // Robolectric resolves SDK jars independently of Gradle's dependency repositories.
+            test.systemProperty(
+                "robolectric.dependency.repo.url",
+                "https://maven-central.storage-download.googleapis.com/maven2",
+            )
+        }
+
         configureKotlin()
     }
 }
 
+/**
+ * Keeps Kotlin bytecode compatible with the Java 17 toolchain used by Android modules.
+ *
+ * @author Dmitriy Moroz
+ */
 private fun Project.configureKotlin() {
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
