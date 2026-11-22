@@ -498,6 +498,9 @@
     <string name="notification_running_title">生成过程正在运行…</string>
     <string name="notification_running_sub_title">请等待，直至生成完成。</string>
 
+    <string name="notification_cancel_title">生成已取消</string>
+    <string name="generation_background_gpu_unavailable">此设备不支持后台 GPU 生成。请关闭后台生成，以便在 SDAI 打开时运行此模型。</string>
+
     <string name="notification_finish_title">生成完成 🤩</string>
     <string name="notification_finish_sub_title">单击此处打开应用程序。</string>
 
@@ -756,6 +759,7 @@
     <string name="loading">加载中</string>
     <string name="notification_download_finish_title">下载完成 🤩</string>
     <string name="notification_download_fail_title">下载失败 😞</string>
+    <string name="notification_download_cancel_title">下载已取消</string>
     <string name="backup_title">备份与恢复</string>
     <string name="backup_category_providers">提供商配置</string>
     <string name="backup_category_gallery">图库与历史记录</string>

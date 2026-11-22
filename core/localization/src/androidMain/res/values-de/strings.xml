@@ -485,6 +485,9 @@
     <string name="notification_running_title">Generierung läuft …</string>
     <string name="notification_running_sub_title">Bitte warte, bis die Generierung abgeschlossen ist.</string>
 
+    <string name="notification_cancel_title">Generierung abgebrochen</string>
+    <string name="generation_background_gpu_unavailable">Die Generierung mit der GPU im Hintergrund ist auf diesem Gerät nicht verfügbar. Deaktivieren Sie die Hintergrundgenerierung, um dieses Modell bei geöffneter SDAI-App auszuführen.</string>
+
     <string name="notification_finish_title">Generierung abgeschlossen 🤩</string>
     <string name="notification_finish_sub_title">Tippe hier, um die Anwendung zu öffnen.</string>
 
@@ -741,6 +744,7 @@
     <string name="loading">Laden</string>
     <string name="notification_download_finish_title">Download abgeschlossen 🤩</string>
     <string name="notification_download_fail_title">Download fehlgeschlagen 😞</string>
+    <string name="notification_download_cancel_title">Download abgebrochen</string>
     <string name="backup_title">Sichern und wiederherstellen</string>
     <string name="backup_category_providers">Anbieterkonfiguration</string>
     <string name="backup_category_gallery">Galerie und Verlauf</string>

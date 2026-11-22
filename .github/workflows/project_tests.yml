@@ -83,6 +83,99 @@ jobs:
           echo "MNN changes in $base..$head: $has_mnn_changes" >> "$GITHUB_STEP_SUMMARY"
           cat "$reasons" >> "$GITHUB_STEP_SUMMARY"
 
+  detect-ios-work-changes:
+    name: Detect iOS work changes
+    runs-on: ubuntu-24.04
+    outputs:
+      has-ios-work-changes: ${{ steps.changes.outputs.has-ios-work-changes }}
+    steps:
+      - name: Checkout complete history
+        uses: actions/checkout@v4.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test iOS work change detection
+        run: python3 scripts/test_ios_work_change_detection.py
+      - name: Check complete iOS work change range
+        id: changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+          PUSH_HEAD_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          has_ios_work_changes=true
+          reasons="$RUNNER_TEMP/ios-work-change-reasons"
+          : > "$reasons"
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            head="$PR_HEAD_SHA"
+            base=$(git merge-base "$PR_BASE_SHA" "$head") || base=''
+          else
+            head="$PUSH_HEAD_SHA"
+            base="$PUSH_BASE_SHA"
+          fi
+
+          if [[ -n "$base" && ! "$base" =~ ^0+$ ]] &&
+             git diff --name-only --no-renames -z "$base" "$head" -- > "$RUNNER_TEMP/ios-work-changed-paths"; then
+            has_ios_work_changes=false
+            while IFS= read -r -d '' path; do
+              case "$path" in
+                feature/work/src/ios*/*|feature/work/src/common*/*|feature/work/swift/*|feature/work/build.gradle.kts)
+                  has_ios_work_changes=true
+                  printf '%s\n' "$path (iOS/shared work source)" >> "$reasons"
+                  ;;
+                domain/src/commonMain/*/entity/BackgroundWork*|domain/src/commonMain/*/entity/ModelDownload*|domain/src/commonMain/*/entity/*Payload.kt|domain/src/commonMain/*/entity/*WorkOwner.kt|domain/src/commonMain/*/entity/*Progress.kt|domain/src/commonMain/*/entity/*Status.kt|domain/src/commonMain/*/feature/work/*|domain/src/commonMain/*/usecase/generation/*|domain/src/commonMain/*/usecase/downloadable/*|domain/src/commonMain/*/usecase/easydiffusion/Observe*|domain/src/commonMain/*/gateway/RemoteGenerationProgressGateway.kt|presentation/generation/src/commonMain/*/*ActionHandler.kt)
+                  has_ios_work_changes=true
+                  printf '%s\n' "$path (shared execution contract)" >> "$reasons"
+                  ;;
+                */src/*Test*/*|*/src/test*/*)
+                  ;;
+                *.kt|*.kts|*.swift|*.toml|*.properties|*.pbxproj|*.plist|*.entitlements|*.xml)
+                  if ! git diff --quiet --no-renames -G 'IosWork|WorkActivity|GenerationActivity|feature[/:]work|[Bb]ackgroundTaskManager|[Bb]ackgroundWorkObserver|[Mm]odelDownloadManager|providerSelectionRevision|BGTask|BackgroundTasks|NSSupportsLiveActivities|background-tasks|\.work\.\*|notification_download_|notification_(running|finish|fail|cancel)_|generation_background_gpu|kotlin[x-]?[._-]?coroutines|koin|kotlin[[:space:]]*=|kotlin\.multiplatform|iosSimulatorArm64|iosArm64' "$base" "$head" -- "$path"; then
+                    has_ios_work_changes=true
+                    printf '%s\n' "$path (changed iOS work integration)" >> "$reasons"
+                  fi
+                  ;;
+              esac
+            done < "$RUNNER_TEMP/ios-work-changed-paths"
+          else
+            printf '%s\n' 'Change history unavailable; running iOS work tests conservatively.' >> "$reasons"
+          fi
+          echo "has-ios-work-changes=$has_ios_work_changes" >> "$GITHUB_OUTPUT"
+          echo "iOS work changes in $base..$head: $has_ios_work_changes" >> "$GITHUB_STEP_SUMMARY"
+          cat "$reasons" >> "$GITHUB_STEP_SUMMARY"
+
+  test-ios-work:
+    name: iOS — background work lifecycle
+    needs: detect-ios-work-changes
+    if: needs.detect-ios-work-changes.outputs.has-ios-work-changes == 'true'
+    runs-on: macos-15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.0
+        with:
+          persist-credentials: false
+      - name: Select Xcode 26.2
+        run: sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3.13.0
+        with:
+          distribution: "adopt"
+          java-version: "17"
+      - name: Test iOS generation and download execution
+        run: ./gradlew :feature:work:iosSimulatorArm64Test --no-daemon
+      - name: Upload iOS work test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-work-tests
+          path: |
+            feature/work/build/reports/tests/iosSimulatorArm64Test/
+            feature/work/build/test-results/iosSimulatorArm64Test/*.xml
+          if-no-files-found: warn
+
   test-mnn:
     name: MNN — ${{ matrix.platform }} contracts and native tests
     needs: detect-mnn-changes

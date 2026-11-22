@@ -16,6 +16,7 @@ kotlin {
             isStatic = true
             export(project(":feature:bonsai"))
             export(project(":feature:mnn"))
+            export(project(":feature:work"))
             export(project(":feature:coreml"))
             export(project(":feature:openai-oauth"))
         }
@@ -55,7 +56,7 @@ kotlin {
             implementation(project(":feature:auth"))
             implementation(project(":feature:backup"))
             implementation(project(":feature:benchmark"))
-            implementation(project(":feature:work"))
+            api(project(":feature:work"))
             api(project(":feature:bonsai"))
             api(project(":feature:mnn"))
             api(project(":feature:coreml"))

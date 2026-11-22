@@ -8,6 +8,7 @@ import com.shifthackz.aisdv1.presentation.components.image.ImageShareResult
 import com.shifthackz.aisdv1.presentation.components.image.ImageSharer
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
+import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
@@ -516,7 +517,11 @@ internal class TextToImageActionHandler(
                         updateState {
                             it.copy(
                                 generating = false,
-                                screenModal = GenerationModal.Background.Scheduled,
+                                screenModal = if (buildInfoProvider.platform == Platform.ANDROID) {
+                                    GenerationModal.Background.Scheduled
+                                } else {
+                                    GenerationModal.None
+                                },
                             )
                         }
                     }

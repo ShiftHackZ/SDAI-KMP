@@ -19,16 +19,17 @@ import com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGeneration
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.entity.MnnWorkOwner
+import com.shifthackz.aisdv1.domain.entity.MnnBackend
+import com.shifthackz.aisdv1.domain.gateway.RemoteGenerationProgressGateway
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
@@ -40,6 +41,8 @@ import kotlin.coroutines.coroutineContext
  * Runs one captured iOS background request and suppresses results/status after its job is replaced.
  *
  * @param backgroundWorkObserver Publishes lifecycle and progress to shared application UI.
+ * @param execution Owns native execution admission and the system progress presentation.
+ * @param remoteProgress Shares request-correlated measurements from remote providers.
  * @param textToImageUseCase Dispatches captured text inputs through the selected provider.
  * @param imageToImageUseCase Dispatches captured image inputs through the selected provider.
  * @param interruptSourceGenerationUseCase Interrupts only the captured legacy provider inside its retained cleanup barrier.
@@ -50,11 +53,15 @@ import kotlin.coroutines.coroutineContext
  * @param observeMnnProcessStatusUseCase Observes overall MNN percentage for the captured job.
  * @param observeEasyDiffusionProgressUseCase Observes remote progress tagged with the exact background job UUID.
  * @param preferenceManager Supplies source defaults only for legacy payloads without captured source identity.
+ * @param coroutineScope Owns generation and retained cleanup jobs for the application lifetime.
+ * @param statusScope Owns independently cancellable subscriptions for the current generation.
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalUuidApi::class)
 internal class BackgroundTaskManagerImpl(
     private val backgroundWorkObserver: BackgroundWorkObserver,
+    private val execution: IosWorkExecution,
+    private val remoteProgress: RemoteGenerationProgressGateway,
     private val textToImageUseCase: TextToImageUseCase,
     private val imageToImageUseCase: ImageToImageUseCase,
     private val interruptSourceGenerationUseCase: InterruptSourceGenerationUseCase,
@@ -65,10 +72,9 @@ internal class BackgroundTaskManagerImpl(
     private val observeMnnProcessStatusUseCase: ObserveMnnProcessStatusUseCase,
     private val preferenceManager: PreferenceManager,
     private val observeEasyDiffusionProgressUseCase: ObserveEasyDiffusionProgressUseCase,
+    private val coroutineScope: CoroutineScope,
+    private val statusScope: CoroutineScope,
 ) : BackgroundTaskManager {
-
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val statusScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var activeJob: Job? = null
 
@@ -98,9 +104,13 @@ internal class BackgroundTaskManagerImpl(
      */
     override fun scheduleTextToImageTask(payload: TextToImagePayload) {
         lastTextToImagePayload = payload
+        val source = payload.sourceSnapshot ?: preferenceManager.source
         runGenerationTask(
-            payload.sourceSnapshot ?: preferenceManager.source,
+            source,
             payload.providerSelectionRevision ?: preferenceManager.providerSelectionRevision,
+            requiresGpu = source == ServerSource.LOCAL_APPLE_CORE_ML ||
+                    source == ServerSource.LOCAL_APPLE_BONSAI ||
+                    (source == ServerSource.LOCAL_MNN && payload.mnnBackend != MnnBackend.CPU),
         ) {
             textToImageUseCase(payload)
         }
@@ -171,12 +181,15 @@ internal class BackgroundTaskManagerImpl(
      *
      * @param source Provider captured by this work request, never reread for progress dispatch.
      * @param selectionRevision Provider revision captured by this work request, including legacy-interruption ownership.
+     * @param requiresGpu Whether the captured provider and backend may execute GPU operations.
      * @param block Generation operation producing application results through normal persistence.
      * @author Dmitriy Moroz
      */
     private fun runGenerationTask(
         source: ServerSource,
         selectionRevision: Long,
+        requiresGpu: Boolean = source == ServerSource.LOCAL_APPLE_CORE_ML ||
+                source == ServerSource.LOCAL_APPLE_BONSAI || source == ServerSource.LOCAL_MNN,
         block: suspend () -> List<AiGenerationResult>
     ) {
         val previousJob = activeJob
@@ -192,21 +205,44 @@ internal class BackgroundTaskManagerImpl(
         val dispatchState = MutableStateFlow(false)
         lateinit var generationJob: Job
         generationJob = coroutineScope.launch(start = CoroutineStart.LAZY) {
-            val backgroundExecution = IosBackgroundExecution(
-                name = "SDAI Generation", activeJob = { generationJob },
-            )
+            var isSuccess = false
+            var isCancelled = false
             try {
                 previousCleanup?.join()
-                backgroundExecution.begin()
-                listenSourceStatus(source, generationJob, ownerId)
+                coroutineContext.ensureActive()
+                val admission = CompletableDeferred<Unit>()
+                execution.begin(
+                    ownerId,
+                    Localization.string("notification_running_title"),
+                    Localization.string("notification_running_sub_title"),
+                    requiresGpu,
+                    onExpiration = { if (isActiveJob(generationJob)) cancelAll() },
+                    onReady = { admission.complete(Unit) },
+                    onUnavailable = {
+                        admission.completeExceptionally(
+                            IllegalStateException(Localization.string("generation_background_gpu_unavailable"))
+                        )
+                    },
+                )
+                admission.await()
                 postRunningMessage()
+                statusScope.launch {
+                    backgroundWorkObserver.observeStatus().collect { status ->
+                        if (isActiveJob(generationJob) && status.running) execution.update(
+                            ownerId, status.statusTitle, status.statusSubTitle, status.percentage,
+                        )
+                    }
+                }
+                listenSourceStatus(source, generationJob, ownerId)
                 val result = withContext(EasyDiffusionWorkOwner(ownerId) + MnnWorkOwner(ownerId)) {
                     dispatchState.value = true
                     coroutineContext.ensureActive()
                     block()
                 }
                 if (isActiveJob(generationJob)) backgroundWorkObserver.postSuccessSignal(result)
+                isSuccess = true
             } catch (failure: CancellationException) {
+                isCancelled = true
                 if (isActiveJob(generationJob)) backgroundWorkObserver.postCancelSignal()
             } catch (failure: Throwable) {
                 if (isActiveJob(generationJob)) backgroundWorkObserver.postFailedSignal(failure)
@@ -218,7 +254,17 @@ internal class BackgroundTaskManagerImpl(
                     activeSelectionRevision = null
                     activeDispatchState = null
                 }
-                backgroundExecution.end()
+                execution.end(
+                    ownerId, isSuccess,
+                    Localization.string(
+                        when {
+                            isSuccess -> "notification_finish_title"
+                            isCancelled -> "notification_cancel_title"
+                            else -> "notification_fail_title"
+                        }
+                    ),
+                    Localization.string("notification_finish_sub_title"),
+                )
             }
         }
         activeSource = source
@@ -277,6 +323,19 @@ internal class BackgroundTaskManagerImpl(
      */
     private fun listenSourceStatus(source: ServerSource, job: Job, ownerId: String) {
         when (source) {
+            ServerSource.AUTOMATIC1111, ServerSource.SWARM_UI -> statusScope.launch {
+                remoteProgress.observe().collect { snapshots ->
+                    if (!isActiveJob(job)) return@collect
+                    val progress =
+                        snapshots.firstOrNull { it.ownerId == ownerId && it.source == source }
+                    backgroundWorkObserver.postProgressMessage(
+                        Localization.string("notification_running_title"),
+                        Localization.string("notification_running_sub_title"),
+                        progress?.percentage,
+                    )
+                }
+            }
+
             ServerSource.EASY_DIFFUSION -> listenEasyDiffusionStatus(job, ownerId)
             ServerSource.HORDE -> listenHordeStatus(job)
             ServerSource.LOCAL_MICROSOFT_ONNX -> listenLocalDiffusionStatus(job)
@@ -398,9 +457,10 @@ internal class BackgroundTaskManagerImpl(
         statusScope.launch {
             observeMnnProcessStatusUseCase().collect { status ->
                 if (!isActiveJob(job)) return@collect
-                backgroundWorkObserver.postStatusMessage(
+                backgroundWorkObserver.postProgressMessage(
                     Localization.string("notification_running_title"),
                     "${status.current.coerceIn(0, 100)}%",
+                    status.current.coerceIn(0, 100),
                 )
             }
         }
@@ -426,13 +486,15 @@ internal class BackgroundTaskManagerImpl(
      * @author Dmitriy Moroz
      */
     private fun postStepMessage(current: Int, total: Int) {
-        backgroundWorkObserver.postStatusMessage(
+        backgroundWorkObserver.postProgressMessage(
             title = Localization.string("notification_running_title"),
             subTitle = Localization.string(
                 "communicating_status_steps",
                 current.toString(),
                 total.toString(),
             ),
+            percentage = if (total > 0) (current.toLong() * 100 / total).toInt()
+                .coerceIn(0, 100) else null,
         )
     }
 

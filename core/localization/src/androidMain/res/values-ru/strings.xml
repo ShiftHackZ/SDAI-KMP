@@ -452,6 +452,9 @@
     <string name="notification_running_title">Идет процесс генерации…</string>
     <string name="notification_running_sub_title">Пожалуйста, дождитесь завершения генерации.</string>
 
+    <string name="notification_cancel_title">Генерация отменена</string>
+    <string name="generation_background_gpu_unavailable">Фоновая генерация на GPU недоступна на этом устройстве. Отключите фоновую генерацию, чтобы запускать эту модель, пока SDAI открыт.</string>
+
     <string name="notification_finish_title">Генерирование завершено 🤩</string>
     <string name="notification_finish_sub_title">Нажмите, чтобы открыть приложение.</string>
 
@@ -704,6 +707,7 @@
     <string name="loading">Загрузка</string>
     <string name="notification_download_finish_title">Загрузка завершена 🤩</string>
     <string name="notification_download_fail_title">Не удалось загрузить 😞</string>
+    <string name="notification_download_cancel_title">Загрузка отменена</string>
     <string name="backup_title">Резервное копирование</string>
     <string name="backup_category_providers">Настройки провайдеров</string>
     <string name="backup_category_gallery">Галерея и история</string>

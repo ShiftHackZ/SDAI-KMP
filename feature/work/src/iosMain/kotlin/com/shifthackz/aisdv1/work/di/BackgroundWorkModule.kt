@@ -12,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import org.koin.dsl.module
 import com.shifthackz.aisdv1.domain.feature.work.ModelDownloadManager
 import com.shifthackz.aisdv1.work.ModelDownloadManagerImpl
+import com.shifthackz.aisdv1.work.IosWorkExecution
+import com.shifthackz.aisdv1.work.NoOpIosWorkExecution
 
 /**
  * Binds platform task scheduling, progress observation and model download ownership.
@@ -19,12 +21,32 @@ import com.shifthackz.aisdv1.work.ModelDownloadManagerImpl
  * @author Dmitriy Moroz
  */
 actual val backgroundWorkModule = module {
+    single<IosWorkExecution> { NoOpIosWorkExecution() }
     single<ModelDownloadManager> {
         ModelDownloadManagerImpl(
+            get(),
             get(),
             CoroutineScope(SupervisorJob() + Dispatchers.Main)
         )
     }
     singleOf(::BackgroundWorkObserverImpl) bind BackgroundWorkObserver::class
-    singleOf(::BackgroundTaskManagerImpl) bind BackgroundTaskManager::class
+    single<BackgroundTaskManager> {
+        BackgroundTaskManagerImpl(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        )
+    }
 }
