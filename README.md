@@ -115,6 +115,7 @@ iOS uses the shared mobile experience with remote generation providers, Silicon 
 ### Save and Review
 
 - Local in-app gallery for generated images.
+- Civitai account connection through native OAuth sign-in or an API key, gallery publishing with SDAI attribution, upload history, and optional automatic uploads.
 - Detail screen with zoom, generation metadata, and sharing.
 - Optional auto-save of results.
 - Native platform save/share flows, including Android MediaStore and iOS Photos/share sheet where available.
@@ -131,6 +132,18 @@ iOS uses the shared mobile experience with remote generation providers, Silicon 
 - Hardware benchmark in AI Settings for local providers, including device score, acceleration availability, Android Bonsai Vulkan compute support, estimated generation time, and recommended local settings.
 - Server availability monitoring for compatible own-server modes.
 - Storage usage and network usage screens for gallery/cache/model files and provider traffic counters.
+
+## Sharing to Civitai
+
+Open **Settings → Integrations → Civitai** to connect your account. OAuth sign-in opens Civitai in the system authentication browser; SDAI never receives your password. Allow offline access on the consent screen to stay connected; an access-only session requires signing in again after its token expires. An API key with profile-read and media-write permissions is also supported.
+
+Use the Civitai action in gallery details to publish the generated output. Posts include a visible SDAI link, generation parameters, and recorded provider, model, device and OS details. The resulting post link is saved with the image and opens on subsequent taps. Civitai may keep newly uploaded images hidden while processing them.
+
+Automatic uploads are off by default. Enabling them publishes subsequent generated outputs and their recorded metadata publicly; existing gallery images and input images are not automatically uploaded. Upload history keeps receipts and failed or unconfirmed attempts. An unconfirmed post is not automatically submitted again.
+
+Gallery backups retain each image’s Civitai post URL. The separate **Civitai** section in Backup and restore transfers upload history, including failed or uncertain attempts. It does not contain OAuth tokens or API keys, sign in an account, or enable automatic uploads. Restoring history is additive and skips existing receipts. Empty upload history is omitted from the archive and does not appear in Restore.
+
+The public OAuth client identifier is configured by `civitaiClientId` in `gradle.properties` and generated into the shared BuildConfig for Android and iOS. No client secret is shipped. See the [consumed Civitai API contract](network/civitai.openapi.json).
 
 ## Supported AI image generation providers
 

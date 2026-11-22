@@ -7,7 +7,7 @@ import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk

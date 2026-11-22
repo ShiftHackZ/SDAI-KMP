@@ -9,7 +9,22 @@ import com.shifthackz.aisdv1.core.navigation.LaunchSource
  */
 interface SettingsRouter {
     /**
+     * Opens the configured server's web interface inside the application.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToWebUi()
+
+    /**
+     * Opens account authorization, automatic publishing and Civitai upload history.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToCivitai()
+
+    /**
      * Opens the standalone Create/Restore backup tabs.
+     *
      * @author Dmitriy Moroz
      */
     fun navigateToBackup()

@@ -24,6 +24,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.navigation.isPlatfor
  * @param state Current image flags, reporting capability and selected detail tab.
  * @param modifier Placement of the persistent action area.
  * @param processIntent Requests mutations, export, form reuse or tab changes on short taps.
+ * @param civitaiAction App-supplied Civitai publishing action, retaining independent screen-module ownership.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -31,6 +32,7 @@ internal fun GalleryDetailNavigationBar(
     state: GalleryDetailState,
     modifier: Modifier = Modifier,
     processIntent: (GalleryDetailIntent) -> Unit = {},
+    civitaiAction: @Composable () -> Unit = {},
 ) {
     val backgroundColor =
         if (isPlatformToolbarNative) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface
@@ -48,6 +50,7 @@ internal fun GalleryDetailNavigationBar(
             state.content?.let { content ->
                 GalleryDetailActions(
                     content = content,
+                    civitaiAction = civitaiAction,
                     processIntent = processIntent,
                 )
                 PlatformNavigationBar(

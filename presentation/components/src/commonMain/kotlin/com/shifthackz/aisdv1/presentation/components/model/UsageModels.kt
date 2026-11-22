@@ -43,6 +43,7 @@ enum class UsageCategory {
     TRAFFIC_MODELS,
     TRAFFIC_CONFIGS,
     TRAFFIC_INFERENCE,
+    TRAFFIC_CIVITAI,
 }
 
 /**
@@ -136,6 +137,7 @@ fun UsageCategory.isStorageCategory(): Boolean = when (this) {
     UsageCategory.TRAFFIC_MODELS,
     UsageCategory.TRAFFIC_CONFIGS,
     UsageCategory.TRAFFIC_INFERENCE,
+    UsageCategory.TRAFFIC_CIVITAI,
         -> false
 }
 
@@ -158,5 +160,6 @@ fun UsageCategory.isModelCategory(): Boolean = when (this) {
     UsageCategory.TRAFFIC_MODELS,
     UsageCategory.TRAFFIC_CONFIGS,
     UsageCategory.TRAFFIC_INFERENCE,
+    UsageCategory.TRAFFIC_CIVITAI,
         -> false
 }

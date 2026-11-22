@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.feature.backup.di
 
+import com.shifthackz.aisdv1.feature.backup.codec.CivitaiBackupCodec
+import com.shifthackz.aisdv1.feature.backup.codec.DefaultCivitaiBackupCodec
 import com.shifthackz.aisdv1.feature.backup.archive.BackupArchiveStore
 import com.shifthackz.aisdv1.feature.backup.archive.BackupStagingCleaner
 import com.shifthackz.aisdv1.feature.backup.archive.DefaultBackupStagingCleaner
@@ -60,12 +62,14 @@ import org.koin.dsl.onClose
 
 /**
  * Installs platform file transport behind the same common backup contracts on both targets.
+ *
  * @author Dmitriy Moroz
  */
 internal expect val backupPlatformModule: Module
 
 /**
  * Registers backup implementations without exposing feature dependencies to presentation leaves.
+ *
  * @author Dmitriy Moroz
  */
 val backupModule = module {
@@ -82,6 +86,7 @@ val backupModule = module {
             get()
         )
     }
+    single<CivitaiBackupCodec> { DefaultCivitaiBackupCodec(get(), get(named("backupJson"))) }
     single<BackupRestoreGuard> { DefaultBackupRestoreGuard() }
     single<BackupProviderPlanner> { DefaultBackupProviderPlanner(get()) }
     single<BackupSessionCodec> { DefaultBackupSessionCodec(get(named("backupJson"))) }
@@ -93,6 +98,7 @@ val backupModule = module {
             get(),
             get(),
             get(named("backupJson")),
+            get(),
             get(),
             get(),
         )
@@ -111,6 +117,7 @@ val backupModule = module {
             get(),
             get(),
             get(named("backupJson")),
+            get(),
             get()
         )
     }

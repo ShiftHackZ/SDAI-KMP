@@ -36,6 +36,8 @@ val modules = listOf(
     ":domain",
     ":feature:appupdate",
     ":feature:auth",
+    ":feature:civitai",
+    ":presentation:civitai",
     ":feature:backup",
     ":feature:openai-oauth",
     ":feature:benchmark",

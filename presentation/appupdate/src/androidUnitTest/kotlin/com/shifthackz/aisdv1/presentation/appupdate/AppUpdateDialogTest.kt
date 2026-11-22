@@ -8,7 +8,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

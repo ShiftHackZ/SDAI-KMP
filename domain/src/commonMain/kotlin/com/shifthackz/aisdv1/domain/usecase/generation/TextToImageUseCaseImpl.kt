@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.usecase.civitai.AutoUploadToCivitaiUseCase
 import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
 import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
@@ -55,6 +56,7 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
  * @param bonsaiGenerationRepository Generation and result persistence for Bonsai.
  * @param mnnGenerationRepository Isolated MNN request execution after fixed-profile and seed admission.
  * @param deviceProbe Captures originating hardware and OS without loading model runtimes.
+ * @param autoUploadToCivitaiUseCase Applies optional public sharing only after a generation completes.
  * @param preferenceManager Current provider selection and independent generation preferences.
  * @param trackRemoteGenerationUseCase Owns request-correlated remote telemetry and its cleanup.
  * @param generationRestoreGate Serializes generation against portable backup restoration.
@@ -94,6 +96,7 @@ internal class TextToImageUseCaseImpl(
     private val mnnGenerationRepository: MnnGenerationRepository,
 
     private val deviceProbe: BenchmarkDeviceProbe,
+    private val autoUploadToCivitaiUseCase: AutoUploadToCivitaiUseCase,
     private val preferenceManager: PreferenceManager,
     private val trackRemoteGenerationUseCase: TrackRemoteGenerationUseCase,
     private val generationRestoreGate: GenerationRestoreGate,
@@ -126,7 +129,7 @@ internal class TextToImageUseCaseImpl(
                 if (source == ServerSource.AUTOMATIC1111 || source == ServerSource.SWARM_UI) {
                     trackRemoteGenerationUseCase(source) { generate(payload) }
                 } else generate(payload)
-            }
+            }.map { autoUploadToCivitaiUseCase(it) }
         }
 
     /**

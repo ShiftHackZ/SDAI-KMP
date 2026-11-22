@@ -359,7 +359,7 @@
     <string name="settings_usage_delete_models_text">İndirilen %2$s (%1$s) bu cihazdan silinecek. Bunları sağlayıcı kurulumundan yeniden indirebilirsiniz.</string>
     <string name="settings_usage_delete_all_text">Burada gösterilen her şey (%1$s) silinecek: %2$s.</string>
     <string name="settings_usage_storage_note">Galeri öğeleri uygulama içi galeriden silinir. Yerel modeller sağlayıcı kurulumundan yeniden indirilebilir.</string>
-    <string name="settings_usage_network_note">Model indirmeleri, yapılandırma senkronizasyonu ve inference istekleri dahildir.</string>
+    <string name="settings_usage_network_note">Model indirmelerini, yapılandırma eşitlemesini, çıkarım isteklerini ve Civitai yüklemelerini içerir.</string>
 
     <string name="settings_item_lf_lang">Dil</string>
     <string name="settings_item_lf_gallery_grid">Galeri ızgara boyutu</string>
@@ -865,4 +865,31 @@
     <string name="app_update_message">%1$s sürümü mevcut. İndirme sayfasını açmak ister misiniz?</string>
     <string name="app_update_action">Güncelle</string>
     <string name="app_update_later">Daha sonra</string>
+
+    <string name="civitai_title">Civitai</string>
+    <string name="civitai_account">Hesap</string>
+    <string name="civitai_key_help">Profilinizi okuma ve medya yayımlama izni olan bir Civitai API anahtarıyla da bağlanabilirsiniz.</string>
+    <string name="civitai_api_key">API anahtarı</string>
+    <string name="civitai_connect">API anahtarıyla bağlan</string>
+    <string name="civitai_get_key">Civitai API anahtarlarını yönet</string>
+    <string name="civitai_disconnect">Hesabın bağlantısını kes</string>
+    <string name="civitai_enable">Etkinleştir</string>
+    <string name="civitai_auto_upload">Oluşturulan görselleri otomatik yükle</string>
+    <string name="civitai_public_notice">Yeni oluşturulan görseller, istemler, üretim ayarları ve kayıtlı cihaz bilgileri SDAI adıyla Civitai üzerinde herkese açık yayımlanır. Mevcut galeri görselleri ve girdi görselleri otomatik yüklenmez.</string>
+    <string name="civitai_history">Yükleme geçmişi</string>
+    <string name="civitai_history_empty">SDAI üzerinden henüz görsel yüklenmedi.</string>
+    <string name="civitai_failure">Civitai işlemi tamamlanamadı. Bağlantınızı ve hesap izinlerinizi kontrol edin. Gönderi oluşturulmuş olabileceği durumlarda tekrar denemeden önce Civitai hesabınızı kontrol edin.</string>
+    <string name="civitai_sign_in">Civitai ile giriş yap</string>
+    <string name="civitai_action_help">Bu oluşturulan görseli ayarları ve SDAI bilgisiyle Civitai üzerinde yayımlayın. Yüklemeden sonra gönderiyi açmak için tekrar dokunun.</string>
+    <string name="civitai_login_required">Civitai hesabınıza giriş yapmadınız. Civitai ayarlarını açıp hesabınızı bağlamak ister misiniz?</string>
+    <string name="civitai_success">Görsel Civitai üzerine yüklendi. İşlenirken gizli kalabilir. Gönderiyi açmak için Civitai düğmesine tekrar dokunun.</string>
+    <string name="settings_header_integrations">Entegrasyonlar</string>
+    <string name="settings_help_integrations_header">Harici hizmetlere bağlanın ve yapılandırılmış sunucunuzun web arayüzünü açın.</string>
+    <string name="settings_help_web_ui">Yapılandırdığınız sunucunun web arayüzünü uygulama içinde açın. Kullanılabilir denetimler ve erişilebilirlik sunucuya bağlıdır.</string>
+    <string name="settings_help_civitai">Civitai hesabınızı, otomatik yüklemeleri ve yükleme geçmişini yönetin.</string>
+    <string name="civitai_upload_uploading">Yükleniyor…</string>
+    <string name="civitai_upload_published">Yayımlandı</string>
+    <string name="civitai_upload_failed">Yükleme başarısız — Civitai aç</string>
+    <string name="civitai_upload_uncertain">Yükleme doğrulanamadı — Civitai kontrol et</string>
+    <string name="backup_category_civitai">Civitai</string>
 </resources>

@@ -1,6 +1,6 @@
 package com.shifthackz.aisdv1.feature.appupdate
 
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.After

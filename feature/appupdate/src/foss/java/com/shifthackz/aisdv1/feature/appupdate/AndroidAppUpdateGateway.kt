@@ -1,6 +1,6 @@
 package com.shifthackz.aisdv1.feature.appupdate
 
-import com.shifthackz.aisdv1.feature.appupdate.domain.AppUpdateGateway
+import com.shifthackz.aisdv1.domain.gateway.AppUpdateGateway
 import org.koin.core.scope.Scope
 
 /**

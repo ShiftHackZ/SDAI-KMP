@@ -2,17 +2,90 @@
 """Regression checks for the schema checker itself, without contacting providers."""
 
 import unittest
+import json
+import yaml
 from io import BytesIO
 from unittest.mock import patch
 from urllib.error import URLError
 
-from check_provider_contracts import check_binding
-from provider_contracts.providers import Binding, STABILITY_ENVELOPE_ISSUE
+from test_provider_contracts import ROOT, check_binding, check_documented_models
+from provider_contracts.providers import Binding, PROVIDERS, STABILITY_ENVELOPE_ISSUE
 from provider_contracts.schema import compare, operation, payload
 from provider_contracts.upstream import fetch
 
 
 class ContractCheckerTests(unittest.TestCase):
+    def test_given_contract_registry_when_matrix_loaded_expected_each_provider_uses_shared_runner(self):
+        """given registered providers and integrations, CI matrix is read, expected every contract uses the shared job"""
+        # Given
+        workflow = yaml.safe_load((ROOT / ".github/workflows/project_tests.yml").read_text())
+        job = workflow["jobs"]["test-cloud-contracts"]
+        # When
+        providers = {item["provider"] for item in job["strategy"]["matrix"]["include"]}
+        commands = [step.get("run", "") for step in job["steps"]]
+        # Then
+        self.assertEqual(set(PROVIDERS), providers)
+        self.assertTrue(any("scripts/test_provider_contracts.py --provider" in command for command in commands))
+
+    def test_given_civitai_document_when_compiled_model_matches_expected_success(self):
+        """given documented Civitai account, compiled serializer matches, expected no differences"""
+        # Given
+        document = json.loads((ROOT / "network/civitai.openapi.json").read_text())
+        models = {"CivitaiAccountResponse": {"type": "object", "properties": {
+            "id": {"type": "integer", "nullable": False},
+            "username": {"type": "string", "nullable": False},
+        }, "required": ["id", "username"]}}
+        # When
+        checks = check_documented_models(document, models)
+        # Then
+        self.assertEqual([], checks[0]["errors"])
+
+    def test_given_civitai_document_when_property_description_missing_expected_failure(self):
+        """given complete Civitai document, one field description disappears, expected documentation rejection"""
+        # Given
+        document = json.loads((ROOT / "network/civitai.openapi.json").read_text())
+        del document["components"]["schemas"]["CivitaiAccountResponse"]["properties"]["username"]["description"]
+        # When
+        with self.assertRaisesRegex(ValueError, "Missing description"):
+            check_documented_models(document, {})
+        # Then
+        self.assertIn("CivitaiAccountResponse", document["components"]["schemas"])
+
+    def test_given_civitai_document_when_type_changes_expected_compiled_contract_failure(self):
+        """given integer Civitai identity, compiled wire type becomes string, expected structural errors"""
+        # Given
+        document = json.loads((ROOT / "network/civitai.openapi.json").read_text())
+        models = {"CivitaiAccountResponse": {"type": "object", "properties": {
+            "id": {"type": "string", "nullable": False},
+            "username": {"type": "string", "nullable": False},
+        }, "required": ["id", "username"]}}
+        # When
+        checks = check_documented_models(document, models)
+        # Then
+        self.assertTrue(any("app string, upstream integer" in error for error in checks[0]["errors"]))
+
+    def test_given_civitai_document_when_model_field_removed_expected_wire_inventory_failure(self):
+        """given documented Civitai fields, compiled serializer drops username, expected wire inventory rejection"""
+        # Given
+        document = json.loads((ROOT / "network/civitai.openapi.json").read_text())
+        models = {"CivitaiAccountResponse": {"type": "object", "properties": {
+            "id": {"type": "integer", "nullable": False},
+        }, "required": ["id"]}}
+        # When
+        checks = check_documented_models(document, models)
+        # Then
+        self.assertTrue(any("wire fields differ" in error for error in checks[0]["errors"]))
+
+    def test_given_civitai_document_when_export_missing_expected_no_silent_pass(self):
+        """given Civitai matrix item, exporter supplies no Civitai models, expected explicit failure"""
+        # Given
+        document = json.loads((ROOT / "network/civitai.openapi.json").read_text())
+        # When
+        with self.assertRaisesRegex(ValueError, "No compiled Civitai"):
+            check_documented_models(document, {})
+        # Then
+        self.assertTrue(document["paths"])
+
     def test_optional_request_extensions(self):
         """given optional nullable request field, schema permits extensions, expected warning only"""
         # Given a shared DTO field omitted when null and an open upstream object.

@@ -4,6 +4,8 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.RestoreSessionEntity
 import com.shifthackz.aisdv1.storage.db.persistent.entity.RestoreSectionEntity
 import com.shifthackz.aisdv1.storage.db.persistent.dao.RestoreSessionDao
 import androidx.room.AutoMigration
+import com.shifthackz.aisdv1.storage.db.persistent.entity.CivitaiUploadEntity
+import com.shifthackz.aisdv1.storage.db.persistent.dao.CivitaiUploadDao
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -28,7 +30,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 
 /**
  * Main Room database containing generated images, downloaded models, and app statistics.
- * Schema version 17 retains generation provenance, originating device and elapsed time without inventing legacy values.
+ * Schema version 19 retains generation provenance, Civitai post links and independent paginated upload receipts.
  *
  * @author Dmitriy Moroz
  */
@@ -44,6 +46,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
         NetworkUsageEntity::class,
         RestoreSessionEntity::class,
         RestoreSectionEntity::class,
+        CivitaiUploadEntity::class,
     ],
     autoMigrations = [
         /**
@@ -160,6 +163,19 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
          * @author Dmitriy Moroz
          */
         AutoMigration(from = 16, to = 17),
+        /**
+         * Added a nullable public Civitai post link without changing existing images.
+         * - [GenerationResultEntity.civitaiUrl]
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 17, to = 18),
+        /**
+         * Added [CivitaiUploadEntity] for paginated receipts retained across sign-out and gallery deletion.
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 18, to = 19),
     ],
 )
 @TypeConverters(
@@ -167,6 +183,13 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 )
 @ConstructedBy(PersistentDatabaseConstructor::class)
 internal abstract class PersistentDatabase : RoomDatabase() {
+    /**
+     * Persists publication phases and reads bounded account-independent history pages.
+     *
+     * @author Dmitriy Moroz
+     */
+    abstract fun civitaiUploadDao(): CivitaiUploadDao
+
     /**
      * Reads and mutates saved gallery images and their metadata.
      *
@@ -230,11 +253,11 @@ internal abstract class PersistentDatabase : RoomDatabase() {
         const val DB_NAME = "ai_sd_v1_storage_db"
 
         /**
-         * Schema target including nullable image provenance, device information and elapsed time.
+         * Schema target including nullable image provenance, device information, elapsed time and public publication links.
          *
          * @author Dmitriy Moroz
          */
-        const val DB_VERSION = 17
+        const val DB_VERSION = 19
     }
 }
 
@@ -243,7 +266,6 @@ internal abstract class PersistentDatabase : RoomDatabase() {
  *
  * @author Dmitriy Moroz
  */
-@Suppress("KotlinNoActualForExpect")
 internal expect object PersistentDatabaseConstructor : RoomDatabaseConstructor<PersistentDatabase> {
     /**
      * Creates the platform Room database implementation generated from this schema.

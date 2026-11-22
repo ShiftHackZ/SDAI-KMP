@@ -21,6 +21,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
+import com.shifthackz.aisdv1.domain.entity.isCivitaiPostUrl
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
@@ -64,6 +71,7 @@ internal fun GalleryDetailsTable(
                 value = row.value,
                 color = colorText,
                 onCopyTextClick = onCopyTextClick,
+                isLink = row.isLink,
             )
         }
     }
@@ -79,6 +87,7 @@ internal fun GalleryDetailsTable(
  * @param value Recorded value; empty and whitespace-only values display a dash without a copy action.
  * @param color Text color for both cells.
  * @param onCopyTextClick Receives the nonblank value when its copy action is activated.
+ * @param isLink Whether the value is a canonical public Civitai post link.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -90,6 +99,7 @@ internal fun GalleryDetailRow(
     value: String,
     color: Color,
     onCopyTextClick: (String) -> Unit = {},
+    isLink: Boolean = false,
 ) {
     Row(modifier) {
         GalleryDetailCell(
@@ -99,6 +109,7 @@ internal fun GalleryDetailRow(
         )
         GalleryDetailCell(
             text = value.ifBlank { "-" },
+            isLink = isLink,
             modifier = Modifier.weight(column2Weight),
             color = color,
         )
@@ -125,6 +136,7 @@ internal fun GalleryDetailRow(
  * @param modifier Column sizing and placement supplied by the row.
  * @param text Already localized/formatted cell text.
  * @param color Foreground color for the cell text.
+ * @param isLink Whether the cell should expose a native browser link rather than ordinary text.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -132,12 +144,23 @@ internal fun GalleryDetailCell(
     modifier: Modifier = Modifier,
     text: String,
     color: Color,
+    isLink: Boolean = false,
 ) {
+    val linkStyle = TextLinkStyles(
+        SpanStyle(
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline,
+        )
+    )
     Text(
         modifier = modifier
             .padding(start = 12.dp)
             .padding(vertical = 8.dp),
-        text = text,
+        text = buildAnnotatedString {
+            if (isLink && text.isCivitaiPostUrl()) {
+                withLink(LinkAnnotation.Url(text, linkStyle)) { append(text) }
+            } else append(text)
+        },
         color = color,
     )
 }
@@ -162,6 +185,15 @@ private fun GalleryDetailContent.detailRows(): List<GalleryDetailField> =
                 provider.orEmpty()
             )
         )
+        civitaiUrl?.let {
+            add(
+                GalleryDetailField(
+                    Localization.string("civitai_title"),
+                    it,
+                    isLink = it.isCivitaiPostUrl()
+                )
+            )
+        }
         add(GalleryDetailField(Localization.string("gallery_info_field_model"), modelName))
         add(
             GalleryDetailField(
@@ -255,4 +287,5 @@ private fun GalleryDetailContent.detailRows(): List<GalleryDetailField> =
 private data class GalleryDetailField(
     val name: String,
     val value: String,
+    val isLink: Boolean = false,
 )

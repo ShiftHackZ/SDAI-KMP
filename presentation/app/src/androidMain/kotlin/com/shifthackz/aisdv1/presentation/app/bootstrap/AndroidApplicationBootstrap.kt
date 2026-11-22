@@ -5,7 +5,6 @@ import androidx.work.WorkerFactory
 import com.shifthackz.aisdv1.core.common.appbuild.ActivityIntentProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
-import com.shifthackz.aisdv1.core.common.links.LinksProvider
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.common.time.TimeProvider
 import com.shifthackz.aisdv1.core.imageprocessing.di.imageProcessingModule
@@ -48,7 +47,6 @@ fun startAndroidApplication(
         modules(notificationModule, imageProcessingModule, openAiOAuthModule)
         modules(*domainModule, *presentationModule)
         modules(uiDiagnosticsModule(isEnabled = isDiagnosticsEnabled), module {
-            single<LinksProvider> { bindings.linksProvider }
             single<BuildInfoProvider> { bindings.buildInfoProvider }
             single<DispatchersProvider> { bindings.dispatchersProvider }
             single<TimeProvider> { bindings.timeProvider }

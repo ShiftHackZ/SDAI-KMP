@@ -23,7 +23,8 @@ class Binding:
 
 
 SKIPPED = {"ARLI_AI", "OPEN_AI_OAUTH"}
-PROVIDERS = ("OPEN_AI", "HORDE", "HUGGING_FACE", "STABILITY_AI", "FAL_AI")
+CLOUD_PROVIDERS = ("OPEN_AI", "HORDE", "HUGGING_FACE", "STABILITY_AI", "FAL_AI")
+PROVIDERS = (*CLOUD_PROVIDERS, "CIVITAI")
 STABILITY_ENVELOPE_ISSUE = "https://github.com/Stability-AI/rest-api-support/issues/38"
 
 
@@ -136,5 +137,5 @@ def verify_inventory(root):
         source.read_text(),
         re.M,
     )
-    if set(entries) != set(PROVIDERS) | SKIPPED:
+    if set(entries) != set(CLOUD_PROVIDERS) | SKIPPED:
         raise ValueError(f"Cloud coverage inventory changed: found {sorted(entries)}")

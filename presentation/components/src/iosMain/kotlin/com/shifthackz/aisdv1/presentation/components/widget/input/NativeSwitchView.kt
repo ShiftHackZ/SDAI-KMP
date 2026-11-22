@@ -10,8 +10,12 @@ import platform.CoreGraphics.CGAffineTransformMakeScale
 import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
 import platform.Foundation.NSSelectorFromString
+import platform.Foundation.NSOperationQueue
 import platform.UIKit.UIColor
 import platform.UIKit.UIControlEventValueChanged
+import platform.UIKit.UIControlEventTouchUpInside
+import platform.UIKit.UIControlEventTouchUpOutside
+import platform.UIKit.UIControlEventTouchCancel
 import platform.UIKit.UISwitch
 import platform.UIKit.UIUserInterfaceStyle.UIUserInterfaceStyleDark
 import platform.UIKit.UIUserInterfaceStyle.UIUserInterfaceStyleLight
@@ -27,6 +31,7 @@ import platform.UIKit.isAccessibilityElement
  */
 internal class NativeSwitchView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0)) {
     private val control = UISwitch()
+    private var isChecked = false
     var onValueChange: ((Boolean) -> Unit)? = null
 
     init {
@@ -34,8 +39,18 @@ internal class NativeSwitchView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0))
         control.isAccessibilityElement = false
         addSubview(control)
         control.addTarget(this, NSSelectorFromString("valueChanged:"), UIControlEventValueChanged)
+        control.addTarget(
+            this,
+            NSSelectorFromString("interactionEnded"),
+            UIControlEventTouchUpInside or UIControlEventTouchUpOutside or UIControlEventTouchCancel,
+        )
     }
 
+    /**
+     * Centers the native thumb and track inside the shared touch target without clipping their material.
+     *
+     * @author Dmitriy Moroz
+     */
     override fun layoutSubviews() {
         super.layoutSubviews()
         control.transform = CGAffineTransformMakeScale(1.0, 1.0)
@@ -66,6 +81,7 @@ internal class NativeSwitchView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0))
         backingColor: UIColor,
         onCheckedChange: ((Boolean) -> Unit)?,
     ) {
+        this.isChecked = isChecked
         onValueChange = onCheckedChange
         backgroundColor = backingColor
         control.enabled = isEnabled
@@ -76,7 +92,8 @@ internal class NativeSwitchView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0))
     }
 
     /**
-     * Forwards one UIKit value change to the current shared-state owner.
+     * Requests a shared-state change, then restores the actual owner value after UIKit finishes dispatching.
+     * A confirmation dialog may leave that value unchanged, so synchronization cannot depend on recomposition.
      *
      * @param sender The native switch after the user's interaction.
      * @author Dmitriy Moroz
@@ -84,5 +101,27 @@ internal class NativeSwitchView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0))
     @ObjCAction
     fun valueChanged(sender: UISwitch) {
         onValueChange?.invoke(sender.on)
+        synchronizeState()
+    }
+
+    /**
+     * Reconciles a slow drag or cancelled touch after the native gesture finishes.
+     *
+     * @author Dmitriy Moroz
+     */
+    @ObjCAction
+    fun interactionEnded() {
+        synchronizeState()
+    }
+
+    /**
+     * Reads the latest shared value on the next main-loop turn without emitting another user event.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun synchronizeState() {
+        NSOperationQueue.mainQueue.addOperationWithBlock {
+            if (control.on != isChecked) control.setOn(isChecked, animated = window != null)
+        }
     }
 }

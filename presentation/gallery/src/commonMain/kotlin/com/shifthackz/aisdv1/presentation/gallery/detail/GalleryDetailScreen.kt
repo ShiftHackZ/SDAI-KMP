@@ -20,7 +20,7 @@ import org.koin.core.parameter.parametersOf
  * @param itemId Initial persistent identity, or nonpositive to open the last cached result.
  * @param modifier Layout modifiers for the detail screen.
  * @param router Optional detail route owner; defaults to the initialized application graph.
- *
+ * @param civitaiAction App-supplied Civitai publishing action, retaining independent screen-module ownership.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -28,6 +28,7 @@ fun GalleryDetailScreen(
     itemId: Long,
     modifier: Modifier = Modifier,
     router: GalleryDetailRouter? = null,
+    civitaiAction: @Composable (Long) -> Unit = {},
 ) {
     val koin = remember { getKoin() }
     val resolvedRouter = remember(koin, router) {
@@ -51,6 +52,7 @@ fun GalleryDetailScreen(
             modifier = modifier.fillMaxSize(),
             state = state,
             imageLoader = imageLoader,
+            civitaiAction = { state.content?.id?.let { civitaiAction(it) } },
             processIntent = intentHandler,
         )
     }

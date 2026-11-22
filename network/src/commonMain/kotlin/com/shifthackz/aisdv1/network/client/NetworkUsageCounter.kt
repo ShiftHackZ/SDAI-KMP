@@ -34,6 +34,13 @@ enum class NetworkUsageCategory {
      * @author Dmitriy Moroz
      */
     INFERENCE,
+
+    /**
+     * Civitai account operations and publication, including original-image object uploads.
+     *
+     * @author Dmitriy Moroz
+     */
+    CIVITAI,
 }
 
 /**

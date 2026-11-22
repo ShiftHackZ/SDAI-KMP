@@ -2,6 +2,11 @@ package com.shifthackz.aisdv1.presentation.app.di
 
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.validation.di.validatorsModule
+import com.shifthackz.aisdv1.network.di.civitaiNetworkModule
+import com.shifthackz.aisdv1.feature.civitai.config.BuildConfig as CivitaiBuildConfig
+import com.shifthackz.aisdv1.data.di.civitaiDataModule
+import com.shifthackz.aisdv1.feature.civitai.di.civitaiModule
+import com.shifthackz.aisdv1.presentation.civitai.di.civitaiPresentationModule
 import com.shifthackz.aisdv1.data.di.coreDataModule
 import com.shifthackz.aisdv1.data.di.dataModule
 import com.shifthackz.aisdv1.demo.di.demoModule
@@ -37,6 +42,13 @@ internal val commonApplicationModules = listOf(
     coreDomainModule,
     benchmarkUseCaseModule,
     coreDataModule,
+    civitaiNetworkModule(
+        CivitaiBuildConfig.CIVITAI_CLIENT_ID,
+        CivitaiBuildConfig.CIVITAI_REDIRECT_URI
+    ),
+    civitaiDataModule,
+    civitaiModule,
+    civitaiPresentationModule,
     *dataModule,
     demoModule,
     authModule,
@@ -53,7 +65,6 @@ internal val commonApplicationModules = listOf(
  * Initializes the iOS graph before runtime registration and Compose rendering.
  *
  * @return Existing or newly started application graph.
- *
  * @author Dmitriy Moroz
  */
 fun initKoin(): Koin = (KoinPlatform.getKoinOrNull() ?: startKoin {
@@ -65,7 +76,6 @@ fun initKoin(): Koin = (KoinPlatform.getKoinOrNull() ?: startKoin {
  * Applies the persisted locale before the first UI composition reads localized strings.
  *
  * @param koin Initialized host graph that owns the current preference store.
- *
  * @author Dmitriy Moroz
  */
 internal fun initializeApplicationLanguage(koin: Koin) {

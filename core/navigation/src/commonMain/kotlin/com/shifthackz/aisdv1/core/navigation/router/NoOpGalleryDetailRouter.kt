@@ -7,6 +7,8 @@ package com.shifthackz.aisdv1.core.navigation.router
  * @author Dmitriy Moroz
  */
 object NoOpGalleryDetailRouter : GalleryDetailRouter {
+    override fun navigateToCivitai() = Unit
+
     /**
      * Ignores this action because no navigation host is attached.
      *

@@ -1,6 +1,6 @@
 package com.shifthackz.aisdv1.presentation.appupdate
 
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import kotlinx.coroutines.flow.StateFlow
 
 /**

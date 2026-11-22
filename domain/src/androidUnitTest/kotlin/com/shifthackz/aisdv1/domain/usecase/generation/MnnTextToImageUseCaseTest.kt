@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.domain.usecase.generation
 
+import com.shifthackz.aisdv1.domain.usecase.civitai.AutoUploadToCivitaiUseCase
 import com.shifthackz.aisdv1.domain.mocks.ImmediateGenerationRestoreGate
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
@@ -53,6 +54,7 @@ class MnnTextToImageUseCaseTest {
     )
     private val useCase = TextToImageUseCaseImpl(
         deviceProbe = mockk<BenchmarkDeviceProbe>(relaxed = true),
+        autoUploadToCivitaiUseCase = AutoUploadToCivitaiUseCase { it },
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
             mockk(relaxed = true),
             mockk(relaxed = true)

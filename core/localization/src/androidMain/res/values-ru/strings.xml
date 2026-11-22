@@ -359,7 +359,7 @@
     <string name="settings_usage_delete_models_text">С устройства будут удалены скачанные %2$s (%1$s). Их можно скачать заново в настройке провайдера.</string>
     <string name="settings_usage_delete_all_text">Будет удалено все, что показано здесь (%1$s): %2$s.</string>
     <string name="settings_usage_storage_note">Элементы галереи удаляются из встроенной галереи. Локальные модели можно скачать заново в настройке провайдера.</string>
-    <string name="settings_usage_network_note">Учитываются скачивание моделей, синхронизация конфигов и запросы инференса.</string>
+    <string name="settings_usage_network_note">Включает загрузку моделей, синхронизацию конфигурации, запросы генерации и публикации в Civitai.</string>
 
     <string name="settings_item_lf_lang">Язык</string>
     <string name="settings_item_lf_gallery_grid">Размер сетки галереи</string>
@@ -865,4 +865,31 @@
     <string name="app_update_message">Доступна версия %1$s. Открыть страницу загрузки?</string>
     <string name="app_update_action">Обновить</string>
     <string name="app_update_later">Позже</string>
+
+    <string name="civitai_title">Civitai</string>
+    <string name="civitai_account">Учётная запись</string>
+    <string name="civitai_key_help">Также можно подключиться с помощью API-ключа Civitai с разрешением читать профиль и публиковать изображения.</string>
+    <string name="civitai_api_key">API-ключ</string>
+    <string name="civitai_connect">Подключить API-ключ</string>
+    <string name="civitai_get_key">Управлять API-ключами на Civitai</string>
+    <string name="civitai_disconnect">Отключить учётную запись</string>
+    <string name="civitai_enable">Включить</string>
+    <string name="civitai_auto_upload">Автоматически публиковать созданные изображения</string>
+    <string name="civitai_public_notice">Новые созданные изображения, запросы, параметры генерации и сохранённые сведения об устройстве будут опубликованы на Civitai с упоминанием SDAI. Имеющиеся изображения галереи и входные изображения автоматически не загружаются.</string>
+    <string name="civitai_history">История публикаций</string>
+    <string name="civitai_history_empty">Из SDAI ещё не опубликовано ни одного изображения.</string>
+    <string name="civitai_failure">Не удалось выполнить действие Civitai. Проверьте соединение и разрешения учётной записи. Если публикация могла быть создана, проверьте Civitai перед повторной попыткой.</string>
+    <string name="civitai_sign_in">Войти через Civitai</string>
+    <string name="civitai_action_help">Опубликовать созданное изображение на Civitai с параметрами и упоминанием SDAI. После загрузки нажмите ещё раз, чтобы открыть публикацию.</string>
+    <string name="civitai_login_required">Вы не вошли в Civitai. Открыть настройки Civitai и подключить учётную запись?</string>
+    <string name="civitai_success">Изображение загружено на Civitai. Оно может быть скрыто во время обработки. Нажмите кнопку Civitai ещё раз, чтобы открыть публикацию.</string>
+    <string name="settings_header_integrations">Интеграции</string>
+    <string name="settings_help_integrations_header">Подключайте внешние сервисы и открывайте веб-интерфейс настроенного сервера.</string>
+    <string name="settings_help_web_ui">Откройте веб-интерфейс настроенного сервера внутри приложения. Его функции и доступность зависят от сервера.</string>
+    <string name="settings_help_civitai">Управляйте учётной записью Civitai, автоматической загрузкой и историей публикаций.</string>
+    <string name="civitai_upload_uploading">Загрузка…</string>
+    <string name="civitai_upload_published">Опубликовано</string>
+    <string name="civitai_upload_failed">Ошибка загрузки — открыть Civitai</string>
+    <string name="civitai_upload_uncertain">Публикация не подтверждена — проверьте Civitai</string>
+    <string name="backup_category_civitai">Civitai</string>
 </resources>

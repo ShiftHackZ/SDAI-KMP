@@ -16,6 +16,8 @@ fun AppRoute.asHomeTabRoute(): AppRoute? = when (this) {
 
     AppRoute.ImageInPaint,
     AppRoute.Benchmark,
+    AppRoute.Civitai,
+    AppRoute.CivitaiHistory,
     AppRoute.StorageUsage,
     AppRoute.NetworkUsage,
     AppRoute.BackupWelcome,

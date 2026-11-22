@@ -392,7 +392,7 @@
     <string name="settings_usage_delete_models_text">Downloaded %2$s (%1$s) will be deleted from this device. You can download them again from provider setup.</string>
     <string name="settings_usage_delete_all_text">Everything shown here (%1$s) will be deleted: %2$s.</string>
     <string name="settings_usage_storage_note">Gallery items are removed from the in-app gallery. Local models can be downloaded again from provider setup.</string>
-    <string name="settings_usage_network_note">Includes model downloads, configuration sync, and inference requests.</string>
+    <string name="settings_usage_network_note">Includes model downloads, configuration sync, inference requests, and Civitai uploads.</string>
 
     <string name="settings_item_lf_lang">Language</string>
     <string name="settings_item_lf_gallery_grid">Gallery grid size</string>
@@ -902,4 +902,31 @@
     <string name="app_update_message">Version %1$s is available. Would you like to open the download page?</string>
     <string name="app_update_action">Update</string>
     <string name="app_update_later">Later</string>
+
+    <string name="civitai_title">Civitai</string>
+    <string name="civitai_account">Account</string>
+    <string name="civitai_key_help">You can also connect with a Civitai API key that allows reading your profile and publishing media.</string>
+    <string name="civitai_api_key">API key</string>
+    <string name="civitai_connect">Connect with API key</string>
+    <string name="civitai_get_key">Manage API keys on Civitai</string>
+    <string name="civitai_disconnect">Disconnect account</string>
+    <string name="civitai_enable">Enable</string>
+    <string name="civitai_auto_upload">Auto-upload generated images</string>
+    <string name="civitai_public_notice">Newly generated output images, prompts, generation settings and recorded device details will be published publicly on Civitai with SDAI attribution. Existing gallery images and input images are not automatically uploaded.</string>
+    <string name="civitai_history">Upload history</string>
+    <string name="civitai_history_empty">No images uploaded from SDAI yet.</string>
+    <string name="civitai_failure">Could not complete the Civitai operation. Check your connection and account permissions. If a post may have been created, check Civitai before trying again.</string>
+    <string name="civitai_sign_in">Sign in with Civitai</string>
+    <string name="civitai_action_help">Publish this generated output to Civitai with its settings and SDAI attribution. Tap again after upload to open its post.</string>
+    <string name="civitai_login_required">You are not signed in to Civitai. Would you like to open Civitai settings and connect your account now?</string>
+    <string name="civitai_success">Image uploaded to Civitai. It may remain hidden while Civitai processes it. Tap the Civitai action again to open the post.</string>
+    <string name="settings_header_integrations">Integrations</string>
+    <string name="settings_help_integrations_header">Connect external services and open your configured server’s web interface.</string>
+    <string name="settings_help_web_ui">Open the web interface of your configured server inside the app. Its controls and availability are provided by that server.</string>
+    <string name="settings_help_civitai">Manage your Civitai account, automatic uploads and upload history.</string>
+    <string name="civitai_upload_uploading">Uploading…</string>
+    <string name="civitai_upload_published">Published</string>
+    <string name="civitai_upload_failed">Upload failed — open Civitai</string>
+    <string name="civitai_upload_uncertain">Upload could not be confirmed — check Civitai</string>
+    <string name="backup_category_civitai">Civitai</string>
 </resources>

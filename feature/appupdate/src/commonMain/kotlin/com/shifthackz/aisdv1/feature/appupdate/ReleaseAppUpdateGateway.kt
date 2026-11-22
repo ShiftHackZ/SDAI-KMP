@@ -2,8 +2,8 @@ package com.shifthackz.aisdv1.feature.appupdate
 
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildVersion
-import com.shifthackz.aisdv1.feature.appupdate.domain.AppUpdateGateway
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.gateway.AppUpdateGateway
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet

@@ -3,8 +3,8 @@ package com.shifthackz.aisdv1.feature.appupdate
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.shifthackz.aisdv1.feature.appupdate.domain.AppUpdateGateway
-import com.shifthackz.aisdv1.feature.appupdate.domain.entity.AppUpdate
+import com.shifthackz.aisdv1.domain.gateway.AppUpdateGateway
+import com.shifthackz.aisdv1.domain.entity.AppUpdate
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine

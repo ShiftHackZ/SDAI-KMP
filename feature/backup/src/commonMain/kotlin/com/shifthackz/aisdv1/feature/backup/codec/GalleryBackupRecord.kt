@@ -28,6 +28,7 @@ import kotlinx.serialization.SerialName
  * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
  * @param osVersion Originating OS version, including Android API level; null for legacy images.
  * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
+ * @param civitaiUrl Confirmed public Civitai post URL; null for older archives or unpublished images.
  * @author Dmitriy Moroz
  */
 @Serializable
@@ -54,4 +55,5 @@ internal data class GalleryBackupRecord(
     val deviceName: String? = null,
     val osVersion: String? = null,
     val generationDurationMillis: Long? = null,
+    val civitaiUrl: String? = null,
 )

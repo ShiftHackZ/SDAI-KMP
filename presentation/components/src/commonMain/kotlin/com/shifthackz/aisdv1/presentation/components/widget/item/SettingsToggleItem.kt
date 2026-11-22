@@ -20,6 +20,7 @@ import com.shifthackz.aisdv1.core.model.UiText
  * @param isLoading Whether to show the existing preference placeholder.
  * @param startIcon Optional leading preference icon.
  * @param textSuffixContent Optional badge displayed after the label.
+ * @param isEnabled Whether the row and native switch accept changes.
  *
  * @author Dmitriy Moroz
  */
@@ -32,10 +33,12 @@ fun SettingsToggleItem(
     isLoading: Boolean = false,
     startIcon: ImageVector? = null,
     textSuffixContent: (@Composable () -> Unit)? = null,
+    isEnabled: Boolean = true,
 ) {
     SettingsItem(
         modifier = modifier,
         loading = isLoading,
+        enabled = isEnabled,
         startIcon = startIcon,
         text = text,
         textSuffixContent = textSuffixContent,
@@ -45,6 +48,7 @@ fun SettingsToggleItem(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 isChecked = isChecked,
                 onCheckedChange = onCheckedChange,
+                isEnabled = isEnabled,
             )
         },
     )

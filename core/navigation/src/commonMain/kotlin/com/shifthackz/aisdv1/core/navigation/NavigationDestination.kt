@@ -19,6 +19,8 @@ enum class NavigationDestination {
     GALLERY,
     GALLERY_DETAIL,
     SETTINGS,
+    CIVITAI,
+    CIVITAI_HISTORY,
     STORAGE_USAGE,
     NETWORK_USAGE,
     BENCHMARK,

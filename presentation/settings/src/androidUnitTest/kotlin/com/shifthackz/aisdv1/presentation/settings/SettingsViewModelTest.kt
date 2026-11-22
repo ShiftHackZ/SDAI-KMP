@@ -442,6 +442,9 @@ private object TestBuildInfoProvider : BuildInfoProvider {
 }
 
 private class TestSettingsRouter : SettingsRouter {
+    override fun navigateToWebUi() = Unit
+    override fun navigateToCivitai() = Unit
+
     override fun navigateToBackup() = Unit
 
     var serverSetupSource: LaunchSource? = null

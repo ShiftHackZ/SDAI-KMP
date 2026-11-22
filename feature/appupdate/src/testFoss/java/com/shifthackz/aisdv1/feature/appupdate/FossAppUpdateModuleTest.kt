@@ -1,8 +1,9 @@
 package com.shifthackz.aisdv1.feature.appupdate
 
+import com.shifthackz.aisdv1.domain.di.coreDomainModule
 import com.shifthackz.aisdv1.feature.appupdate.di.appUpdateModule
-import com.shifthackz.aisdv1.feature.appupdate.domain.AppUpdateGateway
-import com.shifthackz.aisdv1.feature.appupdate.domain.CheckAppUpdateUseCase
+import com.shifthackz.aisdv1.domain.gateway.AppUpdateGateway
+import com.shifthackz.aisdv1.domain.usecase.appupdate.CheckAppUpdateUseCase
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
@@ -19,7 +20,7 @@ class FossAppUpdateModuleTest {
     fun `given FOSS distribution DI, launch discovery is resolved and invoked, expected the NoOp gateway and no offer`() =
         runBlocking {
             // Given
-            val application = koinApplication { modules(appUpdateModule) }
+            val application = koinApplication { modules(coreDomainModule, appUpdateModule) }
             try {
                 val gateway = application.koin.get<AppUpdateGateway>()
                 val check = application.koin.get<CheckAppUpdateUseCase>()

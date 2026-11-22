@@ -1,6 +1,6 @@
 package com.shifthackz.aisdv1.feature.appupdate
 
-import com.shifthackz.aisdv1.feature.appupdate.domain.AppUpdateGateway
+import com.shifthackz.aisdv1.domain.gateway.AppUpdateGateway
 
 /**
  * Leaves version selection entirely to the distribution manager without making requests.

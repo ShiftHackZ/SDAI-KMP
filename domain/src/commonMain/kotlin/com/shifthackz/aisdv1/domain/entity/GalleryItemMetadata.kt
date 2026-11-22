@@ -27,6 +27,7 @@ package com.shifthackz.aisdv1.domain.entity
  * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
  * @param osVersion Originating OS version, including Android API level; null for legacy images.
  * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
+ * @param civitaiUrl Public post URL after a successful Civitai publication; null for unpublished images.
  * @author Dmitriy Moroz
  */
 data class GalleryItemMetadata(
@@ -54,6 +55,7 @@ data class GalleryItemMetadata(
     val deviceName: String? = null,
     val osVersion: String? = null,
     val generationDurationMillis: Long? = null,
+    val civitaiUrl: String? = null,
 ) {
     /**
      * Validated layout ratio for history thumbnails.

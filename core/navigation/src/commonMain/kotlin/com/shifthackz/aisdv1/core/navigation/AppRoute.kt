@@ -15,6 +15,7 @@ sealed interface AppRoute {
 
     /**
      * Reusable backup route carrying settings or first-launch completion behavior.
+     *
      * @param source Caller context; SPLASH requires configuration on exit.
      * @author Dmitriy Moroz
      */
@@ -22,12 +23,20 @@ sealed interface AppRoute {
         override val destination = NavigationDestination.BACKUP
     }
 
-    /** First-launch restore invitation, which cannot return to completed onboarding. @author Dmitriy Moroz */
+    /**
+     * First-launch restore invitation, which cannot return to completed onboarding.
+     *
+     * @author Dmitriy Moroz
+     */
     data object BackupWelcome : AppRoute {
         override val destination = NavigationDestination.BACKUP_WELCOME
     }
 
-    /** Initial launch gate before onboarding, setup or configuration loading. @author Dmitriy Moroz */
+    /**
+     * Initial launch gate before onboarding, setup or configuration loading.
+     *
+     * @author Dmitriy Moroz
+     */
     data object Splash : AppRoute {
         override val destination = NavigationDestination.SPLASH
     }
@@ -123,6 +132,24 @@ sealed interface AppRoute {
      */
     data object Settings : AppRoute {
         override val destination = NavigationDestination.SETTINGS
+    }
+
+    /**
+     * Standalone storage usage screen.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object Civitai : AppRoute {
+        override val destination = NavigationDestination.CIVITAI
+    }
+
+    /**
+     * Paginated local Civitai receipts, available independently of account authorization.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object CivitaiHistory : AppRoute {
+        override val destination = NavigationDestination.CIVITAI_HISTORY
     }
 
     /**

@@ -42,6 +42,10 @@ import com.shifthackz.aisdv1.presentation.statistics.networkusage.NetworkUsageSc
 import com.shifthackz.aisdv1.presentation.onboarding.OnBoardingContent
 import com.shifthackz.aisdv1.presentation.onboarding.OnBoardingViewModel
 import com.shifthackz.aisdv1.presentation.report.ReportScreen
+import com.shifthackz.aisdv1.presentation.civitai.upload.CivitaiUploadViewModel
+import com.shifthackz.aisdv1.presentation.civitai.upload.CivitaiUploadAction
+import com.shifthackz.aisdv1.presentation.civitai.settings.CivitaiScreen
+import com.shifthackz.aisdv1.presentation.civitai.history.CivitaiHistoryScreen
 import com.shifthackz.aisdv1.presentation.settings.SettingsScreen
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupViewModel
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupContent
@@ -71,7 +75,6 @@ import org.koin.core.parameter.parametersOf
 
 /**
  * Hosts the persistent bottom-tab routes inside the app scaffold.
- *
  * Standalone overlay routes such as storage usage and network usage are deliberately excluded so
  * they can render without the bottom bar.
  *
@@ -85,7 +88,6 @@ import org.koin.core.parameter.parametersOf
  * @param observePerformance Cold opt-in sampler shared with visible generation dialogs.
  * @param textToImageViewModel Shared Text-to-Image ViewModel kept alive with its tab.
  * @param imageToImageViewModel Shared Image-to-Image ViewModel kept alive with its tab.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -181,7 +183,6 @@ internal fun HomeRoutesScaffold(
  * @param router Root router passed to overlay screens.
  * @param urlLauncher Platform external URL launcher used by web/report flows.
  * @param imageToImageViewModel Shared Image-to-Image ViewModel reused by in-paint overlay flow.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -240,6 +241,9 @@ internal fun OverlayRouteContent(
                 )
             }
         }
+
+        AppRoute.Civitai -> CivitaiScreen(router = router)
+        AppRoute.CivitaiHistory -> CivitaiHistoryScreen(router = router)
 
         AppRoute.StorageUsage -> {
             StorageUsageScreen(
@@ -355,6 +359,11 @@ internal fun OverlayRouteContent(
             GalleryDetailScreen(
                 itemId = route.itemId,
                 router = router,
+                civitaiAction = { id ->
+                    val uploader =
+                        remember(koin, id) { koin.get<CivitaiUploadViewModel> { parametersOf(id) } }
+                    CivitaiUploadAction(uploader, router::navigateToCivitai, urlLauncher::openUrl)
+                },
             )
         }
 

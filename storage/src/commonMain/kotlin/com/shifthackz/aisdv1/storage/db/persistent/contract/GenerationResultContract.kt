@@ -1,169 +1,211 @@
 package com.shifthackz.aisdv1.storage.db.persistent.contract
 
 /**
- * Provides the `GenerationResultContract` singleton used by the SDAI storage layer.
+ * Stable Room names shared by full generation rows, metadata projections and gallery queries.
  *
  * @author Dmitriy Moroz
  */
 internal object GenerationResultContract {
     /**
-     * Exposes the `TABLE` value used by the SDAI storage layer.
+     * Saved generation rows shared by gallery, backup and publication metadata.
      *
      * @author Dmitriy Moroz
      */
     const val TABLE = "generation_results"
 
     /**
-     * Opaque content identity changed on every image replacement.
+     * Opaque content identity changed whenever the image is replaced.
      *
      * @author Dmitriy Moroz
      */
     const val IMAGE_REVISION = "image_revision"
 
     /**
-     * Exposes the `CREATED_AT_INDEX` value used by the SDAI storage layer.
+     * Index supporting stable newest-first gallery paging.
      *
      * @author Dmitriy Moroz
      */
     const val CREATED_AT_INDEX = "index_generation_results_created_at"
 
     /**
-     * Exposes the `ID` value used by the SDAI storage layer.
+     * Persistent gallery row identity.
      *
      * @author Dmitriy Moroz
      */
     const val ID = "id"
 
     /**
-     * Exposes the `IMAGE_BASE_64` value used by the SDAI storage layer.
+     * Original encoded output image payload.
      *
      * @author Dmitriy Moroz
      */
     const val IMAGE_BASE_64 = "image_base_64"
 
     /**
-     * Exposes the `ORIGINAL_IMAGE_BASE_64` value used by the SDAI storage layer.
+     * Optional encoded input image payload.
      *
      * @author Dmitriy Moroz
      */
     const val ORIGINAL_IMAGE_BASE_64 = "original_image_base_64"
 
     /**
-     * Exposes the `CREATED_AT` value used by the SDAI storage layer.
+     * Original image creation time in epoch milliseconds.
      *
      * @author Dmitriy Moroz
      */
     const val CREATED_AT = "created_at"
 
     /**
-     * Exposes the `GENERATION_TYPE` value used by the SDAI storage layer.
+     * Stored text-to-image or image-to-image operation key.
      *
      * @author Dmitriy Moroz
      */
     const val GENERATION_TYPE = "generation_type"
 
     /**
-     * Exposes the `PROMPT` value used by the SDAI storage layer.
+     * Positive generation prompt.
      *
      * @author Dmitriy Moroz
      */
     const val PROMPT = "prompt"
 
     /**
-     * Exposes the `NEGATIVE_PROMPT` value used by the SDAI storage layer.
+     * Negative generation prompt.
      *
      * @author Dmitriy Moroz
      */
     const val NEGATIVE_PROMPT = "negative_prompt"
 
     /**
-     * Exposes the `WIDTH` value used by the SDAI storage layer.
+     * Recorded output width in pixels.
      *
      * @author Dmitriy Moroz
      */
     const val WIDTH = "width"
 
     /**
-     * Exposes the `HEIGHT` value used by the SDAI storage layer.
+     * Recorded output height in pixels.
      *
      * @author Dmitriy Moroz
      */
     const val HEIGHT = "height"
 
     /**
-     * Exposes the `SAMPLING_STEPS` value used by the SDAI storage layer.
+     * Requested sampling iteration count.
      *
      * @author Dmitriy Moroz
      */
     const val SAMPLING_STEPS = "sampling_steps"
 
     /**
-     * Exposes the `CFG_SCALE` value used by the SDAI storage layer.
+     * Recorded guidance scale.
      *
      * @author Dmitriy Moroz
      */
     const val CFG_SCALE = "cfg_scale"
 
     /**
-     * Exposes the `RESTORE_FACES` value used by the SDAI storage layer.
+     * Whether face restoration was requested.
      *
      * @author Dmitriy Moroz
      */
     const val RESTORE_FACES = "restore_faces"
 
     /**
-     * Exposes the `SAMPLER` value used by the SDAI storage layer.
+     * Recorded sampling algorithm.
      *
      * @author Dmitriy Moroz
      */
     const val SAMPLER = "sampler"
 
     /**
-     * Exposes the `SEED` value used by the SDAI storage layer.
+     * Resolved primary generation seed.
      *
      * @author Dmitriy Moroz
      */
     const val SEED = "seed"
 
     /**
-     * Exposes the `SUB_SEED` value used by the SDAI storage layer.
+     * Recorded variation seed.
      *
      * @author Dmitriy Moroz
      */
     const val SUB_SEED = "sub_seed"
 
     /**
-     * Exposes the `SUB_SEED_STRENGTH` value used by the SDAI storage layer.
+     * Recorded variation-seed strength.
      *
      * @author Dmitriy Moroz
      */
     const val SUB_SEED_STRENGTH = "sub_seed_strength"
 
     /**
-     * Exposes the `DENOISING_STRENGTH` value used by the SDAI storage layer.
+     * Recorded image-to-image denoising strength.
      *
      * @author Dmitriy Moroz
      */
     const val DENOISING_STRENGTH = "denoising_strength"
 
     /**
-     * Exposes the `HIDDEN` value used by the SDAI storage layer.
+     * Whether the image is hidden from the ordinary gallery.
      *
      * @author Dmitriy Moroz
      */
     const val HIDDEN = "hidden"
 
     /**
-     * Exposes the `LIKED` value used by the SDAI storage layer.
+     * Whether the image is marked as a favorite.
      *
      * @author Dmitriy Moroz
      */
     const val LIKED = "liked"
 
     /**
-     * Exposes the `MODEL_NAME` value used by the SDAI storage layer.
+     * Model name captured when the image was generated.
      *
      * @author Dmitriy Moroz
      */
     const val MODEL_NAME = "model_name"
+
+    /**
+     * Provider catalog key captured at generation time.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val PROVIDER_KEY = "provider_key"
+
+    /**
+     * Execution mode captured for this generation.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val ACCELERATION = "acceleration"
+
+    /**
+     * Originating device name retained across backup transfers.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val DEVICE_NAME = "device_name"
+
+    /**
+     * Originating platform and OS version.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val OS_VERSION = "os_version"
+
+    /**
+     * Elapsed generation time in milliseconds.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val GENERATION_DURATION_MILLIS = "generation_duration_millis"
+
+    /**
+     * Confirmed public Civitai post URL for this image.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val CIVITAI_URL = "civitai_url"
 }

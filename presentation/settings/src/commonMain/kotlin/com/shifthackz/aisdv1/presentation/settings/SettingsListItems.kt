@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.settings
 
+import com.shifthackz.aisdv1.domain.entity.FeatureTag
+
 /**
  * Selects visible Settings rows without constructing their UI. The screen's lazy list composes
  * only viewport rows instead of mounting every section during a palette or preference change.
@@ -11,7 +13,6 @@ package com.shifthackz.aisdv1.presentation.settings
  * platforms omit the NNAPI switch and warning, regardless of any saved preference.
  *
  * @return Ordered stable row identities matching current provider and appearance visibility.
- *
  * @author Dmitriy Moroz
  */
 internal fun settingsListItems(
@@ -40,6 +41,9 @@ internal fun settingsListItems(
             if (!state.loading) add(SettingsListItem.BACKGROUND_WARNING)
         }
         if (!state.loading && state.developerMode) add(SettingsListItem.DEBUG_MENU)
+        add(SettingsListItem.INTEGRATIONS_HEADER)
+        if (state.serverSource.featureTags.contains(FeatureTag.OwnServer)) add(SettingsListItem.WEB_UI)
+        add(SettingsListItem.CIVITAI)
         add(SettingsListItem.APP_HEADER)
         add(SettingsListItem.PERFORMANCE_OVERLAY)
         add(SettingsListItem.DIM_SCREEN)

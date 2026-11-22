@@ -52,12 +52,13 @@ data class GalleryDetailState(
  * @param inputImage Optional already decoded source preview.
  * @param createdAt Formatted creation timestamp for display.
  * @param type Serialized generation-kind label displayed/exported as metadata.
+ * @param modelName Recorded checkpoint/model display name.
+ * @param civitaiUrl Public Civitai post URL displayed alongside the recorded generation metadata.
  * @param provider Recorded provider display name; null for legacy images.
  * @param acceleration Recorded execution configuration; null when unavailable.
+ * @param generationDuration Formatted elapsed time; null for legacy images.
  * @param deviceName Originating device vendor and model; null for legacy images.
  * @param osVersion Originating OS release and Android API level; null for legacy images.
- * @param generationDuration Formatted elapsed time; null for legacy images.
- * @param modelName Recorded checkpoint/model display name.
  * @param prompt Recorded positive prompt.
  * @param negativePrompt Recorded negative prompt.
  * @param size Formatted output dimensions.
@@ -86,6 +87,7 @@ data class GalleryDetailContent(
     val createdAt: String,
     val type: String,
     val modelName: String = "",
+    val civitaiUrl: String? = null,
     val provider: String? = null,
     val acceleration: String? = null,
     val generationDuration: String? = null,
@@ -176,6 +178,7 @@ internal fun AiGenerationResult.toGalleryDetailContent(
         createdAt = formatGalleryCreatedAt(createdAt),
         type = type.key,
         modelName = modelName,
+        civitaiUrl = civitaiUrl,
         provider = providerKey?.let { key ->
             ServerSource.entries.find { it.key == key }?.shortDisplayName() ?: key
         },

@@ -8,6 +8,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.PersistentDatabase
 
 /**
  * Keeps Room connection ownership inside storage while backup uses the common transaction contract.
+ *
  * @param database Shared persistent Room owner; never exposed to consuming modules.
  * @author Dmitriy Moroz
  */
@@ -19,6 +20,7 @@ internal class RoomBackupStorage(private val database: PersistentDatabase) : Bac
         database.useWriterConnection { it.immediateTransaction { block() } }
 
     override fun generationResultDao() = database.generationResultDao()
+    override fun civitaiUploadDao() = database.civitaiUploadDao()
     override fun networkUsageDao() = database.networkUsageDao()
     override fun restoreSessionDao() = database.restoreSessionDao()
 }

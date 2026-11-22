@@ -54,6 +54,42 @@ class GalleryBackupCodecTest {
     )
 
     @Test
+    fun `given a published gallery image, backup round trips, expected Civitai URL retained with fresh local identity`() {
+        // Given
+        val published = row.copy(civitaiUrl = "https://civitai.com/posts/123")
+        val source = Buffer()
+        codec.write(source, published)
+        // When
+        val restored = codec.read(source, "restored")!!
+        // Then
+        assertEquals(published.civitaiUrl, restored.civitaiUrl)
+        assertEquals(0L, restored.id)
+        assertEquals("restored", restored.imageRevision)
+    }
+
+    @Test
+    fun `given old gallery backup metadata, Civitai URL is absent, expected null link`() {
+        // Given
+        val metadata = "{}"
+        // When
+        val record = Json.decodeFromString<GalleryBackupRecord>(metadata)
+        // Then
+        assertNull(record.civitaiUrl)
+    }
+
+    @Test
+    fun `given malicious gallery link, backup is decoded, expected unsafe URL rejected`() {
+        // Given
+        val source = Buffer()
+        codec.write(source, row.copy(civitaiUrl = "javascript:alert(1)"))
+        // When
+        val failure =
+            assertThrows(IllegalArgumentException::class.java) { codec.read(source, "restored") }
+        // Then
+        assertEquals("Invalid Civitai post URL", failure.message)
+    }
+
+    @Test
     fun `given legacy gallery metadata, optional provenance fields are absent, expected unknown values remain null`() {
         // Given
         val metadata = "{}"

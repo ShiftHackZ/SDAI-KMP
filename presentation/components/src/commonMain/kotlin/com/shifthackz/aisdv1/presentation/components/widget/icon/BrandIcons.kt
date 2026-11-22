@@ -17,6 +17,14 @@ import androidx.compose.ui.unit.dp
 object BrandIcons {
 
     /**
+     * Official Civitai badge used for account and publication integration links.
+     *
+     * @author Dmitriy Moroz
+     */
+    val Civitai: ImageVector
+        get() = civitaiBrandIcon()
+
+    /**
      * Cached Telegram vector used by community links.
      *
      * @author Dmitriy Moroz

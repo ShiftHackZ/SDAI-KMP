@@ -392,7 +392,7 @@
     <string name="settings_usage_delete_models_text">已下载的 %2$s（%1$s）将从此设备删除。之后可在提供方设置中重新下载。</string>
     <string name="settings_usage_delete_all_text">这里显示的所有内容（%1$s）都将被删除：%2$s。</string>
     <string name="settings_usage_storage_note">图库项目会从应用内图库中删除。本地模型可在提供商设置中重新下载。</string>
-    <string name="settings_usage_network_note">包括模型下载、配置同步和推理请求。</string>
+    <string name="settings_usage_network_note">包括模型下载、配置同步、推理请求和 Civitai 上传。</string>
 
     <!-- 外观和感觉设置 -->
     <string name="settings_item_lf_lang">语言</string>
@@ -917,4 +917,31 @@
     <string name="app_update_message">版本 %1$s 已发布。是否打开下载页面？</string>
     <string name="app_update_action">更新</string>
     <string name="app_update_later">稍后</string>
+
+    <string name="civitai_title">Civitai</string>
+    <string name="civitai_account">账户</string>
+    <string name="civitai_key_help">也可以使用具有读取个人资料和发布媒体权限的 Civitai API 密钥连接。</string>
+    <string name="civitai_api_key">API 密钥</string>
+    <string name="civitai_connect">使用 API 密钥连接</string>
+    <string name="civitai_get_key">管理 Civitai API 密钥</string>
+    <string name="civitai_disconnect">断开账户连接</string>
+    <string name="civitai_enable">启用</string>
+    <string name="civitai_auto_upload">自动上传生成的图像</string>
+    <string name="civitai_public_notice">新生成的图像、提示词、生成设置和已记录的设备信息将公开发布到 Civitai，并注明使用 SDAI。已有图库图像和输入图像不会自动上传。</string>
+    <string name="civitai_history">上传历史</string>
+    <string name="civitai_history_empty">尚未通过 SDAI 上传图像。</string>
+    <string name="civitai_failure">无法完成 Civitai 操作。请检查网络连接和账户权限。如果可能已创建帖子，请先检查 Civitai，再决定是否重试。</string>
+    <string name="civitai_sign_in">使用 Civitai 登录</string>
+    <string name="civitai_action_help">将此生成图像及其设置发布到 Civitai，并注明使用 SDAI。上传后再次点击可打开帖子。</string>
+    <string name="civitai_login_required">您尚未登录 Civitai。是否打开 Civitai 设置并连接账户？</string>
+    <string name="civitai_success">图像已上传到 Civitai。处理期间可能暂时不可见。再次点击 Civitai 按钮可打开帖子。</string>
+    <string name="settings_header_integrations">集成</string>
+    <string name="settings_help_integrations_header">连接外部服务，并打开已配置服务器的网页界面。</string>
+    <string name="settings_help_web_ui">在应用内打开已配置服务器的网页界面。可用功能和访问状态由该服务器决定。</string>
+    <string name="settings_help_civitai">管理 Civitai 账户、自动上传和上传历史记录。</string>
+    <string name="civitai_upload_uploading">正在上传…</string>
+    <string name="civitai_upload_published">已发布</string>
+    <string name="civitai_upload_failed">上传失败 — 打开 Civitai</string>
+    <string name="civitai_upload_uncertain">无法确认上传 — 请检查 Civitai</string>
+    <string name="backup_category_civitai">Civitai</string>
 </resources>

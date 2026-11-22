@@ -9,6 +9,9 @@ package com.shifthackz.aisdv1.presentation.settings
  * @author Dmitriy Moroz
  */
 internal fun SettingsListItem.helpTitleKey(): String? = when (this) {
+    SettingsListItem.INTEGRATIONS_HEADER -> "settings_header_integrations"
+    SettingsListItem.WEB_UI -> "drawer_web_ui"
+    SettingsListItem.CIVITAI -> "civitai_title"
     SettingsListItem.SERVER_HEADER -> "settings_header_server"
     SettingsListItem.CONFIGURATION -> "settings_item_config"
     SettingsListItem.BACKUP -> "backup_title"

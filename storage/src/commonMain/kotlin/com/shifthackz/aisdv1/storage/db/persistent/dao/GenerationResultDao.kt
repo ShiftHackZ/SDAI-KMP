@@ -18,6 +18,16 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface GenerationResultDao {
     /**
+     * Records a successful publication without rewriting image bytes or gallery flags.
+     *
+     * @param id Saved gallery identity.
+     * @param url Public Civitai post URL.
+     * @author Dmitriy Moroz
+     */
+    @Query("UPDATE ${GenerationResultContract.TABLE} SET ${GenerationResultContract.CIVITAI_URL} = :url WHERE ${GenerationResultContract.ID} = :id")
+    suspend fun setCivitaiUrl(id: Long, url: String)
+
+    /**
      * Advances through a stable backup snapshot by primary key without repeated OFFSET scans.
      *
      * @param afterId Exclusive ID cursor from the previous page, or zero for the first page.
@@ -236,7 +246,7 @@ interface GenerationResultDao {
      * @param offset Global starting position.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version, civitai_url FROM generation_results ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset")
     fun observeMetadata(limit: Int, offset: Int): Flow<List<GenerationResultMetadataEntity>>
 
     /**
@@ -245,7 +255,7 @@ interface GenerationResultDao {
      * @param ids Selected IDs, chunked by the caller.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results WHERE id IN (:ids)")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version, civitai_url FROM generation_results WHERE id IN (:ids)")
     suspend fun queryMetadata(ids: List<Long>): List<GenerationResultMetadataEntity>
 
     /**
@@ -263,7 +273,7 @@ interface GenerationResultDao {
      * @param id Persisted identity.
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results WHERE id = :id LIMIT 1")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version, civitai_url FROM generation_results WHERE id = :id LIMIT 1")
     fun observeMetadataItem(id: Long): Flow<GenerationResultMetadataEntity?>
 
     /**
@@ -271,7 +281,7 @@ interface GenerationResultDao {
      *
      * @author Dmitriy Moroz
      */
-    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version FROM generation_results WHERE hidden = 0 ORDER BY created_at DESC, id DESC")
+    @Query("SELECT id, created_at, generation_type, prompt, negative_prompt, width, height, sampling_steps, cfg_scale, restore_faces, sampler, seed, sub_seed, sub_seed_strength, denoising_strength, hidden, liked, model_name, image_revision, provider_key, acceleration, generation_duration_millis, device_name, os_version, civitai_url FROM generation_results WHERE hidden = 0 ORDER BY created_at DESC, id DESC")
     suspend fun queryHistoryMetadata(): List<GenerationResultMetadataEntity>
 
     /**
