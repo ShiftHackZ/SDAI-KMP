@@ -861,4 +861,8 @@
     <string name="demo_explanation_feedback">Demo görselleri istemimle eşleşmediği için uygulamanın bozuk olduğunu iddia eden yanıltıcı yorumlar veya hata bildirimleri paylaşmamayı kabul ediyorum.</string>
     <string name="demo_explanation_continue">Kabul et ve devam et</string>
     <string name="demo_explanation_close">Kapat ve Demo modunu kapat</string>
+    <string name="app_update_title">Güncelleme mevcut</string>
+    <string name="app_update_message">%1$s sürümü mevcut. İndirme sayfasını açmak ister misiniz?</string>
+    <string name="app_update_action">Güncelle</string>
+    <string name="app_update_later">Daha sonra</string>
 </resources>

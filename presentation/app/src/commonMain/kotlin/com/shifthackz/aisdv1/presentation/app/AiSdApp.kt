@@ -13,6 +13,7 @@ import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.navigation.RootAppRouter
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
+import com.shifthackz.aisdv1.presentation.appupdate.AppUpdateLaunchState
 import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
@@ -82,6 +83,7 @@ fun AiSdApp(
         AiSdAppShell(
             modifier = modifier,
             viewModel = viewModel,
+            appUpdateState = remember(koin) { koin.get<AppUpdateLaunchState>() },
             router = router,
             homeContent = { homeRoute, renderedRoutes, shouldShowHomeChrome ->
                 HomeRoutesScaffold(

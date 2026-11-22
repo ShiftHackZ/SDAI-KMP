@@ -861,4 +861,8 @@
     <string name="demo_explanation_feedback">Я соглашаюсь не публиковать вводящие в заблуждение отзывы или сообщения об ошибках с утверждением, что приложение не работает, потому что демонстрационные изображения не соответствуют моему запросу.</string>
     <string name="demo_explanation_continue">Согласиться и продолжить</string>
     <string name="demo_explanation_close">Закрыть и выключить деморежим</string>
+    <string name="app_update_title">Доступно обновление</string>
+    <string name="app_update_message">Доступна версия %1$s. Открыть страницу загрузки?</string>
+    <string name="app_update_action">Обновить</string>
+    <string name="app_update_later">Позже</string>
 </resources>

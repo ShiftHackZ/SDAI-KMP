@@ -11,17 +11,20 @@ import com.shifthackz.aisdv1.core.extensions.clearFocusOnTap
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.core.navigation.AppRoute
 import com.shifthackz.aisdv1.core.navigation.RootAppRouter
+import com.shifthackz.aisdv1.core.navigation.isHomeRoute
+import com.shifthackz.aisdv1.presentation.appupdate.AppUpdateHost
+import com.shifthackz.aisdv1.presentation.appupdate.AppUpdateLaunchState
 import com.shifthackz.aisdv1.presentation.components.extensions.generationBrightnessInteraction
+import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalBackTransitionState
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformBackHandler
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.rememberBackTransitionState
-import com.shifthackz.aisdv1.core.navigation.isHomeRoute
-import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
 
 /**
  * Connects the shell's MVI state and Back intent to its platform effects and visual content.
  *
  * @param viewModel Host-owned shell state observer.
+ * @param appUpdateState Process-lived update discovery and dismissal state.
  * @param router Navigation owner providing capture timing before a screen is covered.
  * @param modifier Layout and input modifiers forwarded to the shell surface.
  * @param homeContent Renders retained home tabs with the selected route, visited routes and chrome visibility.
@@ -31,6 +34,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
 @Composable
 internal fun AiSdAppShell(
     viewModel: AiSdAppViewModel,
+    appUpdateState: AppUpdateLaunchState,
     router: RootAppRouter,
     modifier: Modifier = Modifier,
     homeContent: @Composable (AppRoute, List<AppRoute>, Boolean) -> Unit,
@@ -42,6 +46,9 @@ internal fun AiSdAppShell(
             shouldDimScreen = state.shouldDimScreen,
         ) {
             AiSdAppTheme {
+                if (state.shouldShowHomeChrome && !state.isForegroundGenerating) {
+                    AppUpdateHost(appUpdateState)
+                }
                 AiSdAppShellContent(
                     state = state,
                     router = router,

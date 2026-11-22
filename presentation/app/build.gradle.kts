@@ -26,6 +26,8 @@ kotlin {
             implementation(project(":presentation:benchmark"))
             implementation(project(":presentation:backup"))
             implementation(project(":presentation:components"))
+            implementation(project(":presentation:appupdate"))
+            implementation(project(":feature:appupdate"))
             implementation(project(":presentation:configuration"))
             implementation(project(":presentation:debug"))
             implementation(project(":presentation:donate"))
