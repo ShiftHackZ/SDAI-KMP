@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.contract.RestoreSectionContra
 
 /**
  * Committed-section ledger. Gallery/statistics write this row in their data transaction.
+ *
  * @param sessionId Owning restore session.
  * @param category Stable completed section ID.
  * @param importedCount Number of destination records durably added or applied.

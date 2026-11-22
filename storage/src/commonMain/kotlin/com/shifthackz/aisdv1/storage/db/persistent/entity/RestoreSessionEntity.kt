@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.contract.RestoreSessionContra
 
 /**
  * Durable restore identity containing only private archive and selection references, never secret values.
+ *
  * @param id Unique restore session, separate from archive identity.
  * @param archiveHandle App-owned staged archive basename.
  * @param selection Selected category/provider IDs encoded as JSON.

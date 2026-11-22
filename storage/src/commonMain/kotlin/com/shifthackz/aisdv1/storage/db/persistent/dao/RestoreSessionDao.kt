@@ -11,12 +11,14 @@ import com.shifthackz.aisdv1.storage.db.persistent.contract.RestoreSectionContra
 
 /**
  * Persists restore intent and committed categories without serializing application secrets.
+ *
  * @author Dmitriy Moroz
  */
 @Dao
 interface RestoreSessionDao {
     /**
      * Returns unfinished restore intents before normal application startup publication.
+     *
      * @author Dmitriy Moroz
      */
     @Query("SELECT * FROM ${RestoreSessionContract.TABLE} WHERE ${RestoreSessionContract.IS_COMPLETE} = 0 OR ${RestoreSessionContract.REQUIRES_CONFIGURATION} = 1")
@@ -24,6 +26,7 @@ interface RestoreSessionDao {
 
     /**
      * Loads exact operation intent, refusing to silently reuse IDs for different imports.
+     *
      * @param id Restore session ID.
      * @author Dmitriy Moroz
      */
@@ -32,6 +35,7 @@ interface RestoreSessionDao {
 
     /**
      * Records one new restore intent. Reused session IDs are rejected.
+     *
      * @param session Nonsecret archive and selection binding.
      * @author Dmitriy Moroz
      */
@@ -40,6 +44,7 @@ interface RestoreSessionDao {
 
     /**
      * Reads categories already applied by this operation.
+     *
      * @param sessionId Restore session ID.
      * @author Dmitriy Moroz
      */
@@ -48,6 +53,7 @@ interface RestoreSessionDao {
 
     /**
      * Loads committed counts for accurate reports after process recovery.
+     *
      * @param sessionId Restore session ID.
      * @author Dmitriy Moroz
      */
@@ -56,6 +62,7 @@ interface RestoreSessionDao {
 
     /**
      * Marks a category applied in the same transaction as its additive data.
+     *
      * @param section Committed category and owning operation.
      * @author Dmitriy Moroz
      */
@@ -64,6 +71,7 @@ interface RestoreSessionDao {
 
     /**
      * Completes an operation after all selected sections have committed.
+     *
      * @param id Restore session ID.
      * @author Dmitriy Moroz
      */
@@ -72,6 +80,7 @@ interface RestoreSessionDao {
 
     /**
      * Acknowledges configuration only after its startup stage was checked durably.
+     *
      * @param id Restore session whose first-launch handoff has been persisted.
      * @author Dmitriy Moroz
      */
