@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryBottomSheet
 import com.shifthackz.aisdv1.presentation.components.widget.section.ExpandableSectionHeader
-import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 
 /**
  * Offers device photos, camera, random images and saved gallery images to an owning image field.
@@ -57,43 +55,43 @@ fun ImageInputCard(
 ) {
     var isExpanded by rememberSaveable { mutableStateOf(true) }
     var isHistoryVisible by rememberSaveable { mutableStateOf(false) }
-    Surface(
+    PlatformSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surfaceVariant) {
-            Column {
-                ExpandableSectionHeader(
-                    title = Localization.string("title_input_image"),
-                    isExpanded = isExpanded,
-                    onToggleExpanded = { isExpanded = !isExpanded },
-                    trailingContent = {
-                        if (isPickingImage) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                strokeWidth = 3.dp,
-                            )
-                        }
-                    },
-                )
-                AnimatedVisibility(
-                    visible = isExpanded,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut(),
-                ) {
-                    Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-                        if (hasImage) selectedImage() else ImageInputActions(
-                            isEnabled = isEnabled,
-                            onGalleryClick = onGalleryClick,
-                            onCameraClick = onCameraClick,
-                            onRandomClick = onRandomClick,
-                            onHistoryClick = { isHistoryVisible = true },
+
+        Column {
+            ExpandableSectionHeader(
+                title = Localization.string("title_input_image"),
+                isExpanded = isExpanded,
+                onToggleExpanded = { isExpanded = !isExpanded },
+                trailingContent = {
+                    if (isPickingImage) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            strokeWidth = 3.dp,
                         )
                     }
+                },
+            )
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                    if (hasImage) selectedImage() else ImageInputActions(
+                        isEnabled = isEnabled,
+                        onGalleryClick = onGalleryClick,
+                        onCameraClick = onCameraClick,
+                        onRandomClick = onRandomClick,
+                        onHistoryClick = { isHistoryVisible = true },
+                    )
                 }
             }
         }
+
     }
     if (isHistoryVisible && isEnabled) {
         InputHistoryBottomSheet(

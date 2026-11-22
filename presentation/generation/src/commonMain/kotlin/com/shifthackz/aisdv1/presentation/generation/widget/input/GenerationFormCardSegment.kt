@@ -6,14 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.LocalAbsoluteTonalElevation
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 
 /**
  * Joins independently composed list items into the existing generation card. Only the first
@@ -40,7 +36,7 @@ internal fun GenerationFormCardSegment(
 ) {
     val top = if (isFirst) 16.dp else 0.dp
     val bottom = if (isLast) 16.dp else 0.dp
-    Surface(
+    PlatformSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(
             topStart = top,
@@ -49,23 +45,22 @@ internal fun GenerationFormCardSegment(
             bottomEnd = bottom,
         ),
         color = if (isImg2Img) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant,
+        isTopEdgeVisible = isFirst,
+        isBottomEdgeVisible = isLast,
         tonalElevation = if (isImg2Img) 1.dp else 0.dp,
     ) {
         val horizontal = if (isHeader) 0.dp else 16.dp
-        val backingColor = if (isImg2Img) MaterialTheme.colorScheme.surfaceColorAtElevation(
-            LocalAbsoluteTonalElevation.current
-        ) else MaterialTheme.colorScheme.surfaceVariant
-        CompositionLocalProvider(LocalPlatformControlBackgroundColor provides backingColor) {
-            Column(
-                Modifier.padding(
-                    start = horizontal,
-                    end = horizontal,
-                    top = if (isHeader) 0.dp else top,
-                    bottom = if (isHeader) 0.dp else bottom
-                )
-            ) {
-                content()
-            }
+
+        Column(
+            Modifier.padding(
+                start = horizontal,
+                end = horizontal,
+                top = if (isHeader) 0.dp else top,
+                bottom = if (isHeader) 0.dp else bottom
+            )
+        ) {
+            content()
         }
+
     }
 }

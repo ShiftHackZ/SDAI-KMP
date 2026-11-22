@@ -17,8 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.TextFields
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -48,13 +45,14 @@ import com.shifthackz.aisdv1.core.extensions.shimmer
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.domain.entity.ServerSource
-import org.koin.mp.KoinPlatform.getKoin
-import com.shifthackz.aisdv1.presentation.generation.modal.extras.ExtrasEffect
 import com.shifthackz.aisdv1.presentation.components.model.ErrorState
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.error.ErrorComposable
 import com.shifthackz.aisdv1.presentation.components.widget.source.getName
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ModalDialogToolbar
+import com.shifthackz.aisdv1.presentation.generation.modal.extras.ExtrasEffect
 import org.koin.core.parameter.parametersOf
+import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * Loads textual-inversion choices for a captured prompt pair and returns confirmed edits to the form.
@@ -254,7 +252,7 @@ private fun ScreenContent(
                                 ) { index ->
                                     EmbeddingItemComposable(
                                         item = state.embeddings[index],
-                                        selector = state.selector,
+                                        isPositivePrompt = state.selector,
                                         onItemToggle = {
                                             processIntent(EmbeddingIntent.ToggleItem(it))
                                         },
@@ -300,51 +298,6 @@ private fun EmbeddingEmptyState(
                 path,
             ),
             textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Composable
-private fun EmbeddingItemComposable(
-    item: EmbeddingItemUi,
-    selector: Boolean,
-    onItemToggle: (EmbeddingItemUi) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val isApplied = (selector && item.isInPrompt) || (!selector && item.isInNegativePrompt)
-    val bgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val borderColor = MaterialTheme.colorScheme.primary
-    Row(
-        modifier = modifier
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .drawBehind {
-                drawRoundRect(
-                    color = bgColor,
-                    cornerRadius = CornerRadius(16.dp.toPx()),
-                )
-                if (!isApplied) return@drawBehind
-                drawRoundRect(
-                    color = borderColor,
-                    style = Stroke(2.dp.toPx()),
-                    cornerRadius = CornerRadius(16.dp.toPx()),
-                )
-            }
-            .clickable { onItemToggle(item) }
-            .padding(vertical = 8.dp, horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            imageVector = Icons.Default.TextFields,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            text = item.keyword,
-            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

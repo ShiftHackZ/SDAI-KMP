@@ -36,12 +36,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.DownloadState
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.isCustom
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 
 /**
- * Shows model selection, ownership and the active archive transfer in one catalog row.
+ * Shows model selection, ownership and the active archive transfer on a themed platform surface.
  *
  * @param model Current catalog metadata and transfer progress.
  * @param selected Whether the setup candidate uses this model.
@@ -62,7 +63,7 @@ internal fun LocalModelItem(
     modifier: Modifier = Modifier,
     isActionEnabled: Boolean = true,
 ) {
-    Surface(
+    PlatformSurface(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 50.dp)

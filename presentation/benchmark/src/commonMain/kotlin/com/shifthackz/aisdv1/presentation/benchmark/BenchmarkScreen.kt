@@ -2,19 +2,11 @@
 
 package com.shifthackz.aisdv1.presentation.benchmark
 
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,27 +14,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.DeveloperBoard
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -50,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,10 +46,11 @@ import com.shifthackz.aisdv1.core.extensions.shimmer
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.core.mvi.MviComponent
-import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkAccelerationStatus
+import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
 import com.shifthackz.aisdv1.domain.entity.SdxlBackend
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.ServerSourceType
+import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkAccelerationStatus
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkAccelerator
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform
@@ -70,15 +58,23 @@ import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkProviderIssue
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkProviderRecommendation
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkResult
 import com.shifthackz.aisdv1.domain.entity.benchmark.accelerationCapabilities
-import org.koin.mp.KoinPlatform.getKoin
 import com.shifthackz.aisdv1.presentation.components.model.compactDisplayName
 import com.shifthackz.aisdv1.presentation.components.model.isAvailableOn
-import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialog
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import org.koin.core.parameter.parametersOf
+import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * Connects device benchmark results and run/cancel actions to the retained benchmark ViewModel.
@@ -236,36 +232,10 @@ fun BenchmarkScreenContent(
                 visible = state.error != null,
             ) {
                 state.error?.let { error ->
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        tonalElevation = 6.dp,
-                        color = MaterialTheme.colorScheme.errorContainer,
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onErrorContainer,
-                            )
-                            Text(
-                                modifier = Modifier.weight(1f),
-                                text = error,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            OutlinedButton(
-                                onClick = { processIntent(BenchmarkIntent.DismissError) },
-                            ) {
-                                Text(Localization.string("ok"))
-                            }
-                        }
-                    }
+                    BenchmarkErrorCard(
+                        message = error,
+                        onDismiss = { processIntent(BenchmarkIntent.DismissError) },
+                    )
                 }
             }
         }
@@ -279,6 +249,16 @@ fun BenchmarkScreenContent(
     }
 }
 
+/**
+ * Presents the measured score and run metadata on the themed primary-container surface.
+ * Loading retains the existing score placeholders; an active run adds its progress indicator.
+ *
+ * @param result Latest completed result, or null before the first successful benchmark.
+ * @param loading Whether a saved result is still being loaded.
+ * @param running Whether a benchmark is currently executing.
+ * @param modifier Score-card placement and sizing within the benchmark list.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun ScoreSection(
     result: BenchmarkResult?,
@@ -286,7 +266,7 @@ private fun ScoreSection(
     running: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    PlatformSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.primaryContainer,
@@ -382,7 +362,7 @@ private fun DeviceSection(
     deviceInfo: BenchmarkDeviceInfo?,
     modifier: Modifier = Modifier,
 ) {
-    SectionCard(
+    BenchmarkSectionCard(
         icon = Icons.Default.Memory,
         title = Localization.string("benchmark_hardware"),
         modifier = modifier,
@@ -418,7 +398,7 @@ private fun CapabilitiesSection(
     deviceInfo: BenchmarkDeviceInfo?,
     modifier: Modifier = Modifier,
 ) {
-    SectionCard(
+    BenchmarkSectionCard(
         icon = Icons.Default.DeveloperBoard,
         title = Localization.string("benchmark_capabilities"),
         modifier = modifier,
@@ -460,7 +440,7 @@ private fun ProviderRecommendationsSection(
             )
         }
     }
-    SectionCard(
+    BenchmarkSectionCard(
         icon = Icons.Default.Tune,
         title = Localization.string("benchmark_recommendations"),
         modifier = modifier,
@@ -588,41 +568,6 @@ private fun ProviderRecommendationNote(
     )
 }
 
-@Composable
-private fun SectionCard(
-    icon: ImageVector,
-    title: String,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
-            content()
-        }
-    }
-}
 
 @Composable
 private fun InfoRow(

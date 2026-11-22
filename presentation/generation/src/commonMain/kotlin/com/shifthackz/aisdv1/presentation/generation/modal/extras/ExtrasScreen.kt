@@ -1,26 +1,19 @@
 package com.shifthackz.aisdv1.presentation.generation.modal.extras
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DataExploration
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -32,11 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -45,13 +34,14 @@ import com.shifthackz.aisdv1.core.extensions.shimmer
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.domain.entity.ServerSource
-import org.koin.mp.KoinPlatform.getKoin
 import com.shifthackz.aisdv1.presentation.components.model.ErrorState
 import com.shifthackz.aisdv1.presentation.components.model.ExtraType
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.error.ErrorComposable
 import com.shifthackz.aisdv1.presentation.components.widget.source.getName
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ModalDialogToolbar
 import org.koin.core.parameter.parametersOf
+import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * Loads a LoRA/hypernetwork catalog for the selected provider and returns confirmed prompt edits.
@@ -253,64 +243,5 @@ private fun ExtrasEmptyState(
             ),
             textAlign = TextAlign.Center,
         )
-    }
-}
-
-
-@Composable
-private fun ExtrasItemComposable(
-    modifier: Modifier = Modifier,
-    item: ExtraItemUi,
-    onLoraSelected: (ExtraItemUi) -> Unit,
-) {
-    val bgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val borderColor = MaterialTheme.colorScheme.primary
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .drawBehind {
-                drawRoundRect(
-                    color = bgColor,
-                    cornerRadius = CornerRadius(16.dp.toPx()),
-                )
-                if (!item.isApplied) return@drawBehind
-                drawRoundRect(
-                    color = borderColor,
-                    style = Stroke(2.dp.toPx()),
-                    cornerRadius = CornerRadius(16.dp.toPx()),
-                )
-            }
-            .clickable { onLoraSelected(item) }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Default.DataExploration,
-            contentDescription = Localization.string("title_lora_item", item.name),
-        )
-        Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-            Text(
-                text = item.name,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            item.alias?.let {
-                Text(
-                    text = Localization.string("label_alias", it),
-                    fontSize = 11.5.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-        item.value?.let {
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                modifier = Modifier.requiredWidth(IntrinsicSize.Min),
-                maxLines = 1,
-                text = it,
-            )
-        }
     }
 }

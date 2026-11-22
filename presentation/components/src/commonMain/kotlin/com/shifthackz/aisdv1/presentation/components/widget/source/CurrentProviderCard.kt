@@ -21,10 +21,11 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.ServerSource
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
-import com.shifthackz.aisdv1.presentation.components.model.description
 import com.shifthackz.aisdv1.presentation.components.model.compactDisplayName
+import com.shifthackz.aisdv1.presentation.components.model.description
 import com.shifthackz.aisdv1.presentation.components.model.providerIcon
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 
 /**
  * Identifies the active generation provider and offers one clear route to its configuration.
@@ -49,7 +50,7 @@ fun CurrentProviderCard(
         titleStartIcon = source.providerIcon(platform),
         modifier = modifier.fillMaxWidth(),
     ) {
-        Surface(
+        PlatformSurface(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),

@@ -4,7 +4,6 @@ package com.shifthackz.aisdv1.presentation.components.modal.history
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixNormal
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -59,9 +57,11 @@ import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
 import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.rememberGalleryImage
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import org.koin.mp.KoinPlatform.getKoin
 
 /**
@@ -248,94 +248,94 @@ private fun InputHistoryItem(
         }
     }
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface)
-            .defaultMinSize(minHeight = 50.dp)
-            .clickable { onClick(item) },
+    PlatformSurface(
+        modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 50.dp),
+        color = MaterialTheme.colorScheme.surface,
+        onClick = { onClick(item) },
     ) {
-        if (image != null) {
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth(0.36f)
-                    .onSizeChanged { edge = maxOf(it.width, it.height) }
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(12.dp)),
-                bitmap = image,
-                contentScale = ContentScale.Crop,
-                contentDescription = null,
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.36f)
-                    .onSizeChanged { edge = maxOf(it.width, it.height) }
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Default.AutoFixNormal,
+        Row {
+
+            if (image != null) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth(0.36f)
+                        .onSizeChanged { edge = maxOf(it.width, it.height) }
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(12.dp)),
+                    bitmap = image,
+                    contentScale = ContentScale.Crop,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
                 )
-            }
-        }
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            val textStyle = MaterialTheme.typography.bodySmall
-            val textModifier = Modifier.padding(horizontal = 4.dp)
-            Text(
-                modifier = textModifier.padding(top = 2.dp),
-                text = itemPropertyText("hint_prompt", generation.prompt),
-                style = textStyle,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                color = LocalContentColor.current,
-            )
-            Text(
-                modifier = textModifier,
-                text = itemPropertyText("hint_prompt_negative", generation.negativePrompt),
-                style = textStyle,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                color = LocalContentColor.current,
-            )
-            val tags = buildList {
-                add(generation.type.key)
-                add("${generation.width} X ${generation.height}")
-                add(generation.sampler)
-                add(Localization.string("tag_steps", generation.samplingSteps))
-                add(Localization.string("tag_cfg", "${generation.cfgScale}"))
-                if (generation.type == AiGenerationResult.Type.IMAGE_TO_IMAGE) {
-                    add(Localization.string("tag_denoising", "${generation.denoisingStrength}"))
-                }
-                add(generation.seed)
-                add(generation.subSeed)
-                add("${generation.subSeedStrength}")
-            }.filter(String::isNotEmpty)
-            FlowRow(
-                modifier = Modifier.padding(horizontal = 2.dp),
-            ) {
-                tags.forEach { tag ->
-                    Text(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(4.dp),
-                            )
-                            .padding(1.dp),
-                        text = tag,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.36f)
+                        .onSizeChanged { edge = maxOf(it.width, it.height) }
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Default.AutoFixNormal,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
+                }
+            }
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                val textStyle = MaterialTheme.typography.bodySmall
+                val textModifier = Modifier.padding(horizontal = 4.dp)
+                Text(
+                    modifier = textModifier.padding(top = 2.dp),
+                    text = itemPropertyText("hint_prompt", generation.prompt),
+                    style = textStyle,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = LocalContentColor.current,
+                )
+                Text(
+                    modifier = textModifier,
+                    text = itemPropertyText("hint_prompt_negative", generation.negativePrompt),
+                    style = textStyle,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = LocalContentColor.current,
+                )
+                val tags = buildList {
+                    add(generation.type.key)
+                    add("${generation.width} X ${generation.height}")
+                    add(generation.sampler)
+                    add(Localization.string("tag_steps", generation.samplingSteps))
+                    add(Localization.string("tag_cfg", "${generation.cfgScale}"))
+                    if (generation.type == AiGenerationResult.Type.IMAGE_TO_IMAGE) {
+                        add(Localization.string("tag_denoising", "${generation.denoisingStrength}"))
+                    }
+                    add(generation.seed)
+                    add(generation.subSeed)
+                    add("${generation.subSeedStrength}")
+                }.filter(String::isNotEmpty)
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                ) {
+                    tags.forEach { tag ->
+                        Text(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(4.dp),
+                                )
+                                .padding(1.dp),
+                            text = tag,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    }
                 }
             }
         }

@@ -2,58 +2,42 @@
 
 package com.shifthackz.aisdv1.presentation.debug
 
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TextSnippet
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CancelScheduleSend
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
+import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsHeaderContent
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsToggleItem
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 
 /**
  * Already localized developer-menu labels used by its stateless renderer.
@@ -241,33 +225,14 @@ fun DebugMenuScreenContent(
                     message = Localization.string("debug_help_capture"),
                     modifier = itemModifier,
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-                            .defaultMinSize(minHeight = 50.dp)
-                            .toggleable(
-                                value = state.isUiDiagnosticsCapturing,
-                                role = Role.Switch,
-                                onValueChange = { shouldCapture ->
-                                    processAction(if (shouldCapture) DebugMenuAction.StartUiCapture else DebugMenuAction.StopUiCapture)
-                                },
-                            )
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = strings.diagnosticCapture,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f)
-                        )
-                        PlatformSwitch(
-                            isChecked = state.isUiDiagnosticsCapturing,
-                            onCheckedChange = null
-                        )
-                    }
+                    SettingsToggleItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = UiText.Static(strings.diagnosticCapture),
+                        isChecked = state.isUiDiagnosticsCapturing,
+                        onCheckedChange = { shouldCapture ->
+                            processAction(if (shouldCapture) DebugMenuAction.StartUiCapture else DebugMenuAction.StopUiCapture)
+                        },
+                    )
                 }
                 DebugMenuItem(
                     text = strings.diagnosticReset,
@@ -363,7 +328,7 @@ fun DebugMenuScreenContent(
 
 
 /**
- * Keeps developer help on the whole row while preserving its short-tap action.
+ * Adds developer help to the shared platform settings row while preserving its short-tap action.
  *
  * @param text Localized action title shared by the row and tooltip.
  * @param helpMessage Localized description including any side effects.
@@ -392,65 +357,15 @@ private fun DebugMenuItem(
         titleStartIcon = startIcon,
         modifier = modifier,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-                .defaultMinSize(minHeight = 50.dp)
-                .clickable { onClick() }
-                .border(
-                    width = 2.dp,
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.Transparent,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                modifier = endValueContent
-                    ?.let { Modifier.fillMaxWidth(0.8f) }
-                    ?: Modifier,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Spacer(modifier = Modifier.width(8.dp))
-                startIcon?.let {
-                    Icon(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        imageVector = it,
-                        contentDescription = null,
-                    )
-                }
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                endValueContent?.invoke() ?: run {
-                    if (endValueText.isNotEmpty()) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(0.5f),
-                            text = endValueText,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Right,
-                        )
-                    }
-                    if (showChevron) {
-                        Icon(
-                            modifier = Modifier.padding(horizontal = 6.dp),
-                            imageVector = Icons.Default.ChevronRight,
-                            tint = LocalContentColor.current,
-                            contentDescription = null,
-                        )
-                    }
-                }
-            }
-        }
+        SettingsItem(
+            modifier = Modifier.fillMaxWidth(),
+            startIcon = startIcon,
+            text = UiText.Static(text),
+            showChevron = showChevron,
+            endValueText = UiText.Static(endValueText),
+            endValueContent = endValueContent,
+            onClick = onClick,
+        )
     }
 }
 
