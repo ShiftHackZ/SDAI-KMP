@@ -51,53 +51,68 @@ import platform.ImageIO.kCGImageStatusComplete
  * @author Dmitriy Moroz
  */
 internal actual class PlatformBackupImageDecoder actual constructor() : BackupImageDecoder {
-    override fun dimensions(bytes: ByteArray): Pair<Long, Long> = withSource(bytes) { source ->
-        val properties = requireNotNull(
-            CGImageSourceCopyPropertiesAtIndex(
-                source,
-                0u,
-                null
-            )
-        ) { "Invalid backup image properties" }
-        try {
-            dimension(properties, kCGImagePropertyPixelWidth) to dimension(
-                properties,
-                kCGImagePropertyPixelHeight
-            )
-        } finally {
-            CFRelease(properties)
-        }
-    }
-
-    override fun validateSample(bytes: ByteArray, maxEdge: Int) = withSource(bytes) { source ->
-        val options = imageOptions(maxEdge)
-        try {
-            val image = requireNotNull(
-                CGImageSourceCreateThumbnailAtIndex(
+    /**
+     * Reads uncached ImageIO pixel dimensions and releases the metadata dictionary.
+     *
+     * @param bytes Encoded image admitted by the shared backup byte budget.
+     * @author Dmitriy Moroz
+     */
+    actual override fun dimensions(bytes: ByteArray): Pair<Long, Long> =
+        withSource(bytes) { source ->
+            val properties = requireNotNull(
+                CGImageSourceCopyPropertiesAtIndex(
                     source,
                     0u,
-                    options
+                    null
                 )
-            ) { "Invalid backup image content" }
+            ) { "Invalid backup image properties" }
             try {
-                val width = CGImageGetWidth(image).toLong()
-                val height = CGImageGetHeight(image).toLong()
-                val rowBytes = CGImageGetBytesPerRow(image).toLong()
-                require(width in 1..maxEdge.toLong() && height in 1..maxEdge.toLong()) { "Backup sample exceeds bounds" }
-                require(rowBytes > 0 && rowBytes <= maxEdge.toLong() * maxEdge * 8 / height) { "Backup sample exceeds byte budget" }
-                require(
-                    CGImageSourceGetStatusAtIndex(
-                        source,
-                        0u
-                    ) == kCGImageStatusComplete
-                ) { "Incomplete backup image content" }
+                dimension(properties, kCGImagePropertyPixelWidth) to dimension(
+                    properties,
+                    kCGImagePropertyPixelHeight
+                )
             } finally {
-                CGImageRelease(image)
+                CFRelease(properties)
             }
-        } finally {
-            CFRelease(options)
         }
-    }
+
+    /**
+     * Validates a bounded ImageIO thumbnail and releases its native resources on every exit.
+     *
+     * @param bytes Encoded image whose original dimensions passed admission.
+     * @param maxEdge Maximum sample width and height in pixels.
+     * @author Dmitriy Moroz
+     */
+    actual override fun validateSample(bytes: ByteArray, maxEdge: Int) =
+        withSource(bytes) { source ->
+            val options = imageOptions(maxEdge)
+            try {
+                val image = requireNotNull(
+                    CGImageSourceCreateThumbnailAtIndex(
+                        source,
+                        0u,
+                        options
+                    )
+                ) { "Invalid backup image content" }
+                try {
+                    val width = CGImageGetWidth(image).toLong()
+                    val height = CGImageGetHeight(image).toLong()
+                    val rowBytes = CGImageGetBytesPerRow(image).toLong()
+                    require(width in 1..maxEdge.toLong() && height in 1..maxEdge.toLong()) { "Backup sample exceeds bounds" }
+                    require(rowBytes > 0 && rowBytes <= maxEdge.toLong() * maxEdge * 8 / height) { "Backup sample exceeds byte budget" }
+                    require(
+                        CGImageSourceGetStatusAtIndex(
+                            source,
+                            0u
+                        ) == kCGImageStatusComplete
+                    ) { "Incomplete backup image content" }
+                } finally {
+                    CGImageRelease(image)
+                }
+            } finally {
+                CFRelease(options)
+            }
+        }
 
     /**
      * Creates an owned CF dictionary with native CFString keys and retained CFBoolean/CFNumber values.

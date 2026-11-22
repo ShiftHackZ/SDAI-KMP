@@ -9,14 +9,27 @@ import android.graphics.BitmapFactory
  * @author Dmitriy Moroz
  */
 internal actual class PlatformBackupImageDecoder actual constructor() : BackupImageDecoder {
-    override fun dimensions(bytes: ByteArray): Pair<Long, Long> {
+    /**
+     * Reads bitmap bounds without allocating pixel storage; rejects invalid dimensions.
+     *
+     * @param bytes Encoded image admitted by the shared backup byte budget.
+     * @author Dmitriy Moroz
+     */
+    actual override fun dimensions(bytes: ByteArray): Pair<Long, Long> {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
         require(bounds.outWidth > 0 && bounds.outHeight > 0) { "Invalid backup image dimensions" }
         return bounds.outWidth.toLong() to bounds.outHeight.toLong()
     }
 
-    override fun validateSample(bytes: ByteArray, maxEdge: Int) {
+    /**
+     * Decodes a power-of-two sampled bitmap and releases it after validating its bounds.
+     *
+     * @param bytes Encoded image whose original dimensions passed admission.
+     * @param maxEdge Maximum sample width and height in pixels.
+     * @author Dmitriy Moroz
+     */
+    actual override fun validateSample(bytes: ByteArray, maxEdge: Int) {
         val (width, height) = dimensions(bytes)
         var sample = 1L
         while ((width - 1) / sample + 1 > maxEdge || (height - 1) / sample + 1 > maxEdge) sample *= 2
