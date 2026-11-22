@@ -1,0 +1,351 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>com.shifthackz.aisdv1.feature.appupdate</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/feature/appupdate/com.shifthackz.aisdv1.feature.appupdate/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/feature/appupdate/com.shifthackz.aisdv1.feature.appupdate/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+  <a href="https://www.linkedin.com/company/sdai-app/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+    <span>LinkedIn</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:appupdate/androidFoss">androidFoss</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:appupdate/androidFull">androidFull</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:appupdate/androidPlaystore">androidPlaystore</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:appupdate/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:appupdate/androidFoss" data-filter=":feature:appupdate/androidFoss">
+                                <span class="checkbox--icon"></span>
+                                androidFoss
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:appupdate/androidFull" data-filter=":feature:appupdate/androidFull">
+                                <span class="checkbox--icon"></span>
+                                androidFull
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:appupdate/androidPlaystore" data-filter=":feature:appupdate/androidPlaystore">
+                                <span class="checkbox--icon"></span>
+                                androidPlaystore
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:appupdate/commonMain" data-filter=":feature:appupdate/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="feature/appupdate::com.shifthackz.aisdv1.feature.appupdate////PointingToDeclaration//-1021436099">
+  <div class="breadcrumbs"><a href="../index.html">feature/appupdate</a><span class="delimiter">/</span><span class="current">com.shifthackz.aisdv1.feature.appupdate</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="86195658%2FClasslikes%2F1240725215" anchor-label="AppStoreLookup" id="86195658%2FClasslikes%2F1240725215" data-filterable-set=":feature:appupdate/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/commonMain" data-filterable-set=":feature:appupdate/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-app-store-lookup/index.html"><span>App</span><wbr><span>Store</span><wbr><span><span>Lookup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="86195658%2FClasslikes%2F1240725215"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">internal </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-app-store-lookup/index.html">AppStoreLookup</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>results<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-app-store-release/index.html">AppStoreRelease</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Apple's public lookup envelope; an empty list means unavailable in this storefront.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1035003241%2FClasslikes%2F1240725215" anchor-label="AppStoreRelease" id="-1035003241%2FClasslikes%2F1240725215" data-filterable-set=":feature:appupdate/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/commonMain" data-filterable-set=":feature:appupdate/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-app-store-release/index.html"><span>App</span><wbr><span>Store</span><wbr><span><span>Release</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1035003241%2FClasslikes%2F1240725215"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">internal </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-app-store-release/index.html">AppStoreRelease</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>version<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Published App Store metadata used for optional update discovery.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1123969135%2FClasslikes%2F1240725215" anchor-label="GitHubAsset" id="-1123969135%2FClasslikes%2F1240725215" data-filterable-set=":feature:appupdate/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/commonMain" data-filterable-set=":feature:appupdate/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-git-hub-asset/index.html"><span>Git</span><wbr><span>Hub</span><wbr><span><span>Asset</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1123969135%2FClasslikes%2F1240725215"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">internal </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-git-hub-asset/index.html">GitHubAsset</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A release attachment used to avoid offering an incomplete nightly publication.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-795074982%2FClasslikes%2F1240725215" anchor-label="GitHubRelease" id="-795074982%2FClasslikes%2F1240725215" data-filterable-set=":feature:appupdate/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/commonMain" data-filterable-set=":feature:appupdate/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-git-hub-release/index.html"><span>Git</span><wbr><span>Hub</span><wbr><span><span>Release</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-795074982%2FClasslikes%2F1240725215"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">internal </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-git-hub-release/index.html">GitHubRelease</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isDraft<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isPrerelease<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>body<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>assets<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-git-hub-asset/index.html">GitHubAsset</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Public GitHub release fields consumed by update discovery.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-771563928%2FClasslikes%2F1240725215" anchor-label="NoOpAppUpdateGateway" id="-771563928%2FClasslikes%2F1240725215" data-filterable-set=":feature:appupdate/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/commonMain" data-filterable-set=":feature:appupdate/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-no-op-app-update-gateway/index.html"><span>No</span><wbr><span>Op</span><wbr><span>App</span><wbr><span>Update</span><wbr><span><span>Gateway</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-771563928%2FClasslikes%2F1240725215"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">object </span><a href="-no-op-app-update-gateway/index.html">NoOpAppUpdateGateway</a> : <a href="../../../domain/com.shifthackz.aisdv1.domain.gateway/-app-update-gateway/index.html">AppUpdateGateway</a></div><div class="brief "><p class="paragraph">Leaves version selection entirely to the distribution manager without making requests.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="531091190%2FClasslikes%2F1317247694" anchor-label="PlayAppUpdateGateway" id="531091190%2FClasslikes%2F1317247694" data-filterable-set=":feature:appupdate/androidPlaystore"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/androidPlaystore" data-filterable-set=":feature:appupdate/androidPlaystore">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-play-app-update-gateway/index.html"><span>Play</span><wbr><span>App</span><wbr><span>Update</span><wbr><span><span>Gateway</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="531091190%2FClasslikes%2F1317247694"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:appupdate/androidPlaystore" data-filterable-set=":feature:appupdate/androidPlaystore" data-active="" data-toggle=":feature:appupdate/androidPlaystore">androidPlaystore</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/androidPlaystore"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-play-app-update-gateway/index.html">PlayAppUpdateGateway</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>manager<span class="token operator">: </span><span data-unresolved-link="com.google.android.play.core.appupdate/AppUpdateManager///PointingToDeclaration/">AppUpdateManager</span></span></span><span class="token punctuation">)</span> : <a href="../../../domain/com.shifthackz.aisdv1.domain.gateway/-app-update-gateway/index.html">AppUpdateGateway</a></div><div class="brief "><p class="paragraph">Delegates availability and eligibility to Play without contacting GitHub.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1959221437%2FClasslikes%2F1240725215" anchor-label="ReleaseAppUpdateGateway" id="1959221437%2FClasslikes%2F1240725215" data-filterable-set=":feature:appupdate/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/commonMain" data-filterable-set=":feature:appupdate/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-release-app-update-gateway/index.html"><span>Release</span><wbr><span>App</span><wbr><span>Update</span><wbr><span><span>Gateway</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1959221437%2FClasslikes%2F1240725215"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-release-app-update-gateway/index.html">ReleaseAppUpdateGateway</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>client<span class="token operator">: </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>build<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isAppStore<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span> : <a href="../../../domain/com.shifthackz.aisdv1.domain.gateway/-app-update-gateway/index.html">AppUpdateGateway</a></div><div class="brief "><p class="paragraph">Reads public release metadata. Stable versions exclude prereleases; nightlies use the version code embedded by CI because the nightly tag and publication date are reused.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-182261604%2FFunctions%2F1240725215" anchor-label="configureAppUpdateClient" id="-182261604%2FFunctions%2F1240725215" data-filterable-set=":feature:appupdate/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/commonMain" data-filterable-set=":feature:appupdate/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="configure-app-update-client.html"><span>configure</span><wbr><span>App</span><wbr><span>Update</span><wbr><span><span>Client</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-182261604%2FFunctions%2F1240725215"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><span data-unresolved-link="io.ktor.client/HttpClientConfig///PointingToDeclaration/">HttpClientConfig</span><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="configure-app-update-client.html"><span class="token function">configureAppUpdateClient</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Applies short discovery timeouts independently of long-running generation requests.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="853952528%2FFunctions%2F1368174" anchor-label="createAndroidAppUpdateGateway" id="853952528%2FFunctions%2F1368174" data-filterable-set=":feature:appupdate/androidFoss,:feature:appupdate/androidFull,:feature:appupdate/androidPlaystore"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:appupdate/androidFoss,:feature:appupdate/androidFull,:feature:appupdate/androidPlaystore" data-filterable-set=":feature:appupdate/androidFoss,:feature:appupdate/androidFull,:feature:appupdate/androidPlaystore">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../../feature/appupdate/com.shifthackz.aisdv1.feature.appupdate/[android-playstore]create-android-app-update-gateway.html"><span>create</span><wbr><span>Android</span><wbr><span>App</span><wbr><span>Update</span><wbr><span><span>Gateway</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="853952528%2FFunctions%2F1368174"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:appupdate/androidFoss" data-filterable-set=":feature:appupdate/androidFoss" data-active="" data-toggle=":feature:appupdate/androidFoss">androidFoss</button><button class="platform-bookmark" data-filterable-current=":feature:appupdate/androidFull" data-filterable-set=":feature:appupdate/androidFull" data-toggle=":feature:appupdate/androidFull">androidFull</button><button class="platform-bookmark" data-filterable-current=":feature:appupdate/androidPlaystore" data-filterable-set=":feature:appupdate/androidPlaystore" data-toggle=":feature:appupdate/androidPlaystore">androidPlaystore</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:appupdate/androidFoss"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><span data-unresolved-link="org.koin.core.scope/Scope///PointingToDeclaration/">Scope</span><span class="token punctuation">.</span><a href="[android-foss]create-android-app-update-gateway.html"><span class="token function">createAndroidAppUpdateGateway</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.gateway/-app-update-gateway/index.html">AppUpdateGateway</a></div><div class="brief "><p class="paragraph">Creates the gateway owned by this distribution; FOSS never contacts update services.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":feature:appupdate/androidFull"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><span data-unresolved-link="org.koin.core.scope/Scope///PointingToDeclaration/">Scope</span><span class="token punctuation">.</span><a href="[android-full]create-android-app-update-gateway.html"><span class="token function">createAndroidAppUpdateGateway</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.gateway/-app-update-gateway/index.html">AppUpdateGateway</a></div><div class="brief "><p class="paragraph">Creates the gateway owned by this distribution; FOSS never contacts update services.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":feature:appupdate/androidPlaystore"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><span data-unresolved-link="org.koin.core.scope/Scope///PointingToDeclaration/">Scope</span><span class="token punctuation">.</span><a href="[android-playstore]create-android-app-update-gateway.html"><span class="token function">createAndroidAppUpdateGateway</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.gateway/-app-update-gateway/index.html">AppUpdateGateway</a></div><div class="brief "><p class="paragraph">Creates the gateway owned by this distribution; FOSS never contacts update services.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

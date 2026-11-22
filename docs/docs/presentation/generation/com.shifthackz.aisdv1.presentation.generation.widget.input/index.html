@@ -1,0 +1,773 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>com.shifthackz.aisdv1.presentation.generation.widget.input</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/presentation/generation/com.shifthackz.aisdv1.presentation.generation.widget.input/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/presentation/generation/com.shifthackz.aisdv1.presentation.generation.widget.input/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+  <a href="https://www.linkedin.com/company/sdai-app/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+    <span>LinkedIn</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":presentation:generation/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:generation/commonMain" data-filter=":presentation:generation/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="presentation/generation::com.shifthackz.aisdv1.presentation.generation.widget.input////PointingToDeclaration//-1999068815">
+  <div class="breadcrumbs"><a href="../index.html">presentation/generation</a><span class="delimiter">/</span><span class="current">com.shifthackz.aisdv1.presentation.generation.widget.input</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-393708717%2FClasslikes%2F-1999068815" anchor-label="GenerationAspectRatio" id="-393708717%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-aspect-ratio/index.html"><span>Generation</span><wbr><span>Aspect</span><wbr><span><span>Ratio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-393708717%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">enum class </span><a href="-generation-aspect-ratio/index.html">GenerationAspectRatio</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>displayName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>width<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>height<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-generation-aspect-ratio/index.html">GenerationAspectRatio</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Preset aspect ratios applied by resizing the active width/height fields.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="350160417%2FClasslikes%2F-1999068815" anchor-label="GenerationBaseFormField" id="350160417%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-base-form-field/index.html"><span>Generation</span><wbr><span>Base</span><wbr><span>Form</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="350160417%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">enum class </span><a href="-generation-base-form-field/index.html">GenerationBaseFormField</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-generation-base-form-field/index.html">GenerationBaseFormField</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Stable identities for basic provider, prompt and sizing controls. Each lazy key combines its provider with this identity, keeping positive and negative prompt editing state independent.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2131984649%2FClasslikes%2F-1999068815" anchor-label="GenerationFormContentType" id="-2131984649%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-form-content-type/index.html"><span>Generation</span><wbr><span>Form</span><wbr><span>Content</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2131984649%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">enum class </span><a href="-generation-form-content-type/index.html">GenerationFormContentType</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-generation-form-content-type/index.html">GenerationFormContentType</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Structural categories shared by compatible generation list items for composition recycling and prefetch timing estimates. These are independent of the stable keys that own field state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-896972304%2FClasslikes%2F-1999068815" anchor-label="GenerationFormField" id="-896972304%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-form-field/index.html"><span>Generation</span><wbr><span>Form</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-896972304%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">enum class </span><a href="-generation-form-field/index.html">GenerationFormField</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Stable identities for independently composed advanced fields. The provider name and field name form each lazy item's saveable key, so inserting another control does not replace its state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-219057689%2FClasslikes%2F-1999068815" anchor-label="GenerationInputAdvancedOptionsState" id="-219057689%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-advanced-options-state/index.html"><span>Generation</span><wbr><span>Input</span><wbr><span>Advanced</span><wbr><span>Options</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-219057689%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>mode<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isVisible<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>samplingSteps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>cfgScale<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>shouldRestoreFaces<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>seed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subSeed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>seedValidationError<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subSeedValidationError<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subSeedStrength<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>selectedSampler<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>selectedScheduler<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-scheduler/index.html">Scheduler</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>availableForgeModules<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-forge-module/index.html">ForgeModule</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>selectedForgeModules<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-forge-module/index.html">ForgeModule</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>availableSamplers<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isLoadingSamplers<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hasSamplerLoadFailed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>selectedStylePreset<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-stability-ai-style-preset/index.html">StabilityAiStylePreset</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>selectedClipGuidancePreset<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-stability-ai-clip-guidance/index.html">StabilityAiClipGuidance</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>falAiModel<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-fal-ai-model/index.html">FalAiModel</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>falAiAcceleration<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-fal-ai-acceleration/index.html">FalAiAcceleration</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isFalAiSyncEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isNsfwEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>batchCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hires<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-hires-config/index.html">HiresConfig</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>aDetailer<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-a-detailer-config/index.html">ADetailerConfig</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isADetailerAvailable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isADetailerRefreshing<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Values consumed by advanced generation controls, independent of prompt and result updates.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1302886939%2FClasslikes%2F-1999068815" anchor-label="GenerationInputFormConstants" id="1302886939%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-form-constants/index.html"><span>Generation</span><wbr><span>Input</span><wbr><span>Form</span><wbr><span><span>Constants</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1302886939%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">object </span><a href="-generation-input-form-constants/index.html">GenerationInputFormConstants</a></div><div class="brief "><p class="paragraph">Shared generation-widget ranges and provider-specific UI limits; domain submission validation remains authoritative.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1517299632%2FClasslikes%2F-1999068815" anchor-label="GenerationInputFormEvent" id="1517299632%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-form-event/index.html"><span>Generation</span><wbr><span>Input</span><wbr><span>Form</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1517299632%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a></div><div class="brief "><p class="paragraph">Events emitted by the reusable generation input form.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1977079399%2FClasslikes%2F-1999068815" anchor-label="GenerationInputFormState" id="-1977079399%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-form-state/index.html"><span>Generation</span><wbr><span>Input</span><wbr><span>Form</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1977079399%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a></div><div class="brief "><p class="paragraph">Shared state contract for generation controls.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1805037851%2FClasslikes%2F-1999068815" anchor-label="GenerationNumericFieldParameters" id="-1805037851%2FClasslikes%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-numeric-field-parameters/index.html"><span>Generation</span><wbr><span>Numeric</span><wbr><span>Field</span><wbr><span><span>Parameters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1805037851%2FClasslikes%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Immutable.html"><span class="token annotation builtin">Immutable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-generation-numeric-field-parameters/index.html">GenerationNumericFieldParameters</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>labelKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>labelValue<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>minimum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>maximum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>valueDiff<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">1.0f</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>fractionDigits<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">2</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>steps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Display values for one numeric generation parameter, independent of the rest of the form. This model contains no callbacks; the owning field maps edits back to its existing screen event.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1000806945%2FFunctions%2F-1999068815" anchor-label="ADetailerMissingContent" id="-1000806945%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-detailer-missing-content.html"><span>ADetailer</span><wbr><span>Missing</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1000806945%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-a-detailer-missing-content.html"><span class="token function">ADetailerMissingContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">refreshing<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onInstallClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onRefreshClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1972153992%2FFunctions%2F-1999068815" anchor-label="ADetailerOption" id="-1972153992%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-detailer-option.html"><span>ADetailer</span><wbr><span><span>Option</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1972153992%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-a-detailer-option.html"><span class="token function">ADetailerOption</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">field<span class="token operator">: </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-a-detailer-config/index.html">ADetailerConfig</a><span class="token punctuation">, </span></span><span class="parameter ">onConfigChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-a-detailer-config/index.html">ADetailerConfig</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1518818655%2FFunctions%2F-1999068815" anchor-label="contentType" id="1518818655%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="content-type.html"><span>content</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1518818655%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-base-form-field/index.html">GenerationBaseFormField</a><span class="token punctuation">.</span><a href="content-type.html"><span class="token function">contentType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-generation-form-content-type/index.html">GenerationFormContentType</a></div><div class="brief "><p class="paragraph">Groups basic controls by rendered structure independently of their stable field identity. Prompt editors share one renderer; provider and paired dimension controls retain separate types where their internal structures differ from ordinary dropdowns or advanced numeric editors.</p></div><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">.</span><a href="content-type.html"><span class="token function">contentType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-generation-form-content-type/index.html">GenerationFormContentType</a></div><div class="brief "><p class="paragraph">Groups fields by their rendered control structure without changing provider-qualified identity. Sampler retry feedback and extension notices stay separate from ordinary dropdowns and rows.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-261793787%2FFunctions%2F-1999068815" anchor-label="GenerationBaseDimensions" id="-261793787%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-base-dimensions.html"><span>Generation</span><wbr><span>Base</span><wbr><span><span>Dimensions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-261793787%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-base-dimensions.html"><span class="token function">GenerationBaseDimensions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays the existing provider-specific dimension controls as one horizontal lazy item. Width and height remain paired so their proportions, validation and ratio actions are unchanged.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-646820183%2FFunctions%2F-1999068815" anchor-label="GenerationBaseProviderOption" id="-646820183%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-base-provider-option.html"><span>Generation</span><wbr><span>Base</span><wbr><span>Provider</span><wbr><span><span>Option</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-646820183%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-base-provider-option.html"><span class="token function">GenerationBaseProviderOption</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">field<span class="token operator">: </span><a href="-generation-base-form-field/index.html">GenerationBaseFormField</a><span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays one provider or local-backend selection without mounting prompt editors. Provider visibility is selected by generationInputBaseFields before composition.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1321319256%2FFunctions%2F-1999068815" anchor-label="GenerationBatchComponent" id="1321319256%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-batch-component.html"><span>Generation</span><wbr><span>Batch</span><wbr><span><span>Component</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1321319256%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-batch-component.html"><span class="token function">GenerationBatchComponent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mode<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a><span class="token punctuation">, </span></span><span class="parameter ">requestedBatchCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Edits requested batch size within the active provider's supported UI range.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1590297016%2FFunctions%2F-1999068815" anchor-label="GenerationFormCardSegment" id="-1590297016%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-form-card-segment.html"><span>Generation</span><wbr><span>Form</span><wbr><span>Card</span><wbr><span><span>Segment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1590297016%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-form-card-segment.html"><span class="token function">GenerationFormCardSegment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">isFirst<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">isHeader<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">isLast<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Joins independently composed list items into the existing generation card. Only the first and last segments round their outer corners; adjacent segments share color and horizontal padding without gaps or an inner scrolling container.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2105300273%2FFunctions%2F-1999068815" anchor-label="GenerationInputA1111Option" id="2105300273%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-a1111-option.html"><span>Generation</span><wbr><span>Input</span><wbr><span><span>A1111Option</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2105300273%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-input-a1111-option.html"><span class="token function">GenerationInputA1111Option</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">field<span class="token operator">: </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders the requested AUTOMATIC1111 extension field when applicable to the current generation form.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1895103315%2FFunctions%2F-1999068815" anchor-label="generationInputAdvancedFields" id="-1895103315%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-input-advanced-fields.html"><span>generation</span><wbr><span>Input</span><wbr><span>Advanced</span><wbr><span><span>Fields</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1895103315%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="generation-input-advanced-fields.html"><span class="token function">generationInputAdvancedFields</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Selects logical advanced rows without composing any of their controls. Offscreen rows are emitted as lazy items rather than children of one eager generation-form item.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1445507985%2FFunctions%2F-1999068815" anchor-label="generationInputAdvancedItems" id="1445507985%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-input-advanced-items.html"><span>generation</span><wbr><span>Input</span><wbr><span>Advanced</span><wbr><span><span>Items</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1445507985%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/LazyListScope.html">LazyListScope</a><span class="token punctuation">.</span><a href="generation-input-advanced-items.html"><span class="token function">generationInputAdvancedItems</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">afterSlidersSection<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Emits advanced fields directly into an existing list. All provider visibility decisions are made before composition; each item mounts only its own logical field.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="272836087%2FFunctions%2F-1999068815" anchor-label="GenerationInputAdvancedOption" id="272836087%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-advanced-option.html"><span>Generation</span><wbr><span>Input</span><wbr><span>Advanced</span><wbr><span><span>Option</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="272836087%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-input-advanced-option.html"><span class="token function">GenerationInputAdvancedOption</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">field<span class="token operator">: </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">afterSlidersSection<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Composes one visible logical advanced field. The owning lazy list determines visibility and disposes offscreen controls; no hidden provider form is retained or eagerly constructed.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1004845128%2FFunctions%2F-1999068815" anchor-label="generationInputBaseFields" id="-1004845128%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-input-base-fields.html"><span>generation</span><wbr><span>Input</span><wbr><span>Base</span><wbr><span><span>Fields</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004845128%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="generation-input-base-fields.html"><span class="token function">generationInputBaseFields</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-generation-base-form-field/index.html">GenerationBaseFormField</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Selects basic controls in their established provider-specific order without composing them. The public Column wrapper and lazy generation screens use the same selection rules.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-896293072%2FFunctions%2F-1999068815" anchor-label="GenerationInputBaseOption" id="-896293072%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-base-option.html"><span>Generation</span><wbr><span>Input</span><wbr><span>Base</span><wbr><span><span>Option</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-896293072%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-input-base-option.html"><span class="token function">GenerationInputBaseOption</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">field<span class="token operator">: </span><a href="-generation-base-form-field/index.html">GenerationBaseFormField</a><span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">textFieldContainerColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">promptChipTextFieldState<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/MutableState.html">MutableState</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/TextFieldValue.html">TextFieldValue</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">negativePromptChipTextFieldState<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/MutableState.html">MutableState</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/TextFieldValue.html">TextFieldValue</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders one basic generation control for both the lazy screens and the public Column wrapper. Each control keeps its original values and event owner; this dispatcher adds no business state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1263608017%2FFunctions%2F-1999068815" anchor-label="generationInputFormItems" id="1263608017%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-input-form-items.html"><span>generation</span><wbr><span>Input</span><wbr><span>Form</span><wbr><span><span>Items</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1263608017%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/LazyListScope.html">LazyListScope</a><span class="token punctuation">.</span><a href="generation-input-form-items.html"><span class="token function">generationInputFormItems</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">promptChipTextFieldState<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/MutableState.html">MutableState</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/TextFieldValue.html">TextFieldValue</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">negativePromptChipTextFieldState<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/MutableState.html">MutableState</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/TextFieldValue.html">TextFieldValue</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">isExpanded<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onToggleExpanded<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">afterSlidersSection<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">hasFooter<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">footer<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Emits each basic and advanced control as its own lazy item, followed by the status footer. Stable provider-qualified keys preserve each field's saveable state while scrolling. Expansion uses lazy-item fade and placement transitions rather than measuring an entire offscreen Column before the first expansion frame. The advanced toggle and its fields remain independent when the provider offers that toggle. Otherwise the generation-options disclosure owns the complete form. Status feedback stays visible in either state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="662435655%2FFunctions%2F-1999068815" anchor-label="GenerationInputOtherAdvancedOption" id="662435655%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-input-other-advanced-option.html"><span>Generation</span><wbr><span>Input</span><wbr><span>Other</span><wbr><span>Advanced</span><wbr><span><span>Option</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="662435655%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-generation-input-other-advanced-option.html"><span class="token function">GenerationInputOtherAdvancedOption</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">field<span class="token operator">: </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a><span class="token punctuation">, </span></span><span class="parameter ">isImg2Img<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">afterSlidersSection<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders nonnumeric provider controls after reusable seed and numeric editors have been selected.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-45793157%2FFunctions%2F-1999068815" anchor-label="GenerationNumericEditor" id="-45793157%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-numeric-editor.html"><span>Generation</span><wbr><span>Numeric</span><wbr><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-45793157%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-numeric-editor.html"><span class="token function">GenerationNumericEditor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parameters<span class="token operator">: </span><a href="-generation-numeric-field-parameters/index.html">GenerationNumericFieldParameters</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders all numeric advanced parameters through one structural call site. Compatible recycled lazy items can update this editor's values instead of switching between separate field branches.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1122490082%2FFunctions%2F-1999068815" anchor-label="GenerationPromptEditor" id="-1122490082%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-prompt-editor.html"><span>Generation</span><wbr><span>Prompt</span><wbr><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1122490082%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-prompt-editor.html"><span class="token function">GenerationPromptEditor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">prompt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">negativePrompt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">keywords<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">isNegative<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">isTaggedInputEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">textFieldContainerColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">chipTextFieldState<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/MutableState.html">MutableState</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/TextFieldValue.html">TextFieldValue</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays either prompt through one shared editor structure. Text and chip selection remain owned by the screen. Clearing removes both submitted tags and pending text for this prompt. Scrolling a field out of view does not own or clear its generation value.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1605600351%2FFunctions%2F-1999068815" anchor-label="GenerationSamplerField" id="-1605600351%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-sampler-field.html"><span>Generation</span><wbr><span>Sampler</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1605600351%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-sampler-field.html"><span class="token function">GenerationSamplerField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mode<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a><span class="token punctuation">, </span></span><span class="parameter ">selectedSampler<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">availableSamplers<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">isLoadingSamplers<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">hasSamplerLoadFailed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays sampler selection and an inline retry when AUTOMATIC1111 has no usable sampler list. Loading feedback replaces the empty dropdown while the current attempt is running.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-704633084%2FFunctions%2F-1999068815" anchor-label="GenerationSeedEditor" id="-704633084%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-seed-editor.html"><span>Generation</span><wbr><span>Seed</span><wbr><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-704633084%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-seed-editor.html"><span class="token function">GenerationSeedEditor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">labelKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">validationError<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders seed and variation-seed controls through the same reusable editor structure. The screen owns text and validation; clear and dice retain their existing seed event semantics.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-643205819%2FFunctions%2F-1999068815" anchor-label="GenerationSizeTextFieldsComponent" id="-643205819%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generation-size-text-fields-component.html"><span>Generation</span><wbr><span>Size</span><wbr><span>Text</span><wbr><span>Fields</span><wbr><span><span>Component</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-643205819%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><a href="-generation-size-text-fields-component.html"><span class="token function">GenerationSizeTextFieldsComponent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">widthValidationError<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">heightValidationError<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Edits numeric dimensions and exposes swap/aspect-ratio actions with per-field validation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1057808456%2FFunctions%2F-1999068815" anchor-label="HiresOption" id="-1057808456%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-hires-option.html"><span>Hires</span><wbr><span><span>Option</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1057808456%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-hires-option.html"><span class="token function">HiresOption</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">field<span class="token operator">: </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-hires-config/index.html">HiresConfig</a><span class="token punctuation">, </span></span><span class="parameter ">onConfigChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-hires-config/index.html">HiresConfig</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1341360077%2FFunctions%2F-1999068815" anchor-label="numericChangeEvent" id="-1341360077%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="numeric-change-event.html"><span>numeric</span><wbr><span>Change</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1341360077%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">.</span><a href="numeric-change-event.html"><span class="token function">numericChangeEvent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a></div><div class="brief "><p class="paragraph">Maps one applied numeric edit back to the original form event. Configuration copies preserve every unrelated Hires or ADetailer value supplied by the screen.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1386601841%2FFunctions%2F-1999068815" anchor-label="numericParameters" id="-1386601841%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="numeric-parameters.html"><span>numeric</span><wbr><span><span>Parameters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1386601841%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-form-field/index.html">GenerationFormField</a><span class="token punctuation">.</span><a href="numeric-parameters.html"><span class="token function">numericParameters</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-generation-numeric-field-parameters/index.html">GenerationNumericFieldParameters</a></div><div class="brief "><p class="paragraph">Resolves only the display parameters of a numeric field before its shared editor is composed. Provider bounds, clamping, tick counts and decimal precision match the existing controls.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1750794816%2FFunctions%2F-1999068815" anchor-label="OpenAiCompatibleDimensionsInput" id="-1750794816%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-open-ai-compatible-dimensions-input.html"><span>Open</span><wbr><span>Ai</span><wbr><span>Compatible</span><wbr><span>Dimensions</span><wbr><span><span>Input</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1750794816%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-open-ai-compatible-dimensions-input.html"><span class="token function">OpenAiCompatibleDimensionsInput</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays unrestricted compatible-provider pixel dimensions as a paired horizontal control.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-643137428%2FFunctions%2F-1999068815" anchor-label="OpenAiCompatibleModelInput" id="-643137428%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-open-ai-compatible-model-input.html"><span>Open</span><wbr><span>Ai</span><wbr><span>Compatible</span><wbr><span>Model</span><wbr><span><span>Input</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-643137428%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-open-ai-compatible-model-input.html"><span class="token function">OpenAiCompatibleModelInput</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a><span class="token punctuation">, </span></span><span class="parameter ">onEvent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-generation-input-form-event/index.html">GenerationInputFormEvent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays the compatible provider's editable model or the fixed OAuth model label.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-915434588%2FFunctions%2F-1999068815" anchor-label="processTaggedPrompt" id="-915434588%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="process-tagged-prompt.html"><span>process</span><wbr><span>Tagged</span><wbr><span><span>Prompt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-915434588%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="process-tagged-prompt.html"><span class="token function">processTaggedPrompt</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">keywords<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">event<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.widget.input.chip/-chip-text-field-event/index.html">ChipTextFieldEvent</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Applies a chip mutation to prompt keywords and serializes the resulting prompt.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-305844272%2FFunctions%2F-1999068815" anchor-label="SchedulerSection" id="-305844272%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-scheduler-section.html"><span>Scheduler</span><wbr><span><span>Section</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-305844272%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-scheduler-section.html"><span class="token function">SchedulerSection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-scheduler/index.html">Scheduler</a><span class="token punctuation">, </span></span><span class="parameter ">onConfigChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-scheduler/index.html">Scheduler</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2114971928%2FFunctions%2F-1999068815" anchor-label="toAdvancedOptionsState" id="2114971928%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-advanced-options-state.html"><span>to</span><wbr><span>Advanced</span><wbr><span>Options</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2114971928%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-generation-input-form-state/index.html">GenerationInputFormState</a><span class="token punctuation">.</span><a href="to-advanced-options-state.html"><span class="token function">toAdvancedOptionsState</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-generation-input-advanced-options-state/index.html">GenerationInputAdvancedOptionsState</a></div><div class="brief "><p class="paragraph">Projects only fields rendered by advanced controls and their sampler, batch and A1111 children. Prompt edits, output changes and screen progress therefore do not change this value.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1330361881%2FFunctions%2F-1999068815" anchor-label="validateGenerationSeed" id="1330361881%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="validate-generation-seed.html"><span>validate</span><wbr><span>Generation</span><wbr><span><span>Seed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1330361881%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="validate-generation-seed.html"><span class="token function">validateGenerationSeed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">input<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">mode<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a><span class="token punctuation">, </span></span><span class="parameter ">isVariationSeed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">validator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a><span class="token punctuation">, </span></span><span class="parameter ">nativeValidator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a><span class="token punctuation">, </span></span><span class="parameter ">easyDiffusionValidator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Maps seed validation to inline feedback for controls used by the active provider. AUTOMATIC1111/SwarmUI use JavaScript safe integers; Easy Diffusion uses unsigned 32-bit seeds and native controls retain Long range. Hidden seed controls cannot block generation after switching providers or applying history.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-805227581%2FFunctions%2F-1999068815" anchor-label="withSeedValidation" id="-805227581%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with-seed-validation.html"><span>with</span><wbr><span>Seed</span><wbr><span><span>Validation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-805227581%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="../com.shifthackz.aisdv1.presentation.generation.img2img/-image-to-image-state/index.html">ImageToImageState</a><span class="token punctuation">.</span><a href="with-seed-validation.html"><span class="token function">withSeedValidation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">validator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a><span class="token punctuation">, </span></span><span class="parameter ">nativeValidator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a><span class="token punctuation">, </span></span><span class="parameter ">easyDiffusionValidator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.shifthackz.aisdv1.presentation.generation.img2img/-image-to-image-state/index.html">ImageToImageState</a></div><div class="brief "><p class="paragraph">Recomputes seed feedback before publishing a changed image-to-image form.</p></div><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="../com.shifthackz.aisdv1.presentation.generation.txt2img/-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">.</span><a href="with-seed-validation.html"><span class="token function">withSeedValidation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">validator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a><span class="token punctuation">, </span></span><span class="parameter ">nativeValidator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a><span class="token punctuation">, </span></span><span class="parameter ">easyDiffusionValidator<span class="token operator">: </span><a href="../../../core/validation/com.shifthackz.aisdv1.core.validation.seed/-seed-validator/index.html">SeedValidator</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.shifthackz.aisdv1.presentation.generation.txt2img/-text-to-image-state/index.html">TextToImageState</a></div><div class="brief "><p class="paragraph">Recomputes seed feedback before publishing a changed text-to-image form.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

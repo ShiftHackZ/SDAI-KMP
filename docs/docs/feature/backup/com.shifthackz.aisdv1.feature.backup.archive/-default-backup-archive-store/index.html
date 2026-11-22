@@ -1,0 +1,662 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>DefaultBackupArchiveStore</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/feature/backup/com.shifthackz.aisdv1.feature.backup.archive/-default-backup-archive-store/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/feature/backup/com.shifthackz.aisdv1.feature.backup.archive/-default-backup-archive-store/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+  <a href="https://www.linkedin.com/company/sdai-app/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+    <span>LinkedIn</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:backup/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:backup/commonMain" data-filter=":feature:backup/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature/backup::com.shifthackz.aisdv1.feature.backup.archive/DefaultBackupArchiveStore///PointingToDeclaration//110843729">
+  <div class="breadcrumbs"><a href="../../index.html">feature/backup</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.feature.backup.archive</a><span class="delimiter">/</span><span class="current">DefaultBackupArchiveStore</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Default</span><wbr><span>Backup</span><wbr><span>Archive</span><wbr><span><span>Store</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">DefaultBackupArchiveStore</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>files<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.io/-backup-file-store/index.html">BackupFileStore</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>codec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-backup-archive-codec/index.html">BackupArchiveCodec</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>galleryCodec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-gallery-backup-codec/index.html">GalleryBackupCodec</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>preferencesCodec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-backup-preferences-codec/index.html">BackupPreferencesCodec</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>database<span class="token operator">: </span><a href="../../../../storage/com.shifthackz.aisdv1.storage.gateway/-backup-storage/index.html">BackupStorage</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>preferencesGateway<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway.backup/-backup-preferences-gateway/index.html">BackupPreferencesGateway</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>authorizationStore<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-store/index.html">AuthorizationStore</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>selectionGuard<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-provider-selection-guard/index.html">ProviderSelectionGuard</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>buildInfo<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>clock<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.time/-time-provider/index.html">TimeProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>json<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization.json/Json///PointingToDeclaration/">Json</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>staging<span class="token operator">: </span><a href="../-backup-staging-cleaner/index.html">BackupStagingCleaner</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>civitaiCodec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-civitai-backup-codec/index.html">CivitaiBackupCodec</a></span></span><span class="token punctuation">)</span> : <a href="../-backup-archive-store/index.html">BackupArchiveStore</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/feature/backup/src/commonMain/kotlin/com/shifthackz/aisdv1/feature/backup/archive/DefaultBackupArchiveStore.kt#L58">source</a>)</span></span></div><p class="paragraph">Creates consistent paged snapshots and validates immutable staged files before restore.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>files</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Platform document transport and durable private directory.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>codec</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Bounded binary framing and section integrity.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>gallery</span><wbr><span><span>Codec</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Portable gallery record codec.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>preferences</span><wbr><span><span>Codec</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Portable scalar field codec.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>database</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Shared Room database used for consistent snapshot reads.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>preferences</span><wbr><span><span>Gateway</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Strict allowlisted preference store.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>authorization</span><wbr><span><span>Store</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Protected portable Basic Auth source.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>selection</span><wbr><span><span>Guard</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Serializes provider snapshot reads with configuration publication.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>build</span><wbr><span><span>Info</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Flavor/platform availability and source version.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>clock</span></span></u></div></span></div><div><div class="title"><p class="paragraph">UTC archive timestamp.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>json</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Forward-compatible metadata serializer.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>staging</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Admits file creation only after one-time orphan cleanup has preserved pending restores.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>civitai</span><wbr><span><span>Codec</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Public receipt framing with no protected-session access.</p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="188862464%2FConstructors%2F110843729" anchor-label="DefaultBackupArchiveStore" id="188862464%2FConstructors%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-default-backup-archive-store.html"><span>Default</span><wbr><span>Backup</span><wbr><span>Archive</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="188862464%2FConstructors%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">files<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.io/-backup-file-store/index.html">BackupFileStore</a><span class="token punctuation">, </span></span><span class="parameter ">codec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-backup-archive-codec/index.html">BackupArchiveCodec</a><span class="token punctuation">, </span></span><span class="parameter ">galleryCodec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-gallery-backup-codec/index.html">GalleryBackupCodec</a><span class="token punctuation">, </span></span><span class="parameter ">preferencesCodec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-backup-preferences-codec/index.html">BackupPreferencesCodec</a><span class="token punctuation">, </span></span><span class="parameter ">database<span class="token operator">: </span><a href="../../../../storage/com.shifthackz.aisdv1.storage.gateway/-backup-storage/index.html">BackupStorage</a><span class="token punctuation">, </span></span><span class="parameter ">preferencesGateway<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway.backup/-backup-preferences-gateway/index.html">BackupPreferencesGateway</a><span class="token punctuation">, </span></span><span class="parameter ">authorizationStore<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-store/index.html">AuthorizationStore</a><span class="token punctuation">, </span></span><span class="parameter ">selectionGuard<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-provider-selection-guard/index.html">ProviderSelectionGuard</a><span class="token punctuation">, </span></span><span class="parameter ">buildInfo<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a><span class="token punctuation">, </span></span><span class="parameter ">clock<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.time/-time-provider/index.html">TimeProvider</a><span class="token punctuation">, </span></span><span class="parameter ">json<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization.json/Json///PointingToDeclaration/">Json</span><span class="token punctuation">, </span></span><span class="parameter ">staging<span class="token operator">: </span><a href="../-backup-staging-cleaner/index.html">BackupStagingCleaner</a><span class="token punctuation">, </span></span><span class="parameter ">civitaiCodec<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-civitai-backup-codec/index.html">CivitaiBackupCodec</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-494032606%2FClasslikes%2F110843729" anchor-label="Companion" id="-494032606%2FClasslikes%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-494032606%2FClasslikes%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1642420855%2FProperties%2F110843729" anchor-label="authorizationStore" id="1642420855%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="authorization-store.html"><span>authorization</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1642420855%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="authorization-store.html">authorizationStore</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.auth/-authorization-store/index.html">AuthorizationStore</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="442866463%2FProperties%2F110843729" anchor-label="buildInfo" id="442866463%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="build-info.html"><span>build</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="442866463%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="build-info.html">buildInfo</a><span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-595953716%2FProperties%2F110843729" anchor-label="civitaiCodec" id="-595953716%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="civitai-codec.html"><span>civitai</span><wbr><span><span>Codec</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-595953716%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="civitai-codec.html">civitaiCodec</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-civitai-backup-codec/index.html">CivitaiBackupCodec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1662531955%2FProperties%2F110843729" anchor-label="clock" id="-1662531955%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clock.html"><span><span>clock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1662531955%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="clock.html">clock</a><span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.time/-time-provider/index.html">TimeProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="598977413%2FProperties%2F110843729" anchor-label="codec" id="598977413%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="codec.html"><span><span>codec</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="598977413%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="codec.html">codec</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-backup-archive-codec/index.html">BackupArchiveCodec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-316706108%2FProperties%2F110843729" anchor-label="database" id="-316706108%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="database.html"><span><span>database</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-316706108%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="database.html">database</a><span class="token operator">: </span><a href="../../../../storage/com.shifthackz.aisdv1.storage.gateway/-backup-storage/index.html">BackupStorage</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-772292540%2FProperties%2F110843729" anchor-label="files" id="-772292540%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="files.html"><span><span>files</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-772292540%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="files.html">files</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.io/-backup-file-store/index.html">BackupFileStore</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="908365691%2FProperties%2F110843729" anchor-label="galleryCodec" id="908365691%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="gallery-codec.html"><span>gallery</span><wbr><span><span>Codec</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="908365691%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="gallery-codec.html">galleryCodec</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-gallery-backup-codec/index.html">GalleryBackupCodec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="819772663%2FProperties%2F110843729" anchor-label="json" id="819772663%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="json.html"><span><span>json</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="819772663%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="json.html">json</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization.json/Json///PointingToDeclaration/">Json</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1506160545%2FProperties%2F110843729" anchor-label="preferencesCodec" id="1506160545%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="preferences-codec.html"><span>preferences</span><wbr><span><span>Codec</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1506160545%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="preferences-codec.html">preferencesCodec</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.feature.backup.codec/-backup-preferences-codec/index.html">BackupPreferencesCodec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2031631693%2FProperties%2F110843729" anchor-label="preferencesGateway" id="-2031631693%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="preferences-gateway.html"><span>preferences</span><wbr><span><span>Gateway</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2031631693%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="preferences-gateway.html">preferencesGateway</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway.backup/-backup-preferences-gateway/index.html">BackupPreferencesGateway</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="460539910%2FProperties%2F110843729" anchor-label="selectionGuard" id="460539910%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="selection-guard.html"><span>selection</span><wbr><span><span>Guard</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="460539910%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="selection-guard.html">selectionGuard</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-provider-selection-guard/index.html">ProviderSelectionGuard</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1562793856%2FProperties%2F110843729" anchor-label="staging" id="1562793856%2FProperties%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="staging.html"><span><span>staging</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1562793856%2FProperties%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="staging.html">staging</a><span class="token operator">: </span><a href="../-backup-staging-cleaner/index.html">BackupStagingCleaner</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="899504487%2FFunctions%2F110843729" anchor-label="compatible" id="899504487%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="compatible.html"><span><span>compatible</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="899504487%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="compatible.html"><span class="token function">compatible</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">archive<span class="token operator">: </span><a href="../-staged-backup/index.html">StagedBackup</a><span class="token punctuation">, </span></span><span class="parameter ">category<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-category/index.html">BackupCategory</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1236698938%2FFunctions%2F110843729" anchor-label="create" id="1236698938%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create.html"><span><span>create</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1236698938%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="create.html"><span class="token function">create</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">selection<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-selection/index.html">BackupSelection</a><span class="token punctuation">, </span></span><span class="parameter ">progress<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-progress/index.html">BackupProgress</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-export/index.html">BackupExport</a></div><div class="brief "><p class="paragraph">Captures selected portable settings and a paged gallery/statistics snapshot into private binary staging.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="354351542%2FFunctions%2F110843729" anchor-label="directory" id="354351542%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="directory.html"><span><span>directory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="354351542%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="directory.html"><span class="token function">directory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1006340185%2FFunctions%2F110843729" anchor-label="discard" id="-1006340185%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="discard.html"><span><span>discard</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1006340185%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="discard.html"><span class="token function">discard</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes only generated app-owned staging; the caller must resolve pending journal intent first.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1171973342%2FFunctions%2F110843729" anchor-label="export" id="1171973342%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="export.html"><span><span>export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1171973342%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="export.html"><span class="token function">export</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">document<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">destination<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Streams complete staged bytes into the selected destination; write failure propagates.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="285497475%2FFunctions%2F110843729" anchor-label="inspect" id="285497475%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inspect.html"><span><span>inspect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="285497475%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="inspect.html"><span class="token function">inspect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">document<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">progress<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-progress/index.html">BackupProgress</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-inspection/index.html">BackupInspection</a></div><div class="brief "><p class="paragraph">Stages a selected native document and validates all known payloads before any app-data writes.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1471725055%2FFunctions%2F110843729" anchor-label="inventory" id="1471725055%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inventory.html"><span><span>inventory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1471725055%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="inventory.html"><span class="token function">inventory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-inspection/index.html">BackupInspection</a></div><div class="brief "><p class="paragraph">Reads current selectable counts and portable fields without requiring protected credentials.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1367289817%2FFunctions%2F110843729" anchor-label="ordinarySnapshot" id="1367289817%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ordinary-snapshot.html"><span>ordinary</span><wbr><span><span>Snapshot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1367289817%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="ordinary-snapshot.html"><span class="token function">ordinarySnapshot</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-preferences/index.html">BackupPreferences</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1250521728%2FFunctions%2F110843729" anchor-label="portableSnapshot" id="1250521728%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="portable-snapshot.html"><span>portable</span><wbr><span><span>Snapshot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1250521728%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="portable-snapshot.html"><span class="token function">portableSnapshot</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-preferences/index.html">BackupPreferences</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-707241017%2FFunctions%2F110843729" anchor-label="preferences" id="-707241017%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="preferences.html"><span><span>preferences</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-707241017%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="preferences.html"><span class="token function">preferences</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">archive<span class="token operator">: </span><a href="../-staged-backup/index.html">StagedBackup</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-preferences/index.html">BackupPreferences</a></div><div class="brief "><p class="paragraph">Reads supported portable fields while ignoring removed providers/fields and retaining omitted values.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1024418043%2FFunctions%2F110843729" anchor-label="preparedExport" id="1024418043%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="prepared-export.html"><span>prepared</span><wbr><span><span>Export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1024418043%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="prepared-export.html"><span class="token function">preparedExport</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">filename<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-export/index.html">BackupExport</a></div><div class="brief "><p class="paragraph">Resolves a retained staged source without persisting platform-specific private paths.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="794229959%2FFunctions%2F110843729" anchor-label="privateDocument" id="794229959%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="private-document.html"><span>private</span><wbr><span><span>Document</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="794229959%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="private-document.html"><span class="token function">privateDocument</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">document<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1742520786%2FFunctions%2F110843729" anchor-label="repeatCount" id="-1742520786%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="repeat-count.html"><span>repeat</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1742520786%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="repeat-count.html"><span class="token function">repeatCount</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">count<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2052268117%2FFunctions%2F110843729" anchor-label="staged" id="-2052268117%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="staged.html"><span><span>staged</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2052268117%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="staged.html"><span class="token function">staged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-staged-backup/index.html">StagedBackup</a></div><div class="brief "><p class="paragraph">Revalidates the binary integrity of an existing private archive for retry or recovery.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1526859253%2FFunctions%2F110843729" anchor-label="summary" id="1526859253%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="summary.html"><span><span>summary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1526859253%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="summary.html"><span class="token function">summary</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">archive<span class="token operator">: </span><a href="../-staged-backup/index.html">StagedBackup</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-inspection/index.html">BackupInspection</a></div><div class="brief "><p class="paragraph">Describes readable sections and skipped data without exposing provider credentials.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2144700876%2FFunctions%2F110843729" anchor-label="validatePayloads" id="2144700876%2FFunctions%2F110843729" data-filterable-set=":feature:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:backup/commonMain" data-filterable-set=":feature:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="validate-payloads.html"><span>validate</span><wbr><span><span>Payloads</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2144700876%2FFunctions%2F110843729"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="validate-payloads.html"><span class="token function">validatePayloads</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">archive<span class="token operator">: </span><a href="../-staged-backup/index.html">StagedBackup</a><span class="token punctuation">, </span></span><span class="parameter ">progress<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-progress/index.html">BackupProgress</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

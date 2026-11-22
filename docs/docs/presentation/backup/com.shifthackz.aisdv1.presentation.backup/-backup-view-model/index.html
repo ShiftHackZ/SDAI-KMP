@@ -1,0 +1,1063 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>BackupViewModel</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/presentation/backup/com.shifthackz.aisdv1.presentation.backup/-backup-view-model/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/presentation/backup/com.shifthackz.aisdv1.presentation.backup/-backup-view-model/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+  <a href="https://www.linkedin.com/company/sdai-app/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+    <span>LinkedIn</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":presentation:backup/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:backup/commonMain" data-filter=":presentation:backup/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="presentation/backup::com.shifthackz.aisdv1.presentation.backup/BackupViewModel///PointingToDeclaration//1249804955">
+  <div class="breadcrumbs"><a href="../../index.html">presentation/backup</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.presentation.backup</a><span class="delimiter">/</span><span class="current">BackupViewModel</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Backup</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">BackupViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>mode<span class="token operator">: </span><a href="../-backup-screen-mode/index.html">BackupScreenMode</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>router<span class="token operator">: </span><a href="../../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-backup-router/index.html">BackupRouter</a><span class="token punctuation">, </span></span><span class="parameter ">diagnostics<span class="token operator">: </span><a href="../../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dispatchers<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>inventory<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-load-backup-inventory-use-case/index.html">LoadBackupInventoryUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>createBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-create-backup-use-case/index.html">CreateBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>inspectBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-inspect-backup-use-case/index.html">InspectBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>restoreBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-restore-backup-use-case/index.html">RestoreBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>observeExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-observe-backup-export-use-case/index.html">ObserveBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>completeExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-complete-backup-export-use-case/index.html">CompleteBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>cancelExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-cancel-backup-export-use-case/index.html">CancelBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dismissExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-dismiss-backup-export-use-case/index.html">DismissBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>getStartupStage<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-get-backup-startup-stage-use-case/index.html">GetBackupStartupStageUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>discardBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-discard-backup-use-case/index.html">DiscardBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>loadPending<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-load-pending-backup-use-case/index.html">LoadPendingBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>setStartupStage<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-set-backup-startup-stage-use-case/index.html">SetBackupStartupStageUseCase</a></span></span><span class="token punctuation">)</span> : <a href="../../../../core/ui/com.shifthackz.aisdv1.core.mvi/-base-mvi-view-model/index.html">BaseMviViewModel</a><span class="token operator">&lt;</span><a href="../-backup-state/index.html">BackupState</a><span class="token punctuation">, </span><a href="../-backup-intent/index.html">BackupIntent</a><span class="token punctuation">, </span><a href="../-backup-effect/index.html">BackupEffect</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/presentation/backup/src/commonMain/kotlin/com/shifthackz/aisdv1/presentation/backup/BackupViewModel.kt#L58">source</a>)</span></span></div><p class="paragraph">Owns independent tab selections, native picker outcomes and resumable restore intent.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>mode</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Settings tabs or first-launch recovery context.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>router</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Caller-owned navigation contract.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>diagnostics</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Bounded nonsecret MVI diagnostics.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>dispatchers</span></span></u></div></span></div><div><div class="title"><p class="paragraph">IO work and immediate UI publication dispatchers.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>inventory</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Loads current selectable app data.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>create</span><wbr><span><span>Backup</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Creates a complete staged binary archive.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>inspect</span><wbr><span><span>Backup</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Stages and validates a native document.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>restore</span><wbr><span><span>Backup</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Merges selected categories with durable retry identity.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>observe</span><wbr><span><span>Export</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Observes graph-owned export work across host recreation.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>complete</span><wbr><span><span>Export</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Queues native outcomes independently of screen initialization.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>cancel</span><wbr><span><span>Export</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Interrupts destination copying while retaining its owned source.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>dismiss</span><wbr><span><span>Export</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Acknowledges export completion or abandons a staged export.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>get</span><wbr><span>Startup</span><wbr><span><span>Stage</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Reads acknowledged first-launch progression after pending recovery.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>discard</span><wbr><span><span>Backup</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Releases staging after resolving checked writes.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>load</span><wbr><span><span>Pending</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Loads nonsecret process-recovery intent.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>set</span><wbr><span>Startup</span><wbr><span><span>Stage</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Persists first-launch progression before navigation.</p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-372584970%2FConstructors%2F1249804955" anchor-label="BackupViewModel" id="-372584970%2FConstructors%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-backup-view-model.html"><span>Backup</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372584970%2FConstructors%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mode<span class="token operator">: </span><a href="../-backup-screen-mode/index.html">BackupScreenMode</a><span class="token punctuation">, </span></span><span class="parameter ">router<span class="token operator">: </span><a href="../../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-backup-router/index.html">BackupRouter</a><span class="token punctuation">, </span></span><span class="parameter ">diagnostics<span class="token operator">: </span><a href="../../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter ">inventory<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-load-backup-inventory-use-case/index.html">LoadBackupInventoryUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">createBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-create-backup-use-case/index.html">CreateBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">inspectBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-inspect-backup-use-case/index.html">InspectBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">restoreBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-restore-backup-use-case/index.html">RestoreBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">observeExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-observe-backup-export-use-case/index.html">ObserveBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">completeExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-complete-backup-export-use-case/index.html">CompleteBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">cancelExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-cancel-backup-export-use-case/index.html">CancelBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">dismissExport<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-dismiss-backup-export-use-case/index.html">DismissBackupExportUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">getStartupStage<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-get-backup-startup-stage-use-case/index.html">GetBackupStartupStageUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">discardBackup<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-discard-backup-use-case/index.html">DiscardBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">loadPending<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-load-pending-backup-use-case/index.html">LoadPendingBackupUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">setStartupStage<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-set-backup-startup-stage-use-case/index.html">SetBackupStartupStageUseCase</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-7883239%2FProperties%2F1249804955" anchor-label="_effect" id="-7883239%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-7883239%2FProperties%2F1249804955"><span>_</span><wbr><span>effect</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-7883239%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="index.html#-7883239%2FProperties%2F1249804955">_effect</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.channels/Channel///PointingToDeclaration/">Channel</span><span class="token operator">&lt;</span><a href="../../../../core/ui/com.shifthackz.aisdv1.core.mvi/-base-mvi-view-model/index.html">E</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2016956383%2FProperties%2F1249804955" anchor-label="_state" id="2016956383%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2016956383%2FProperties%2F1249804955"><span>_</span><wbr><span>state</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2016956383%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="index.html#2016956383%2FProperties%2F1249804955">_state</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/MutableStateFlow///PointingToDeclaration/">MutableStateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/ui/com.shifthackz.aisdv1.core.mvi/-base-mvi-view-model/index.html">S</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1402583783%2FProperties%2F1249804955" anchor-label="cancelExport" id="-1402583783%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cancel-export.html"><span>cancel</span><wbr><span><span>Export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1402583783%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="cancel-export.html">cancelExport</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-cancel-backup-export-use-case/index.html">CancelBackupExportUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1698838522%2FProperties%2F1249804955" anchor-label="completeExport" id="1698838522%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="complete-export.html"><span>complete</span><wbr><span><span>Export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1698838522%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="complete-export.html">completeExport</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-complete-backup-export-use-case/index.html">CompleteBackupExportUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1829399561%2FProperties%2F1249804955" anchor-label="createBackup" id="1829399561%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-backup.html"><span>create</span><wbr><span><span>Backup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1829399561%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="create-backup.html">createBackup</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-create-backup-use-case/index.html">CreateBackupUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="629721241%2FProperties%2F1249804955" anchor-label="currentState" id="629721241%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#629721241%2FProperties%2F1249804955"><span>current</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="629721241%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">val </span><a href="index.html#629721241%2FProperties%2F1249804955">currentState</a><span class="token operator">: </span><a href="../-backup-state/index.html">BackupState</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-967097248%2FProperties%2F1249804955" anchor-label="diagnosticAttachments" id="-967097248%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-967097248%2FProperties%2F1249804955"><span>diagnostic</span><wbr><span><span>Attachments</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-967097248%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="index.html#-967097248%2FProperties%2F1249804955">diagnosticAttachments</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1197402391%2FProperties%2F1249804955" anchor-label="diagnosticObserverJob" id="-1197402391%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1197402391%2FProperties%2F1249804955"><span>diagnostic</span><wbr><span>Observer</span><wbr><span><span>Job</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1197402391%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="index.html#-1197402391%2FProperties%2F1249804955">diagnosticObserverJob</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1650782461%2FProperties%2F1249804955" anchor-label="diagnosticOwner" id="1650782461%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1650782461%2FProperties%2F1249804955"><span>diagnostic</span><wbr><span><span>Owner</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1650782461%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="index.html#1650782461%2FProperties%2F1249804955">diagnosticOwner</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="401571997%2FProperties%2F1249804955" anchor-label="diagnostics" id="401571997%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#401571997%2FProperties%2F1249804955"><span><span>diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="401571997%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="index.html#401571997%2FProperties%2F1249804955">diagnostics</a><span class="token operator">: </span><a href="../../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="956877971%2FProperties%2F1249804955" anchor-label="discardBackup" id="956877971%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="discard-backup.html"><span>discard</span><wbr><span><span>Backup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="956877971%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="discard-backup.html">discardBackup</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-discard-backup-use-case/index.html">DiscardBackupUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="623672181%2FProperties%2F1249804955" anchor-label="dismissExport" id="623672181%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dismiss-export.html"><span>dismiss</span><wbr><span><span>Export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="623672181%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="dismiss-export.html">dismissExport</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-dismiss-backup-export-use-case/index.html">DismissBackupExportUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="566977767%2FProperties%2F1249804955" anchor-label="dispatchers" id="566977767%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dispatchers.html"><span><span>dispatchers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="566977767%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="dispatchers.html">dispatchers</a><span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-377487473%2FProperties%2F1249804955" anchor-label="documentResult" id="-377487473%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="document-result.html"><span>document</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-377487473%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="document-result.html">documentResult</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1311075788%2FProperties%2F1249804955" anchor-label="documentResultId" id="-1311075788%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="document-result-id.html"><span>document</span><wbr><span>Result</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1311075788%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="document-result-id.html">documentResultId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1155028288%2FProperties%2F1249804955" anchor-label="effect" id="-1155028288%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1155028288%2FProperties%2F1249804955"><span><span>effect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1155028288%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="index.html#-1155028288%2FProperties%2F1249804955">effect</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../-backup-effect/index.html">BackupEffect</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1348299289%2FProperties%2F1249804955" anchor-label="effectDispatcher" id="1348299289%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1348299289%2FProperties%2F1249804955"><span>effect</span><wbr><span><span>Dispatcher</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1348299289%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="index.html#1348299289%2FProperties%2F1249804955">effectDispatcher</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="262125117%2FProperties%2F1249804955" anchor-label="exportObserver" id="262125117%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="export-observer.html"><span>export</span><wbr><span><span>Observer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="262125117%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="export-observer.html">exportObserver</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="434927100%2FProperties%2F1249804955" anchor-label="getStartupStage" id="434927100%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-startup-stage.html"><span>get</span><wbr><span>Startup</span><wbr><span><span>Stage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="434927100%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="get-startup-stage.html">getStartupStage</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-get-backup-startup-stage-use-case/index.html">GetBackupStartupStageUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-688096501%2FProperties%2F1249804955" anchor-label="hasBeenCleared" id="-688096501%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-688096501%2FProperties%2F1249804955"><span>has</span><wbr><span>Been</span><wbr><span><span>Cleared</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-688096501%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="index.html#-688096501%2FProperties%2F1249804955">hasBeenCleared</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-758266787%2FProperties%2F1249804955" anchor-label="inspectBackup" id="-758266787%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inspect-backup.html"><span>inspect</span><wbr><span><span>Backup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-758266787%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="inspect-backup.html">inspectBackup</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-inspect-backup-use-case/index.html">InspectBackupUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-551286345%2FProperties%2F1249804955" anchor-label="inventory" id="-551286345%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inventory.html"><span><span>inventory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-551286345%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="inventory.html">inventory</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-load-backup-inventory-use-case/index.html">LoadBackupInventoryUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-542845598%2FProperties%2F1249804955" anchor-label="loadPending" id="-542845598%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="load-pending.html"><span>load</span><wbr><span><span>Pending</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-542845598%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="load-pending.html">loadPending</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-load-pending-backup-use-case/index.html">LoadPendingBackupUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1763812%2FProperties%2F1249804955" anchor-label="mode" id="1763812%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mode.html"><span><span>mode</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1763812%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="mode.html">mode</a><span class="token operator">: </span><a href="../-backup-screen-mode/index.html">BackupScreenMode</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1067578717%2FProperties%2F1249804955" anchor-label="observeExport" id="-1067578717%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="observe-export.html"><span>observe</span><wbr><span><span>Export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1067578717%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="observe-export.html">observeExport</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-observe-backup-export-use-case/index.html">ObserveBackupExportUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-532979700%2FProperties%2F1249804955" anchor-label="operation" id="-532979700%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="operation.html"><span><span>operation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-532979700%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="operation.html">operation</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1407712568%2FProperties%2F1249804955" anchor-label="pendingExport" id="-1407712568%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="pending-export.html"><span>pending</span><wbr><span><span>Export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1407712568%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="pending-export.html">pendingExport</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-export/index.html">BackupExport</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-247479133%2FProperties%2F1249804955" anchor-label="restoreBackup" id="-247479133%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="restore-backup.html"><span>restore</span><wbr><span><span>Backup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-247479133%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="restore-backup.html">restoreBackup</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-restore-backup-use-case/index.html">RestoreBackupUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1308134234%2FProperties%2F1249804955" anchor-label="restoreRequest" id="-1308134234%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="restore-request.html"><span>restore</span><wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1308134234%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="restore-request.html">restoreRequest</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-restore-request/index.html">BackupRestoreRequest</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="792600702%2FProperties%2F1249804955" anchor-label="router" id="792600702%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="router.html"><span><span>router</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="792600702%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="router.html">router</a><span class="token operator">: </span><a href="../../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-backup-router/index.html">BackupRouter</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="794017904%2FProperties%2F1249804955" anchor-label="setStartupStage" id="794017904%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-startup-stage.html"><span>set</span><wbr><span>Startup</span><wbr><span><span>Stage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="794017904%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="set-startup-stage.html">setStartupStage</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.backup/-set-backup-startup-stage-use-case/index.html">SetBackupStartupStageUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1979951704%2FProperties%2F1249804955" anchor-label="state" id="1979951704%2FProperties%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1979951704%2FProperties%2F1249804955"><span><span>state</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1979951704%2FProperties%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="index.html#1979951704%2FProperties%2F1249804955">state</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../-backup-state/index.html">BackupState</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-462089743%2FFunctions%2F1249804955" anchor-label="addCloseable" id="-462089743%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2068605057%2FFunctions%2F1249804955"><span>add</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-462089743%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2068605057%2FFunctions%2F1249804955"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="index.html#2093014716%2FFunctions%2F1249804955"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1501205210%2FFunctions%2F1249804955" anchor-label="allSelected" id="1501205210%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="all-selected.html"><span>all</span><wbr><span><span>Selected</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1501205210%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="all-selected.html"><span class="token function">allSelected</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">summary<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-inspection/index.html">BackupInspection</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-selection/index.html">BackupSelection</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1967297662%2FFunctions%2F1249804955" anchor-label="attachDiagnostics" id="-1967297662%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1967297662%2FFunctions%2F1249804955"><span>attach</span><wbr><span><span>Diagnostics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1967297662%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1967297662%2FFunctions%2F1249804955"><span class="token function">attachDiagnostics</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1763538009%2FFunctions%2F1249804955" anchor-label="canEdit" id="1763538009%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="can-edit.html"><span>can</span><wbr><span><span>Edit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1763538009%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="can-edit.html"><span class="token function">canEdit</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2062912851%2FFunctions%2F1249804955" anchor-label="canInteract" id="-2062912851%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="can-interact.html"><span>can</span><wbr><span><span>Interact</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2062912851%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="can-interact.html"><span class="token function">canInteract</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1936886459%2FFunctions%2F1249804955" anchor-label="clear" id="-1936886459%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1936886459%2FFunctions%2F1249804955"><span><span>clear</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1936886459%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation builtin">MainThread</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="index.html#-1936886459%2FFunctions%2F1249804955"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1166728134%2FFunctions%2F1249804955" anchor-label="clearRestore" id="1166728134%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-restore.html"><span>clear</span><wbr><span><span>Restore</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1166728134%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="clear-restore.html"><span class="token function">clearRestore</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1271044218%2FFunctions%2F1249804955" anchor-label="completeExport" id="1271044218%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="complete-export.html"><span>complete</span><wbr><span><span>Export</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1271044218%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="complete-export.html"><span class="token function">completeExport</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="../-backup-intent/-export-finished/index.html">BackupIntent.ExportFinished</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1658890740%2FFunctions%2F1249804955" anchor-label="editPage" id="-1658890740%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="edit-page.html"><span>edit</span><wbr><span><span>Page</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1658890740%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="edit-page.html"><span class="token function">editPage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">transform<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-backup-page-state/index.html">BackupPageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-backup-page-state/index.html">BackupPageState</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1779036171%2FFunctions%2F1249804955" anchor-label="emitEffect" id="-1779036171%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1779036171%2FFunctions%2F1249804955"><span>emit</span><wbr><span><span>Effect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1779036171%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">fun </span><a href="index.html#-1779036171%2FFunctions%2F1249804955"><span class="token function">emitEffect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">effect<span class="token operator">: </span><a href="../-backup-effect/index.html">BackupEffect</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1383838475%2FFunctions%2F1249804955" anchor-label="emitState" id="-1383838475%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1383838475%2FFunctions%2F1249804955"><span>emit</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1383838475%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">fun </span><a href="index.html#-1383838475%2FFunctions%2F1249804955"><span class="token function">emitState</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="../-backup-state/index.html">BackupState</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1102255800%2FFunctions%2F1249804955" anchor-label="getCloseable" id="1102255800%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1102255800%2FFunctions%2F1249804955"><span>get</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1102255800%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="index.html#1102255800%2FFunctions%2F1249804955">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a><span class="token operator">&gt; </span><a href="index.html#1102255800%2FFunctions%2F1249804955"><span class="token function">getCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html#1102255800%2FFunctions%2F1249804955">T</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1252033859%2FFunctions%2F1249804955" anchor-label="launch" id="1252033859%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1252033859%2FFunctions%2F1249804955"><span><span>launch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1252033859%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">fun </span><a href="index.html#1252033859%2FFunctions%2F1249804955"><span class="token function">launch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dispatcher<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span><span class="token punctuation">, </span></span><span class="parameter ">start<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineStart///PointingToDeclaration/">CoroutineStart</span><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1528931396%2FFunctions%2F1249804955" anchor-label="leave" id="-1528931396%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="leave.html"><span><span>leave</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1528931396%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="leave.html"><span class="token function">leave</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="747739318%2FFunctions%2F1249804955" anchor-label="newSessionId" id="747739318%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="new-session-id.html"><span>new</span><wbr><span>Session</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="747739318%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="new-session-id.html"><span class="token function">newSessionId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1831297124%2FFunctions%2F1249804955" anchor-label="onCleared" id="-1831297124%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1831297124%2FFunctions%2F1249804955"><span>on</span><wbr><span><span>Cleared</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1831297124%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1831297124%2FFunctions%2F1249804955"><span class="token function">onCleared</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="557057826%2FFunctions%2F1249804955" anchor-label="onDiagnosticCaptureChanged" id="557057826%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#557057826%2FFunctions%2F1249804955"><span>on</span><wbr><span>Diagnostic</span><wbr><span>Capture</span><wbr><span><span>Changed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="557057826%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#557057826%2FFunctions%2F1249804955"><span class="token function">onDiagnosticCaptureChanged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isCapturing<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="473605636%2FFunctions%2F1249804955" anchor-label="onRouteDisposed" id="473605636%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-route-disposed.html"><span>on</span><wbr><span>Route</span><wbr><span><span>Disposed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="473605636%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="on-route-disposed.html"><span class="token function">onRouteDisposed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Stops owned work on route disposal. Interrupted restore staging remains journal-owned for recovery.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1648678210%2FFunctions%2F1249804955" anchor-label="processIntent" id="1648678210%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="process-intent.html"><span>process</span><wbr><span><span>Intent</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1648678210%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="process-intent.html"><span class="token function">processIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">intent<span class="token operator">: </span><a href="../-backup-intent/index.html">BackupIntent</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Applies UI choices or native document outcomes while rejecting overlapping jobs.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1738372414%2FFunctions%2F1249804955" anchor-label="progress" id="1738372414%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="progress.html"><span><span>progress</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1738372414%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="progress.html"><span class="token function">progress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-progress/index.html">BackupProgress</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-199787470%2FFunctions%2F1249804955" anchor-label="runOperation" id="-199787470%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="run-operation.html"><span>run</span><wbr><span><span>Operation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-199787470%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="run-operation.html"><span class="token function">runOperation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">shouldClearFeedback<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">isLeaving<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Serializes bounded work and publishes cancellable loading plus acknowledged failure feedback.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="600875439%2FFunctions%2F1249804955" anchor-label="selectDocument" id="600875439%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="select-document.html"><span>select</span><wbr><span><span>Document</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="600875439%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="select-document.html"><span class="token function">selectDocument</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">document<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1321488722%2FFunctions%2F1249804955" anchor-label="submit" id="-1321488722%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="submit.html"><span><span>submit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1321488722%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="submit.html"><span class="token function">submit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fingerprint<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-599510215%2FFunctions%2F1249804955" anchor-label="transition" id="-599510215%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="transition.html"><span><span>transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-599510215%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="transition.html"><span class="token function">transition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">stage<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity.backup/-backup-startup-stage/index.html">BackupStartupStage</a><span class="token punctuation">, </span></span><span class="parameter ">navigate<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2049862131%2FFunctions%2F1249804955" anchor-label="updateState" id="-2049862131%2FFunctions%2F1249804955" data-filterable-set=":presentation:backup/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:backup/commonMain" data-filterable-set=":presentation:backup/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-2049862131%2FFunctions%2F1249804955"><span>update</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2049862131%2FFunctions%2F1249804955"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:backup/commonMain"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">fun </span><a href="index.html#-2049862131%2FFunctions%2F1249804955"><span class="token function">updateState</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mutation<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-backup-state/index.html">BackupState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-backup-state/index.html">BackupState</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

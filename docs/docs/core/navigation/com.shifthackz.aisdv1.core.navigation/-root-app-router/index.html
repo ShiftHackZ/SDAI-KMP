@@ -152,7 +152,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core/navigation</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.core.navigation</a><span class="delimiter">/</span><span class="current">RootAppRouter</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Root</span><wbr><span>App</span><wbr><span><span>Router</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">RootAppRouter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">initialRoute<span class="token operator">: </span><a href="../-app-route/index.html">AppRoute</a><span class="token operator"> = </span>AppRoute.Splash</span></span><span class="token punctuation">)</span> : <a href="../../com.shifthackz.aisdv1.core.navigation.router/-server-setup-router/index.html">ServerSetupRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-configuration-loader-router/index.html">ConfigurationLoaderRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-splash-router/index.html">SplashRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-donate-router/index.html">DonateRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-home-router/index.html">HomeRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-text-to-image-router/index.html">TextToImageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-image-to-image-router/index.html">ImageToImageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-history-router/index.html">HistoryRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-gallery-router/index.html">GalleryRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-gallery-detail-router/index.html">GalleryDetailRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-debug-menu-router/index.html">DebugMenuRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-logger-router/index.html">LoggerRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-report-router/index.html">ReportRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-settings-router/index.html">SettingsRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-benchmark-router/index.html">BenchmarkRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-storage-usage-router/index.html">StorageUsageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-network-usage-router/index.html">NetworkUsageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-web-ui-router/index.html">WebUiRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-on-boarding-router/index.html">OnBoardingRouter</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/core/navigation/src/commonMain/kotlin/com/shifthackz/aisdv1/core/navigation/RootAppRouter.kt#L31">source</a>)</span></span></div><p class="paragraph">Owns the in-process route stack and drawer state for one application host. Call navigation actions on the host UI thread. Consecutive home-tab selections replace each other; standalone screens retain Back history.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>initial</span><wbr><span><span>Route</span></span></u></div></span></div><div><div class="title"><p class="paragraph">First route retained when the host creates its navigation controller.</p></div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">RootAppRouter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">initialRoute<span class="token operator">: </span><a href="../-app-route/index.html">AppRoute</a><span class="token operator"> = </span>AppRoute.Splash</span></span><span class="token punctuation">)</span> : <a href="../../com.shifthackz.aisdv1.core.navigation.router/-server-setup-router/index.html">ServerSetupRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-backup-router/index.html">BackupRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-configuration-loader-router/index.html">ConfigurationLoaderRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-splash-router/index.html">SplashRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-donate-router/index.html">DonateRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-home-router/index.html">HomeRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-text-to-image-router/index.html">TextToImageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-image-to-image-router/index.html">ImageToImageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-history-router/index.html">HistoryRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-gallery-router/index.html">GalleryRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-gallery-detail-router/index.html">GalleryDetailRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-debug-menu-router/index.html">DebugMenuRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-logger-router/index.html">LoggerRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-report-router/index.html">ReportRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-settings-router/index.html">SettingsRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-benchmark-router/index.html">BenchmarkRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-civitai-router/index.html">CivitaiRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-storage-usage-router/index.html">StorageUsageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-network-usage-router/index.html">NetworkUsageRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-web-ui-router/index.html">WebUiRouter</a>, <a href="../../com.shifthackz.aisdv1.core.navigation.router/-on-boarding-router/index.html">OnBoardingRouter</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/core/navigation/src/commonMain/kotlin/com/shifthackz/aisdv1/core/navigation/RootAppRouter.kt#L33">source</a>)</span></span></div><p class="paragraph">Owns the in-process route stack and drawer state for one application host. Call navigation actions on the host UI thread. Consecutive home-tab selections replace each other; standalone screens retain Back history.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>initial</span><wbr><span><span>Route</span></span></u></div></span></div><div><div class="title"><p class="paragraph">First route retained when the host creates its navigation controller.</p></div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -178,7 +178,52 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="-2047385160%2FProperties%2F-1271788216" anchor-label="canNavigateBack" id="-2047385160%2FProperties%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+        <div class="table"><a data-name="104527391%2FProperties%2F-1271788216" anchor-label="backStack" id="104527391%2FProperties%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="back-stack.html"><span>back</span><wbr><span><span>Stack</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="104527391%2FProperties%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="back-stack.html">backStack</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-navigation-entry/index.html">NavigationEntry</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Immutable history snapshots for rendering retained screens and cancellable Back previews. Entry IDs are stable across pushes and pops; replacement starts a new screen lifetime.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2060376906%2FProperties%2F-1271788216" anchor-label="backStackState" id="2060376906%2FProperties%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="back-stack-state.html"><span>back</span><wbr><span>Stack</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2060376906%2FProperties%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="back-stack-state.html">backStackState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/MutableStateFlow///PointingToDeclaration/">MutableStateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-navigation-entry/index.html">NavigationEntry</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2138897045%2FProperties%2F-1271788216" anchor-label="beforeCoverObservers" id="2138897045%2FProperties%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="before-cover-observers.html"><span>before</span><wbr><span>Cover</span><wbr><span><span>Observers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2138897045%2FProperties%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="before-cover-observers.html">beforeCoverObservers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-mutable-set/index.html">MutableSet</a><span class="token operator">&lt;</span><span class="token punctuation">(</span><a href="../-navigation-entry/index.html">NavigationEntry</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2047385160%2FProperties%2F-1271788216" anchor-label="canNavigateBack" id="-2047385160%2FProperties%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -238,6 +283,21 @@
               </div>
             </div>
           </div>
+<a data-name="-1106128218%2FProperties%2F-1271788216" anchor-label="nextEntryId" id="-1106128218%2FProperties%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="next-entry-id.html"><span>next</span><wbr><span>Entry</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1106128218%2FProperties%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="next-entry-id.html">nextEntryId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="510089271%2FProperties%2F-1271788216" anchor-label="route" id="510089271%2FProperties%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
             <div class="main-subrow keyValue ">
@@ -263,7 +323,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="route-stack.html">routeStack</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a><span class="token operator">&lt;</span><a href="../-app-route/index.html">AppRoute</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="route-stack.html">routeStack</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a><span class="token operator">&lt;</span><a href="../-navigation-entry/index.html">NavigationEntry</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -347,6 +407,51 @@
               </div>
             </div>
           </div>
+<a data-name="1203137612%2FFunctions%2F-1271788216" anchor-label="navigateToBackup" id="1203137612%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigate-to-backup.html"><span>navigate</span><wbr><span>To</span><wbr><span><span>Backup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1203137612%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-backup.html"><span class="token function">navigateToBackup</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens reusable backup tabs from Settings.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1218017696%2FFunctions%2F-1271788216" anchor-label="navigateToBackupRestore" id="1218017696%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigate-to-backup-restore.html"><span>navigate</span><wbr><span>To</span><wbr><span>Backup</span><wbr><span><span>Restore</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1218017696%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-backup-restore.html"><span class="token function">navigateToBackupRestore</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Rebuilds Settings as the return destination before opening a cold-start pending backup operation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="267290444%2FFunctions%2F-1271788216" anchor-label="navigateToBackupWelcome" id="267290444%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigate-to-backup-welcome.html"><span>navigate</span><wbr><span>To</span><wbr><span>Backup</span><wbr><span><span>Welcome</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="267290444%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-backup-welcome.html"><span class="token function">navigateToBackupWelcome</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Consumes onboarding so Back cannot reopen it.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-755047505%2FFunctions%2F-1271788216" anchor-label="navigateToBenchmark" id="-755047505%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
             <div class="main-subrow keyValue ">
@@ -358,6 +463,36 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-benchmark.html"><span class="token function">navigateToBenchmark</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens the hardware benchmark destination.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1760856119%2FFunctions%2F-1271788216" anchor-label="navigateToCivitai" id="-1760856119%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigate-to-civitai.html"><span>navigate</span><wbr><span>To</span><wbr><span><span>Civitai</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1760856119%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-civitai.html"><span class="token function">navigateToCivitai</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens Civitai account settings and upload history from the invoking route.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1941956547%2FFunctions%2F-1271788216" anchor-label="navigateToCivitaiHistory" id="-1941956547%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigate-to-civitai-history.html"><span>navigate</span><wbr><span>To</span><wbr><span>Civitai</span><wbr><span><span>History</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1941956547%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-civitai-history.html"><span class="token function">navigateToCivitaiHistory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens the account-independent receipt history above Civitai settings.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -512,6 +647,36 @@
               </div>
             </div>
           </div>
+<a data-name="-1228575172%2FFunctions%2F-1271788216" anchor-label="navigateToInitialConfiguration" id="-1228575172%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigate-to-initial-configuration.html"><span>navigate</span><wbr><span>To</span><wbr><span>Initial</span><wbr><span><span>Configuration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1228575172%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-initial-configuration.html"><span class="token function">navigateToInitialConfiguration</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Consumes first-launch backup before mandatory provider setup.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="261125988%2FFunctions%2F-1271788216" anchor-label="navigateToInitialRestore" id="261125988%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigate-to-initial-restore.html"><span>navigate</span><wbr><span>To</span><wbr><span>Initial</span><wbr><span><span>Restore</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="261125988%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-initial-restore.html"><span class="token function">navigateToInitialRestore</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens restore-only content during first launch.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="1927065662%2FFunctions%2F-1271788216" anchor-label="navigateToLogger" id="1927065662%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
             <div class="main-subrow keyValue ">
@@ -572,21 +737,6 @@
               </div>
             </div>
           </div>
-<a data-name="561918654%2FFunctions%2F-1271788216" anchor-label="navigateToPostOnBoardingConfigLoader" id="561918654%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="navigate-to-post-on-boarding-config-loader.html"><span>navigate</span><wbr><span>To</span><wbr><span>Post</span><wbr><span>On</span><wbr><span>Boarding</span><wbr><span>Config</span><wbr><span><span>Loader</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="561918654%2FFunctions%2F-1271788216"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-post-on-boarding-config-loader.html"><span class="token function">navigateToPostOnBoardingConfigLoader</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Replaces completed onboarding with configuration loading.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
 <a data-name="536183674%2FFunctions%2F-1271788216" anchor-label="navigateToPostSetupConfigLoader" id="536183674%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
             <div class="main-subrow keyValue ">
@@ -643,21 +793,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-server-setup.html"><span class="token function">navigateToServerSetup</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-server-setup.html"><span class="token function">navigateToServerSetup</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">source<span class="token operator">: </span><a href="../-launch-source/index.html">LaunchSource</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens provider/server setup while preserving the source used for its completion behavior.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1351367919%2FFunctions%2F-1271788216" anchor-label="navigateToServerSetupAfterOnBoarding" id="-1351367919%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="navigate-to-server-setup-after-on-boarding.html"><span>navigate</span><wbr><span>To</span><wbr><span>Server</span><wbr><span>Setup</span><wbr><span>After</span><wbr><span>On</span><wbr><span><span>Boarding</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1351367919%2FFunctions%2F-1271788216"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-server-setup-after-on-boarding.html"><span class="token function">navigateToServerSetupAfterOnBoarding</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Replaces completed onboarding with initial-launch server setup.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -732,7 +867,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="navigate-to-web-ui.html"><span class="token function">navigateToWebUi</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens the configured server web interface.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="navigate-to-web-ui.html"><span class="token function">navigateToWebUi</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Opens the configured server web interface.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1643958080%2FFunctions%2F-1271788216" anchor-label="observeBeforeCover" id="-1643958080%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="observe-before-cover.html"><span>observe</span><wbr><span>Before</span><wbr><span><span>Cover</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1643958080%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="observe-before-cover.html"><span class="token function">observeBeforeCover</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">observer<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-navigation-entry/index.html">NavigationEntry</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div><div class="brief "><p class="paragraph">Observes the still-visible entry before a drawer or standalone screen covers it. Used by the host to retain a visual Back preview; observers must not mutate navigation.</p></div></div></div>
                 </div>
               </div>
             </div>

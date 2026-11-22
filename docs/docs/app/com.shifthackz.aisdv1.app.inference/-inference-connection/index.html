@@ -154,7 +154,7 @@
     <h1 class="cover"><span>Inference</span><wbr><span><span>Connection</span></span></h1>
     <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
       <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":app/main" data-filterable-set=":app/main" data-active="" data-toggle=":app/main">androidJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":app/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">interface </span><a href="index.html">InferenceConnection</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/app/android/src/main/java/com/shifthackz/aisdv1/app/inference/InferenceConnection.kt#L12">source</a>)</span></span></div><p class="paragraph">One host binding and validated process incarnation for one generation attempt.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":app/main" data-filterable-set=":app/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-android-inference-connection/index.html">AndroidInferenceConnection</a></div></span></div><div></div></div></div></div></div>    </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":app/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">interface </span><a href="index.html">InferenceConnection</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/app/android/src/main/java/com/shifthackz/aisdv1/app/inference/InferenceConnection.kt#L13">source</a>)</span></span></div><p class="paragraph">One host binding and validated process incarnation for one generation attempt.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":app/main" data-filterable-set=":app/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-android-inference-connection/index.html">AndroidInferenceConnection</a></div></span></div><div></div></div></div></div></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -212,6 +212,23 @@
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":app/main" data-filterable-set=":app/main" data-active="" data-toggle=":app/main">androidJvm</button></div>
 <div class="content sourceset-dependent-content" data-active="" data-togglable=":app/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Requests process exit and releases binding. False quarantines admission until app restart.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-355384050%2FFunctions%2F1606452474" anchor-label="readPerformance" id="-355384050%2FFunctions%2F1606452474" data-filterable-set=":app/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":app/main" data-filterable-set=":app/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-performance.html"><span>read</span><wbr><span><span>Performance</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-355384050%2FFunctions%2F1606452474"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":app/main" data-filterable-set=":app/main" data-active="" data-toggle=":app/main">androidJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":app/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="read-performance.html"><span class="token function">readPerformance</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-process-performance-reading/index.html">ProcessPerformanceReading</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Reads child-owned counters on demand. Returns null before submission or after completion; timeout, child death and malformed responses fail this read without cancelling inference.</p></div></div>                  </div>
                 </div>
               </div>
             </div>

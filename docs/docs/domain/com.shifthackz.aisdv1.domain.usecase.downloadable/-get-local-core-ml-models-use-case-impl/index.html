@@ -152,24 +152,24 @@
   <div class="breadcrumbs"><a href="../../index.html">domain</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.domain.usecase.downloadable</a><span class="delimiter">/</span><span class="current">GetLocalCoreMlModelsUseCaseImpl</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Get</span><wbr><span>Local</span><wbr><span>Core</span><wbr><span>Ml</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span>Case</span><wbr><span><span>Impl</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">GetLocalCoreMlModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="../-get-local-core-ml-models-use-case/index.html">GetLocalCoreMlModelsUseCase</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/domain/src/commonMain/kotlin/com/shifthackz/aisdv1/domain/usecase/downloadable/GetLocalCoreMlModelsUseCaseImpl.kt#L10">source</a>)</span></span></div><p class="paragraph">Implements <code class="lang-kotlin">GetLocalCoreMlModelsUseCase</code> behavior in the SDAI domain layer.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">GetLocalCoreMlModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>refreshCatalog<span class="token operator">: </span><a href="../-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span> : <a href="../-get-local-core-ml-models-use-case/index.html">GetLocalCoreMlModelsUseCase</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/domain/src/commonMain/kotlin/com/shifthackz/aisdv1/domain/usecase/downloadable/GetLocalCoreMlModelsUseCaseImpl.kt#L12">source</a>)</span></span></div><p class="paragraph">Keeps the existing CoreMl model-list operation while shared catalog recovery owns offline policy.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>refresh</span><wbr><span><span>Catalog</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Refreshes one provider and reads usable cached model states.</p></div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="-1504673721%2FConstructors%2F-911324849" anchor-label="GetLocalCoreMlModelsUseCaseImpl" id="-1504673721%2FConstructors%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+        <div class="table"><a data-name="1940463986%2FConstructors%2F-911324849" anchor-label="GetLocalCoreMlModelsUseCaseImpl" id="1940463986%2FConstructors%2F-911324849" data-filterable-set=":domain/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-get-local-core-ml-models-use-case-impl.html"><span>Get</span><wbr><span>Local</span><wbr><span>Core</span><wbr><span>Ml</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span>Case</span><wbr><span><span>Impl</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1504673721%2FConstructors%2F-911324849"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1940463986%2FConstructors%2F-911324849"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">downloadableModelRepository<span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">refreshCatalog<span class="token operator">: </span><a href="../-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -178,17 +178,17 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="-62889923%2FProperties%2F-911324849" anchor-label="downloadableModelRepository" id="-62889923%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+        <div class="table"><a data-name="-496983890%2FProperties%2F-911324849" anchor-label="refreshCatalog" id="-496983890%2FProperties%2F-911324849" data-filterable-set=":domain/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="downloadable-model-repository.html"><span>downloadable</span><wbr><span>Model</span><wbr><span><span>Repository</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-62889923%2FProperties%2F-911324849"></span>
+                  <div><a href="refresh-catalog.html"><span>refresh</span><wbr><span><span>Catalog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-496983890%2FProperties%2F-911324849"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="downloadable-model-repository.html">downloadableModelRepository</a><span class="token operator">: </span><a href="../../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></div><div class="brief "><p class="paragraph">Exposes the <code class="lang-kotlin">downloadableModelRepository</code> value used by the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="refresh-catalog.html">refreshCatalog</a><span class="token operator">: </span><a href="../-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -207,7 +207,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend operator override </span><span class="token keyword">fun </span><a href="invoke.html"><span class="token function">invoke</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../com.shifthackz.aisdv1.domain.entity/-local-ai-model/index.html">LocalAiModel</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Executes the <code class="lang-kotlin">invoke</code> step in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend operator override </span><span class="token keyword">fun </span><a href="invoke.html"><span class="token function">invoke</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../com.shifthackz.aisdv1.domain.entity/-local-ai-model/index.html">LocalAiModel</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns current CoreMl choices after an independent refresh; cancellation and cache failures propagate.</p></div></div></div>
                 </div>
               </div>
             </div>

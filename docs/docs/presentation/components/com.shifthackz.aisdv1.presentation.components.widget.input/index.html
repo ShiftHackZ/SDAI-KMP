@@ -1,0 +1,591 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>com.shifthackz.aisdv1.presentation.components.widget.input</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/presentation/components/com.shifthackz.aisdv1.presentation.components.widget.input/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/presentation/components/com.shifthackz.aisdv1.presentation.components.widget.input/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+  <a href="https://www.linkedin.com/company/sdai-app/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+    <span>LinkedIn</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":presentation:components/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":presentation:components/commonMain">common</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":presentation:components/iosMain">ios</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:components/androidMain" data-filter=":presentation:components/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:components/commonMain" data-filter=":presentation:components/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:components/iosMain" data-filter=":presentation:components/iosMain">
+                                <span class="checkbox--icon"></span>
+                                ios
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="presentation/components::com.shifthackz.aisdv1.presentation.components.widget.input////PointingToDeclaration//-1787571865">
+  <div class="breadcrumbs"><a href="../index.html">presentation/components</a><span class="delimiter">/</span><span class="current">com.shifthackz.aisdv1.presentation.components.widget.input</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1298937566%2FClasslikes%2F-1645628565" anchor-label="NativeSearchFieldBackgroundView" id="1298937566%2FClasslikes%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-native-search-field-background-view/index.html"><span>Native</span><wbr><span>Search</span><wbr><span>Field</span><wbr><span>Background</span><wbr><span><span>View</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1298937566%2FClasslikes%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-native-search-field-background-view/index.html">NativeSearchFieldBackgroundView</a> : <span data-unresolved-link="platform.UIKit/UIView///PointingToDeclaration/">UIView</span></div><div class="brief "><p class="paragraph">Supplies UIKit's native glass capsule without owning the search editor or its input. The inset retains the outer highlight inside the interop bounds, matching circular toolbar actions.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2032464583%2FClasslikes%2F-1645628565" anchor-label="NativeSliderView" id="-2032464583%2FClasslikes%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-native-slider-view/index.html"><span>Native</span><wbr><span>Slider</span><wbr><span><span>View</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2032464583%2FClasslikes%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-native-slider-view/index.html">NativeSliderView</a> : <span data-unresolved-link="platform.UIKit/UIView///PointingToDeclaration/">UIView</span></div><div class="brief "><p class="paragraph">Hosts the system slider within a 48-point touch area and applies shared discrete stops. Compose releases both callbacks when the view leaves composition.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2041328582%2FClasslikes%2F-1645628565" anchor-label="NativeSwitchView" id="2041328582%2FClasslikes%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-native-switch-view/index.html"><span>Native</span><wbr><span>Switch</span><wbr><span><span>View</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2041328582%2FClasslikes%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-native-switch-view/index.html">NativeSwitchView</a> : <span data-unresolved-link="platform.UIKit/UIView///PointingToDeclaration/">UIView</span></div><div class="brief "><p class="paragraph">Fits a system switch proportionally inside the shared touch area, leaving room for its glass thumb. The Compose owner supplies state and releases the callback when the native view leaves composition.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1642724355%2FClasslikes%2F-1645628565" anchor-label="PlatformTextInputView" id="-1642724355%2FClasslikes%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-text-input-view/index.html"><span>Platform</span><wbr><span>Text</span><wbr><span>Input</span><wbr><span><span>View</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1642724355%2FClasslikes%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">class </span><a href="-platform-text-input-view/index.html">PlatformTextInputView</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>singleLine<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="platform.UIKit/UIView///PointingToDeclaration/">UIView</span></div><div class="brief "><p class="paragraph">Owns the native text editor, floating-label outline and trailing-action spacing inside UIKitView.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="450679430%2FClasslikes%2F-1645628565" anchor-label="PlatformUITextField" id="450679430%2FClasslikes%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-u-i-text-field/index.html"><span>Platform</span><wbr><span>UIText</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="450679430%2FClasslikes%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-platform-u-i-text-field/index.html">PlatformUITextField</a> : <span data-unresolved-link="platform.UIKit/UITextField///PointingToDeclaration/">UITextField</span>, <span data-unresolved-link="platform.UIKit/UITextFieldDelegateProtocol///PointingToDeclaration/">UITextFieldDelegateProtocol</span></div><div class="brief "><p class="paragraph">Single-line UIKit editor forwarding native text/focus changes without replacing unchanged caller text.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2041790781%2FClasslikes%2F-1645628565" anchor-label="PlatformUITextView" id="2041790781%2FClasslikes%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-u-i-text-view/index.html"><span>Platform</span><wbr><span>UIText</span><wbr><span><span>View</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2041790781%2FClasslikes%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-platform-u-i-text-view/index.html">PlatformUITextView</a> : <span data-unresolved-link="platform.UIKit/UITextView///PointingToDeclaration/">UITextView</span>, <span data-unresolved-link="platform.UIKit/UITextViewDelegateProtocol///PointingToDeclaration/">UITextViewDelegateProtocol</span></div><div class="brief "><p class="paragraph">Multiline UIKit editor retaining native selection while forwarding caller-owned text and focus changes.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="491264193%2FProperties%2F-1645628565" anchor-label="FIELD_TOP" id="491264193%2FProperties%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-f-i-e-l-d_-t-o-p.html"><span>FIELD_</span><wbr><span>TOP</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="491264193%2FProperties%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-i-e-l-d_-t-o-p.html">FIELD_TOP</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">8.0</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="690030391%2FProperties%2F-1645628565" anchor-label="LABEL_HEIGHT" id="690030391%2FProperties%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-l-a-b-e-l_-h-e-i-g-h-t.html"><span>LABEL_</span><wbr><span>HEIGHT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="690030391%2FProperties%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-l-a-b-e-l_-h-e-i-g-h-t.html">LABEL_HEIGHT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">20.0</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-9261328%2FProperties%2F-1645628565" anchor-label="MIN_FIELD_HEIGHT" id="-9261328%2FProperties%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-i-n_-f-i-e-l-d_-h-e-i-g-h-t.html"><span>MIN_</span><wbr><span>FIELD_</span><wbr><span>HEIGHT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-9261328%2FProperties%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-i-n_-f-i-e-l-d_-h-e-i-g-h-t.html">MIN_FIELD_HEIGHT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">56.0</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="393095406%2FProperties%2F-1645628565" anchor-label="MULTILINE_BOTTOM_INSET" id="393095406%2FProperties%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-u-l-t-i-l-i-n-e_-b-o-t-t-o-m_-i-n-s-e-t.html"><span>MULTILINE_</span><wbr><span>BOTTOM_</span><wbr><span>INSET</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="393095406%2FProperties%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-u-l-t-i-l-i-n-e_-b-o-t-t-o-m_-i-n-s-e-t.html">MULTILINE_BOTTOM_INSET</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">10.0</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2087596757%2FProperties%2F-1645628565" anchor-label="MULTILINE_HORIZONTAL_INSET" id="2087596757%2FProperties%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-u-l-t-i-l-i-n-e_-h-o-r-i-z-o-n-t-a-l_-i-n-s-e-t.html"><span>MULTILINE_</span><wbr><span>HORIZONTAL_</span><wbr><span>INSET</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2087596757%2FProperties%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-u-l-t-i-l-i-n-e_-h-o-r-i-z-o-n-t-a-l_-i-n-s-e-t.html">MULTILINE_HORIZONTAL_INSET</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">14.0</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-405181200%2FProperties%2F-1645628565" anchor-label="MULTILINE_TOP_INSET" id="-405181200%2FProperties%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-u-l-t-i-l-i-n-e_-t-o-p_-i-n-s-e-t.html"><span>MULTILINE_</span><wbr><span>TOP_</span><wbr><span>INSET</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-405181200%2FProperties%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-u-l-t-i-l-i-n-e_-t-o-p_-i-n-s-e-t.html">MULTILINE_TOP_INSET</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">16.0</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1560948868%2FProperties%2F-1645628565" anchor-label="TEXT_FIELD_CORNER_RADIUS" id="1560948868%2FProperties%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-e-x-t_-f-i-e-l-d_-c-o-r-n-e-r_-r-a-d-i-u-s.html"><span>TEXT_</span><wbr><span>FIELD_</span><wbr><span>CORNER_</span><wbr><span>RADIUS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1560948868%2FProperties%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-e-x-t_-f-i-e-l-d_-c-o-r-n-e-r_-r-a-d-i-u-s.html">TEXT_FIELD_CORNER_RADIUS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">4.0</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1089464184%2FFunctions%2F265549423" anchor-label="DropdownTextField" id="1089464184%2FFunctions%2F265549423" data-filterable-set=":presentation:components/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-dropdown-text-field.html"><span>Dropdown</span><wbr><span>Text</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1089464184%2FFunctions%2F265549423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="-dropdown-text-field.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="-dropdown-text-field.html"><span class="token function">DropdownTextField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">loading<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator"> = </span>UiText.empty<span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="-dropdown-text-field.html">T</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">items<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-dropdown-text-field.html">T</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter ">onItemSelected<span class="token operator">: </span><span class="token punctuation">(</span><a href="-dropdown-text-field.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">displayDelegate<span class="token operator">: </span><span class="token punctuation">(</span><a href="-dropdown-text-field.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator"> = </span>{ t -&gt; t.toString().asUiText() }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays a read-only single-choice field and menu, replacing the field with a loading placeholder. Selecting the current value closes the menu without emitting another selection.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1653475157%2FFunctions%2F265549423" anchor-label="MultiSelectDropdownField" id="-1653475157%2FFunctions%2F265549423" data-filterable-set=":presentation:components/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-multi-select-dropdown-field.html"><span>Multi</span><wbr><span>Select</span><wbr><span>Dropdown</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1653475157%2FFunctions%2F265549423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="-multi-select-dropdown-field.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="-multi-select-dropdown-field.html"><span class="token function">MultiSelectDropdownField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator"> = </span>UiText.empty<span class="token punctuation">, </span></span><span class="parameter ">selectedItems<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-multi-select-dropdown-field.html">T</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter ">availableItems<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-multi-select-dropdown-field.html">T</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter ">onSelectionChanged<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-multi-select-dropdown-field.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">displayDelegate<span class="token operator">: </span><span class="token punctuation">(</span><a href="-multi-select-dropdown-field.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.model/-ui-text/index.html">UiText</a><span class="token operator"> = </span>{ t -&gt; t.toString().asUiText() }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays a multi-choice menu with removable chips for the caller-owned selection. The field summarizes the first two labels and the remaining selection count.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="432328804%2FFunctions%2F-1645628565" anchor-label="NativeEditorFocusRetention" id="432328804%2FFunctions%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-native-editor-focus-retention.html"><span>Native</span><wbr><span>Editor</span><wbr><span>Focus</span><wbr><span><span>Retention</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="432328804%2FFunctions%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-native-editor-focus-retention.html"><span class="token function">NativeEditorFocusRetention</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isFocused<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Keeps a native first-responder editor's lazy item alive while it is focused. UIKit focus does not participate in Compose's focus pinning, so the surrounding item needs an explicit handle. Blur, a container change or removal from composition releases that handle exactly once. Editors outside a pinnable container require no retention.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="595711801%2FFunctions%2F-1787571865" anchor-label="PlatformOutlinedTextField" id="595711801%2FFunctions%2F-1787571865" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-outlined-text-field.html"><span>Platform</span><wbr><span>Outlined</span><wbr><span>Text</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="595711801%2FFunctions%2F-1787571865"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/androidMain" data-filterable-set=":presentation:components/androidMain" data-active="" data-toggle=":presentation:components/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain" data-toggle=":presentation:components/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-outlined-text-field.html"><span class="token function">PlatformOutlinedTextField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">containerColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">textColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">hintColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">error<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">keyboardType<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/KeyboardType.html">KeyboardType</a><span class="token punctuation">, </span></span><span class="parameter ">visualTransformation<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/VisualTransformation.html">VisualTransformation</a><span class="token punctuation">, </span></span><span class="parameter ">trailingIcon<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">singleLine<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Edits caller-owned text with Compose Material's outlined field on Android. The platform implementation owns native focus/keyboard integration and reports edits through the callback.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="-platform-outlined-text-field.html"><span class="token function">PlatformOutlinedTextField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">containerColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">textColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">hintColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">error<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">keyboardType<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/KeyboardType.html">KeyboardType</a><span class="token operator"> = </span>KeyboardType.Text<span class="token punctuation">, </span></span><span class="parameter ">visualTransformation<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/VisualTransformation.html">VisualTransformation</a><span class="token operator"> = </span>VisualTransformation.None<span class="token punctuation">, </span></span><span class="parameter ">trailingIcon<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">singleLine<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Edits text using the platform's outlined-field adapter while keeping the text value caller-owned. The platform implementation owns native focus/keyboard integration and reports edits through the callback.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-outlined-text-field.html"><span class="token function">PlatformOutlinedTextField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">containerColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">textColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">hintColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">error<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">keyboardType<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/KeyboardType.html">KeyboardType</a><span class="token punctuation">, </span></span><span class="parameter ">visualTransformation<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/VisualTransformation.html">VisualTransformation</a><span class="token punctuation">, </span></span><span class="parameter ">trailingIcon<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">singleLine<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays the iOS outlined input using a native UITextField or UITextView. Native focus pins its surrounding lazy item so scrolling retains the active view, first responder and selection. Text remains caller-owned; UIKit callbacks and selection synchronization are unchanged.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1001707586%2FFunctions%2F-1787571865" anchor-label="PlatformSearchFieldContainer" id="-1001707586%2FFunctions%2F-1787571865" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-search-field-container.html"><span>Platform</span><wbr><span>Search</span><wbr><span>Field</span><wbr><span><span>Container</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1001707586%2FFunctions%2F-1787571865"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/androidMain" data-filterable-set=":presentation:components/androidMain" data-active="" data-toggle=":presentation:components/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain" data-toggle=":presentation:components/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-search-field-container.html"><span class="token function">PlatformSearchFieldContainer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Preserves the provider search field's Material background and rounded outline on Android.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="-platform-search-field-container.html"><span class="token function">PlatformSearchFieldContainer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Keeps the search editor above a platform-specific rounded background. The caller supplies explicit bounds and retains ownership of input and clear actions.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-search-field-container.html"><span class="token function">PlatformSearchFieldContainer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Draws a decorative native glass background beneath the shared editor in its existing composition. Keeping input in that composition preserves its focus, selection and immediate editing feedback. Older systems and scaled previews retain the ordinary Material surface.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="393102816%2FFunctions%2F-1787571865" anchor-label="PlatformSlider" id="393102816%2FFunctions%2F-1787571865" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-slider.html"><span>Platform</span><wbr><span><span>Slider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="393102816%2FFunctions%2F-1787571865"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/androidMain" data-filterable-set=":presentation:components/androidMain" data-active="" data-toggle=":presentation:components/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain" data-toggle=":presentation:components/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-slider.html"><span class="token function">PlatformSlider</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">valueRange<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.ranges/-closed-floating-point-range/index.html">ClosedFloatingPointRange</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">steps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">colors<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/SliderColors.html">SliderColors</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChangeFinished<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">contentDescription<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Retains the existing Material slider layout, colors, stop behavior and gestures.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="-platform-slider.html"><span class="token function">PlatformSlider</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">valueRange<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.ranges/-closed-floating-point-range/index.html">ClosedFloatingPointRange</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>0f..1f<span class="token punctuation">, </span></span><span class="parameter ">steps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">colors<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/SliderColors.html">SliderColors</a><span class="token operator"> = </span>SliderDefaults.colors()<span class="token punctuation">, </span></span><span class="parameter ">onValueChangeFinished<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">contentDescription<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Edits a bounded value with Material on Android and the system slider on iOS. Shared state remains authoritative; discrete stops include both range endpoints.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-slider.html"><span class="token function">PlatformSlider</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">valueRange<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.ranges/-closed-floating-point-range/index.html">ClosedFloatingPointRange</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">steps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">colors<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/SliderColors.html">SliderColors</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChangeFinished<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">contentDescription<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Embeds UISlider with its native thumb, gestures and adjustable accessibility. Tutorial illustrations stay in Compose so their scaled phone frames clip correctly.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="652299534%2FFunctions%2F-1787571865" anchor-label="PlatformSwitch" id="652299534%2FFunctions%2F-1787571865" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain" data-filterable-set=":presentation:components/androidMain,:presentation:components/commonMain,:presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-switch.html"><span>Platform</span><wbr><span><span>Switch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="652299534%2FFunctions%2F-1787571865"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/androidMain" data-filterable-set=":presentation:components/androidMain" data-active="" data-toggle=":presentation:components/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain" data-toggle=":presentation:components/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-switch.html"><span class="token function">PlatformSwitch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isChecked<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onCheckedChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Preserves Android's Material switch sizing, colors, gestures and semantics.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="-platform-switch.html"><span class="token function">PlatformSwitch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isChecked<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onCheckedChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays a caller-owned Boolean using Material on Android and an accent-tinted native iOS switch. A null callback makes the switch decorative so an enclosing settings row can own activation.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="-platform-switch.html"><span class="token function">PlatformSwitch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isChecked<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onCheckedChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span></span><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Uses UIKit switch gestures with shared state and Compose accessibility in scrollable settings rows. The native view stays below the Compose canvas, so drawers, navigation and viewport clips cover it. Tutorial phone illustrations use a Compose switch to stay within their scaled preview bounds.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1499356789%2FFunctions%2F265549423" anchor-label="SearchField" id="-1499356789%2FFunctions%2F265549423" data-filterable-set=":presentation:components/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-search-field.html"><span>Search</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1499356789%2FFunctions%2F265549423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-search-field.html"><span class="token function">SearchField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">placeholder<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Edits a single-line search query with fixed leading-icon and placeholder alignment. iOS uses native Liquid Glass; Android keeps the Material variant surface. The caller owns query changes, clear actions and the field's height.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1699897716%2FFunctions%2F265549423" anchor-label="SliderTextInputField" id="-1699897716%2FFunctions%2F265549423" data-filterable-set=":presentation:components/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:components/commonMain" data-filterable-set=":presentation:components/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-slider-text-input-field.html"><span>Slider</span><wbr><span>Text</span><wbr><span>Input</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1699897716%2FFunctions%2F265549423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-slider-text-input-field.html"><span class="token function">SliderTextInputField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">valueRange<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.ranges/-closed-floating-point-range/index.html">ClosedFloatingPointRange</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span><span class="token operator"> = </span>0.0..1.0<span class="token punctuation">, </span></span><span class="parameter ">valueDiff<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">1.0</span><span class="token punctuation">, </span></span><span class="parameter ">fractionDigits<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">2</span><span class="token punctuation">, </span></span><span class="parameter ">steps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">sliderColors<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/SliderColors.html">SliderColors</a><span class="token operator"> = </span>SliderDefaults.colors()</span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-slider-text-input-field.html"><span class="token function">SliderTextInputField</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">onValueChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">valueRange<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.ranges/-closed-floating-point-range/index.html">ClosedFloatingPointRange</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>0f..1f<span class="token punctuation">, </span></span><span class="parameter ">valueDiff<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">1.0f</span><span class="token punctuation">, </span></span><span class="parameter ">fractionDigits<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">2</span><span class="token punctuation">, </span></span><span class="parameter ">steps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">sliderColors<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/SliderColors.html">SliderColors</a><span class="token operator"> = </span>SliderDefaults.colors()</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays a bounded numeric editor and slider. The float editor saves its draft by the owning lazy item key, while actual parameter values remain owned by the generation screen. Losing focus discards unapplied edits; external values synchronize when the editor is unfocused. Only typed edits expose Apply; slider and step-button changes apply immediately.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="570131376%2FFunctions%2F-1645628565" anchor-label="toUiKeyboardType" id="570131376%2FFunctions%2F-1645628565" data-filterable-set=":presentation:components/iosMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-ui-keyboard-type.html"><span>to</span><wbr><span>Ui</span><wbr><span>Keyboard</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="570131376%2FFunctions%2F-1645628565"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:components/iosMain" data-filterable-set=":presentation:components/iosMain" data-active="" data-toggle=":presentation:components/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:components/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/text/input/KeyboardType.html">KeyboardType</a><span class="token punctuation">.</span><a href="to-ui-keyboard-type.html"><span class="token function">toUiKeyboardType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="platform.UIKit/UIKeyboardType///PointingToDeclaration/">UIKeyboardType</span></div><div class="brief "><p class="paragraph">Maps shared keyboard categories to UIKit input layouts, using the system default for other types.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

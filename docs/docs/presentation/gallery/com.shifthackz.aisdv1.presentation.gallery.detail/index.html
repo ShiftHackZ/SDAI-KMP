@@ -1,0 +1,807 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>com.shifthackz.aisdv1.presentation.gallery.detail</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/presentation/gallery/com.shifthackz.aisdv1.presentation.gallery.detail/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/presentation/gallery/com.shifthackz.aisdv1.presentation.gallery.detail/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+  <a href="https://www.linkedin.com/company/sdai-app/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+    <span>LinkedIn</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":presentation:gallery/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":presentation:gallery/commonMain">common</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":presentation:gallery/iosMain">ios</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:gallery/androidMain" data-filter=":presentation:gallery/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:gallery/commonMain" data-filter=":presentation:gallery/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:gallery/iosMain" data-filter=":presentation:gallery/iosMain">
+                                <span class="checkbox--icon"></span>
+                                ios
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="presentation/gallery::com.shifthackz.aisdv1.presentation.gallery.detail////PointingToDeclaration//-1404454181">
+  <div class="breadcrumbs"><a href="../index.html">presentation/gallery</a><span class="delimiter">/</span><span class="current">com.shifthackz.aisdv1.presentation.gallery.detail</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="973305625%2FClasslikes%2F-1021118595" anchor-label="AndroidGalleryDetailPlatformActions" id="973305625%2FClasslikes%2F-1021118595" data-filterable-set=":presentation:gallery/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/androidMain" data-filterable-set=":presentation:gallery/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-android-gallery-detail-platform-actions/index.html"><span>Android</span><wbr><span>Gallery</span><wbr><span>Detail</span><wbr><span>Platform</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="973305625%2FClasslikes%2F-1021118595"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:gallery/androidMain" data-filterable-set=":presentation:gallery/androidMain" data-active="" data-toggle=":presentation:gallery/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-android-gallery-detail-platform-actions/index.html">AndroidGalleryDetailPlatformActions</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>fileProviderDescriptor<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.file/-file-provider-descriptor/index.html">FileProviderDescriptor</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dispatchersProvider<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>originals<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.utils/-original-image-file-exporter/index.html">OriginalImageFileExporter</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>imageSaver<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.image/-image-saver/index.html">ImageSaver</a></span></span><span class="token punctuation">)</span> : <a href="-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a></div><div class="brief "><p class="paragraph">Performs Android image export, native sharing and clipboard operations for gallery detail. Original image files are staged on IO; UI handoffs run on the immediate dispatcher. Cancellation propagates while ordinary platform failures become explicit action failures.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="233443076%2FClasslikes%2F-1931731267" anchor-label="BoundedGalleryDetailContentCache" id="233443076%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-bounded-gallery-detail-content-cache/index.html"><span>Bounded</span><wbr><span>Gallery</span><wbr><span>Detail</span><wbr><span>Content</span><wbr><span><span>Cache</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="233443076%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-bounded-gallery-detail-content-cache/index.html">BoundedGalleryDetailContentCache</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>budget<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.widget.image/-gallery-memory-budget/index.html">GalleryMemoryBudget</a></span></span><span class="token punctuation">)</span> : <a href="-gallery-detail-content-cache/index.html">GalleryDetailContentCache</a></div><div class="brief "><p class="paragraph">Keeps navigation metadata within the injected entry and retained-text budgets. Methods are called only on the view-model's immediate dispatcher.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1206218521%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailActionResult" id="1206218521%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-action-result/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Action</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1206218521%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-gallery-detail-action-result/index.html">GalleryDetailActionResult</a></div><div class="brief "><p class="paragraph">Completion, unsupported capability or public failure details from a native detail action.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-460970115%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailContent" id="-460970115%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-content/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-460970115%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Immutable.html"><span class="token annotation builtin">Immutable</span></a></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>showReportButton<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>generationType<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/-type/index.html">AiGenerationResult.Type</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>imageBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>imageRevision<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>image<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/ImageBitmap.html">ImageBitmap</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>inputImageBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>inputImage<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/ImageBitmap.html">ImageBitmap</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>createdAt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>modelName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>civitaiUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>provider<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>acceleration<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>generationDuration<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>deviceName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>osVersion<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>prompt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>negativePrompt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>size<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>samplingSteps<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>cfgScale<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>restoreFaces<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sampler<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>seed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subSeed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>subSeedStrength<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>denoisingStrength<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hidden<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>liked<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Formatted generation metadata and optional transient image content for one detail page. Persisted entries may contain metadata only; original bytes are resolved on explicit actions.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="129132355%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailContentCache" id="129132355%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-content-cache/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Content</span><wbr><span><span>Cache</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="129132355%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-gallery-detail-content-cache/index.html">GalleryDetailContentCache</a></div><div class="brief "><p class="paragraph">Navigation-owned metadata cache; originals and decoded images belong to separate bounded loaders.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-490367580%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailDialog" id="-490367580%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-dialog/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Dialog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-490367580%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Immutable.html"><span class="token annotation builtin">Immutable</span></a></div></div><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-gallery-detail-dialog/index.html">GalleryDetailDialog</a></div><div class="brief "><p class="paragraph">Delete confirmation or public operation failure displayed over gallery detail.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1016578908%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailField" id="1016578908%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-field/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1016578908%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">data </span><span class="token keyword">class </span><a href="-gallery-detail-field/index.html">GalleryDetailField</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isLink<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1465924912%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailIntent" id="-1465924912%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-intent/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Intent</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1465924912%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-gallery-detail-intent/index.html">GalleryDetailIntent</a> : <a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-mvi-intent/index.html">MviIntent</a></div><div class="brief "><p class="paragraph">Detail navigation, parameter reuse, export/sharing and confirmed deletion requests.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-589702388%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailPlatformActions" id="-589702388%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-platform-actions/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Platform</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-589702388%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a></div><div class="brief "><p class="paragraph">Native media, sharing and clipboard operations used by the gallery-detail route.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="350816165%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailState" id="350816165%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-state/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="350816165%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Immutable.html"><span class="token annotation builtin">Immutable</span></a></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-gallery-detail-state/index.html">GalleryDetailState</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>loading<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>tabs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>selectedTab<span class="token operator">: </span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a><span class="token operator"> = </span>GalleryDetailTab.IMAGE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>galleryItemIds<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dialog<span class="token operator">: </span><a href="-gallery-detail-dialog/index.html">GalleryDetailDialog</a><span class="token operator"> = </span>GalleryDetailDialog.None<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>content<span class="token operator">: </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>pagerContents<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>pagerContentStartIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>pagerCurrentIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-mvi-state/index.html">MviState</a></div><div class="brief "><p class="paragraph">Current gallery detail metadata and a bounded neighboring-page window.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1798614625%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailTab" id="1798614625%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-tab/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Tab</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1798614625%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">enum class </span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Detail sections showing generated output, original source or generation metadata.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="686180754%2FClasslikes%2F-1931731267" anchor-label="GalleryDetailViewModel" id="686180754%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-view-model/index.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="686180754%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-gallery-detail-view-model/index.html">GalleryDetailViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">diagnostics<span class="token operator">: </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi.diagnostics/-ui-diagnostics/index.html">UiDiagnostics</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>itemId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dispatchersProvider<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>buildInfoProvider<span class="token operator">: </span><a href="../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>getGenerationResultUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-get-generation-result-use-case/index.html">GetGenerationResultUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>getAllGalleryIdsUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.gallery/-get-all-gallery-ids-use-case/index.html">GetAllGalleryIdsUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>getLastResultFromCacheUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.caching/-get-last-result-from-cache-use-case/index.html">GetLastResultFromCacheUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>deleteGalleryItemUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.gallery/-delete-gallery-item-use-case/index.html">DeleteGalleryItemUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>toggleImageVisibilityUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.gallery/-toggle-image-visibility-use-case/index.html">ToggleImageVisibilityUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>toggleImageLikeUseCase<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.usecase.gallery/-toggle-image-like-use-case/index.html">ToggleImageLikeUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>generationFormUpdateEvent<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.core/-generation-form-update-event/index.html">GenerationFormUpdateEvent</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>router<span class="token operator">: </span><a href="../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-gallery-detail-router/index.html">GalleryDetailRouter</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platformActions<span class="token operator">: </span><a href="-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>galleryReads<span class="token operator">: </span><a href="../../../domain/com.shifthackz.aisdv1.domain.gateway/-gallery-read-gateway/index.html">GalleryReadGateway</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contentCache<span class="token operator">: </span><a href="-gallery-detail-content-cache/index.html">GalleryDetailContentCache</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>pagerBuffer<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>GALLERY_DETAIL_PAGER_BUFFER<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onError<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span> : <a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-base-mvi-view-model/index.html">BaseMviViewModel</a><span class="token operator">&lt;</span><a href="-gallery-detail-state/index.html">GalleryDetailState</a><span class="token punctuation">, </span><a href="-gallery-detail-intent/index.html">GalleryDetailIntent</a><span class="token punctuation">, </span><a href="../../../core/ui/com.shifthackz.aisdv1.core.mvi/-empty-effect/index.html">EmptyEffect</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Maintains detail navigation with bounded metadata prefetch and revision-fenced asynchronous reads. Original bytes are loaded for explicit save/share/form-restoration actions, preserving page/cache identity.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-315634885%2FClasslikes%2F-317608391" anchor-label="IosGalleryDetailPlatformActions" id="-315634885%2FClasslikes%2F-317608391" data-filterable-set=":presentation:gallery/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ios-gallery-detail-platform-actions/index.html"><span>Ios</span><wbr><span>Gallery</span><wbr><span>Detail</span><wbr><span>Platform</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-315634885%2FClasslikes%2F-317608391"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain" data-active="" data-toggle=":presentation:gallery/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/iosMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">class </span><a href="-ios-gallery-detail-platform-actions/index.html">IosGalleryDetailPlatformActions</a> : <a href="../../../presentation/gallery/com.shifthackz.aisdv1.presentation.gallery.detail/-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1680849834%2FClasslikes%2F-1931731267" anchor-label="NoOpGalleryDetailPlatformActions" id="1680849834%2FClasslikes%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-no-op-gallery-detail-platform-actions/index.html"><span>No</span><wbr><span>Op</span><wbr><span>Gallery</span><wbr><span>Detail</span><wbr><span>Platform</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1680849834%2FClasslikes%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">object </span><a href="-no-op-gallery-detail-platform-actions/index.html">NoOpGalleryDetailPlatformActions</a> : <a href="-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a></div><div class="brief "><p class="paragraph">Reports unsupported native detail actions without side effects.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="212717342%2FProperties%2F-317608391" anchor-label="APPLE_REFERENCE_EPOCH_SECONDS" id="212717342%2FProperties%2F-317608391" data-filterable-set=":presentation:gallery/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-p-p-l-e_-r-e-f-e-r-e-n-c-e_-e-p-o-c-h_-s-e-c-o-n-d-s.html"><span>APPLE_</span><wbr><span>REFERENCE_</span><wbr><span>EPOCH_</span><wbr><span>SECONDS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="212717342%2FProperties%2F-317608391"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain" data-active="" data-toggle=":presentation:gallery/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/iosMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-a-p-p-l-e_-r-e-f-e-r-e-n-c-e_-e-p-o-c-h_-s-e-c-o-n-d-s.html">APPLE_REFERENCE_EPOCH_SECONDS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">9.783072E8</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-181170319%2FProperties%2F-1931731267" anchor-label="GALLERY_DETAIL_PAGER_BUFFER" id="-181170319%2FProperties%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-g-a-l-l-e-r-y_-d-e-t-a-i-l_-p-a-g-e-r_-b-u-f-f-e-r.html"><span>GALLERY_</span><wbr><span>DETAIL_</span><wbr><span>PAGER_</span><wbr><span>BUFFER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-181170319%2FProperties%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-g-a-l-l-e-r-y_-d-e-t-a-i-l_-p-a-g-e-r_-b-u-f-f-e-r.html">GALLERY_DETAIL_PAGER_BUFFER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">3</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2008683371%2FProperties%2F-1931731267" anchor-label="GALLERY_PAGER_ZOOM_LOCK_SCALE" id="-2008683371%2FProperties%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-g-a-l-l-e-r-y_-p-a-g-e-r_-z-o-o-m_-l-o-c-k_-s-c-a-l-e.html"><span>GALLERY_</span><wbr><span>PAGER_</span><wbr><span>ZOOM_</span><wbr><span>LOCK_</span><wbr><span>SCALE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2008683371%2FProperties%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">const </span><span class="token keyword">val </span><a href="-g-a-l-l-e-r-y_-p-a-g-e-r_-z-o-o-m_-l-o-c-k_-s-c-a-l-e.html">GALLERY_PAGER_ZOOM_LOCK_SCALE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">1.01f</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="734259202%2FProperties%2F-1931731267" anchor-label="icon" id="734259202%2FProperties%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="icon.html"><span><span>icon</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="734259202%2FProperties%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">val </span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a><span class="token punctuation">.</span><a href="icon.html">icon</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/vector/ImageVector.html">ImageVector</a></div><div class="brief "><p class="paragraph">Selects the image or information icon for a detail tab.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1830279145%2FProperties%2F-1931731267" anchor-label="label" id="1830279145%2FProperties%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="label.html"><span><span>label</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1830279145%2FProperties%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">val </span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a><span class="token punctuation">.</span><a href="label.html">label</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Resolves the current localized label of an output/source/info tab.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-280522494%2FFunctions%2F-1404454181" anchor-label="createDefaultGalleryDetailPlatformActions" id="-280522494%2FFunctions%2F-1404454181" data-filterable-set=":presentation:gallery/commonMain,:presentation:gallery/androidMain,:presentation:gallery/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain,:presentation:gallery/androidMain,:presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/commonMain,:presentation:gallery/androidMain,:presentation:gallery/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-default-gallery-detail-platform-actions.html"><span>create</span><wbr><span>Default</span><wbr><span>Gallery</span><wbr><span>Detail</span><wbr><span>Platform</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-280522494%2FFunctions%2F-1404454181"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:gallery/androidMain" data-filterable-set=":presentation:gallery/androidMain" data-active="" data-toggle=":presentation:gallery/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain" data-toggle=":presentation:gallery/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain" data-toggle=":presentation:gallery/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":presentation:gallery/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-default-gallery-detail-platform-actions.html"><span class="token function">createDefaultGalleryDetailPlatformActions</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a></div><div class="brief "><p class="paragraph">Returns an unsupported placeholder; application DI installs the context/file-provider Android adapter.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="create-default-gallery-detail-platform-actions.html"><span class="token function">createDefaultGalleryDetailPlatformActions</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a></div><div class="brief "><p class="paragraph">Creates the platform default detail-action adapter; Android DI replaces its unsupported default.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:gallery/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-default-gallery-detail-platform-actions.html"><span class="token function">createDefaultGalleryDetailPlatformActions</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../presentation/gallery/com.shifthackz.aisdv1.presentation.gallery.detail/-gallery-detail-platform-actions/index.html">GalleryDetailPlatformActions</a></div><div class="brief "><p class="paragraph">Creates UIKit clipboard/sharing actions backed by original-image Photos/share adapters.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="976252597%2FFunctions%2F-1931731267" anchor-label="detailRows" id="976252597%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="detail-rows.html"><span>detail</span><wbr><span><span>Rows</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="976252597%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">.</span><a href="detail-rows.html"><span class="token function">detailRows</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-gallery-detail-field/index.html">GalleryDetailField</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-273243955%2FFunctions%2F-1404454181" anchor-label="formatGalleryCreatedAt" id="-273243955%2FFunctions%2F-1404454181" data-filterable-set=":presentation:gallery/commonMain,:presentation:gallery/androidMain,:presentation:gallery/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain,:presentation:gallery/androidMain,:presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/commonMain,:presentation:gallery/androidMain,:presentation:gallery/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="format-gallery-created-at.html"><span>format</span><wbr><span>Gallery</span><wbr><span>Created</span><wbr><span><span>At</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-273243955%2FFunctions%2F-1404454181"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:gallery/androidMain" data-filterable-set=":presentation:gallery/androidMain" data-active="" data-toggle=":presentation:gallery/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain" data-toggle=":presentation:gallery/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain" data-toggle=":presentation:gallery/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":presentation:gallery/androidMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="format-gallery-created-at.html"><span class="token function">formatGalleryCreatedAt</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">epochMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Formats a stored Unix timestamp through the current platform date representation.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="format-gallery-created-at.html"><span class="token function">formatGalleryCreatedAt</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">epochMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Formats a stored Unix timestamp through the current platform date representation.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":presentation:gallery/iosMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="format-gallery-created-at.html"><span class="token function">formatGalleryCreatedAt</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">epochMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Formats a stored Unix timestamp through the current platform date representation.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1392322378%2FFunctions%2F-1931731267" anchor-label="GalleryDetailActionButton" id="1392322378%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-action-button.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Action</span><wbr><span><span>Button</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1392322378%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-action-button.html"><span class="token function">GalleryDetailActionButton</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">icon<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/vector/ImageVector.html">ImageVector</a><span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">helpMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">tint<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token operator"> = </span>MaterialTheme.colorScheme.onSurface</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Wraps a platform circular icon action with persistent long-press help and an accessible name.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1487662553%2FFunctions%2F-1931731267" anchor-label="GalleryDetailActions" id="1487662553%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-actions.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1487662553%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-actions.html"><span class="token function">GalleryDetailActions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">content<span class="token operator">: </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">, </span></span><span class="parameter ">processIntent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-gallery-detail-intent/index.html">GalleryDetailIntent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">civitaiAction<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Keeps image mutations and form-reuse actions in one row, with an optional provider report action. Very narrow viewports can scroll the row rather than shrinking its 48dp touch targets.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-688031620%2FFunctions%2F-1931731267" anchor-label="GalleryDetailCell" id="-688031620%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-cell.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Cell</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-688031620%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-cell.html"><span class="token function">GalleryDetailCell</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">isLink<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders one padded metadata-table cell.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1766926964%2FFunctions%2F-1931731267" anchor-label="GalleryDetailContentState" id="1766926964%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-content-state.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Content</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1766926964%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-content-state.html"><span class="token function">GalleryDetailContentState</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-gallery-detail-state/index.html">GalleryDetailState</a><span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">, </span></span><span class="parameter ">imageLoader<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.widget.image/-gallery-image-loader/index.html">GalleryImageLoader</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">onCopyTextClick<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onPageSelected<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Chooses sampled output/source paging or the metadata table for the active detail tab.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="539684082%2FFunctions%2F-1931731267" anchor-label="GalleryDetailDialogRenderer" id="539684082%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-dialog-renderer.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Dialog</span><wbr><span><span>Renderer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="539684082%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-dialog-renderer.html"><span class="token function">GalleryDetailDialogRenderer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dialog<span class="token operator">: </span><a href="-gallery-detail-dialog/index.html">GalleryDetailDialog</a><span class="token punctuation">, </span></span><span class="parameter ">processIntent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-gallery-detail-intent/index.html">GalleryDetailIntent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders confirmed deletion or a public operation failure above gallery detail.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="277194895%2FFunctions%2F-1931731267" anchor-label="GalleryDetailNavigationBar" id="277194895%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-navigation-bar.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Navigation</span><wbr><span><span>Bar</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="277194895%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-navigation-bar.html"><span class="token function">GalleryDetailNavigationBar</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="-gallery-detail-state/index.html">GalleryDetailState</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">processIntent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-gallery-detail-intent/index.html">GalleryDetailIntent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">civitaiAction<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Shows current-image actions and output/source/info tabs, each with explanatory help. iOS uses the screen background behind both rows; Android retains its Material surface.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1472048749%2FFunctions%2F-1931731267" anchor-label="GalleryDetailRow" id="-1472048749%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-row.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Row</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1472048749%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-row.html"><span class="token function">GalleryDetailRow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">column1Weight<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.4f</span><span class="token punctuation">, </span></span><span class="parameter ">column2Weight<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.6f</span><span class="token punctuation">, </span></span><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">onCopyTextClick<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">isLink<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Shows one named metadata value, reserving the clipboard-action width on every row so values align.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-60935136%2FFunctions%2F-1931731267" anchor-label="GalleryDetailScreen" id="-60935136%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-screen.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-60935136%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-gallery-detail-screen.html"><span class="token function">GalleryDetailScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">itemId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">router<span class="token operator">: </span><a href="../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-gallery-detail-router/index.html">GalleryDetailRouter</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">civitaiAction<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Binds a remembered detail ViewModel and shared sampled loader for a selected generation identity.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1142785112%2FFunctions%2F-1931731267" anchor-label="GalleryDetailScreenContent" id="-1142785112%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-screen-content.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Screen</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1142785112%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-gallery-detail-screen-content.html"><span class="token function">GalleryDetailScreenContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">state<span class="token operator">: </span><a href="-gallery-detail-state/index.html">GalleryDetailState</a><span class="token punctuation">, </span></span><span class="parameter ">imageLoader<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.widget.image/-gallery-image-loader/index.html">GalleryImageLoader</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">processIntent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-gallery-detail-intent/index.html">GalleryDetailIntent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">civitaiAction<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders detail tabs, sampled image paging, metadata and caller-owned operation dialogs.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1068596742%2FFunctions%2F-1931731267" anchor-label="GalleryDetailsTable" id="1068596742%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-details-table.html"><span>Gallery</span><wbr><span>Details</span><wbr><span><span>Table</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1068596742%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-details-table.html"><span class="token function">GalleryDetailsTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">, </span></span><span class="parameter ">onCopyTextClick<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays recorded generation parameters as alternating rows with per-value clipboard actions.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2041556700%2FFunctions%2F-1931731267" anchor-label="GalleryDetailToolbarAction" id="2041556700%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-gallery-detail-toolbar-action.html"><span>Gallery</span><wbr><span>Detail</span><wbr><span>Toolbar</span><wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2041556700%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-toolbar-action.html"><span class="token function">GalleryDetailToolbarAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">selectedTab<span class="token operator">: </span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a><span class="token punctuation">, </span></span><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">processIntent<span class="token operator">: </span><span class="token punctuation">(</span><a href="-gallery-detail-intent/index.html">GalleryDetailIntent</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Crossfades Export and Share glyphs in one stable toolbar target when the detail tab changes. Image tabs retain the original-image share-sheet action; Info shares generation parameters. The current tab owns the click and accessible label throughout the short visual transition.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="771502988%2FFunctions%2F-1931731267" anchor-label="paramsText" id="771502988%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="params-text.html"><span>params</span><wbr><span><span>Text</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="771502988%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">.</span><a href="params-text.html"><span class="token function">paramsText</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Formats the current generation parameters into localized text for copy/share operations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1052280930%2FFunctions%2F-317608391" anchor-label="rootViewController" id="-1052280930%2FFunctions%2F-317608391" data-filterable-set=":presentation:gallery/iosMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="root-view-controller.html"><span>root</span><wbr><span>View</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1052280930%2FFunctions%2F-317608391"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain" data-active="" data-toggle=":presentation:gallery/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/iosMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><span data-unresolved-link="platform.UIKit/UIApplication///PointingToDeclaration/">UIApplication</span><span class="token punctuation">.</span><a href="root-view-controller.html"><span class="token function">rootViewController</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="platform.UIKit/UIViewController///PointingToDeclaration/">UIViewController</span><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="647043929%2FFunctions%2F-1931731267" anchor-label="selectedImageBase64OrNull" id="647043929%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="selected-image-base64-or-null.html"><span>selected</span><wbr><span>Image</span><wbr><span>Base64Or</span><wbr><span><span>Null</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="647043929%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">.</span><a href="selected-image-base64-or-null.html"><span class="token function">selectedImageBase64OrNull</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">selectedTab<span class="token operator">: </span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2010203871%2FFunctions%2F-1931731267" anchor-label="SwipeableGalleryImage" id="-2010203871%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-swipeable-gallery-image.html"><span>Swipeable</span><wbr><span>Gallery</span><wbr><span><span>Image</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2010203871%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">private </span><span class="token keyword">fun </span><a href="-swipeable-gallery-image.html"><span class="token function">SwipeableGalleryImage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">selectedTab<span class="token operator">: </span><a href="-gallery-detail-tab/index.html">GalleryDetailTab</a><span class="token punctuation">, </span></span><span class="parameter ">imageLoader<span class="token operator">: </span><a href="../../../presentation/components/com.shifthackz.aisdv1.presentation.components.widget.image/-gallery-image-loader/index.html">GalleryImageLoader</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token punctuation">, </span></span><span class="parameter ">pagerContents<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">pagerContentStartIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">pagerCurrentIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">pagerPageCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">onPageSelected<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Pages sampled gallery images while preventing page swipes during image zoom. Only the supplied bounded metadata window is retained; persistent pixels use the sampled loader.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="890188039%2FFunctions%2F-1931731267" anchor-label="toGalleryDetailContent" id="890188039%2FFunctions%2F-1931731267" data-filterable-set=":presentation:gallery/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:gallery/commonMain" data-filterable-set=":presentation:gallery/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-gallery-detail-content.html"><span>to</span><wbr><span>Gallery</span><wbr><span>Detail</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="890188039%2FFunctions%2F-1931731267"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a><span class="token punctuation">.</span><a href="to-gallery-detail-content.html"><span class="token function">toGalleryDetailContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">showReportButton<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a></div><div class="brief "><p class="paragraph">Formats a transient generation result for detail without eagerly decoding original pixels.</p></div><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">fun </span><a href="../../../domain/com.shifthackz.aisdv1.domain.entity/-gallery-item-metadata/index.html">GalleryItemMetadata</a><span class="token punctuation">.</span><a href="to-gallery-detail-content.html"><span class="token function">toGalleryDetailContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">shouldShowReportButton<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-gallery-detail-content/index.html">GalleryDetailContent</a></div><div class="brief "><p class="paragraph">Maps persisted parameters; display images are loaded by revision outside UI metadata state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-309476209%2FFunctions%2F-317608391" anchor-label="topMostPresentedViewController" id="-309476209%2FFunctions%2F-317608391" data-filterable-set=":presentation:gallery/iosMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="top-most-presented-view-controller.html"><span>top</span><wbr><span>Most</span><wbr><span>Presented</span><wbr><span>View</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-309476209%2FFunctions%2F-317608391"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":presentation:gallery/iosMain" data-filterable-set=":presentation:gallery/iosMain" data-active="" data-toggle=":presentation:gallery/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:gallery/iosMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><span data-unresolved-link="platform.UIKit/UIViewController///PointingToDeclaration/">UIViewController</span><span class="token punctuation">.</span><a href="top-most-presented-view-controller.html"><span class="token function">topMostPresentedViewController</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="platform.UIKit/UIViewController///PointingToDeclaration/">UIViewController</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

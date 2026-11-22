@@ -1,6 +1,38 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-$dokka.location:com.shifthackz.aisdv1.data.mappers//toPngDataUri/kotlin.String#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.mappers/[common]to-png-data-uri.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore///PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/index.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/SecureCivitaiCredentialStore/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/-secure-civitai-credential-store.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/SecureCivitaiCredentialStore/#android.content.Context/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[android]-secure-civitai-credential-store/-secure-civitai-credential-store.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/hasWriteFailed/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[android]-secure-civitai-credential-store/has-write-failed.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/perform/#kotlin.String#kotlin.Function0[kotlin.Int]/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/perform.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/preferences/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[android]-secure-civitai-credential-store/preferences.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/prepare/#kotlin.String#kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/prepare.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/read/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/read.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/replace/#kotlin.String?/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/replace.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/withBaseQuery/#kotlin.Function1[kotlin.collections.Map[kotlinx.cinterop.CPointer[cnames.structs.__CFString]?,kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointed]?],TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/with-base-query.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/withDictionary/kotlin.collections.Map[kotlinx.cinterop.CPointer[cnames.structs.__CFString]?,kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointed]?]#kotlin.String#kotlin.Function1[kotlinx.cinterop.CPointer[cnames.structs.__CFDictionary],TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/with-dictionary.html
+$dokka.location:com.shifthackz.aisdv1.data.civitai/SecureCivitaiCredentialStore/withRetained/#kotlin.Any#kotlin.String#kotlin.Function1[kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointed],TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/data/com.shifthackz.aisdv1.data.civitai/[ios]-secure-civitai-credential-store/with-retained.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl///PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/index.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/MnnGenerationRepositoryImpl/#com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway#com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource.Local#com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver#com.shifthackz.aisdv1.domain.preference.PreferenceManager#com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway#com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource.Local#com.shifthackz.aisdv1.domain.gateway.MnnModelStore#com.shifthackz.aisdv1.domain.validator.MnnBundleValidator/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[android]-mnn-generation-repository-impl/-mnn-generation-repository-impl.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/MnnGenerationRepositoryImpl/#com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway#com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource.Local#com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver#com.shifthackz.aisdv1.domain.preference.PreferenceManager#com.shifthackz.aisdv1.feature.mnn.MnnRuntime#com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource.Local#com.shifthackz.aisdv1.domain.gateway.MnnModelStore#com.shifthackz.aisdv1.domain.validator.MnnBundleValidator#com.shifthackz.aisdv1.domain.gateway.MnnBackendPolicy/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/-mnn-generation-repository-impl.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/admission/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/admission.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/backendPolicy/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/backend-policy.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/generateFromText/#com.shifthackz.aisdv1.domain.entity.TextToImagePayload/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/generate-from-text.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/interruptGeneration/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/interrupt-generation.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/interruptOwnedGeneration/#kotlin.String/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/interrupt-owned-generation.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/modelFiles/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/model-files.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/models/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/models.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/nativeGateway/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[android]-mnn-generation-repository-impl/native-gateway.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/observeStatus/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/observe-status.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/preferenceManager/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[android]-mnn-generation-repository-impl/preference-manager.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/preferences/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/preferences.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/requireArm64/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[android]-mnn-generation-repository-impl/require-arm64.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/runtime/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/runtime.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/status/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/status.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/validateModel/#kotlin.String#kotlin.String/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/validate-model.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/validateOwnedModel/#kotlin.String#kotlin.String/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/validate-owned-model.html
+$dokka.location:com.shifthackz.aisdv1.data.repository/MnnGenerationRepositoryImpl/validator/#/PointingToDeclaration/data/com.shifthackz.aisdv1.data.repository/[ios]-mnn-generation-repository-impl/validator.html
+$dokka.location:com.shifthackz.aisdv1.feature.appupdate//createAndroidAppUpdateGateway/org.koin.core.scope.Scope#/PointingToDeclaration/feature/appupdate/com.shifthackz.aisdv1.feature.appupdate/[android-playstore]create-android-app-update-gateway.html
 $dokka.location:com.shifthackz.aisdv1.feature.bonsai/BonsaiDiffusionImpl///PointingToDeclaration/feature/bonsai/com.shifthackz.aisdv1.feature.bonsai/[ios]-bonsai-diffusion-impl/index.html
 $dokka.location:com.shifthackz.aisdv1.feature.bonsai/BonsaiDiffusionImpl/BonsaiDiffusionImpl/#/PointingToDeclaration/feature/bonsai/com.shifthackz.aisdv1.feature.bonsai/[ios]-bonsai-diffusion-impl/-bonsai-diffusion-impl.html
 $dokka.location:com.shifthackz.aisdv1.feature.bonsai/BonsaiDiffusionImpl/BonsaiDiffusionImpl/#com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway/PointingToDeclaration/feature/bonsai/com.shifthackz.aisdv1.feature.bonsai/[android]-bonsai-diffusion-impl/-bonsai-diffusion-impl.html
@@ -35,12 +67,13 @@ $dokka.location:com.shifthackz.aisdv1.feature.openaioauth.storage/SecureSessionS
 $dokka.location:com.shifthackz.aisdv1.feature.openaioauth.storage/SecureSessionStore/withBaseQuery/#kotlin.Function1[kotlin.collections.Map[kotlinx.cinterop.CPointer[cnames.structs.__CFString]?,kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointed]?],TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/feature/openai-oauth/com.shifthackz.aisdv1.feature.openaioauth.storage/[ios]-secure-session-store/with-base-query.html
 $dokka.location:com.shifthackz.aisdv1.feature.openaioauth.storage/SecureSessionStore/withDictionary/kotlin.collections.Map[kotlinx.cinterop.CPointer[cnames.structs.__CFString]?,kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointed]?]#kotlin.String#kotlin.Function1[kotlinx.cinterop.CPointer[cnames.structs.__CFDictionary],TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/feature/openai-oauth/com.shifthackz.aisdv1.feature.openaioauth.storage/[ios]-secure-session-store/with-dictionary.html
 $dokka.location:com.shifthackz.aisdv1.feature.openaioauth.storage/SecureSessionStore/withRetained/#kotlin.Any#kotlin.String#kotlin.Function1[kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointed],TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/feature/openai-oauth/com.shifthackz.aisdv1.feature.openaioauth.storage/[ios]-secure-session-store/with-retained.html
-$dokka.location:com.shifthackz.aisdv1.presentation.screen.benchmark//deviceName/com.shifthackz.aisdv1.feature.benchmark.BenchmarkDeviceInfo#/PointingToDeclaration/presentation/com.shifthackz.aisdv1.presentation.screen.benchmark/[common]device-name.html
-$dokka.location:com.shifthackz.aisdv1.presentation.screen.benchmark//displayName/com.shifthackz.aisdv1.domain.entity.SdxlBackend#/PointingToDeclaration/presentation/com.shifthackz.aisdv1.presentation.screen.benchmark/[common]display-name.html
-$dokka.location:com.shifthackz.aisdv1.presentation.screen.benchmark//localizedText/com.shifthackz.aisdv1.feature.benchmark.BenchmarkProviderIssue#/PointingToDeclaration/presentation/com.shifthackz.aisdv1.presentation.screen.benchmark/[common]localized-text.html
-$dokka.location:com.shifthackz.aisdv1.presentation.screen.benchmark//toPlatform/com.shifthackz.aisdv1.feature.benchmark.BenchmarkPlatform#/PointingToDeclaration/presentation/com.shifthackz.aisdv1.presentation.screen.benchmark/[common]to-platform.html
+$dokka.location:com.shifthackz.aisdv1.presentation.appupdate//DistributionAppUpdateHost/#kotlin.Function0[kotlin.Unit]/PointingToDeclaration/presentation/appupdate/com.shifthackz.aisdv1.presentation.appupdate/[android-playstore]-distribution-app-update-host.html
+$dokka.location:com.shifthackz.aisdv1.presentation.benchmark//deviceName/com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo#/PointingToDeclaration/presentation/benchmark/com.shifthackz.aisdv1.presentation.benchmark/[common]device-name.html
+$dokka.location:com.shifthackz.aisdv1.presentation.benchmark//displayName/com.shifthackz.aisdv1.domain.entity.SdxlBackend#/PointingToDeclaration/presentation/benchmark/com.shifthackz.aisdv1.presentation.benchmark/[common]display-name.html
+$dokka.location:com.shifthackz.aisdv1.presentation.benchmark//localizedText/com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkProviderIssue#/PointingToDeclaration/presentation/benchmark/com.shifthackz.aisdv1.presentation.benchmark/[common]localized-text.html
+$dokka.location:com.shifthackz.aisdv1.presentation.benchmark//toPlatform/com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform#/PointingToDeclaration/presentation/benchmark/com.shifthackz.aisdv1.presentation.benchmark/[common]to-platform.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl///PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/index.html
-$dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/BackgroundTaskManagerImpl/#com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver#com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase#com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase#com.shifthackz.aisdv1.domain.preference.PreferenceManager#com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/-background-task-manager-impl.html
+$dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/BackgroundTaskManagerImpl/#com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver#com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ImageToImageUseCase#com.shifthackz.aisdv1.domain.usecase.generation.InterruptSourceGenerationUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveHordeProcessStatusUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveLocalDiffusionProcessStatusUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveCoreMlProcessStatusUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveBonsaiProcessStatusUseCase#com.shifthackz.aisdv1.domain.usecase.generation.ObserveMnnProcessStatusUseCase#com.shifthackz.aisdv1.domain.preference.PreferenceManager#com.shifthackz.aisdv1.domain.usecase.easydiffusion.ObserveEasyDiffusionProgressUseCase/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/-background-task-manager-impl.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/BackgroundTaskManagerImpl/#com.shifthackz.aisdv1.work.di.WorkManagerProvider#com.shifthackz.aisdv1.work.GenerationWorkPayloadStore#com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver#kotlinx.coroutines.CoroutineScope/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-task-manager-impl/-background-task-manager-impl.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/activeDispatchState/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/active-dispatch-state.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/activeJob/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/active-job.html
@@ -65,12 +98,14 @@ $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/listenCoreM
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/listenEasyDiffusionStatus/#kotlinx.coroutines.Job#kotlin.String/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/listen-easy-diffusion-status.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/listenHordeStatus/#kotlinx.coroutines.Job/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/listen-horde-status.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/listenLocalDiffusionStatus/#kotlinx.coroutines.Job/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/listen-local-diffusion-status.html
+$dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/listenMnnStatus/#kotlinx.coroutines.Job/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/listen-mnn-status.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/listenSourceStatus/#com.shifthackz.aisdv1.domain.entity.ServerSource#kotlinx.coroutines.Job#kotlin.String/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/listen-source-status.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/observeBonsaiProcessStatusUseCase/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/observe-bonsai-process-status-use-case.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/observeCoreMlProcessStatusUseCase/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/observe-core-ml-process-status-use-case.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/observeEasyDiffusionProgressUseCase/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/observe-easy-diffusion-progress-use-case.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/observeHordeProcessStatusUseCase/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/observe-horde-process-status-use-case.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/observeLocalDiffusionProcessStatusUseCase/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/observe-local-diffusion-process-status-use-case.html
+$dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/observeMnnProcessStatusUseCase/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/observe-mnn-process-status-use-case.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/observer/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-task-manager-impl/observer.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/payloads/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-task-manager-impl/payloads.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundTaskManagerImpl/postRunningMessage/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-task-manager-impl/post-running-message.html
@@ -103,6 +138,7 @@ $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/ownerId/#/
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/ownerLock/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-work-observer-impl/owner-lock.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/postCancelSignal/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-work-observer-impl/post-cancel-signal.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/postFailedSignal/#kotlin.Throwable/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-work-observer-impl/post-failed-signal.html
+$dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/postProgressMessage/#kotlin.String#kotlin.String#kotlin.Int?/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-work-observer-impl/post-progress-message.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/postStatusMessage/#kotlin.String#kotlin.String/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-work-observer-impl/post-status-message.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/postSuccessSignal/#kotlin.collections.List[com.shifthackz.aisdv1.domain.entity.AiGenerationResult]/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-work-observer-impl/post-success-signal.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/publishForOwner/#kotlin.String#kotlin.Function0[kotlin.Unit]/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-work-observer-impl/publish-for-owner.html
@@ -111,11 +147,25 @@ $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/resultFlow
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/scope/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-work-observer-impl/scope.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/stateFlow/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-background-work-observer-impl/state-flow.html
 $dokka.location:com.shifthackz.aisdv1.work/BackgroundWorkObserverImpl/workManager/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-background-work-observer-impl/work-manager.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl///PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/index.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/ModelDownloadManagerImpl/#com.shifthackz.aisdv1.domain.usecase.downloadable.DownloadModelsUseCase#kotlinx.coroutines.CoroutineScope/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/-model-download-manager-impl.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/ModelDownloadManagerImpl/#com.shifthackz.aisdv1.work.di.WorkManagerProvider#com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-model-download-manager-impl/-model-download-manager-impl.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/batches/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/batches.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/cancel/#com.shifthackz.aisdv1.domain.entity.LocalAiModel.Type?#kotlin.String?/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/cancel.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/dispatchersProvider/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-model-download-manager-impl/dispatchers-provider.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/downloadModels/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/download-models.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/jobs/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/jobs.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/lifecycleMutex/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/lifecycle-mutex.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/scheduling/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-model-download-manager-impl/scheduling.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/scope/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/scope.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/start/#com.shifthackz.aisdv1.domain.entity.ModelDownloadRequest#kotlin.Boolean/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/start.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/state/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[ios]-model-download-manager-impl/state.html
+$dokka.location:com.shifthackz.aisdv1.work/ModelDownloadManagerImpl/workManager/#/PointingToDeclaration/feature/work/com.shifthackz.aisdv1.work/[android]-model-download-manager-impl/work-manager.html
 module:app
 com.shifthackz.aisdv1.app
-com.shifthackz.aisdv1.app.di
 com.shifthackz.aisdv1.app.diagnostics
 com.shifthackz.aisdv1.app.inference
+com.shifthackz.aisdv1.presentation.activity
 module:core/common
 com.shifthackz.aisdv1.core.common.appbuild
 com.shifthackz.aisdv1.core.common.extensions
@@ -156,6 +206,7 @@ com.shifthackz.aisdv1.core.validation.seed
 com.shifthackz.aisdv1.core.validation.url
 module:data
 com.shifthackz.aisdv1.data
+com.shifthackz.aisdv1.data.civitai
 com.shifthackz.aisdv1.data.core
 com.shifthackz.aisdv1.data.di
 com.shifthackz.aisdv1.data.export
@@ -165,10 +216,13 @@ com.shifthackz.aisdv1.data.gateway.mediastore
 com.shifthackz.aisdv1.data.image
 com.shifthackz.aisdv1.data.local
 com.shifthackz.aisdv1.data.mappers
+com.shifthackz.aisdv1.data.performance
 com.shifthackz.aisdv1.data.preference
+com.shifthackz.aisdv1.data.preference.backup
 com.shifthackz.aisdv1.data.provider
 com.shifthackz.aisdv1.data.remote
 com.shifthackz.aisdv1.data.repository
+com.shifthackz.aisdv1.data.validator
 module:demo
 com.shifthackz.aisdv1.demo
 com.shifthackz.aisdv1.demo.di
@@ -178,6 +232,9 @@ com.shifthackz.aisdv1.domain.datasource
 com.shifthackz.aisdv1.domain.demo
 com.shifthackz.aisdv1.domain.di
 com.shifthackz.aisdv1.domain.entity
+com.shifthackz.aisdv1.domain.entity.backup
+com.shifthackz.aisdv1.domain.entity.benchmark
+com.shifthackz.aisdv1.domain.entity.mnn
 com.shifthackz.aisdv1.domain.feature.auth
 com.shifthackz.aisdv1.domain.feature.bonsai
 com.shifthackz.aisdv1.domain.feature.coreml
@@ -187,12 +244,18 @@ com.shifthackz.aisdv1.domain.feature.openaioauth
 com.shifthackz.aisdv1.domain.feature.sdxl
 com.shifthackz.aisdv1.domain.feature.work
 com.shifthackz.aisdv1.domain.gateway
+com.shifthackz.aisdv1.domain.gateway.backup
 com.shifthackz.aisdv1.domain.interactor.settings
 com.shifthackz.aisdv1.domain.interactor.wakelock
+com.shifthackz.aisdv1.domain.policy.benchmark
 com.shifthackz.aisdv1.domain.preference
 com.shifthackz.aisdv1.domain.repository
+com.shifthackz.aisdv1.domain.usecase.appupdate
 com.shifthackz.aisdv1.domain.usecase.arliai
+com.shifthackz.aisdv1.domain.usecase.backup
+com.shifthackz.aisdv1.domain.usecase.benchmark
 com.shifthackz.aisdv1.domain.usecase.caching
+com.shifthackz.aisdv1.domain.usecase.civitai
 com.shifthackz.aisdv1.domain.usecase.connectivity
 com.shifthackz.aisdv1.domain.usecase.debug
 com.shifthackz.aisdv1.domain.usecase.donate
@@ -214,18 +277,33 @@ com.shifthackz.aisdv1.domain.usecase.splash
 com.shifthackz.aisdv1.domain.usecase.stabilityai
 com.shifthackz.aisdv1.domain.usecase.swarmmodel
 com.shifthackz.aisdv1.domain.usecase.wakelock
+com.shifthackz.aisdv1.domain.validator
+module:feature/appupdate
+com.shifthackz.aisdv1.feature.appupdate
+com.shifthackz.aisdv1.feature.appupdate.di
 module:feature/auth
 com.shifthackz.aisdv1.feature.auth
 com.shifthackz.aisdv1.feature.auth.credentials
 com.shifthackz.aisdv1.feature.auth.crypto
 com.shifthackz.aisdv1.feature.auth.di
 com.shifthackz.aisdv1.feature.auth.transaction
+module:feature/backup
+com.shifthackz.aisdv1.feature.backup.archive
+com.shifthackz.aisdv1.feature.backup.codec
+com.shifthackz.aisdv1.feature.backup.di
+com.shifthackz.aisdv1.feature.backup.export
+com.shifthackz.aisdv1.feature.backup.io
+com.shifthackz.aisdv1.feature.backup.restore
+com.shifthackz.aisdv1.feature.backup.usecase
 module:feature/benchmark
 com.shifthackz.aisdv1.feature.benchmark
 com.shifthackz.aisdv1.feature.benchmark.di
 module:feature/bonsai
 com.shifthackz.aisdv1.feature.bonsai
 com.shifthackz.aisdv1.feature.bonsai.di
+module:feature/civitai
+com.shifthackz.aisdv1.feature.civitai
+com.shifthackz.aisdv1.feature.civitai.di
 module:feature/coreml
 com.shifthackz.aisdv1.feature.coreml
 com.shifthackz.aisdv1.feature.coreml.di
@@ -233,6 +311,9 @@ module:feature/mediapipe
 com.shifthackz.aisdv1.feature.mediapipe
 com.shifthackz.aisdv1.feature.mediapipe.di
 com.shifthackz.aisdv1.feature.mediapipe.extensions
+module:feature/mnn
+com.shifthackz.aisdv1.feature.mnn
+com.shifthackz.aisdv1.feature.mnn.di
 module:feature/onnx
 com.shifthackz.aisdv1.feature.onnx
 com.shifthackz.aisdv1.feature.onnx.ai.extensions
@@ -262,6 +343,8 @@ com.shifthackz.aisdv1.work.task
 module:network
 com.shifthackz.aisdv1.network.api.arliai
 com.shifthackz.aisdv1.network.api.automatic1111
+com.shifthackz.aisdv1.network.api.civitai
+com.shifthackz.aisdv1.network.api.civitai.model
 com.shifthackz.aisdv1.network.api.easydiffusion
 com.shifthackz.aisdv1.network.api.falai
 com.shifthackz.aisdv1.network.api.horde
@@ -280,83 +363,147 @@ com.shifthackz.aisdv1.network.exception
 com.shifthackz.aisdv1.network.model
 com.shifthackz.aisdv1.network.request
 com.shifthackz.aisdv1.network.response
-module:presentation
-com.shifthackz.aisdv1.presentation.activity
+module:presentation/app
 com.shifthackz.aisdv1.presentation.app
-com.shifthackz.aisdv1.presentation.core
-com.shifthackz.aisdv1.presentation.di
-com.shifthackz.aisdv1.presentation.extensions
-com.shifthackz.aisdv1.presentation.modal
-com.shifthackz.aisdv1.presentation.modal.download
-com.shifthackz.aisdv1.presentation.modal.embedding
-com.shifthackz.aisdv1.presentation.modal.extras
-com.shifthackz.aisdv1.presentation.modal.grid
-com.shifthackz.aisdv1.presentation.modal.history
-com.shifthackz.aisdv1.presentation.modal.language
-com.shifthackz.aisdv1.presentation.modal.ldscheduler
-com.shifthackz.aisdv1.presentation.modal.tag
-com.shifthackz.aisdv1.presentation.model
-com.shifthackz.aisdv1.presentation.navigation.router
-com.shifthackz.aisdv1.presentation.platform
-com.shifthackz.aisdv1.presentation.preview
-com.shifthackz.aisdv1.presentation.screen.benchmark
-com.shifthackz.aisdv1.presentation.screen.debug
-com.shifthackz.aisdv1.presentation.screen.donate
-com.shifthackz.aisdv1.presentation.screen.drawer
-com.shifthackz.aisdv1.presentation.screen.gallery.detail
-com.shifthackz.aisdv1.presentation.screen.gallery.list
-com.shifthackz.aisdv1.presentation.screen.history
-com.shifthackz.aisdv1.presentation.screen.img2img
-com.shifthackz.aisdv1.presentation.screen.loader
-com.shifthackz.aisdv1.presentation.screen.logger
-com.shifthackz.aisdv1.presentation.screen.networkusage
-com.shifthackz.aisdv1.presentation.screen.networkusage.model
-com.shifthackz.aisdv1.presentation.screen.onboarding
-com.shifthackz.aisdv1.presentation.screen.onboarding.page
-com.shifthackz.aisdv1.presentation.screen.report
-com.shifthackz.aisdv1.presentation.screen.settings
-com.shifthackz.aisdv1.presentation.screen.settings.content
-com.shifthackz.aisdv1.presentation.screen.settings.modal
-com.shifthackz.aisdv1.presentation.screen.settings.model
-com.shifthackz.aisdv1.presentation.screen.settings.platform
-com.shifthackz.aisdv1.presentation.screen.settings.section
-com.shifthackz.aisdv1.presentation.screen.setup
-com.shifthackz.aisdv1.presentation.screen.setup.component
-com.shifthackz.aisdv1.presentation.screen.setup.content
-com.shifthackz.aisdv1.presentation.screen.setup.form.local
-com.shifthackz.aisdv1.presentation.screen.setup.form.remote
-com.shifthackz.aisdv1.presentation.screen.setup.mappers
-com.shifthackz.aisdv1.presentation.screen.setup.model
-com.shifthackz.aisdv1.presentation.screen.setup.platform
-com.shifthackz.aisdv1.presentation.screen.setup.reducer
-com.shifthackz.aisdv1.presentation.screen.setup.source
-com.shifthackz.aisdv1.presentation.screen.setup.validation
-com.shifthackz.aisdv1.presentation.screen.setup.viewmodel
-com.shifthackz.aisdv1.presentation.screen.splash
-com.shifthackz.aisdv1.presentation.screen.storageusage
-com.shifthackz.aisdv1.presentation.screen.storageusage.model
-com.shifthackz.aisdv1.presentation.screen.storageusage.platform
-com.shifthackz.aisdv1.presentation.screen.txt2img
-com.shifthackz.aisdv1.presentation.screen.web.webui
-com.shifthackz.aisdv1.presentation.theme
-com.shifthackz.aisdv1.presentation.theme.global
-com.shifthackz.aisdv1.presentation.utils
-com.shifthackz.aisdv1.presentation.widget.color
-com.shifthackz.aisdv1.presentation.widget.connectivity
-com.shifthackz.aisdv1.presentation.widget.dialog
-com.shifthackz.aisdv1.presentation.widget.engine
-com.shifthackz.aisdv1.presentation.widget.error
-com.shifthackz.aisdv1.presentation.widget.frame
-com.shifthackz.aisdv1.presentation.widget.icon
-com.shifthackz.aisdv1.presentation.widget.image
-com.shifthackz.aisdv1.presentation.widget.input
-com.shifthackz.aisdv1.presentation.widget.input.chip
-com.shifthackz.aisdv1.presentation.widget.item
-com.shifthackz.aisdv1.presentation.widget.scrollbar
-com.shifthackz.aisdv1.presentation.widget.source
-com.shifthackz.aisdv1.presentation.widget.toolbar
-com.shifthackz.aisdv1.presentation.widget.usage
-com.shifthackz.aisdv1.presentation.widget.work
+com.shifthackz.aisdv1.presentation.app.bootstrap
+com.shifthackz.aisdv1.presentation.app.di
+com.shifthackz.aisdv1.presentation.app.onboarding
+module:presentation/appupdate
+com.shifthackz.aisdv1.presentation.appupdate
+com.shifthackz.aisdv1.presentation.appupdate.di
+com.shifthackz.aisdv1.presentation.appupdate.preview
+module:presentation/backup
+com.shifthackz.aisdv1.presentation.backup
+com.shifthackz.aisdv1.presentation.backup.component
+com.shifthackz.aisdv1.presentation.backup.create
+com.shifthackz.aisdv1.presentation.backup.di
+com.shifthackz.aisdv1.presentation.backup.dialog
+com.shifthackz.aisdv1.presentation.backup.platform
+com.shifthackz.aisdv1.presentation.backup.restore
+com.shifthackz.aisdv1.presentation.backup.service
+com.shifthackz.aisdv1.presentation.backup.welcome
+module:presentation/benchmark
+com.shifthackz.aisdv1.presentation.benchmark
+com.shifthackz.aisdv1.presentation.benchmark.di
+module:presentation/civitai
+com.shifthackz.aisdv1.presentation.civitai.di
+com.shifthackz.aisdv1.presentation.civitai.history
+com.shifthackz.aisdv1.presentation.civitai.preview
+com.shifthackz.aisdv1.presentation.civitai.settings
+com.shifthackz.aisdv1.presentation.civitai.upload
+module:presentation/components
+com.shifthackz.aisdv1.presentation.components.core
+com.shifthackz.aisdv1.presentation.components.di
+com.shifthackz.aisdv1.presentation.components.extensions
+com.shifthackz.aisdv1.presentation.components.image
+com.shifthackz.aisdv1.presentation.components.modal.grid
+com.shifthackz.aisdv1.presentation.components.modal.history
+com.shifthackz.aisdv1.presentation.components.modal.language
+com.shifthackz.aisdv1.presentation.components.modal.ldscheduler
+com.shifthackz.aisdv1.presentation.components.model
+com.shifthackz.aisdv1.presentation.components.platform
+com.shifthackz.aisdv1.presentation.components.service.debug
+com.shifthackz.aisdv1.presentation.components.service.storage
+com.shifthackz.aisdv1.presentation.components.theme
+com.shifthackz.aisdv1.presentation.components.theme.global
+com.shifthackz.aisdv1.presentation.components.utils
+com.shifthackz.aisdv1.presentation.components.widget.action
+com.shifthackz.aisdv1.presentation.components.widget.color
+com.shifthackz.aisdv1.presentation.components.widget.connectivity
+com.shifthackz.aisdv1.presentation.components.widget.dialog
+com.shifthackz.aisdv1.presentation.components.widget.engine
+com.shifthackz.aisdv1.presentation.components.widget.error
+com.shifthackz.aisdv1.presentation.components.widget.frame
+com.shifthackz.aisdv1.presentation.components.widget.help
+com.shifthackz.aisdv1.presentation.components.widget.icon
+com.shifthackz.aisdv1.presentation.components.widget.image
+com.shifthackz.aisdv1.presentation.components.widget.imageinput
+com.shifthackz.aisdv1.presentation.components.widget.input
+com.shifthackz.aisdv1.presentation.components.widget.input.chip
+com.shifthackz.aisdv1.presentation.components.widget.item
+com.shifthackz.aisdv1.presentation.components.widget.navigation
+com.shifthackz.aisdv1.presentation.components.widget.scrollbar
+com.shifthackz.aisdv1.presentation.components.widget.section
+com.shifthackz.aisdv1.presentation.components.widget.source
+com.shifthackz.aisdv1.presentation.components.widget.surface
+com.shifthackz.aisdv1.presentation.components.widget.toolbar
+com.shifthackz.aisdv1.presentation.components.widget.usage
+com.shifthackz.aisdv1.presentation.components.widget.work
+module:presentation/configuration
+com.shifthackz.aisdv1.presentation.configuration.di
+com.shifthackz.aisdv1.presentation.configuration.loader
+com.shifthackz.aisdv1.presentation.configuration.modal.download
+com.shifthackz.aisdv1.presentation.configuration.preview
+com.shifthackz.aisdv1.presentation.configuration.setup
+com.shifthackz.aisdv1.presentation.configuration.setup.component
+com.shifthackz.aisdv1.presentation.configuration.setup.content
+com.shifthackz.aisdv1.presentation.configuration.setup.form.local
+com.shifthackz.aisdv1.presentation.configuration.setup.form.remote
+com.shifthackz.aisdv1.presentation.configuration.setup.mappers
+com.shifthackz.aisdv1.presentation.configuration.setup.platform
+com.shifthackz.aisdv1.presentation.configuration.setup.reducer
+com.shifthackz.aisdv1.presentation.configuration.setup.source
+com.shifthackz.aisdv1.presentation.configuration.setup.validation
+com.shifthackz.aisdv1.presentation.configuration.setup.viewmodel
+module:presentation/debug
+com.shifthackz.aisdv1.presentation.debug
+com.shifthackz.aisdv1.presentation.debug.di
+module:presentation/donate
+com.shifthackz.aisdv1.presentation.donate
+com.shifthackz.aisdv1.presentation.donate.di
+module:presentation/gallery
+com.shifthackz.aisdv1.presentation.gallery.detail
+com.shifthackz.aisdv1.presentation.gallery.di
+com.shifthackz.aisdv1.presentation.gallery.list
+com.shifthackz.aisdv1.presentation.gallery.preview
+module:presentation/generation
+com.shifthackz.aisdv1.presentation.generation.di
+com.shifthackz.aisdv1.presentation.generation.img2img
+com.shifthackz.aisdv1.presentation.generation.modal
+com.shifthackz.aisdv1.presentation.generation.modal.embedding
+com.shifthackz.aisdv1.presentation.generation.modal.extras
+com.shifthackz.aisdv1.presentation.generation.modal.tag
+com.shifthackz.aisdv1.presentation.generation.model
+com.shifthackz.aisdv1.presentation.generation.performance
+com.shifthackz.aisdv1.presentation.generation.preview
+com.shifthackz.aisdv1.presentation.generation.txt2img
+com.shifthackz.aisdv1.presentation.generation.widget.dialog
+com.shifthackz.aisdv1.presentation.generation.widget.input
+module:presentation/history
+com.shifthackz.aisdv1.presentation.history
+com.shifthackz.aisdv1.presentation.history.di
+module:presentation/home
+com.shifthackz.aisdv1.presentation.home
+module:presentation/logger
+com.shifthackz.aisdv1.presentation.logger
+com.shifthackz.aisdv1.presentation.logger.di
+module:presentation/onboarding
+com.shifthackz.aisdv1.presentation.onboarding
+com.shifthackz.aisdv1.presentation.onboarding.di
+com.shifthackz.aisdv1.presentation.onboarding.page
+module:presentation/report
+com.shifthackz.aisdv1.presentation.report
+com.shifthackz.aisdv1.presentation.report.di
+module:presentation/settings
+com.shifthackz.aisdv1.presentation.settings
+com.shifthackz.aisdv1.presentation.settings.content
+com.shifthackz.aisdv1.presentation.settings.di
+com.shifthackz.aisdv1.presentation.settings.modal
+com.shifthackz.aisdv1.presentation.settings.platform
+com.shifthackz.aisdv1.presentation.settings.preview
+com.shifthackz.aisdv1.presentation.settings.section
+module:presentation/splash
+com.shifthackz.aisdv1.presentation.splash
+com.shifthackz.aisdv1.presentation.splash.di
+com.shifthackz.aisdv1.presentation.splash.navigation
+module:presentation/statistics
+com.shifthackz.aisdv1.presentation.statistics.di
+com.shifthackz.aisdv1.presentation.statistics.networkusage
+com.shifthackz.aisdv1.presentation.statistics.storageusage
+com.shifthackz.aisdv1.presentation.statistics.storageusage.platform
+module:presentation/web
+com.shifthackz.aisdv1.presentation.web
+com.shifthackz.aisdv1.presentation.web.di
 module:storage
 com.shifthackz.aisdv1.storage.converters
 com.shifthackz.aisdv1.storage.db.cache

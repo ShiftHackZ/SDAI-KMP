@@ -183,7 +183,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-delete-model-use-case-impl/index.html">DeleteModelUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-delete-model-use-case/index.html">DeleteModelUseCase</a></div><div class="brief "><p class="paragraph">Implements <code class="lang-kotlin">DeleteModelUseCase</code> behavior in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-delete-model-use-case-impl/index.html">DeleteModelUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>preferenceManager<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.preference/-preference-manager/index.html">PreferenceManager</a></span></span><span class="token punctuation">)</span> : <a href="-delete-model-use-case/index.html">DeleteModelUseCase</a></div><div class="brief "><p class="paragraph">Removes an owned model payload and reconciles any affected provider selection.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-263335864%2FClasslikes%2F-911324849" anchor-label="DownloadModelsUseCase" id="-263335864%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-download-models-use-case/index.html"><span>Download</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-263335864%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-download-models-use-case/index.html">DownloadModelsUseCase</a></div><div class="brief "><p class="paragraph">Downloads one selected archive or missing catalog models in order, stopping at the first failure.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-348938616%2FClasslikes%2F-911324849" anchor-label="DownloadModelsUseCaseImpl" id="-348938616%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-download-models-use-case-impl/index.html"><span>Download</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span>Case</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-348938616%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-download-models-use-case-impl/index.html">DownloadModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>catalog<span class="token operator">: </span><a href="-get-cached-local-model-catalog-use-case/index.html">GetCachedLocalModelCatalogUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>download<span class="token operator">: </span><a href="-download-model-use-case/index.html">DownloadModelUseCase</a></span></span><span class="token punctuation">)</span> : <a href="-download-models-use-case/index.html">DownloadModelsUseCase</a></div><div class="brief "><p class="paragraph">Applies sequential download and fail-fast policy without hiding repository failures.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -213,7 +243,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-download-model-use-case-impl/index.html">DownloadModelUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-download-model-use-case/index.html">DownloadModelUseCase</a></div><div class="brief "><p class="paragraph">Implements <code class="lang-kotlin">DownloadModelUseCase</code> behavior in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-download-model-use-case-impl/index.html">DownloadModelUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-download-model-use-case/index.html">DownloadModelUseCase</a></div><div class="brief "><p class="paragraph">Allows independent installs concurrently while a replacement waits for the same model's cleanup.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-564899911%2FClasslikes%2F-911324849" anchor-label="GetCachedLocalModelCatalogUseCase" id="-564899911%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-get-cached-local-model-catalog-use-case/index.html"><span>Get</span><wbr><span>Cached</span><wbr><span>Local</span><wbr><span>Model</span><wbr><span>Catalog</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-564899911%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-get-cached-local-model-catalog-use-case/index.html">GetCachedLocalModelCatalogUseCase</a></div><div class="brief "><p class="paragraph">Reads usable local choices before a potentially slow catalog request, without starting network work.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1780153721%2FClasslikes%2F-911324849" anchor-label="GetCachedLocalModelCatalogUseCaseImpl" id="1780153721%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-get-cached-local-model-catalog-use-case-impl/index.html"><span>Get</span><wbr><span>Cached</span><wbr><span>Local</span><wbr><span>Model</span><wbr><span>Catalog</span><wbr><span>Use</span><wbr><span>Case</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1780153721%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-cached-local-model-catalog-use-case-impl/index.html">GetCachedLocalModelCatalogUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>repository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>buildInfoProvider<span class="token operator">: </span><a href="../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a></span></span><span class="token punctuation">)</span> : <a href="-get-cached-local-model-catalog-use-case/index.html">GetCachedLocalModelCatalogUseCase</a></div><div class="brief "><p class="paragraph">Applies flavor availability to a strict cache-only catalog read.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -243,7 +303,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-bonsai-models-use-case-impl/index.html">GetLocalBonsaiModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-bonsai-models-use-case/index.html">GetLocalBonsaiModelsUseCase</a></div><div class="brief "><p class="paragraph">Implements <code class="lang-kotlin">GetLocalBonsaiModelsUseCase</code> behavior in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-bonsai-models-use-case-impl/index.html">GetLocalBonsaiModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>refreshCatalog<span class="token operator">: </span><a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-bonsai-models-use-case/index.html">GetLocalBonsaiModelsUseCase</a></div><div class="brief "><p class="paragraph">Keeps the existing Bonsai model-list operation while shared catalog recovery owns offline policy.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -273,7 +333,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-core-ml-models-use-case-impl/index.html">GetLocalCoreMlModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-core-ml-models-use-case/index.html">GetLocalCoreMlModelsUseCase</a></div><div class="brief "><p class="paragraph">Implements <code class="lang-kotlin">GetLocalCoreMlModelsUseCase</code> behavior in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-core-ml-models-use-case-impl/index.html">GetLocalCoreMlModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>refreshCatalog<span class="token operator">: </span><a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-core-ml-models-use-case/index.html">GetLocalCoreMlModelsUseCase</a></div><div class="brief "><p class="paragraph">Keeps the existing CoreMl model-list operation while shared catalog recovery owns offline policy.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -303,7 +363,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-media-pipe-models-use-case-impl/index.html">GetLocalMediaPipeModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-media-pipe-models-use-case/index.html">GetLocalMediaPipeModelsUseCase</a></div><div class="brief "><p class="paragraph">Implements <code class="lang-kotlin">GetLocalMediaPipeModelsUseCase</code> behavior in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-media-pipe-models-use-case-impl/index.html">GetLocalMediaPipeModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>refreshCatalog<span class="token operator">: </span><a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-media-pipe-models-use-case/index.html">GetLocalMediaPipeModelsUseCase</a></div><div class="brief "><p class="paragraph">Keeps the existing MediaPipe model-list operation while shared catalog recovery owns offline policy.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1065114240%2FClasslikes%2F-911324849" anchor-label="GetLocalMnnModelsUseCase" id="1065114240%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-get-local-mnn-models-use-case/index.html"><span>Get</span><wbr><span>Local</span><wbr><span>Mnn</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1065114240%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-get-local-mnn-models-use-case/index.html">GetLocalMnnModelsUseCase</a></div><div class="brief "><p class="paragraph">Refreshes the MNN setup catalog, retaining usable cached models when offline.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1893577536%2FClasslikes%2F-911324849" anchor-label="GetLocalMnnModelsUseCaseImpl" id="-1893577536%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-get-local-mnn-models-use-case-impl/index.html"><span>Get</span><wbr><span>Local</span><wbr><span>Mnn</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span>Case</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1893577536%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-mnn-models-use-case-impl/index.html">GetLocalMnnModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>refreshCatalog<span class="token operator">: </span><a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-mnn-models-use-case/index.html">GetLocalMnnModelsUseCase</a></div><div class="brief "><p class="paragraph">Keeps the existing Mnn model-list operation while shared catalog recovery owns offline policy.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -363,7 +453,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-onnx-models-use-case-impl/index.html">GetLocalOnnxModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-onnx-models-use-case/index.html">GetLocalOnnxModelsUseCase</a></div><div class="brief "><p class="paragraph">Implements <code class="lang-kotlin">GetLocalOnnxModelsUseCase</code> behavior in the SDAI domain layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-onnx-models-use-case-impl/index.html">GetLocalOnnxModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>refreshCatalog<span class="token operator">: </span><a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-onnx-models-use-case/index.html">GetLocalOnnxModelsUseCase</a></div><div class="brief "><p class="paragraph">Keeps the existing Onnx model-list operation while shared catalog recovery owns offline policy.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -393,7 +483,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-sdxl-models-use-case-impl/index.html">GetLocalSdxlModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>downloadableModelRepository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-sdxl-models-use-case/index.html">GetLocalSdxlModelsUseCase</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-get-local-sdxl-models-use-case-impl/index.html">GetLocalSdxlModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>refreshCatalog<span class="token operator">: </span><a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></span></span><span class="token punctuation">)</span> : <a href="-get-local-sdxl-models-use-case/index.html">GetLocalSdxlModelsUseCase</a></div><div class="brief "><p class="paragraph">Keeps the existing Sdxl model-list operation while shared catalog recovery owns offline policy.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -458,6 +548,36 @@
               </div>
             </div>
           </div>
+<a data-name="1103019974%2FClasslikes%2F-911324849" anchor-label="ObserveLocalMnnModelsUseCase" id="1103019974%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-observe-local-mnn-models-use-case/index.html"><span>Observe</span><wbr><span>Local</span><wbr><span>Mnn</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1103019974%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-observe-local-mnn-models-use-case/index.html">ObserveLocalMnnModelsUseCase</a></div><div class="brief "><p class="paragraph">Observes catalog model download and selection state used by MNN setup.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="864329478%2FClasslikes%2F-911324849" anchor-label="ObserveLocalMnnModelsUseCaseImpl" id="864329478%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-observe-local-mnn-models-use-case-impl/index.html"><span>Observe</span><wbr><span>Local</span><wbr><span>Mnn</span><wbr><span>Models</span><wbr><span>Use</span><wbr><span>Case</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="864329478%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-observe-local-mnn-models-use-case-impl/index.html">ObserveLocalMnnModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>repository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-observe-local-mnn-models-use-case/index.html">ObserveLocalMnnModelsUseCase</a></div><div class="brief "><p class="paragraph">Retains only meaningful MNN setup state changes.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="103889912%2FClasslikes%2F-911324849" anchor-label="ObserveLocalOnnxModelsUseCase" id="103889912%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
             <div class="main-subrow keyValue ">
@@ -514,6 +634,36 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-observe-local-sdxl-models-use-case-impl/index.html">ObserveLocalSdxlModelsUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>repository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a></span></span><span class="token punctuation">)</span> : <a href="-observe-local-sdxl-models-use-case/index.html">ObserveLocalSdxlModelsUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1422208426%2FClasslikes%2F-911324849" anchor-label="RefreshLocalModelCatalogUseCase" id="-1422208426%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-refresh-local-model-catalog-use-case/index.html"><span>Refresh</span><wbr><span>Local</span><wbr><span>Model</span><wbr><span>Catalog</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1422208426%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></div><div class="brief "><p class="paragraph">Refreshes one runtime catalog while retaining an explicit failure and usable cached choices.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2070615658%2FClasslikes%2F-911324849" anchor-label="RefreshLocalModelCatalogUseCaseImpl" id="-2070615658%2FClasslikes%2F-911324849" data-filterable-set=":domain/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":domain/commonMain" data-filterable-set=":domain/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-refresh-local-model-catalog-use-case-impl/index.html"><span>Refresh</span><wbr><span>Local</span><wbr><span>Model</span><wbr><span>Catalog</span><wbr><span>Use</span><wbr><span>Case</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2070615658%2FClasslikes%2F-911324849"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":domain/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="-refresh-local-model-catalog-use-case-impl/index.html">RefreshLocalModelCatalogUseCaseImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>repository<span class="token operator">: </span><a href="../com.shifthackz.aisdv1.domain.repository/-downloadable-model-repository/index.html">DownloadableModelRepository</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>buildInfoProvider<span class="token operator">: </span><a href="../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a></span></span><span class="token punctuation">)</span> : <a href="-refresh-local-model-catalog-use-case/index.html">RefreshLocalModelCatalogUseCase</a></div><div class="brief "><p class="paragraph">Owns offline catalog recovery without hiding transport or persistence failures in data operations.</p></div></div></div>
                 </div>
               </div>
             </div>

@@ -1,0 +1,958 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>TextToImageActionHandler</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script><meta id="sdai-docs-seo" name="description" content="Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.">
+<link rel="canonical" href="https://sdai.moroz.cc/docs/presentation/generation/com.shifthackz.aisdv1.presentation.generation.txt2img/-text-to-image-action-handler/index.html">
+<meta property="og:title" content="SDAI Documentation">
+<meta property="og:description" content="Kotlin API documentation for SDAI Android, iOS, and shared modules.">
+<meta property="og:url" content="https://sdai.moroz.cc/docs/presentation/generation/com.shifthackz.aisdv1.presentation.generation.txt2img/-text-to-image-action-handler/index.html">
+<meta property="og:site_name" content="SDAI">
+<meta property="og:type" content="website">
+<style id="sdai-docs-branding">
+  .sdai-docs-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .sdai-docs-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .sdai-docs-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .sdai-docs-links svg {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 760px) {
+    .sdai-docs-links {
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+      padding: 6px 0;
+    }
+    .sdai-docs-links a {
+      padding: 0 6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    SDAI
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+<nav class="sdai-docs-links" aria-label="SDAI documentation links">
+  <a href="https://sdai.moroz.cc/">Main site</a>
+  <a href="https://t.me/sdai_app" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.86 4.58 18.62 19.84c-.24 1.08-.88 1.34-1.78.83l-4.92-3.63-2.37 2.28c-.26.26-.48.48-.98.48l.35-5.02 9.14-8.26c.4-.35-.09-.55-.61-.2L6.15 13.43l-4.87-1.52c-1.06-.33-1.08-1.06.22-1.57L20.55 3c.88-.33 1.65.2 1.31 1.58Z"/></svg>
+    <span>Telegram</span>
+  </a>
+  <a href="https://discord.gg/jzdR9m8Ves" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.54 5.26A18.1 18.1 0 0 0 15.04 3.86c-.19.34-.42.8-.57 1.16a16.7 16.7 0 0 0-4.99 0 12.3 12.3 0 0 0-.58-1.16 18 18 0 0 0-4.5 1.4C1.55 9.49.78 13.61 1.16 17.68a18.3 18.3 0 0 0 5.51 2.79c.44-.6.84-1.24 1.17-1.91-.64-.24-1.25-.54-1.82-.89.15-.11.3-.23.44-.35a12.96 12.96 0 0 0 11.08 0l.44.35c-.58.35-1.19.65-1.83.89.34.67.73 1.31 1.17 1.91a18.2 18.2 0 0 0 5.52-2.79c.46-4.72-.78-8.81-3.3-12.42ZM8.68 15.18c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.08 0 1.96.99 1.95 2.19 0 1.21-.87 2.2-1.95 2.2Zm6.64 0c-1.07 0-1.95-.99-1.95-2.2 0-1.2.86-2.19 1.95-2.19 1.09 0 1.96.99 1.95 2.19 0 1.21-.86 2.2-1.95 2.2Z"/></svg>
+    <span>Discord</span>
+  </a>
+  <a href="https://www.linkedin.com/company/sdai-app/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg>
+    <span>LinkedIn</span>
+  </a>
+</nav>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":presentation:generation/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":presentation:generation/commonMain" data-filter=":presentation:generation/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    SDAI
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="presentation/generation::com.shifthackz.aisdv1.presentation.generation.txt2img/TextToImageActionHandler///PointingToDeclaration//-1999068815">
+  <div class="breadcrumbs"><a href="../../index.html">presentation/generation</a><span class="delimiter">/</span><a href="../index.html">com.shifthackz.aisdv1.presentation.generation.txt2img</a><span class="delimiter">/</span><span class="current">TextToImageActionHandler</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Text</span><wbr><span>To</span><wbr><span>Image</span><wbr><span>Action</span><wbr><span><span>Handler</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">class </span><a href="index.html">TextToImageActionHandler</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>openAiOAuthGateway<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.openaioauth/-open-ai-o-auth-gateway/index.html">OpenAiOAuthGateway</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>providerSelectionGuard<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-provider-selection-guard/index.html">ProviderSelectionGuard</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dispatchersProvider<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>textToImageUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-text-to-image-use-case/index.html">TextToImageUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>saveGenerationResultUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-save-generation-result-use-case/index.html">SaveGenerationResultUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>saveLastResultToCacheUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.caching/-save-last-result-to-cache-use-case/index.html">SaveLastResultToCacheUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>interruptSourceGenerationUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-interrupt-source-generation-use-case/index.html">InterruptSourceGenerationUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>preferenceManager<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.preference/-preference-manager/index.html">PreferenceManager</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>backgroundTaskManager<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.work/-background-task-manager/index.html">BackgroundTaskManager</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>backgroundWorkObserver<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.work/-background-work-observer/index.html">BackgroundWorkObserver</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>wakeLockInterActor<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.interactor.wakelock/-wake-lock-inter-actor/index.html">WakeLockInterActor</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platformServices<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.core/-generation-platform-services/index.html">GenerationPlatformServices</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>buildInfoProvider<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dimensionValidator<span class="token operator">: </span><a href="../../../../core/validation/com.shifthackz.aisdv1.core.validation.dimension/-dimension-validator/index.html">DimensionValidator</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>evaluateGenerationBenchmarkUseCase<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-evaluate-generation-benchmark-use-case/index.html">EvaluateGenerationBenchmarkUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>recordBenchmarkPromptAnswerUseCase<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-record-benchmark-prompt-answer-use-case/index.html">RecordBenchmarkPromptAnswerUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>suppressBenchmarkWarningsUseCase<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-suppress-benchmark-warnings-use-case/index.html">SuppressBenchmarkWarningsUseCase</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>imageSaver<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.image/-image-saver/index.html">ImageSaver</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>imageSharer<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.image/-image-sharer/index.html">ImageSharer</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>router<span class="token operator">: </span><a href="../../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-text-to-image-router/index.html">TextToImageRouter</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>currentState<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>emitState<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>updateState<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">(</span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>launch<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.core/-view-model-launcher/index.html">ViewModelLauncher</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onError<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/ShiftHackZ/SDAI-KMP/tree/master/presentation/generation/src/commonMain/kotlin/com/shifthackz/aisdv1/presentation/generation/txt2img/TextToImageActionHandler.kt#L78">source</a>)</span></span></div><p class="paragraph">Handles form actions, captured foreground/background generation, result persistence and platform export.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">Dmitriy Moroz</p></span><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>open</span><wbr><span>Ai</span><wbr><span>OAuth</span><wbr><span><span>Gateway</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Guards completed results against account replacement or logout.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>provider</span><wbr><span>Selection</span><wbr><span><span>Guard</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Serializes final UI publication with provider replacement.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>dispatchers</span><wbr><span><span>Provider</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Dispatches persistence and generation off the UI thread and publishes state immediately.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>text</span><wbr><span>To</span><wbr><span>Image</span><wbr><span>Use</span><wbr><span><span>Case</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Generates results from immutable text inputs through the selected provider.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>save</span><wbr><span>Generation</span><wbr><span>Result</span><wbr><span>Use</span><wbr><span><span>Case</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Persists a generated result when it has no durable gallery identity.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>save</span><wbr><span>Last</span><wbr><span>Result</span><wbr><span>To</span><wbr><span>Cache</span><wbr><span>Use</span><wbr><span><span>Case</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Keeps the latest generated image available to normal preview/share flows.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>interrupt</span><wbr><span>Source</span><wbr><span>Generation</span><wbr><span>Use</span><wbr><span><span>Case</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Interrupts only the captured legacy provider after its foreground job is cancelled.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>preference</span><wbr><span><span>Manager</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Reads current persistence/export choices and the provider selection revision.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>background</span><wbr><span>Task</span><wbr><span><span>Manager</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Schedules captured generation payloads when background mode is enabled.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>background</span><wbr><span>Work</span><wbr><span><span>Observer</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Prevents overlapping foreground/background requests and opens active work status.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>wake</span><wbr><span>Lock</span><wbr><span>Inter</span><wbr><span><span>Actor</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Keeps the device awake during foreground generation and releases it on completion.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>platform</span><wbr><span><span>Services</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Reports platform support and opens application result/export surfaces.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>build</span><wbr><span>Info</span><wbr><span><span>Provider</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Controls result reporting availability for the current build flavor.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>dimension</span><wbr><span><span>Validator</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Validates form dimensions before dispatching generation.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>evaluate</span><wbr><span>Generation</span><wbr><span>Benchmark</span><wbr><span>Use</span><wbr><span><span>Case</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Lazily obtains recommendation admission policy.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>record</span><wbr><span>Benchmark</span><wbr><span>Prompt</span><wbr><span>Answer</span><wbr><span>Use</span><wbr><span><span>Case</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Lazily obtains the initial-question recorder.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>suppress</span><wbr><span>Benchmark</span><wbr><span>Warnings</span><wbr><span>Use</span><wbr><span><span>Case</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Lazily obtains the recommendation warning preference writer.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>image</span><wbr><span><span>Saver</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Saves encoded output through the platform media workflow.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>image</span><wbr><span><span>Sharer</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Shares encoded output through the platform share workflow.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>router</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Navigates to benchmark, generation preview and report screens.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>current</span><wbr><span><span>State</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Reads the current form without retaining a stale state snapshot between actions.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>emit</span><wbr><span><span>State</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Publishes a complete validated state before attempting generation.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>update</span><wbr><span><span>State</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Atomically transforms current presentation state after asynchronous actions.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>launch</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Starts coroutines in the owning view model lifecycle.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>on</span><wbr><span><span>Error</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Reports generation, persistence, picker and export failures to the application error sink.</p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1703253558%2FConstructors%2F-1999068815" anchor-label="TextToImageActionHandler" id="-1703253558%2FConstructors%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-text-to-image-action-handler.html"><span>Text</span><wbr><span>To</span><wbr><span>Image</span><wbr><span>Action</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1703253558%2FConstructors%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">openAiOAuthGateway<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.openaioauth/-open-ai-o-auth-gateway/index.html">OpenAiOAuthGateway</a><span class="token punctuation">, </span></span><span class="parameter ">providerSelectionGuard<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-provider-selection-guard/index.html">ProviderSelectionGuard</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchersProvider<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a><span class="token punctuation">, </span></span><span class="parameter ">textToImageUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-text-to-image-use-case/index.html">TextToImageUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">saveGenerationResultUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-save-generation-result-use-case/index.html">SaveGenerationResultUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">saveLastResultToCacheUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.caching/-save-last-result-to-cache-use-case/index.html">SaveLastResultToCacheUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">interruptSourceGenerationUseCase<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-interrupt-source-generation-use-case/index.html">InterruptSourceGenerationUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">preferenceManager<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.preference/-preference-manager/index.html">PreferenceManager</a><span class="token punctuation">, </span></span><span class="parameter ">backgroundTaskManager<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.work/-background-task-manager/index.html">BackgroundTaskManager</a><span class="token punctuation">, </span></span><span class="parameter ">backgroundWorkObserver<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.work/-background-work-observer/index.html">BackgroundWorkObserver</a><span class="token punctuation">, </span></span><span class="parameter ">wakeLockInterActor<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.interactor.wakelock/-wake-lock-inter-actor/index.html">WakeLockInterActor</a><span class="token punctuation">, </span></span><span class="parameter ">platformServices<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.core/-generation-platform-services/index.html">GenerationPlatformServices</a><span class="token punctuation">, </span></span><span class="parameter ">buildInfoProvider<span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a><span class="token punctuation">, </span></span><span class="parameter ">dimensionValidator<span class="token operator">: </span><a href="../../../../core/validation/com.shifthackz.aisdv1.core.validation.dimension/-dimension-validator/index.html">DimensionValidator</a><span class="token punctuation">, </span></span><span class="parameter ">evaluateGenerationBenchmarkUseCase<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-evaluate-generation-benchmark-use-case/index.html">EvaluateGenerationBenchmarkUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">recordBenchmarkPromptAnswerUseCase<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-record-benchmark-prompt-answer-use-case/index.html">RecordBenchmarkPromptAnswerUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">suppressBenchmarkWarningsUseCase<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-suppress-benchmark-warnings-use-case/index.html">SuppressBenchmarkWarningsUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">imageSaver<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.image/-image-saver/index.html">ImageSaver</a><span class="token punctuation">, </span></span><span class="parameter ">imageSharer<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.image/-image-sharer/index.html">ImageSharer</a><span class="token punctuation">, </span></span><span class="parameter ">router<span class="token operator">: </span><a href="../../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-text-to-image-router/index.html">TextToImageRouter</a><span class="token punctuation">, </span></span><span class="parameter ">currentState<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">, </span></span><span class="parameter ">emitState<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">updateState<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">(</span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">launch<span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.core/-view-model-launcher/index.html">ViewModelLauncher</a><span class="token punctuation">, </span></span><span class="parameter ">onError<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1504612624%2FProperties%2F-1999068815" anchor-label="backgroundGenerationEnabled" id="-1504612624%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="background-generation-enabled.html"><span>background</span><wbr><span>Generation</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1504612624%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="background-generation-enabled.html">backgroundGenerationEnabled</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether both platform support and the saved preference permit scheduling background generation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1559766671%2FProperties%2F-1999068815" anchor-label="backgroundTaskManager" id="-1559766671%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="background-task-manager.html"><span>background</span><wbr><span>Task</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1559766671%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="background-task-manager.html">backgroundTaskManager</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.work/-background-task-manager/index.html">BackgroundTaskManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="324648186%2FProperties%2F-1999068815" anchor-label="backgroundWorkObserver" id="324648186%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="background-work-observer.html"><span>background</span><wbr><span>Work</span><wbr><span><span>Observer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="324648186%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="background-work-observer.html">backgroundWorkObserver</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.work/-background-work-observer/index.html">BackgroundWorkObserver</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="992894430%2FProperties%2F-1999068815" anchor-label="buildInfoProvider" id="992894430%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="build-info-provider.html"><span>build</span><wbr><span>Info</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="992894430%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="build-info-provider.html">buildInfoProvider</a><span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.appbuild/-build-info-provider/index.html">BuildInfoProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-379551914%2FProperties%2F-1999068815" anchor-label="cleanupJob" id="-379551914%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cleanup-job.html"><span>cleanup</span><wbr><span><span>Job</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-379551914%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="cleanup-job.html">cleanupJob</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Independent join barrier retaining every cancelled predecessor until its provider cleanup finishes.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1307859863%2FProperties%2F-1999068815" anchor-label="currentState" id="1307859863%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-state.html"><span>current</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1307859863%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="current-state.html">currentState</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-text-to-image-state/index.html">TextToImageState</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1128825507%2FProperties%2F-1999068815" anchor-label="dimensionValidator" id="1128825507%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dimension-validator.html"><span>dimension</span><wbr><span><span>Validator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1128825507%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="dimension-validator.html">dimensionValidator</a><span class="token operator">: </span><a href="../../../../core/validation/com.shifthackz.aisdv1.core.validation.dimension/-dimension-validator/index.html">DimensionValidator</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1426838034%2FProperties%2F-1999068815" anchor-label="dispatchersProvider" id="-1426838034%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dispatchers-provider.html"><span>dispatchers</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1426838034%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="dispatchers-provider.html">dispatchersProvider</a><span class="token operator">: </span><a href="../../../../core/common/com.shifthackz.aisdv1.core.common.schedulers/-dispatchers-provider/index.html">DispatchersProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="890514125%2FProperties%2F-1999068815" anchor-label="emitState" id="890514125%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="emit-state.html"><span>emit</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="890514125%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="emit-state.html">emitState</a><span class="token operator">: </span><span class="token punctuation">(</span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1066769980%2FProperties%2F-1999068815" anchor-label="evaluateGenerationBenchmarkUseCase" id="-1066769980%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="evaluate-generation-benchmark-use-case.html"><span>evaluate</span><wbr><span>Generation</span><wbr><span>Benchmark</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1066769980%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="evaluate-generation-benchmark-use-case.html">evaluateGenerationBenchmarkUseCase</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-evaluate-generation-benchmark-use-case/index.html">EvaluateGenerationBenchmarkUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1067465748%2FProperties%2F-1999068815" anchor-label="generationDispatchState" id="-1067465748%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-dispatch-state.html"><span>generation</span><wbr><span>Dispatch</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1067465748%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="generation-dispatch-state.html">generationDispatchState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/MutableStateFlow///PointingToDeclaration/">MutableStateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Per-operation dispatch marker; a cancelled replacement still awaiting cleanup owns no legacy task.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1116382886%2FProperties%2F-1999068815" anchor-label="generationJob" id="1116382886%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-job.html"><span>generation</span><wbr><span><span>Job</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1116382886%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="generation-job.html">generationJob</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Captured foreground coroutine; cancelling it triggers provider-specific cleanup before it can publish results.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2002471524%2FProperties%2F-1999068815" anchor-label="generationSelectionRevision" id="-2002471524%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-selection-revision.html"><span>generation</span><wbr><span>Selection</span><wbr><span><span>Revision</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2002471524%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="generation-selection-revision.html">generationSelectionRevision</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Selection revision captured with the launched request and used only for its cancellation ownership.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-790570436%2FProperties%2F-1999068815" anchor-label="generationSource" id="-790570436%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generation-source.html"><span>generation</span><wbr><span><span>Source</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-790570436%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="generation-source.html">generationSource</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Provider identity captured from the launched request, retained independently of later form edits.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-823990539%2FProperties%2F-1999068815" anchor-label="imageSaver" id="-823990539%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="image-saver.html"><span>image</span><wbr><span><span>Saver</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-823990539%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="image-saver.html">imageSaver</a><span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.image/-image-saver/index.html">ImageSaver</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1537623069%2FProperties%2F-1999068815" anchor-label="imageSharer" id="1537623069%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="image-sharer.html"><span>image</span><wbr><span><span>Sharer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1537623069%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="image-sharer.html">imageSharer</a><span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.image/-image-sharer/index.html">ImageSharer</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1389114606%2FProperties%2F-1999068815" anchor-label="interruptSourceGenerationUseCase" id="1389114606%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="interrupt-source-generation-use-case.html"><span>interrupt</span><wbr><span>Source</span><wbr><span>Generation</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1389114606%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="interrupt-source-generation-use-case.html">interruptSourceGenerationUseCase</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-interrupt-source-generation-use-case/index.html">InterruptSourceGenerationUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1873103780%2FProperties%2F-1999068815" anchor-label="launch" id="-1873103780%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="launch.html"><span><span>launch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1873103780%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="launch.html">launch</a><span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.core/-view-model-launcher/index.html">ViewModelLauncher</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1321804350%2FProperties%2F-1999068815" anchor-label="onError" id="-1321804350%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-error.html"><span>on</span><wbr><span><span>Error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1321804350%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="on-error.html">onError</a><span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2020099536%2FProperties%2F-1999068815" anchor-label="openAiOAuthGateway" id="2020099536%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-ai-o-auth-gateway.html"><span>open</span><wbr><span>Ai</span><wbr><span>OAuth</span><wbr><span><span>Gateway</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2020099536%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="open-ai-o-auth-gateway.html">openAiOAuthGateway</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.feature.openaioauth/-open-ai-o-auth-gateway/index.html">OpenAiOAuthGateway</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1298652068%2FProperties%2F-1999068815" anchor-label="pendingGeneration" id="-1298652068%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="pending-generation.html"><span>pending</span><wbr><span><span>Generation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1298652068%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">var </span><a href="pending-generation.html">pendingGeneration</a><span class="token operator">: </span><a href="../-pending-generation/index.html">PendingGeneration</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1180173986%2FProperties%2F-1999068815" anchor-label="platformServices" id="-1180173986%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="platform-services.html"><span>platform</span><wbr><span><span>Services</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1180173986%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="platform-services.html">platformServices</a><span class="token operator">: </span><a href="../../../../presentation/components/com.shifthackz.aisdv1.presentation.components.core/-generation-platform-services/index.html">GenerationPlatformServices</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1238805127%2FProperties%2F-1999068815" anchor-label="preferenceManager" id="-1238805127%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="preference-manager.html"><span>preference</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1238805127%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="preference-manager.html">preferenceManager</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.preference/-preference-manager/index.html">PreferenceManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1871798053%2FProperties%2F-1999068815" anchor-label="providerSelectionGuard" id="1871798053%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="provider-selection-guard.html"><span>provider</span><wbr><span>Selection</span><wbr><span><span>Guard</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1871798053%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="provider-selection-guard.html">providerSelectionGuard</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.gateway/-provider-selection-guard/index.html">ProviderSelectionGuard</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1180469350%2FProperties%2F-1999068815" anchor-label="recordBenchmarkPromptAnswerUseCase" id="1180469350%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="record-benchmark-prompt-answer-use-case.html"><span>record</span><wbr><span>Benchmark</span><wbr><span>Prompt</span><wbr><span>Answer</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1180469350%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="record-benchmark-prompt-answer-use-case.html">recordBenchmarkPromptAnswerUseCase</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-record-benchmark-prompt-answer-use-case/index.html">RecordBenchmarkPromptAnswerUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1095128454%2FProperties%2F-1999068815" anchor-label="router" id="1095128454%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="router.html"><span><span>router</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1095128454%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="router.html">router</a><span class="token operator">: </span><a href="../../../../core/navigation/com.shifthackz.aisdv1.core.navigation.router/-text-to-image-router/index.html">TextToImageRouter</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-903089242%2FProperties%2F-1999068815" anchor-label="saveGenerationResultUseCase" id="-903089242%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="save-generation-result-use-case.html"><span>save</span><wbr><span>Generation</span><wbr><span>Result</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-903089242%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="save-generation-result-use-case.html">saveGenerationResultUseCase</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-save-generation-result-use-case/index.html">SaveGenerationResultUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="775150031%2FProperties%2F-1999068815" anchor-label="saveLastResultToCacheUseCase" id="775150031%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="save-last-result-to-cache-use-case.html"><span>save</span><wbr><span>Last</span><wbr><span>Result</span><wbr><span>To</span><wbr><span>Cache</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="775150031%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="save-last-result-to-cache-use-case.html">saveLastResultToCacheUseCase</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.caching/-save-last-result-to-cache-use-case/index.html">SaveLastResultToCacheUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="227529495%2FProperties%2F-1999068815" anchor-label="suppressBenchmarkWarningsUseCase" id="227529495%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="suppress-benchmark-warnings-use-case.html"><span>suppress</span><wbr><span>Benchmark</span><wbr><span>Warnings</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="227529495%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="suppress-benchmark-warnings-use-case.html">suppressBenchmarkWarningsUseCase</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.benchmark/-suppress-benchmark-warnings-use-case/index.html">SuppressBenchmarkWarningsUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-875310581%2FProperties%2F-1999068815" anchor-label="textToImageUseCase" id="-875310581%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="text-to-image-use-case.html"><span>text</span><wbr><span>To</span><wbr><span>Image</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-875310581%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="text-to-image-use-case.html">textToImageUseCase</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.usecase.generation/-text-to-image-use-case/index.html">TextToImageUseCase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2092759613%2FProperties%2F-1999068815" anchor-label="updateState" id="-2092759613%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-state.html"><span>update</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2092759613%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="update-state.html">updateState</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">(</span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-420619801%2FProperties%2F-1999068815" anchor-label="wakeLockInterActor" id="-420619801%2FProperties%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="wake-lock-inter-actor.html"><span>wake</span><wbr><span>Lock</span><wbr><span>Inter</span><wbr><span><span>Actor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-420619801%2FProperties%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">val </span><a href="wake-lock-inter-actor.html">wakeLockInterActor</a><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.interactor.wakelock/-wake-lock-inter-actor/index.html">WakeLockInterActor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="574349388%2FFunctions%2F-1999068815" anchor-label="cacheResultIfNeeded" id="574349388%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cache-result-if-needed.html"><span>cache</span><wbr><span>Result</span><wbr><span>If</span><wbr><span><span>Needed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="574349388%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="cache-result-if-needed.html"><span class="token function">cacheResultIfNeeded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a></div><div class="brief "><p class="paragraph">Caches a result for downstream preview, reporting or sharing and returns the cached result.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-858223811%2FFunctions%2F-1999068815" anchor-label="cancelGeneration" id="-858223811%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cancel-generation.html"><span>cancel</span><wbr><span><span>Generation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-858223811%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="cancel-generation.html"><span class="token function">cancelGeneration</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancels the captured coroutine; Easy Diffusion stops only its captured remote task during domain cleanup.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2087237476%2FFunctions%2F-1999068815" anchor-label="continueAfterBenchmarkWarning" id="-2087237476%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="continue-after-benchmark-warning.html"><span>continue</span><wbr><span>After</span><wbr><span>Benchmark</span><wbr><span><span>Warning</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2087237476%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="continue-after-benchmark-warning.html"><span class="token function">continueAfterBenchmarkWarning</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">suppressFutureWarnings<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Resumes the captured generation after a local performance warning.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-457239468%2FFunctions%2F-1999068815" anchor-label="dismissBenchmarkDialog" id="-457239468%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dismiss-benchmark-dialog.html"><span>dismiss</span><wbr><span>Benchmark</span><wbr><span><span>Dialog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-457239468%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="dismiss-benchmark-dialog.html"><span class="token function">dismissBenchmarkDialog</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Discards the pending generation and closes the local performance recommendation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-567447500%2FFunctions%2F-1999068815" anchor-label="evaluateBenchmarkGate" id="-567447500%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="evaluate-benchmark-gate.html"><span>evaluate</span><wbr><span>Benchmark</span><wbr><span><span>Gate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-567447500%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="evaluate-benchmark-gate.html"><span class="token function">evaluateBenchmarkGate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">validatedState<span class="token operator">: </span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">, </span></span><span class="parameter ">payload<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-text-to-image-payload/index.html">TextToImagePayload</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Evaluates the captured local request and either resumes generation or shows a benchmark recommendation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1738249126%2FFunctions%2F-1999068815" anchor-label="generate" id="-1738249126%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="generate.html"><span><span>generate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1738249126%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="generate.html"><span class="token function">generate</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Validates the current form, rejects overlapping work and starts or schedules the captured generation request.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1054776390%2FFunctions%2F-1999068815" anchor-label="persistResultIfNeeded" id="-1054776390%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="persist-result-if-needed.html"><span>persist</span><wbr><span>Result</span><wbr><span>If</span><wbr><span><span>Needed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1054776390%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="persist-result-if-needed.html"><span class="token function">persistResultIfNeeded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a></div><div class="brief "><p class="paragraph">Returns an existing durable result unchanged or stores it and attaches the new gallery identity.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="883118383%2FFunctions%2F-1999068815" anchor-label="persistResultsIfNeeded" id="883118383%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="persist-results-if-needed.html"><span>persist</span><wbr><span>Results</span><wbr><span>If</span><wbr><span><span>Needed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="883118383%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="persist-results-if-needed.html"><span class="token function">persistResultsIfNeeded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">results<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Preserves existing gallery identities and persists only newly generated results.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-27600929%2FFunctions%2F-1999068815" anchor-label="publishGenerationResults" id="-27600929%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="publish-generation-results.html"><span>publish</span><wbr><span>Generation</span><wbr><span><span>Results</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-27600929%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="publish-generation-results.html"><span class="token function">publishGenerationResults</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">payload<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-text-to-image-payload/index.html">TextToImagePayload</a><span class="token punctuation">, </span></span><span class="parameter ">results<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Checks the submitted account and durable source revision on main immediately before publishing. No suspension separates the final checks from the state update while both guards are held.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-456507176%2FFunctions%2F-1999068815" anchor-label="reportGenerationResult" id="-456507176%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="report-generation-result.html"><span>report</span><wbr><span>Generation</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-456507176%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="report-generation-result.html"><span class="token function">reportGenerationResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists and caches the selected result before opening the report workflow.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1634158110%2FFunctions%2F-1999068815" anchor-label="retainCleanup" id="1634158110%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="retain-cleanup.html"><span>retain</span><wbr><span><span>Cleanup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1634158110%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="retain-cleanup.html"><span class="token function">retainCleanup</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">job<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">source<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-server-source/index.html">ServerSource</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">selectionRevision<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Retains cleanup outside generation jobs so cancelling a replacement cannot skip earlier remote cleanup.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="91997871%2FFunctions%2F-1999068815" anchor-label="runBenchmarkFromPrompt" id="91997871%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="run-benchmark-from-prompt.html"><span>run</span><wbr><span>Benchmark</span><wbr><span>From</span><wbr><span><span>Prompt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="91997871%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="run-benchmark-from-prompt.html"><span class="token function">runBenchmarkFromPrompt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records the benchmark prompt response and navigates to the local performance benchmark.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-885221440%2FFunctions%2F-1999068815" anchor-label="saveGenerationResults" id="-885221440%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="save-generation-results.html"><span>save</span><wbr><span>Generation</span><wbr><span><span>Results</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-885221440%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="save-generation-results.html"><span class="token function">saveGenerationResults</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">results<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists completed results and updates the result modal with durable gallery identities.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="415350967%2FFunctions%2F-1999068815" anchor-label="saveImage" id="415350967%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="save-image.html"><span>save</span><wbr><span><span>Image</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="415350967%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="save-image.html"><span class="token function">saveImage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">base64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Exports the supplied encoded image through the platform media saver and reports completion or failure.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-477313679%2FFunctions%2F-1999068815" anchor-label="shareImage" id="-477313679%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="share-image.html"><span>share</span><wbr><span><span>Image</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-477313679%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="share-image.html"><span class="token function">shareImage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">base64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Shares the supplied encoded image through the platform share surface and restores presentation state afterward.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2048097545%2FFunctions%2F-1999068815" anchor-label="skipBenchmarkPrompt" id="2048097545%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="skip-benchmark-prompt.html"><span>skip</span><wbr><span>Benchmark</span><wbr><span><span>Prompt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2048097545%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="skip-benchmark-prompt.html"><span class="token function">skipBenchmarkPrompt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records the skipped benchmark and resumes the captured pending generation request.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="686627647%2FFunctions%2F-1999068815" anchor-label="startGeneration" id="686627647%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="start-generation.html"><span>start</span><wbr><span><span>Generation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="686627647%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword">fun </span><a href="start-generation.html"><span class="token function">startGeneration</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">validatedState<span class="token operator">: </span><a href="../-text-to-image-state/index.html">TextToImageState</a><span class="token punctuation">, </span></span><span class="parameter ">payload<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-text-to-image-payload/index.html">TextToImagePayload</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Schedules the immutable background payload or runs a captured foreground coroutine and publishes only active results.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="630925767%2FFunctions%2F-1999068815" anchor-label="viewGenerationResult" id="630925767%2FFunctions%2F-1999068815" data-filterable-set=":presentation:generation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":presentation:generation/commonMain" data-filterable-set=":presentation:generation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="view-generation-result.html"><span>view</span><wbr><span>Generation</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="630925767%2FFunctions%2F-1999068815"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":presentation:generation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="view-generation-result.html"><span class="token function">viewGenerationResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="../../../../domain/com.shifthackz.aisdv1.domain.entity/-ai-generation-result/index.html">AiGenerationResult</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Ensures the result is persisted and cached before opening its normal preview.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
