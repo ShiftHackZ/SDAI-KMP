@@ -13,8 +13,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
  * Retains the existing Android sheet color and default shape/insets.
+ *
  * @param modifier Sheet placement.
  * @param content Existing header and destination rows.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -28,11 +30,13 @@ actual fun PlatformDrawerSheet(modifier: Modifier, content: @Composable ColumnSc
 
 /**
  * Retains the existing Material destination styling and selection behavior.
+ *
  * @param label Localized destination name.
  * @param icon Existing shared vector.
  * @param isSelected Active destination state.
  * @param onClick Existing navigation callback.
  * @param modifier Destination placement.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

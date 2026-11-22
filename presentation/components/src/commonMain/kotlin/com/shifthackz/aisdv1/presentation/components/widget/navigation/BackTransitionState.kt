@@ -21,15 +21,27 @@ import kotlinx.coroutines.launch
  * @author Dmitriy Moroz
  */
 class BackTransitionState internal constructor(private val scope: CoroutineScope) {
-    /** Fraction of the current screen revealed toward its Back destination. @author Dmitriy Moroz */
+    /**
+     * Fraction of the current screen revealed toward its Back destination.
+     *
+     * @author Dmitriy Moroz
+     */
     var progress by mutableFloatStateOf(0f)
         private set
 
-    /** Whether the finger or a settling animation owns the transition. @author Dmitriy Moroz */
+    /**
+     * Whether the finger or a settling animation owns the transition.
+     *
+     * @author Dmitriy Moroz
+     */
     var isActive by mutableStateOf(false)
         private set
 
-    /** Whether navigation has committed after the foreground reached the far edge. @author Dmitriy Moroz */
+    /**
+     * Whether navigation has committed after the foreground reached the far edge.
+     *
+     * @author Dmitriy Moroz
+     */
     var hasCommittedGesture by mutableStateOf(false)
         private set
 
@@ -62,7 +74,11 @@ class BackTransitionState internal constructor(private val scope: CoroutineScope
         progress = value.coerceIn(0f, 1f)
     }
 
-    /** Returns the current screen to rest without dispatching navigation. @author Dmitriy Moroz */
+    /**
+     * Returns the current screen to rest without dispatching navigation.
+     *
+     * @author Dmitriy Moroz
+     */
     internal fun cancel() {
         settling?.cancel()
         settling = scope.launch {

@@ -22,7 +22,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Protects search query ownership and empty-state decoration.
+/**
+ * Protects search query ownership and empty-state decoration.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)

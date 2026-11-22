@@ -14,11 +14,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.luminance
@@ -45,6 +52,7 @@ import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
  * Compose owns activation, semantics and enclosing contextual-help gestures.
  * Older systems and tutorial illustrations keep the Material control.
  * Retained hidden routes reserve their layout bounds without keeping a native overlay mounted.
+ * Native decoration follows the Compose ancestor clip while scrolling underneath fixed screen chrome.
  *
  * @param onClick Enabled short-tap action.
  * @param modifier Placement of the circular control.
@@ -94,8 +102,19 @@ internal fun PlatformCircleButton(
         if (nativeIcon != null) {
             val image = rememberNativeIconImage(nativeIcon)
             val colors = MaterialTheme.colorScheme
+            val density = LocalDensity.current.density
+            var visibleBounds by remember { mutableStateOf(Rect.Zero) }
             UIKitView(
-                modifier = Modifier.matchParentSize(),
+                modifier = Modifier.matchParentSize().onGloballyPositioned { coordinates ->
+                    val origin = coordinates.localToWindow(Offset.Zero)
+                    val clipped = coordinates.boundsInWindow()
+                    visibleBounds = Rect(
+                        left = (clipped.left - origin.x) / density,
+                        top = (clipped.top - origin.y) / density,
+                        right = (clipped.right - origin.x) / density,
+                        bottom = (clipped.bottom - origin.y) / density,
+                    )
+                },
                 factory = { NativeGlassButtonView() },
                 update = {
                     it.update(
@@ -109,6 +128,7 @@ internal fun PlatformCircleButton(
                         image = image,
                         foreground = nativeTint.toUIColor(),
                     )
+                    it.updateVisibleBounds(visibleBounds)
                 },
                 properties = UIKitInteropProperties(
                     interactionMode = null,

@@ -18,7 +18,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Checks that the actual demo modal presents two independent acknowledgements and a guarded CTA.
+/**
+ * Checks that the actual demo modal presents two independent acknowledgements and a guarded CTA.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -28,9 +30,12 @@ class DemoModeExplanationDialogTest {
     val compose = createComposeRule()
     private val intents = mutableListOf<ServerSetupIntent>()
 
-    /** Renders caller-owned checkbox state without replacing the production dialog.
+    /**
+     * Renders caller-owned checkbox state without replacing the production dialog.
+     *
      * @param hasUnderstood First acknowledgement value.
      * @param hasAgreed Feedback acknowledgement value.
+     *
      * @author Dmitriy Moroz
      */
     private fun render(hasUnderstood: Boolean = false, hasAgreed: Boolean = false) {

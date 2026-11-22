@@ -31,7 +31,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Verifies metadata paging and explicit original selection through production domain contracts.
+/**
+ * Verifies metadata paging and explicit original selection through production domain contracts.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -47,8 +49,11 @@ class InputHistorySelectionTest {
         Dispatchers.resetMain()
     }
 
-    /** Builds actual persisted gallery metadata without retaining image payloads.
+    /**
+     * Builds actual persisted gallery metadata without retaining image payloads.
+     *
      * @param id Stable gallery identity.
+     *
      * @author Dmitriy Moroz
      */
     private fun metadata(id: Long) = GalleryItemMetadata(
@@ -56,7 +61,9 @@ class InputHistorySelectionTest {
         "Landscape", "", 512, 512, 20, 7f, false, "Euler", "1", "", 0f, 0f, false, false, "SD1.5"
     )
 
-    /** Creates the production view model under a lifecycle owner.
+    /**
+     * Creates the production view model under a lifecycle owner.
+     *
      * @author Dmitriy Moroz
      */
     private fun TestScope.createModel(): InputHistoryViewModel {

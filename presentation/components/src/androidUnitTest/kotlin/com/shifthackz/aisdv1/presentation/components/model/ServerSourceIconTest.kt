@@ -10,7 +10,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
-/** Protects local provider branding in shared configuration and generation controls.
+/**
+ * Protects local provider branding in shared configuration and generation controls.
+ *
  * @author Dmitriy Moroz
  */
 class ServerSourceIconTest {

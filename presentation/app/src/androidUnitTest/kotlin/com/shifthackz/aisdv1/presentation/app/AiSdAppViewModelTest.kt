@@ -23,7 +23,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Verifies the production shell projection preserves tab owners across overlay routes.
+/**
+ * Verifies the production shell projection preserves tab owners across overlay routes.
+ *
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -195,11 +197,14 @@ class AiSdAppViewModelTest {
             assertTrue(model.state.value.shouldDimScreen)
         }
 
-    /** Creates the actual shell model with controlled collaborator streams and a real router.
+    /**
+     * Creates the actual shell model with controlled collaborator streams and a real router.
+     *
      * @param router Navigation authority under test.
      * @param dispatcher Shared scheduler for model work.
      * @param settings Preference stream supplied by the settings owner.
      * @param generating Activity from retained generation forms.
+     *
      * @author Dmitriy Moroz
      */
     private fun createModel(

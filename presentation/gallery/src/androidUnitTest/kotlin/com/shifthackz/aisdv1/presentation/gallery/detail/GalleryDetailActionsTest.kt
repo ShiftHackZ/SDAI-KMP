@@ -22,7 +22,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Protects compact gallery actions from dispatching an adjacent or destructive operation.
+/**
+ * Protects compact gallery actions from dispatching an adjacent or destructive operation.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -32,9 +34,12 @@ class GalleryDetailActionsTest {
     val compose = createComposeRule()
     private val intents = mutableListOf<GalleryDetailIntent>()
 
-    /** Renders actual detail actions using the existing generation-result model fixture.
+    /**
+     * Renders actual detail actions using the existing generation-result model fixture.
+     *
      * @param canReport Whether this provider exposes reporting.
      * @param isLiked Whether the persisted item is already liked.
+     *
      * @author Dmitriy Moroz
      */
     private fun render(canReport: Boolean = true, isLiked: Boolean = false) {

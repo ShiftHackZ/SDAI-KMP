@@ -7,8 +7,10 @@ import androidx.compose.ui.draw.clipToBounds
 
 /**
  * Uses the ordinary Compose clipping boundary for Material controls.
+ *
  * @param modifier Viewport placement and dimensions.
  * @param content Controls clipped to the viewport.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

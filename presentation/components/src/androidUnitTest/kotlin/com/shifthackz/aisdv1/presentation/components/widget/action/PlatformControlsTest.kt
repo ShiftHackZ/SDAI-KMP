@@ -25,7 +25,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Verifies shared action contracts against their real Android implementations.
+/**
+ * Verifies shared action contracts against their real Android implementations.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)

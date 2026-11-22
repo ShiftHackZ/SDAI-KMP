@@ -18,7 +18,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Ensures disclosure events remain caller-owned and accessible.
+/**
+ * Ensures disclosure events remain caller-owned and accessible.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)

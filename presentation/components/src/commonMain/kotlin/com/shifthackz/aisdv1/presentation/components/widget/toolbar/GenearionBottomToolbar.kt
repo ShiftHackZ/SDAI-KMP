@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -61,22 +63,24 @@ fun GenerationBottomToolbar(
     content: @Composable () -> Unit,
 ) {
     val hasExtraShortcuts = mode == ServerSource.AUTOMATIC1111 || mode == ServerSource.SWARM_UI
-    Column(
-        modifier = modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
-            .padding(top = 8.dp),
-    ) {
-        if (hasExtraShortcuts) {
-            GenerationBottomToolbarShortcuts(
-                modifier = Modifier.padding(bottom = 4.dp),
-                strokeAccentState = strokeAccentState,
-                mode = mode,
-                prompt = prompt,
-                negativePrompt = negativePrompt,
-                onExtraSelected = onExtraSelected,
-                onEmbeddingsSelected = onEmbeddingsSelected,
-            )
+    CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surface) {
+        Column(
+            modifier = modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
+                .padding(top = 8.dp),
+        ) {
+            if (hasExtraShortcuts) {
+                GenerationBottomToolbarShortcuts(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    strokeAccentState = strokeAccentState,
+                    mode = mode,
+                    prompt = prompt,
+                    negativePrompt = negativePrompt,
+                    onExtraSelected = onExtraSelected,
+                    onEmbeddingsSelected = onEmbeddingsSelected,
+                )
+            }
+            content()
         }
-        content()
     }
 }
 

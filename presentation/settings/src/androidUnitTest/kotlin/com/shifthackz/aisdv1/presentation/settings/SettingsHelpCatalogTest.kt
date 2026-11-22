@@ -5,7 +5,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Verifies every discoverable settings explanation exists in each bundled locale without fallback.
+/**
+ * Verifies every discoverable settings explanation exists in each bundled locale without fallback.
+ *
  * @author Dmitriy Moroz
  */
 class SettingsHelpCatalogTest {

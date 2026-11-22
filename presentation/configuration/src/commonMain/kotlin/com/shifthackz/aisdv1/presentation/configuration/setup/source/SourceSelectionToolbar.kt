@@ -32,7 +32,11 @@ import com.shifthackz.aisdv1.presentation.components.widget.input.SearchField
 import com.shifthackz.aisdv1.presentation.components.widget.action.CircleIconButton
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 
-/** Height of the fixed 48dp actions plus the search row's vertical padding. @author Dmitriy Moroz */
+/**
+ * Height of the fixed 48dp actions plus the search row's vertical padding.
+ *
+ * @author Dmitriy Moroz
+ */
 internal val SourceSelectionToolbarHeight = 58.dp
 
 /**

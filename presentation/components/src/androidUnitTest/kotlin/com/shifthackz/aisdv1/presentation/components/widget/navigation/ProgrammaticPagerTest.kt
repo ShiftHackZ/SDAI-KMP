@@ -32,7 +32,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Checks ownership, retained local state and gesture exclusion in the production pager.
+/**
+ * Checks ownership, retained local state and gesture exclusion in the production pager.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -49,7 +51,9 @@ class ProgrammaticPagerTest {
     private val controls = mutableMapOf<Int, Boolean>()
     private val input = mutableMapOf<Int, Boolean>()
 
-    /** Renders actual retained pages under the same ownership locals used by the app shell.
+    /**
+     * Renders actual retained pages under the same ownership locals used by the app shell.
+     *
      * @author Dmitriy Moroz
      */
     private fun render() {

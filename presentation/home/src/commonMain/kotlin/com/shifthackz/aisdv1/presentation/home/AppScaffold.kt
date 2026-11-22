@@ -1,7 +1,6 @@
 package com.shifthackz.aisdv1.presentation.home
 
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarObscured
-
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.core.navigation.isHomeRoute
 import com.shifthackz.aisdv1.core.navigation.RootAppRouter
@@ -47,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
@@ -57,7 +57,8 @@ import com.shifthackz.aisdv1.domain.entity.Settings
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
-import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityComposable
+import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityStateProvider
+import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityWidget
 import com.shifthackz.aisdv1.presentation.components.widget.source.getName
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.isPlatformNavigationBarFloating
@@ -169,26 +170,30 @@ fun AppScaffold(
                 LocalFloatingNavigationBarInset provides floatingInset,
                 LocalToolbarObscured provides isDrawerObscuringContent,
             ) {
-                HomeContentLayout(
-                    shouldReserveTopInset = isPlatformToolbarNative && shouldShowHomeNavigation,
-                    topWindowInsets = persistentTopAppBarWindowInsets(),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(if (shouldFloatNavigation) PaddingValues(top = paddingValues.calculateTopPadding()) else paddingValues),
-                    status = {
-                        if (shouldShowHomeNavigation) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surface),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                ConnectivityComposable()
+                ConnectivityStateProvider { connectivity ->
+                    HomeContentLayout(
+                        hasNativeToolbar = isPlatformToolbarNative && shouldShowHomeNavigation,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(if (shouldFloatNavigation) PaddingValues(top = paddingValues.calculateTopPadding()) else paddingValues),
+                        status = {
+                            if (shouldShowHomeNavigation) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            if (isPlatformToolbarNative) Color.Transparent
+                                            else MaterialTheme.colorScheme.surface
+                                        ),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    ConnectivityWidget(connectivity)
+                                }
                             }
-                        }
-                    },
-                ) {
-                    content(Modifier.fillMaxSize())
+                        },
+                    ) {
+                        content(Modifier.fillMaxSize())
+                    }
                 }
             }
         }

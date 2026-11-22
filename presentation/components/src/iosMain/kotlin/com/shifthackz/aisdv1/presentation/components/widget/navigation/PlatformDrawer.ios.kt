@@ -44,8 +44,10 @@ import kotlinx.cinterop.ExperimentalForeignApi
  * Keeps Material drawer gestures and sizing with a native blur sampling Compose and UIKit content.
  * Cooperative touch delivery lets the parent drawer retain its swipe-to-close gesture.
  * The child composition uses the app's foreground color for header text in both appearances.
+ *
  * @param modifier Sheet placement and measured width.
  * @param content Header and destination rows above the backdrop.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -85,11 +87,13 @@ actual fun PlatformDrawerSheet(modifier: Modifier, content: @Composable ColumnSc
 /**
  * Uses a native UIButton's complete glass rendering, including its label and icon, above Compose.
  * The transparent overlay samples the blurred sheet; Compose owns taps, help and semantics.
+ *
  * @param label Localized destination name.
  * @param icon Shared vector converted to a native template image.
  * @param isSelected Whether accent glass marks the active route.
  * @param onClick Root navigation callback.
  * @param modifier Destination placement.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

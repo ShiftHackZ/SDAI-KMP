@@ -19,7 +19,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.math.abs
 
-/** Protects shared modal dismissal and balanced title geometry, including loading state.
+/**
+ * Protects shared modal dismissal and balanced title geometry, including loading state.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)

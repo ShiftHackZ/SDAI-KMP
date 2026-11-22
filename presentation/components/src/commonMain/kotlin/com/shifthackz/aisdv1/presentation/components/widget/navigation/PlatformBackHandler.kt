@@ -3,10 +3,18 @@ package com.shifthackz.aisdv1.presentation.components.widget.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 
-/** Shared route transition, inherited by route-specific Back handlers. @author Dmitriy Moroz */
+/**
+ * Shared route transition, inherited by route-specific Back handlers.
+ *
+ * @author Dmitriy Moroz
+ */
 val LocalBackTransitionState = staticCompositionLocalOf<BackTransitionState?> { null }
 
-/** Whether this visible route owns navigation input rather than serving as a preview. @author Dmitriy Moroz */
+/**
+ * Whether this visible route owns navigation input rather than serving as a preview.
+ *
+ * @author Dmitriy Moroz
+ */
 val LocalNavigationInputEnabled = staticCompositionLocalOf { true }
 
 /**

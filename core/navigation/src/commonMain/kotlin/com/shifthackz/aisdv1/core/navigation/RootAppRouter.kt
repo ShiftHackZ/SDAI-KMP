@@ -52,14 +52,23 @@ class RootAppRouter(
     WebUiRouter,
     OnBoardingRouter {
 
-    /** Opens reusable backup tabs from Settings. @author Dmitriy Moroz */
+    /**
+     * Opens reusable backup tabs from Settings.
+     *
+     * @author Dmitriy Moroz
+     */
     override fun navigateToBackup() = navigateTo(AppRoute.Backup(LaunchSource.SETTINGS))
 
-    /** Consumes onboarding so Back cannot reopen it. @author Dmitriy Moroz */
+    /**
+     * Consumes onboarding so Back cannot reopen it.
+     *
+     * @author Dmitriy Moroz
+     */
     override fun navigateToBackupWelcome() = replaceRoute(AppRoute.BackupWelcome)
 
     /**
      * Rebuilds Settings as the return destination before opening a cold-start pending backup operation.
+     *
      * @author Dmitriy Moroz
      */
     override fun navigateToBackupRestore() {
@@ -67,10 +76,18 @@ class RootAppRouter(
         navigateTo(AppRoute.Backup(LaunchSource.SETTINGS))
     }
 
-    /** Opens restore-only content during first launch. @author Dmitriy Moroz */
+    /**
+     * Opens restore-only content during first launch.
+     *
+     * @author Dmitriy Moroz
+     */
     override fun navigateToInitialRestore() = replaceRoute(AppRoute.Backup(LaunchSource.SPLASH))
 
-    /** Consumes first-launch backup before mandatory provider setup. @author Dmitriy Moroz */
+    /**
+     * Consumes first-launch backup before mandatory provider setup.
+     *
+     * @author Dmitriy Moroz
+     */
     override fun navigateToInitialConfiguration() =
         replaceRoute(AppRoute.Setup(LaunchSource.SPLASH))
 

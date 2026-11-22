@@ -16,8 +16,10 @@ import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialo
 
 /**
  * Presents exclusive progress, provider-consent and acknowledged result feedback using shared app dialogs.
+ *
  * @param state Nonsecret operation state; completed restore data stays available after acknowledgement.
  * @param processIntent Cancellation, conflict consent and acknowledgement event sink.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

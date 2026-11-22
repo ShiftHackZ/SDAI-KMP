@@ -19,7 +19,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Exercises the reusable image acquisition routes and caller-owned selected image content.
+/**
+ * Exercises the reusable image acquisition routes and caller-owned selected image content.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -29,8 +31,11 @@ class ImageInputTest {
     val compose = createComposeRule()
     private val requests = mutableListOf<String>()
 
-    /** Renders the production acquisition grid.
+    /**
+     * Renders the production acquisition grid.
+     *
      * @param isEnabled Whether acquisition is available.
+     *
      * @author Dmitriy Moroz
      */
     private fun renderActions(isEnabled: Boolean = true) {

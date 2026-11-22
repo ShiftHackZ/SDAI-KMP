@@ -1,22 +1,18 @@
 package com.shifthackz.aisdv1.presentation.home
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarStatusBarInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarTopContent
 
 /**
- * Places home status above route content while assigning the status-area inset to exactly one owner.
- * Native home chrome reserves it before the connection badge; its child toolbar then uses zero.
- * Android and standalone routes retain their existing outer-scaffold or toolbar ownership.
+ * Gives native route chrome the home status slot so badge, title and system area share one backdrop.
+ * Android keeps the status above the route in the outer layout. The native route owns its complete
+ * top inset, allowing scrolled content to pass behind the badge as well as the title.
  *
- * @param shouldReserveTopInset Whether this home shell owns the native status area.
- * @param topWindowInsets Safe-area insets supplied by the host platform.
+ * @param hasNativeToolbar Whether the route hosts status inside its native toolbar.
  * @param modifier Placement and remaining outer scaffold padding.
  * @param status Connection indicator, empty when home chrome is absent or monitoring is disabled.
  * @param content Current retained route content below the status indicator.
@@ -24,21 +20,16 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbar
  */
 @Composable
 internal fun HomeContentLayout(
-    shouldReserveTopInset: Boolean,
-    topWindowInsets: WindowInsets,
+    hasNativeToolbar: Boolean,
     modifier: Modifier = Modifier,
     status: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalToolbarStatusBarInset provides if (shouldReserveTopInset) 0.dp else null,
+        LocalToolbarTopContent provides if (hasNativeToolbar) status else null,
     ) {
-        Column(
-            modifier.fillMaxSize().then(
-                if (shouldReserveTopInset) Modifier.windowInsetsPadding(topWindowInsets) else Modifier
-            ),
-        ) {
-            status()
+        Column(modifier.fillMaxSize()) {
+            if (!hasNativeToolbar) status()
             content()
         }
     }

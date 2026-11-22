@@ -35,7 +35,9 @@ private val StepBottomPadding = 8.dp
 
 /**
  * Calculates the progress strip's circle, caption line and padding height for the native toolbar host.
+ *
  * @return Height including the current font scale.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

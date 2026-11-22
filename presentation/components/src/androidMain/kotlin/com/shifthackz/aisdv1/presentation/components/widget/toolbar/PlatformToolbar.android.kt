@@ -15,7 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Keeps status-area ownership in the existing Android app scaffold. @author Dmitriy Moroz */
+/**
+ * Keeps status-area ownership in the existing Android app scaffold.
+ *
+ * @author Dmitriy Moroz
+ */
 actual val isPlatformToolbarNative: Boolean = false
 
 /**

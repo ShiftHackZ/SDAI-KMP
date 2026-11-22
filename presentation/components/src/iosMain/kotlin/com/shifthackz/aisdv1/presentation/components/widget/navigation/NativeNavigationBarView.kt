@@ -180,6 +180,7 @@ internal class NativeNavigationBarView : UIView(frame = CGRectMake(0.0, 0.0, 0.0
 
     /**
      * Reconciles UIKit's drag highlight with the destination still displayed by the caller.
+     *
      * @author Dmitriy Moroz
      */
     private fun restoreSelection() {

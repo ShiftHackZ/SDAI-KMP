@@ -28,27 +28,32 @@ import androidx.compose.ui.unit.Dp
 val LocalToolbarContentInset = staticCompositionLocalOf { 0.dp }
 
 /**
- * Overrides the native toolbar's status-area inset when an enclosing home shell already reserves it.
- * Null leaves safe-area ownership with the route toolbar.
+ * Optional home status rendered above the title inside the native toolbar's continuous backdrop.
+ * The shell collects its state once; retained route toolbars receive only the stateless content.
+ *
  * @author Dmitriy Moroz
  */
-val LocalToolbarStatusBarInset = staticCompositionLocalOf<Dp?> { null }
+val LocalToolbarTopContent = staticCompositionLocalOf<(@Composable () -> Unit)?> { null }
 
 /**
  * Prevents floating native toolbar content from drawing above the app's modal drawer.
+ *
  * @author Dmitriy Moroz
  */
 val LocalToolbarObscured = staticCompositionLocalOf { false }
 
 /**
  * Whether route toolbars own iOS status-area painting and native typography.
+ *
  * @author Dmitriy Moroz
  */
 expect val isPlatformToolbarNative: Boolean
 
 /**
  * Uses compact native-style title typography on iOS without altering Android title styles.
+ *
  * @param androidStyle Existing title style selected by the Android screen.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

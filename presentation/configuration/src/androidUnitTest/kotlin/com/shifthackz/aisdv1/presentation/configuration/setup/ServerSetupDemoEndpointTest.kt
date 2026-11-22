@@ -6,7 +6,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Protects the demo acknowledgement gate when users enter equivalent endpoint spellings.
+/**
+ * Protects the demo acknowledgement gate when users enter equivalent endpoint spellings.
+ *
  * @author Dmitriy Moroz
  */
 class ServerSetupDemoEndpointTest {

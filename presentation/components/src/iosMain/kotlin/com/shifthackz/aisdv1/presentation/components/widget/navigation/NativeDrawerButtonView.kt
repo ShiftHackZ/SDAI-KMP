@@ -80,6 +80,7 @@ internal class NativeDrawerButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0,
     /**
      * Refreshes native glass, content and app-specific appearance without changing row geometry.
      * Separate native label and icon retain theme contrast without configuration color transforms.
+     *
      * @param label Localized destination name.
      * @param image Shared template icon.
      * @param isSelected Whether prominent accent glass indicates the current destination.
@@ -87,6 +88,7 @@ internal class NativeDrawerButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0,
      * @param foreground Normal destination foreground.
      * @param selectedForeground Foreground with contrast against the accent.
      * @param isDark Manual or system app appearance.
+     *
      * @author Dmitriy Moroz
      */
     fun update(

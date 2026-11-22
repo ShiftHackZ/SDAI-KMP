@@ -1,24 +1,25 @@
 package com.shifthackz.aisdv1.presentation.home
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityState
 import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityWidget
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarStatusBarInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarTopContent
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +27,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Protects home monitoring placement and single ownership of the native status-area inset.
+/**
+ * Protects status ownership: native routes host the badge in their chrome, Android keeps it outside.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -34,74 +37,123 @@ import org.robolectric.annotation.Config
 class HomeContentLayoutTest {
     @get:Rule
     val compose = createComposeRule()
-    private var childInset: Dp? = null
 
-    /** Renders the actual status widget within the production home layout.
-     * @param shouldReserve Whether the native shell owns safe-area placement.
-     * @param state Provider status and indicator visibility.
-     * @author Dmitriy Moroz
-     */
-    private fun render(shouldReserve: Boolean, state: ConnectivityState) {
-        Localization.setLanguageCode("en")
+    @Test
+    fun `given native home monitoring, route has not consumed status, expected shell reserves no separate status strip`() {
+        // Given
+        var hasStatusSlot = false
         compose.setContent {
-            MaterialTheme {
-                HomeContentLayout(shouldReserve, WindowInsets(top = 60), status = {
-                    ConnectivityWidget(state, Modifier.testTag("status"))
-                }) {
-                    val inset = LocalToolbarStatusBarInset.current
-                    SideEffect { childInset = inset }
-                    Box(Modifier.height(64.dp).testTag("toolbar")) { Text("Route toolbar") }
-                }
+            HomeContentLayout(true, status = { Text("Connection") }) {
+                val hasSlot = LocalToolbarTopContent.current != null
+                SideEffect { hasStatusSlot = hasSlot }
+                Text("Route", Modifier.testTag("route"))
             }
         }
+        // When
+        val route = compose.onNodeWithTag("route").fetchSemanticsNode().boundsInRoot
+        // Then
+        assertTrue(hasStatusSlot)
+        assertEquals(0f, route.top)
+        compose.onNodeWithText("Connection").assertDoesNotExist()
     }
 
     @Test
-    fun `given native home monitoring, indicator is enabled, expected badge below system area and toolbar below badge`() {
+    fun `given native home monitoring, route consumes status, expected one badge inside route chrome`() {
         // Given
         render(true, ConnectivityState.Connected())
         // When
         val badge = compose.onNodeWithText(Localization.string("status_connected"))
             .fetchSemanticsNode().boundsInRoot
-        val toolbar = compose.onNodeWithTag("toolbar").fetchSemanticsNode().boundsInRoot
+        val route = compose.onNodeWithTag("route").fetchSemanticsNode().boundsInRoot
+        val title = compose.onNodeWithText("Title").fetchSemanticsNode().boundsInRoot
         // Then
-        assertTrue(badge.top >= 60f)
-        assertTrue(toolbar.top >= badge.bottom)
-        assertEquals(0.dp, childInset)
+        assertEquals(0f, route.top)
+        assertTrue(badge.top >= route.top)
+        assertTrue(title.top >= badge.bottom)
+        compose.onAllNodesWithText(Localization.string("status_connected")).assertCountEquals(1)
     }
 
     @Test
-    fun `given native home monitoring, indicator is disabled, expected one safe area without empty status gap`() {
+    fun `given native home monitoring, status toggles off then on, expected route origin stays fixed and badge is restored once`() {
         // Given
-        render(true, ConnectivityState.Connected(false))
+        val isEnabled = mutableStateOf(true)
+        Localization.setLanguageCode("en")
+        compose.setContent {
+            MaterialTheme {
+                HomeContentLayout(
+                    true,
+                    status = { ConnectivityWidget(ConnectivityState.Connected(isEnabled.value)) }) {
+                    Column(Modifier.fillMaxWidth().testTag("route")) {
+                        LocalToolbarTopContent.current?.invoke()
+                        Text("Title")
+                    }
+                }
+            }
+        }
         // When
-        val toolbar = compose.onNodeWithTag("toolbar").fetchSemanticsNode().boundsInRoot
+        compose.runOnIdle { isEnabled.value = false }
         // Then
-        assertEquals(60f, toolbar.top)
         compose.onNodeWithText(Localization.string("status_connected")).assertDoesNotExist()
-        assertEquals(0.dp, childInset)
+        assertEquals(0f, compose.onNodeWithTag("route").fetchSemanticsNode().boundsInRoot.top)
+        compose.runOnIdle { isEnabled.value = true }
+        compose.onAllNodesWithText(Localization.string("status_connected")).assertCountEquals(1)
+        assertEquals(0f, compose.onNodeWithTag("route").fetchSemanticsNode().boundsInRoot.top)
     }
 
     @Test
-    fun `given Android home monitoring, outer scaffold owns system inset, expected no duplicate safe-area padding`() {
+    fun `given Android home monitoring, shell renders status, expected badge above route without native slot`() {
         // Given
-        render(false, ConnectivityState.Disconnected())
+        var hasNativeSlot = true
+        render(false, ConnectivityState.Disconnected()) { hasNativeSlot = it }
         // When
-        val status = compose.onNodeWithTag("status").fetchSemanticsNode().boundsInRoot
+        val badge = compose.onNodeWithText(Localization.string("status_disconnected"))
+            .fetchSemanticsNode().boundsInRoot
+        val route = compose.onNodeWithTag("route").fetchSemanticsNode().boundsInRoot
         // Then
-        assertEquals(0f, status.top)
-        assertEquals(null, childInset)
+        assertFalse(hasNativeSlot)
+        assertTrue(route.top >= badge.bottom)
         compose.onNodeWithText(Localization.string("status_disconnected")).assertIsDisplayed()
     }
 
     @Test
-    fun `given standalone route layout, monitoring is absent, expected toolbar keeps its own native inset`() {
+    fun `given standalone route layout, status is disabled, expected no status slot or extra top space`() {
         // Given
-        render(false, ConnectivityState.Uninitialized(false))
+        var hasNativeSlot = true
+        render(false, ConnectivityState.Uninitialized(false)) { hasNativeSlot = it }
         // When
-        val toolbar = compose.onNodeWithTag("toolbar").fetchSemanticsNode().boundsInRoot
+        val route = compose.onNodeWithTag("route").fetchSemanticsNode().boundsInRoot
         // Then
-        assertEquals(0f, toolbar.top)
-        assertEquals(null, childInset)
+        assertFalse(hasNativeSlot)
+        assertEquals(0f, route.top)
+        compose.onNodeWithText(Localization.string("status_communicating")).assertDoesNotExist()
+    }
+
+    /**
+     * Renders the real badge in the shell's status slot and lets the route consume native chrome.
+     *
+     * @param hasNativeToolbar Whether the route owns the status slot.
+     * @param state Provider status and monitoring visibility.
+     * @param onSlotObserved Receives whether the route can consume a native status slot.
+     *
+     * @author Dmitriy Moroz
+     */
+    private fun render(
+        hasNativeToolbar: Boolean,
+        state: ConnectivityState,
+        onSlotObserved: (Boolean) -> Unit = {}
+    ) {
+        Localization.setLanguageCode("en")
+        compose.setContent {
+            MaterialTheme {
+                HomeContentLayout(hasNativeToolbar, status = { ConnectivityWidget(state) }) {
+                    val status = LocalToolbarTopContent.current
+                    SideEffect { onSlotObserved(status != null) }
+                    Column(Modifier.fillMaxWidth().testTag("route")) {
+                        status?.invoke()
+                        Text("Title")
+                    }
+                }
+            }
+        }
     }
 }

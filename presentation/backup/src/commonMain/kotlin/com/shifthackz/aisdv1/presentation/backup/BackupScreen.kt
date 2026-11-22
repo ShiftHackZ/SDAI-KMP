@@ -34,10 +34,12 @@ import kotlinx.coroutines.flow.drop
 
 /**
  * Hosts reusable backup content with configuration-aligned chrome and operation dialogs.
+ *
  * @param mode Settings tabs or first-launch recovery context.
  * @param state Nonsecret inventory, selection and operation feedback.
  * @param processIntent Caller-owned MVI event sink.
  * @param modifier Root screen placement.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

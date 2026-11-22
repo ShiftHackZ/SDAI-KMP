@@ -30,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
@@ -63,7 +65,11 @@ import platform.UIKit.accessibilityElementsHidden
 private val LocalToolbarOverlap = staticCompositionLocalOf<MutableState<Boolean>?> { null }
 private val LocalToolbarUnderlap = staticCompositionLocalOf { false }
 
-/** Lets the iOS route toolbar paint and blur its own status area. @author Dmitriy Moroz */
+/**
+ * Lets the iOS route toolbar paint and blur its own status area.
+ *
+ * @author Dmitriy Moroz
+ */
 actual val isPlatformToolbarNative: Boolean = true
 
 /**
@@ -159,9 +165,11 @@ actual fun PlatformTopAppBar(
         return
     }
     val density = LocalDensity.current
-    val topPixels = LocalToolbarStatusBarInset.current?.let { with(density) { it.roundToPx() } }
-        ?: WindowInsets.statusBars.getTop(density)
-    val height = 64.dp + with(LocalDensity.current) { topPixels.toDp() } + bottomContentHeight
+    val topPixels = WindowInsets.statusBars.getTop(density)
+    val topContent = LocalToolbarTopContent.current
+    var topContentPixels by remember { mutableStateOf(0) }
+    val height =
+        64.dp + with(density) { (topPixels + topContentPixels).toDp() } + bottomContentHeight
     val bounds = modifier.fillMaxWidth().height(height)
     val isObscured = LocalToolbarObscured.current
     val hiddenFraction by animateFloatAsState(
@@ -176,13 +184,16 @@ actual fun PlatformTopAppBar(
     val isScrolled = LocalToolbarUnderlap.current && LocalToolbarOverlap.current?.value == true
     val colors = MaterialTheme.colorScheme
     val nativeContent = rememberThemedNativeContent {
-        Column {
+        Column(Modifier.padding(top = with(density) { topPixels.toDp() })) {
+            Box(Modifier.fillMaxWidth().onSizeChanged { topContentPixels = it.height }) {
+                topContent?.invoke()
+            }
             CenterAlignedTopAppBar(
                 modifier = Modifier.padding(horizontal = 12.dp),
                 title = title,
                 navigationIcon = navigationIcon,
                 actions = actions,
-                windowInsets = WindowInsets(0, topPixels, 0, 0),
+                windowInsets = WindowInsets(0, 0, 0, 0),
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
             if (bottomContentHeight > 0.dp) {
@@ -222,6 +233,7 @@ actual fun PlatformTopAppBar(
 /**
  * Synchronizes toolbar overlap from the foreground scroll owner, including restored positions.
  * Retained pager previews cannot replace the active page's blur state.
+ *
  * @param isScrolled Whether the owning scroll container can move toward its start.
  * @author Dmitriy Moroz
  */

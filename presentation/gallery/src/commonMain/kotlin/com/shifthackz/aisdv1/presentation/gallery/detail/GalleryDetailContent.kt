@@ -5,6 +5,7 @@ package com.shifthackz.aisdv1.presentation.gallery.detail
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,7 +63,10 @@ fun GalleryDetailScreenContent(
             topBar = {
                 PlatformTopAppBar(
                     title = {
-                        Text(Localization.string("title_gallery_details"))
+                        Text(
+                            Localization.string("title_gallery_details"),
+                            style = platformToolbarTitleStyle(MaterialTheme.typography.titleLarge),
+                        )
                     },
                     navigationIcon = {
                         ToolbarBackButton(

@@ -13,7 +13,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Checks tab-dependent sharing payloads through the production toolbar action.
+/**
+ * Checks tab-dependent sharing payloads through the production toolbar action.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)

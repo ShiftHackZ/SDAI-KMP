@@ -13,8 +13,10 @@ import kotlinx.cinterop.ExperimentalForeignApi
 
 /**
  * Keeps native child controls inside their animated viewport, including their glass backgrounds.
+ *
  * @param modifier Measured bounds of the clipping viewport.
  * @param content Control group retaining its current app appearance.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

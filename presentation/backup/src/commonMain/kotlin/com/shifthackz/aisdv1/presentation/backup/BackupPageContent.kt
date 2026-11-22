@@ -16,6 +16,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
 
 /**
  * Keeps each pager page's vertical scroll independent while reusing dedicated create/restore content.
+ *
  * @param isRestore Whether this page selects and restores an existing backup.
  * @param page Independent inventory and checkbox selection for the displayed operation.
  * @param isEnabled Whether native document and selection actions can currently run.
@@ -23,6 +24,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
  * @param processIntent Caller-owned selection and file actions.
  * @param modifier Placement within the pager or first-launch content area.
  * @param canReportToolbarScroll Whether this is the active pager page controlling toolbar overlap.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

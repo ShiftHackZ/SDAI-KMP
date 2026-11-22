@@ -25,7 +25,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Checks configuration navigation and provider-specific help from the reusable generation card.
+/**
+ * Checks configuration navigation and provider-specific help from the reusable generation card.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -35,9 +37,12 @@ class CurrentProviderCardTest {
     val compose = createComposeRule()
     private var requests = 0
 
-    /** Renders a selected provider under its declared platform.
+    /**
+     * Renders a selected provider under its declared platform.
+     *
      * @param source Current provider.
      * @param platform Platform selecting local descriptions and artwork.
+     *
      * @author Dmitriy Moroz
      */
     private fun render(source: ServerSource, platform: Platform) {

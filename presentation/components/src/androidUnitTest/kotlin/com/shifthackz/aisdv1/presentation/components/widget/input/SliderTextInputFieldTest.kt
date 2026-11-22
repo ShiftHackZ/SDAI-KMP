@@ -27,7 +27,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Guards numeric drafts against accidental application and stale slider feedback.
+/**
+ * Guards numeric drafts against accidental application and stale slider feedback.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -38,7 +40,9 @@ class SliderTextInputFieldTest {
     private var value by mutableFloatStateOf(2f)
     private val applied = mutableListOf<Float>()
 
-    /** Renders the production editor with an owner that accepts applied values.
+    /**
+     * Renders the production editor with an owner that accepts applied values.
+     *
      * @author Dmitriy Moroz
      */
     private fun render() {

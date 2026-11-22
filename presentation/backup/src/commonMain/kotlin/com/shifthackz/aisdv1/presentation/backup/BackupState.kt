@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupRestoreResult
 
 /**
  * Nonsecret backup UI state. Archive bytes and provider credential values never enter this model.
+ *
  * @param create Create inventory and choices.
  * @param restore Restore summary and choices.
  * @param isRestoreTab Current tab, or true in first-launch restore-only mode.
@@ -23,6 +24,7 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupRestoreResult
  * @param hasExported Whether native document export actually completed.
  * @param hasPendingSession Whether unfinished restore intent owns the staged archive.
  * @param isRestoreSelectionLocked Whether displayed choices are bound to a submitted or completed restore operation.
+ *
  * @author Dmitriy Moroz
  */
 data class BackupState(

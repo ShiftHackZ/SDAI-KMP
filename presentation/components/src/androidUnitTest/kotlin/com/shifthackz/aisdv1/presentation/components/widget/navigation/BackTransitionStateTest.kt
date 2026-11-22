@@ -11,7 +11,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Exercises real composition-owned animations and navigation dispatch at their frame boundaries.
+/**
+ * Exercises real composition-owned animations and navigation dispatch at their frame boundaries.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)

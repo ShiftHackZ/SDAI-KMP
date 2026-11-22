@@ -26,7 +26,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Protects help-only gestures from invoking destructive or navigational primary actions.
+/**
+ * Protects help-only gestures from invoking destructive or navigational primary actions.
+ *
  * @author Dmitriy Moroz
  */
 @RunWith(RobolectricTestRunner::class)
@@ -36,7 +38,9 @@ class ContextualHelpTest {
     val compose = createComposeRule()
     private var calls = 0
 
-    /** Renders the production help wrapper with a real shared control.
+    /**
+     * Renders the production help wrapper with a real shared control.
+     *
      * @author Dmitriy Moroz
      */
     private fun render() {

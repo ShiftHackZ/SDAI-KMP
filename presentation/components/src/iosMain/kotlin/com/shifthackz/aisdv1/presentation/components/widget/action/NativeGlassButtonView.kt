@@ -2,6 +2,7 @@
 
 package com.shifthackz.aisdv1.presentation.components.widget.action
 
+import androidx.compose.ui.geometry.Rect
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGRectInset
 import platform.CoreGraphics.CGRectMake
@@ -13,7 +14,10 @@ import platform.UIKit.UIImage
 import platform.UIKit.UIUserInterfaceStyle.UIUserInterfaceStyleDark
 import platform.UIKit.UIUserInterfaceStyle.UIUserInterfaceStyleLight
 import platform.UIKit.UIView
+import platform.UIKit.UIBezierPath
 import platform.UIKit.isAccessibilityElement
+import platform.QuartzCore.CAShapeLayer
+import platform.QuartzCore.CATransaction
 
 /**
  * Fills the Compose interop cutout independently of the button's continuous glass outline.
@@ -25,6 +29,7 @@ import platform.UIKit.isAccessibilityElement
  */
 internal class NativeGlassButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0)) {
     private val button = UIButton(frame = CGRectMake(0.0, 0.0, 0.0, 0.0))
+    private val viewportMask = CAShapeLayer()
 
     init {
         userInteractionEnabled = false
@@ -38,6 +43,27 @@ internal class NativeGlassButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 
     override fun layoutSubviews() {
         super.layoutSubviews()
         button.setFrame(CGRectInset(bounds, 2.0, 2.0))
+    }
+
+    /**
+     * Clips an overlay to the visible part of its Compose scroll viewport. UIKit overlays do not
+     * inherit canvas clipping, so their native glyph and glass must share this explicit mask.
+     *
+     * @param bounds Visible rectangle relative to this view's origin, in UIKit points.
+     * @author Dmitriy Moroz
+     */
+    fun updateVisibleBounds(bounds: Rect) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        viewportMask.path = UIBezierPath.bezierPathWithRect(
+            CGRectMake(
+                bounds.left.toDouble(), bounds.top.toDouble(),
+                bounds.width.coerceAtLeast(0f).toDouble(),
+                bounds.height.coerceAtLeast(0f).toDouble(),
+            )
+        ).CGPath
+        layer.mask = viewportMask
+        CATransaction.commit()
     }
 
     /**

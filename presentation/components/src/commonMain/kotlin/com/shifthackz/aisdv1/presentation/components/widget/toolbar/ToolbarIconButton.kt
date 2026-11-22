@@ -59,9 +59,11 @@ fun ToolbarBackButton(
 
 /**
  * Reuses the back component for secondary generation routes and the drawer action for home tabs.
+ *
  * @param canNavigateBack Whether this toolbar belongs to a secondary route.
  * @param onClick Existing router action for the current route.
  * @param modifier Button placement.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
