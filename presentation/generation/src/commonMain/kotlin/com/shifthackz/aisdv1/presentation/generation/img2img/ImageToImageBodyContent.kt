@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -14,38 +16,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArtTrack
 import androidx.compose.material.icons.filled.Brush
-import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeviceUnknown
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.ServerSource
-import com.shifthackz.aisdv1.presentation.components.model.compactDisplayName
 import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.components.widget.image.rememberPreviewImage
-import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
+import com.shifthackz.aisdv1.presentation.components.widget.imageinput.ImageInputCard
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.source.CurrentProviderCard
+import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 
 /**
  * Explains why the selected provider cannot accept image-to-image requests.
@@ -127,6 +127,7 @@ internal fun ImageToImageBody(
     onInPaintClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isFormExpanded by rememberSaveable { mutableStateOf(true) }
     val listState = rememberLazyListState()
     val urlLauncher = rememberExternalUrlLauncher()
     val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
@@ -140,13 +141,27 @@ internal fun ImageToImageBody(
     val afterSlidersSection: @Composable () -> Unit = remember(denoisingStrength, processIntent) {
         { DenoisingStrengthSlider(denoisingStrength, processIntent) }
     }
+    ToolbarScrollObserver(listState.canScrollBackward)
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .verticalScrollbar(listState),
+            .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
         state = listState,
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp + LocalToolbarContentInset.current,
+            bottom = 16.dp
+        ),
     ) {
+        item(key = "generation-provider") {
+            CurrentProviderCard(
+                source = state.mode,
+                platform = state.platform,
+                onClick = { processIntent(ImageToImageIntent.ConfigureProvider) },
+                modifier = Modifier.padding(bottom = 16.dp),
+            )
+        }
         item(key = "generation-input-image") {
             BoxWithConstraints(Modifier.padding(bottom = 16.dp)) {
                 val edge = with(LocalDensity.current) { maxWidth.roundToPx() }
@@ -161,6 +176,8 @@ internal fun ImageToImageBody(
         }
         imageToImageFormItems(
             state = state,
+            isExpanded = isFormExpanded,
+            onToggleExpanded = { isFormExpanded = !isFormExpanded },
             strings = strings,
             promptChipTextFieldState = promptChipTextFieldState,
             negativePromptChipTextFieldState = negativePromptChipTextFieldState,
@@ -192,122 +209,27 @@ internal fun ImageInputSection(
     onInPaintClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = state.mode.compactDisplayName(state.platform),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.W600,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = strings.inputImage,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                if (state.pickingImage) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(28.dp),
-                        strokeWidth = 3.dp,
-                    )
-                }
-            }
-
-            if (image != null) {
-                SelectedImageInput(
-                    image = image,
-                    inPaint = if (state.sourceSupportsInPaint) {
-                        state.inPaint
-                    } else {
-                        ImageInPaintState()
-                    },
-                    strings = strings,
-                    enabled = !state.generating,
-                    inPaintVisible = state.sourceSupportsInPaint,
-                    onInPaintClick = onInPaintClick,
-                    onClearClick = { processIntent(ImageToImageIntent.ClearImageInput) },
-                )
-            } else {
-                EmptyImageInputActions(
-                    strings = strings,
-                    enabled = !state.pickingImage && !state.generating,
-                    onGalleryClick = { processIntent(ImageToImageIntent.PickGallery) },
-                    onCameraClick = { processIntent(ImageToImageIntent.PickCamera) },
-                    onRandomClick = { processIntent(ImageToImageIntent.PickRandom) },
-                )
-            }
-        }
-    }
-}
-
-/**
- * Offers gallery, camera and random-gallery acquisition when no source preview is available.
- *
- * @param strings Localized acquisition labels.
- * @param enabled Whether another acquisition/generation operation permits input changes.
- * @param onGalleryClick Requests native photo selection.
- * @param onCameraClick Requests native camera capture.
- * @param onRandomClick Requests a random saved gallery image.
- * @param modifier Layout modifiers for the action group.
- *
- * @author Dmitriy Moroz
- */
-@Composable
-internal fun EmptyImageInputActions(
-    strings: ImageToImageStrings,
-    enabled: Boolean,
-    onGalleryClick: () -> Unit,
-    onCameraClick: () -> Unit,
-    onRandomClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ImageInputCard(
+        isPickingImage = state.pickingImage,
+        isEnabled = !state.pickingImage && !state.generating,
+        hasImage = state.imageBase64.isNotBlank(),
+        onGalleryClick = { processIntent(ImageToImageIntent.PickGallery) },
+        onCameraClick = { processIntent(ImageToImageIntent.PickCamera) },
+        onRandomClick = { processIntent(ImageToImageIntent.PickRandom) },
+        onHistoryImageSelected = { processIntent(ImageToImageIntent.ApplyImageInput(it)) },
         modifier = modifier,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            ImagePickerTileButton(
-                modifier = Modifier.weight(1f),
-                enabled = enabled,
-                icon = Icons.Default.Image,
-                text = strings.pickGallery,
-                onClick = onGalleryClick,
-            )
-            ImagePickerTileButton(
-                modifier = Modifier.weight(1f),
-                enabled = enabled,
-                icon = Icons.Default.Camera,
-                text = strings.pickCamera,
-                onClick = onCameraClick,
+        if (image != null) {
+            SelectedImageInput(
+                image = image,
+                inPaint = if (state.sourceSupportsInPaint) state.inPaint else ImageInPaintState(),
+                strings = strings,
+                enabled = !state.pickingImage && !state.generating,
+                inPaintVisible = state.sourceSupportsInPaint,
+                onInPaintClick = onInPaintClick,
+                onClearClick = { processIntent(ImageToImageIntent.ClearImageInput) },
             )
         }
-        ImagePickerButton(
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            icon = Icons.Default.ArtTrack,
-            text = strings.pickRandom,
-            onClick = onRandomClick,
-        )
     }
 }
 
@@ -359,7 +281,7 @@ internal fun SelectedImageInput(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                    enabled = enabled,
+                    isEnabled = enabled,
                     onClick = onInPaintClick,
                 ) {
                     Icon(
@@ -378,7 +300,7 @@ internal fun SelectedImageInput(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
-                enabled = enabled,
+                isEnabled = enabled,
                 onClick = onClearClick,
             ) {
                 Icon(

@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -117,8 +117,8 @@ private fun HiresOption(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Switch(
-                    checked = config.enabled,
+                PlatformSwitch(
+                    isChecked = config.enabled,
                     onCheckedChange = { onConfigChange(config.copy(enabled = it)) },
                 )
                 Text(
@@ -158,8 +158,8 @@ private fun ADetailerOption(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Switch(
-                    checked = config.enabled,
+                PlatformSwitch(
+                    isChecked = config.enabled,
                     onCheckedChange = { onConfigChange(config.copy(enabled = it)) },
                 )
                 Text(
@@ -217,11 +217,11 @@ private fun ADetailerMissingContent(
                     text = Localization.string("action_install_instructions"),
                 )
             }
-            Button(
+            PrimaryButton(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 4.dp),
-                enabled = !refreshing,
+                isEnabled = !refreshing,
                 onClick = onRefreshClick,
             ) {
                 if (refreshing) {

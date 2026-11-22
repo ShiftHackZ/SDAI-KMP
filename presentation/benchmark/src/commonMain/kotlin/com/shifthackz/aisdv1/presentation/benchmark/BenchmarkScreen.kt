@@ -2,6 +2,13 @@
 
 package com.shifthackz.aisdv1.presentation.benchmark
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,15 +36,12 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,7 +81,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
 import org.koin.core.parameter.parametersOf
 
 /**
- * Renders the benchmark screen with its Koin-provided ViewModel.
+ * Connects device benchmark results and run/cancel actions to the retained benchmark ViewModel.
  *
  * @param modifier Compose modifier applied to the rendered UI.
  * @param router navigation router used by the screen.
@@ -107,11 +111,11 @@ fun BenchmarkScreen(
 }
 
 /**
- * Renders benchmark screen content.
+ * Presents device capabilities, provider recommendations and benchmark progress with run/cancel actions.
  *
  * @param modifier Compose modifier applied to the rendered UI.
- * @param state state rendered or processed by the component.
- * @param processIntent callback for benchmark actions.
+ * @param state Device information, measured results, progress and any benchmark failure.
+ * @param processIntent Requests benchmark execution, cancellation, retry or navigation.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -121,27 +125,26 @@ fun BenchmarkScreenContent(
     processIntent: (BenchmarkIntent) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier,
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { processIntent(BenchmarkIntent.NavigateBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = Localization.string("action_back"),
-                        )
-                    }
+                    ToolbarBackButton(
+                        onClick = { processIntent(BenchmarkIntent.NavigateBack) },
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack
+                    )
                 },
                 title = {
                     Text(
                         text = Localization.string("title_benchmark"),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                     )
                 },
                 actions = {
-                    IconButton(
-                        enabled = state.latestResult != null && !state.running,
+                    ToolbarIconButton(
+                        isEnabled = state.latestResult != null && !state.running,
                         onClick = { processIntent(BenchmarkIntent.ShareResults) },
                     ) {
                         Icon(
@@ -154,7 +157,7 @@ fun BenchmarkScreenContent(
             )
         },
         bottomBar = {
-            Button(
+            PrimaryButton(
                 modifier = Modifier
                     .windowInsetsPadding(persistentBottomBarWindowInsets())
                     .fillMaxWidth()
@@ -162,7 +165,7 @@ fun BenchmarkScreenContent(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp, top = 8.dp),
-                enabled = !state.running,
+                isEnabled = !state.running,
                 onClick = { processIntent(BenchmarkIntent.RunBenchmark) },
             ) {
                 Icon(
@@ -185,14 +188,15 @@ fun BenchmarkScreenContent(
                 .padding(paddingValues)
                 .fillMaxSize(),
         ) {
+            ToolbarScrollObserver(listState.canScrollBackward)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScrollbar(listState),
+                    .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
                 state = listState,
                 contentPadding = PaddingValues(
                     start = 16.dp,
-                    top = 16.dp,
+                    top = 16.dp + LocalToolbarContentInset.current,
                     end = 16.dp,
                     bottom = 32.dp,
                 ),

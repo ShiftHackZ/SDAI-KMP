@@ -10,20 +10,15 @@ import com.shifthackz.aisdv1.presentation.backup.BackupEffect
 import com.shifthackz.aisdv1.presentation.backup.platform.rememberBackupDocumentLauncher
 
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
-import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.core.navigation.AppRoute
 import com.shifthackz.aisdv1.core.navigation.RootAppRouter
@@ -50,8 +45,6 @@ import com.shifthackz.aisdv1.presentation.report.ReportScreen
 import com.shifthackz.aisdv1.presentation.settings.SettingsScreen
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupViewModel
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupContent
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 import com.shifthackz.aisdv1.presentation.configuration.setup.platform.rememberServerSetupEffectHandler
 import com.shifthackz.aisdv1.presentation.splash.SplashScreenContent
 import com.shifthackz.aisdv1.presentation.splash.SplashViewModel
@@ -60,6 +53,8 @@ import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageContent
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageViewModel
 import com.shifthackz.aisdv1.presentation.web.WebUiScreen
 import com.shifthackz.aisdv1.presentation.components.theme.global.RetainedHomeRouteTheme
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.ProgrammaticPager
+import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
 import com.shifthackz.aisdv1.presentation.components.widget.dialog.ErrorDialog
 import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
 import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
@@ -114,101 +109,65 @@ internal fun HomeRoutesScaffold(
         shouldShowHomeChrome = shouldShowHomeChrome,
         modifier = modifier,
     ) { contentModifier ->
-        Box(modifier = contentModifier.fillMaxSize()) {
-            HomeRouteSlot(
-                route = AppRoute.TextToImage,
-                activeRoute = activeRoute,
-                renderedRoutes = renderedRoutes,
-            ) { modifier ->
-                MviComponent(viewModel = textToImageViewModel) { state, processIntent ->
-                    TextToImageContent(
-                        modifier = modifier,
-                        state = state,
-                        processIntent = processIntent,
-                        useDrawerNavigation = true,
-                        performanceOverlay = {
-                            val history = remember(observePerformance) { observePerformance() }
-                            GenerationPerformanceOverlay(history)
-                        },
-                    )
-                }
-            }
-            HomeRouteSlot(
-                route = AppRoute.ImageToImage,
-                activeRoute = activeRoute,
-                renderedRoutes = renderedRoutes,
-            ) { modifier ->
-                MviComponent(viewModel = imageToImageViewModel) { state, processIntent ->
-                    ImageToImageContent(
-                        modifier = modifier,
-                        state = state,
-                        processIntent = processIntent,
-                        useDrawerNavigation = true,
-                        performanceOverlay = {
-                            val history = remember(observePerformance) { observePerformance() }
-                            GenerationPerformanceOverlay(history)
-                        },
-                    )
-                }
-            }
-            HomeRouteSlot(
-                route = AppRoute.Gallery,
-                activeRoute = activeRoute,
-                renderedRoutes = renderedRoutes,
-            ) { modifier ->
-                GalleryScreen(
-                    modifier = modifier,
-                    galleryRouter = router,
-                    backHandlerEnabled = activeRoute == AppRoute.Gallery,
-                )
-            }
-            HomeRouteSlot(
-                route = AppRoute.Settings,
-                activeRoute = activeRoute,
-                renderedRoutes = renderedRoutes,
-            ) { modifier ->
-                SettingsScreen(
-                    modifier = modifier,
-                    router = router,
-                )
-            }
-        }
-    }
-}
+        val pages =
+            listOf(AppRoute.TextToImage, AppRoute.ImageToImage, AppRoute.Gallery, AppRoute.Settings)
+        ProgrammaticPager(
+            selectedPage = pages.indexOf(activeRoute).coerceAtLeast(0),
+            pageCount = pages.size,
+            modifier = contentModifier.fillMaxSize(),
+        ) { page ->
+            val route = pages[page]
+            if (route in renderedRoutes) RetainedHomeRouteTheme(LocalMviVisibility.current) {
+                when (route) {
+                    AppRoute.TextToImage -> {
+                        MviComponent(viewModel = textToImageViewModel) { state, processIntent ->
+                            TextToImageContent(
+                                modifier = Modifier.fillMaxSize(),
+                                state = state,
+                                processIntent = processIntent,
+                                useDrawerNavigation = true,
+                                performanceOverlay = {
+                                    val history =
+                                        remember(observePerformance) { observePerformance() }
+                                    GenerationPerformanceOverlay(history)
+                                },
+                            )
+                        }
+                    }
 
-/**
- * Keeps previously rendered home tabs alive while hiding inactive tabs at zero size.
- * Hidden tabs retain their last visible Material theme so palette edits do not reconstruct
- * invisible forms; the current root theme is applied as soon as a tab becomes visible.
- *
- * @param route Home route represented by this slot.
- * @param activeRoute Currently visible home route.
- * @param renderedRoutes Home routes already instantiated by the root route host.
- * @param modifier Layout modifiers for this retained tab container.
- * @param content Tab content receiving visibility-dependent sizing while retaining its composition.
- *
- * @author Dmitriy Moroz
- */
-@Composable
-internal fun HomeRouteSlot(
-    route: AppRoute,
-    activeRoute: AppRoute,
-    renderedRoutes: List<AppRoute>,
-    modifier: Modifier = Modifier,
-    content: @Composable (Modifier) -> Unit,
-) {
-    if (route !in renderedRoutes) return
-    val isVisible = route == activeRoute
-    Box(
-        modifier = if (isVisible) {
-            modifier.fillMaxSize()
-        } else {
-            modifier.requiredSize(0.dp)
-        },
-    ) {
-        CompositionLocalProvider(LocalMviVisibility provides isVisible) {
-            RetainedHomeRouteTheme(isVisible = isVisible) {
-                content(Modifier.fillMaxSize())
+                    AppRoute.ImageToImage -> {
+                        MviComponent(viewModel = imageToImageViewModel) { state, processIntent ->
+                            ImageToImageContent(
+                                modifier = Modifier.fillMaxSize(),
+                                state = state,
+                                processIntent = processIntent,
+                                useDrawerNavigation = true,
+                                performanceOverlay = {
+                                    val history =
+                                        remember(observePerformance) { observePerformance() }
+                                    GenerationPerformanceOverlay(history)
+                                },
+                            )
+                        }
+                    }
+
+                    AppRoute.Gallery -> {
+                        GalleryScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            galleryRouter = router,
+                            backHandlerEnabled = activeRoute == AppRoute.Gallery,
+                        )
+                    }
+
+                    AppRoute.Settings -> {
+                        SettingsScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            router = router,
+                        )
+                    }
+
+                    else -> Unit
+                }
             }
         }
     }
@@ -267,9 +226,6 @@ internal fun OverlayRouteContent(
                 },
             )
             DisposableEffect(viewModel) { onDispose { viewModel.onRouteDisposed() } }
-            RootBackHandler(enabled = true) {
-                if (mode != BackupScreenMode.WELCOME) viewModel.processIntent(BackupIntent.NavigateBack)
-            }
             MviComponent(viewModel = viewModel, processEffect = { effect ->
                 when (effect) {
                     BackupEffect.OpenDocument -> launcher.open()
@@ -353,10 +309,6 @@ internal fun OverlayRouteContent(
                 viewModel = setupViewModel,
                 processEffect = effectHandler,
             ) { state, processIntent ->
-                RootBackHandler(
-                    enabled = state.showBackNavArrow || state.step == ServerSetupState.Step.CONFIGURE,
-                    onBack = { processIntent(ServerSetupIntent.NavigateBack) },
-                )
                 ServerSetupContent(
                     state = state,
                     processIntent = processIntent,

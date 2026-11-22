@@ -1,11 +1,11 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.OpenAiSize
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.generation.model.GenerationModal
 import com.shifthackz.aisdv1.presentation.generation.model.PromptTagEditRequest
-import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationAspectRatio
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -59,6 +59,20 @@ internal class ImageToImageIntentProcessor(
             ImageToImageIntent.PickCamera -> pickImage(ImageToImagePickSource.Camera)
             ImageToImageIntent.PickGallery -> pickImage(ImageToImagePickSource.Gallery)
             ImageToImageIntent.PickRandom -> pickRandomImage()
+            is ImageToImageIntent.ApplyImageInput -> {
+                updateState { state ->
+                    if (state.generating || state.pickingImage || intent.base64.isBlank()) state
+                    else state.copy(
+                        imageBase64 = intent.base64,
+                        inPaint = ImageInPaintState(),
+                        results = emptyList(),
+                        screenModal = GenerationModal.None,
+                        error = null,
+                        message = null,
+                    )
+                }
+            }
+
             ImageToImageIntent.ClearImageInput -> updateState {
                 it.copy(
                     imageBase64 = "",

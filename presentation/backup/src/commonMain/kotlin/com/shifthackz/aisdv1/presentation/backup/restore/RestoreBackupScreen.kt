@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +21,7 @@ import com.shifthackz.aisdv1.presentation.backup.component.BackupSelectionList
 
 /**
  * Dedicated restore content shared by settings tabs and first-launch recovery.
+ *
  * @param state Inspected file summary and category choices.
  * @param isEnabled Whether a new file can be selected.
  * @param canEditSelection Whether choices are still editable before a journal-bound restore.
@@ -45,7 +46,7 @@ internal fun RestoreBackupScreen(
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             OutlinedButton(
                 onClick = { processIntent(BackupIntent.ChooseFile) },
-                enabled = isEnabled,
+                isEnabled = isEnabled,
                 modifier = Modifier.heightIn(min = 48.dp),
             ) { Text(Localization.string("backup_choose_file")) }
         }

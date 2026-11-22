@@ -1,10 +1,10 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.input.TextFieldValue
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
-import com.shifthackz.aisdv1.presentation.generation.modal.history.InputHistoryBottomSheet
+import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryBottomSheet
 import com.shifthackz.aisdv1.presentation.components.model.ExtraType
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 import kotlin.math.roundToInt

@@ -5,7 +5,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.input.DropdownTextFi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Switch
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -162,8 +162,8 @@ private fun GenerationInputOtherAdvancedOption(
                     .padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Switch(
-                    checked = state.isFalAiSyncEnabled,
+                PlatformSwitch(
+                    isChecked = state.isFalAiSyncEnabled,
                     onCheckedChange = {
                         onEvent(GenerationInputFormEvent.UpdateFalAiSyncMode(it))
                     },
@@ -188,8 +188,8 @@ private fun GenerationInputOtherAdvancedOption(
                         .padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Switch(
-                        checked = state.isNsfwEnabled,
+                    PlatformSwitch(
+                        isChecked = state.isNsfwEnabled,
                         onCheckedChange = { onEvent(GenerationInputFormEvent.UpdateNsfw(it)) },
                     )
                     Text(
@@ -213,8 +213,8 @@ private fun GenerationInputOtherAdvancedOption(
                         .padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Switch(
-                        checked = state.shouldRestoreFaces,
+                    PlatformSwitch(
+                        isChecked = state.shouldRestoreFaces,
                         onCheckedChange = {
                             onEvent(GenerationInputFormEvent.UpdateRestoreFaces(it))
                         },

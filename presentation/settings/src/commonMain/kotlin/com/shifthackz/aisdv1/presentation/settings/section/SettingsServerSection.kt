@@ -1,23 +1,5 @@
 package com.shifthackz.aisdv1.presentation.settings.section
 
-import androidx.compose.material.icons.filled.BrightnessLow
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountTree
-import androidx.compose.material.icons.filled.AutoFixNormal
-import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.DataUsage
-import androidx.compose.material.icons.filled.DeveloperMode
-import androidx.compose.material.icons.filled.DynamicForm
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.MiscellaneousServices
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.SettingsEthernet
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Tag
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +8,7 @@ import com.shifthackz.aisdv1.core.common.math.roundTo
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
+import com.shifthackz.aisdv1.presentation.settings.startIcon
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
 import com.shifthackz.aisdv1.presentation.settings.SettingsState
 import com.shifthackz.aisdv1.presentation.settings.label
@@ -75,7 +58,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.SettingsEthernet,
+                startIcon = row.startIcon,
                 text = text("settings_item_config"),
                 endValueText = state.serverSource.shortTitle().asUiText(),
                 onClick = { processIntent(SettingsIntent.NavigateConfiguration) },
@@ -86,7 +69,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Backup,
+                startIcon = row.startIcon,
                 text = text("backup_title"),
                 onClick = { processIntent(SettingsIntent.NavigateBackup) },
             )
@@ -96,7 +79,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Speed,
+                startIcon = row.startIcon,
                 text = text("settings_item_benchmark"),
                 textSuffixContent = { BetaBadge() },
                 onClick = { processIntent(SettingsIntent.NavigateBenchmark) },
@@ -108,7 +91,7 @@ internal fun SettingsServerSection(
                 modifier = itemModifier,
                 loading = isLoading,
                 enabled = false,
-                startIcon = Icons.Default.Circle,
+                startIcon = row.startIcon,
                 text = text("settings_item_stability_ai_credits"),
                 endValueText = state.stabilityAiCredits.roundTo(4).toString().asUiText(),
             )
@@ -118,7 +101,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Timer,
+                startIcon = row.startIcon,
                 text = text("settings_connection_timeout"),
                 endValueText = state.connectionTimeout.label().asUiText(),
                 onClick = { processIntent(SettingsIntent.PickConnectionTimeout) },
@@ -130,7 +113,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Timer,
+                startIcon = row.startIcon,
                 text = text("settings_generation_timeout"),
                 endValueText = state.generationRequestTimeout.label().asUiText(),
                 onClick = { processIntent(SettingsIntent.PickGenerationTimeout) },
@@ -141,7 +124,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.AutoFixNormal,
+                startIcon = row.startIcon,
                 text = text("settings_item_sd_model"),
                 endValueText = state.sdModelSelected.asUiText(),
                 onClick = { processIntent(SettingsIntent.SdModel.OpenChooser) },
@@ -152,7 +135,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.AccountTree,
+                startIcon = row.startIcon,
                 text = (Localization.string("settings_item_local_nnapi") +
                         if (state.localUseNNAPI) "*" else "").asUiText(),
                 isChecked = state.localUseNNAPI,
@@ -172,7 +155,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.MiscellaneousServices,
+                startIcon = row.startIcon,
                 text = text("settings_item_background_generation"),
                 textSuffixContent = { BetaBadge() },
                 isChecked = isBackgroundGenerationEnabled,
@@ -198,7 +181,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.DeveloperMode,
+                startIcon = row.startIcon,
                 text = text("title_debug_menu"),
                 onClick = { processIntent(SettingsIntent.NavigateDeveloperMode) },
             )
@@ -216,7 +199,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = state.loading,
-                startIcon = Icons.Default.Speed,
+                startIcon = row.startIcon,
                 text = text("settings_item_performance_overlay"),
                 isChecked = state.shouldShowPerformanceOverlay,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.PerformanceOverlay(it)) },
@@ -227,7 +210,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.BrightnessLow,
+                startIcon = row.startIcon,
                 text = (Localization.string("settings_item_dim_screen") +
                         if (isBackgroundGenerationEnabled) "*" else "").asUiText(),
                 isChecked = state.shouldDimScreen,
@@ -247,7 +230,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.Refresh,
+                startIcon = row.startIcon,
                 text = text("settings_item_monitor_connection"),
                 isChecked = state.monitorConnectivity,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.MonitorConnection(it)) },
@@ -259,7 +242,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.Save,
+                startIcon = row.startIcon,
                 text = (Localization.string("settings_item_auto_save") +
                         if (isBackgroundGenerationEnabled) "*" else "").asUiText(),
                 isChecked = state.autoSaveAiResults,
@@ -280,7 +263,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.Folder,
+                startIcon = row.startIcon,
                 text = text("settings_item_auto_save_media_store"),
                 isChecked = state.saveToMediaStore,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.SaveToMediaStore(it)) },
@@ -291,7 +274,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.Tag,
+                startIcon = row.startIcon,
                 text = text("settings_item_tagged_input"),
                 isChecked = state.formPromptTaggedInput,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.TaggedInput(it)) },
@@ -302,7 +285,7 @@ internal fun SettingsServerSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.DynamicForm,
+                startIcon = row.startIcon,
                 text = text("settings_item_advanced_form_default"),
                 isChecked = state.formAdvancedOptionsAlwaysShow,
                 onCheckedChange = {
@@ -320,7 +303,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Storage,
+                startIcon = row.startIcon,
                 text = text("settings_item_storage_usage"),
                 endValueText = state.storageUsageBytes
                     .takeIf { it > 0L }
@@ -337,7 +320,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.DataUsage,
+                startIcon = row.startIcon,
                 text = text("settings_item_network_usage"),
                 endValueText = state.networkUsageBytes
                     .takeIf { it > 0L }

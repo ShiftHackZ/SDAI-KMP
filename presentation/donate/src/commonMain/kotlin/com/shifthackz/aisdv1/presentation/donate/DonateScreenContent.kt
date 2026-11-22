@@ -2,9 +2,16 @@
 
 package com.shifthackz.aisdv1.presentation.donate
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,14 +28,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -85,26 +88,23 @@ fun DonateScreenContent(
     modifier: Modifier = Modifier,
     brandIcon: @Composable () -> Unit = {},
 ) {
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 title = {
                     Text(
                         text = strings.title,
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                     )
                 },
                 navigationIcon = {
-                    IconButton(
+                    ToolbarBackButton(
                         onClick = { processIntent(DonateIntent.NavigateBack) },
-                        content = {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = strings.backContentDescription,
-                            )
-                        },
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = strings.backContentDescription,
                     )
                 },
                 windowInsets = persistentTopAppBarWindowInsets(),
@@ -153,7 +153,7 @@ fun DonateScreenContent(
                     fontWeight = FontWeight.W300,
                     lineHeight = 17.sp,
                 )
-                Button(
+                PrimaryButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
@@ -180,11 +180,16 @@ fun DonateScreenContent(
                             .fadedEdge(gradientOffset = shadowHeight),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
+                        ToolbarScrollObserver(listState.canScrollBackward)
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .verticalScrollbar(listState),
+                                .verticalScrollbar(
+                                    listState,
+                                    topInset = LocalToolbarContentInset.current
+                                ),
                             state = listState,
+                            contentPadding = PaddingValues(top = LocalToolbarContentInset.current),
                         ) {
                             item {
                                 Text(

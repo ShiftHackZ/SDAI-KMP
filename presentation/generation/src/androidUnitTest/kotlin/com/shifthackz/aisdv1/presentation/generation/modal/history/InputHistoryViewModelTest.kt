@@ -2,17 +2,21 @@ package com.shifthackz.aisdv1.presentation.generation.modal.history
 
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.presentation.generation.mocks.toGalleryMetadata
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
-import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultPagedUseCase
 import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
-import kotlinx.coroutines.flow.flow
-import io.mockk.every
+import com.shifthackz.aisdv1.domain.usecase.generation.GetGenerationResultPagedUseCase
+import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryIntent
+import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryItemUi
+import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryState
+import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryViewModel
+import com.shifthackz.aisdv1.presentation.generation.mocks.toGalleryMetadata
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -20,7 +24,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InputHistoryViewModelTest {

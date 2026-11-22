@@ -2,6 +2,10 @@
 
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarNavigationButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,19 +16,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixNormal
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,25 +34,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.components.widget.source.CurrentProviderCard
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.GenerationBottomToolbar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.GenerationHistoryButton
+import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkWidget
 import com.shifthackz.aisdv1.presentation.generation.modal.GenerationModalRenderer
 import com.shifthackz.aisdv1.presentation.generation.modal.embedding.EmbeddingScreen
 import com.shifthackz.aisdv1.presentation.generation.modal.extras.ExtrasScreen
 import com.shifthackz.aisdv1.presentation.generation.modal.tag.EditTagDialog
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.GenerationBottomToolbar
-import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkWidget
 
 /**
  * Localized labels and provider capability explanations for image-to-image rendering.
  *
  * @param title Image-to-image toolbar heading.
- * @param pickGallery Action label for native photo selection.
- * @param pickCamera Action label for native camera capture.
- * @param pickRandom Action label for selecting a saved random gallery image.
  * @param clear Action label for removing the selected source.
  * @param configureProvider Action label for changing provider configuration.
  * @param generate Generation submission label.
  * @param generating Label shown during an active generation.
- * @param inputImage Heading of the source-image card.
  * @param inPaint Action label for opening mask editing.
  * @param sourceUnavailable Explanation when the selected source cannot generate from images.
  * @param unsupportedTitle Heading for the unsupported-provider state.
@@ -66,14 +63,10 @@ import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkW
  */
 data class ImageToImageStrings(
     val title: String = Localization.string("title_image_to_image"),
-    val pickGallery: String = Localization.string("action_image_picker_gallery"),
-    val pickCamera: String = Localization.string("action_image_picker_camera"),
-    val pickRandom: String = Localization.string("action_image_picker_random"),
     val clear: String = Localization.string("action_clear"),
     val configureProvider: String = Localization.string("action_change_configuration"),
     val generate: String = Localization.string("action_generate"),
     val generating: String = Localization.string("notification_running_title"),
-    val inputImage: String = Localization.string("title_input_image"),
     val inPaint: String = Localization.string("in_paint_title"),
     val sourceUnavailable: String = Localization.string("error_source_img2img_unsupported"),
     val unsupportedTitle: String = Localization.string("local_no_img2img_support_title"),
@@ -108,49 +101,29 @@ fun ImageToImageContent(
     val negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     var activeModal by remember { mutableStateOf<ImageToImagePanel?>(null) }
 
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier.fillMaxSize(),
         topBar = {
             Column {
-                CenterAlignedTopAppBar(
+                PlatformTopAppBar(
                     windowInsets = WindowInsets(0, 0, 0, 0),
                     navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                processIntent(
-                                    if (useDrawerNavigation) {
-                                        ImageToImageIntent.OpenDrawer
-                                    } else {
-                                        ImageToImageIntent.NavigateBack
-                                    },
-                                )
-                            },
-                        ) {
-                            Icon(
-                                imageVector = if (useDrawerNavigation) {
-                                    Icons.Default.Menu
-                                } else {
-                                    Icons.AutoMirrored.Filled.ArrowBack
-                                },
-                                contentDescription = null,
-                            )
-                        }
+                        ToolbarNavigationButton(
+                            canNavigateBack = !useDrawerNavigation,
+                            onClick = { processIntent(if (useDrawerNavigation) ImageToImageIntent.OpenDrawer else ImageToImageIntent.NavigateBack) },
+                        )
                     },
                     title = {
                         Text(
                             text = strings.title,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = platformToolbarTitleStyle(MaterialTheme.typography.titleLarge),
                         )
                     },
                     actions = {
-                        IconButton(
+                        GenerationHistoryButton(
                             onClick = { activeModal = ImageToImagePanel.History },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = null,
-                            )
-                        }
+                        )
                     },
                 )
                 BackgroundWorkWidget(
@@ -174,46 +147,53 @@ fun ImageToImageContent(
                     activeModal = ImageToImagePanel.Embeddings(prompt, negativePrompt)
                 },
             ) {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 16.dp),
-                    enabled = configureOnly || state.canGenerate,
-                    onClick = {
-                        if (configureOnly) {
-                            processIntent(ImageToImageIntent.ConfigureProvider)
-                        } else {
-                            flushPendingTaggedText(
-                                state = state,
-                                promptChipTextFieldState = promptChipTextFieldState,
-                                negativePromptChipTextFieldState = negativePromptChipTextFieldState,
-                                processIntent = processIntent,
-                            )
-                            processIntent(ImageToImageIntent.Generate)
-                        }
-                    },
+                ContextualHelp(
+                    title = if (configureOnly) strings.configureProvider else strings.generate,
+                    message = Localization.string(if (configureOnly) "settings_help_configuration" else "help_imagine"),
+                    titleStartIcon = if (configureOnly) null else Icons.Default.AutoFixNormal,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    if (state.generating) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                        )
-                    } else if (!configureOnly) {
-                        Icon(
-                            imageVector = Icons.Default.AutoFixNormal,
-                            contentDescription = null,
+                    PrimaryButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 16.dp),
+                        isEnabled = configureOnly || state.canGenerate,
+                        onClick = {
+                            if (configureOnly) {
+                                processIntent(ImageToImageIntent.ConfigureProvider)
+                            } else {
+                                flushPendingTaggedText(
+                                    state = state,
+                                    promptChipTextFieldState = promptChipTextFieldState,
+                                    negativePromptChipTextFieldState = negativePromptChipTextFieldState,
+                                    processIntent = processIntent,
+                                )
+                                processIntent(ImageToImageIntent.Generate)
+                            }
+                        },
+                    ) {
+                        if (state.generating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else if (!configureOnly) {
+                            Icon(
+                                imageVector = Icons.Default.AutoFixNormal,
+                                contentDescription = null,
+                            )
+                        }
+                        Text(
+                            modifier = Modifier.padding(start = 8.dp),
+                            text = when {
+                                configureOnly -> strings.configureProvider
+                                state.generating -> strings.generating
+                                else -> strings.generate
+                            },
                         )
                     }
-                    Text(
-                        modifier = Modifier.padding(start = 8.dp),
-                        text = when {
-                            configureOnly -> strings.configureProvider
-                            state.generating -> strings.generating
-                            else -> strings.generate
-                        },
-                    )
                 }
             }
         },
@@ -230,11 +210,18 @@ fun ImageToImageContent(
                         .size(56.dp),
                 )
             } else if (!state.sourceSupportsImageToImage) {
-                UnsupportedImageToImageBody(
-                    modifier = Modifier.fillMaxSize(),
-                    mode = state.mode,
-                    strings = strings,
-                )
+                Column(Modifier.fillMaxSize().padding(16.dp)) {
+                    CurrentProviderCard(
+                        source = state.mode,
+                        platform = state.platform,
+                        onClick = { processIntent(ImageToImageIntent.ConfigureProvider) },
+                    )
+                    UnsupportedImageToImageBody(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        mode = state.mode,
+                        strings = strings,
+                    )
+                }
             } else {
                 ImageToImageBody(
                     state = state,

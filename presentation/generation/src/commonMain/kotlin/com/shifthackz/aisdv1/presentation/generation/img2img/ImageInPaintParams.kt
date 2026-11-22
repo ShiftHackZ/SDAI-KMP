@@ -21,7 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Slider
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -81,7 +81,7 @@ internal fun BrushSizeSlider(
             }
         }
 
-        Slider(
+        PlatformSlider(
             modifier = Modifier.weight(1f),
             value = size.toFloat(),
             valueRange = IN_PAINT_BRUSH_SIZE_MIN.toFloat()..IN_PAINT_BRUSH_SIZE_MAX.toFloat(),
@@ -121,7 +121,7 @@ internal fun ImageInPaintParamsForm(
             modifier = Modifier.padding(top = 8.dp),
             text = Localization.string("hint_mask_blur", model.maskBlur),
         )
-        Slider(
+        PlatformSlider(
             value = model.maskBlur.toFloat(),
             valueRange = IN_PAINT_MASK_BLUR_MIN.toFloat()..IN_PAINT_MASK_BLUR_MAX.toFloat(),
             steps = abs(IN_PAINT_MASK_BLUR_MIN - IN_PAINT_MASK_BLUR_MAX) - 1,
@@ -182,7 +182,7 @@ internal fun ImageInPaintParamsForm(
             modifier = Modifier.padding(top = 8.dp),
             text = Localization.string("hint_only_masked_padding", model.onlyMaskedPaddingPx),
         )
-        Slider(
+        PlatformSlider(
             value = model.onlyMaskedPaddingPx.toFloat(),
             valueRange = IN_PAINT_MASK_PADDING_MIN.toFloat()..IN_PAINT_MASK_PADDING_MAX.toFloat(),
             steps = abs(IN_PAINT_MASK_PADDING_MIN - IN_PAINT_MASK_PADDING_MAX) - 1,

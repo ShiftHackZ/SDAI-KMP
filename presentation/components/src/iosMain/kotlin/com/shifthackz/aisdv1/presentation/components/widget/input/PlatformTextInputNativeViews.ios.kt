@@ -2,7 +2,6 @@
 
 package com.shifthackz.aisdv1.presentation.components.widget.input
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -180,7 +179,7 @@ internal class PlatformUITextView : UITextView(
 }
 
 /**
- * Converts SDAI data with `toUiKeyboardType`.
+ * Maps shared keyboard categories to UIKit input layouts, using the system default for other types.
  *
  * @author Dmitriy Moroz
  */
@@ -192,15 +191,3 @@ internal fun KeyboardType.toUiKeyboardType(): UIKeyboardType = when (this) {
     KeyboardType.Uri -> UIKeyboardTypeURL
     else -> UIKeyboardTypeDefault
 }
-
-/**
- * Converts SDAI data with `toUIColor`.
- *
- * @author Dmitriy Moroz
- */
-internal fun Color.toUIColor(): UIColor = UIColor.colorWithRed(
-    red = red.toDouble(),
-    green = green.toDouble(),
-    blue = blue.toDouble(),
-    alpha = alpha.toDouble(),
-)

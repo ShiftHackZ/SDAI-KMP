@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.presentation.backup
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,14 +12,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformTabBar
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformBackHandler
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.backup.dialog.BackupDialogs
 import com.shifthackz.aisdv1.presentation.backup.welcome.RestoreWelcomeScreen
@@ -33,13 +34,14 @@ import kotlinx.coroutines.flow.drop
 
 /**
  * Hosts reusable backup content with configuration-aligned chrome and operation dialogs.
+ *
  * @param mode Settings tabs or first-launch recovery context.
  * @param state Nonsecret inventory, selection and operation feedback.
  * @param processIntent Caller-owned MVI event sink.
  * @param modifier Root screen placement.
+ *
  * @author Dmitriy Moroz
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupScreen(
     mode: BackupScreenMode,
@@ -48,6 +50,14 @@ fun BackupScreen(
     modifier: Modifier = Modifier,
 ) {
     val isEnabled = !state.isBusy && !state.isPicking && !state.isExporting
+    PlatformBackHandler(
+        isEnabled = true,
+        canStartGesture = isEnabled && mode == BackupScreenMode.SETTINGS &&
+                !state.isFeedbackVisible && state.conflict == null,
+        onBack = {
+            if (mode != BackupScreenMode.WELCOME) processIntent(BackupIntent.NavigateBack)
+        },
+    )
     if (mode == BackupScreenMode.WELCOME) {
         RestoreWelcomeScreen(
             isEnabled = isEnabled,
@@ -82,28 +92,39 @@ fun BackupScreen(
         }
         val isFinished =
             if (state.isRestoreTab) state.result?.hasFailed == false else state.hasExported
-        Scaffold(
-            modifier = modifier,
+        PlatformScaffold(
+            canUnderlapToolbar = true, modifier = modifier,
             topBar = {
-                CenterAlignedTopAppBar(
+                PlatformTopAppBar(
                     title = {
                         Text(
                             Localization.string("backup_title"),
-                            style = MaterialTheme.typography.headlineMedium
+                            style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium)
                         )
                     },
                     navigationIcon = {
-                        IconButton(
+                        ToolbarBackButton(
                             onClick = { processIntent(BackupIntent.NavigateBack) },
-                            enabled = isEnabled
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Outlined.ArrowBack,
-                                Localization.string("action_back")
+                            isEnabled = isEnabled, icon = Icons.AutoMirrored.Outlined.ArrowBack
+                        )
+                    },
+                    windowInsets = persistentTopAppBarWindowInsets(),
+                    bottomContentHeight = if (mode == BackupScreenMode.SETTINGS) {
+                        if (isPlatformToolbarNative) 56.dp else 48.dp
+                    } else 0.dp,
+                    bottomContent = {
+                        if (mode == BackupScreenMode.SETTINGS) {
+                            PlatformTabBar(
+                                labels = listOf(
+                                    Localization.string("backup_create_tab"),
+                                    Localization.string("backup_restore_tab"),
+                                ),
+                                selectedIndex = selectedPage,
+                                onSelect = { processIntent(BackupIntent.SelectTab(it == 1)) },
+                                isEnabled = isEnabled,
                             )
                         }
                     },
-                    windowInsets = persistentTopAppBarWindowInsets(),
                 )
             },
             bottomBar = {
@@ -119,23 +140,6 @@ fun BackupScreen(
         ) { padding ->
             Column(Modifier.padding(padding).fillMaxSize()) {
                 if (mode == BackupScreenMode.SETTINGS) {
-                    SecondaryTabRow(
-                        selectedTabIndex = selectedPage,
-                        contentColor = MaterialTheme.colorScheme.primary,
-                    ) {
-                        Tab(
-                            selected = !state.isRestoreTab,
-                            onClick = { processIntent(BackupIntent.SelectTab(false)) },
-                            enabled = isEnabled,
-                            text = { Text(Localization.string("backup_create_tab")) },
-                        )
-                        Tab(
-                            selected = state.isRestoreTab,
-                            onClick = { processIntent(BackupIntent.SelectTab(true)) },
-                            enabled = isEnabled,
-                            text = { Text(Localization.string("backup_restore_tab")) },
-                        )
-                    }
                     HorizontalPager(
                         state = pager,
                         modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -145,6 +149,7 @@ fun BackupScreen(
                         val isRestorePage = pageIndex == 1
                         BackupPageContent(
                             isRestore = isRestorePage,
+                            canReportToolbarScroll = isRestorePage == state.isRestoreTab,
                             page = if (isRestorePage) state.restore else state.create,
                             isEnabled = isEnabled && canInteractWithPage && isRestorePage == state.isRestoreTab,
                             canEditSelection = if (isRestorePage) !state.isRestoreSelectionLocked else !state.hasPendingExport,

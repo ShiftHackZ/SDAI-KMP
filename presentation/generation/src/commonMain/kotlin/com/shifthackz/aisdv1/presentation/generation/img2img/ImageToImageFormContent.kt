@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -26,6 +26,8 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInpu
 /**
  * Adds shared generation fields and image-to-image validation/progress feedback to a lazy form.
  *
+ * @param isExpanded Whether generation fields and non-independent advanced controls are visible.
+ * @param onToggleExpanded Toggles generation options without changing advanced preferences.
  * @param state Captured form state and provider-specific validation.
  * @param strings Localized unsupported-provider and error explanations.
  * @param promptChipTextFieldState Pending positive-prompt chip text retained by the screen.
@@ -37,23 +39,27 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInpu
  */
 internal fun LazyListScope.imageToImageFormItems(
     state: ImageToImageState,
+    isExpanded: Boolean,
+    onToggleExpanded: () -> Unit,
     strings: ImageToImageStrings,
     promptChipTextFieldState: MutableState<TextFieldValue>,
     negativePromptChipTextFieldState: MutableState<TextFieldValue>,
     onEvent: (GenerationInputFormEvent) -> Unit,
     afterSlidersSection: @Composable () -> Unit,
 ) {
+    val hasFooter = state.promptValidationError != null || !state.sourceSupportsImageToImage ||
+            state.error != null || state.message != null || state.generating
     generationInputFormItems(
         state = state,
         isImg2Img = true,
+        isExpanded = isExpanded,
+        onToggleExpanded = onToggleExpanded,
         promptChipTextFieldState = promptChipTextFieldState,
         negativePromptChipTextFieldState = negativePromptChipTextFieldState,
         onEvent = onEvent,
         afterSlidersSection = afterSlidersSection,
+        hasFooter = hasFooter,
         footer = {
-            val hasFooter =
-                state.promptValidationError != null || !state.sourceSupportsImageToImage ||
-                        state.error != null || state.message != null || state.generating
             if (hasFooter) Column(
                 modifier = Modifier.padding(top = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -124,7 +130,7 @@ internal fun DenoisingStrengthSlider(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Slider(
+        PlatformSlider(
             value = denoisingStrength,
             onValueChange = {
                 processIntent(ImageToImageIntent.UpdateDenoisingStrength(it))

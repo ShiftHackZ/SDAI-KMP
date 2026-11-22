@@ -4,6 +4,7 @@ plugins {
 
 android {
     namespace = "com.shifthackz.aisdv1.presentation.configuration"
+    testOptions.unitTests.isIncludeAndroidResources = true
     testOptions.unitTests {
         all { test ->
             test.jvmArgs(
@@ -24,11 +25,11 @@ kotlin {
             implementation(project(":domain"))
             implementation(project(":presentation:components"))
             implementation(project(":core:validation"))
-            implementation(compose.runtime)
-            implementation(compose.ui)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.material.icons.extended)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
             implementation(libs.androidx.lifecycle.viewmodel.core)
@@ -44,12 +45,15 @@ kotlin {
             implementation(libs.test.junit)
             implementation(libs.test.mockk)
             implementation(libs.test.coroutines)
+            implementation(libs.test.roboelectric)
+            implementation(libs.test.compose.junit)
         }
     }
 }
 
 dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.test.compose.manifest)
 }
 
 // Reports describe compiler stability/skipping decisions; they do not measure frame performance.

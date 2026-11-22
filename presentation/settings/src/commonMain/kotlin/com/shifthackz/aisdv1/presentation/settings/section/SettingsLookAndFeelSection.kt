@@ -7,13 +7,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.FormatColorFill
-import androidx.compose.material.icons.filled.InvertColors
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -25,6 +18,7 @@ import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.entity.Grid
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
+import com.shifthackz.aisdv1.presentation.settings.startIcon
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
 import com.shifthackz.aisdv1.presentation.settings.text
 import com.shifthackz.aisdv1.presentation.components.widget.color.AccentColorSelector
@@ -80,7 +74,7 @@ internal fun SettingsLookAndFeelSection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = Icons.Default.Translate,
+                startIcon = row.startIcon,
                 text = text("settings_item_lf_lang"),
                 endValueText = text("language"),
                 onClick = { processIntent(SettingsIntent.Action.PickLanguage) },
@@ -108,7 +102,7 @@ internal fun SettingsLookAndFeelSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.Save,
+                startIcon = row.startIcon,
                 text = text("settings_item_lf_dynamic_colors"),
                 isChecked = shouldUseSystemColorPalette,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.DynamicColors(it)) },
@@ -119,7 +113,7 @@ internal fun SettingsLookAndFeelSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.InvertColors,
+                startIcon = row.startIcon,
                 text = text("settings_item_lf_system_dark_theme"),
                 isChecked = shouldUseSystemDarkTheme,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.SystemDarkTheme(it)) },
@@ -130,7 +124,7 @@ internal fun SettingsLookAndFeelSection(
             SettingsToggleItem(
                 modifier = itemModifier,
                 isLoading = isLoading,
-                startIcon = Icons.Default.DarkMode,
+                startIcon = row.startIcon,
                 text = text("settings_item_lf_dark_theme"),
                 isChecked = isDarkTheme,
                 onCheckedChange = { processIntent(SettingsIntent.UpdateFlag.DarkTheme(it)) },
@@ -147,7 +141,7 @@ internal fun SettingsLookAndFeelSection(
                 Spacer(modifier = Modifier.height(16.dp))
                 SettingsItemContent(
                     text = text("settings_item_lf_dark_theme_color"),
-                    icon = Icons.Default.FormatColorFill,
+                    icon = row.startIcon,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 DarkThemeColorSelector(
@@ -172,7 +166,7 @@ internal fun SettingsLookAndFeelSection(
                 Spacer(modifier = Modifier.height(16.dp))
                 SettingsItemContent(
                     text = text("settings_item_lf_accent_color"),
-                    icon = Icons.Default.ColorLens,
+                    icon = row.startIcon,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 AccentColorSelector(

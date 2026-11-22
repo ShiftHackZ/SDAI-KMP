@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalAbsoluteTonalElevation
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 
 /**
  * Joins independently composed list items into the existing generation card. Only the first
@@ -17,6 +21,7 @@ import androidx.compose.ui.unit.dp
  * padding without gaps or an inner scrolling container.
  *
  * @param isImg2Img Whether to use the elevated image-to-image form surface.
+ * @param isHeader Whether the segment supplies its own header padding and touch area.
  * @param isFirst Whether this is the card header and base-input segment.
  * @param isLast Whether this is the status and bottom-padding segment.
  * @param modifier Item placement and appearance animation supplied by the parent lazy list.
@@ -29,6 +34,7 @@ internal fun GenerationFormCardSegment(
     isImg2Img: Boolean,
     modifier: Modifier = Modifier,
     isFirst: Boolean = false,
+    isHeader: Boolean = false,
     isLast: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -45,8 +51,21 @@ internal fun GenerationFormCardSegment(
         color = if (isImg2Img) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = if (isImg2Img) 1.dp else 0.dp,
     ) {
-        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = top, bottom = bottom)) {
-            content()
+        val horizontal = if (isHeader) 0.dp else 16.dp
+        val backingColor = if (isImg2Img) MaterialTheme.colorScheme.surfaceColorAtElevation(
+            LocalAbsoluteTonalElevation.current
+        ) else MaterialTheme.colorScheme.surfaceVariant
+        CompositionLocalProvider(LocalPlatformControlBackgroundColor provides backingColor) {
+            Column(
+                Modifier.padding(
+                    start = horizontal,
+                    end = horizontal,
+                    top = if (isHeader) 0.dp else top,
+                    bottom = if (isHeader) 0.dp else bottom
+                )
+            ) {
+                content()
+            }
         }
     }
 }

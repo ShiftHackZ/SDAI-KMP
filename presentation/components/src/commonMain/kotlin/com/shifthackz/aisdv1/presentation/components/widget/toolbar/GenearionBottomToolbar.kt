@@ -5,7 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.ui.graphics.Color
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +47,7 @@ import com.shifthackz.aisdv1.presentation.components.model.ExtraType
  * @param strokeAccentState Whether extra-prompt shortcuts use the highlighted border color.
  * @param onExtraSelected Opens the selected extra type with the current prompt pair.
  * @param onEmbeddingsSelected Opens textual-inversion selection with the current prompt pair.
- * @param content Main generation controls rendered above the shortcut backing layer.
+ * @param content Main generation controls rendered below the shortcut row.
  *
  * @author Dmitriy Moroz
  */
@@ -56,18 +62,15 @@ fun GenerationBottomToolbar(
     onEmbeddingsSelected: (prompt: String, negativePrompt: String) -> Unit = { _, _ -> },
     content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface)
-            .padding(top = 8.dp),
-        contentAlignment = Alignment.BottomCenter,
-    ) {
-        when (mode) {
-            ServerSource.AUTOMATIC1111,
-            ServerSource.SWARM_UI -> {
-                GenerationBottomToolbarBottomLayer(
-                    modifier = Modifier.padding(bottom = 36.dp),
+    val hasExtraShortcuts = mode == ServerSource.AUTOMATIC1111 || mode == ServerSource.SWARM_UI
+    CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surface) {
+        Column(
+            modifier = modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
+                .padding(top = 8.dp),
+        ) {
+            if (hasExtraShortcuts) {
+                GenerationBottomToolbarShortcuts(
+                    modifier = Modifier.padding(bottom = 4.dp),
                     strokeAccentState = strokeAccentState,
                     mode = mode,
                     prompt = prompt,
@@ -75,30 +78,26 @@ fun GenerationBottomToolbar(
                     onExtraSelected = onExtraSelected,
                     onEmbeddingsSelected = onEmbeddingsSelected,
                 )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(horizontal = 16.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 22.dp,
-                                topEnd = 22.dp,
-                            )
-                        )
-                        .background(color = MaterialTheme.colorScheme.surface),
-                )
             }
-
-            else -> Unit
+            content()
         }
-        content()
     }
 }
 
-
+/**
+ * Renders the extension rail with an outline around the visible shortcut row.
+ *
+ * @param modifier Placement relative to the generation action.
+ * @param mode Provider determining whether hypernetworks are supported.
+ * @param prompt Positive prompt passed to an extension selector.
+ * @param negativePrompt Negative prompt passed to an extension selector.
+ * @param strokeAccentState Whether the rail uses an accent outline.
+ * @param onExtraSelected Opens LoRA or hypernetwork selection.
+ * @param onEmbeddingsSelected Opens inversion selection.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun GenerationBottomToolbarBottomLayer(
+private fun GenerationBottomToolbarShortcuts(
     modifier: Modifier = Modifier,
     mode: ServerSource,
     prompt: String,
@@ -107,14 +106,12 @@ private fun GenerationBottomToolbarBottomLayer(
     onExtraSelected: (prompt: String, negativePrompt: String, type: ExtraType) -> Unit = { _, _, _ -> },
     onEmbeddingsSelected: (prompt: String, negativePrompt: String) -> Unit = { _, _ -> },
 ) {
-    val shape = RoundedCornerShape(
-        topStart = 16.dp,
-        topEnd = 16.dp,
-    )
-    val accentColor = if (strokeAccentState)
-
+    val shape = RoundedCornerShape(16.dp)
+    val accentColor = if (strokeAccentState) {
         MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+    }
     var dividerHeight by remember {
         mutableIntStateOf(0)
     }
@@ -135,25 +132,13 @@ private fun GenerationBottomToolbarBottomLayer(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        fun localModifier(click: () -> Unit) = Modifier
-            .fillMaxWidth()
-            .align(Alignment.CenterVertically)
-            .clickable { click() }
-            .weight(1f)
-            .padding(vertical = 8.dp)
-            .padding(bottom = 26.dp)
-
         val localColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
-        val localStyle = MaterialTheme.typography.labelLarge
 
-        Text(
-            modifier = localModifier {
-                onExtraSelected(prompt, negativePrompt, ExtraType.Lora)
-            },
-            text = Localization.string("title_lora"),
-            textAlign = TextAlign.Center,
+        GenerationExtraShortcut(
+            title = Localization.string("title_lora"),
+            message = Localization.string("help_lora"),
             color = localColor,
-            style = localStyle,
+            onClick = { onExtraSelected(prompt, negativePrompt, ExtraType.Lora) },
         )
         Spacer(
             modifier = Modifier
@@ -161,14 +146,11 @@ private fun GenerationBottomToolbarBottomLayer(
                 .height(with(LocalDensity.current) { dividerHeight.toDp() })
                 .background(color = accentColor),
         )
-        Text(
-            modifier = localModifier {
-                onEmbeddingsSelected(prompt, negativePrompt)
-            },
-            text = Localization.string("title_txt_inversion_short"),
-            textAlign = TextAlign.Center,
+        GenerationExtraShortcut(
+            title = Localization.string("title_txt_inversion_short"),
+            message = Localization.string("help_inversion"),
             color = localColor,
-            style = localStyle,
+            onClick = { onEmbeddingsSelected(prompt, negativePrompt) },
         )
         if (mode == ServerSource.AUTOMATIC1111) {
             Spacer(
@@ -177,14 +159,43 @@ private fun GenerationBottomToolbarBottomLayer(
                     .height(with(LocalDensity.current) { dividerHeight.toDp() })
                     .background(color = accentColor),
             )
-            Text(
-                modifier = localModifier {
-                    onExtraSelected(prompt, negativePrompt, ExtraType.HyperNet)
-                },
-                text = Localization.string("title_hyper_net_short"),
-                textAlign = TextAlign.Center,
+            GenerationExtraShortcut(
+                title = Localization.string("title_hyper_net_short"),
+                message = Localization.string("help_hypernetwork"),
                 color = localColor,
-                style = localStyle,
+                onClick = { onExtraSelected(prompt, negativePrompt, ExtraType.HyperNet) },
+            )
+        }
+    }
+}
+
+/**
+ * Gives each prompt-extension shortcut an equal share of the row and explanatory long-press help.
+ *
+ * @param title Localized compact name of the extension.
+ * @param message Friendly explanation of the extension and selector.
+ * @param color Existing toolbar label color.
+ * @param onClick Opens the corresponding extension selector.
+ * @param modifier Placement of the weighted shortcut.
+ * @author Dmitriy Moroz
+ */
+@Composable
+private fun RowScope.GenerationExtraShortcut(
+    title: String,
+    message: String,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier.weight(1f)) {
+        ContextualHelp(title = title, message = message, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = title,
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+                    .padding(vertical = 8.dp),
+                textAlign = TextAlign.Center,
+                color = color,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }

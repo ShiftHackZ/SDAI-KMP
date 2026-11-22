@@ -51,6 +51,71 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BackupViewModelTest {
+    @Test
+    fun `given backup route, Back waits for cleanup, expected quiet leaving state and one navigation`() =
+        runTest {
+            // Given
+            val vm = viewModel()
+            advanceUntilIdle()
+            val cleanup = CompletableDeferred<Unit>()
+            coEvery { dismissExport() } coAnswers { cleanup.await() }
+            // When
+            vm.processIntent(BackupIntent.NavigateBack)
+            runCurrent()
+            // Then
+            assertTrue(vm.state.value.isBusy)
+            assertTrue(vm.state.value.isLeaving)
+            assertFalse(vm.state.value.isFeedbackVisible)
+            verify(exactly = 0) { router.navigateBack() }
+            vm.processIntent(BackupIntent.NavigateBack)
+            cleanup.complete(Unit)
+            advanceUntilIdle()
+            verify(exactly = 1) { router.navigateBack() }
+            assertFalse(vm.state.value.isBusy)
+            assertFalse(vm.state.value.isLeaving)
+            vm.onRouteDisposed()
+        }
+
+    @Test
+    fun `given backup route, exit cleanup fails, expected feedback without leaving or navigation`() =
+        runTest {
+            // Given
+            val vm = viewModel()
+            advanceUntilIdle()
+            coEvery { dismissExport() } throws IllegalStateException("cleanup failed")
+            // When
+            vm.processIntent(BackupIntent.NavigateBack)
+            advanceUntilIdle()
+            // Then
+            assertTrue(vm.state.value.hasError)
+            assertTrue(vm.state.value.isFeedbackVisible)
+            assertFalse(vm.state.value.isLeaving)
+            assertFalse(vm.state.value.isBusy)
+            verify(exactly = 0) { router.navigateBack() }
+            vm.onRouteDisposed()
+        }
+
+    @Test
+    fun `given backup route, failed exit is retried, expected cleanup and navigation recover`() =
+        runTest {
+            // Given
+            val vm = viewModel()
+            advanceUntilIdle()
+            coEvery { dismissExport() } throws IllegalStateException("cleanup failed")
+            vm.processIntent(BackupIntent.NavigateBack)
+            advanceUntilIdle()
+            coEvery { dismissExport() } returns Unit
+            // When
+            vm.processIntent(BackupIntent.NavigateBack)
+            advanceUntilIdle()
+            // Then
+            verify(exactly = 1) { router.navigateBack() }
+            assertFalse(vm.state.value.isFeedbackVisible)
+            assertFalse(vm.state.value.hasError)
+            assertFalse(vm.state.value.isLeaving)
+            vm.onRouteDisposed()
+        }
+
     private val router = mockk<BackupRouter>(relaxed = true)
     private val inventory = mockk<LoadBackupInventoryUseCase>()
     private val create = mockk<CreateBackupUseCase>()

@@ -23,7 +23,7 @@ import com.shifthackz.aisdv1.core.extensions.shimmer
 import com.shifthackz.aisdv1.core.localization.Localization
 
 /**
- * Centers a sheet title or loading placeholder beside an always-available close action.
+ * Centers a sheet title or loading placeholder beside a flat, always-available close action.
  *
  * @param modifier Layout modifiers for the toolbar row.
  * @param loading Replaces the title with a shimmer while content loads.
@@ -34,17 +34,17 @@ import com.shifthackz.aisdv1.core.localization.Localization
  */
 @Composable
 fun ModalDialogToolbar(
-    modifier: Modifier = Modifier,
-    loading: Boolean = false,
     text: String,
     onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    loading: Boolean = false,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Spacer(modifier = Modifier.width(40.dp))
+        Spacer(modifier = Modifier.width(48.dp))
         Spacer(modifier = Modifier.weight(1f))
         if (!loading) {
             Text(

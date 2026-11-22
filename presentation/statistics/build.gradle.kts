@@ -23,8 +23,8 @@ kotlin {
             implementation(project(":core:ui"))
             implementation(project(":domain"))
             implementation(project(":presentation:components"))
-            implementation(compose.runtime)
-            implementation(compose.ui)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
         }

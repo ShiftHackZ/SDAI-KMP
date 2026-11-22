@@ -82,6 +82,7 @@ fun AiSdApp(
         AiSdAppShell(
             modifier = modifier,
             viewModel = viewModel,
+            router = router,
             homeContent = { homeRoute, renderedRoutes, shouldShowHomeChrome ->
                 HomeRoutesScaffold(
                     activeRoute = homeRoute,

@@ -1,5 +1,11 @@
 package com.shifthackz.aisdv1.presentation.components.widget.usage
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -28,13 +34,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -94,23 +98,19 @@ fun UsageScreenContent(
     onPrimaryAction: () -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
-    Scaffold(
+    PlatformScaffold(
+        canUnderlapToolbar = true,
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            CenterAlignedTopAppBar(
+            PlatformTopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = Localization.string("action_back"),
-                        )
-                    }
+                    ToolbarBackButton(onClick = onBack, icon = Icons.AutoMirrored.Filled.ArrowBack)
                 },
                 title = {
                     Text(
                         text = Localization.string(screen.titleKey()),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -118,7 +118,7 @@ fun UsageScreenContent(
             )
         },
         bottomBar = {
-            Button(
+            PrimaryButton(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .fillMaxWidth()
@@ -126,7 +126,7 @@ fun UsageScreenContent(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp, top = 8.dp),
-                enabled = !usage.loading && (usage.totalBytes > 0L || screen == UsageScreenKind.NETWORK),
+                isEnabled = !usage.loading && (usage.totalBytes > 0L || screen == UsageScreenKind.NETWORK),
                 onClick = onPrimaryAction,
             ) {
                 Text(
@@ -144,12 +144,14 @@ fun UsageScreenContent(
             }
         },
     ) { paddingValues ->
+        ToolbarScrollObserver(scrollState.canScrollBackward)
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .verticalScrollbar(scrollState)
+                .verticalScrollbar(scrollState, topInset = LocalToolbarContentInset.current)
                 .verticalScroll(scrollState)
+                .padding(top = LocalToolbarContentInset.current)
                 .padding(horizontal = 16.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

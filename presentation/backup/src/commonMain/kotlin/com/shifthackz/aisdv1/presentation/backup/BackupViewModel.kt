@@ -35,6 +35,7 @@ import kotlin.random.Random
 
 /**
  * Owns independent tab selections, native picker outcomes and resumable restore intent.
+ *
  * @param mode Settings tabs or first-launch recovery context.
  * @param router Caller-owned navigation contract.
  * @param diagnostics Bounded nonsecret MVI diagnostics.
@@ -51,6 +52,7 @@ import kotlin.random.Random
  * @param discardBackup Releases staging after resolving checked writes.
  * @param loadPending Loads nonsecret process-recovery intent.
  * @param setStartupStage Persists first-launch progression before navigation.
+ *
  * @author Dmitriy Moroz
  */
 class BackupViewModel(
@@ -136,7 +138,9 @@ class BackupViewModel(
 
     /**
      * Applies UI choices or native document outcomes while rejecting overlapping jobs.
+     *
      * @param intent User action or native document picker result.
+     *
      * @author Dmitriy Moroz
      */
     override fun processIntent(intent: BackupIntent) {
@@ -303,7 +307,7 @@ class BackupViewModel(
         )
     }
 
-    private fun leave() = runOperation {
+    private fun leave() = runOperation(isLeaving = true) {
         if (mode == BackupScreenMode.FIRST_LAUNCH) setStartupStage(BackupStartupStage.CONFIGURATION)
         clearRestore()
         dismissExport()
@@ -335,15 +339,23 @@ class BackupViewModel(
 
     /**
      * Serializes bounded work and publishes cancellable loading plus acknowledged failure feedback.
+     *
      * @param shouldClearFeedback Whether a new user operation replaces the prior feedback; startup keeps durable export completion.
+     * @param isLeaving Whether this job prepares route exit without presenting a progress dialog.
      * @param block Work run on IO with state publication through the MVI owner.
+     *
      * @author Dmitriy Moroz
      */
-    private fun runOperation(shouldClearFeedback: Boolean = true, block: suspend () -> Unit) {
+    private fun runOperation(
+        shouldClearFeedback: Boolean = true,
+        isLeaving: Boolean = false,
+        block: suspend () -> Unit
+    ) {
         if (operation?.isActive == true) return
         updateState {
             it.copy(
                 isBusy = true,
+                isLeaving = isLeaving,
                 hasError = if (shouldClearFeedback) false else it.hasError,
                 hasCanceled = if (shouldClearFeedback) false else it.hasCanceled,
                 isFeedbackVisible = if (shouldClearFeedback) false else it.isFeedbackVisible,
@@ -359,7 +371,7 @@ class BackupViewModel(
             } catch (_: Exception) {
                 updateState { it.copy(hasError = true, isFeedbackVisible = true) }
             } finally {
-                updateState { it.copy(isBusy = false, progress = null) }
+                updateState { it.copy(isBusy = false, isLeaving = false, progress = null) }
             }
         }
     }
@@ -395,6 +407,7 @@ class BackupViewModel(
 
     /**
      * Stops owned work on route disposal. Interrupted restore staging remains journal-owned for recovery.
+     *
      * @author Dmitriy Moroz
      */
     fun onRouteDisposed() {

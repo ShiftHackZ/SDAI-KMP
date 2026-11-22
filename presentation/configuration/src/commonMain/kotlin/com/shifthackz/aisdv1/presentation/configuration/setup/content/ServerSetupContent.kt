@@ -2,55 +2,50 @@
 
 package com.shifthackz.aisdv1.presentation.configuration.setup.content
 
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
-import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.LocalModelDownloadAction
-import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
-import com.shifthackz.aisdv1.domain.entity.ServerSource
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.ConfigurationStepBar
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.OpenAiOAuthActionBar
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.ServerSetupLoading
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.ServerSetupModal
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.mainButtonEnabled
-import com.shifthackz.aisdv1.presentation.configuration.setup.form.local.ConfigurationStep
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalBackTransitionState
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformBackHandler
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.rememberBackTransitionState
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.ProgrammaticPager
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationInputEnabled
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.ServerSetupModal
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.ServerSetupLoading
+import com.shifthackz.aisdv1.presentation.configuration.setup.form.local.ConfigurationStep
+import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionStep
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceFiltersBottomSheet
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionEffects
-import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionStep
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSortBottomSheet
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 
 /**
- * Hosts source selection and a scrolling configuration form with actions pinned above system insets.
+ * Owns wizard scroll positions, discovery effects and a side-effect-free local Back preview.
+ * iOS Configuration-to-provider gestures commit the existing intent only after visual completion.
+ * Android Back changes the internal pager, independently of the application's route animation.
  *
  * @param state Current wizard, provider and form state.
  * @param processIntent Dispatches navigation, configuration and account actions through MVI.
  * @param modifier Bounds supplied by the navigation host.
  * @param strings Localized shared wizard labels.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -62,106 +57,76 @@ fun ServerSetupContent(
 ) {
     val sourceListState = rememberLazyListState()
     val configurationListState = rememberLazyListState()
-
+    val localBack = rememberBackTransitionState()
+    val routeBack = LocalBackTransitionState.current
+    val currentState by rememberUpdatedState(state)
+    val currentIntent by rememberUpdatedState(processIntent)
+    val isConfiguration = state.step == ServerSetupState.Step.CONFIGURE
+    var hasOpenedConfiguration by remember { mutableStateOf(isConfiguration) }
+    val shouldAnimateStepBack = isConfiguration && isPlatformToolbarNative
+    val canGoBack = state.showBackNavArrow || isConfiguration
+    val canStartGesture =
+        canGoBack && state.modal == ServerSetupState.Modal.None && !state.loadingConfiguration
+    PlatformBackHandler(
+        isEnabled = canGoBack,
+        canStartGesture = canStartGesture && (!isConfiguration || shouldAnimateStepBack),
+        transitionState = if (isConfiguration) localBack else routeBack,
+        onBack = { currentIntent(ServerSetupIntent.NavigateBack) },
+    )
     SourceSelectionEffects(state, strings, sourceListState, processIntent)
-
-    LaunchedEffect(state.mode) {
-        configurationListState.scrollToItem(0)
+    LaunchedEffect(state.mode) { configurationListState.scrollToItem(0) }
+    LaunchedEffect(state.step) {
+        if (isConfiguration) hasOpenedConfiguration = true
+        else {
+            withFrameNanos { }
+            localBack.reset()
+        }
     }
-
-    Box(modifier = modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = {
-                Column {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                text = strings.title,
-                                style = MaterialTheme.typography.headlineMedium,
-                            )
-                        },
-                        navigationIcon = {
-                            if (state.showBackNavArrow || state.step != ServerSetupState.Step.SOURCE) {
-                                IconButton(
-                                    onClick = { processIntent(ServerSetupIntent.NavigateBack) },
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                        contentDescription = strings.backContentDescription,
-                                    )
-                                }
-                            }
-                        },
-                        windowInsets = persistentTopAppBarWindowInsets(),
-                    )
-                    ConfigurationStepBar(
-                        currentStep = state.step,
-                        strings = strings,
-                    )
-                }
-            },
-            bottomBar = {
-                if (state.step == ServerSetupState.Step.CONFIGURE && state.mode == ServerSource.OPEN_AI_OAUTH) {
-                    OpenAiOAuthActionBar(
-                        state = state,
-                        strings = strings,
-                        processIntent = processIntent
-                    )
-                } else {
-                    ScreenActionBar(verticalArrangement = Arrangement.Top) {
-                        if (state.step == ServerSetupState.Step.CONFIGURE && state.mode.localCatalogType != null) {
-                            LocalModelDownloadAction(state, processIntent)
-                        }
-                        PrimaryActionButton(
-                            isEnabled = !state.loadingConfiguration && state.mainButtonEnabled,
-                            onClick = { processIntent(ServerSetupIntent.MainButtonClick) },
-                        ) {
-                            Text(
-                                text = when (state.step) {
-                                    ServerSetupState.Step.SOURCE -> strings.next
-                                    ServerSetupState.Step.CONFIGURE -> when (state.mode) {
-                                        ServerSource.LOCAL_MICROSOFT_ONNX,
-                                        ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
-                                        ServerSource.LOCAL_STABLE_DIFFUSION_CPP -> strings.setup
-
-                                        else -> strings.connect
-                                    }
-                                },
-                                style = MaterialTheme.typography.labelLarge,
-                            )
-                        }
-                    }
-                }
-            },
-        ) { paddingValues ->
+    val handleIntent: (ServerSetupIntent) -> Unit = { intent ->
+        if (intent == ServerSetupIntent.NavigateBack && shouldAnimateStepBack) {
+            localBack.complete(
+                canCommit = {
+                    currentState.step == ServerSetupState.Step.CONFIGURE &&
+                            currentState.modal == ServerSetupState.Modal.None
+                },
+                onBack = { currentIntent(intent) },
+            )
+        } else currentIntent(intent)
+    }
+    Box(modifier.fillMaxSize()) {
+        ServerSetupScaffold(state, handleIntent, strings) { paddingValues ->
             if (state.loadingConfiguration) {
                 ServerSetupLoading(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize(),
+                    modifier = Modifier.padding(paddingValues).fillMaxSize(),
                     text = strings.loadingConfiguration,
                 )
             } else {
-                when (state.step) {
-                    ServerSetupState.Step.SOURCE -> SourceSelectionStep(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize(),
-                        state = state,
-                        strings = strings,
-                        listState = sourceListState,
-                        processIntent = processIntent,
-                    )
+                ProgrammaticPager(
+                    selectedPage = state.step.ordinal,
+                    pageCount = ServerSetupState.Step.entries.size,
+                    modifier = Modifier.padding(paddingValues).fillMaxSize(),
+                    shouldAnimate = !localBack.hasCommittedGesture,
+                    backProgress = if (shouldAnimateStepBack && localBack.isActive) localBack.progress else null,
+                ) { page ->
+                    val step = ServerSetupState.Step.entries[page]
+                    val canSendIntent = LocalNavigationInputEnabled.current && step == state.step
+                    val pageIntent: (ServerSetupIntent) -> Unit =
+                        { if (canSendIntent) currentIntent(it) }
+                    if (step == ServerSetupState.Step.SOURCE || isConfiguration || hasOpenedConfiguration) {
+                        when (step) {
+                            ServerSetupState.Step.SOURCE -> SourceSelectionStep(
+                                state, strings, sourceListState, pageIntent, Modifier.fillMaxSize()
+                            )
 
-                    ServerSetupState.Step.CONFIGURE -> ConfigurationStep(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize(),
-                        state = state,
-                        strings = strings,
-                        listState = configurationListState,
-                        processIntent = processIntent,
-                    )
+                            ServerSetupState.Step.CONFIGURE -> ConfigurationStep(
+                                state,
+                                strings,
+                                configurationListState,
+                                pageIntent,
+                                Modifier.fillMaxSize()
+                            )
+                        }
+                    }
                 }
             }
         }

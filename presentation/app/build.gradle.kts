@@ -56,11 +56,11 @@ kotlin {
             api(project(":feature:mnn"))
             api(project(":feature:coreml"))
             api(project(":feature:openai-oauth"))
-            implementation(compose.runtime)
-            implementation(compose.ui)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.material.icons.extended)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
             implementation(libs.androidx.lifecycle.compose)
@@ -77,7 +77,11 @@ kotlin {
             implementation(libs.koin.android)
         }
 
-        androidUnitTest.dependencies { implementation(libs.test.junit) }
+        androidUnitTest.dependencies {
+            implementation(libs.test.junit)
+            implementation(libs.test.mockk)
+            implementation(libs.test.coroutines)
+        }
 
         iosMain.dependencies {
             implementation(project(":feature:sdxl"))

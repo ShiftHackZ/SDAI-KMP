@@ -117,7 +117,7 @@ kotlin {
         }
         commonMain {
             dependencies {
-                implementation(compose.runtime)
+                implementation(libs.compose.runtime)
             }
         }
     }
@@ -153,8 +153,18 @@ private fun File.parseAndroidStrings(): Map<String, String> {
     }
 }
 
+/**
+ * Moves each language map into its own factory so catalog growth cannot overflow the JVM class initializer.
+ *
+ * @param name Stable generated property name used by the catalog and fallback merge.
+ * @param strings Ordered canonical entries for one language.
+ * @author Dmitriy Moroz
+ */
 private fun StringBuilder.appendStringsMap(name: String, strings: Map<String, String>) {
-    appendLine("private val $name: Map<String, String> = mapOf(")
+    val factoryName = "create" + name.replaceFirstChar { it.uppercase() }
+    appendLine("private val $name: Map<String, String> = $factoryName()")
+    appendLine()
+    appendLine("private fun $factoryName(): Map<String, String> = mapOf(")
     strings.forEach { (key, value) ->
         appendLine("    ${key.kotlinLiteral()} to ${value.kotlinLiteral()},")
     }

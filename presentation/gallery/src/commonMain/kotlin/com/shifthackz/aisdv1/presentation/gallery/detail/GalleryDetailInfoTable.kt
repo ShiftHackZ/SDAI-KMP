@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
@@ -42,10 +44,12 @@ internal fun GalleryDetailsTable(
     onCopyTextClick: (String) -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
+    ToolbarScrollObserver(scrollState.canScrollBackward)
     Column(
         modifier = modifier
-            .verticalScrollbar(scrollState)
+            .verticalScrollbar(scrollState, topInset = LocalToolbarContentInset.current)
             .verticalScroll(scrollState)
+            .padding(top = LocalToolbarContentInset.current)
             .fillMaxSize(),
     ) {
         val colorOddBg = MaterialTheme.colorScheme.surface

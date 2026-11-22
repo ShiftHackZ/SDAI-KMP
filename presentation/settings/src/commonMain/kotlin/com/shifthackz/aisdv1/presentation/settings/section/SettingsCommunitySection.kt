@@ -11,9 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
+import com.shifthackz.aisdv1.presentation.settings.startIcon
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
 import com.shifthackz.aisdv1.presentation.settings.text
-import com.shifthackz.aisdv1.presentation.components.widget.icon.BrandIcons
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsHeader
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
 
@@ -48,7 +48,7 @@ internal fun SettingsCommunitySection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = BrandIcons.Telegram,
+                startIcon = row.startIcon,
                 text = text("settings_item_telegram"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenTelegramCommunity) },
             )
@@ -58,7 +58,7 @@ internal fun SettingsCommunitySection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = BrandIcons.Discord,
+                startIcon = row.startIcon,
                 text = text("settings_item_discord"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenDiscordCommunity) },
             )
@@ -68,7 +68,7 @@ internal fun SettingsCommunitySection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = BrandIcons.LinkedIn,
+                startIcon = row.startIcon,
                 text = text("settings_item_linkedin"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenLinkedInCommunity) },
             )
@@ -101,7 +101,7 @@ internal fun SettingsCommunitySection(
             SettingsItem(
                 modifier = itemModifier,
                 loading = isLoading,
-                startIcon = BrandIcons.Moroz,
+                startIcon = row.startIcon,
                 text = text("settings_item_developer_website"),
                 onClick = { processIntent(SettingsIntent.LaunchUrl.OpenDeveloperWebsite) },
             )

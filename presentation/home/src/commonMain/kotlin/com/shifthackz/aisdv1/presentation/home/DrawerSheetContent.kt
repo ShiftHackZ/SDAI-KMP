@@ -1,17 +1,16 @@
 package com.shifthackz.aisdv1.presentation.home
 
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformDrawerItem
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformDrawerSheet
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 
 /**
  * One destination rendered by the home drawer; the application supplies navigation callbacks.
@@ -19,6 +18,7 @@ import androidx.compose.ui.unit.dp
  * @param label Localized destination label.
  * @param selected Whether this item represents the active route.
  * @param icon Destination icon rendered with the drawer's content color.
+ * @param helpMessage Localized explanation shared with other navigation surfaces where applicable.
  * @param onClick Requests navigation through the root router.
  *
  * @author Dmitriy Moroz
@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.dp
 data class DrawerSheetItem(
     val label: String,
     val selected: Boolean,
-    val icon: @Composable () -> Unit,
+    val icon: ImageVector,
+    val helpMessage: String,
     val onClick: () -> Unit,
 )
 
@@ -45,8 +46,7 @@ fun DrawerSheetContent(
     header: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ModalDrawerSheet(
-        drawerContainerColor = MaterialTheme.colorScheme.background,
+    PlatformDrawerSheet(
         modifier = modifier,
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -55,18 +55,19 @@ fun DrawerSheetContent(
 
         Spacer(modifier = Modifier.height(32.dp))
         items.forEach { item ->
-            NavigationDrawerItem(
+            ContextualHelp(
+                title = item.label,
+                message = item.helpMessage,
+                titleStartIcon = item.icon,
                 modifier = itemModifier.padding(bottom = 4.dp),
-                selected = item.selected,
-                label = {
-                    Text(
-                        text = item.label,
-                        color = LocalContentColor.current,
-                    )
-                },
-                icon = item.icon,
-                onClick = item.onClick,
-            )
+            ) {
+                PlatformDrawerItem(
+                    label = item.label,
+                    icon = item.icon,
+                    isSelected = item.selected,
+                    onClick = item.onClick,
+                )
+            }
         }
     }
 }

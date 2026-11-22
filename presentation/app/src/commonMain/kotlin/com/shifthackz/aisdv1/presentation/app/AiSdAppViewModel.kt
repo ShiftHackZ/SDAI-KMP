@@ -35,6 +35,8 @@ internal class AiSdAppViewModel(
     diagnosticScreen = UiDiagnosticComponent.ROOT,
     initialState = AiSdAppState(
         route = router.route.value,
+        backStack = router.backStack.value,
+        isDrawerOpen = router.drawerOpen.value,
         homeRoute = router.route.value.asHomeTabRoute(),
         renderedHomeRoutes = listOfNotNull(router.route.value.asHomeTabRoute()),
         shouldShowHomeChrome = router.route.value.asHomeTabRoute() != null,
@@ -46,16 +48,19 @@ internal class AiSdAppViewModel(
     init {
         launch(dispatchersProvider.immediate) {
             combine(
-                router.route,
+                router.backStack,
                 router.drawerOpen,
                 router.canNavigateBack,
                 preferenceManager.observe().map { it.backgroundGeneration to it.shouldDimScreen }
                     .distinctUntilChanged(),
                 generationActivity.distinctUntilChanged(),
-            ) { route, isDrawerOpen, canNavigateBack, displaySettings, isGenerating ->
+            ) { backStack, isDrawerOpen, canNavigateBack, displaySettings, isGenerating ->
+                val route = backStack.last().route
                 val selectedHomeRoute = route.asHomeTabRoute()
                 currentState.copy(
                     route = route,
+                    backStack = backStack,
+                    isDrawerOpen = isDrawerOpen,
                     homeRoute = selectedHomeRoute ?: currentState.homeRoute,
                     renderedHomeRoutes = (currentState.renderedHomeRoutes + listOfNotNull(
                         selectedHomeRoute

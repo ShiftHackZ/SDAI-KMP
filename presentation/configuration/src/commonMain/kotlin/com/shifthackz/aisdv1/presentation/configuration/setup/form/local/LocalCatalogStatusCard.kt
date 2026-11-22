@@ -15,10 +15,12 @@ import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -60,41 +62,43 @@ internal fun LocalCatalogStatusCard(
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+        CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surfaceVariant) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    imageVector = if (hasFailed) Icons.Outlined.CloudOff else Icons.Outlined.Inventory2,
-                    contentDescription = null,
-                    tint = if (hasFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp),
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (hasFailed) Icons.Outlined.CloudOff else Icons.Outlined.Inventory2,
+                        contentDescription = null,
+                        tint = if (hasFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Text(
+                        title,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
                 Text(
-                    title,
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold
+                    Localization.string(if (hasFailed) "local_catalog_error_body" else "local_catalog_empty_body"),
+                    style = MaterialTheme.typography.bodyMedium,
                 )
-            }
-            Text(
-                Localization.string(if (hasFailed) "local_catalog_error_body" else "local_catalog_empty_body"),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            OutlinedButton(
-                onClick = onRetry,
-                enabled = !isRefreshing,
-                modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 144.dp)
-                    .heightIn(min = 48.dp),
-            ) {
-                Text(
-                    Localization.string(if (isRefreshing) "loading" else "retry"),
-                    style = MaterialTheme.typography.labelLarge
-                )
+                OutlinedButton(
+                    onClick = onRetry,
+                    isEnabled = !isRefreshing,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 144.dp)
+                        .heightIn(min = 48.dp),
+                ) {
+                    Text(
+                        Localization.string(if (isRefreshing) "loading" else "retry"),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             }
         }
     }

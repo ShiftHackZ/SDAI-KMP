@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import kotlin.math.ceil
 
 /**
@@ -22,6 +23,8 @@ import kotlin.math.ceil
  *
  * @param state Scroll offset and maximum supplied by the container.
  *
+ * @param topInset Space above the indicator track, excluding an overlapping toolbar.
+ *
  * @return Modifier drawing the thumb after content.
  *
  * @author Dmitriy Moroz
@@ -29,8 +32,10 @@ import kotlin.math.ceil
 @Composable
 fun Modifier.verticalScrollbar(
     state: ScrollState,
+    topInset: Dp = 0.dp,
 ): Modifier = verticalScrollbar(
     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.72f),
+    topInset = topInset,
 ) {
     val viewportHeight = size.height
     val maxValue = state.maxValue.toFloat()
@@ -49,6 +54,8 @@ fun Modifier.verticalScrollbar(
  *
  * @param state Grid viewport and visible-item measurements.
  *
+ * @param topInset Space above the indicator track, excluding an overlapping toolbar.
+ *
  * @return Modifier drawing an estimated scroll thumb.
  *
  * @author Dmitriy Moroz
@@ -56,8 +63,10 @@ fun Modifier.verticalScrollbar(
 @Composable
 fun Modifier.verticalScrollbar(
     state: LazyGridState,
+    topInset: Dp = 0.dp,
 ): Modifier = verticalScrollbar(
     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.72f),
+    topInset = topInset,
 ) {
     val layoutInfo = state.layoutInfo
     val visibleItems = layoutInfo.visibleItemsInfo
@@ -98,6 +107,8 @@ fun Modifier.verticalScrollbar(
  *
  * @param state List viewport and visible-item measurements.
  *
+ * @param topInset Space above the indicator track, excluding an overlapping toolbar.
+ *
  * @return Modifier drawing an estimated scroll thumb.
  *
  * @author Dmitriy Moroz
@@ -105,8 +116,10 @@ fun Modifier.verticalScrollbar(
 @Composable
 fun Modifier.verticalScrollbar(
     state: LazyListState,
+    topInset: Dp = 0.dp,
 ): Modifier = verticalScrollbar(
     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.72f),
+    topInset = topInset,
 ) {
     val layoutInfo = state.layoutInfo
     val visibleItems = layoutInfo.visibleItemsInfo
@@ -153,17 +166,24 @@ private fun DrawScope.thumbHeight(
 
 private fun Modifier.verticalScrollbar(
     color: Color,
+    topInset: Dp,
     thumbProvider: DrawScope.() -> ScrollbarThumb?,
 ): Modifier = drawWithContent {
     drawContent()
     val thumb = thumbProvider() ?: return@drawWithContent
     val width = 3.dp.toPx()
     val margin = 2.dp.toPx()
-    val top = thumb.offset.coerceIn(0f, (size.height - thumb.size).coerceAtLeast(0f))
+    val trackTop = topInset.toPx().coerceIn(0f, size.height)
+    val trackHeight = size.height - trackTop
+    if (trackHeight <= 0f || size.height <= 0f) return@drawWithContent
+    val scale = trackHeight / size.height
+    val thumbSize = thumb.size * scale
+    val top =
+        trackTop + (thumb.offset * scale).coerceIn(0f, (trackHeight - thumbSize).coerceAtLeast(0f))
     drawRoundRect(
         color = color,
         topLeft = Offset(x = size.width - width - margin, y = top),
-        size = Size(width, thumb.size),
+        size = Size(width, thumbSize),
         cornerRadius = CornerRadius(width, width),
     )
 }

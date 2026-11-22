@@ -6,10 +6,12 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupRestoreResult
 
 /**
  * Nonsecret backup UI state. Archive bytes and provider credential values never enter this model.
+ *
  * @param create Create inventory and choices.
  * @param restore Restore summary and choices.
  * @param isRestoreTab Current tab, or true in first-launch restore-only mode.
  * @param isBusy Whether a serialized file or commit job owns the screen.
+ * @param isLeaving Whether Back is quietly cleaning up before the route exits.
  * @param isExporting Whether graph-owned destination copying is in progress.
  * @param hasPendingExport Whether a durable export intent owns the staged source.
  * @param isPicking Whether a native document picker is open.
@@ -22,6 +24,7 @@ import com.shifthackz.aisdv1.domain.entity.backup.BackupRestoreResult
  * @param hasExported Whether native document export actually completed.
  * @param hasPendingSession Whether unfinished restore intent owns the staged archive.
  * @param isRestoreSelectionLocked Whether displayed choices are bound to a submitted or completed restore operation.
+ *
  * @author Dmitriy Moroz
  */
 data class BackupState(
@@ -29,6 +32,7 @@ data class BackupState(
     val restore: BackupPageState = BackupPageState(),
     val isRestoreTab: Boolean = false,
     val isBusy: Boolean = false,
+    val isLeaving: Boolean = false,
     val isExporting: Boolean = false,
     val hasPendingExport: Boolean = false,
     val isPicking: Boolean = false,

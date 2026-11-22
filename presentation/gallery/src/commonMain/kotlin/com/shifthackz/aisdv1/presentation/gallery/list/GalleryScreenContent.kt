@@ -5,6 +5,12 @@
 
 package com.shifthackz.aisdv1.presentation.gallery.list
 
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -33,15 +39,11 @@ import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
 import androidx.compose.runtime.snapshotFlow
@@ -53,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
 import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkWidget
 import kotlin.random.Random
 
@@ -81,18 +84,19 @@ fun GalleryScreenContent(
     }
 
     Box(modifier) {
-        Scaffold(
+        PlatformScaffold(
+            canUnderlapToolbar = true,
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 Column {
-                    CenterAlignedTopAppBar(
+                    PlatformTopAppBar(
                         navigationIcon = {
                             AnimatedContent(
                                 targetState = state.selectionMode,
                                 transitionSpec = { fadeIn() togetherWith fadeOut() },
                                 label = "main_nav_icon_animation",
                             ) { isInSelectionMode ->
-                                IconButton(
+                                ToolbarIconButton(
                                     onClick = {
                                         val intent = if (isInSelectionMode) {
                                             GalleryIntent.ChangeSelectionMode(false)
@@ -116,7 +120,7 @@ fun GalleryScreenContent(
                         title = {
                             Text(
                                 text = Localization.string("title_gallery"),
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
                             )
                         },
                         actions = {
@@ -131,7 +135,7 @@ fun GalleryScreenContent(
                                         enter = fadeIn(),
                                         exit = fadeOut(),
                                     ) {
-                                        IconButton(
+                                        ToolbarIconButton(
                                             onClick = {
                                                 processIntent(GalleryIntent.Dropdown.Toggle)
                                             },
@@ -149,66 +153,39 @@ fun GalleryScreenContent(
                                 onDismissRequest = { processIntent(GalleryIntent.Dropdown.Close) },
                                 containerColor = MaterialTheme.colorScheme.background,
                             ) {
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Checklist,
-                                            contentDescription = null,
-                                            tint = LocalContentColor.current,
-                                        )
-                                    },
-                                    text = {
-                                        Text(text = Localization.string("gallery_menu_selection_mode"))
-                                    },
+                                ContextualHelpMenuItem(
+                                    title = Localization.string("gallery_menu_selection_mode"),
+                                    message = Localization.string("help_gallery_selection"),
+                                    icon = Icons.Default.Checklist,
                                     onClick = {
                                         processIntent(GalleryIntent.Dropdown.Close)
                                         processIntent(GalleryIntent.ChangeSelectionMode(true))
                                     },
                                 )
                                 if (state.mediaStoreInfo.isNotEmpty) {
-                                    DropdownMenuItem(
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.FileOpen,
-                                                contentDescription = null,
-                                                tint = LocalContentColor.current,
-                                            )
-                                        },
-                                        text = {
-                                            Text(text = Localization.string("browse"))
-                                        },
+                                    ContextualHelpMenuItem(
+                                        title = Localization.string("browse"),
+                                        message = Localization.string("help_gallery_browse"),
+                                        icon = Icons.Default.FileOpen,
                                         onClick = {
                                             processIntent(GalleryIntent.Dropdown.Close)
                                             processIntent(GalleryIntent.OpenMediaStoreFolder)
                                         },
                                     )
                                 }
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Share,
-                                            contentDescription = null,
-                                            tint = LocalContentColor.current,
-                                        )
-                                    },
-                                    text = {
-                                        Text(text = Localization.string("gallery_menu_export_all"))
-                                    },
+                                ContextualHelpMenuItem(
+                                    title = Localization.string("gallery_menu_export_all"),
+                                    message = Localization.string("help_gallery_export_all"),
+                                    icon = Icons.Default.Share,
                                     onClick = {
                                         processIntent(GalleryIntent.Dropdown.Close)
                                         processIntent(GalleryIntent.Export.All.Request)
                                     },
                                 )
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = {
-                                        Text(text = Localization.string("gallery_menu_delete_all"))
-                                    },
+                                ContextualHelpMenuItem(
+                                    title = Localization.string("gallery_menu_delete_all"),
+                                    message = Localization.string("help_gallery_delete_all"),
+                                    icon = Icons.Default.Delete,
                                     onClick = {
                                         processIntent(GalleryIntent.Dropdown.Close)
                                         processIntent(GalleryIntent.Delete.All.Request)
@@ -232,6 +209,7 @@ fun GalleryScreenContent(
                 )
             },
         ) { paddingValues ->
+            ToolbarScrollObserver(!state.loading && state.itemIds.isNotEmpty() && listState.canScrollBackward)
             when {
                 state.loading -> GalleryLoadingGrid(
                     modifier = Modifier
@@ -245,9 +223,19 @@ fun GalleryScreenContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = paddingValues.calculateTopPadding())
-                        .verticalScrollbar(listState),
+                        .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
                     columns = GridCells.Fixed(state.grid.size),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        top = 16.dp + LocalToolbarContentInset.current,
+                        end = 16.dp,
+                        bottom = 16.dp + if (LocalFloatingNavigationBarInset.current > 0.dp) {
+                            maxOf(
+                                LocalFloatingNavigationBarInset.current,
+                                paddingValues.calculateBottomPadding()
+                            )
+                        } else 0.dp
+                    ),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     state = listState,

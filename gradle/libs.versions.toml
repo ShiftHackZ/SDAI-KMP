@@ -10,11 +10,14 @@ kotlin = "2.3.21"
 ksp = "2.3.9"
 appcompat = "1.7.1"
 composeMultiplatform = "1.11.1"
+composeMaterial3 = "1.9.0"
+composeMaterialIcons = "1.7.3"
 composeBom = "2026.05.01"
 composeActivity = "1.13.0"
 composeJunit = "1.11.2"
 lifecycleViewModel = "2.10.0"
 navigation = "2.9.8"
+navigationEvent = "1.1.0"
 gson = "2.15.0"
 okhttp = "5.4.0"
 okio = "3.17.0"
@@ -47,6 +50,13 @@ dokka = "2.3.0"
 detekt = "2.0.0-alpha.3"
 
 [libraries]
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMaterial3" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "composeMaterialIcons" }
+compose-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "composeMultiplatform" }
+compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 android-tools-build-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -60,6 +70,7 @@ androidx-lifecycle-viewmodel-core = { group = "androidx.lifecycle", name = "life
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewModel" }
 androidx-lifecycle-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleViewModel" }
 androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+navigation-event-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationEvent" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
