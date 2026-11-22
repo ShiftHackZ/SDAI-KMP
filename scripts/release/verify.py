@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate release metadata and compare clean unsigned builds before signing."""
+"""Validate unsigned release artifacts, comparing independent rebuilds only for FOSS."""
 import hashlib
 import json
 import os
@@ -148,17 +148,24 @@ def compare_reference(url, expected_hash, unsigned, tools, output):
 
 
 def main():
-    require(len(sys.argv) in (9, 11), "Usage: verify.py FIRST SECOND OUTPUT FLAVOR FORMAT VERSION CODE SOURCE_SHA [REFERENCE_URL REFERENCE_SHA256]")
-    first, second, output = (Path(value).resolve() for value in sys.argv[1:4])
+    require(len(sys.argv) in (9, 11), "Usage: verify.py FIRST SECOND|- OUTPUT FLAVOR FORMAT VERSION CODE SOURCE_SHA [REFERENCE_URL REFERENCE_SHA256]")
+    first = Path(sys.argv[1]).resolve()
+    second = None if sys.argv[2] == "-" else Path(sys.argv[2]).resolve()
+    output = Path(sys.argv[3]).resolve()
     flavor, format_, version, code, sha = sys.argv[4:9]
     require(flavor in ("foss", "full", "playstore") and format_ in ("apk", "aab"), "Invalid release variant.")
     require(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", version) and re.fullmatch(r"[1-9][0-9]*", code), "Invalid version.")
     require(re.fullmatch(r"[0-9a-f]{40}", sha), "Source revision must be a full commit SHA.")
-    require(first.is_file() and second.is_file() and not first.samefile(second), "Two separate build artifacts are required.")
+    require((second is not None) == (flavor == "foss"), "An independent rebuild is required only for FOSS; use - for other flavors.")
+    require(first.is_file(), "The unsigned build artifact is missing.")
+    if second is not None:
+        require(second.is_file() and not first.samefile(second), "Two separate FOSS build artifacts are required.")
     output.mkdir(parents=True, exist_ok=True)
     require(not (output / ("unsigned." + format_)).exists(), "Verified output already exists.")
-    hashes = [file_digest(first), file_digest(second)]
-    if hashes[0] != hashes[1]:
+    hashes = [file_digest(first)]
+    if second is not None:
+        hashes.append(file_digest(second))
+    if second is not None and hashes[0] != hashes[1]:
         inventories = [zip_inventory(path) for path in (first, second)]
         differences = {name: [inventory.get(name) for inventory in inventories]
                        for name in sorted(set(inventories[0]) | set(inventories[1]))
@@ -178,14 +185,16 @@ def main():
         reference = compare_reference(sys.argv[9], sys.argv[10], first, tools, output)
     metadata = {"sha256": hashes[0], "flavor": flavor, "format": format_, "source_sha": sha,
                 "version_name": version, "version_code": int(code), "application_id": app_id,
-                "unsigned_rebuild_comparison": "byte_identical", "reference_comparison": reference,
+                "unsigned_rebuild_comparison": "byte_identical" if second is not None else "not_requested", "reference_comparison": reference,
                 "fdroid_pipeline_execution": "not_run"}
-    diagnostic_archives = [path.parent / "native-diagnostics.zip" for path in (first, second)]
+    packages = [first, second] if second is not None else [first]
+    diagnostic_archives = [path.parent / "native-diagnostics.zip" for path in packages]
     manifests = [verify_archive(archive, package, metadata)
-                 for archive, package in zip(diagnostic_archives, (first, second))]
-    require(manifests[0] == manifests[1], "Independent native diagnostics manifests differ.")
-    require(file_digest(diagnostic_archives[0]) == file_digest(diagnostic_archives[1]),
-            "Independent native diagnostics archives differ.")
+                 for archive, package in zip(diagnostic_archives, packages)]
+    if second is not None:
+        require(manifests[0] == manifests[1], "Independent native diagnostics manifests differ.")
+        require(file_digest(diagnostic_archives[0]) == file_digest(diagnostic_archives[1]),
+                "Independent native diagnostics archives differ.")
     shutil.copyfile(first, output / ("unsigned." + format_))
     shutil.copyfile(diagnostic_archives[0], output / "native-diagnostics.zip")
     write_json(output / "metadata.json", metadata)

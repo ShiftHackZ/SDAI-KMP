@@ -120,21 +120,28 @@ def collect(args):
     versions = tomllib.loads((source / "gradle/libs.versions.toml").read_text())["versions"]
     libraries = package_libraries(args.package)
     chosen = {}
+    unverifiable = set()
     rank = {"stripped": 0, "symbols": 1, "full": 2}
 
     def consider(key, data, origin, must_match=False):
         if key not in libraries:
-            require(not must_match, "Symbols reference a library absent from package")
+            # AGP symbol archives may include dependency ABIs excluded from the package.
             return
         identity = elf_identity(data)
-        matches = all(identity[field] == libraries[key][field] for field in ("build_id", "machine", "bits"))
-        if identity["build_id"] is None:
-            matches = matches and sha256(data) == libraries[key]["sha256"]
+        has_matching_abi = all(identity[field] == libraries[key][field] for field in ("machine", "bits"))
+        require(has_matching_abi or not must_match, "Native symbol ABI does not match package: " + "/".join(key))
+        if not has_matching_abi:
+            return
+        if identity["build_id"] is None or libraries[key]["build_id"] is None:
+            # Separate debug files cannot be authenticated by comparing their bytes to a stripped library.
+            unverifiable.add(key)
+            return
+        matches = identity["build_id"] == libraries[key]["build_id"]
         require(matches or not must_match, "Native symbols do not match package build ID: " + "/".join(key))
         if not matches:
             return
         previous = chosen.get(key)
-        if identity["build_id"] is not None and identity["quality"] != "stripped" and (previous is None or rank[identity["quality"]] > rank[previous[0]["quality"]]):
+        if identity["quality"] != "stripped" and (previous is None or rank[identity["quality"]] > rank[previous[0]["quality"]]):
             chosen[key] = identity, data, origin
 
     with zipfile.ZipFile(args.package) as archive:
@@ -176,9 +183,20 @@ def collect(args):
             selected = None
         quality = selected[0]["quality"] if selected else "stripped"
         require(name not in FIRST_PARTY or (quality == "full" and packaged["build_id"]), "First-party line symbols are missing: " + "/".join(key))
+        has_unverifiable_symbols = selected is None and key in unverifiable
+        limitation = None if quality == "full" else "Source lines unavailable; obtain matching symbols from dependency maintainer."
+        if selected:
+            origin = selected[2]
+        elif has_host_paths:
+            origin = "dependency-paths-excluded"
+            limitation = "Debug data excluded because it contains host paths."
+        elif has_unverifiable_symbols:
+            origin = "dependency-build-id-missing"
+            limitation = "Debug data excluded because a GNU build ID is missing."
+        else:
+            origin = "dependency-prestripped"
         record = {"abi": abi, "name": name, **packaged, "debug_quality": quality,
-                  "origin": selected[2] if selected else "dependency-paths-excluded" if has_host_paths else "dependency-prestripped",
-                  "limitation": "Debug data excluded because it contains host paths." if has_host_paths else None if quality == "full" else "Source lines unavailable; obtain matching symbols from dependency maintainer."}
+                  "origin": origin, "limitation": limitation}
         if selected:
             archive_path = f"native/{abi}/{packaged['build_id']}/{name}.dbg"
             entries[archive_path] = selected[1]

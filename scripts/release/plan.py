@@ -33,7 +33,8 @@ def main():
             if selection not in (kind, "both"):
                 continue
             task = ("assemble" if kind == "apk" else "bundle") + flavor.capitalize() + "Release"
-            targets.append({"flavor": flavor, "format": kind, "task": ":app:" + task})
+            targets.append({"flavor": flavor, "format": kind, "task": ":app:" + task,
+                            "attempts": 2 if flavor == "foss" else 1})
     if not targets:
         raise ValueError("Select at least one APK or AAB")
 
@@ -61,7 +62,7 @@ def main():
         "version_code": version_code,
         "targets": json.dumps({"include": targets}, separators=(",", ":")),
         "builds": json.dumps(
-            {"include": [dict(t, attempt=a) for t in targets for a in (1, 2)]},
+            {"include": [dict(t, attempt=a) for t in targets for a in range(1, t["attempts"] + 1)]},
             separators=(",", ":"),
         ),
     }
@@ -73,7 +74,8 @@ def main():
         summary.write("| Flavor | Format | Gradle task |\n| --- | --- | --- |\n")
         for target in targets:
             summary.write(f"| {target['flavor']} | {target['format']} | `{target['task']}` |\n")
-        summary.write("\nEach output is built twice on separate runners before signing.\n")
+        summary.write("\nFOSS outputs are built twice on separate runners and compared before signing. "
+                      "Full and Play Store outputs are built once.\n")
 
 
 if __name__ == "__main__":

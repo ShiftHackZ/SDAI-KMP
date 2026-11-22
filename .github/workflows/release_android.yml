@@ -109,7 +109,7 @@ jobs:
             --tag "$RELEASE_TAG" --source-sha "$SOURCE_SHA" --version "$VERSION_NAME"
 
   build:
-    name: Build ${{ matrix.flavor }} ${{ matrix.format }} (${{ matrix.attempt }}/2)
+    name: Build ${{ matrix.flavor }} ${{ matrix.format }} (${{ matrix.attempt }}/${{ matrix.attempts }})
     needs: plan
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -186,6 +186,10 @@ jobs:
       - name: Install verification tools
         run: |
           bash ci/scripts/release/setup.sh sign "$RUNNER_TEMP/release-tools"
+
+      - name: Install FOSS reproducibility tools
+        if: matrix.flavor == 'foss'
+        run: |
           python3 -m venv "$RUNNER_TEMP/apksigcopier"
           "$RUNNER_TEMP/apksigcopier/bin/pip" install --require-hashes -r ci/scripts/release/requirements.txt
           echo "$RUNNER_TEMP/apksigcopier/bin" >> "$GITHUB_PATH"
@@ -197,12 +201,13 @@ jobs:
           path: first
 
       - name: Download independent rebuild
+        if: matrix.flavor == 'foss'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: unsigned-${{ matrix.flavor }}-${{ matrix.format }}-2
           path: second
 
-      - name: Compare builds and validate package identity
+      - name: Validate package identity and compare FOSS rebuilds
         env:
           FLAVOR: ${{ matrix.flavor }}
           FORMAT: ${{ matrix.format }}
@@ -213,12 +218,16 @@ jobs:
           FOSS_REFERENCE_SHA256: ${{ inputs.foss_reference_sha256 }}
           ANDROID_RELEASE_CERT_SHA256: ${{ vars.ANDROID_RELEASE_CERT_SHA256 }}
         run: |
+          rebuild="-"
+          if [[ "$FLAVOR" == foss ]]; then
+            rebuild="second/unsigned.$FORMAT"
+          fi
           reference_args=()
           if [[ "$FLAVOR" == foss && "$FORMAT" == apk && -n "$FOSS_REFERENCE_URL" ]]; then
             reference_args=("$FOSS_REFERENCE_URL" "$FOSS_REFERENCE_SHA256")
           fi
           python3 ci/scripts/release/verify.py \
-            "first/unsigned.$FORMAT" "second/unsigned.$FORMAT" "$RUNNER_TEMP/verified" \
+            "first/unsigned.$FORMAT" "$rebuild" "$RUNNER_TEMP/verified" \
             "$FLAVOR" "$FORMAT" "$VERSION_NAME" "$VERSION_CODE" "$SOURCE_SHA" \
             "${reference_args[@]}"
           cp first/toolchain.json first/submodules.txt first/environment.txt "$RUNNER_TEMP/verified/"
@@ -263,6 +272,10 @@ jobs:
       - name: Install pinned signing tools
         run: |
           bash ci/scripts/release/setup.sh sign "$RUNNER_TEMP/release-tools"
+
+      - name: Install FOSS signature-copy tools
+        if: matrix.flavor == 'foss' && matrix.format == 'apk'
+        run: |
           python3 -m venv "$RUNNER_TEMP/apksigcopier"
           "$RUNNER_TEMP/apksigcopier/bin/pip" install --require-hashes -r ci/scripts/release/requirements.txt
           echo "$RUNNER_TEMP/apksigcopier/bin" >> "$GITHUB_PATH"
@@ -274,7 +287,7 @@ jobs:
           path: verified
 
       - name: Download independent APK rebuild for signature-copy verification
-        if: matrix.format == 'apk'
+        if: matrix.flavor == 'foss' && matrix.format == 'apk'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: unsigned-${{ matrix.flavor }}-${{ matrix.format }}-2
@@ -301,7 +314,7 @@ jobs:
           cp verified/native-diagnostics.zip "$RUNNER_TEMP/signed/sdai-$FLAVOR-$FORMAT-$VERSION_NAME-native-diagnostics.zip"
 
       - name: Verify signed APK against the independent rebuild
-        if: matrix.format == 'apk'
+        if: matrix.flavor == 'foss' && matrix.format == 'apk'
         env:
           FLAVOR: ${{ matrix.flavor }}
           VERSION_NAME: ${{ needs.plan.outputs.version_name }}
@@ -318,7 +331,7 @@ jobs:
             --report "$RUNNER_TEMP/signed/signature-copy-comparison.json"
 
       - name: Save signature-copy failure report
-        if: failure() && matrix.format == 'apk'
+        if: failure() && matrix.flavor == 'foss' && matrix.format == 'apk'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: signature-copy-failure-${{ matrix.flavor }}

@@ -1,11 +1,12 @@
 # Android release workflow
 
 [Android Release](../../.github/workflows/release_android.yml) builds selected Android
-artifacts on native Ubuntu 24.04 x86-64 GitHub runners. Each artifact is built twice
-on separate fresh runners. Only byte-identical unsigned outputs with the expected
-package, version and embedded Git revision proceed to signing. Signing is enabled
+artifacts on native Ubuntu 24.04 x86-64 GitHub runners. FOSS artifacts are built twice
+on separate fresh runners and must be byte-identical. Full and Play Store artifacts
+are built once. Every output must have the expected package, version and embedded
+Git revision before signing. Signing is enabled
 by default; no separate unsigned run or existing-release reference is required.
-Signed APKs then pass signature-copy verification against the independent rebuild.
+Signed FOSS APKs then pass signature-copy verification against the independent rebuild.
 
 ## Select outputs
 
@@ -81,7 +82,7 @@ Play configuration fails instead of falling back to another key. These settings
 apply to both APK and AAB outputs for the Play Store flavor.
 
 APKs use `apksigner` with alignment preservation. After signing, the workflow uses
-`compare_apk.py` to verify the signed APK against the second independent CI build.
+`compare_apk.py` to verify the signed FOSS APK against the second independent CI build.
 The same helper supports local comparison against F-Droid APKs. AABs use `jarsigner`; the upload
 key must match Play Console's registered upload certificate. Google Play's app
 signing certificate can be different from the upload certificate.
@@ -242,12 +243,13 @@ Each output has its own downloadable artifact:
 
 Signed filenames are `sdai-<flavor>-release-<version>.apk` or `.aab`. Metadata
 records the source commit, version, unsigned checksum and reference comparison
-status. Signed APK artifacts also contain `signature-copy-comparison.json` from
-comparison with the independent CI rebuild. ZIP entry differences are retained if
-the two unsigned builds disagree.
+status. `unsigned_rebuild_comparison` is `byte_identical` for FOSS and
+`not_requested` for Full and Play Store. Signed FOSS APK artifacts also contain
+`signature-copy-comparison.json` from comparison with the independent CI rebuild.
+ZIP entry differences are retained if the two FOSS unsigned builds disagree.
 
 Actions artifacts are retained for 14 days. Download the verified signed files for
-the normal release process. AAB repeatability is checked before signing; JAR
+the normal release process. FOSS AAB repeatability is checked before signing; JAR
 signing metadata may differ between signing runs.
 
 ## Native crash symbols
@@ -257,7 +259,7 @@ The release helpers run in CI, independently of the application:
 | Script                   | Responsibility                                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `native_symbols.py`      | Collects matching native debug data and a build-identity manifest; verifies an archive against packaged ELF bytes. Called by `build.sh`, and imported by the verification and attachment helpers. |
-| `verify.py`              | Checks the two independent unsigned builds and their native diagnostic archives before signing.                                                                                                   |
+| `verify.py`              | Validates package identity and native diagnostics before signing; compares independent unsigned builds only for FOSS.                                                                             |
 | `publish_diagnostics.py` | Optionally attaches verified diagnostic archives and checksum bindings to an existing version release. It also provides read-only release/asset preflight checks.                                 |
 
 The collector and verifier preserve the evidence needed to symbolicate crashes
@@ -278,6 +280,11 @@ first-party debug information needs compiler prefix-map repair. Prestripped
 dependencies, absent build IDs and unavailable third-party source lines are
 recorded as limitations. A library name alone is insufficient for symbolication;
 match its ABI and build ID to the manifest before using a symbol file.
+
+AGP symbol archives may include ABIs excluded from the package; those entries are
+ignored. Third-party debug files without a verifiable GNU build ID are omitted
+and recorded as a diagnostic limitation. Known build-ID and ABI mismatches still
+fail, and first-party libraries still require full matching line symbols.
 
 For a distributed version, preserve its diagnostics for the release's supported
 lifetime. Set `diagnostics_release_tag` to an **existing** release tag matching
