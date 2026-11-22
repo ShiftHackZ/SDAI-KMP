@@ -39,6 +39,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
  * @param onHistoryImageSelected Receives the selected gallery output as Base64, without restoring metadata.
  * @param modifier Placement and sizing of the card.
  * @param selectedImage Preview and editing controls supplied by the owning screen.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

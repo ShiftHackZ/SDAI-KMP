@@ -24,9 +24,11 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
 
 /**
  * Displays one LoRA or hypernetwork entry with its current application state and optional weight.
+ *
+ * @param modifier Card placement within the catalog list.
  * @param item Catalog entry and caller-owned selection state.
  * @param onLoraSelected Requests toggling this entry through the owning sheet.
- * @param modifier Card placement within the catalog list.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

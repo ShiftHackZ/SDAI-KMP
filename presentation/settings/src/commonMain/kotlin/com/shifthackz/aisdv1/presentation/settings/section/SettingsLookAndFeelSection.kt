@@ -42,6 +42,7 @@ import com.shifthackz.aisdv1.presentation.settings.text
  * @param headerModifier Layout applied to the section header.
  * @param itemModifier Layout applied to each preference row.
  * @param processIntent Receives appearance and gallery preference actions.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

@@ -25,6 +25,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
  *
  * @param archive Validated summary with no provider credentials or decoded image data.
  * @param modifier Card placement within the scrolling restore content.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

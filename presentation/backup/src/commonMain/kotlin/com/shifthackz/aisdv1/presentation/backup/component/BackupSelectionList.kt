@@ -39,6 +39,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
  * @param isEnabled Whether selection can change during this operation.
  * @param processIntent Receives selection and disclosure actions.
  * @param modifier Layout applied to the root list container.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -135,6 +136,7 @@ internal fun BackupSelectionList(
  * Unknown IDs retain their literal identifier so inspection can still describe unsupported data.
  *
  * @param key Stable provider wire identifier from backup metadata.
+ *
  * @author Dmitriy Moroz
  */
 internal fun providerName(key: String): String =

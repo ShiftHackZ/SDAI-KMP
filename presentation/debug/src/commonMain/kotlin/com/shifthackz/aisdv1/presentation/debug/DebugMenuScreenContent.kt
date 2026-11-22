@@ -338,6 +338,7 @@ fun DebugMenuScreenContent(
  * @param endValueText Current preference value displayed after the title.
  * @param endValueContent Optional trailing control replacing the value and chevron.
  * @param onClick Primary action performed only on a short tap.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -375,6 +376,7 @@ private fun DebugMenuItem(
  * @param text Localized section title.
  * @param helpMessage Localized purpose of this group of tools.
  * @param modifier Placement of the heading and its help anchor.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

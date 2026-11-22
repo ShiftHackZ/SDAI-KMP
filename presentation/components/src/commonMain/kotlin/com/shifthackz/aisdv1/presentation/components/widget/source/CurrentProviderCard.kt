@@ -35,6 +35,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
  * @param platform Host platform selecting the local-provider label and icon.
  * @param onClick Opens provider configuration through the owning screen's router.
  * @param modifier Placement of the complete navigation card.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

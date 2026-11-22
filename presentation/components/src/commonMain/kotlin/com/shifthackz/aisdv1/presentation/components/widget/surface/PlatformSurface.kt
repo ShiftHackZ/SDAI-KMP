@@ -36,6 +36,7 @@ import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformContr
  * @param onClick Optional surface action; null leaves input handling to child content.
  * @param isEnabled Whether the optional surface action can run.
  * @param content Controls drawn above the platform background.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -104,6 +105,7 @@ fun PlatformSurface(
 
 /**
  * Reports whether the current platform, route visibility and preview support a native glass backdrop.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -112,13 +114,14 @@ internal expect fun isPlatformSurfaceGlassAvailable(): Boolean
 /**
  * Draws only the native decorative backdrop; shared content retains ownership of input.
  *
- * @param modifier Bounds measured from the enclosing surface content.
  * @param color Resolved themed tint, including tonal elevation.
  * @param backingColor Parent canvas filling the native interop cutout.
  * @param shape Surface corners resolved in the current density and layout direction.
  * @param inset Space retaining the glass rim inside its bounds.
  * @param isTopEdgeVisible Whether this segment starts a glass surface.
  * @param isBottomEdgeVisible Whether this segment ends a glass surface.
+ * @param modifier Bounds measured from the enclosing surface content.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

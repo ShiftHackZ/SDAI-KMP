@@ -16,6 +16,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformTo
  * so iOS draws the equivalent page-color gradient above the content instead.
  *
  * @param gradientOffset Distance from the top that remains fully visible before fading begins.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

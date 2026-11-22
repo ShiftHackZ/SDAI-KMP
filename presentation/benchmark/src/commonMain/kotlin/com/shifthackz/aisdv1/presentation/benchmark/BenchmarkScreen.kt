@@ -81,6 +81,7 @@ import org.koin.mp.KoinPlatform.getKoin
  *
  * @param modifier Compose modifier applied to the rendered UI.
  * @param router navigation router used by the screen.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -112,6 +113,7 @@ fun BenchmarkScreen(
  * @param modifier Compose modifier applied to the rendered UI.
  * @param state Device information, measured results, progress and any benchmark failure.
  * @param processIntent Requests benchmark execution, cancellation, retry or navigation.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -257,6 +259,7 @@ fun BenchmarkScreenContent(
  * @param loading Whether a saved result is still being loaded.
  * @param running Whether a benchmark is currently executing.
  * @param modifier Score-card placement and sizing within the benchmark list.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

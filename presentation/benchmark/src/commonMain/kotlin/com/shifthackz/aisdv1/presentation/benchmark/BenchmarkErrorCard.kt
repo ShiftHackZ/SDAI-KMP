@@ -24,6 +24,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
  * @param message Localized failure supplied by benchmark state.
  * @param onDismiss Requests clearing the failure without starting another benchmark.
  * @param modifier Card placement above the benchmark content.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

@@ -51,6 +51,7 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
  * @param onAction Downloads, retries, cancels or deletes the model.
  * @param modifier Layout and decoration applied to the row surface.
  * @param isActionEnabled Prevents conflicting transfers or removal while a batch owns the catalog.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

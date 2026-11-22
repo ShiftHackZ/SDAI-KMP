@@ -29,7 +29,11 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.Foundation.NSProcessInfo
 
-/** Restricts glass to supported systems and visible, unscaled compositions. @author Dmitriy Moroz */
+/**
+ * Enables native glass on iOS 26 or later for visible routes outside platform-control previews.
+ *
+ * @author Dmitriy Moroz
+ */
 @Composable
 internal actual fun isPlatformSurfaceGlassAvailable(): Boolean {
     val hasGlassSupport = remember {
@@ -49,6 +53,7 @@ internal actual fun isPlatformSurfaceGlassAvailable(): Boolean {
  * @param isTopEdgeVisible Whether this segment starts a glass surface.
  * @param isBottomEdgeVisible Whether this segment ends a glass surface.
  * @param modifier Surface backdrop bounds.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

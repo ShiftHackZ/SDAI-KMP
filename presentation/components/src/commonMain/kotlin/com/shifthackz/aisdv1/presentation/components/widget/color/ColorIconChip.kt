@@ -44,6 +44,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.isPlatformSu
  * @param selectedIcon Symbol centered over the complete chip when selected.
  * @param iconSize Size of the selected symbol, independent of the fill inset.
  * @param isEnabled Whether touch and accessibility can request selection.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

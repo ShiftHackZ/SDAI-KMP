@@ -19,10 +19,12 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
 
 /**
  * Displays an embedding and highlights whether it belongs to the active prompt field.
+ *
  * @param item Catalog keyword and its positive/negative prompt membership.
  * @param isPositivePrompt Whether selection targets the positive rather than negative prompt.
  * @param onItemToggle Requests toggling the keyword in the owning sheet.
  * @param modifier Outer list spacing and card bounds.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

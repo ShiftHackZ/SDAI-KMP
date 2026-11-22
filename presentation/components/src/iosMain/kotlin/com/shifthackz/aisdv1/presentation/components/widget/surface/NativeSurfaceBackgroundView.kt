@@ -60,11 +60,11 @@ internal class NativeSurfaceBackgroundView : UIView(frame = CGRectMake(0.0, 0.0,
     }
 
     /**
-     * Keeps the parent canvas opaque and applies the surface's theme tint to native glass.
+     * Fills the native cutout with the enclosing canvas color and applies the surface tint to glass.
      * Reuses the effect until its tint changes, including during animated row highlights.
      *
      * @param isDark App appearance, independent of the system preference.
-     * @param backingColor Parent canvas filling the rectangular native interop cutout.
+     * @param backingColor Enclosing canvas color; may be clear when another native surface supplies it.
      * @param color Themed tint, preserving its configured alpha.
      * @param inset Space retaining the native glass rim inside the clipping bounds.
      * @param isTopEdgeVisible Whether this segment starts the surface; false clips away the top rim.
@@ -73,6 +73,7 @@ internal class NativeSurfaceBackgroundView : UIView(frame = CGRectMake(0.0, 0.0,
      * @param topRightRadius Outer top-right corner radius in logical points.
      * @param bottomLeftRadius Outer bottom-left corner radius in logical points.
      * @param bottomRightRadius Outer bottom-right corner radius in logical points.
+     *
      * @author Dmitriy Moroz
      */
     fun update(

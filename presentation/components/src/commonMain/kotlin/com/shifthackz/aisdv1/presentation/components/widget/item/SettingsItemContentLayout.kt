@@ -41,18 +41,18 @@ import kotlinx.coroutines.delay
 /**
  * Renders a settings row with optional loading, selection emphasis and trailing value controls.
  *
+ * @param text Setting label.
  * @param modifier Layout modifiers for the complete row or loading placeholder.
  * @param loading Replaces content with a shimmer while the setting loads.
  * @param enabled Whether row clicks are accepted.
  * @param selected Whether a selection border highlights the row.
- * @param text Setting label.
  * @param animateBackground Whether the row cycles between theme highlight colors.
  * @param showChevron Displays a navigation chevron when no custom trailing content is supplied.
  * @param endValueText Textual value displayed at the trailing edge.
  * @param endValueContent Custom trailing content replacing the textual value and chevron.
  * @param textSuffixContent Additional inline content after the main label.
  * @param startIconContent Custom leading content beside the label.
- * @param onClick Requests the setting's action. Return values and persistence stay caller-owned.
+ * @param onClick Requests the setting's action; persistence stays caller-owned.
  *
  * @author Dmitriy Moroz
  */
