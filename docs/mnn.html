@@ -1,17 +1,17 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MNN SD 1.5 — SDAI</title>
-    <meta
-      name="description"
-      content="Alpha Android and iOS MNN SD 1.5 model setup and supported generation options in SDAI."
-    />
-  </head>
-  <body>
-    <main>
-      <h1>MNN SD 1.5</h1>
+---
+layout: "site"
+title: "MNN SD 1.5"
+description: "Alpha Android and iOS MNN SD 1.5 model setup and supported generation options in SDAI."
+schema: "TechArticle"
+social_type: "article"
+---
+<main id="main-content">
+  {% include page-hero.html
+    title="MNN SD 1.5"
+    summary="On-device text-to-image generation for supported Android phones and iPhones."
+  %}
+  <section class="section">
+    <div class="shell legal-copy">
       <p>
         Alpha local text-to-image generation on Android arm64 and physical iOS
         17+ devices with MNN 3.6.2. Each request creates one 512×512 image using
@@ -64,7 +64,6 @@
         tokenizer, verify graph declarations and package a manifest with
         checksums and the model license. End users do not need conversion tools.
       </p>
-      <p><a href="index.html">SDAI home</a></p>
-    </main>
-  </body>
-</html>
+    </div>
+  </section>
+</main>

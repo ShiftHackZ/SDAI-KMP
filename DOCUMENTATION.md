@@ -441,6 +441,37 @@ will be overwritten by the next Dokka run.
 New modules included in `settings.gradle.kts` are documented automatically when
 they have their own build script; no separate Dokka module list is maintained.
 
+## Website and blog
+
+GitHub Pages builds the site from `docs/` on `master` using Jekyll. Shared site
+layouts and includes live in `docs/_layouts/` and `docs/_includes/`. The FAQ
+source is `docs/_data/faq.json`, which generates both the HTML and the
+`/faq.json` endpoint.
+
+Create a lowercase, hyphenated folder in `docs/blog/` for each post. For
+example, `docs/blog/my-post/BLOGPOST.md` becomes `/blog/my-post/` and appears in
+the blog index and sitemap automatically.
+
+1. Write the article in `BLOGPOST.md`. The YAML front matter needs a `title`,
+   `description`, `date` in `YYYY-MM-DD` format, `category`, and `cover_alt`.
+   Start body headings at level two because the template supplies the title.
+2. Add a 1280 × 720 image named `header.jpg`. For different artwork, specify
+   `cover`, `cover_width`, and `cover_height` in the front matter.
+3. Save any distinct platform copy in `TELEGRAM.md`, `LINKEDIN.md`, or
+   `DISCORD.md` beside the post. The Pages build excludes these files.
+
+The template uses SDAI as the byline. To credit someone else, set `author`,
+`author_type` (`Person` or `Organization`), and `author_url`. Set `updated`
+when making a substantial revision to a published post.
+
+To preview, use the
+[GitHub Pages Jekyll setup](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll)
+and run from the repository root:
+
+```sh
+bundle exec jekyll serve --source docs --destination "$(mktemp -d)"
+```
+
 ## Pre-Release Checklist
 
 Before a release or store upload:

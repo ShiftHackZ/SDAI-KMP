@@ -1,0 +1,29 @@
+title: SDAI
+url: https://sdai.moroz.cc
+baseurl: ""
+theme: null
+markdown: kramdown
+kramdown:
+  input: GFM
+
+# Keep archival platform copy in the repository and outside the published site.
+exclude:
+  - blog/*/TELEGRAM.md
+  - blog/*/LINKEDIN.md
+  - blog/*/DISCORD.md
+
+defaults:
+  - scope:
+      path: blog/*/BLOGPOST.md
+      type: pages
+    values:
+      layout: blog-post
+      nav: blog
+      social_type: article
+      cover: header.jpg
+      cover_width: 1280
+      cover_height: 720
+      author: SDAI
+      author_type: Organization
+      author_url: https://sdai.moroz.cc/
+      permalink: /:path/

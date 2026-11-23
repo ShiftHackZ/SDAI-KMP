@@ -1,237 +1,160 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Privacy Policy - SDAI</title>
-    <meta
-      name="description"
-      content="Privacy Policy for SDAI, the open-source AI image generation app for Android and iOS."
-    />
-    <meta name="application-name" content="SDAI" />
-    <meta name="author" content="Moroz Inc." />
-    <meta name="robots" content="index,follow" />
-    <meta name="theme-color" content="#514a91" />
-    <link rel="canonical" href="https://sdai.moroz.cc/privacy.html" />
-    <link rel="apple-touch-icon" href="https://sdai.moroz.cc/assets/sdai.png" />
-    <link rel="manifest" href="site.webmanifest" />
-    <meta property="og:title" content="Privacy Policy - SDAI" />
-    <meta
-      property="og:description"
-      content="How SDAI handles local settings, generated images, provider requests, permissions, reports, logs, and third-party services."
-    />
-    <meta property="og:url" content="https://sdai.moroz.cc/privacy.html" />
-    <meta property="og:site_name" content="SDAI" />
-    <meta property="og:type" content="article" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:image" content="https://sdai.moroz.cc/assets/sdai.png" />
-    <meta property="og:image:width" content="512" />
-    <meta property="og:image:height" content="512" />
-    <meta property="og:image:alt" content="SDAI app icon" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Privacy Policy - SDAI" />
-    <meta
-      name="twitter:description"
-      content="Privacy details for the SDAI open-source AI image generation app."
-    />
-    <meta
-      name="twitter:image"
-      content="https://sdai.moroz.cc/assets/sdai.png"
-    />
-    <link rel="icon" href="assets/sdai.png" />
-    <link rel="stylesheet" href="css/site.css?v=20261117" />
-    <script src="js/site.js?v=20261117" defer></script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "@id": "https://sdai.moroz.cc/privacy.html#webpage",
-        "name": "Privacy Policy - SDAI",
-        "description": "Privacy Policy for SDAI, the open-source AI image generation app for Android and iOS.",
-        "url": "https://sdai.moroz.cc/privacy.html",
-        "isPartOf": {
-          "@id": "https://sdai.moroz.cc/#website"
-        },
-        "about": {
-          "@id": "https://sdai.moroz.cc/#app"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "Moroz Inc.",
-          "url": "https://moroz.cc/"
-        }
-      }
-    </script>
-  </head>
-  <body data-page="privacy">
-    <div id="site-header"></div>
+---
+layout: "site"
+title: "Privacy Policy"
+description: "Privacy Policy for SDAI, the open-source AI image generation app for Android and iOS."
+nav: "privacy"
+---
+<main id="main-content">
+  {% include page-hero.html
+    eyebrow="SDAI"
+    title="Privacy Policy"
+    summary="This policy explains how SDAI handles information when you use the app."
+  %}
 
-    <main>
-      <section class="page-hero">
-        <div class="shell">
-          <p class="eyebrow">SDAI</p>
-          <h1>Privacy Policy</h1>
-          <p>
-            This policy explains how SDAI handles information when you use the
-            app.
-          </p>
-        </div>
-      </section>
+  <section class="section">
+    <article class="shell legal-copy">
+      <p>
+        SDAI is an open-source app built by Dmitriy Moroz. The app itself does
+        not include ads or telemetry, and the maintainer does not collect
+        personal information from the app for analytics or advertising.
+      </p>
 
-      <section class="section">
-        <article class="shell legal-copy">
-          <p>
-            SDAI is an open-source app built by Dmitriy Moroz. The app itself
-            does not include ads or telemetry, and the maintainer does not
-            collect personal information from the app for analytics or
-            advertising.
-          </p>
+      <h2>Information Stored On Your Device</h2>
+      <p>
+        SDAI stores app settings, provider configuration, generated images,
+        gallery metadata, selected local models, and optional logs locally on
+        your device. API keys, server URLs, and local model paths are used to
+        run the features you configure in the app.
+      </p>
+      <p>
+        You control when generated images are saved, shared, exported, or
+        deleted. Gallery export and image sharing happen only when you start
+        those actions.
+      </p>
 
-          <h2>Information Stored On Your Device</h2>
-          <p>
-            SDAI stores app settings, provider configuration, generated images,
-            gallery metadata, selected local models, and optional logs locally
-            on your device. API keys, server URLs, and local model paths are
-            used to run the features you configure in the app.
-          </p>
-          <p>
-            You control when generated images are saved, shared, exported, or
-            deleted. Gallery export and image sharing happen only when you start
-            those actions.
-          </p>
+      <h2>ChatGPT OAuth Sessions</h2>
+      <p>
+        When you choose ChatGPT OAuth, SDAI requests a temporary device code
+        from auth.openai.com. You authorize the code in your browser. Completed
+        sessions are stored using Android Keystore-backed encrypted storage or
+        iOS Keychain with device-only protection. Access and refresh tokens are
+        not stored in ordinary preferences, gallery records, queued work or
+        application logs. Pending codes are kept only in memory.
+      </p>
+      <p>
+        Direct image requests send your prompt, requested dimensions, access
+        token and ChatGPT account identifier to chatgpt.com. No SDAI proxy or
+        desktop credential import is used. Sign out in provider configuration to
+        delete the local session; this does not revoke other sessions in your
+        OpenAI account. This unofficial integration is subject to account access
+        and service changes.
+      </p>
+      <h2>Civitai Account And Publishing</h2>
+      <p>
+        Connecting Civitai is optional. OAuth sign-in takes place on Civitai's
+        hosted page in the system authentication browser; SDAI does not receive
+        your password. OAuth tokens and optional API keys are stored in Android
+        Keystore-backed encrypted storage or device-only iOS Keychain. Public
+        post links and upload history are stored locally with app data.
+      </p>
+      <p>
+        Publishing sends the selected generated output, prompts, generation
+        settings, and recorded provider, model, device and OS information to
+        Civitai. Posts are public and identify SDAI with a link to its homepage.
+        Input images are not uploaded by this feature. Civitai processes
+        published content under its own terms and privacy policy.
+      </p>
+      <p>
+        Automatic publishing is off by default. If you enable it, subsequent
+        generated outputs and the same metadata are published automatically.
+        Existing gallery images are not automatically uploaded. Disabling this
+        setting stops future automatic uploads. Disconnecting removes saved
+        authorization from this device; previously published posts remain on
+        Civitai and can be managed there.
+      </p>
 
-          <h2>ChatGPT OAuth Sessions</h2>
-          <p>
-            When you choose ChatGPT OAuth, SDAI requests a temporary device code
-            from auth.openai.com. You authorize the code in your browser.
-            Completed sessions are stored using Android Keystore-backed
-            encrypted storage or iOS Keychain with device-only protection.
-            Access and refresh tokens are not stored in ordinary preferences,
-            gallery records, queued work or application logs. Pending codes are
-            kept only in memory.
-          </p>
-          <p>
-            Direct image requests send your prompt, requested dimensions, access
-            token and ChatGPT account identifier to chatgpt.com. No SDAI proxy
-            or desktop credential import is used. Sign out in provider
-            configuration to delete the local session; this does not revoke
-            other sessions in your OpenAI account. This unofficial integration
-            is subject to account access and service changes.
-          </p>
-          <h2>Civitai Account And Publishing</h2>
-          <p>
-            Connecting Civitai is optional. OAuth sign-in takes place on
-            Civitai's hosted page in the system authentication browser; SDAI
-            does not receive your password. OAuth tokens and optional API keys
-            are stored in Android Keystore-backed encrypted storage or
-            device-only iOS Keychain. Public post links and upload history are
-            stored locally with app data.
-          </p>
-          <p>
-            Publishing sends the selected generated output, prompts, generation
-            settings, and recorded provider, model, device and OS information to
-            Civitai. Posts are public and identify SDAI with a link to its
-            homepage. Input images are not uploaded by this feature. Civitai
-            processes published content under its own terms and privacy policy.
-          </p>
-          <p>
-            Automatic publishing is off by default. If you enable it, subsequent
-            generated outputs and the same metadata are published automatically.
-            Existing gallery images are not automatically uploaded. Disabling
-            this setting stops future automatic uploads. Disconnecting removes
-            saved authorization from this device; previously published posts
-            remain on Civitai and can be managed there.
-          </p>
+      <h2>AI Providers</h2>
+      <p>
+        SDAI can connect to providers you choose, including AUTOMATIC1111,
+        SwarmUI, OpenAI-compatible image servers and proxies, AI Horde, Hugging
+        Face, OpenAI, ChatGPT OAuth, Stability AI, Fal.ai, ArliAI, Android local
+        ONNX, Google AI MediaPipe, Android local SDXL, Silicon Diffusion Core
+        ML, and Silicon Diffusion PrismML Bonsai.
+      </p>
+      <p>
+        When you use a remote provider, prompts, input images, generation
+        settings, API keys, and related request data may be sent to that
+        provider or to your own server. Those services process data under their
+        own terms and privacy policies. Local ONNX, MediaPipe, local SDXL, Core
+        ML, and Bonsai generation are designed to run on device after the
+        selected model is available.
+      </p>
 
-          <h2>AI Providers</h2>
-          <p>
-            SDAI can connect to providers you choose, including AUTOMATIC1111,
-            SwarmUI, OpenAI-compatible image servers and proxies, AI Horde,
-            Hugging Face, OpenAI, ChatGPT OAuth, Stability AI, Fal.ai, ArliAI,
-            Android local ONNX, Google AI MediaPipe, Android local SDXL, Silicon
-            Diffusion Core ML, and Silicon Diffusion PrismML Bonsai.
-          </p>
-          <p>
-            When you use a remote provider, prompts, input images, generation
-            settings, API keys, and related request data may be sent to that
-            provider or to your own server. Those services process data under
-            their own terms and privacy policies. Local ONNX, MediaPipe, local
-            SDXL, Core ML, and Bonsai generation are designed to run on device
-            after the selected model is available.
-          </p>
+      <p>
+        For OpenAI-compatible generation, your prompt, model ID, requested size
+        and optional API key go to the API URL you configure. That server or
+        proxy may forward requests to its upstream provider. SDAI does not send
+        the provider API key when downloading a returned image URL. Any ChatGPT
+        login required by an external proxy is handled by that proxy, outside
+        SDAI.
+      </p>
 
-          <p>
-            For OpenAI-compatible generation, your prompt, model ID, requested
-            size and optional API key go to the API URL you configure. That
-            server or proxy may forward requests to its upstream provider. SDAI
-            does not send the provider API key when downloading a returned image
-            URL. Any ChatGPT login required by an external proxy is handled by
-            that proxy, outside SDAI.
-          </p>
+      <h2>Device Permissions</h2>
+      <p>SDAI may request device permissions for features you choose to use:</p>
+      <ul>
+        <li>Camera access for taking an input image for Img2Img.</li>
+        <li>
+          Storage or media access for reading, saving, exporting, and sharing
+          images.
+        </li>
+        <li>Notification permission for background generation progress.</li>
+      </ul>
+      <p>
+        Denying a permission may disable the related feature, but the rest of
+        the app can continue to work where possible.
+      </p>
 
-          <h2>Device Permissions</h2>
-          <p>
-            SDAI may request device permissions for features you choose to use:
-          </p>
-          <ul>
-            <li>Camera access for taking an input image for Img2Img.</li>
-            <li>
-              Storage or media access for reading, saving, exporting, and
-              sharing images.
-            </li>
-            <li>Notification permission for background generation progress.</li>
-          </ul>
-          <p>
-            Denying a permission may disable the related feature, but the rest
-            of the app can continue to work where possible.
-          </p>
+      <h2>Reports And Logs</h2>
+      <p>
+        SDAI can help you report a problem. A report or support email is sent
+        only after you start that action. Depending on the report flow, it may
+        include the text you write, the selected report reason, current provider
+        type, selected model identifier, an image you attach, or a local log
+        file.
+      </p>
 
-          <h2>Reports And Logs</h2>
-          <p>
-            SDAI can help you report a problem. A report or support email is
-            sent only after you start that action. Depending on the report flow,
-            it may include the text you write, the selected report reason,
-            current provider type, selected model identifier, an image you
-            attach, or a local log file.
-          </p>
+      <h2>Cookies</h2>
+      <p>
+        SDAI does not use browser cookies for app analytics or advertising.
+        External websites linked from the app or this site may use cookies
+        according to their own policies.
+      </p>
 
-          <h2>Cookies</h2>
-          <p>
-            SDAI does not use browser cookies for app analytics or advertising.
-            External websites linked from the app or this site may use cookies
-            according to their own policies.
-          </p>
+      <h2>Links To Other Sites</h2>
+      <p>
+        The app and website link to third-party services, stores, documentation,
+        and community pages. These sites are not operated by the maintainer, so
+        review their policies before using them.
+      </p>
 
-          <h2>Links To Other Sites</h2>
-          <p>
-            The app and website link to third-party services, stores,
-            documentation, and community pages. These sites are not operated by
-            the maintainer, so review their policies before using them.
-          </p>
+      <h2>Children's Privacy</h2>
+      <p>
+        SDAI is not directed to children under 13. The maintainer does not
+        knowingly collect personal information from children through the app.
+      </p>
 
-          <h2>Children's Privacy</h2>
-          <p>
-            SDAI is not directed to children under 13. The maintainer does not
-            knowingly collect personal information from children through the
-            app.
-          </p>
+      <h2>Changes To This Policy</h2>
+      <p>
+        This policy may be updated from time to time. Changes are published on
+        this page.
+      </p>
+      <p>Effective date: 2026-11-14.</p>
 
-          <h2>Changes To This Policy</h2>
-          <p>
-            This policy may be updated from time to time. Changes are published
-            on this page.
-          </p>
-          <p>Effective date: 2026-11-14.</p>
-
-          <h2>Contact</h2>
-          <p>
-            For questions or suggestions about this policy, contact
-            <a href="mailto:sdai@moroz.cc">sdai@moroz.cc</a>.
-          </p>
-        </article>
-      </section>
-    </main>
-
-    <div id="site-footer"></div>
-  </body>
-</html>
+      <h2>Contact</h2>
+      <p>
+        For questions or suggestions about this policy, contact
+        <a href="mailto:sdai@moroz.cc">sdai@moroz.cc</a>.
+      </p>
+    </article>
+  </section>
+</main>

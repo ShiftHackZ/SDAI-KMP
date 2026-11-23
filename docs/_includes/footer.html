@@ -1,0 +1,103 @@
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <nav class="footer-column" aria-label="Info">
+      <h2>Info</h2>
+      <a href="{{ site.data.links.blog | relative_url }}">Blog</a>
+      <a href="{{ site.data.links.faq | relative_url }}">FAQ</a>
+      <a href="{{ site.data.links.privacy | relative_url }}">Privacy Policy</a>
+      <a href="{{ site.data.links.docs | relative_url }}">Documentation</a>
+      <a
+        href="{{ site.data.links.github }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >GitHub</a
+      >
+      <a href="{{ site.data.links.donate | relative_url }}">Donate</a>
+    </nav>
+    <nav class="footer-column" aria-label="Community">
+      <h2>Community</h2>
+      <a
+        href="{{ site.data.links.telegram }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Telegram</a
+      >
+      <a
+        href="{{ site.data.links.discord }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Discord</a
+      >
+      <a
+        href="{{ site.data.links.linkedin }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >LinkedIn</a
+      >
+      <a
+        href="{{ site.data.links.fourPda }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >4PDA</a
+      >
+    </nav>
+    <nav class="footer-column" aria-label="Beta testing">
+      <h2>Beta Testing</h2>
+      <a href="{{ site.data.links.nightly | relative_url }}">Nightly Build</a>
+      <a href="{{ site.data.links.testFlight | relative_url }}"
+        >TestFlight Beta</a
+      >
+    </nav>
+    <nav class="footer-column" aria-label="Get app">
+      <h2>Get app</h2>
+      <a
+        href="{{ site.data.links.googlePlay }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Google Play</a
+      >
+      <a
+        href="{{ site.data.links.fdroid }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >F-Droid</a
+      >
+      <a
+        href="{{ site.data.links.appStore }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >App Store</a
+      >
+    </nav>
+    <div class="footer-brand">
+      <a
+        class="footer-brand-row"
+        href="{{ site.data.links.home | relative_url }}"
+        aria-label="{{ site.title }} home"
+      >
+        <img
+          src="{{ '/assets/sdai.png' | relative_url }}"
+          width="38"
+          height="38"
+          alt=""
+        />
+        <span>{{ site.title }}</span>
+      </a>
+      <p class="copyright">
+        <span><a href="mailto:sdai@moroz.cc">sdai@moroz.cc</a></span>
+        <span
+          >{{ site.title }} App &copy; 2023 - {{ site.time | date: "%Y" }}</span
+        >
+        <span
+          >Developed by
+          <a
+            href="{{ site.data.links.company }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Moroz Inc.</a
+          ></span
+        >
+      </p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,44 @@
+---
+layout: site
+title: Blog
+description: "Release notes, announcements, and engineering stories from SDAI, the open-source AI image generation app for Android and iOS."
+schema: CollectionPage
+nav: blog
+social_image: /assets/li-header-logo.png
+social_alt: SDAI logo and colorful illustration
+social_width: 1862
+social_height: 845
+---
+{% assign posts = site.pages | where: 'layout', 'blog-post' | sort: 'date' | reverse %}
+<main id="main-content">
+  {% include page-hero.html
+    eyebrow="Project updates"
+    title=page.title
+    summary="Release notes, announcements, and engineering stories from SDAI."
+  %}
+
+  <div class="shell blog-list">
+    {% for post in posts %}
+      <article class="blog-card{% if forloop.first %} blog-card-featured{% endif %}">
+        <a class="blog-card-link" href="{{ post.url | relative_url }}" aria-labelledby="post-title-{{ forloop.index }}">
+          <div class="blog-card-image">
+            {% unless forloop.first %}
+              {% include blog-image.html post=post decorative=true lazy=true %}
+            {% else %}
+              {% include blog-image.html post=post decorative=true %}
+            {% endunless %}
+          </div>
+          <div class="blog-card-copy">
+            <p class="blog-meta">
+              <span>{{ post.category | escape }}</span>
+              <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: '%B %-d, %Y' }}</time>
+            </p>
+            <h2 id="post-title-{{ forloop.index }}">{{ post.title | escape }}</h2>
+            <p>{{ post.description | escape }}</p>
+            <span class="blog-read" aria-hidden="true">Read post <span>→</span></span>
+          </div>
+        </a>
+      </article>
+    {% endfor %}
+  </div>
+</main>

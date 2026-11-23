@@ -1,0 +1,9 @@
+<header class="page-hero">
+  <div class="shell">
+    {% if include.eyebrow %}
+    <p class="eyebrow">{{ include.eyebrow | escape }}</p>
+    {% endif %}
+    <h1>{{ include.title | escape }}</h1>
+    {{ include.summary | markdownify }}
+  </div>
+</header>
