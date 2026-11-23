@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Shape
  * @param isEnabled Whether pointer and accessibility activation are available.
  * @param shape Shared outline used to clip the platform surface.
  * @param contentPadding Shared spacing around the label and icons.
+ * @param shouldClipBackground Native-only backing clipping; Material retains its existing outline.
  * @param content Compose label, icons or progress content with the shared label text style.
  * @author Dmitriy Moroz
  */
@@ -26,6 +27,7 @@ actual fun OutlinedButton(
     isEnabled: Boolean,
     shape: Shape,
     contentPadding: PaddingValues,
+    shouldClipBackground: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
     MaterialButton(

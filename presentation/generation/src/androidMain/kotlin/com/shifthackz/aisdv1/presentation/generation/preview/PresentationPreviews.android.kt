@@ -2,6 +2,9 @@ package com.shifthackz.aisdv1.presentation.generation.preview
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberOverscrollEffect
+import androidx.compose.foundation.withoutVisualEffect
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -16,6 +19,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.StabilityAiSampler
 import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppTheme
 import com.shifthackz.aisdv1.presentation.components.theme.global.AiSdAppThemeState
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformLazySurface
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageContent
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageState
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageContent
@@ -52,16 +56,29 @@ private fun GenerationInputFormPreview() {
     PreviewTheme {
         val promptState = remember { mutableStateOf(TextFieldValue()) }
         val negativePromptState = remember { mutableStateOf(TextFieldValue()) }
-        LazyColumn(Modifier.padding(16.dp)) {
-            generationInputFormItems(
-                state = previewTextToImageState(),
-                isImg2Img = false,
-                isExpanded = true,
-                onToggleExpanded = {},
-                promptChipTextFieldState = promptState,
-                negativePromptChipTextFieldState = negativePromptState,
-                onEvent = {},
-            )
+        val listState = rememberLazyListState()
+        val overscrollEffect = rememberOverscrollEffect()
+        PlatformLazySurface(
+            state = listState,
+            firstItemIndex = 0,
+            modifier = Modifier.padding(16.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            overscrollEffect = overscrollEffect,
+        ) {
+            LazyColumn(
+                state = listState,
+                overscrollEffect = overscrollEffect?.withoutVisualEffect()
+            ) {
+                generationInputFormItems(
+                    state = previewTextToImageState(),
+                    isImg2Img = false,
+                    isExpanded = true,
+                    onToggleExpanded = {},
+                    promptChipTextFieldState = promptState,
+                    negativePromptChipTextFieldState = negativePromptState,
+                    onEvent = {},
+                )
+            }
         }
     }
 }

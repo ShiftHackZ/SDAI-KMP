@@ -91,7 +91,8 @@ fun GalleryUiItem(
             item.imageRevision,
             edge = imageEdge
         ).value else DecodedImageBitmap.Unavailable
-        Box(
+        GalleryGridItemSurface(
+            borderColor = borderColor,
             modifier = modifier
                 .onSizeChanged { imageEdge = maxOf(it.width, it.height) }
                 .clip(shape)
@@ -105,17 +106,13 @@ fun GalleryUiItem(
                         }
                     },
                 ),
-        ) {
+        ) { imageBorderColor ->
             when (val image = decodedImage) {
                 DecodedImageBitmap.Loading -> Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .border(
-                            width = 4.dp,
-                            color = borderColor,
-                            shape = shape,
-                        )
+                        .border(width = 4.dp, color = imageBorderColor, shape = shape)
                         .shimmer(),
                 )
 
@@ -123,11 +120,7 @@ fun GalleryUiItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .border(
-                            width = 4.dp,
-                            color = borderColor,
-                            shape = shape,
-                        )
+                        .border(width = 4.dp, color = imageBorderColor, shape = shape)
                         .then(
                             if (!item.hidden) Modifier
                             else Modifier.graphicsLayer {
@@ -146,11 +139,7 @@ fun GalleryUiItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .border(
-                            width = 4.dp,
-                            color = borderColor,
-                            shape = shape,
-                        ),
+                        .border(width = 4.dp, color = imageBorderColor, shape = shape),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -179,11 +168,7 @@ fun GalleryUiItem(
                         .align(Alignment.TopStart),
                     imageVector = Icons.Default.Favorite,
                     contentDescription = null,
-                    tint = if (item.liked) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
             if (selectionMode) {

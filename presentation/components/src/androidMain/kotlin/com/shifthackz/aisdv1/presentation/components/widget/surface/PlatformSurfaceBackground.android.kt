@@ -23,6 +23,7 @@ internal actual fun isPlatformSurfaceGlassAvailable(): Boolean = false
  * @param inset Native rim spacing, unused on Android.
  * @param isTopEdgeVisible Shared top-edge treatment, unused on Android.
  * @param isBottomEdgeVisible Shared bottom-edge treatment, unused on Android.
+ * @param shouldClipBackground Native-only backing clipping; Material already clips its surface.
  * @param modifier Native backdrop bounds, unused on Android.
  *
  * @author Dmitriy Moroz
@@ -35,5 +36,6 @@ internal actual fun PlatformSurfaceBackground(
     inset: Dp,
     isTopEdgeVisible: Boolean,
     isBottomEdgeVisible: Boolean,
+    shouldClipBackground: Boolean,
     modifier: Modifier,
 ) = Unit

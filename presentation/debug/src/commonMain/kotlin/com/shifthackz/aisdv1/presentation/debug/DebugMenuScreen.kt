@@ -5,7 +5,7 @@ package com.shifthackz.aisdv1.presentation.debug
 import com.shifthackz.aisdv1.presentation.components.service.debug.mapToUi
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -63,7 +63,7 @@ fun DebugMenuScreen(
         )
         when (val modal = state.screenModal) {
             DebugMenuModal.None -> Unit
-            is DebugMenuModal.LDScheduler -> ModalBottomSheet(
+            is DebugMenuModal.LDScheduler -> PlatformModalBottomSheet(
                 onDismissRequest = { intentHandler(DebugMenuIntent.DismissModal) },
             ) {
                 LDSchedulerBottomSheet(

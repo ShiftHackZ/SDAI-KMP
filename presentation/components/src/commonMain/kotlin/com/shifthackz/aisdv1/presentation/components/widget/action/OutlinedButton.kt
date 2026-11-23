@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Shape
  * @param isEnabled Whether pointer and accessibility activation are available.
  * @param shape Button outline; UIKit uses its corner radius with a native continuous curve.
  * @param contentPadding Shared spacing around the label and icons.
+ * @param shouldClipBackground Whether the complete native backing is clipped to the button outline.
  * @param content Compose label, icons or progress content with the shared label text style.
  * @author Dmitriy Moroz
  */
@@ -26,5 +27,6 @@ expect fun OutlinedButton(
     isEnabled: Boolean = true,
     shape: Shape = ButtonDefaults.outlinedShape,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    shouldClipBackground: Boolean = false,
     content: @Composable RowScope.() -> Unit,
 )

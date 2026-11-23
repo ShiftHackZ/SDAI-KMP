@@ -29,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -42,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.AnnotatedString
@@ -61,11 +61,14 @@ import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
 import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.rememberGalleryImage
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.isPlatformSheetBlurAvailable
 import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * Hosts input-history selection in a fully expanded sheet while keeping dismissal caller-owned.
+ * Native blurred sheets use square edges to avoid backdrop artifacts at the top corners.
  *
  * @param onClose Removes the sheet after back/outside dismissal.
  * @param onGenerationSelected Receives a fully loaded selected generation for form restoration.
@@ -84,12 +87,13 @@ fun InputHistoryBottomSheet(
         confirmValueChange = { value -> value != SheetValue.PartiallyExpanded },
     )
 
-    ModalBottomSheet(
+    PlatformModalBottomSheet(
         modifier = modifier.windowInsetsPadding(persistentTopAppBarWindowInsets()),
         sheetState = sheetState,
         onDismissRequest = onClose,
         containerColor = MaterialTheme.colorScheme.background,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        shape = if (isPlatformSheetBlurAvailable()) RectangleShape
+        else RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
         InputHistoryScreen(
             modifier = Modifier
@@ -217,6 +221,15 @@ private fun InputHistoryError(
 }
 
 
+/**
+ * Shows generation metadata and a cached thumbnail as one selectable history entry.
+ *
+ * @param modifier Item sizing and spacing in the history list.
+ * @param item Generation metadata and image revision used to load its thumbnail.
+ * @param onClick Requests restoration of the selected generation.
+ *
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun InputHistoryItem(
     modifier: Modifier = Modifier,
@@ -251,6 +264,7 @@ private fun InputHistoryItem(
     PlatformSurface(
         modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 50.dp),
         color = MaterialTheme.colorScheme.surface,
+        shouldClipBackground = true,
         onClick = { onClick(item) },
     ) {
         Row {

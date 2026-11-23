@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import kotlin.time.TimeMark
@@ -107,7 +107,7 @@ fun GenerationModalRenderer(
             onViewDetailRequest = { onViewDetailRequest(screenModal.result) },
         )
 
-        is GenerationModal.Image.Batch -> ModalBottomSheet(
+        is GenerationModal.Image.Batch -> PlatformModalBottomSheet(
             onDismissRequest = onDismissRequest,
             shape = RectangleShape,
             containerColor = MaterialTheme.colorScheme.background,

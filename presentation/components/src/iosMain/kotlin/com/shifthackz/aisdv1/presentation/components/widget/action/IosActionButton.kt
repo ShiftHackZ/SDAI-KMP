@@ -43,6 +43,7 @@ import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformContr
  * @param shape Supplies the corner radius of the native button surface.
  * @param contentPadding Shared label/icon spacing.
  * @param isOutlined Whether to use the secondary glass appearance.
+ * @param shouldClipBackground Whether to clip the entire decorative native backing to the outline.
  * @param content Shared label, icon or progress composition.
  * @author Dmitriy Moroz
  */
@@ -54,6 +55,7 @@ internal fun IosActionButton(
     shape: Shape,
     contentPadding: PaddingValues,
     isOutlined: Boolean,
+    shouldClipBackground: Boolean = false,
     content: @Composable RowScope.() -> Unit,
 ) {
     val hasGlassSupport = remember {
@@ -103,6 +105,7 @@ internal fun IosActionButton(
             isEnabled = isEnabled,
             isPressed = isPressed,
             shape = shape,
+            shouldClipBackground = shouldClipBackground,
         )
         CompositionLocalProvider(LocalContentColor provides contentColor) {
             ProvideTextStyle(MaterialTheme.typography.labelLarge) {

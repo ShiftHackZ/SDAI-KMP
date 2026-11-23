@@ -108,8 +108,8 @@ class StorageUsageViewModel(
         }
     }
 
-    private fun selectCategory(category: UsageCategory) {
-        if (!category.isStorageCategory()) return
+    private fun selectCategory(category: UsageCategory?) {
+        if (category != null && !category.isStorageCategory()) return
         updateState { state ->
             state.copy(usage = state.usage.copy(selectedCategory = category))
         }

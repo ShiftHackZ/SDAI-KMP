@@ -145,6 +145,25 @@ class StorageUsageViewModelTest {
     }
 
     @Test
+    fun `given selected storage category, selection is cleared, expected total without deleting storage`() =
+        runTest {
+            // Given
+            platformActions.appCacheBytes = 2048L
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+            viewModel.processIntent(StorageUsageIntent.SelectCategory(UsageCategory.CACHE))
+            assertEquals(UsageCategory.CACHE, viewModel.state.value.usage.selectedCategory)
+
+            // When
+            viewModel.processIntent(StorageUsageIntent.SelectCategory(null))
+
+            // Then
+            assertEquals(null, viewModel.state.value.usage.selectedCategory)
+            assertEquals(2048L, viewModel.state.value.usage.totalBytes)
+            assertEquals(2048L, platformActions.appCacheBytes)
+        }
+
+    @Test
     fun `given storage usage, clear all requested, expected confirmation before deleting cache`() =
         runTest {
             // Given

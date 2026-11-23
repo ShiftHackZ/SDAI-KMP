@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -140,7 +140,7 @@ fun ServerSetupContent(
                 skipPartiallyExpanded = true,
                 confirmValueChange = { value -> value != SheetValue.PartiallyExpanded },
             )
-            ModalBottomSheet(
+            PlatformModalBottomSheet(
                 sheetState = sheetState,
                 onDismissRequest = { processIntent(ServerSetupIntent.DismissDialog) },
                 shape = RectangleShape,
@@ -158,7 +158,7 @@ fun ServerSetupContent(
                 skipPartiallyExpanded = true,
                 confirmValueChange = { value -> value != SheetValue.PartiallyExpanded },
             )
-            ModalBottomSheet(
+            PlatformModalBottomSheet(
                 sheetState = sheetState,
                 onDismissRequest = { processIntent(ServerSetupIntent.DismissDialog) },
                 shape = RectangleShape,

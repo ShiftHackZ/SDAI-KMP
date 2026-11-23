@@ -30,6 +30,8 @@ import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformContr
  * @param border Optional outline drawn above the background and content.
  * @param tonalElevation Material tonal elevation, accumulated with enclosing surfaces.
  * @param shadowElevation Material shadow elevation, independent of tonal elevation.
+ * @param shouldDrawBackground Whether this surface draws a backdrop or shares its lazy-list card backdrop.
+ * @param shouldClipBackground Clips the complete native backing to [shape]; false retains its parent-color backing at the corners.
  * @param glassInset Space retaining the native glass rim inside the clipping bounds, in logical units.
  * @param isTopEdgeVisible Whether glass draws its top rim; false joins a preceding lazy card segment.
  * @param isBottomEdgeVisible Whether glass draws its bottom rim; false joins a following lazy card segment.
@@ -48,6 +50,8 @@ fun PlatformSurface(
     border: BorderStroke? = null,
     tonalElevation: Dp = 0.dp,
     shadowElevation: Dp = 0.dp,
+    shouldDrawBackground: Boolean = true,
+    shouldClipBackground: Boolean = false,
     glassInset: Dp = 2.dp,
     isTopEdgeVisible: Boolean = true,
     isBottomEdgeVisible: Boolean = true,
@@ -64,7 +68,7 @@ fun PlatformSurface(
             MaterialTheme.colorScheme.surfaceColorAtElevation(LocalAbsoluteTonalElevation.current)
         } else color
         Box(propagateMinConstraints = true) {
-            if (shouldShowGlass) {
+            if (shouldShowGlass && shouldDrawBackground) {
                 PlatformSurfaceBackground(
                     modifier = Modifier.matchParentSize(),
                     color = resolvedColor,
@@ -73,6 +77,7 @@ fun PlatformSurface(
                     inset = glassInset,
                     isTopEdgeVisible = isTopEdgeVisible,
                     isBottomEdgeVisible = isBottomEdgeVisible,
+                    shouldClipBackground = shouldClipBackground,
                 )
             }
             CompositionLocalProvider(
@@ -86,7 +91,7 @@ fun PlatformSurface(
     if (onClick == null) {
         Surface(
             modifier = modifier, shape = shape,
-            color = if (shouldShowGlass) Color.Transparent else color,
+            color = if (shouldShowGlass || !shouldDrawBackground) Color.Transparent else color,
             contentColor = contentColor, border = border,
             tonalElevation = tonalElevation, shadowElevation = shadowElevation,
             content = surfaceContent,
@@ -95,7 +100,7 @@ fun PlatformSurface(
         Surface(
             onClick = onClick, enabled = isEnabled,
             modifier = modifier, shape = shape,
-            color = if (shouldShowGlass) Color.Transparent else color,
+            color = if (shouldShowGlass || !shouldDrawBackground) Color.Transparent else color,
             contentColor = contentColor, border = border,
             tonalElevation = tonalElevation, shadowElevation = shadowElevation,
             content = surfaceContent,
@@ -120,6 +125,7 @@ internal expect fun isPlatformSurfaceGlassAvailable(): Boolean
  * @param inset Space retaining the glass rim inside its bounds.
  * @param isTopEdgeVisible Whether this segment starts a glass surface.
  * @param isBottomEdgeVisible Whether this segment ends a glass surface.
+ * @param shouldClipBackground Whether native backing is clipped to the shared outer shape.
  * @param modifier Bounds measured from the enclosing surface content.
  *
  * @author Dmitriy Moroz
@@ -132,5 +138,6 @@ internal expect fun PlatformSurfaceBackground(
     inset: Dp,
     isTopEdgeVisible: Boolean,
     isBottomEdgeVisible: Boolean,
+    shouldClipBackground: Boolean,
     modifier: Modifier = Modifier,
 )

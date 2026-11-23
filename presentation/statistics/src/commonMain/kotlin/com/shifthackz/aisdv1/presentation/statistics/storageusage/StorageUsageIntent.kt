@@ -19,11 +19,11 @@ sealed interface StorageUsageIntent : MviIntent {
     /**
      * Highlight a storage category in the donut chart and center label.
      *
-     * @param category Storage category selected by tapping the row or donut segment.
+     * @param category Storage category selected by a row or segment, or null to restore the total.
      *
      * @author Dmitriy Moroz
      */
-    data class SelectCategory(val category: UsageCategory) : StorageUsageIntent
+    data class SelectCategory(val category: UsageCategory?) : StorageUsageIntent
 
     /**
      * Ask the UI to confirm deleting one non-empty category.
