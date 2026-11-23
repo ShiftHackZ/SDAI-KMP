@@ -19,11 +19,11 @@ sealed interface NetworkUsageIntent : MviIntent {
     /**
      * Highlight a traffic category in the donut chart and center label.
      *
-     * @param category Traffic category selected by tapping the row or donut segment.
+     * @param category Traffic category selected by a row or segment, or null to restore the total.
      *
      * @author Dmitriy Moroz
      */
-    data class SelectCategory(val category: UsageCategory) : NetworkUsageIntent
+    data class SelectCategory(val category: UsageCategory?) : NetworkUsageIntent
 
     /**
      * Reset all persisted traffic counters.

@@ -8,7 +8,6 @@ import com.shifthackz.aisdv1.core.mvi.MviState
  *
  * @param loading Whether the log reader is loading a fresh snapshot.
  * @param text Displayed log text, empty before loading or after a failed read.
- *
  * @author Dmitriy Moroz
  */
 @Immutable

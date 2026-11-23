@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.graphics.RectangleShape
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalBackTransitionState
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformBackHandler
@@ -46,6 +48,8 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSortB
  * @param processIntent Dispatches navigation, configuration and account actions through MVI.
  * @param modifier Bounds supplied by the navigation host.
  * @param strings Localized shared wizard labels.
+ * @param sourceListState Retained scroll position of the provider list.
+ * @param configurationListState Independent scroll position of the selected provider form.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -54,9 +58,10 @@ fun ServerSetupContent(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
     strings: ServerSetupStrings = ServerSetupStrings(),
+    sourceListState: LazyListState = rememberLazyListState(),
+    configurationListState: LazyListState = rememberLazyListState(),
 ) {
-    val sourceListState = rememberLazyListState()
-    val configurationListState = rememberLazyListState()
+    val isInspectionMode = LocalInspectionMode.current
     val localBack = rememberBackTransitionState()
     val routeBack = LocalBackTransitionState.current
     val currentState by rememberUpdatedState(state)
@@ -67,14 +72,16 @@ fun ServerSetupContent(
     val canGoBack = state.showBackNavArrow || isConfiguration
     val canStartGesture =
         canGoBack && state.modal == ServerSetupState.Modal.None && !state.loadingConfiguration
-    PlatformBackHandler(
-        isEnabled = canGoBack,
-        canStartGesture = canStartGesture && (!isConfiguration || shouldAnimateStepBack),
-        transitionState = if (isConfiguration) localBack else routeBack,
-        onBack = { currentIntent(ServerSetupIntent.NavigateBack) },
-    )
-    SourceSelectionEffects(state, strings, sourceListState, processIntent)
-    LaunchedEffect(state.mode) { configurationListState.scrollToItem(0) }
+    if (!isInspectionMode) {
+        PlatformBackHandler(
+            isEnabled = canGoBack,
+            canStartGesture = canStartGesture && (!isConfiguration || shouldAnimateStepBack),
+            transitionState = if (isConfiguration) localBack else routeBack,
+            onBack = { currentIntent(ServerSetupIntent.NavigateBack) },
+        )
+        SourceSelectionEffects(state, strings, sourceListState, processIntent)
+        LaunchedEffect(state.mode) { configurationListState.scrollToItem(0) }
+    }
     LaunchedEffect(state.step) {
         if (isConfiguration) hasOpenedConfiguration = true
         else {
@@ -105,7 +112,7 @@ fun ServerSetupContent(
                     selectedPage = state.step.ordinal,
                     pageCount = ServerSetupState.Step.entries.size,
                     modifier = Modifier.padding(paddingValues).fillMaxSize(),
-                    shouldAnimate = !localBack.hasCommittedGesture,
+                    shouldAnimate = !isInspectionMode && !localBack.hasCommittedGesture,
                     backProgress = if (shouldAnimateStepBack && localBack.isActive) localBack.progress else null,
                 ) { page ->
                     val step = ServerSetupState.Step.entries[page]
@@ -140,7 +147,7 @@ fun ServerSetupContent(
                 skipPartiallyExpanded = true,
                 confirmValueChange = { value -> value != SheetValue.PartiallyExpanded },
             )
-            ModalBottomSheet(
+            PlatformModalBottomSheet(
                 sheetState = sheetState,
                 onDismissRequest = { processIntent(ServerSetupIntent.DismissDialog) },
                 shape = RectangleShape,
@@ -158,7 +165,7 @@ fun ServerSetupContent(
                 skipPartiallyExpanded = true,
                 confirmValueChange = { value -> value != SheetValue.PartiallyExpanded },
             )
-            ModalBottomSheet(
+            PlatformModalBottomSheet(
                 sheetState = sheetState,
                 onDismissRequest = { processIntent(ServerSetupIntent.DismissDialog) },
                 shape = RectangleShape,

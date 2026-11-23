@@ -1,7 +1,4 @@
-@file:OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class,
-)
+@file:OptIn(ExperimentalFoundationApi::class)
 
 package com.shifthackz.aisdv1.presentation.gallery.list
 
@@ -28,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -41,7 +39,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
 import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,6 +49,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
@@ -66,7 +65,9 @@ import kotlin.random.Random
  * @param state Gallery ordering, current metadata window, selection and dialogs.
  * @param imageLoader Shared revision-aware sampled image loader; null supports static preview placeholders.
  * @param processIntent Requests viewport metadata, selection/mutations, export or navigation.
- *
+ * @param listState Retained grid position used for scrolling and viewport reporting.
+ * @param backgroundWorkContent Background-generation status supplied by the application host.
+ * @param imageContent Optional cell-pixel renderer receiving metadata and the current image border color.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -75,12 +76,21 @@ fun GalleryScreenContent(
     state: GalleryState,
     imageLoader: GalleryImageLoader? = null,
     processIntent: (GalleryIntent) -> Unit = {},
+    listState: LazyGridState = rememberLazyGridState(),
+    backgroundWorkContent: @Composable () -> Unit = {
+        BackgroundWorkWidget(
+            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                .padding(vertical = 4.dp),
+        )
+    },
+    imageContent: (@Composable (GalleryGridItemUi, Color) -> Unit)? = null,
 ) {
-    val listState = rememberLazyGridState()
     val metadata = remember(state.items) { state.items.associateBy(GalleryGridItemUi::id) }
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.firstVisibleItemIndex }.distinctUntilChanged()
-            .collect { processIntent(GalleryIntent.Viewport(it)) }
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.firstVisibleItemIndex }.distinctUntilChanged()
+                .collect { processIntent(GalleryIntent.Viewport(it)) }
+        }
     }
 
     Box(modifier) {
@@ -195,11 +205,7 @@ fun GalleryScreenContent(
                         },
                         windowInsets = WindowInsets(0, 0, 0, 0),
                     )
-                    BackgroundWorkWidget(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.background)
-                            .padding(vertical = 4.dp),
-                    )
+                    backgroundWorkContent()
                 }
             },
             bottomBar = {
@@ -236,8 +242,8 @@ fun GalleryScreenContent(
                             )
                         } else 0.dp
                     ),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     state = listState,
                 ) {
                     items(
@@ -259,6 +265,9 @@ fun GalleryScreenContent(
                                 ),
                             item = item,
                             imageLoader = imageLoader,
+                            imageContent = imageContent?.let { content ->
+                                { borderColor -> content(item, borderColor) }
+                            },
                             selectionMode = state.selectionMode,
                             checked = selected,
                             onCheckedChange = {

@@ -5,7 +5,7 @@ package com.shifthackz.aisdv1.presentation.debug
 import com.shifthackz.aisdv1.presentation.components.service.debug.mapToUi
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -59,11 +59,11 @@ fun DebugMenuScreen(
             modifier = modifier,
             strings = debugMenuScreenStrings(),
             state = state.toContentState(),
-            processAction = { action -> intentHandler(action.toIntent()) },
+            processIntent = intentHandler,
         )
         when (val modal = state.screenModal) {
             DebugMenuModal.None -> Unit
-            is DebugMenuModal.LDScheduler -> ModalBottomSheet(
+            is DebugMenuModal.LDScheduler -> PlatformModalBottomSheet(
                 onDismissRequest = { intentHandler(DebugMenuIntent.DismissModal) },
             ) {
                 LDSchedulerBottomSheet(
@@ -120,24 +120,3 @@ internal fun DebugMenuState.toContentState() = DebugMenuScreenContentState(
     showLocalDiffusionSection = showLocalDiffusionSection,
     showQualityAssuranceSection = showQualityAssuranceSection,
 )
-
-/**
- * Maps a stateless debug-menu action to its corresponding MVI intent.
- *
- * @author Dmitriy Moroz
- */
-internal fun DebugMenuAction.toIntent(): DebugMenuIntent = when (this) {
-    DebugMenuAction.StartUiCapture -> DebugMenuIntent.StartUiCapture
-    DebugMenuAction.StopUiCapture -> DebugMenuIntent.StopUiCapture
-    DebugMenuAction.ResetUiCapture -> DebugMenuIntent.ResetUiCapture
-    DebugMenuAction.ShareUiCapture -> DebugMenuIntent.ShareUiCapture
-    DebugMenuAction.NavigateBack -> DebugMenuIntent.NavigateBack
-    DebugMenuAction.ViewLogs -> DebugMenuIntent.ViewLogs
-    DebugMenuAction.ClearLogs -> DebugMenuIntent.ClearLogs
-    DebugMenuAction.RestartTxt2Img -> DebugMenuIntent.WorkManager.RestartTxt2Img
-    DebugMenuAction.RestartImg2Img -> DebugMenuIntent.WorkManager.RestartImg2Img
-    DebugMenuAction.CancelAllWork -> DebugMenuIntent.WorkManager.CancelAll
-    DebugMenuAction.ToggleLocalDiffusionCancel -> DebugMenuIntent.AllowLocalDiffusionCancel
-    DebugMenuAction.RequestLocalDiffusionScheduler -> DebugMenuIntent.LocalDiffusionScheduler.Request
-    DebugMenuAction.InsertBadBase64 -> DebugMenuIntent.InsertBadBase64
-}

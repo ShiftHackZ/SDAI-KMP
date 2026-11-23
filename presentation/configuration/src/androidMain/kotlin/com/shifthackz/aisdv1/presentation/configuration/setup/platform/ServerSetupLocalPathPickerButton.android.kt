@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import com.shifthackz.aisdv1.core.extensions.getRealPath
 
 /**
@@ -28,6 +29,10 @@ internal actual fun ServerSetupLocalPathPickerButton(
     onPathSelected: (String) -> Unit,
     modifier: Modifier,
 ) {
+    if (LocalInspectionMode.current) {
+        OutlinedButton(modifier = modifier, onClick = {}) { Text(text) }
+        return
+    }
     val context = LocalContext.current
     val uriFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
     val launcher = rememberLauncherForActivityResult(

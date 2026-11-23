@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.domain.entity.OpenAiQuality
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
 
 
 /**
@@ -34,6 +35,7 @@ import com.shifthackz.aisdv1.domain.entity.OpenAiQuality
  * @param promptChipTextFieldState Caller-owned positive prompt chip text and selection.
  * @param negativePromptChipTextFieldState Caller-owned negative prompt chip text and selection.
  * @param onEvent Receives generation edits and actions.
+ * @param engineContent Checkpoint picker supplied by the owning form.
  *
  * @author Dmitriy Moroz
  */
@@ -46,6 +48,7 @@ internal fun GenerationInputBaseOption(
     promptChipTextFieldState: MutableState<TextFieldValue>,
     negativePromptChipTextFieldState: MutableState<TextFieldValue>,
     onEvent: (GenerationInputFormEvent) -> Unit,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
 ) {
     when (field) {
         GenerationBaseFormField.PROVIDER,
@@ -55,7 +58,8 @@ internal fun GenerationInputBaseOption(
             field,
             state,
             isImg2Img,
-            onEvent
+            onEvent,
+            engineContent,
         )
 
         GenerationBaseFormField.COMPATIBLE_MODEL -> OpenAiCompatibleModelInput(state, onEvent)

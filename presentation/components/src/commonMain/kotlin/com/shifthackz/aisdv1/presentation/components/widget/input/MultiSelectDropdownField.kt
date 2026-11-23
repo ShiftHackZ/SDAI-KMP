@@ -43,6 +43,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.textFieldColors
  * @param onSelectionChanged Receives the full proposed selection after a menu toggle or chip removal.
  * @param displayDelegate Converts each choice to a localized field/menu/chip label.
  *
+ * @param isInitiallyExpanded Initial menu visibility; later changes are owned by user interaction.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -53,8 +54,9 @@ fun <T : Any> MultiSelectDropdownField(
     availableItems: List<T> = emptyList(),
     onSelectionChanged: (List<T>) -> Unit = {},
     displayDelegate: (T) -> UiText = { t -> t.toString().asUiText() },
+    isInitiallyExpanded: Boolean = false,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(isInitiallyExpanded) }
     val selectedText = selectedItems
         .map { displayDelegate(it).asString() }
         .let { labels ->

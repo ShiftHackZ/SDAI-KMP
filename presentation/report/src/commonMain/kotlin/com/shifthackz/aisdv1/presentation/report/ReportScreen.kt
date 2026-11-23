@@ -4,12 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import org.koin.mp.KoinPlatform.getKoin
-import com.shifthackz.aisdv1.presentation.components.model.ErrorState
 import com.shifthackz.aisdv1.core.navigation.router.ReportRouter
-import com.shifthackz.aisdv1.presentation.components.widget.dialog.ErrorDialog
+import com.shifthackz.aisdv1.presentation.report.modal.ReportErrorDialog
 import org.koin.core.parameter.parametersOf
 
 /**
@@ -52,18 +50,10 @@ fun ReportScreen(
             onTextChange = { intentHandler(ReportIntent.UpdateText(it)) },
             onReasonChange = { intentHandler(ReportIntent.UpdateReason(it)) },
         )
-        when (val error = state.error) {
-            ErrorState.None -> Unit
-            ErrorState.Generic -> ErrorDialog(
-                text = Localization.string("error_generic").asUiText(),
-                onDismissRequest = { intentHandler(ReportIntent.DismissError) },
-            )
-
-            is ErrorState.WithMessage -> ErrorDialog(
-                text = error.message,
-                onDismissRequest = { intentHandler(ReportIntent.DismissError) },
-            )
-        }
+        ReportErrorDialog(
+            error = state.error,
+            onDismissRequest = { intentHandler(ReportIntent.DismissError) },
+        )
     }
 }
 

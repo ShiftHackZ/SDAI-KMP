@@ -1,51 +1,22 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.web
 
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.mvi.MviComponent
-import com.shifthackz.aisdv1.domain.entity.ServerSource
-import org.koin.mp.KoinPlatform.getKoin
 import com.shifthackz.aisdv1.core.navigation.router.WebUiRouter
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
-import com.shifthackz.aisdv1.presentation.components.widget.source.getName
+import com.shifthackz.aisdv1.domain.entity.ServerSource
 import org.koin.core.parameter.parametersOf
+import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * Binds the configured provider WebUI route to its remembered ViewModel from the initialized graph.
  *
  * @param modifier Layout modifiers for the WebUI screen.
  * @param router Optional route owner; defaults to the application graph binding.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -80,7 +51,6 @@ fun WebUiScreen(
  * @param modifier Layout modifiers for the WebUI scaffold.
  * @param state Provider identity, configured URL and configuration-loading state.
  * @param processIntent Requests return to the previous application route.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -89,7 +59,7 @@ fun WebUiScreenContent(
     state: WebUiState = WebUiState(),
     processIntent: (WebUiIntent) -> Unit = {},
 ) {
-    var pageLoading by remember { mutableStateOf(true) }
+    var isPageLoading by remember { mutableStateOf(true) }
     var webController: WebUiController? by remember { mutableStateOf(null) }
 
     fun navigateBack() {
@@ -108,64 +78,19 @@ fun WebUiScreenContent(
     WebUiBackHandler {
         navigateBack()
     }
-    PlatformScaffold(
-        topBar = {
-            PlatformTopAppBar(
-                title = {
-                    Text(
-                        text = state.source.takeIf { !state.loading }?.getName() ?: "",
-                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
-                    )
-                },
-                navigationIcon = {
-                    ToolbarBackButton(
-                        onClick = { navigateBack() }, icon = Icons.AutoMirrored.Outlined.ArrowBack
-                    )
-                },
-                windowInsets = persistentTopAppBarWindowInsets(),
-            )
-        },
-        contentColor = MaterialTheme.colorScheme.surface,
+    WebUiContent(
+        state = state,
+        isPageLoading = isPageLoading,
+        onNavigateBack = ::navigateBack,
         modifier = modifier,
-    ) { paddingValues ->
-        AnimatedContent(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            targetState = !state.loading,
-            label = "web_ui_root_state_animation",
-        ) { contentVisible ->
-            if (contentVisible) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface),
-                    verticalArrangement = Arrangement.Top,
-                ) {
-                    AnimatedVisibility(visible = pageLoading) {
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = AlertDialogDefaults.iconContentColor,
-                        )
-                    }
-                    state.url.takeIf(String::isNotBlank)?.let { url ->
-                        WebUiBrowser(
-                            modifier = Modifier.fillMaxSize(),
-                            url = url,
-                            onLoadingChanged = { pageLoading = it },
-                            onControllerChanged = { webController = it },
-                        )
-                    }
-                }
-            } else {
-                Box(Modifier.fillMaxSize()) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .aspectRatio(1f),
-                    )
-                }
-            }
+    ) { browserModifier ->
+        state.url.takeIf(String::isNotBlank)?.let { url ->
+            WebUiBrowser(
+                modifier = browserModifier,
+                url = url,
+                onLoadingChanged = { isPageLoading = it },
+                onControllerChanged = { webController = it },
+            )
         }
     }
 }
@@ -177,7 +102,6 @@ fun WebUiScreenContent(
  * @param url Configured provider WebUI URL to load.
  * @param onLoadingChanged Reports platform adapter loading activity to the route.
  * @param onControllerChanged Publishes native history controls after the browser view is available.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -192,7 +116,6 @@ internal expect fun WebUiBrowser(
  * Installs platform system-back handling for the embedded browser route.
  *
  * @param onBack Requests browser-history navigation or application-route dismissal.
- *
  * @author Dmitriy Moroz
  */
 @Composable

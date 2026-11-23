@@ -2,9 +2,7 @@
 
 package com.shifthackz.aisdv1.presentation.components.modal.history
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,15 +21,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoFixNormal
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -44,7 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -59,13 +52,18 @@ import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
 import com.shifthackz.aisdv1.presentation.components.widget.image.LocalGalleryImageLoader
 import com.shifthackz.aisdv1.presentation.components.widget.image.rememberGalleryImage
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.isPlatformSheetBlurAvailable
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * Hosts input-history selection in a fully expanded sheet while keeping dismissal caller-owned.
+ * Native blurred sheets use square edges to avoid backdrop artifacts at the top corners.
  *
  * @param onClose Removes the sheet after back/outside dismissal.
  * @param onGenerationSelected Receives a fully loaded selected generation for form restoration.
@@ -84,12 +82,13 @@ fun InputHistoryBottomSheet(
         confirmValueChange = { value -> value != SheetValue.PartiallyExpanded },
     )
 
-    ModalBottomSheet(
+    PlatformModalBottomSheet(
         modifier = modifier.windowInsetsPadding(persistentTopAppBarWindowInsets()),
         sheetState = sheetState,
         onDismissRequest = onClose,
         containerColor = MaterialTheme.colorScheme.background,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        shape = if (isPlatformSheetBlurAvailable()) RectangleShape
+        else RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
         InputHistoryScreen(
             modifier = Modifier
@@ -122,7 +121,7 @@ fun InputHistoryScreen(
     MviComponent(
         viewModel = viewModel,
     ) { state: InputHistoryState, processIntent: (InputHistoryIntent) -> Unit ->
-        ScreenContent(
+        InputHistoryScreenContent(
             modifier = modifier.fillMaxSize(),
             state = state,
             processIntent = processIntent,
@@ -132,12 +131,23 @@ fun InputHistoryScreen(
 }
 
 
+/**
+ * Shows metadata pages, initial feedback and pagination without owning the history view model.
+ *
+ * @param modifier Bounds of the selector.
+ * @param state Metadata pages and read feedback.
+ * @param processIntent Requests retry or the next page.
+ * @param onGenerationSelected Requests loading the selected generation by ID.
+ * @param imageContent Optional thumbnail renderer; null retains the bounded runtime loader.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun ScreenContent(
+internal fun InputHistoryScreenContent(
     modifier: Modifier = Modifier,
     state: InputHistoryState,
     processIntent: (InputHistoryIntent) -> Unit = {},
     onGenerationSelected: (Long) -> Unit = {},
+    imageContent: (@Composable (InputHistoryItemUi, Modifier) -> Unit)? = null,
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
@@ -168,6 +178,7 @@ private fun ScreenContent(
                 ) { itemUi ->
                     InputHistoryItem(
                         item = itemUi,
+                        imageContent = imageContent,
                         onClick = { onGenerationSelected(it.generationResult.id) },
                     )
                 }
@@ -194,6 +205,14 @@ private fun ScreenContent(
 }
 
 
+/**
+ * Offers an explicit retry after page or selection loading failed.
+ *
+ * @param message Localized failure details.
+ * @param processIntent Delivers the retry request.
+ * @param modifier Placement of the error and retry button.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun InputHistoryError(
     message: String,
@@ -217,15 +236,26 @@ private fun InputHistoryError(
 }
 
 
+/**
+ * Shows generation metadata and a cached thumbnail as one selectable history entry.
+ *
+ * @param modifier Item sizing and spacing in the history list.
+ * @param item Generation metadata and image revision used to load its thumbnail.
+ * @param imageContent Optional thumbnail content; null uses the runtime image loader.
+ * @param onClick Requests restoration of the selected generation.
+ *
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun InputHistoryItem(
     modifier: Modifier = Modifier,
     item: InputHistoryItemUi,
     onClick: (InputHistoryItemUi) -> Unit = {},
+    imageContent: (@Composable (InputHistoryItemUi, Modifier) -> Unit)? = null,
 ) {
     val generation = item.generationResult
     var edge by remember { mutableIntStateOf(0) }
-    val loader = LocalGalleryImageLoader.current
+    val loader = if (imageContent == null) LocalGalleryImageLoader.current else null
     val image = loader?.let {
         (rememberGalleryImage(
             it,
@@ -248,94 +278,77 @@ private fun InputHistoryItem(
         }
     }
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface)
-            .defaultMinSize(minHeight = 50.dp)
-            .clickable { onClick(item) },
+    PlatformSurface(
+        modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 50.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shouldClipBackground = true,
+        onClick = { onClick(item) },
     ) {
-        if (image != null) {
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth(0.36f)
-                    .onSizeChanged { edge = maxOf(it.width, it.height) }
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(12.dp)),
-                bitmap = image,
-                contentScale = ContentScale.Crop,
-                contentDescription = null,
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.36f)
-                    .onSizeChanged { edge = maxOf(it.width, it.height) }
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Default.AutoFixNormal,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
+        Row {
+
+            val thumbnailModifier = Modifier
+                .fillMaxWidth(0.36f)
+                .onSizeChanged { edge = maxOf(it.width, it.height) }
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(12.dp))
+            if (imageContent != null) {
+                imageContent(item, thumbnailModifier)
+            } else {
+                InputHistoryThumbnail(image = image, modifier = thumbnailModifier)
             }
-        }
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            val textStyle = MaterialTheme.typography.bodySmall
-            val textModifier = Modifier.padding(horizontal = 4.dp)
-            Text(
-                modifier = textModifier.padding(top = 2.dp),
-                text = itemPropertyText("hint_prompt", generation.prompt),
-                style = textStyle,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                color = LocalContentColor.current,
-            )
-            Text(
-                modifier = textModifier,
-                text = itemPropertyText("hint_prompt_negative", generation.negativePrompt),
-                style = textStyle,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                color = LocalContentColor.current,
-            )
-            val tags = buildList {
-                add(generation.type.key)
-                add("${generation.width} X ${generation.height}")
-                add(generation.sampler)
-                add(Localization.string("tag_steps", generation.samplingSteps))
-                add(Localization.string("tag_cfg", "${generation.cfgScale}"))
-                if (generation.type == AiGenerationResult.Type.IMAGE_TO_IMAGE) {
-                    add(Localization.string("tag_denoising", "${generation.denoisingStrength}"))
-                }
-                add(generation.seed)
-                add(generation.subSeed)
-                add("${generation.subSeedStrength}")
-            }.filter(String::isNotEmpty)
-            FlowRow(
-                modifier = Modifier.padding(horizontal = 2.dp),
+            Column(
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                tags.forEach { tag ->
-                    Text(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(4.dp),
-                            )
-                            .padding(1.dp),
-                        text = tag,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
+                val textStyle = MaterialTheme.typography.bodySmall
+                val textModifier = Modifier.padding(horizontal = 4.dp)
+                Text(
+                    modifier = textModifier.padding(top = 2.dp),
+                    text = itemPropertyText("hint_prompt", generation.prompt),
+                    style = textStyle,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = LocalContentColor.current,
+                )
+                Text(
+                    modifier = textModifier,
+                    text = itemPropertyText("hint_prompt_negative", generation.negativePrompt),
+                    style = textStyle,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = LocalContentColor.current,
+                )
+                val tags = buildList {
+                    add(generation.type.key)
+                    add("${generation.width} X ${generation.height}")
+                    add(generation.sampler)
+                    add(Localization.string("tag_steps", generation.samplingSteps))
+                    add(Localization.string("tag_cfg", "${generation.cfgScale}"))
+                    if (generation.type == AiGenerationResult.Type.IMAGE_TO_IMAGE) {
+                        add(Localization.string("tag_denoising", "${generation.denoisingStrength}"))
+                    }
+                    add(generation.seed)
+                    add(generation.subSeed)
+                    add("${generation.subSeedStrength}")
+                }.filter(String::isNotEmpty)
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                ) {
+                    tags.forEach { tag ->
+                        Text(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(4.dp),
+                                )
+                                .padding(1.dp),
+                            text = tag,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    }
                 }
             }
         }

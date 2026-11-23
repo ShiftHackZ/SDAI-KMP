@@ -20,7 +20,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
  * @param icon Destination icon rendered with the drawer's content color.
  * @param helpMessage Localized explanation shared with other navigation surfaces where applicable.
  * @param onClick Requests navigation through the root router.
- *
  * @author Dmitriy Moroz
  */
 data class DrawerSheetItem(
@@ -37,7 +36,6 @@ data class DrawerSheetItem(
  * @param items Ordered navigation destinations; selection and actions remain caller-owned.
  * @param header Branding and build information shown above the destinations.
  * @param modifier Layout modifiers for the drawer sheet.
- *
  * @author Dmitriy Moroz
  */
 @Composable

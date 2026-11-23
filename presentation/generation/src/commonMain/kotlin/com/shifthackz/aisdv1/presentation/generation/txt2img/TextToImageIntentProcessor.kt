@@ -28,7 +28,6 @@ import kotlin.math.roundToInt
  * @param viewGenerationResult Opens the selected generated image in the gallery viewer.
  * @param reportGenerationResult Starts reporting the selected generated image.
  * @param applyGenerationResult Restores generation controls from a previously generated result.
- *
  * @author Dmitriy Moroz
  */
 internal class TextToImageIntentProcessor(

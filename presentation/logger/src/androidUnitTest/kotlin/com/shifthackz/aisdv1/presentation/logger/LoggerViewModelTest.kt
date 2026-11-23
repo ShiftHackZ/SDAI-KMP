@@ -49,7 +49,6 @@ class LoggerViewModelTest {
                 ),
                 viewModel.state.value,
             )
-
         }
 
     @Test
@@ -73,7 +72,6 @@ class LoggerViewModelTest {
                 ),
                 viewModel.state.value,
             )
-
         }
 
     @Test
@@ -93,7 +91,6 @@ class LoggerViewModelTest {
             verify {
                 stubRouter.navigateBack()
             }
-
         }
 
     @Test
@@ -115,7 +112,6 @@ class LoggerViewModelTest {
             coVerify {
                 stubPlatformActions.copyLogs("Sample log line")
             }
-
         }
 
     @Test
@@ -137,7 +133,6 @@ class LoggerViewModelTest {
             coVerify {
                 stubPlatformActions.shareLogs("Sample log line")
             }
-
         }
 
     private fun TestScope.createViewModel() = LoggerViewModel(

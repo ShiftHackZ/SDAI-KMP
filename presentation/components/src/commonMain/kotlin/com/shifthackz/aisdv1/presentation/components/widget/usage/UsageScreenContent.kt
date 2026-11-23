@@ -6,13 +6,10 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbar
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,19 +36,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -64,10 +55,7 @@ import com.shifthackz.aisdv1.presentation.components.model.UsageItem
 import com.shifthackz.aisdv1.presentation.components.model.UsageScreenKind
 import com.shifthackz.aisdv1.presentation.components.model.UsageState
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
-import kotlin.math.PI
-import kotlin.math.atan2
 import kotlin.math.floor
-import kotlin.math.hypot
 
 /**
  * Shared standalone layout for storage and network usage screens.
@@ -80,7 +68,7 @@ import kotlin.math.hypot
  * @param screen Storage or network flavor that controls copy, CTA, placeholders, and row actions.
  * @param usage Current dashboard data, including shimmer loading state and selected category.
  * @param onBack Called when the standalone screen back button is tapped.
- * @param onSelectCategory Called when a row or donut segment selects a usage category.
+ * @param onSelectCategory Receives a selected row or segment category; null restores the total on a background tap.
  * @param onClearCategory Called from storage rows when the user requests category deletion.
  * @param onPrimaryAction Called by the pinned CTA to clear storage or reset traffic statistics.
  *
@@ -93,7 +81,7 @@ fun UsageScreenContent(
     screen: UsageScreenKind,
     usage: UsageState,
     onBack: () -> Unit = {},
-    onSelectCategory: (UsageCategory) -> Unit = {},
+    onSelectCategory: (UsageCategory?) -> Unit = {},
     onClearCategory: (UsageCategory) -> Unit = {},
     onPrimaryAction: () -> Unit = {},
 ) {
@@ -149,6 +137,9 @@ fun UsageScreenContent(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .pointerInput(onSelectCategory) {
+                    detectTapGestures { onSelectCategory(null) }
+                }
                 .verticalScrollbar(scrollState, topInset = LocalToolbarContentInset.current)
                 .verticalScroll(scrollState)
                 .padding(top = LocalToolbarContentInset.current)
@@ -274,7 +265,7 @@ private fun UsageCategoryListPlaceholder(
     rowCount: Int,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    PlatformSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.78f),
@@ -338,125 +329,6 @@ private fun UsageCategoryPlaceholderRow(
 }
 
 @Composable
-private fun UsageDonutChart(
-    usage: UsageState,
-    onSelect: (UsageCategory) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val progress by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = tween(
-            durationMillis = 720,
-            easing = FastOutSlowInEasing,
-        ),
-        label = "usage-chart-progress",
-    )
-    val totalBytes = usage.totalBytes
-    val segments = remember(usage.items, totalBytes) {
-        usage.items.chartSegments(totalBytes)
-    }
-    val selectedItem = usage.selectedItem
-    val centerValue = selectedItem?.bytes ?: totalBytes
-    val centerLabel = selectedItem?.category?.title() ?: Localization.string("settings_usage_total")
-
-    Box(
-        modifier = modifier.size(246.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Canvas(
-            modifier = Modifier
-                .matchParentSize()
-                .pointerInput(segments) {
-                    detectTapGestures { offset ->
-                        val category = hitCategory(
-                            offset = offset,
-                            segments = segments,
-                            strokeWidthPx = 40.dp.toPx(),
-                            canvasWidth = size.width.toFloat(),
-                            canvasHeight = size.height.toFloat(),
-                        )
-                        category?.let(onSelect)
-                    }
-                },
-        ) {
-            val diameter = size.minDimension
-            val baseStroke = 34.dp.toPx()
-            val selectedStroke = 42.dp.toPx()
-            val inset = selectedStroke / 2f + 2.dp.toPx()
-            val arcSize = Size(diameter - inset * 2f, diameter - inset * 2f)
-            val topLeft = Offset(
-                x = (size.width - arcSize.width) / 2f,
-                y = (size.height - arcSize.height) / 2f,
-            )
-
-            if (segments.isEmpty()) {
-                drawCircle(
-                    color = Color(0xFF697183).copy(alpha = 0.16f),
-                    radius = arcSize.width / 2f,
-                    center = center,
-                    style = Stroke(width = baseStroke, cap = StrokeCap.Round),
-                )
-            }
-
-            val visibleAngle = 360f * progress
-            segments.forEach { segment ->
-                val sweep = (
-                        minOf(segment.startAngle + segment.sweepAngle, visibleAngle) -
-                                segment.startAngle
-                        ).coerceIn(0f, segment.sweepAngle)
-                if (sweep <= 0f) return@forEach
-                val item = segment.item
-                val isSelected = item.category == usage.selectedCategory
-                val color = item.category.color().copy(alpha = if (isSelected) 1f else 0.82f)
-                val stroke = Stroke(
-                    width = if (isSelected) selectedStroke else baseStroke,
-                    cap = StrokeCap.Butt,
-                )
-                if (segments.size == 1 && sweep >= 359.9f) {
-                    drawCircle(
-                        color = color,
-                        radius = arcSize.width / 2f,
-                        center = center,
-                        style = stroke,
-                    )
-                } else {
-                    drawArc(
-                        color = color,
-                        startAngle = -90f + segment.startAngle,
-                        sweepAngle = sweep,
-                        useCenter = false,
-                        topLeft = topLeft,
-                        size = arcSize,
-                        style = stroke,
-                    )
-                }
-            }
-        }
-        Column(
-            modifier = Modifier.padding(horizontal = 48.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = centerValue.formatBytes(),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                modifier = Modifier.padding(top = 2.dp),
-                text = centerLabel,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
-
-@Composable
 private fun UsageCategoryList(
     usage: UsageState,
     showClearActions: Boolean,
@@ -467,7 +339,7 @@ private fun UsageCategoryList(
     val percentLabels = remember(usage.items, usage.totalBytes) {
         usage.items.percentLabels(usage.totalBytes)
     }
-    Surface(
+    PlatformSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.78f),
@@ -593,34 +465,6 @@ private fun UsageCategoryRow(
     }
 }
 
-private fun hitCategory(
-    offset: Offset,
-    segments: List<UsageChartSegment>,
-    strokeWidthPx: Float,
-    canvasWidth: Float,
-    canvasHeight: Float,
-): UsageCategory? {
-    if (segments.isEmpty()) return null
-
-    val centerX = canvasWidth / 2f
-    val centerY = canvasHeight / 2f
-    val dx = offset.x - centerX
-    val dy = offset.y - centerY
-    val radius = minOf(canvasWidth, canvasHeight) / 2f
-    val distance = hypot(dx, dy)
-    val innerRadius = radius - strokeWidthPx - 16f
-    val outerRadius = radius + 16f
-    if (distance !in innerRadius..outerRadius) return null
-
-    val angle = ((atan2(dy, dx) * 180f / PI.toFloat()) + 450f) % 360f
-    segments.forEach { segment ->
-        if (angle >= segment.startAngle && angle < segment.startAngle + segment.sweepAngle) {
-            return segment.item.category
-        }
-    }
-    return segments.lastOrNull()?.item?.category
-}
-
 @Composable
 private fun ShimmerLine(
     modifier: Modifier,
@@ -635,81 +479,6 @@ private fun ShimmerLine(
 private fun UsageScreenKind.placeholderRowsCount(): Int = when (this) {
     UsageScreenKind.STORAGE -> 6
     UsageScreenKind.NETWORK -> 3
-}
-
-private data class UsageChartSegment(
-    val item: UsageItem,
-    val startAngle: Float,
-    val sweepAngle: Float,
-)
-
-/**
- * Builds tappable donut segments that always fill exactly 360 degrees.
- *
- * Very small non-empty categories get a minimum visual sweep so users can still tap them, while the
- * largest segment absorbs floating-point correction to avoid gray gaps between arcs.
- *
- * @param totalBytes Sum of enabled category bytes used as the raw sweep denominator.
- * @receiver Ordered usage rows rendered by the current dashboard.
- *
- * @author Dmitriy Moroz
- */
-private fun List<UsageItem>.chartSegments(
-    totalBytes: Long,
-): List<UsageChartSegment> {
-    val enabledItems = filter(UsageItem::enabled)
-    if (totalBytes <= 0L || enabledItems.isEmpty()) return emptyList()
-    if (enabledItems.size == 1) {
-        return listOf(
-            UsageChartSegment(
-                item = enabledItems.first(),
-                startAngle = 0f,
-                sweepAngle = 360f,
-            ),
-        )
-    }
-
-    val minSweep = MIN_CHART_SWEEP_DEGREES.coerceAtMost(360f / enabledItems.size * 0.6f)
-    val rawSweeps = enabledItems.map { item ->
-        item.bytes.toFloat() / totalBytes.toFloat() * 360f
-    }
-    val smallIndexes = rawSweeps
-        .mapIndexedNotNull { index, sweep -> index.takeIf { sweep < minSweep } }
-        .toSet()
-
-    val sweeps = if (smallIndexes.size == enabledItems.size) {
-        List(enabledItems.size) { 360f / enabledItems.size }
-    } else {
-        val reserved = smallIndexes.size * minSweep
-        val remaining = (360f - reserved).coerceAtLeast(0f)
-        val largeRawTotal = rawSweeps
-            .filterIndexed { index, _ -> index !in smallIndexes }
-            .sum()
-            .takeIf { it > 0f }
-            ?: 1f
-        rawSweeps.mapIndexed { index, sweep ->
-            if (index in smallIndexes) {
-                minSweep
-            } else {
-                sweep / largeRawTotal * remaining
-            }
-        }
-    }.toMutableList()
-
-    val correction = 360f - sweeps.sum()
-    val correctionIndex = sweeps.indices.maxByOrNull { sweeps[it] } ?: 0
-    sweeps[correctionIndex] += correction
-
-    var cursor = 0f
-    return enabledItems.mapIndexed { index, item ->
-        UsageChartSegment(
-            item = item,
-            startAngle = cursor,
-            sweepAngle = sweeps[index],
-        ).also {
-            cursor += sweeps[index]
-        }
-    }
 }
 
 /**
@@ -868,7 +637,12 @@ fun UsageCategory.summaryTitle(): String = Localization.string(
     },
 )
 
-private fun UsageCategory.color(): Color = when (this) {
+/**
+ * Keeps category colors consistent between the chart and its legend.
+ *
+ * @author Dmitriy Moroz
+ */
+internal fun UsageCategory.color(): Color = when (this) {
     UsageCategory.CACHE -> Color(0xFF4C7EF3)
     UsageCategory.GALLERY -> Color(0xFF6EC6F2)
     UsageCategory.MODELS_ONNX -> Color(0xFFF59F32)
@@ -883,7 +657,12 @@ private fun UsageCategory.color(): Color = when (this) {
     UsageCategory.TRAFFIC_CIVITAI -> Color(0xFF8B7FE8)
 }
 
-private fun Long.formatBytes(): String {
+/**
+ * Formats a nonnegative byte count in decimal units for chart labels and category rows.
+ *
+ * @author Dmitriy Moroz
+ */
+internal fun Long.formatBytes(): String {
     val value = coerceAtLeast(0L)
     val units = listOf("B", "KB", "MB", "GB", "TB")
     var unitIndex = 0
@@ -900,6 +679,5 @@ private fun Long.formatBytes(): String {
     }
 }
 
-private const val MIN_CHART_SWEEP_DEGREES = 6f
 private const val MIN_PERCENT_TENTH = 1
 private const val PERCENT_TENTHS_TOTAL = 1000

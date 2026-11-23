@@ -21,6 +21,7 @@ import com.shifthackz.aisdv1.core.localization.Localization
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -263,7 +264,7 @@ internal fun LocalCustomModelPathForm(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (!isLocalGenerationSetupAvailable()) {
+        if (!LocalInspectionMode.current && !isLocalGenerationSetupAvailable()) {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = strings.localPermissionHeader,

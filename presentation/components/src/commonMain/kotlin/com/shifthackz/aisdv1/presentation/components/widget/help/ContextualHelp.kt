@@ -10,10 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
@@ -101,13 +99,7 @@ internal fun ContextualHelpAnchor(
         hasAction = true,
         onDismissRequest = { state.dismiss() },
         tooltip = {
-            RichTooltip(
-                colors = TooltipDefaults.richTooltipColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+            PlatformRichTooltip(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         titleStartIcon?.let { icon ->

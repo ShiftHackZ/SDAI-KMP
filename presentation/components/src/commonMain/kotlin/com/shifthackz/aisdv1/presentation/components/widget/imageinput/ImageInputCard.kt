@@ -12,19 +12,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.modal.history.InputHistoryBottomSheet
 import com.shifthackz.aisdv1.presentation.components.widget.section.ExpandableSectionHeader
-import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 
 /**
  * Offers device photos, camera, random images and saved gallery images to an owning image field.
@@ -40,7 +39,9 @@ import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformContr
  * @param onRandomClick Requests a random image through the owner's acquisition flow.
  * @param onHistoryImageSelected Receives the selected gallery output as Base64, without restoring metadata.
  * @param modifier Placement and sizing of the card.
+ * @param isInitiallyExpanded Initial disclosure state, retained locally after interaction.
  * @param selectedImage Preview and editing controls supplied by the owning screen.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -53,49 +54,50 @@ fun ImageInputCard(
     onRandomClick: () -> Unit,
     onHistoryImageSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isInitiallyExpanded: Boolean = true,
     selectedImage: @Composable () -> Unit,
 ) {
-    var isExpanded by rememberSaveable { mutableStateOf(true) }
+    var isExpanded by rememberSaveable { mutableStateOf(isInitiallyExpanded) }
     var isHistoryVisible by rememberSaveable { mutableStateOf(false) }
-    Surface(
+    PlatformSurface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surfaceVariant) {
-            Column {
-                ExpandableSectionHeader(
-                    title = Localization.string("title_input_image"),
-                    isExpanded = isExpanded,
-                    onToggleExpanded = { isExpanded = !isExpanded },
-                    trailingContent = {
-                        if (isPickingImage) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                strokeWidth = 3.dp,
-                            )
-                        }
-                    },
-                )
-                AnimatedVisibility(
-                    visible = isExpanded,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut(),
-                ) {
-                    Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-                        if (hasImage) selectedImage() else ImageInputActions(
-                            isEnabled = isEnabled,
-                            onGalleryClick = onGalleryClick,
-                            onCameraClick = onCameraClick,
-                            onRandomClick = onRandomClick,
-                            onHistoryClick = { isHistoryVisible = true },
+
+        Column {
+            ExpandableSectionHeader(
+                title = Localization.string("title_input_image"),
+                isExpanded = isExpanded,
+                onToggleExpanded = { isExpanded = !isExpanded },
+                trailingContent = {
+                    if (isPickingImage) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            strokeWidth = 3.dp,
                         )
                     }
+                },
+            )
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                    if (hasImage) selectedImage() else ImageInputActions(
+                        isEnabled = isEnabled,
+                        onGalleryClick = onGalleryClick,
+                        onCameraClick = onCameraClick,
+                        onRandomClick = onRandomClick,
+                        onHistoryClick = { isHistoryVisible = true },
+                    )
                 }
             }
         }
+
     }
-    if (isHistoryVisible && isEnabled) {
+    if (isHistoryVisible && isEnabled && !LocalInspectionMode.current) {
         InputHistoryBottomSheet(
             onClose = { isHistoryVisible = false },
             onGenerationSelected = { result ->

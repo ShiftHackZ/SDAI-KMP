@@ -125,6 +125,28 @@ class NetworkUsageViewModelTest {
     }
 
     @Test
+    fun `given selected network category, selection is cleared, expected total without resetting counters`() =
+        runTest {
+            // Given
+            networkUsage.value = NetworkUsage(configBytes = 512L)
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+            viewModel.processIntent(NetworkUsageIntent.SelectCategory(UsageCategory.TRAFFIC_CONFIGS))
+            assertEquals(
+                UsageCategory.TRAFFIC_CONFIGS,
+                viewModel.state.value.usage.selectedCategory
+            )
+
+            // When
+            viewModel.processIntent(NetworkUsageIntent.SelectCategory(null))
+
+            // Then
+            assertEquals(null, viewModel.state.value.usage.selectedCategory)
+            assertEquals(512L, viewModel.state.value.usage.totalBytes)
+            assertEquals(512L, networkUsage.value.configBytes)
+        }
+
+    @Test
     fun `given network usage, selected network category becomes empty, expected total selected`() =
         runTest {
             // Given

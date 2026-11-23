@@ -8,6 +8,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -22,7 +26,8 @@ import kotlin.math.roundToInt
  * Animates externally selected peer pages without accepting swipe navigation or changing history.
  * Retains page compositions; only intersecting pages mount native controls and collect visible state.
  * The selected, settled page owns input and accessibility.
- * Resizing snaps to the selected page so an interrupted animation cannot leave content offset.
+ * Width changes snap to the selected page so rotation cannot leave an interrupted animation offset.
+ * Height changes from screen chrome or the keyboard preserve the current horizontal transition.
  *
  * @param selectedPage Index selected by the screen's existing state owner.
  * @param pageCount Fixed number of peer pages.
@@ -30,6 +35,7 @@ import kotlin.math.roundToInt
  * @param shouldAnimate Whether to animate selection or synchronize after an interactive transition.
  * @param backProgress Optional interactive movement from the selected page to its preceding page.
  * @param content Retained content for each page index.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -42,6 +48,7 @@ fun ProgrammaticPager(
     content: @Composable (Int) -> Unit,
 ) {
     val pager = rememberPagerState(initialPage = selectedPage, pageCount = { pageCount })
+    var viewportWidth by remember { mutableIntStateOf(0) }
     val isParentVisible = LocalMviVisibility.current
     val areParentControlsVisible = LocalPlatformControlVisibility.current
     val isParentInputEnabled = LocalNavigationInputEnabled.current
@@ -58,7 +65,14 @@ fun ProgrammaticPager(
     }
     HorizontalPager(
         state = pager,
-        modifier = modifier.onSizeChanged { pager.requestScrollToPage(selectedPage) },
+        modifier = modifier.onSizeChanged { size ->
+            if (size.width > 0) {
+                if (viewportWidth > 0 && viewportWidth != size.width) {
+                    pager.requestScrollToPage(selectedPage)
+                }
+                viewportWidth = size.width
+            }
+        },
         userScrollEnabled = false,
         beyondViewportPageCount = pageCount - 1,
         key = { it },

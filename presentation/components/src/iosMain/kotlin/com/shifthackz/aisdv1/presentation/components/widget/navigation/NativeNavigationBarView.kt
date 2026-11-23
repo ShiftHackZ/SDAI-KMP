@@ -10,6 +10,7 @@ import platform.CoreGraphics.CGRectMake
 import platform.CoreGraphics.CGSizeMake
 import platform.Foundation.NSSelectorFromString
 import platform.Foundation.NSOperationQueue
+import platform.UIKit.NSForegroundColorAttributeName
 import platform.UIKit.UIColor
 import platform.UIKit.UIGestureRecognizerStateBegan
 import platform.UIKit.UIGestureRecognizerStateEnded
@@ -19,6 +20,7 @@ import platform.UIKit.UIGestureRecognizerDelegateProtocol
 import platform.UIKit.UIImage
 import platform.UIKit.UILongPressGestureRecognizer
 import platform.UIKit.UITabBar
+import platform.UIKit.UITabBarAppearance
 import platform.UIKit.UITabBarDelegateProtocol
 import platform.UIKit.UITabBarItem
 import platform.UIKit.UIAccessibilityCustomAction
@@ -34,12 +36,14 @@ import kotlin.math.floor
 /**
  * Hosts a native tab bar with caller-owned selection and one long-press recognizer for shared help.
  * UIKit owns the entire control rendering and normal activation; no custom glass layers are drawn.
+ * Older iOS bars use the caller's opaque backing color for both standard and scroll-edge appearances.
  *
  * @author Dmitriy Moroz
  */
 internal class NativeNavigationBarView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 0.0)),
     UITabBarDelegateProtocol, UIGestureRecognizerDelegateProtocol {
     private val bar = UITabBar()
+    private var previousAppearanceColors: List<UIColor> = emptyList()
     private var items: List<PlatformNavigationBarItem> = emptyList()
     private var images: List<UIImage?> = emptyList()
     private var onLongPress: ((Int) -> Unit)? = null
@@ -81,7 +85,7 @@ internal class NativeNavigationBarView : UIView(frame = CGRectMake(0.0, 0.0, 0.0
      * @param isRtl Whether the shared layout places the first destination at the right edge.
      * @param accent Selected icon and label tint.
      * @param foreground Unselected icon and label tint.
-     * @param backingColor Resolved Compose surface behind the native control.
+     * @param backingColor Resolved Compose surface behind the control and its opaque older-iOS bar.
      * @param hasOpaqueBacking Whether the native view is under Compose and needs an opaque cutout.
      * @param onHeightChanged Receives UIKit's preferred total height, including its own safe area.
      * @param onLongPress Opens shared help for a destination without selecting it.
@@ -121,6 +125,30 @@ internal class NativeNavigationBarView : UIView(frame = CGRectMake(0.0, 0.0, 0.0
         this.onHeightChanged = onHeightChanged
         this.isRtl = isRtl
         backgroundColor = if (hasOpaqueBacking) backingColor else UIColor.clearColor
+        val appearanceColors = listOf(backingColor, accent, foreground)
+        if (!isPlatformNavigationBarFloating && previousAppearanceColors != appearanceColors) {
+            val appearance = UITabBarAppearance().apply {
+                configureWithOpaqueBackground()
+                backgroundColor = backingColor
+                shadowColor = UIColor.clearColor
+                listOf(
+                    stackedLayoutAppearance,
+                    inlineLayoutAppearance,
+                    compactInlineLayoutAppearance
+                )
+                    .forEach { itemAppearance ->
+                        itemAppearance.normal.iconColor = foreground
+                        itemAppearance.normal.titleTextAttributes =
+                            mapOf(NSForegroundColorAttributeName to foreground)
+                        itemAppearance.selected.iconColor = accent
+                        itemAppearance.selected.titleTextAttributes =
+                            mapOf(NSForegroundColorAttributeName to accent)
+                    }
+            }
+            bar.standardAppearance = appearance
+            bar.scrollEdgeAppearance = appearance
+            previousAppearanceColors = appearanceColors
+        }
         overrideUserInterfaceStyle =
             if (isDark) UIUserInterfaceStyleDark else UIUserInterfaceStyleLight
         bar.tintColor = accent

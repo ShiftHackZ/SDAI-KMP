@@ -34,6 +34,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
  * @param isPressed Mirrors the Compose press interaction into UIKit highlighting.
  * @param shape Supplies the corner radius in the current layout direction and density.
  * @param modifier Bounds occupied by the decorative surface.
+ * @param shouldClipBackground Whether the complete native backing follows the supplied corner radius.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -43,6 +44,7 @@ internal fun GlassButtonSurface(
     isPressed: Boolean,
     shape: Shape,
     modifier: Modifier = Modifier,
+    shouldClipBackground: Boolean = false,
 ) {
     val accent = MaterialTheme.colorScheme.primary.toUIColor()
     val backingColor = (LocalPlatformControlBackgroundColor.current
@@ -66,6 +68,7 @@ internal fun GlassButtonSurface(
                 accent = accent,
                 backingColor = backingColor,
                 cornerRadius = radiusPoints.toDouble(),
+                shouldClipBackground = shouldClipBackground,
             )
         },
         properties = UIKitInteropProperties(

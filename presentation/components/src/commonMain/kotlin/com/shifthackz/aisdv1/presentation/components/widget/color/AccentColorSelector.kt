@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +16,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.global.catppuccinAcce
 import com.shifthackz.aisdv1.presentation.components.theme.global.catppuccinBaseColor
 
 /**
- * Shows all supported accent tokens in the active light/dark palette.
+ * Shows all supported accent tokens in two rows of selectable platform color chips.
  *
  * @param modifier Layout modifiers for the accent swatch grid.
  * @param isDark Whether swatches use a dark palette.
@@ -34,135 +34,26 @@ fun AccentColorSelector(
     selectedToken: ColorToken = ColorToken.MAUVE,
     onSelected: (Color, ColorToken) -> Unit = { _, _ -> },
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.selectableGroup()) {
         val iconTint = catppuccinBaseColor(isDark, darkThemeToken)
-        val rowModifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp)
-        val colorModifier = Modifier
-            .weight(1f)
-            .size(32.dp)
-        Row(
-            modifier = rowModifier,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.ROSEWATER,
-                color = catppuccinAccentColor(ColorToken.ROSEWATER, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.FLAMINGO,
-                color = catppuccinAccentColor(ColorToken.FLAMINGO, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.PINK,
-                color = catppuccinAccentColor(ColorToken.PINK, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.MAUVE,
-                color = catppuccinAccentColor(ColorToken.MAUVE, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.RED,
-                color = catppuccinAccentColor(ColorToken.RED, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.MAROON,
-                color = catppuccinAccentColor(ColorToken.MAROON, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.PEACH,
-                color = catppuccinAccentColor(ColorToken.PEACH, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-        }
-        Row(
-            modifier = rowModifier,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.YELLOW,
-                color = catppuccinAccentColor(ColorToken.YELLOW, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.GREEN,
-                color = catppuccinAccentColor(ColorToken.GREEN, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.TEAL,
-                color = catppuccinAccentColor(ColorToken.TEAL, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.SKY,
-                color = catppuccinAccentColor(ColorToken.SKY, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.SAPPHIRE,
-                color = catppuccinAccentColor(ColorToken.SAPPHIRE, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.BLUE,
-                color = catppuccinAccentColor(ColorToken.BLUE, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
-            ColorComposable(
-                modifier = colorModifier,
-                selectedToken = selectedToken,
-                token = ColorToken.LAVENDER,
-                color = catppuccinAccentColor(ColorToken.LAVENDER, isDark, darkThemeToken),
-                onClick = onSelected,
-                iconTint = iconTint,
-            )
+        ColorToken.entries.chunked(7).forEach { tokens ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                tokens.forEach { token ->
+                    val color = catppuccinAccentColor(token, isDark, darkThemeToken)
+                    ColorIconChip(
+                        modifier = Modifier.weight(1f),
+                        color = color,
+                        isSelected = token == selectedToken,
+                        onClick = { onSelected(color, token) },
+                        contentDescription = token.name.lowercase()
+                            .replaceFirstChar { it.titlecase() },
+                        iconTint = iconTint,
+                    )
+                }
+            }
         }
     }
 }

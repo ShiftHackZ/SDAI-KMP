@@ -9,7 +9,6 @@ import com.shifthackz.aisdv1.domain.entity.ServerSourceType
 
 /**
  * User events handled by the provider setup wizard.
- *
  * Source-selection intents update search/filter/sort state, provider-form intents update the
  * active configuration form, and local-model intents drive download/delete confirmation flows.
  *
@@ -41,7 +40,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Retries only the catalog whose recovery action was selected.
      *
      * @param source Local provider owning the failed or empty catalog.
-     *
      * @author Dmitriy Moroz
      */
     data class RetryLocalCatalog(val source: ServerSource) : ServerSetupIntent
@@ -106,7 +104,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Selects the candidate provider without committing configuration.
      *
      * @param mode Provider whose setup fields should be displayed.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateServerMode(val mode: ServerSource) : ServerSetupIntent
@@ -115,7 +112,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Changes provider discovery search text.
      *
      * @param query User-entered provider search text.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateSourceSearchQuery(val query: String) : ServerSetupIntent
@@ -124,7 +120,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Changes the optional provider hosting-type filter.
      *
      * @param type Required hosting type, or null for every type.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateSourceTypeFilter(val type: ServerSourceType?) : ServerSetupIntent
@@ -133,7 +128,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Adds or removes a provider readiness marker from discovery filters.
      *
      * @param readiness Readiness marker whose membership should toggle.
-     *
      * @author Dmitriy Moroz
      */
     data class ToggleSourceReadinessFilter(val readiness: ServerSourceReadiness) : ServerSetupIntent
@@ -142,7 +136,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Adds or removes a required provider capability from discovery filters.
      *
      * @param tag Capability tag whose membership should toggle.
-     *
      * @author Dmitriy Moroz
      */
     data class ToggleSourceTagFilter(val tag: FeatureTag) : ServerSetupIntent
@@ -152,7 +145,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Changes ordering of the filtered provider catalog.
      *
      * @param sortOrder Ordering selected by the user.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateSourceSortOrder(val sortOrder: ServerSetupState.SourceSortOrder) :
@@ -162,7 +154,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate AUTOMATIC1111 endpoint without committing it.
      *
      * @param url User-entered HTTP(S) instance root or prefix.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateServerUrl(val url: String) : ServerSetupIntent
@@ -171,7 +162,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Updates the anonymous candidate endpoint without changing saved settings.
      *
      * @param url User-entered HTTP(S) root or prefix.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateEasyDiffusionUrl(val url: String) : ServerSetupIntent
@@ -180,7 +170,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the independent candidate SwarmUI endpoint.
      *
      * @param url User-entered HTTP(S) instance root or prefix.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateSwarmUiUrl(val url: String) : ServerSetupIntent
@@ -189,7 +178,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Chooses anonymous or Basic Auth for supporting self-hosted providers.
      *
      * @param type Authorization mode selected by the user.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateAuthType(val type: ServerSetupState.AuthType) : ServerSetupIntent
@@ -198,7 +186,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate Basic Auth login without persisting credentials.
      *
      * @param login User-entered login.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateLogin(val login: String) : ServerSetupIntent
@@ -207,7 +194,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate Basic Auth password without persisting credentials.
      *
      * @param password User-entered password.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdatePassword(val password: String) : ServerSetupIntent
@@ -216,7 +202,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Changes whether the setup password field reveals its text.
      *
      * @param visible Whether the password should be shown.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdatePasswordVisibility(val visible: Boolean) : ServerSetupIntent
@@ -225,7 +210,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate AI Horde API key.
      *
      * @param key User-entered AI Horde credential.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateHordeApiKey(val key: String) : ServerSetupIntent
@@ -234,7 +218,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the independent compatible-server API prefix.
      *
      * @param url Complete HTTP(S) API prefix, including version and proxy path.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateOpenAiCompatibleUrl(val url: String) : ServerSetupIntent
@@ -243,7 +226,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the optional compatible-server bearer key.
      *
      * @param key User-entered compatible-server credential; empty preserves anonymous access.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateOpenAiCompatibleApiKey(val key: String) : ServerSetupIntent
@@ -253,7 +235,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the official OpenAI API key independently of OAuth sessions.
      *
      * @param key User-entered official OpenAI credential.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateOpenAiApiKey(val key: String) : ServerSetupIntent
@@ -262,7 +243,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate Stability AI API key.
      *
      * @param key User-entered Stability AI credential.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateStabilityAiApiKey(val key: String) : ServerSetupIntent
@@ -271,7 +251,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate Fal.ai API key.
      *
      * @param key User-entered Fal.ai credential.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateFalAiApiKey(val key: String) : ServerSetupIntent
@@ -280,7 +259,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate ArliAI API key.
      *
      * @param key User-entered ArliAI credential.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateArliAiApiKey(val key: String) : ServerSetupIntent
@@ -289,7 +267,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the candidate Hugging Face token.
      *
      * @param key User-entered Hugging Face credential.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateHuggingFaceApiKey(val key: String) : ServerSetupIntent
@@ -298,7 +275,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Selects the candidate supported Hugging Face inference model.
      *
      * @param model Supported inference model alias.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateHuggingFaceModel(val model: String) : ServerSetupIntent
@@ -307,7 +283,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Chooses whether AUTOMATIC1111 should use the configured demonstration endpoint.
      *
      * @param value Whether demonstration mode is enabled.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateDemoMode(val value: Boolean) : ServerSetupIntent
@@ -316,7 +291,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Chooses the supported anonymous AI Horde key.
      *
      * @param value Whether the anonymous default should replace manual key input.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateHordeDefaultApiKey(val value: Boolean) : ServerSetupIntent
@@ -325,7 +299,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Edits the active local runtime’s custom filesystem path.
      *
      * @param value User-selected custom local model path.
-     *
      * @author Dmitriy Moroz
      */
     data class SelectLocalModelPath(val value: String) : ServerSetupIntent
@@ -334,7 +307,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Chooses an available model from the active local runtime catalog.
      *
      * @param model Local model item selected by the user.
-     *
      * @author Dmitriy Moroz
      */
     data class SelectLocalModel(val model: ServerSetupState.LocalModel) : ServerSetupIntent
@@ -343,7 +315,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Enables or disables selecting a custom local model path.
      *
      * @param allow Whether custom path selection is enabled.
-     *
      * @author Dmitriy Moroz
      */
     data class AllowLocalCustomModel(val allow: Boolean) : ServerSetupIntent
@@ -352,7 +323,6 @@ sealed interface ServerSetupIntent : MviIntent {
      * Requests external navigation to a supported setup/help destination.
      *
      * @param link Supported destination resolved by the injected links provider.
-     *
      * @author Dmitriy Moroz
      */
     data class LaunchUrl(val link: ServerSetupLink) : ServerSetupIntent
@@ -400,7 +370,6 @@ sealed interface ServerSetupIntent : MviIntent {
          * Requests the appropriate download/delete/source action for a clicked local model.
          *
          * @param model Clicked model with its current download/selection state.
-         *
          * @author Dmitriy Moroz
          */
         data class ClickReduce(val model: ServerSetupState.LocalModel) : LocalModel
@@ -411,7 +380,6 @@ sealed interface ServerSetupIntent : MviIntent {
          * @param modelId Stable catalog model identifier.
          * @param url Chosen archive mirror URL.
          * @param type Provider captured when its source picker opened.
-         *
          * @author Dmitriy Moroz
          */
         data class DownloadConfirm(
@@ -425,7 +393,6 @@ sealed interface ServerSetupIntent : MviIntent {
          *
          * @param model Downloaded item whose files should be removed.
          * @param type Provider captured when deletion was requested.
-         *
          * @author Dmitriy Moroz
          */
         data class DeleteConfirm(

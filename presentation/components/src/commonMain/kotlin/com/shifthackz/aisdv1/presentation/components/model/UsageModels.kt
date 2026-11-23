@@ -25,7 +25,6 @@ enum class UsageScreenKind {
 
 /**
  * Categories shared by storage and network usage dashboards.
- *
  * Storage model categories are filtered by allowed build modes before they reach UI state, so
  * platform-specific providers such as Core ML are only displayed on builds where they are valid.
  *
@@ -52,7 +51,6 @@ enum class UsageCategory {
  * @param loading True while the screen should show shimmer placeholders instead of stale data.
  * @param items Ordered categories visible on the current usage screen.
  * @param selectedCategory Category currently highlighted in the donut, or null to show total.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -84,7 +82,6 @@ data class UsageState(
  * @param category Semantic bucket represented by the row and donut segment.
  * @param bytes Byte count currently attributed to this category.
  * @param modelIds Local model identifiers represented by this row. Only model storage rows use it.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -106,9 +103,7 @@ data class UsageItem(
  * Keeps selection only while the category is still present and non-empty.
  *
  * @param preferred Previously selected category, or null when the donut should show total.
- *
  * @receiver Ordered usage rows currently rendered by a storage or network screen.
- *
  * @author Dmitriy Moroz
  */
 fun List<UsageItem>.resolveSelectedCategory(

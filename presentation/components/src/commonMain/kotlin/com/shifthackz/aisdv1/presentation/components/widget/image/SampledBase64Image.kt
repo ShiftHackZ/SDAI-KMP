@@ -1,7 +1,5 @@
 package com.shifthackz.aisdv1.presentation.components.widget.image
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,12 +30,10 @@ fun SampledBase64Image(
 ) {
     var edge by remember { mutableIntStateOf(0) }
     val image = rememberPreviewImage(base64, edge)
-    Box(modifier.onSizeChanged { edge = maxOf(it.width, it.height) }) {
-        if (image != null) Image(
-            bitmap = image,
-            contentDescription = contentDescription,
-            contentScale = contentScale,
-            modifier = Modifier.matchParentSize()
-        )
-    }
+    SampledImageContent(
+        image = image,
+        modifier = modifier.onSizeChanged { edge = maxOf(it.width, it.height) },
+        contentDescription = contentDescription,
+        contentScale = contentScale,
+    )
 }

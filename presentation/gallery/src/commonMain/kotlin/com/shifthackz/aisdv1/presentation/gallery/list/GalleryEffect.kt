@@ -12,7 +12,6 @@ sealed interface GalleryEffect : MviEffect {
      * Opens the native media destination selected for saved images.
      *
      * @param folderUri Native content/document URI of the export folder.
-     *
      * @author Dmitriy Moroz
      */
     data class OpenMediaStoreFolder(val folderUri: String) : GalleryEffect
@@ -21,7 +20,6 @@ sealed interface GalleryEffect : MviEffect {
      * Shares a fully written gallery archive.
      *
      * @param filePath Absolute local path to the completed app-owned ZIP artifact.
-     *
      * @author Dmitriy Moroz
      */
     data class ShareExport(val filePath: String) : GalleryEffect

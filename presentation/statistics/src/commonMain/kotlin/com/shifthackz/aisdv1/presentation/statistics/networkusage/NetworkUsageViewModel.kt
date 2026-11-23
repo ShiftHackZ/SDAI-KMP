@@ -62,7 +62,7 @@ class NetworkUsageViewModel(
         }
     }
 
-    private fun selectCategory(category: UsageCategory) {
+    private fun selectCategory(category: UsageCategory?) {
         updateState { state ->
             state.copy(usage = state.usage.copy(selectedCategory = category))
         }

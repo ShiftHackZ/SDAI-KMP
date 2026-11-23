@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,29 +31,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.extensions.shimmer
-import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import kotlinx.coroutines.delay
 
 /**
  * Renders a settings row with optional loading, selection emphasis and trailing value controls.
  *
+ * @param text Setting label.
  * @param modifier Layout modifiers for the complete row or loading placeholder.
  * @param loading Replaces content with a shimmer while the setting loads.
  * @param enabled Whether row clicks are accepted.
  * @param selected Whether a selection border highlights the row.
- * @param text Setting label.
  * @param animateBackground Whether the row cycles between theme highlight colors.
  * @param showChevron Displays a navigation chevron when no custom trailing content is supplied.
  * @param endValueText Textual value displayed at the trailing edge.
  * @param endValueContent Custom trailing content replacing the textual value and chevron.
  * @param textSuffixContent Additional inline content after the main label.
  * @param startIconContent Custom leading content beside the label.
- * @param onClick Requests the setting's action. Return values and persistence stay caller-owned.
+ * @param onClick Requests the setting's action; persistence stays caller-owned.
  *
  * @author Dmitriy Moroz
  */
@@ -108,13 +105,10 @@ fun SettingsItem(
             if (animateBackground) colorState.value else MaterialTheme.colorScheme.surfaceTint.copy(
                 alpha = 0.8f
             )
-        val backingColor = rowColor.compositeOver(
-            LocalPlatformControlBackgroundColor.current ?: MaterialTheme.colorScheme.background
-        )
-        Row(
+        PlatformSurface(
+            color = rowColor,
             modifier = modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(color = rowColor)
                 .defaultMinSize(minHeight = 50.dp)
                 .clickable(enabled = enabled) { onClick() }
                 .border(
@@ -122,21 +116,22 @@ fun SettingsItem(
                     shape = RoundedCornerShape(16.dp),
                     color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
                 ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            SettingsItemContent(
-                modifier = endValueContent
-                    ?.let { Modifier.fillMaxWidth(0.8f) }
-                    ?: Modifier,
-                text = text,
-                textSuffixContent = textSuffixContent,
-                startIconContent = startIconContent,
-            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                CompositionLocalProvider(LocalPlatformControlBackgroundColor provides backingColor) {
+                SettingsItemContent(
+                    modifier = endValueContent
+                        ?.let { Modifier.fillMaxWidth(0.8f) }
+                        ?: Modifier,
+                    text = text,
+                    textSuffixContent = textSuffixContent,
+                    startIconContent = startIconContent,
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     endValueContent?.invoke() ?: run {
                         if (endValueText.isNotEmpty()) {
                             Text(

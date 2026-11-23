@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import androidx.compose.foundation.lazy.LazyListState
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
+import androidx.compose.ui.platform.LocalInspectionMode
+import com.shifthackz.aisdv1.presentation.components.platform.ExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberOverscrollEffect
+import androidx.compose.foundation.withoutVisualEffect
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Delete
@@ -45,6 +51,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.image.rememberPrevie
 import com.shifthackz.aisdv1.presentation.components.widget.imageinput.ImageInputCard
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 import com.shifthackz.aisdv1.presentation.components.widget.source.CurrentProviderCard
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformLazySurface
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 
 /**
@@ -114,6 +121,10 @@ internal fun UnsupportedImageToImageBody(
  * @param processIntent Publishes form changes and source-image requests.
  * @param onInPaintClick Opens the shared inpaint editor for the current source.
  * @param modifier Layout modifiers for the lazy input form.
+ * @param listState Retained vertical position within the generation form.
+ * @param isInitiallyExpanded Initial disclosure state of generation options.
+ * @param engineContent Checkpoint picker supplied by the owning form.
+ * @param inputImageContent Optional source-image card receiving its existing spacing modifier.
  *
  * @author Dmitriy Moroz
  */
@@ -126,10 +137,15 @@ internal fun ImageToImageBody(
     processIntent: (ImageToImageIntent) -> Unit,
     onInPaintClick: () -> Unit,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    isInitiallyExpanded: Boolean = true,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
+    inputImageContent: (@Composable (Modifier) -> Unit)? = null,
 ) {
-    var isFormExpanded by rememberSaveable { mutableStateOf(true) }
-    val listState = rememberLazyListState()
-    val urlLauncher = rememberExternalUrlLauncher()
+    var isFormExpanded by rememberSaveable { mutableStateOf(isInitiallyExpanded) }
+    val overscrollEffect = rememberOverscrollEffect()
+    val urlLauncher = if (LocalInspectionMode.current) remember { ExternalUrlLauncher {} }
+    else rememberExternalUrlLauncher()
     val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
         { event ->
             if (event == GenerationInputFormEvent.OpenADetailerInstallInstructions) {
@@ -142,49 +158,62 @@ internal fun ImageToImageBody(
         { DenoisingStrengthSlider(denoisingStrength, processIntent) }
     }
     ToolbarScrollObserver(listState.canScrollBackward)
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
+    PlatformLazySurface(
         state = listState,
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 16.dp + LocalToolbarContentInset.current,
-            bottom = 16.dp
-        ),
+        firstItemIndex = 2,
+        modifier = modifier.fillMaxSize(),
+        horizontalPadding = 16.dp,
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp,
+        overscrollEffect = overscrollEffect,
     ) {
-        item(key = "generation-provider") {
-            CurrentProviderCard(
-                source = state.mode,
-                platform = state.platform,
-                onClick = { processIntent(ImageToImageIntent.ConfigureProvider) },
-                modifier = Modifier.padding(bottom = 16.dp),
-            )
-        }
-        item(key = "generation-input-image") {
-            BoxWithConstraints(Modifier.padding(bottom = 16.dp)) {
-                val edge = with(LocalDensity.current) { maxWidth.roundToPx() }
-                ImageInputSection(
-                    state = state,
-                    strings = strings,
-                    image = rememberPreviewImage(state.imageBase64, edge),
-                    processIntent = processIntent,
-                    onInPaintClick = onInPaintClick,
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
+            state = listState,
+            overscrollEffect = overscrollEffect?.withoutVisualEffect(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp + LocalToolbarContentInset.current,
+                bottom = 16.dp
+            ),
+        ) {
+            item(key = "generation-provider") {
+                CurrentProviderCard(
+                    source = state.mode,
+                    platform = state.platform,
+                    onClick = { processIntent(ImageToImageIntent.ConfigureProvider) },
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
             }
-        }
-        imageToImageFormItems(
-            state = state,
-            isExpanded = isFormExpanded,
-            onToggleExpanded = { isFormExpanded = !isFormExpanded },
-            strings = strings,
-            promptChipTextFieldState = promptChipTextFieldState,
-            negativePromptChipTextFieldState = negativePromptChipTextFieldState,
-            onEvent = onEvent,
-            afterSlidersSection = afterSlidersSection,
-        )
+            item(key = "generation-input-image") {
+                if (inputImageContent != null) inputImageContent(Modifier.padding(bottom = 16.dp))
+                else BoxWithConstraints(Modifier.padding(bottom = 16.dp)) {
+                    val edge = with(LocalDensity.current) { maxWidth.roundToPx() }
+                    ImageInputSection(
+                        state = state,
+                        strings = strings,
+                        image = rememberPreviewImage(state.imageBase64, edge),
+                        processIntent = processIntent,
+                        onInPaintClick = onInPaintClick,
+                    )
+                }
+            }
+            imageToImageFormItems(
+                state = state,
+                isExpanded = isFormExpanded,
+                onToggleExpanded = { isFormExpanded = !isFormExpanded },
+                strings = strings,
+                promptChipTextFieldState = promptChipTextFieldState,
+                negativePromptChipTextFieldState = negativePromptChipTextFieldState,
+                onEvent = onEvent,
+                afterSlidersSection = afterSlidersSection,
+                engineContent = engineContent,
+            )
 
+        }
     }
 }
 

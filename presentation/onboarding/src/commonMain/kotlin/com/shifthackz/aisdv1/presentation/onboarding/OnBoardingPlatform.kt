@@ -1,21 +1,23 @@
 package com.shifthackz.aisdv1.presentation.onboarding
 
 import androidx.compose.runtime.Composable
+import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 
 /**
- * Provider identity and localization keys for the current platform's local-generation preview.
+ * Host identity, provider and localization keys for the platform's local-generation illustration.
  *
  * @param serverSource Local provider demonstrated by the preview.
  * @param titleKey Localization key for the explanatory heading.
  * @param progressTitleKey Localization key for the illustrative generation-progress title.
- *
+ * @param platform Current host selecting the local provider's native branding.
  * @author Dmitriy Moroz
  */
 data class LocalDiffusionOnBoardingSpec(
     val serverSource: ServerSource,
     val titleKey: String,
     val progressTitleKey: String,
+    val platform: Platform,
 )
 
 /**
@@ -37,7 +39,6 @@ expect fun localDiffusionOnBoardingSpec(): LocalDiffusionOnBoardingSpec
  *
  * @param enabled Whether a previous page or active scroll should consume platform back.
  * @param onBack Requests the pager's previous-page animation.
- *
  * @author Dmitriy Moroz
  */
 @Composable

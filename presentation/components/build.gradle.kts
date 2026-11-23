@@ -40,6 +40,9 @@ kotlin {
         }
 
         androidMain.dependencies {
+            implementation(project.dependencies.platform(libs.androidx.compose.bom))
+            implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.compose.ui.tooling)
             implementation(libs.androidx.compose.activity)
             implementation(project(":core:notification"))
             implementation(libs.androidx.core)

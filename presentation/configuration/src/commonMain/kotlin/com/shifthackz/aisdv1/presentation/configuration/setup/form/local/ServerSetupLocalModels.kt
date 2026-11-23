@@ -36,12 +36,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.DownloadState
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.isCustom
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 
 /**
- * Shows model selection, ownership and the active archive transfer in one catalog row.
+ * Shows model selection, ownership and the active archive transfer on a themed platform surface.
  *
  * @param model Current catalog metadata and transfer progress.
  * @param selected Whether the setup candidate uses this model.
@@ -50,6 +51,7 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
  * @param onAction Downloads, retries, cancels or deletes the model.
  * @param modifier Layout and decoration applied to the row surface.
  * @param isActionEnabled Prevents conflicting transfers or removal while a batch owns the catalog.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -62,7 +64,7 @@ internal fun LocalModelItem(
     modifier: Modifier = Modifier,
     isActionEnabled: Boolean = true,
 ) {
-    Surface(
+    PlatformSurface(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 50.dp)

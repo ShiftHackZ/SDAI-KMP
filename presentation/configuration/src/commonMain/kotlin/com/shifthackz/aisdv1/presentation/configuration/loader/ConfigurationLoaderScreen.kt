@@ -12,15 +12,18 @@ import org.koin.core.parameter.parametersOf
  * Binds startup configuration loading to a remembered ViewModel from the initialized graph.
  *
  * @param modifier Layout modifiers for the configuration-loading screen.
+ * @param router Navigation owner; defaults to the initialized application graph binding.
  *
  * @author Dmitriy Moroz
  */
 @Composable
 fun ConfigurationLoaderScreen(
     modifier: Modifier = Modifier,
+    router: ConfigurationLoaderRouter? = null,
 ) {
     val koin = remember { getKoin() }
-    val configurationLoaderRouter = remember(koin) { koin.get<ConfigurationLoaderRouter>() }
+    val configurationLoaderRouter =
+        remember(koin, router) { router ?: koin.get<ConfigurationLoaderRouter>() }
     val viewModel = remember(koin, configurationLoaderRouter) {
         koin.get<ConfigurationLoaderViewModel> {
             parametersOf(configurationLoaderRouter)

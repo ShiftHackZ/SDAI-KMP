@@ -79,6 +79,7 @@ internal class NativeGlassButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 
      * @param cornerRadius Shared shape radius in UIKit points, rendered with UIKit's continuous curve.
      * @param image Optional native glyph when the entire circular control is above the Compose canvas.
      * @param foreground Tint of that native glyph; null retains the configuration's default foreground.
+     * @param shouldClipBackground Whether the complete native backing is clipped to the shared corner radius.
      * @author Dmitriy Moroz
      */
     fun update(
@@ -91,7 +92,13 @@ internal class NativeGlassButtonView : UIView(frame = CGRectMake(0.0, 0.0, 0.0, 
         cornerRadius: Double,
         image: UIImage? = null,
         foreground: UIColor? = null,
+        shouldClipBackground: Boolean = false,
     ) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        layer.cornerRadius = if (shouldClipBackground) cornerRadius else 0.0
+        clipsToBounds = shouldClipBackground
+        CATransaction.commit()
         backgroundColor = backingColor
         overrideUserInterfaceStyle =
             if (isDark) UIUserInterfaceStyleDark else UIUserInterfaceStyleLight

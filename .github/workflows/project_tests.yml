@@ -164,6 +164,10 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "17"
+      - name: Set up Gradle dependency cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
       - name: Test iOS generation and download execution
         run: ./gradlew :feature:work:iosSimulatorArm64Test --no-daemon
       - name: Upload iOS work test reports
@@ -238,6 +242,11 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "17"
+      - name: Set up Gradle dependency cache
+        if: runner.os == 'macOS'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
       - name: Test MNN iOS storage, model leases and host admission
         if: runner.os == 'macOS'
         run: ./gradlew :data:iosSimulatorArm64Test :feature:mnn:iosSimulatorArm64Test --no-daemon
@@ -305,6 +314,10 @@ jobs:
         run: python3 -m pip install -r scripts/provider_contracts/requirements.txt
       - name: Check schema comparison logic
         run: python3 scripts/test_provider_contract_checker.py
+      - name: Set up Gradle dependency cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
       - name: Export compiled provider wire contracts
         run: ./gradlew :network:exportProviderContracts --no-daemon
       - name: Test provider and integration API contracts
@@ -348,6 +361,11 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "17"
+
+      - name: Set up Gradle dependency cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
 
       - name: Grant execute permissions for gradlew
         run: chmod +x ./gradlew

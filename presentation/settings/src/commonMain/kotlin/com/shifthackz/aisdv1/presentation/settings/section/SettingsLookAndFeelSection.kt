@@ -1,26 +1,19 @@
 package com.shifthackz.aisdv1.presentation.settings.section
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.entity.Grid
-import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
-import com.shifthackz.aisdv1.presentation.settings.startIcon
-import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
-import com.shifthackz.aisdv1.presentation.settings.text
 import com.shifthackz.aisdv1.presentation.components.widget.color.AccentColorSelector
 import com.shifthackz.aisdv1.presentation.components.widget.color.DarkThemeColorSelector
 import com.shifthackz.aisdv1.presentation.components.widget.item.GridIcon
@@ -28,6 +21,11 @@ import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsHeader
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItemContent
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsToggleItem
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
+import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
+import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
+import com.shifthackz.aisdv1.presentation.settings.startIcon
+import com.shifthackz.aisdv1.presentation.settings.text
 
 /**
  * Renders appearance preferences from only their displayed values, so unrelated settings can skip.
@@ -44,6 +42,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsToggleI
  * @param headerModifier Layout applied to the section header.
  * @param itemModifier Layout applied to each preference row.
  * @param processIntent Receives appearance and gallery preference actions.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -132,53 +131,53 @@ internal fun SettingsLookAndFeelSection(
         }
 
         SettingsListItem.DARK_PALETTE -> {
-            Column(
-                modifier = itemModifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-                    .defaultMinSize(minHeight = 50.dp),
+            PlatformSurface(
+                modifier = itemModifier.defaultMinSize(minHeight = 50.dp),
+                color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f),
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsItemContent(
-                    text = text("settings_item_lf_dark_theme_color"),
-                    icon = row.startIcon,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                DarkThemeColorSelector(
-                    modifier = Modifier.padding(horizontal = 10.dp),
-                    selectedToken = darkThemeToken,
-                    colorToken = colorToken,
-                    onSelected = { _, token ->
-                        processIntent(SettingsIntent.NewDarkThemeToken(token))
-                    },
-                )
-                Spacer(modifier = Modifier.height(14.dp))
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SettingsItemContent(
+                        text = text("settings_item_lf_dark_theme_color"),
+                        icon = row.startIcon,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    DarkThemeColorSelector(
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                        selectedToken = darkThemeToken,
+                        colorToken = colorToken,
+                        onSelected = { _, token ->
+                            processIntent(SettingsIntent.NewDarkThemeToken(token))
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
             }
         }
 
         SettingsListItem.ACCENT_COLOR -> {
-            Column(
-                modifier = itemModifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-                    .defaultMinSize(minHeight = 50.dp),
+            PlatformSurface(
+                modifier = itemModifier.defaultMinSize(minHeight = 50.dp),
+                color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f),
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsItemContent(
-                    text = text("settings_item_lf_accent_color"),
-                    icon = row.startIcon,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                AccentColorSelector(
-                    modifier = Modifier.padding(horizontal = 10.dp),
-                    isDark = isDark,
-                    darkThemeToken = darkThemeToken,
-                    selectedToken = colorToken,
-                    onSelected = { _, token ->
-                        processIntent(SettingsIntent.NewColorToken(token))
-                    },
-                )
-                Spacer(modifier = Modifier.height(14.dp))
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SettingsItemContent(
+                        text = text("settings_item_lf_accent_color"),
+                        icon = row.startIcon,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    AccentColorSelector(
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                        isDark = isDark,
+                        darkThemeToken = darkThemeToken,
+                        selectedToken = colorToken,
+                        onSelected = { _, token ->
+                            processIntent(SettingsIntent.NewColorToken(token))
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
             }
         }
 

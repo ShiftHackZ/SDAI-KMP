@@ -53,6 +53,7 @@ internal fun ImagePickerTileButton(
                 modifier = Modifier.fillMaxWidth().height(112.dp),
                 isEnabled = isEnabled,
                 shape = RoundedCornerShape(size = 28.dp),
+                shouldClipBackground = true,
                 contentPadding = PaddingValues(8.dp),
                 onClick = onClick,
             ) {

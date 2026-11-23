@@ -2,33 +2,27 @@
 
 package com.shifthackz.aisdv1.presentation.donate
 
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -42,11 +36,18 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.shifthackz.aisdv1.core.extensions.fadedEdge
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.item.SupporterItem
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 
 /**
  * Localized donation-page explanation and toolbar labels.
@@ -77,6 +78,7 @@ data class DonateScreenStrings(
  * @param processIntent Requests support-link navigation or return to the caller.
  * @param brandIcon Platform branding rendered in the donation illustration.
  * @param modifier Layout modifiers for the donation scaffold.
+ * @param listState Retained supporter-list position beneath the toolbar.
  *
  * @author Dmitriy Moroz
  */
@@ -86,6 +88,7 @@ fun DonateScreenContent(
     strings: DonateScreenStrings,
     processIntent: (DonateIntent) -> Unit,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
     brandIcon: @Composable () -> Unit = {},
 ) {
     PlatformScaffold(
@@ -172,12 +175,11 @@ fun DonateScreenContent(
         ) { contentVisible ->
             if (contentVisible) {
                 if (state.supporters.isNotEmpty()) {
-                    val listState = rememberLazyListState()
                     val shadowHeight = 150.dp
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .fadedEdge(gradientOffset = shadowHeight),
+                            .donateSupporterListFade(gradientOffset = shadowHeight),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
                         ToolbarScrollObserver(listState.canScrollBackward)
@@ -210,26 +212,19 @@ fun DonateScreenContent(
                                 key = { index -> state.supporters[index].id },
                             ) { index ->
                                 val supporter = state.supporters[index]
-                                val itemShape = RoundedCornerShape(12.dp)
-                                val bgColor =
-                                    MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f)
-                                SupporterItem(
+                                PlatformSurface(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(
                                             top = if (index == 0) 8.dp else 4.dp,
                                             bottom = 4.dp,
                                         )
-                                        .padding(horizontal = 12.dp)
-                                        .clip(itemShape)
-                                        .drawBehind {
-                                            drawRoundRect(
-                                                color = bgColor,
-                                                cornerRadius = CornerRadius(12.dp.toPx()),
-                                            )
-                                        },
-                                    supporter = supporter,
-                                )
+                                        .padding(horizontal = 12.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f),
+                                ) {
+                                    SupporterItem(supporter = supporter)
+                                }
                             }
                             item {
                                 Spacer(modifier = Modifier.height(shadowHeight + 32.dp))

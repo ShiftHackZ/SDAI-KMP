@@ -23,6 +23,9 @@ kotlin {
             implementation(project(":core:ui"))
             implementation(project(":domain"))
             implementation(project(":presentation:components"))
+            implementation(project(":presentation:configuration"))
+            implementation(project(":presentation:generation"))
+            implementation(project(":presentation:settings"))
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
             implementation(libs.compose.foundation)
@@ -35,6 +38,9 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.androidx.compose.activity)
+            implementation(project.dependencies.platform(libs.androidx.compose.bom))
+            implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.compose.ui.tooling)
         }
 
         androidUnitTest.dependencies {

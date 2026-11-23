@@ -18,6 +18,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
  *
  * @param modifier Layout modifiers for the language list.
  * @param onLanguageSelected Applies/persists the selected language; the default invokes the platform adapter.
+ * @param selectedLanguageCode Locale whose row receives selected styling.
  * @param onDismissRequest Closes the owning sheet after selection.
  *
  * @author Dmitriy Moroz
@@ -27,6 +28,7 @@ fun LanguageBottomSheet(
     modifier: Modifier = Modifier,
     onLanguageSelected: (String) -> Unit = { applyAppLanguage(it) },
     onDismissRequest: () -> Unit = {},
+    selectedLanguageCode: String = Localization.currentLanguageCode(),
 ) {
     val languages = remember { Localization.entries.sortedBy { it.name.lowercase() } }
     Column(
@@ -42,7 +44,7 @@ fun LanguageBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                selected = locale == Localization.currentLanguageCode(),
+                selected = locale == selectedLanguageCode,
                 text = language.name.asUiText(),
                 showChevron = false,
                 startIconContent = {

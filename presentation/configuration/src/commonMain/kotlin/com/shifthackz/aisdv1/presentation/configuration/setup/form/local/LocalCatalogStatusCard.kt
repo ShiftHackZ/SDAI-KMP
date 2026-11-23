@@ -15,12 +15,8 @@ import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -29,6 +25,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import com.shifthackz.aisdv1.presentation.configuration.setup.LocalCatalogStatus
 
 /**
@@ -55,51 +53,51 @@ internal fun LocalCatalogStatusCard(
             else -> "local_catalog_empty_title"
         }
     )
-    Surface(
+    PlatformSurface(
         modifier = modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surfaceVariant) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = if (hasFailed) Icons.Outlined.CloudOff else Icons.Outlined.Inventory2,
-                        contentDescription = null,
-                        tint = if (hasFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Text(
-                        title,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                Text(
-                    Localization.string(if (hasFailed) "local_catalog_error_body" else "local_catalog_empty_body"),
-                    style = MaterialTheme.typography.bodyMedium,
+                Icon(
+                    imageVector = if (hasFailed) Icons.Outlined.CloudOff else Icons.Outlined.Inventory2,
+                    contentDescription = null,
+                    tint = if (hasFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp),
                 )
-                OutlinedButton(
-                    onClick = onRetry,
-                    isEnabled = !isRefreshing,
-                    modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 144.dp)
-                        .heightIn(min = 48.dp),
-                ) {
-                    Text(
-                        Localization.string(if (isRefreshing) "loading" else "retry"),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
+                Text(
+                    title,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Text(
+                Localization.string(if (hasFailed) "local_catalog_error_body" else "local_catalog_empty_body"),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            OutlinedButton(
+                onClick = onRetry,
+                isEnabled = !isRefreshing,
+                modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 144.dp)
+                    .heightIn(min = 48.dp),
+            ) {
+                Text(
+                    Localization.string(if (isRefreshing) "loading" else "retry"),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
+
     }
 }

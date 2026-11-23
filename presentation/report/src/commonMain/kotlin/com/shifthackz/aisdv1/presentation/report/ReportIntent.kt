@@ -13,7 +13,6 @@ sealed interface ReportIntent : MviIntent {
      * Replaces the report description.
      *
      * @param text User-entered description sent with the report.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateText(val text: String) : ReportIntent
@@ -22,7 +21,6 @@ sealed interface ReportIntent : MviIntent {
      * Selects the report category.
      *
      * @param reason Category attached to the report submission.
-     *
      * @author Dmitriy Moroz
      */
     data class UpdateReason(val reason: ReportReason) : ReportIntent

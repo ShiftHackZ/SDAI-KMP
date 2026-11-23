@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.onboarding
 
 import androidx.compose.runtime.Composable
+import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 
 /**
@@ -19,6 +20,7 @@ actual fun localDiffusionOnBoardingSpec() = LocalDiffusionOnBoardingSpec(
     serverSource = ServerSource.LOCAL_APPLE_CORE_ML,
     titleKey = "on_boarding_page_core_ml_title",
     progressTitleKey = "communicating_core_ml_title",
+    platform = Platform.IOS,
 )
 
 /**

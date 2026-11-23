@@ -2,6 +2,10 @@
 
 package com.shifthackz.aisdv1.presentation.generation.txt2img
 
+import androidx.compose.foundation.lazy.LazyListState
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.platform.LocalInspectionMode
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarNavigationButton
@@ -72,6 +76,10 @@ data class TextToImageStrings(
  * @param strings Localized screen labels that previews and tests can override.
  * @param performanceOverlay Optional live resource panel supplied by the application root.
  * @param useDrawerNavigation Whether the top app bar opens the app drawer instead of navigating back.
+ * @param listState Optional caller-owned form position; otherwise the active form retains its own state.
+ * @param isFormInitiallyExpanded Initial disclosure state of generation options.
+ * @param engineContent Checkpoint picker supplied by the screen host.
+ * @param backgroundWorkContent Status below the toolbar, defaulting to the live background-work widget.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -81,8 +89,13 @@ fun TextToImageContent(
     modifier: Modifier = Modifier,
     strings: TextToImageStrings = TextToImageStrings(),
     useDrawerNavigation: Boolean = false,
+    backgroundWorkContent: @Composable (Modifier) -> Unit = { BackgroundWorkWidget(modifier = it) },
     performanceOverlay: @Composable () -> Unit = {},
+    listState: LazyListState? = null,
+    isFormInitiallyExpanded: Boolean = true,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
 ) {
+    val isInspectionMode = LocalInspectionMode.current
     val promptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     val negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     var activeModal by remember { mutableStateOf<TextToImagePanel?>(null) }
@@ -112,8 +125,8 @@ fun TextToImageContent(
                         )
                     },
                 )
-                BackgroundWorkWidget(
-                    modifier = Modifier
+                backgroundWorkContent(
+                    Modifier
                         .background(MaterialTheme.colorScheme.background)
                         .padding(vertical = 4.dp),
                 )
@@ -189,54 +202,58 @@ fun TextToImageContent(
             } else {
                 TextToImageBody(
                     state = state,
-                    strings = strings,
                     promptChipTextFieldState = promptChipTextFieldState,
                     negativePromptChipTextFieldState = negativePromptChipTextFieldState,
                     processIntent = processIntent,
+                    listState = listState ?: rememberLazyListState(),
+                    isInitiallyExpanded = isFormInitiallyExpanded,
+                    engineContent = engineContent,
                 )
             }
         }
     }
-    state.editTag?.let { editTag ->
-        EditTagDialog(
-            prompt = editTag.prompt,
-            negativePrompt = editTag.negativePrompt,
-            tag = editTag.tag,
-            isNegative = editTag.isNegative,
-            onDismissRequest = { processIntent(TextToImageIntent.DismissEditTag) },
-            onNewPrompts = { prompt, negativePrompt ->
-                processIntent(TextToImageIntent.ApplyPrompts(prompt, negativePrompt))
-            },
-        )
-    }
-    when (val modal = activeModal) {
-        null -> Unit
-        is TextToImagePanel.Embeddings -> EmbeddingScreen(
-            prompt = modal.prompt,
-            negativePrompt = modal.negativePrompt,
-            onNewPrompts = { prompt, negativePrompt ->
-                processIntent(TextToImageIntent.ApplyPrompts(prompt, negativePrompt))
-            },
-            onClose = { activeModal = null },
-        )
+    if (!isInspectionMode) {
+        state.editTag?.let { editTag ->
+            EditTagDialog(
+                prompt = editTag.prompt,
+                negativePrompt = editTag.negativePrompt,
+                tag = editTag.tag,
+                isNegative = editTag.isNegative,
+                onDismissRequest = { processIntent(TextToImageIntent.DismissEditTag) },
+                onNewPrompts = { prompt, negativePrompt ->
+                    processIntent(TextToImageIntent.ApplyPrompts(prompt, negativePrompt))
+                },
+            )
+        }
+        when (val modal = activeModal) {
+            null -> Unit
+            is TextToImagePanel.Embeddings -> EmbeddingScreen(
+                prompt = modal.prompt,
+                negativePrompt = modal.negativePrompt,
+                onNewPrompts = { prompt, negativePrompt ->
+                    processIntent(TextToImageIntent.ApplyPrompts(prompt, negativePrompt))
+                },
+                onClose = { activeModal = null },
+            )
 
-        is TextToImagePanel.Extras -> ExtrasScreen(
-            prompt = modal.prompt,
-            negativePrompt = modal.negativePrompt,
-            type = modal.type,
-            onNewPrompts = { prompt, negativePrompt ->
-                processIntent(TextToImageIntent.ApplyPrompts(prompt, negativePrompt))
-            },
-            onClose = { activeModal = null },
-        )
+            is TextToImagePanel.Extras -> ExtrasScreen(
+                prompt = modal.prompt,
+                negativePrompt = modal.negativePrompt,
+                type = modal.type,
+                onNewPrompts = { prompt, negativePrompt ->
+                    processIntent(TextToImageIntent.ApplyPrompts(prompt, negativePrompt))
+                },
+                onClose = { activeModal = null },
+            )
 
-        TextToImagePanel.History -> GenerationHistoryDialog(
-            onClose = { activeModal = null },
-            onGenerationSelected = { ai ->
-                processIntent(TextToImageIntent.ApplyGenerationResult(ai))
-                activeModal = null
-            },
-        )
+            TextToImagePanel.History -> GenerationHistoryDialog(
+                onClose = { activeModal = null },
+                onGenerationSelected = { ai ->
+                    processIntent(TextToImageIntent.ApplyGenerationResult(ai))
+                    activeModal = null
+                },
+            )
+        }
     }
     GenerationModalRenderer(
         generationStartedAt = state.generationStartedAt,

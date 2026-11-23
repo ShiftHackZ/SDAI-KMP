@@ -172,6 +172,7 @@ fun EngineSelectionContent(
  * @param onItemSelected Receives a changed item after the menu closes; persistence belongs to the caller.
  * @param displayDelegate Maps each item into the visible field and menu label.
  *
+ * @param isInitiallyExpanded Initial menu visibility; later changes are owned by user interaction.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -183,8 +184,9 @@ internal fun <T : Any> DropdownTextField(
     items: List<T> = emptyList(),
     onItemSelected: (T) -> Unit = {},
     displayDelegate: (T) -> String = { it.toString() },
+    isInitiallyExpanded: Boolean = false,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(isInitiallyExpanded) }
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = expanded,

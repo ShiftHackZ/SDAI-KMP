@@ -2,58 +2,43 @@
 
 package com.shifthackz.aisdv1.presentation.debug
 
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TextSnippet
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CancelScheduleSend
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
+import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
+import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsHeaderContent
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsItem
+import com.shifthackz.aisdv1.presentation.components.widget.item.SettingsToggleItem
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 
 /**
  * Already localized developer-menu labels used by its stateless renderer.
@@ -76,7 +61,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
  * @param qualityAssuranceSection Heading for malformed-data diagnostics.
  * @param actionBadBase64 Label for deliberately inserting invalid image data.
  * @param backContentDescription Accessible label for returning to the preceding route.
- *
  * @author Dmitriy Moroz
  */
 data class DebugMenuScreenStrings(
@@ -110,7 +94,6 @@ data class DebugMenuScreenStrings(
  * @param showWorkManagerSection Whether background-work controls are supported.
  * @param showLocalDiffusionSection Whether local ONNX preferences are supported.
  * @param showQualityAssuranceSection Whether malformed-data insertion controls are visible.
- *
  * @author Dmitriy Moroz
  */
 data class DebugMenuScreenContentState(
@@ -124,46 +107,13 @@ data class DebugMenuScreenContentState(
 )
 
 /**
- * User requests emitted by the stateless developer-menu renderer.
- *
- * @author Dmitriy Moroz
- */
-sealed interface DebugMenuAction {
-
-    data object ShareUiCapture : DebugMenuAction
-
-    data object ResetUiCapture : DebugMenuAction
-
-    data object StopUiCapture : DebugMenuAction
-
-    data object StartUiCapture : DebugMenuAction
-
-    data object NavigateBack : DebugMenuAction
-
-    data object ViewLogs : DebugMenuAction
-
-    data object ClearLogs : DebugMenuAction
-
-    data object RestartTxt2Img : DebugMenuAction
-
-    data object RestartImg2Img : DebugMenuAction
-
-    data object CancelAllWork : DebugMenuAction
-
-    data object ToggleLocalDiffusionCancel : DebugMenuAction
-
-    data object RequestLocalDiffusionScheduler : DebugMenuAction
-
-    data object InsertBadBase64 : DebugMenuAction
-}
-
-/**
  * Renders capability-filtered developer controls from caller-owned state.
  *
  * @param strings Localized labels for sections, actions and accessibility.
  * @param state Current preferences and supported section visibility.
- * @param processAction Requests state changes, platform operations or navigation.
+ * @param processIntent Dispatches developer operations and navigation through the screen's MVI contract.
  * @param modifier Layout modifiers for the developer-menu scaffold.
+ * @param scrollState Retained position of the developer controls beneath the toolbar.
  *
  * @author Dmitriy Moroz
  */
@@ -171,8 +121,9 @@ sealed interface DebugMenuAction {
 fun DebugMenuScreenContent(
     strings: DebugMenuScreenStrings,
     state: DebugMenuScreenContentState,
-    processAction: (DebugMenuAction) -> Unit,
+    processIntent: (DebugMenuIntent) -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     PlatformScaffold(
         canUnderlapToolbar = true,
@@ -187,7 +138,7 @@ fun DebugMenuScreenContent(
                 },
                 navigationIcon = {
                     ToolbarBackButton(
-                        onClick = { processAction(DebugMenuAction.NavigateBack) },
+                        onClick = { processIntent(DebugMenuIntent.NavigateBack) },
                         icon = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = strings.backContentDescription,
                     )
@@ -196,7 +147,6 @@ fun DebugMenuScreenContent(
             )
         },
     ) { paddingValues ->
-        val scrollState = rememberScrollState()
         ToolbarScrollObserver(scrollState.canScrollBackward)
         Column(
             modifier = Modifier
@@ -221,14 +171,14 @@ fun DebugMenuScreenContent(
                 startIcon = Icons.AutoMirrored.Filled.TextSnippet,
                 text = strings.actionLogger,
                 helpMessage = Localization.string("debug_help_logs_view"),
-                onClick = { processAction(DebugMenuAction.ViewLogs) },
+                onClick = { processIntent(DebugMenuIntent.ViewLogs) },
             )
             DebugMenuItem(
                 modifier = itemModifier,
                 startIcon = Icons.Default.CleaningServices,
                 text = strings.actionLoggerClear,
                 helpMessage = Localization.string("debug_help_logs_clear"),
-                onClick = { processAction(DebugMenuAction.ClearLogs) },
+                onClick = { processIntent(DebugMenuIntent.ClearLogs) },
             )
 
             if (state.isUiDiagnosticsSupported) {
@@ -241,44 +191,25 @@ fun DebugMenuScreenContent(
                     message = Localization.string("debug_help_capture"),
                     modifier = itemModifier,
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-                            .defaultMinSize(minHeight = 50.dp)
-                            .toggleable(
-                                value = state.isUiDiagnosticsCapturing,
-                                role = Role.Switch,
-                                onValueChange = { shouldCapture ->
-                                    processAction(if (shouldCapture) DebugMenuAction.StartUiCapture else DebugMenuAction.StopUiCapture)
-                                },
-                            )
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = strings.diagnosticCapture,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f)
-                        )
-                        PlatformSwitch(
-                            isChecked = state.isUiDiagnosticsCapturing,
-                            onCheckedChange = null
-                        )
-                    }
+                    SettingsToggleItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = UiText.Static(strings.diagnosticCapture),
+                        isChecked = state.isUiDiagnosticsCapturing,
+                        onCheckedChange = { shouldCapture ->
+                            processIntent(if (shouldCapture) DebugMenuIntent.StartUiCapture else DebugMenuIntent.StopUiCapture)
+                        },
+                    )
                 }
                 DebugMenuItem(
                     text = strings.diagnosticReset,
                     helpMessage = Localization.string("debug_help_capture_reset"),
                     modifier = itemModifier,
-                    onClick = { processAction(DebugMenuAction.ResetUiCapture) })
+                    onClick = { processIntent(DebugMenuIntent.ResetUiCapture) })
                 DebugMenuItem(
                     text = strings.diagnosticShare,
                     helpMessage = Localization.string("debug_help_capture_share"),
                     modifier = itemModifier,
-                    onClick = { processAction(DebugMenuAction.ShareUiCapture) })
+                    onClick = { processIntent(DebugMenuIntent.ShareUiCapture) })
             }
 
             if (state.showWorkManagerSection) {
@@ -292,21 +223,21 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.Refresh,
                     text = strings.actionWorkRestartTxt2Img,
                     helpMessage = Localization.string("debug_help_retry_txt"),
-                    onClick = { processAction(DebugMenuAction.RestartTxt2Img) },
+                    onClick = { processIntent(DebugMenuIntent.WorkManager.RestartTxt2Img) },
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Refresh,
                     text = strings.actionWorkRestartImg2Img,
                     helpMessage = Localization.string("debug_help_retry_img"),
-                    onClick = { processAction(DebugMenuAction.RestartImg2Img) },
+                    onClick = { processIntent(DebugMenuIntent.WorkManager.RestartImg2Img) },
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Cancel,
                     text = strings.actionWorkCancelAll,
                     helpMessage = Localization.string("debug_help_cancel_work"),
-                    onClick = { processAction(DebugMenuAction.CancelAllWork) },
+                    onClick = { processIntent(DebugMenuIntent.WorkManager.CancelAll) },
                 )
             }
 
@@ -321,14 +252,14 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.CancelScheduleSend,
                     text = strings.actionLocalDiffusionAllowCancel,
                     helpMessage = Localization.string("debug_help_allow_cancel"),
-                    onClick = { processAction(DebugMenuAction.ToggleLocalDiffusionCancel) },
+                    onClick = { processIntent(DebugMenuIntent.AllowLocalDiffusionCancel) },
                     showChevron = false,
                     endValueContent = {
                         PlatformSwitch(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             isChecked = state.localDiffusionAllowCancel,
                             onCheckedChange = {
-                                processAction(DebugMenuAction.ToggleLocalDiffusionCancel)
+                                processIntent(DebugMenuIntent.AllowLocalDiffusionCancel)
                             },
                         )
                     },
@@ -338,7 +269,7 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.Construction,
                     text = strings.actionLocalDiffusionScheduler,
                     helpMessage = Localization.string("debug_help_scheduler"),
-                    onClick = { processAction(DebugMenuAction.RequestLocalDiffusionScheduler) },
+                    onClick = { processIntent(DebugMenuIntent.LocalDiffusionScheduler.Request) },
                     endValueText = state.localDiffusionSchedulerThread,
                 )
             }
@@ -354,7 +285,7 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.SettingsEthernet,
                     text = strings.actionBadBase64,
                     helpMessage = Localization.string("debug_help_bad_image"),
-                    onClick = { processAction(DebugMenuAction.InsertBadBase64) },
+                    onClick = { processIntent(DebugMenuIntent.InsertBadBase64) },
                 )
             }
         }
@@ -363,7 +294,7 @@ fun DebugMenuScreenContent(
 
 
 /**
- * Keeps developer help on the whole row while preserving its short-tap action.
+ * Adds developer help to the shared platform settings row while preserving its short-tap action.
  *
  * @param text Localized action title shared by the row and tooltip.
  * @param helpMessage Localized description including any side effects.
@@ -373,6 +304,7 @@ fun DebugMenuScreenContent(
  * @param endValueText Current preference value displayed after the title.
  * @param endValueContent Optional trailing control replacing the value and chevron.
  * @param onClick Primary action performed only on a short tap.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -392,65 +324,15 @@ private fun DebugMenuItem(
         titleStartIcon = startIcon,
         modifier = modifier,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.8f))
-                .defaultMinSize(minHeight = 50.dp)
-                .clickable { onClick() }
-                .border(
-                    width = 2.dp,
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.Transparent,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                modifier = endValueContent
-                    ?.let { Modifier.fillMaxWidth(0.8f) }
-                    ?: Modifier,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Spacer(modifier = Modifier.width(8.dp))
-                startIcon?.let {
-                    Icon(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        imageVector = it,
-                        contentDescription = null,
-                    )
-                }
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                endValueContent?.invoke() ?: run {
-                    if (endValueText.isNotEmpty()) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(0.5f),
-                            text = endValueText,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Right,
-                        )
-                    }
-                    if (showChevron) {
-                        Icon(
-                            modifier = Modifier.padding(horizontal = 6.dp),
-                            imageVector = Icons.Default.ChevronRight,
-                            tint = LocalContentColor.current,
-                            contentDescription = null,
-                        )
-                    }
-                }
-            }
-        }
+        SettingsItem(
+            modifier = Modifier.fillMaxWidth(),
+            startIcon = startIcon,
+            text = UiText.Static(text),
+            showChevron = showChevron,
+            endValueText = UiText.Static(endValueText),
+            endValueContent = endValueContent,
+            onClick = onClick,
+        )
     }
 }
 
@@ -460,6 +342,7 @@ private fun DebugMenuItem(
  * @param text Localized section title.
  * @param helpMessage Localized purpose of this group of tools.
  * @param modifier Placement of the heading and its help anchor.
+ *
  * @author Dmitriy Moroz
  */
 @Composable

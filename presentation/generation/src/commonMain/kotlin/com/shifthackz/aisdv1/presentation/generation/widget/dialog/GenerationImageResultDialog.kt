@@ -53,6 +53,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.image.SampledBase64I
  * @param onSaveRequest Requests persistence of the completed result.
  * @param onReportRequest Opens reporting for this result.
  * @param onViewDetailRequest Opens the image detail view when the preview is activated.
+ * @param imageContent Optional synchronous image renderer receiving the encoded source and bounded slot modifier.
  *
  * @author Dmitriy Moroz
  */
@@ -65,6 +66,7 @@ fun GenerationImageResultDialog(
     onSaveRequest: () -> Unit = {},
     onReportRequest: () -> Unit = {},
     onViewDetailRequest: () -> Unit = {},
+    imageContent: (@Composable (String, Modifier) -> Unit)? = null,
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
@@ -76,20 +78,20 @@ fun GenerationImageResultDialog(
                     .padding(horizontal = 16.dp, vertical = 16.dp)
                     .fillMaxWidth(0.96f),
             ) {
-                run {
-                    SampledBase64Image(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultMinSize(minHeight = 300.dp)
-                            .align(Alignment.CenterHorizontally)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                            ) { onViewDetailRequest() },
-                        base64 = imageBase64,
-                        contentDescription = Localization.string("action_generate"),
-                    )
-                }
+                val imageModifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 300.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onViewDetailRequest() }
+                if (imageContent != null) imageContent(imageBase64, imageModifier)
+                else SampledBase64Image(
+                    modifier = imageModifier,
+                    base64 = imageBase64,
+                    contentDescription = Localization.string("action_generate"),
+                )
 
                 if (showSaveButton) {
                     PrimaryButton(
@@ -145,6 +147,7 @@ fun GenerationImageResultDialog(
  * @param showSaveButton Whether unsaved batch outputs may be persisted.
  * @param onSaveRequest Requests persistence of the full batch.
  * @param onViewDetailRequest Receives the output selected for detail navigation.
+ * @param imageContent Optional synchronous image renderer receiving the encoded source and cell modifier.
  *
  * @author Dmitriy Moroz
  */
@@ -154,6 +157,7 @@ fun ColumnScope.GenerationImageBatchResultModal(
     showSaveButton: Boolean = false,
     onSaveRequest: () -> Unit = {},
     onViewDetailRequest: (AiGenerationResult) -> Unit = {},
+    imageContent: (@Composable (String, Modifier) -> Unit)? = null,
 ) {
     if (showSaveButton) {
         PrimaryButton(
@@ -184,6 +188,7 @@ fun ColumnScope.GenerationImageBatchResultModal(
             val result = results[index]
             GenerationBatchImageItem(
                 result = result,
+                imageContent = imageContent,
                 onClick = { onViewDetailRequest(result) },
             )
         }
@@ -196,11 +201,21 @@ fun ColumnScope.GenerationImageBatchResultModal(
 }
 
 
+/**
+ * Displays one sampled batch image with its hidden-image blur and detail action.
+ *
+ * @param result Completed output and its visibility flag.
+ * @param onClick Opens detail for this output.
+ * @param modifier Placement of the square batch cell.
+ * @param imageContent Optional synchronous image renderer receiving the encoded source and cell modifier.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun GenerationBatchImageItem(
     result: AiGenerationResult,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    imageContent: (@Composable (String, Modifier) -> Unit)? = null,
 ) {
     Box(
         modifier = modifier
@@ -211,27 +226,18 @@ private fun GenerationBatchImageItem(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        run {
-            SampledBase64Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(
-                        if (!result.hidden) {
-                            Modifier
-                        } else {
-                            Modifier.graphicsLayer {
-                                renderEffect = BlurEffect(
-                                    radiusX = 32f,
-                                    radiusY = 32f,
-                                )
-                            }
-                        },
-                    ),
-                base64 = result.image,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-            )
-        }
+        val imageModifier = Modifier.fillMaxSize().then(
+            if (!result.hidden) Modifier else Modifier.graphicsLayer {
+                renderEffect = BlurEffect(radiusX = 32f, radiusY = 32f)
+            },
+        )
+        if (imageContent != null) imageContent(result.image, imageModifier)
+        else SampledBase64Image(
+            modifier = imageModifier,
+            base64 = result.image,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+        )
         if (result.hidden) {
             Icon(
                 imageVector = Icons.Default.VisibilityOff,

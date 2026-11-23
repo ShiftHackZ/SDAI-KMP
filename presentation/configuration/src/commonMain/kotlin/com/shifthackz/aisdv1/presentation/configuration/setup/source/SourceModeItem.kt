@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +26,7 @@ import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.components.model.providerIcon
 import com.shifthackz.aisdv1.presentation.components.model.readinessFor
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.subtitle
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.title
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
@@ -35,12 +35,12 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.mappers.mapToUi
 /**
  * Renders one provider option in the provider selection list.
  *
- * @param source provider represented by this row.
- * @param selected true when this provider is the current setup target.
- * @param strings localized labels used by source title/subtitle and metadata.
- * @param onClick invoked when the provider row is selected.
- * @param modifier Layout modifiers for this selectable provider card.
+ * @param source Provider represented by this row.
+ * @param selected Whether the current setup draft selects this provider.
  * @param platform Current host selecting provider readiness, local branding and platform labels.
+ * @param strings Localized labels used by the provider title, subtitle and metadata.
+ * @param onClick Requests selecting this provider in the owning setup flow.
+ * @param modifier Layout modifiers for this selectable provider card.
  *
  * @author Dmitriy Moroz
  */
@@ -55,7 +55,7 @@ internal fun SourceModeItem(
 ) {
     val shape = RoundedCornerShape(16.dp)
     val readiness = source.readinessFor(platform)
-    Surface(
+    PlatformSurface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = shape,

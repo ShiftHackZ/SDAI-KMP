@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,6 +101,7 @@ internal fun BrushSizeSlider(
  * @param modifier Layout modifiers for the scrollable parameter panel.
  * @param model Current inpaint mask settings.
  * @param processIntent Publishes requested inpaint parameter changes to the shared image-to-image ViewModel.
+ * @param scrollState Retained vertical position within the mask-parameter panel.
  *
  * @author Dmitriy Moroz
  */
@@ -108,8 +110,8 @@ internal fun ImageInPaintParamsForm(
     modifier: Modifier = Modifier,
     model: ImageInPaintState,
     processIntent: (ImageToImageIntent) -> Unit,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
-    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
             .fillMaxWidth()

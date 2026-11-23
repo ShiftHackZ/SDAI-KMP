@@ -54,8 +54,13 @@ fun DonateScreen(
 }
 
 
+/**
+ * Reads the donation page's headings and support explanation from the active locale.
+ *
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun donateScreenStrings() = DonateScreenStrings(
+internal fun donateScreenStrings() = DonateScreenStrings(
     title = Localization.string("settings_item_donate"),
     thanksTitle = Localization.string("donate_title_thanks"),
     bottomTitle = Localization.string("donate_bs_title"),

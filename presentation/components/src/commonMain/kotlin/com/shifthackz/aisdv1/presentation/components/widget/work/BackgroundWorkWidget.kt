@@ -74,7 +74,7 @@ fun BackgroundWorkWidget(
  * @author Dmitriy Moroz
  */
 @Composable
-private fun BackgroundWorkWidgetContent(
+internal fun BackgroundWorkWidgetContent(
     modifier: Modifier = Modifier,
     state: BackgroundWorkState = BackgroundWorkState(),
     processIntent: (BackgroundWorkIntent) -> Unit = {},

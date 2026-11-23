@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import kotlin.time.TimeMark
@@ -46,6 +46,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialo
  * @param onSkipBenchmarkRequest callback invoked when the user skips first-run benchmark.
  * @param onBenchmarkContinueRequest callback invoked when the user accepts recommendation risk.
  * @param onBenchmarkDoNotAskRequest callback invoked when the user suppresses future recommendation warnings.
+ * @param elapsedText Optional formatted elapsed time; the live monotonic clock supplies the default.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -61,13 +62,14 @@ fun GenerationModalRenderer(
     onSkipBenchmarkRequest: () -> Unit,
     onBenchmarkContinueRequest: () -> Unit,
     onBenchmarkDoNotAskRequest: () -> Unit,
+    elapsedText: String? = null,
     performanceOverlay: @Composable () -> Unit = {},
 ) {
     when (screenModal) {
         GenerationModal.None -> Unit
 
         is GenerationModal.Communicating -> ProgressDialog(
-            elapsedText = generationStartedAt?.let { generationElapsedText(it) },
+            elapsedText = elapsedText ?: generationStartedAt?.let { generationElapsedText(it) },
             canDismiss = false,
             waitTimeSeconds = screenModal.hordeProcessStatus?.waitTimeSeconds,
             positionInQueue = screenModal.hordeProcessStatus?.queuePosition,
@@ -78,7 +80,7 @@ fun GenerationModalRenderer(
         )
 
         is GenerationModal.Generating -> ProgressDialog(
-            elapsedText = generationStartedAt?.let { generationElapsedText(it) },
+            elapsedText = elapsedText ?: generationStartedAt?.let { generationElapsedText(it) },
             title = screenModal.title ?: Localization.string("communicating_local_title")
                 .asUiText(),
             canDismiss = false,
@@ -107,7 +109,7 @@ fun GenerationModalRenderer(
             onViewDetailRequest = { onViewDetailRequest(screenModal.result) },
         )
 
-        is GenerationModal.Image.Batch -> ModalBottomSheet(
+        is GenerationModal.Image.Batch -> PlatformModalBottomSheet(
             onDismissRequest = onDismissRequest,
             shape = RectangleShape,
             containerColor = MaterialTheme.colorScheme.background,
@@ -165,6 +167,15 @@ fun GenerationModalRenderer(
     }
 }
 
+/**
+ * Offers continuing, cancelling or suppressing future benchmark warnings without changing the decision policy.
+ *
+ * @param onContinueRequest Accepts the current recommendation risk.
+ * @param onDismissRequest Cancels the pending generation request.
+ * @param onDoNotAskRequest Accepts this request and suppresses future warnings.
+ * @param modifier Placement of the warning's action column.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun BenchmarkExceedsActions(
     onContinueRequest: () -> Unit,
@@ -189,6 +200,13 @@ private fun BenchmarkExceedsActions(
     }
 }
 
+/**
+ * Resolves the current locale's explanation for one exceeded benchmark limit.
+ *
+ * @receiver Captured recommendation limit exceeded by the pending request.
+ * @return Localized warning line without provider internals or request payloads.
+ * @author Dmitriy Moroz
+ */
 private fun BenchmarkLimitExceeded.localizedText(): String = when (this) {
     BenchmarkLimitExceeded.IMAGE_SIZE -> Localization.string("benchmark_limit_image_size")
     BenchmarkLimitExceeded.SAMPLING_STEPS -> Localization.string("benchmark_limit_sampling_steps")

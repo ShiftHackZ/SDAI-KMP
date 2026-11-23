@@ -1,78 +1,25 @@
 package com.shifthackz.aisdv1.presentation.home
 
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarObscured
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
-import com.shifthackz.aisdv1.core.navigation.isHomeRoute
-import com.shifthackz.aisdv1.core.navigation.RootAppRouter
-import com.shifthackz.aisdv1.core.navigation.AppRoute
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsTopHeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeveloperMode
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SettingsEthernet
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.Web
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationInputEnabled
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
-import com.shifthackz.aisdv1.core.common.appbuild.displayString
-import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.domain.entity.FeatureTag
+import com.shifthackz.aisdv1.core.navigation.AppRoute
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
+import com.shifthackz.aisdv1.core.navigation.RootAppRouter
+import com.shifthackz.aisdv1.core.navigation.isHomeRoute
 import com.shifthackz.aisdv1.domain.entity.Settings
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.core.navigation.LaunchSource
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityStateProvider
-import com.shifthackz.aisdv1.presentation.components.widget.connectivity.ConnectivityWidget
-import com.shifthackz.aisdv1.presentation.components.widget.source.getName
-import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
-import com.shifthackz.aisdv1.presentation.components.widget.navigation.isPlatformNavigationBarFloating
 
 /**
- * Owns drawer synchronization, connectivity status and persistent home navigation around a content slot.
- * System-bar handling in this scaffold is intentionally explicit. Material `Scaffold` defaults and
- * raw Compose `WindowInsets.statusBars`/`navigationBars` are not stable enough for the app's release
- * matrix because Android has two layout contracts in the wild: legacy windows that are already
- * resized away from system bars, and Android 15+ edge-to-edge windows where the app must reserve safe
- * space itself. The Pixel 3a XL/API 32 release regression came from applying a Compose system-bar
- * inset on top of a window that had already consumed it, which moved toolbars and persistent bottom
- * controls by exactly one system-bar height. Keep the platform-specific inset helpers in this scaffold
- * path so future SDK or CI/Docker build changes do not silently reintroduce duplicated padding.
+ * Observes settings and connectivity for the home shell and synchronizes its drawer with the router.
+ * Destination selections retain the router's existing tab replacement and standalone Back behavior.
  *
  * @param currentRoute Active route controlling drawer selection and home navigation visibility.
  * @param router Shared owner of drawer visibility and destination navigation.
@@ -95,18 +42,7 @@ fun AppScaffold(
 ) {
     val isDrawerOpen by router.drawerOpen.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    var drawerWidth by remember { mutableIntStateOf(0) }
     val settings by preferenceManager.observe().collectAsState(Settings())
-    val shouldShowHomeNavigation = shouldShowHomeChrome && currentRoute.isHomeRoute()
-    val shouldFloatNavigation = isPlatformNavigationBarFloating &&
-            (currentRoute == AppRoute.Settings || currentRoute == AppRoute.Gallery)
-    val isDrawerObscuringContent by remember(drawerState, shouldFloatNavigation, drawerWidth) {
-        derivedStateOf {
-            !drawerState.isClosed || drawerState.targetValue != DrawerValue.Closed ||
-                    (shouldFloatNavigation && drawerWidth > 0 &&
-                            drawerState.currentOffset > -drawerWidth.toFloat() + 0.5f)
-        }
-    }
 
     LaunchedEffect(isDrawerOpen) {
         when {
@@ -122,226 +58,25 @@ fun AppScaffold(
             }
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        gesturesEnabled = LocalNavigationInputEnabled.current && (drawerState.isOpen || shouldShowHomeNavigation),
-        drawerContent = {
-            DrawerSheetContent(
-                modifier = Modifier.onSizeChanged { drawerWidth = it.width },
-                items = appDrawerItems(
-                    currentRoute = currentRoute,
-                    settings = settings,
-                    buildInfoProvider = buildInfoProvider,
-                    router = router,
-                ),
-                header = {
-                    DrawerHeader(buildInfoProvider = buildInfoProvider)
-                },
-            )
+    AppScaffoldContent(
+        currentRoute = currentRoute,
+        settings = settings,
+        buildInfoProvider = buildInfoProvider,
+        connectivityContent = { content -> ConnectivityStateProvider(content) },
+        processAction = { action ->
+            when (action) {
+                HomeNavigationAction.TextToImage -> router.navigateToTextToImage()
+                HomeNavigationAction.ImageToImage -> router.navigateToImageToImage()
+                HomeNavigationAction.Gallery -> router.navigateToGallery()
+                HomeNavigationAction.Settings -> router.navigateToSettings()
+                HomeNavigationAction.WebUi -> router.navigateToWebUi()
+                HomeNavigationAction.Configuration -> router.navigateToServerSetup(LaunchSource.SETTINGS)
+                HomeNavigationAction.Debug -> router.navigateToDebugMenu()
+            }
         },
         modifier = modifier,
-    ) {
-        Scaffold(
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            bottomBar = {
-                if (shouldShowHomeNavigation) {
-                    HomeNavigationBar(
-                        items = appBottomNavigationItems(
-                            currentRoute = currentRoute,
-                            router = router,
-                        ),
-                        hasBackground = !shouldFloatNavigation,
-                        isObscured = isDrawerObscuringContent,
-                    )
-                }
-            },
-            topBar = {
-                if (!isPlatformToolbarNative) Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsTopHeight(persistentTopAppBarWindowInsets())
-                        .background(TopAppBarDefaults.topAppBarColors().containerColor)
-                )
-            },
-        ) { paddingValues ->
-            val floatingInset =
-                if (shouldFloatNavigation) paddingValues.calculateBottomPadding() else 0.dp
-            CompositionLocalProvider(
-                LocalFloatingNavigationBarInset provides floatingInset,
-                LocalToolbarObscured provides isDrawerObscuringContent,
-            ) {
-                ConnectivityStateProvider { connectivity ->
-                    HomeContentLayout(
-                        hasNativeToolbar = isPlatformToolbarNative && shouldShowHomeNavigation,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(if (shouldFloatNavigation) PaddingValues(top = paddingValues.calculateTopPadding()) else paddingValues),
-                        status = {
-                            if (shouldShowHomeNavigation) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(
-                                            if (isPlatformToolbarNative) Color.Transparent
-                                            else MaterialTheme.colorScheme.surface
-                                        ),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    ConnectivityWidget(connectivity)
-                                }
-                            }
-                        },
-                    ) {
-                        content(Modifier.fillMaxSize())
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-private fun DrawerHeader(
-    buildInfoProvider: BuildInfoProvider,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.padding(horizontal = 28.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        DrawerBrandLogo(modifier = Modifier.size(56.dp))
-        Column {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "SDAI",
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                DrawerPlatformIcon(modifier = Modifier.size(18.dp))
-            }
-            Text(
-                text = buildInfoProvider.displayString(),
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun appBottomNavigationItems(
-    currentRoute: AppRoute,
-    router: RootAppRouter,
-): List<HomeNavigationBarItem> = listOf(
-    HomeNavigationBarItem(
-        label = Localization.string("home_tab_txt_to_img"),
-        selected = currentRoute == AppRoute.Home || currentRoute == AppRoute.TextToImage,
-        icon = Icons.Default.TextFields,
-        helpMessage = Localization.string("home_help_txt_to_img"),
-        onClick = router::navigateToTextToImage,
-    ),
-    HomeNavigationBarItem(
-        label = Localization.string("home_tab_img_to_img"),
-        selected = currentRoute == AppRoute.ImageToImage,
-        icon = Icons.Default.Image,
-        helpMessage = Localization.string("home_help_img_to_img"),
-        onClick = router::navigateToImageToImage,
-    ),
-    HomeNavigationBarItem(
-        label = Localization.string("home_tab_gallery"),
-        selected = currentRoute == AppRoute.Gallery,
-        icon = Icons.Default.PhotoLibrary,
-        helpMessage = Localization.string("home_help_gallery"),
-        onClick = router::navigateToGallery,
-    ),
-    HomeNavigationBarItem(
-        label = Localization.string("home_tab_settings"),
-        selected = currentRoute == AppRoute.Settings,
-        icon = Icons.Default.Settings,
-        helpMessage = Localization.string("home_help_settings"),
-        onClick = router::navigateToSettings,
-    ),
-)
-
-@Composable
-private fun appDrawerItems(
-    currentRoute: AppRoute,
-    settings: Settings,
-    buildInfoProvider: BuildInfoProvider,
-    router: RootAppRouter,
-): List<DrawerSheetItem> {
-    val sourceName = settings.source.getName(buildInfoProvider.platform)
-    return buildList {
-        add(
-            DrawerSheetItem(
-                label = Localization.string("title_text_to_image"),
-                selected = currentRoute == AppRoute.Home || currentRoute == AppRoute.TextToImage,
-                icon = Icons.Default.TextFields,
-                helpMessage = Localization.string("home_help_txt_to_img"),
-                onClick = { router.navigateToTextToImage() },
-            ),
-        )
-        add(
-            DrawerSheetItem(
-                label = Localization.string("title_image_to_image"),
-                selected = currentRoute == AppRoute.ImageToImage,
-                icon = Icons.Default.Image,
-                helpMessage = Localization.string("home_help_img_to_img"),
-                onClick = { router.navigateToImageToImage() },
-            ),
-        )
-        add(
-            DrawerSheetItem(
-                label = Localization.string("title_gallery"),
-                selected = currentRoute == AppRoute.Gallery || currentRoute is AppRoute.GalleryDetail,
-                icon = Icons.Default.PhotoLibrary,
-                helpMessage = Localization.string("home_help_gallery"),
-                onClick = { router.navigateToGallery() },
-            ),
-        )
-        if (settings.source.featureTags.contains(FeatureTag.OwnServer)) {
-            add(
-                DrawerSheetItem(
-                    label = "${Localization.string("drawer_web_ui")} ($sourceName)",
-                    selected = currentRoute == AppRoute.WebUi,
-                    icon = Icons.Default.Web,
-                    helpMessage = Localization.string("home_help_web_ui"),
-                    onClick = { router.navigateToWebUi() },
-                ),
-            )
-        }
-        add(
-            DrawerSheetItem(
-                label = Localization.string("title_settings"),
-                selected = currentRoute == AppRoute.Settings,
-                icon = Icons.Default.Settings,
-                helpMessage = Localization.string("home_help_settings"),
-                onClick = { router.navigateToSettings() },
-            ),
-        )
-        add(
-            DrawerSheetItem(
-                label = Localization.string("settings_item_config"),
-                selected = currentRoute is AppRoute.Setup,
-                icon = Icons.Default.SettingsEthernet,
-                helpMessage = Localization.string("settings_help_configuration"),
-                onClick = { router.navigateToServerSetup(LaunchSource.SETTINGS) },
-            ),
-        )
-        if (settings.developerMode) {
-            add(
-                DrawerSheetItem(
-                    label = Localization.string("title_debug_menu"),
-                    selected = currentRoute == AppRoute.Debug,
-                    icon = Icons.Default.DeveloperMode,
-                    helpMessage = Localization.string("settings_help_debug_menu"),
-                    onClick = { router.navigateToDebugMenu() },
-                ),
-            )
-        }
-    }
+        drawerState = drawerState,
+        shouldShowHomeChrome = shouldShowHomeChrome,
+        content = content,
+    )
 }

@@ -2,7 +2,6 @@ package com.shifthackz.aisdv1.presentation.civitai.upload
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -23,7 +22,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelpC
  * @param modifier Placement of the gallery action's touch target.
  * @author Dmitriy Moroz
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CivitaiUploadAction(
     viewModel: CivitaiUploadViewModel,

@@ -9,9 +9,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformTool
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -47,6 +45,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.image.ZoomableImageS
  * @param imageLoader Revision-aware sampled loader; null renders static-preview fallback content.
  * @param processIntent Requests detail navigation, native actions or metadata mutations.
  * @param civitaiAction App-supplied Civitai publishing action, retaining independent screen-module ownership.
+ * @param content Optional detail body receiving the scaffold's padded viewport modifier.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -56,6 +55,7 @@ fun GalleryDetailScreenContent(
     imageLoader: GalleryImageLoader? = null,
     processIntent: (GalleryDetailIntent) -> Unit = {},
     civitaiAction: @Composable () -> Unit = {},
+    content: (@Composable (Modifier) -> Unit)? = null,
 ) {
     Box(modifier = modifier) {
         PlatformScaffold(
@@ -90,7 +90,9 @@ fun GalleryDetailScreenContent(
                     .fillMaxSize()
                     .padding(paddingValues)
 
-                if (state.content != null) {
+                if (content != null) {
+                    content(contentModifier)
+                } else if (state.content != null) {
                     GalleryDetailContentState(
                         modifier = contentModifier,
                         state = state,

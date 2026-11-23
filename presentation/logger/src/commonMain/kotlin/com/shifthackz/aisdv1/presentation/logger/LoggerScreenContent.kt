@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -65,7 +64,6 @@ import kotlinx.coroutines.launch
  * @param shareContentDescription Accessible label for native text sharing.
  * @param scrollTopContentDescription Accessible label for scrolling to the beginning.
  * @param scrollBottomContentDescription Accessible label for scrolling to the latest end.
- *
  * @author Dmitriy Moroz
  */
 data class LoggerScreenStrings(
@@ -84,7 +82,6 @@ data class LoggerScreenStrings(
  *
  * @param loading Whether a new log snapshot is loading.
  * @param text Current log snapshot, empty before a successful read.
- *
  * @author Dmitriy Moroz
  */
 data class LoggerScreenContentState(
@@ -131,13 +128,13 @@ fun LoggerScreenAction.toIntent(): LoggerIntent = when (this) {
 }
 
 /**
- * Shows selectable log text with refresh, copy/share and scroll controls.
+ * Shows monospace log text with refresh, copy/share and scroll controls.
+ * The loading indicator occupies the bounded content area independently of the text scroller.
  *
  * @param strings Localized toolbar and empty-state labels.
  * @param state Current file-read status and log text.
  * @param processAction Requests reload, copy/share or back navigation.
  * @param modifier Layout modifiers for the log-viewer scaffold.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -273,6 +270,22 @@ fun LoggerScreenContent(
                 )
             }
         }
+        AnimatedVisibility(
+            visible = state.loading,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(top = LocalToolbarContentInset.current),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(60.dp))
+            }
+        }
         Column(
             modifier = Modifier
                 .padding(paddingValues)
@@ -281,22 +294,6 @@ fun LoggerScreenContent(
                 .verticalScroll(scrollState)
                 .padding(top = LocalToolbarContentInset.current),
         ) {
-            AnimatedVisibility(
-                visible = state.loading,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .aspectRatio(1f),
-                    )
-                }
-            }
             Text(
                 modifier = Modifier.horizontalScroll(scrollStateHorizontal),
                 text = text,

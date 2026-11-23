@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +18,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.global.catppuccinBase
 import com.shifthackz.aisdv1.presentation.components.theme.global.catppuccinOverlayColor
 
 /**
- * Shows the three supported dark palettes as selectable base-color swatches.
+ * Shows the three supported dark palettes as platform color chips with an accent selection mark.
  *
  * @param modifier Layout modifiers for the palette selector.
  * @param selectedToken Palette currently marked as selected.
@@ -34,13 +34,12 @@ fun DarkThemeColorSelector(
     colorToken: ColorToken = ColorToken.MAUVE,
     onSelected: (Color, DarkThemeToken) -> Unit = { _, _ -> },
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.selectableGroup()) {
         val rowModifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp)
         val colorModifier = Modifier
             .weight(1f)
-            .size(32.dp)
         Row(
             modifier = rowModifier,
             verticalAlignment = Alignment.CenterVertically,
@@ -54,19 +53,19 @@ fun DarkThemeColorSelector(
                 val baseColor = catppuccinBaseColor(isDark = true, darkThemeToken = token)
                 val accentColor =
                     catppuccinAccentColor(colorToken, isDark = true, darkThemeToken = token)
-                ColorComposable(
+                ColorIconChip(
                     modifier = colorModifier,
-                    selectedToken = selectedToken,
-                    token = token,
+                    borderSize = 2.dp,
                     color = baseColor,
-                    onClick = onSelected,
+                    isSelected = token == selectedToken,
+                    onClick = { onSelected(baseColor, token) },
+                    contentDescription = token.name.lowercase().replaceFirstChar { it.titlecase() },
                     iconTint = accentColor,
                     selectedBorderTint = accentColor.copy(alpha = 0.4f),
                     unselectedBorderTint = catppuccinOverlayColor(
                         isDark = true,
                         darkThemeToken = token,
                     ).copy(alpha = 0.3f),
-                    borderSize = 2.dp,
                 )
             }
         }

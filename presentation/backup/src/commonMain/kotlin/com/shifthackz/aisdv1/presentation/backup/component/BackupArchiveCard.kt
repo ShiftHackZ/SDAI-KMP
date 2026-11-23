@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,17 +18,25 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.backup.BackupInspection
 import com.shifthackz.aisdv1.presentation.backup.platform.formatBackupCreatedAt
+import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
 
 /**
  * Groups the selected archive identity, available source location and creation details before restore choices.
  *
  * @param archive Validated summary with no provider credentials or decoded image data.
  * @param modifier Card placement within the scrolling restore content.
+ *
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun BackupArchiveCard(archive: BackupInspection, modifier: Modifier = Modifier) {
-    OutlinedCard(modifier.fillMaxWidth()) {
+    PlatformSurface(
+        modifier = modifier.fillMaxWidth(),
+        shape = CardDefaults.outlinedShape,
+        color = CardDefaults.outlinedCardColors().containerColor,
+        contentColor = CardDefaults.outlinedCardColors().contentColor,
+        border = CardDefaults.outlinedCardBorder(),
+    ) {
         Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Icon(
                 Icons.Outlined.Description,

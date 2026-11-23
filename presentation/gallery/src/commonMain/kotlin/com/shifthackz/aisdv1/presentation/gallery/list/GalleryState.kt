@@ -19,7 +19,6 @@ import com.shifthackz.aisdv1.domain.entity.MediaStoreInfo
  * @param selectionMode Whether grid taps edit a multi-selection.
  * @param selection Persistent identities currently selected.
  * @param grid Saved grid density used by the renderer.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -70,9 +69,7 @@ sealed interface GalleryDialog {
 
     data object None : GalleryDialog
 
-
     data object DeleteAllConfirm : GalleryDialog
-
 
     data object DeleteSelectionConfirm : GalleryDialog
 
@@ -80,7 +77,6 @@ sealed interface GalleryDialog {
      * Asks whether to create an archive for the requested gallery scope.
      *
      * @param exportAll True exports the full gallery; false exports the current selection.
-     *
      * @author Dmitriy Moroz
      */
     data class ConfirmExport(val exportAll: Boolean) : GalleryDialog
@@ -96,7 +92,6 @@ sealed interface GalleryDialog {
      * An operation failed with public details for the gallery dialog.
      *
      * @param message User-visible failure explanation.
-     *
      * @author Dmitriy Moroz
      */
     data class Error(val message: String) : GalleryDialog
@@ -109,17 +104,12 @@ sealed interface GalleryDialog {
  * @param imageRevision Opaque content identity invalidating sampled image caches after replacement.
  * @param hidden Whether the preview should be obscured.
  * @param liked Whether the generation is marked as a favorite.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
 data class GalleryGridItemUi(
-
     val id: Long,
-
     val imageRevision: String = "",
-
     val hidden: Boolean,
-
     val liked: Boolean = false,
 )

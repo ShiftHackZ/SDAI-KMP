@@ -12,7 +12,6 @@ import kotlinx.coroutines.withContext
  *
  * @param context Launches Android native text sharing.
  * @param dispatchersProvider Supplies the immediate dispatcher for the native UI handoff.
- *
  * @author Dmitriy Moroz
  */
 internal class AndroidBenchmarkPlatformActions(

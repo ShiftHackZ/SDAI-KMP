@@ -5,7 +5,7 @@ package com.shifthackz.aisdv1.presentation.settings.modal
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -89,7 +89,7 @@ internal fun SettingsModalRenderer(
             }
         }
 
-        SettingsModal.Language -> ModalBottomSheet(
+        SettingsModal.Language -> PlatformModalBottomSheet(
             onDismissRequest = dismiss,
             shape = RectangleShape,
             containerColor = MaterialTheme.colorScheme.background,
@@ -100,7 +100,7 @@ internal fun SettingsModalRenderer(
             )
         }
 
-        is SettingsModal.GalleryGrid -> ModalBottomSheet(
+        is SettingsModal.GalleryGrid -> PlatformModalBottomSheet(
             onDismissRequest = dismiss,
             shape = RectangleShape,
             containerColor = MaterialTheme.colorScheme.background,
@@ -114,7 +114,7 @@ internal fun SettingsModalRenderer(
             )
         }
 
-        is SettingsModal.GenerationTimeout -> ModalBottomSheet(
+        is SettingsModal.GenerationTimeout -> PlatformModalBottomSheet(
             onDismissRequest = dismiss,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             shape = RectangleShape,
@@ -128,7 +128,7 @@ internal fun SettingsModalRenderer(
             )
         }
 
-        is SettingsModal.ConnectionTimeout -> ModalBottomSheet(
+        is SettingsModal.ConnectionTimeout -> PlatformModalBottomSheet(
             onDismissRequest = dismiss,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             shape = RectangleShape,

@@ -9,6 +9,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.luminance
@@ -66,6 +69,10 @@ import com.shifthackz.aisdv1.presentation.components.theme.sliderColors
  * @param state Current strokes, brush and inpaint request parameters.
  * @param processIntent Publishes stroke/parameter changes to the shared image-to-image ViewModel.
  * @param onClose Returns to the source form without discarding shared mask state.
+ * @param shouldStartOnAdjustments Initial editor section; otherwise starts on drawing.
+ * @param isInitiallyDrawing Initial drawing mode rather than viewport transformation.
+ * @param initialZoom Initial viewport scale, clamped to the editor's supported range.
+ * @param adjustmentScrollState Optional caller-owned parameter position; otherwise the active Adjust tab owns it.
  *
  * @author Dmitriy Moroz
  */
@@ -76,12 +83,23 @@ fun ImageInPaintScreenContent(
     state: ImageInPaintState,
     processIntent: (ImageToImageIntent) -> Unit,
     onClose: () -> Unit,
+    shouldStartOnAdjustments: Boolean = false,
+    isInitiallyDrawing: Boolean = true,
+    initialZoom: Float = MIN_IN_PAINT_ZOOM,
+    adjustmentScrollState: ScrollState? = null,
 ) {
-    var selectedTab by remember { mutableStateOf(ImageInPaintTab.Draw) }
-    var drawMode by remember { mutableStateOf(true) }
-    var zoom by remember { mutableFloatStateOf(MIN_IN_PAINT_ZOOM) }
+    var selectedTab by remember { mutableStateOf(if (shouldStartOnAdjustments) ImageInPaintTab.Adjust else ImageInPaintTab.Draw) }
+    var isDrawing by remember { mutableStateOf(isInitiallyDrawing) }
+    var zoom by remember {
+        mutableFloatStateOf(
+            initialZoom.coerceIn(
+                MIN_IN_PAINT_ZOOM,
+                MAX_IN_PAINT_ZOOM
+            )
+        )
+    }
     var pan by remember { mutableStateOf(Offset.Zero) }
-    SystemBarAppearance(
+    if (!LocalInspectionMode.current) SystemBarAppearance(
         colorScheme = MaterialTheme.colorScheme,
         isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f,
     )
@@ -155,8 +173,8 @@ fun ImageInPaintScreenContent(
                             }
                             DrawModeButton(
                                 modifier = Modifier.weight(1f),
-                                selected = drawMode,
-                                onClick = { drawMode = !drawMode },
+                                isSelected = isDrawing,
+                                onClick = { isDrawing = !isDrawing },
                             )
                         }
                         BrushSizeSlider(
@@ -231,10 +249,10 @@ fun ImageInPaintScreenContent(
                         .fillMaxWidth(),
                     image = image,
                     state = state,
-                    drawEnabled = drawMode,
+                    drawEnabled = isDrawing,
                     zoom = zoom,
                     pan = pan,
-                    transformEnabled = !drawMode,
+                    transformEnabled = !isDrawing,
                     onZoomChange = { value ->
                         zoom = value
                         if (value <= MIN_IN_PAINT_ZOOM) {
@@ -253,6 +271,7 @@ fun ImageInPaintScreenContent(
                         .padding(16.dp),
                     model = state,
                     processIntent = processIntent,
+                    scrollState = adjustmentScrollState ?: rememberScrollState(),
                 )
             }
         }
@@ -260,13 +279,21 @@ fun ImageInPaintScreenContent(
 }
 
 
+/**
+ * Switches between stroke drawing and viewport transformation using the selected button style.
+ *
+ * @param modifier Placement within the brush-action row.
+ * @param isSelected Whether stroke drawing is active.
+ * @param onClick Toggles drawing mode without changing stored mask strokes.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun DrawModeButton(
     modifier: Modifier = Modifier,
-    selected: Boolean,
+    isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    if (selected) {
+    if (isSelected) {
         PrimaryButton(
             modifier = modifier,
             onClick = onClick,
@@ -283,6 +310,11 @@ private fun DrawModeButton(
     }
 }
 
+/**
+ * Displays the brush icon and localized drawing-mode label in either button style.
+ *
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun DrawModeButtonContent() {
     Icon(
@@ -297,6 +329,15 @@ private fun DrawModeButtonContent() {
 }
 
 
+/**
+ * Adjusts viewport zoom and provides an explicit return to the initial image scale.
+ *
+ * @param modifier Placement of the zoom controls.
+ * @param zoom Current viewport scale.
+ * @param onZoomChanged Updates the local viewport scale.
+ * @param onResetClick Resets zoom and pan without changing mask strokes.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun ZoomSlider(
     modifier: Modifier = Modifier,

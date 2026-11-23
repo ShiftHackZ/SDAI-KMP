@@ -37,7 +37,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.frame.PhoneFrame
  * Introduces shared Android/iOS support using branded platform cards inside the onboarding pager.
  *
  * @param modifier Layout modifiers for this explanatory page.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -113,7 +112,6 @@ fun UniversalPageContent(
     }
     Spacer(modifier = Modifier.weight(1f))
 }
-
 
 @Composable
 private fun PlatformCard(
