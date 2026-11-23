@@ -1,0 +1,61 @@
+{% if page.schema == 'home' %}
+  {% include home-schema.html %}
+{% else %}
+  {% assign site_id = '/' | absolute_url | append: '#website' %}
+  {% assign app_id = '/' | absolute_url | append: '#app' %}
+  {% assign publisher_id = '/' | absolute_url | append: '#organization' %}
+  {% assign page_id = canonical | append: '#webpage' %}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      {% if page.layout == 'blog-post' %}
+        "@type": "BlogPosting",
+        "@id": {{ canonical | append: '#article' | jsonify }},
+        "name": {{ page.title | jsonify }},
+        "headline": {{ page.title | jsonify }},
+        "mainEntityOfPage": {{ canonical | jsonify }},
+        "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+        {% if page.updated %}
+        "dateModified": {{ page.updated | date_to_xmlschema | jsonify }},
+        {% endif %}
+        "author": {
+          "@type": {{ page.author_type | jsonify }},
+          "name": {{ page.author | jsonify }},
+          "url": {{ page.author_url | jsonify }}
+        },
+      {% elsif page.schema == 'faq' %}
+        "@type": "FAQPage",
+        "@id": {{ page_id | jsonify }},
+        "mainEntity": [
+          {% assign separator = '' %}
+          {% for category in site.data.faq.categories %}
+            {% for item in category.items %}
+              {{ separator }}{
+                "@type": "Question",
+                "name": {{ item.question | jsonify }},
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": {{ item.answer | join: ' ' | jsonify }}
+                }
+              }
+              {% assign separator = ',' %}
+            {% endfor %}
+          {% endfor %}
+        ],
+      {% else %}
+        "@type": {{ page.schema | default: 'WebPage' | jsonify }},
+        "@id": {{ page_id | jsonify }},
+      {% endif %}
+      {% unless page.layout == 'blog-post' %}
+      "name": {{ page_title | jsonify }},
+      {% endunless %}
+      "description": {{ page.description | jsonify }},
+      "url": {{ canonical | jsonify }},
+      "image": {{ image | jsonify }},
+      "inLanguage": "en",
+      "isPartOf": { "@id": {{ site_id | jsonify }} },
+      "about": { "@id": {{ app_id | jsonify }} },
+      "publisher": { "@id": {{ publisher_id | jsonify }} }
+    }
+  </script>
+{% endif %}

@@ -1,0 +1,27 @@
+---
+layout: site
+---
+<main id="main-content">
+  <article class="shell blog-post">
+    <header>
+      <p class="blog-meta">
+        <span>{{ page.category | escape }}</span>
+        <time datetime="{{ page.date | date: '%Y-%m-%d' }}"
+          >{{ page.date | date: '%B %-d, %Y' }}</time
+        >
+      </p>
+      <h1>{{ page.title | escape }}</h1>
+      <p class="blog-summary">{{ page.description | escape }}</p>
+      <p class="blog-byline">
+        By
+        <a href="{{ page.author_url | escape }}">{{ page.author | escape }}</a
+        >{% if page.updated %} <span>·</span> Updated
+        <time datetime="{{ page.updated | date: '%Y-%m-%d' }}"
+          >{{ page.updated | date: '%B %-d, %Y' }}</time
+        >{% endif %}
+      </p>
+    </header>
+    <div class="blog-cover">{% include blog-image.html post=page %}</div>
+    <div class="blog-prose">{{ content }}</div>
+  </article>
+</main>

@@ -1,0 +1,19 @@
+{
+  "home": "/",
+  "faq": "/faq.html",
+  "docs": "/docs/",
+  "donate": "/donate.html",
+  "privacy": "/privacy.html",
+  "github": "https://github.com/ShiftHackZ/SDAI-KMP",
+  "company": "https://moroz.cc",
+  "telegram": "https://t.me/sdai_app",
+  "discord": "https://discord.gg/jzdR9m8Ves",
+  "linkedin": "https://www.linkedin.com/company/sdai-app/",
+  "fourPda": "https://4pda.to/forum/index.php?showtopic=1082639",
+  "nightly": "/nightly.html",
+  "testFlight": "/testflight.html",
+  "googlePlay": "https://play.google.com/store/apps/details?id=com.shifthackz.aisdv1.app",
+  "fdroid": "https://f-droid.org/packages/com.shifthackz.aisdv1.app.foss",
+  "appStore": "https://apps.apple.com/us/app/sdai-ai-image-generator/id6778314183",
+  "blog": "/blog/"
+}

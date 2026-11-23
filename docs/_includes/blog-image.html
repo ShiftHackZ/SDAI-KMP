@@ -1,0 +1,7 @@
+<img
+  src="{{ include.post.url | append: include.post.cover | relative_url }}"
+  alt="{% if include.decorative != true %}{{ include.post.cover_alt | escape }}{% endif %}"
+  width="{{ include.post.cover_width }}"
+  height="{{ include.post.cover_height }}"
+  {% if include.lazy %}loading="lazy"{% else %}fetchpriority="high"{% endif %}
+/>

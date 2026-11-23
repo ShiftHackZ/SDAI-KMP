@@ -1,0 +1,26 @@
+<header class="site-header">
+  <div class="shell nav-shell">
+    <a class="brand" href="{{ site.data.links.home | relative_url }}" aria-label="{{ site.title }} home">
+      <img src="{{ '/assets/sdai.png' | relative_url }}" width="42" height="42" alt="">
+      <span>{{ site.title }}</span>
+    </a>
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="site-menu" aria-expanded="false" data-menu-toggle hidden>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="site-menu" id="site-menu" data-site-menu>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="{{ site.data.links.home | relative_url }}" {% if page.nav == 'home' %}aria-current="page"{% endif %}>Home</a>
+        <a href="{{ site.data.links.blog | relative_url }}" {% if page.layout == 'blog-post' %}aria-current="location"{% elsif page.nav == 'blog' %}aria-current="page"{% endif %}>Blog</a>
+        <a href="{{ site.data.links.faq | relative_url }}" {% if page.nav == 'faq' %}aria-current="page"{% endif %}>FAQ</a>
+        <a href="{{ site.data.links.privacy | relative_url }}" {% if page.nav == 'privacy' %}aria-current="page"{% endif %}>Privacy Policy</a>
+      </nav>
+      <div class="social-links" aria-label="Community">
+        <a class="icon-link" href="{{ site.data.links.telegram }}" target="_blank" rel="noopener noreferrer" aria-label="Telegram">{% include icon-telegram.html %}</a>
+        <a class="icon-link" href="{{ site.data.links.discord }}" target="_blank" rel="noopener noreferrer" aria-label="Discord">{% include icon-discord.html %}</a>
+        <a class="icon-link" href="{{ site.data.links.linkedin }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">{% include icon-linkedin.html %}</a>
+      </div>
+    </div>
+  </div>
+</header>

@@ -1,29 +1,13 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="refresh" content="0; url=privacy.html" />
-    <meta name="robots" content="noindex,follow" />
-    <link rel="canonical" href="https://sdai.moroz.cc/privacy.html" />
-    <title>Privacy Policy - SDAI</title>
-    <link rel="icon" href="assets/sdai.png" />
-    <link rel="stylesheet" href="css/site.css?v=20261117" />
-    <script src="js/site.js?v=20261117" defer></script>
-  </head>
-  <body data-page="privacy">
-    <div id="site-header"></div>
-    <main>
-      <section class="page-hero">
-        <div class="shell">
-          <p class="eyebrow">SDAI</p>
-          <h1>Privacy Policy</h1>
-          <p>
-            The privacy policy moved to <a href="privacy.html">privacy.html</a>.
-          </p>
-        </div>
-      </section>
-    </main>
-    <div id="site-footer"></div>
-  </body>
-</html>
+---
+layout: "site"
+title: "Privacy Policy"
+nav: "privacy"
+redirect_to: "/privacy.html"
+---
+<main id="main-content">
+  {% include page-hero.html
+    eyebrow="SDAI"
+    title="Privacy Policy"
+    summary="The privacy policy moved to [privacy.html](privacy.html)."
+  %}
+</main>
