@@ -1,0 +1,78 @@
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://sdai.moroz.cc/#organization",
+        "name": "Moroz Inc.",
+        "url": "https://moroz.cc/",
+        "email": "sdai@moroz.cc"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://sdai.moroz.cc/#website",
+        "name": "SDAI",
+        "url": "https://sdai.moroz.cc/",
+        "hasPart": [
+          {
+            "@id": "https://sdai.moroz.cc/blog/#webpage"
+          },
+          {
+            "@id": "https://sdai.moroz.cc/docs/#documentation"
+          }
+        ],
+        "publisher": {
+          "@id": "https://sdai.moroz.cc/#organization"
+        }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://sdai.moroz.cc/#app",
+        "name": "SDAI",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Android, iOS",
+        "description": "Generate AI images on Android and iOS with SDAI, an open-source app for self-hosted servers, cloud providers, and supported on-device models.",
+        "image": "https://sdai.moroz.cc/assets/sdai.png",
+        "screenshot": [
+          "https://sdai.moroz.cc/screenshots/site/ios/en-US/01-create.png",
+          "https://sdai.moroz.cc/screenshots/site/ios/en-US/02-controls.png",
+          "https://sdai.moroz.cc/screenshots/site/ios/en-US/03-providers.png"
+        ],
+        "url": "https://sdai.moroz.cc/",
+        "downloadUrl": [
+          "https://play.google.com/store/apps/details?id=com.shifthackz.aisdv1.app",
+          "https://f-droid.org/packages/com.shifthackz.aisdv1.app.foss",
+          "https://apps.apple.com/us/app/sdai-ai-image-generator/id6778314183"
+        ],
+        "sameAs": [
+          "https://github.com/ShiftHackZ/SDAI-KMP",
+          "https://t.me/sdai_app",
+          "https://discord.gg/jzdR9m8Ves",
+          "https://www.linkedin.com/company/sdai-app/"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "publisher": {
+          "@id": "https://sdai.moroz.cc/#organization"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://sdai.moroz.cc/docs/#documentation",
+        "name": "SDAI Documentation",
+        "url": "https://sdai.moroz.cc/docs/",
+        "description": "Dokka API documentation for SDAI Kotlin Multiplatform, Android, iOS, and shared modules.",
+        "isPartOf": {
+          "@id": "https://sdai.moroz.cc/#website"
+        },
+        "about": {
+          "@id": "https://sdai.moroz.cc/#app"
+        }
+      }
+    ]
+  }
+</script>

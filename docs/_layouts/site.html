@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {% include head.html %}
+  </head>
+  <body data-page="{{ page.nav | default: '' | escape }}">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    {% include header.html %} {{ content }} {% include footer.html %}
+  </body>
+</html>
