@@ -39,7 +39,12 @@ kotlin {
             implementation(libs.koin.core)
         }
 
-        androidMain.dependencies { implementation(libs.androidx.compose.activity) }
+        androidMain.dependencies {
+            implementation(libs.androidx.compose.activity)
+            implementation(project.dependencies.platform(libs.androidx.compose.bom))
+            implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.compose.ui.tooling)
+        }
         androidUnitTest.dependencies {
             implementation(libs.test.junit)
             implementation(libs.test.mockk)

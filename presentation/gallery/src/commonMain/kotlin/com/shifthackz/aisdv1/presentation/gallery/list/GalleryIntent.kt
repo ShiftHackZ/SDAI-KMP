@@ -75,12 +75,9 @@ sealed interface GalleryIntent : MviIntent {
         Toggle, Show, Close;
     }
 
-
     data object DismissDialog : GalleryIntent
 
-
     data object OpenDrawer : GalleryIntent
-
 
     data object OpenMediaStoreFolder : GalleryIntent
 
@@ -102,12 +99,9 @@ sealed interface GalleryIntent : MviIntent {
      */
     data class ChangeSelectionMode(val flag: Boolean) : GalleryIntent
 
-
     data object UnselectAll : GalleryIntent
 
-
     data object ToggleSelectionVisibility : GalleryIntent
-
 
     data object ToggleSelectionLike : GalleryIntent
 

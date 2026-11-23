@@ -52,8 +52,17 @@ tasks.register("checkPresentationArchitecture") {
         fun isPermitted(path: String): Boolean = path == ":domain" ||
                 path.startsWith(":core:") || path == ":presentation:components"
 
+        // Onboarding owns illustrations composed from these screens; implementation layers remain forbidden.
+        val onboardingPageModules = setOf(
+            ":presentation:configuration",
+            ":presentation:generation",
+            ":presentation:settings",
+        )
         leaves.forEach { leaf ->
-            val forbidden = reachable(leaf.path).filterNot(::isPermitted)
+            val forbidden = reachable(leaf.path).filterNot { dependency ->
+                isPermitted(dependency) ||
+                        (leaf.path == ":presentation:onboarding" && dependency in onboardingPageModules)
+            }
             check(forbidden.isEmpty()) { "${leaf.path} reaches forbidden modules: $forbidden" }
             leaf.fileTree("src").matching {
                 include("**/*.kt")

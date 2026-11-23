@@ -9,7 +9,6 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
  * @param loading Whether provider configuration is still being prepared.
  * @param source Selected provider controlling title and special back-navigation policy.
  * @param url Configured WebUI base URL, empty when the provider has no embedded page.
- *
  * @author Dmitriy Moroz
  */
 data class WebUiState(

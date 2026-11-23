@@ -17,7 +17,6 @@ import com.shifthackz.aisdv1.core.navigation.router.WebUiRouter
  * @param dispatchersProvider Supplies the immediate dispatcher for screen effects.
  * @param preferenceManager Supplies the current provider and saved AUTOMATIC1111/SwarmUI endpoint.
  * @param router Returns from the embedded page to the preceding application route.
- *
  * @author Dmitriy Moroz
  */
 class WebUiViewModel(

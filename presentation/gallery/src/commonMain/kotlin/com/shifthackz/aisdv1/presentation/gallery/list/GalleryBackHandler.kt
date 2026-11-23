@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
  *
  * @param enabled Whether the visible gallery is currently in selection mode.
  * @param onBack Requests leaving selection mode without leaving the home tab.
- *
  * @author Dmitriy Moroz
  */
 @Composable

@@ -11,9 +11,7 @@ interface GalleryExportService {
      * Filesystem/read failures and cancellation propagate to the caller.
      *
      * @param ids Persistent identities to include, or null to export all saved generations.
-     *
      * @return Completed ZIP artifact available for native sharing.
-     *
      * @author Dmitriy Moroz
      */
     suspend fun export(ids: List<Long>? = null): GalleryExportResult

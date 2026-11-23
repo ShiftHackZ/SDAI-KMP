@@ -16,7 +16,6 @@ import org.koin.core.parameter.parametersOf
  * @param modifier Layout modifiers for the gallery route.
  * @param galleryRouter Optional gallery navigation owner; defaults to the initialized application graph.
  * @param backHandlerEnabled Whether this retained tab is visible and may intercept selection-mode back events.
- *
  * @author Dmitriy Moroz
  */
 @Composable

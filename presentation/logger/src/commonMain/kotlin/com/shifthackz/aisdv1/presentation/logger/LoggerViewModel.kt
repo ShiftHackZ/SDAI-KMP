@@ -18,7 +18,6 @@ import kotlinx.coroutines.withContext
  * @param platformActions Copies or shares a nonblank displayed log snapshot.
  * @param router Handles back navigation from the log viewer.
  * @param onError Receives log-read and native-action failures.
- *
  * @author Dmitriy Moroz
  */
 class LoggerViewModel(

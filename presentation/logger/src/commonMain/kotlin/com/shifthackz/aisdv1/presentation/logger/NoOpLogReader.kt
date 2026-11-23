@@ -6,6 +6,5 @@ package com.shifthackz.aisdv1.presentation.logger
  * @author Dmitriy Moroz
  */
 internal object NoOpLogReader : LogReader {
-
     override suspend fun read() = ""
 }

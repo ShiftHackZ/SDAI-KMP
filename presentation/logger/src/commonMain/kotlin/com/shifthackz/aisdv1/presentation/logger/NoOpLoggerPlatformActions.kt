@@ -7,9 +7,7 @@ package com.shifthackz.aisdv1.presentation.logger
  */
 internal object NoOpLoggerPlatformActions : LoggerPlatformActions {
 
-
     override suspend fun copyLogs(text: String) = Unit
-
 
     override suspend fun shareLogs(text: String) = Unit
 }

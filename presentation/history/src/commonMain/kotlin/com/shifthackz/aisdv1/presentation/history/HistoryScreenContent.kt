@@ -10,7 +10,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackB
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoFixNormal
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,17 +36,9 @@ import androidx.compose.material3.Text
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSubtree
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.ui.layout.onSizeChanged
 import com.shifthackz.aisdv1.presentation.components.widget.image.GalleryImageLoader
-import com.shifthackz.aisdv1.presentation.components.widget.image.rememberGalleryImage
-import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBitmap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -91,6 +81,7 @@ data class HistoryStrings(
  * @param modifier Layout modifiers for the history scaffold.
  * @param imageLoader Revision-aware sampled loader; absent loaders render preview placeholders.
  * @param strings Localized labels and generation-metadata formatter.
+ * @param imageContent Thumbnail renderer receiving the entry and its weighted, aspect-ratio-constrained modifier.
  *
  * @author Dmitriy Moroz
  */
@@ -101,6 +92,14 @@ fun HistoryScreenContent(
     modifier: Modifier = Modifier,
     imageLoader: GalleryImageLoader? = null,
     strings: HistoryStrings = HistoryStrings(),
+    imageContent: @Composable (GalleryItemMetadata, Modifier) -> Unit = { item, imageModifier ->
+        HistoryThumbnail(
+            item = item,
+            imageUnavailable = strings.imageUnavailable,
+            modifier = imageModifier,
+            imageLoader = imageLoader,
+        )
+    },
 ) {
     PlatformScaffold(
         canUnderlapToolbar = true,
@@ -177,8 +176,8 @@ fun HistoryScreenContent(
                         ) { item ->
                             HistoryItem(
                                 item = item,
-                                imageLoader = imageLoader,
                                 strings = strings,
+                                imageContent = imageContent,
                             )
                         }
                     }
@@ -189,6 +188,15 @@ fun HistoryScreenContent(
 }
 
 
+/**
+ * Shows a persistent-history read failure and an explicit retry action.
+ *
+ * @param message User-visible failure returned by the history reader.
+ * @param strings Localized refresh label.
+ * @param processIntent Receives the refresh request.
+ * @param modifier Placement of the error and retry group.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun HistoryError(
     message: String,
@@ -220,12 +228,21 @@ private fun HistoryError(
 }
 
 
+/**
+ * Pairs a caller-rendered thumbnail with truncated prompt text and generation parameters.
+ *
+ * @param item Metadata determining text and thumbnail aspect ratio.
+ * @param strings Localized generation-parameter formatter.
+ * @param modifier Placement of the history card.
+ * @param imageContent Thumbnail renderer receiving the card-controlled image geometry.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun HistoryItem(
     item: GalleryItemMetadata,
-    modifier: Modifier = Modifier,
-    imageLoader: GalleryImageLoader? = null,
     strings: HistoryStrings,
+    modifier: Modifier = Modifier,
+    imageContent: @Composable (GalleryItemMetadata, Modifier) -> Unit,
 ) {
     UiDiagnosticSection(UiDiagnosticSubtree.HISTORY_IMAGE) {
         Surface(
@@ -239,40 +256,7 @@ private fun HistoryItem(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                var imageEdge by remember(item.id) { mutableIntStateOf(0) }
-                val decoded = if (imageLoader != null) rememberGalleryImage(
-                    imageLoader,
-                    item.id,
-                    item.imageRevision,
-                    edge = imageEdge
-                ).value else DecodedImageBitmap.Unavailable
-                val imageBitmap = (decoded as? DecodedImageBitmap.Ready)?.image
-                if (imageBitmap != null) {
-                    Image(
-                        modifier = Modifier
-                            .weight(0.38f)
-                            .onSizeChanged { imageEdge = maxOf(it.width, it.height) }
-                            .aspectRatio(item.aspectRatio),
-                        bitmap = imageBitmap,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .weight(0.38f)
-                            .onSizeChanged { imageEdge = maxOf(it.width, it.height) }
-                            .aspectRatio(item.aspectRatio),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(36.dp),
-                            imageVector = Icons.Default.AutoFixNormal,
-                            contentDescription = strings.imageUnavailable,
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
+                imageContent(item, Modifier.weight(0.38f).aspectRatio(item.aspectRatio))
                 Column(
                     modifier = Modifier.weight(0.62f),
                     verticalArrangement = Arrangement.spacedBy(6.dp),

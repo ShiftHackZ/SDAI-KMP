@@ -29,6 +29,14 @@ kotlin {
             implementation(libs.koin.core)
         }
 
+        androidMain.dependencies {
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(project.dependencies.platform(libs.androidx.compose.bom))
+            implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.compose.ui.tooling)
+        }
+
         androidUnitTest.dependencies {
             implementation(libs.test.junit)
             implementation(libs.test.mockk)

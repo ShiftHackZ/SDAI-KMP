@@ -14,6 +14,8 @@ import com.shifthackz.aisdv1.presentation.components.widget.icon.BrandIcons
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalFloatingNavigationBarInset
@@ -40,6 +42,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.source.getName
  * @param modifier Layout applied to the scrollable Settings body.
  * @param platformActions platform capabilities needed by settings rows.
  * @param processIntent sends user actions back to the Settings MVI pipeline.
+ * @param listState Caller-owned scroll position retained while preference rows change.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -48,6 +51,7 @@ internal fun ContentSettingsState(
     state: SettingsState,
     platformActions: SettingsPlatformActions = NoOpSettingsPlatformActions,
     processIntent: (SettingsIntent) -> Unit = {},
+    listState: LazyListState = rememberLazyListState(),
 ) {
     val isDark = if (state.useSystemDarkTheme) {
         isSystemInDarkTheme()
@@ -63,6 +67,7 @@ internal fun ContentSettingsState(
     SettingsList(
         modifier = modifier,
         bottomPadding = LocalFloatingNavigationBarInset.current,
+        state = listState,
     ) {
         items(items = rows, key = { it.name }, contentType = { it.contentType() }) { row ->
             SettingsItemHelp(

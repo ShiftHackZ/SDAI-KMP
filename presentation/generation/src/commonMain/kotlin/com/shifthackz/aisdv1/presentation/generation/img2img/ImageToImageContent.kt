@@ -2,6 +2,10 @@
 
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import androidx.compose.foundation.lazy.LazyListState
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.platform.LocalInspectionMode
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarNavigationButton
@@ -86,6 +90,11 @@ data class ImageToImageStrings(
  * @param strings Localized labels and provider capability explanations.
  * @param performanceOverlay Optional live resource panel supplied by the application root.
  * @param useDrawerNavigation Whether the toolbar opens the home drawer instead of navigating back.
+ * @param listState Optional caller-owned form position; otherwise the active form retains its own state.
+ * @param isFormInitiallyExpanded Initial disclosure state of generation options.
+ * @param engineContent Checkpoint picker supplied by the screen host.
+ * @param inputImageContent Optional source-image card retaining the form-supplied spacing.
+ * @param backgroundWorkContent Status below the toolbar, defaulting to the live background-work widget.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -96,7 +105,13 @@ fun ImageToImageContent(
     strings: ImageToImageStrings = ImageToImageStrings(),
     useDrawerNavigation: Boolean = false,
     performanceOverlay: @Composable () -> Unit = {},
+    listState: LazyListState? = null,
+    isFormInitiallyExpanded: Boolean = true,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
+    inputImageContent: (@Composable (Modifier) -> Unit)? = null,
+    backgroundWorkContent: @Composable (Modifier) -> Unit = { BackgroundWorkWidget(modifier = it) },
 ) {
+    val isInspectionMode = LocalInspectionMode.current
     val promptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     val negativePromptChipTextFieldState = remember { mutableStateOf(TextFieldValue()) }
     var activeModal by remember { mutableStateOf<ImageToImagePanel?>(null) }
@@ -126,8 +141,8 @@ fun ImageToImageContent(
                         )
                     },
                 )
-                BackgroundWorkWidget(
-                    modifier = Modifier
+                backgroundWorkContent(
+                    Modifier
                         .background(MaterialTheme.colorScheme.background)
                         .padding(vertical = 4.dp),
                 )
@@ -229,51 +244,57 @@ fun ImageToImageContent(
                     promptChipTextFieldState = promptChipTextFieldState,
                     negativePromptChipTextFieldState = negativePromptChipTextFieldState,
                     processIntent = processIntent,
+                    listState = listState ?: rememberLazyListState(),
+                    isInitiallyExpanded = isFormInitiallyExpanded,
+                    engineContent = engineContent,
                     onInPaintClick = { processIntent(ImageToImageIntent.NavigateToInPaint) },
+                    inputImageContent = inputImageContent,
                 )
             }
         }
     }
-    state.editTag?.let { editTag ->
-        EditTagDialog(
-            prompt = editTag.prompt,
-            negativePrompt = editTag.negativePrompt,
-            tag = editTag.tag,
-            isNegative = editTag.isNegative,
-            onDismissRequest = { processIntent(ImageToImageIntent.DismissEditTag) },
-            onNewPrompts = { prompt, negativePrompt ->
-                processIntent(ImageToImageIntent.ApplyPrompts(prompt, negativePrompt))
-            },
-        )
-    }
-    when (val modal = activeModal) {
-        null -> Unit
-        is ImageToImagePanel.Embeddings -> EmbeddingScreen(
-            prompt = modal.prompt,
-            negativePrompt = modal.negativePrompt,
-            onNewPrompts = { prompt, negativePrompt ->
-                processIntent(ImageToImageIntent.ApplyPrompts(prompt, negativePrompt))
-            },
-            onClose = { activeModal = null },
-        )
+    if (!isInspectionMode) {
+        state.editTag?.let { editTag ->
+            EditTagDialog(
+                prompt = editTag.prompt,
+                negativePrompt = editTag.negativePrompt,
+                tag = editTag.tag,
+                isNegative = editTag.isNegative,
+                onDismissRequest = { processIntent(ImageToImageIntent.DismissEditTag) },
+                onNewPrompts = { prompt, negativePrompt ->
+                    processIntent(ImageToImageIntent.ApplyPrompts(prompt, negativePrompt))
+                },
+            )
+        }
+        when (val modal = activeModal) {
+            null -> Unit
+            is ImageToImagePanel.Embeddings -> EmbeddingScreen(
+                prompt = modal.prompt,
+                negativePrompt = modal.negativePrompt,
+                onNewPrompts = { prompt, negativePrompt ->
+                    processIntent(ImageToImageIntent.ApplyPrompts(prompt, negativePrompt))
+                },
+                onClose = { activeModal = null },
+            )
 
-        is ImageToImagePanel.Extras -> ExtrasScreen(
-            prompt = modal.prompt,
-            negativePrompt = modal.negativePrompt,
-            type = modal.type,
-            onNewPrompts = { prompt, negativePrompt ->
-                processIntent(ImageToImageIntent.ApplyPrompts(prompt, negativePrompt))
-            },
-            onClose = { activeModal = null },
-        )
+            is ImageToImagePanel.Extras -> ExtrasScreen(
+                prompt = modal.prompt,
+                negativePrompt = modal.negativePrompt,
+                type = modal.type,
+                onNewPrompts = { prompt, negativePrompt ->
+                    processIntent(ImageToImageIntent.ApplyPrompts(prompt, negativePrompt))
+                },
+                onClose = { activeModal = null },
+            )
 
-        ImageToImagePanel.History -> GenerationHistoryDialog(
-            onClose = { activeModal = null },
-            onGenerationSelected = { ai ->
-                processIntent(ImageToImageIntent.ApplyGenerationResult(ai, inputImage = true))
-                activeModal = null
-            },
-        )
+            ImageToImagePanel.History -> GenerationHistoryDialog(
+                onClose = { activeModal = null },
+                onGenerationSelected = { ai ->
+                    processIntent(ImageToImageIntent.ApplyGenerationResult(ai, inputImage = true))
+                    activeModal = null
+                },
+            )
+        }
     }
     GenerationModalRenderer(
         generationStartedAt = state.generationStartedAt,

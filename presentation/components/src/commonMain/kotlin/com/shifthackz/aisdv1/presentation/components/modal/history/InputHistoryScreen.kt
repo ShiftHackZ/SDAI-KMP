@@ -2,7 +2,6 @@
 
 package com.shifthackz.aisdv1.presentation.components.modal.history
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,11 +21,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoFixNormal
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
@@ -42,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -126,7 +121,7 @@ fun InputHistoryScreen(
     MviComponent(
         viewModel = viewModel,
     ) { state: InputHistoryState, processIntent: (InputHistoryIntent) -> Unit ->
-        ScreenContent(
+        InputHistoryScreenContent(
             modifier = modifier.fillMaxSize(),
             state = state,
             processIntent = processIntent,
@@ -136,12 +131,23 @@ fun InputHistoryScreen(
 }
 
 
+/**
+ * Shows metadata pages, initial feedback and pagination without owning the history view model.
+ *
+ * @param modifier Bounds of the selector.
+ * @param state Metadata pages and read feedback.
+ * @param processIntent Requests retry or the next page.
+ * @param onGenerationSelected Requests loading the selected generation by ID.
+ * @param imageContent Optional thumbnail renderer; null retains the bounded runtime loader.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun ScreenContent(
+internal fun InputHistoryScreenContent(
     modifier: Modifier = Modifier,
     state: InputHistoryState,
     processIntent: (InputHistoryIntent) -> Unit = {},
     onGenerationSelected: (Long) -> Unit = {},
+    imageContent: (@Composable (InputHistoryItemUi, Modifier) -> Unit)? = null,
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
@@ -172,6 +178,7 @@ private fun ScreenContent(
                 ) { itemUi ->
                     InputHistoryItem(
                         item = itemUi,
+                        imageContent = imageContent,
                         onClick = { onGenerationSelected(it.generationResult.id) },
                     )
                 }
@@ -198,6 +205,14 @@ private fun ScreenContent(
 }
 
 
+/**
+ * Offers an explicit retry after page or selection loading failed.
+ *
+ * @param message Localized failure details.
+ * @param processIntent Delivers the retry request.
+ * @param modifier Placement of the error and retry button.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun InputHistoryError(
     message: String,
@@ -226,6 +241,7 @@ private fun InputHistoryError(
  *
  * @param modifier Item sizing and spacing in the history list.
  * @param item Generation metadata and image revision used to load its thumbnail.
+ * @param imageContent Optional thumbnail content; null uses the runtime image loader.
  * @param onClick Requests restoration of the selected generation.
  *
  * @author Dmitriy Moroz
@@ -235,10 +251,11 @@ private fun InputHistoryItem(
     modifier: Modifier = Modifier,
     item: InputHistoryItemUi,
     onClick: (InputHistoryItemUi) -> Unit = {},
+    imageContent: (@Composable (InputHistoryItemUi, Modifier) -> Unit)? = null,
 ) {
     val generation = item.generationResult
     var edge by remember { mutableIntStateOf(0) }
-    val loader = LocalGalleryImageLoader.current
+    val loader = if (imageContent == null) LocalGalleryImageLoader.current else null
     val image = loader?.let {
         (rememberGalleryImage(
             it,
@@ -269,33 +286,15 @@ private fun InputHistoryItem(
     ) {
         Row {
 
-            if (image != null) {
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth(0.36f)
-                        .onSizeChanged { edge = maxOf(it.width, it.height) }
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp)),
-                    bitmap = image,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                )
+            val thumbnailModifier = Modifier
+                .fillMaxWidth(0.36f)
+                .onSizeChanged { edge = maxOf(it.width, it.height) }
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(12.dp))
+            if (imageContent != null) {
+                imageContent(item, thumbnailModifier)
             } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.36f)
-                        .onSizeChanged { edge = maxOf(it.width, it.height) }
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(32.dp),
-                        imageVector = Icons.Default.AutoFixNormal,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+                InputHistoryThumbnail(image = image, modifier = thumbnailModifier)
             }
             Column(
                 modifier = Modifier.fillMaxWidth(),

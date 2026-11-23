@@ -15,9 +15,7 @@ private const val CHAR_BOLD_END = ']'
  * Square brackets switch between bold and light weight and are omitted from the rendered text.
  *
  * @param value Localized text containing optional bracket-delimited emphasized passages.
- *
  * @return Annotated text preserving all characters except emphasis delimiters.
- *
  * @author Dmitriy Moroz
  */
 fun buildOnBoardingText(value: String): AnnotatedString = buildAnnotatedString {

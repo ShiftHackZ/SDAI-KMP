@@ -25,7 +25,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurf
  * @param title Localized section heading.
  * @param modifier Card placement and sizing within the benchmark list.
  * @param content Section rows retaining their existing spacing and caller-owned state.
- *
  * @author Dmitriy Moroz
  */
 @Composable

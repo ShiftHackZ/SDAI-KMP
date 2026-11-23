@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.settings
 
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
@@ -12,9 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -80,6 +79,8 @@ fun SettingsScreen(
  * @param state Current Settings MVI state.
  * @param platformActions Platform permission and settings bridge used by Settings actions.
  * @param processIntent Intent sink used to route UI actions back to the ViewModel.
+ * @param listState Caller-owned Settings list position, preserved as preferences change.
+ * @param backgroundWorkContent Status content below the toolbar; defaults to the live background-work widget.
  *
  * @author Dmitriy Moroz
  */
@@ -89,6 +90,8 @@ fun SettingsScreenContent(
     state: SettingsState,
     platformActions: SettingsPlatformActions = NoOpSettingsPlatformActions,
     processIntent: (SettingsIntent) -> Unit = {},
+    listState: LazyListState = rememberLazyListState(),
+    backgroundWorkContent: @Composable (Modifier) -> Unit = { BackgroundWorkWidget(modifier = it) },
 ) {
     Box(modifier) {
         PlatformScaffold(
@@ -114,8 +117,8 @@ fun SettingsScreenContent(
                         },
                         windowInsets = WindowInsets(0, 0, 0, 0),
                     )
-                    BackgroundWorkWidget(
-                        modifier = Modifier
+                    backgroundWorkContent(
+                        Modifier
                             .background(MaterialTheme.colorScheme.background)
                             .padding(vertical = 4.dp),
                     )
@@ -135,6 +138,7 @@ fun SettingsScreenContent(
                     state = state,
                     platformActions = platformActions,
                     processIntent = processIntent,
+                    listState = listState,
                 )
             },
         )

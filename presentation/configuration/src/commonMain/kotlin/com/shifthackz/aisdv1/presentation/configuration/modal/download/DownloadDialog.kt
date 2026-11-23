@@ -93,8 +93,16 @@ fun DownloadDialog(
     }
 }
 
+/**
+ * Presents advertised mirror hosts and a caller-owned selection without starting a download.
+ *
+ * @param modifier Placement of the source-selection dialog surface.
+ * @param state Exact mirror URLs and selected-source flags.
+ * @param processIntent Receives selection, confirmation and dismissal requests.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun DownloadDialogContent(
+internal fun DownloadDialogContent(
     modifier: Modifier = Modifier,
     state: DownloadDialogState = DownloadDialogState(),
     processIntent: (DownloadDialogIntent) -> Unit = {},

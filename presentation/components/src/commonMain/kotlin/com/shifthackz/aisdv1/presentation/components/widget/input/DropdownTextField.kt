@@ -40,6 +40,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.textFieldColors
  * @param onItemSelected Receives a newly selected value different from the current selection.
  * @param displayDelegate Converts each choice to its localized display label.
  *
+ * @param isInitiallyExpanded Initial menu visibility; later changes are owned by user interaction.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -51,8 +52,9 @@ fun <T : Any> DropdownTextField(
     items: List<T> = emptyList(),
     onItemSelected: (T) -> Unit = {},
     displayDelegate: (T) -> UiText = { t -> t.toString().asUiText() },
+    isInitiallyExpanded: Boolean = false,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(isInitiallyExpanded) }
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = expanded,

@@ -47,6 +47,7 @@ kotlin {
             implementation(libs.koin.android)
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
             implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.compose.ui.tooling)
         }
 
         androidUnitTest.dependencies {
@@ -60,7 +61,6 @@ kotlin {
 }
 
 dependencies {
-    debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.test.compose.manifest)
 }
 

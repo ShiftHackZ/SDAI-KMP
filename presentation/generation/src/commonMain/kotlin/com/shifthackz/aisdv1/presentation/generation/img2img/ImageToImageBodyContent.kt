@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
+import androidx.compose.foundation.lazy.LazyListState
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
+import androidx.compose.ui.platform.LocalInspectionMode
+import com.shifthackz.aisdv1.presentation.components.platform.ExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.layout.Arrangement
@@ -117,6 +121,10 @@ internal fun UnsupportedImageToImageBody(
  * @param processIntent Publishes form changes and source-image requests.
  * @param onInPaintClick Opens the shared inpaint editor for the current source.
  * @param modifier Layout modifiers for the lazy input form.
+ * @param listState Retained vertical position within the generation form.
+ * @param isInitiallyExpanded Initial disclosure state of generation options.
+ * @param engineContent Checkpoint picker supplied by the owning form.
+ * @param inputImageContent Optional source-image card receiving its existing spacing modifier.
  *
  * @author Dmitriy Moroz
  */
@@ -129,11 +137,15 @@ internal fun ImageToImageBody(
     processIntent: (ImageToImageIntent) -> Unit,
     onInPaintClick: () -> Unit,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    isInitiallyExpanded: Boolean = true,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
+    inputImageContent: (@Composable (Modifier) -> Unit)? = null,
 ) {
-    var isFormExpanded by rememberSaveable { mutableStateOf(true) }
-    val listState = rememberLazyListState()
+    var isFormExpanded by rememberSaveable { mutableStateOf(isInitiallyExpanded) }
     val overscrollEffect = rememberOverscrollEffect()
-    val urlLauncher = rememberExternalUrlLauncher()
+    val urlLauncher = if (LocalInspectionMode.current) remember { ExternalUrlLauncher {} }
+    else rememberExternalUrlLauncher()
     val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
         { event ->
             if (event == GenerationInputFormEvent.OpenADetailerInstallInstructions) {
@@ -177,7 +189,8 @@ internal fun ImageToImageBody(
                 )
             }
             item(key = "generation-input-image") {
-                BoxWithConstraints(Modifier.padding(bottom = 16.dp)) {
+                if (inputImageContent != null) inputImageContent(Modifier.padding(bottom = 16.dp))
+                else BoxWithConstraints(Modifier.padding(bottom = 16.dp)) {
                     val edge = with(LocalDensity.current) { maxWidth.roundToPx() }
                     ImageInputSection(
                         state = state,
@@ -197,6 +210,7 @@ internal fun ImageToImageBody(
                 negativePromptChipTextFieldState = negativePromptChipTextFieldState,
                 onEvent = onEvent,
                 afterSlidersSection = afterSlidersSection,
+                engineContent = engineContent,
             )
 
         }

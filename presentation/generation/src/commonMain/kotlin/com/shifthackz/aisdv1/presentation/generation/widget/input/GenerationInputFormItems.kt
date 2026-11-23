@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.components.widget.section.ExpandableSectionHeader
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
 
 /**
  * Emits each basic and advanced control as its own lazy item, followed by the status footer.
@@ -30,6 +31,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.section.ExpandableSe
  * @param afterSlidersSection Image-to-image denoising controls inserted at their existing position.
  * @param hasFooter Whether validation, status or progress content needs its own segment when fields are collapsed.
  * @param footer Validation, status and progress content beneath all form fields.
+ * @param engineContent Checkpoint picker supplied by the owning form.
  *
  * @author Dmitriy Moroz
  */
@@ -44,6 +46,7 @@ internal fun LazyListScope.generationInputFormItems(
     afterSlidersSection: @Composable () -> Unit = {},
     hasFooter: Boolean = false,
     footer: @Composable () -> Unit = {},
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
 ) {
     val baseFields = generationInputBaseFields(state)
     val hasIndependentAdvancedToggle = GenerationBaseFormField.ADVANCED_TOGGLE in baseFields
@@ -83,6 +86,7 @@ internal fun LazyListScope.generationInputFormItems(
                     promptChipTextFieldState = promptChipTextFieldState,
                     negativePromptChipTextFieldState = negativePromptChipTextFieldState,
                     onEvent = onEvent,
+                    engineContent = engineContent,
                 )
             }
         }

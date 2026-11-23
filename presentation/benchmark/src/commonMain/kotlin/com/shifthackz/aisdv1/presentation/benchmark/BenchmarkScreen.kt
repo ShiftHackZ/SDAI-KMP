@@ -1,33 +1,21 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.benchmark
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.extensions.shimmer
 import com.shifthackz.aisdv1.core.localization.Localization
-import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.core.navigation.router.BenchmarkRouter
 import com.shifthackz.aisdv1.domain.entity.SdxlBackend
@@ -60,28 +47,15 @@ import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkResult
 import com.shifthackz.aisdv1.domain.entity.benchmark.accelerationCapabilities
 import com.shifthackz.aisdv1.presentation.components.model.compactDisplayName
 import com.shifthackz.aisdv1.presentation.components.model.isAvailableOn
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
-import com.shifthackz.aisdv1.presentation.components.widget.dialog.ProgressDialog
-import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformSurface
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarIconButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform.getKoin
 
 /**
- * Connects device benchmark results and run/cancel actions to the retained benchmark ViewModel.
+ * Connects device benchmark state and run/share/navigation actions to the remembered benchmark ViewModel.
  *
- * @param modifier Compose modifier applied to the rendered UI.
- * @param router navigation router used by the screen.
- *
+ * @param modifier Placement of the complete benchmark scaffold.
+ * @param router Back-navigation owner; defaults to the application graph binding.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -108,165 +82,21 @@ fun BenchmarkScreen(
 }
 
 /**
- * Presents device capabilities, provider recommendations and benchmark progress with run/cancel actions.
- *
- * @param modifier Compose modifier applied to the rendered UI.
- * @param state Device information, measured results, progress and any benchmark failure.
- * @param processIntent Requests benchmark execution, cancellation, retry or navigation.
- *
- * @author Dmitriy Moroz
- */
-@Composable
-fun BenchmarkScreenContent(
-    modifier: Modifier = Modifier,
-    state: BenchmarkState,
-    processIntent: (BenchmarkIntent) -> Unit = {},
-) {
-    val listState = rememberLazyListState()
-    PlatformScaffold(
-        canUnderlapToolbar = true,
-        modifier = modifier,
-        topBar = {
-            PlatformTopAppBar(
-                navigationIcon = {
-                    ToolbarBackButton(
-                        onClick = { processIntent(BenchmarkIntent.NavigateBack) },
-                        icon = Icons.AutoMirrored.Outlined.ArrowBack
-                    )
-                },
-                title = {
-                    Text(
-                        text = Localization.string("title_benchmark"),
-                        style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
-                    )
-                },
-                actions = {
-                    ToolbarIconButton(
-                        isEnabled = state.latestResult != null && !state.running,
-                        onClick = { processIntent(BenchmarkIntent.ShareResults) },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = Localization.string("benchmark_share_results"),
-                        )
-                    }
-                },
-                windowInsets = persistentTopAppBarWindowInsets(),
-            )
-        },
-        bottomBar = {
-            PrimaryButton(
-                modifier = Modifier
-                    .windowInsetsPadding(persistentBottomBarWindowInsets())
-                    .fillMaxWidth()
-                    .height(68.dp)
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 16.dp, top = 8.dp),
-                isEnabled = !state.running,
-                onClick = { processIntent(BenchmarkIntent.RunBenchmark) },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = null,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 8.dp),
-                    text = if (state.running) {
-                        Localization.string("benchmark_running")
-                    } else {
-                        Localization.string("benchmark_run")
-                    },
-                )
-            }
-        },
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-        ) {
-            ToolbarScrollObserver(listState.canScrollBackward)
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScrollbar(listState, topInset = LocalToolbarContentInset.current),
-                state = listState,
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    top = 16.dp + LocalToolbarContentInset.current,
-                    end = 16.dp,
-                    bottom = 32.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item {
-                    ScoreSection(
-                        result = state.latestResult,
-                        loading = state.loadingResult,
-                        running = state.running,
-                    )
-                }
-                item {
-                    DeviceSection(
-                        loading = state.loadingDevice,
-                        deviceInfo = state.deviceInfo ?: state.latestResult?.deviceInfo,
-                    )
-                }
-                item {
-                    CapabilitiesSection(
-                        loading = state.loadingDevice,
-                        deviceInfo = state.deviceInfo ?: state.latestResult?.deviceInfo,
-                    )
-                }
-                item {
-                    ProviderRecommendationsSection(
-                        loading = state.loadingResult,
-                        deviceInfo = state.deviceInfo ?: state.latestResult?.deviceInfo,
-                        recommendations = state.latestResult?.providerRecommendations.orEmpty(),
-                    )
-                }
-            }
-            AnimatedVisibility(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                visible = state.error != null,
-            ) {
-                state.error?.let { error ->
-                    BenchmarkErrorCard(
-                        message = error,
-                        onDismiss = { processIntent(BenchmarkIntent.DismissError) },
-                    )
-                }
-            }
-        }
-    }
-    if (state.running) {
-        ProgressDialog(
-            title = Localization.string("benchmark_running_title").asUiText(),
-            subTitle = Localization.string("benchmark_running_sub_title").asUiText(),
-            canDismiss = false,
-        )
-    }
-}
-
-/**
  * Presents the measured score and run metadata on the themed primary-container surface.
  * Loading retains the existing score placeholders; an active run adds its progress indicator.
  *
  * @param result Latest completed result, or null before the first successful benchmark.
- * @param loading Whether a saved result is still being loaded.
- * @param running Whether a benchmark is currently executing.
+ * @param isLoading Whether a saved result is still being loaded.
+ * @param isRunning Whether a benchmark is currently executing.
  * @param modifier Score-card placement and sizing within the benchmark list.
  *
  * @author Dmitriy Moroz
  */
 @Composable
-private fun ScoreSection(
+internal fun ScoreSection(
     result: BenchmarkResult?,
-    loading: Boolean,
-    running: Boolean,
+    isLoading: Boolean,
+    isRunning: Boolean,
     modifier: Modifier = Modifier,
 ) {
     PlatformSurface(
@@ -294,7 +124,7 @@ private fun ScoreSection(
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.labelLarge,
                     )
-                    if (loading && result == null) {
+                    if (isLoading && result == null) {
                         ShimmerLine(
                             modifier = Modifier
                                 .padding(top = 6.dp)
@@ -312,7 +142,7 @@ private fun ScoreSection(
                     }
                 }
             }
-            if (loading && result == null) {
+            if (isLoading && result == null) {
                 ScoreInfoRowSkeleton()
                 ScoreInfoRowSkeleton()
             } else if (result != null) {
@@ -325,7 +155,7 @@ private fun ScoreSection(
                     value = formatBenchmarkTimestamp(result.createdAt),
                 )
             }
-            if (running) {
+            if (isRunning) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         }
@@ -359,9 +189,17 @@ private fun ScoreInfoRow(
     }
 }
 
+/**
+ * Shows the device snapshot used for the score, with skeletons before capture and unknown-value fallbacks.
+ *
+ * @param isLoading Whether hardware capture is still pending.
+ * @param deviceInfo Current hardware snapshot or the snapshot from the stored result.
+ * @param modifier Placement of the hardware card in the benchmark list.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun DeviceSection(
-    loading: Boolean,
+internal fun DeviceSection(
+    isLoading: Boolean,
     deviceInfo: BenchmarkDeviceInfo?,
     modifier: Modifier = Modifier,
 ) {
@@ -370,7 +208,7 @@ private fun DeviceSection(
         title = Localization.string("benchmark_hardware"),
         modifier = modifier,
     ) {
-        if (loading && deviceInfo == null) {
+        if (isLoading && deviceInfo == null) {
             TableRowsSkeleton(count = 7)
         } else {
             val info = deviceInfo
@@ -395,9 +233,17 @@ private fun DeviceSection(
     }
 }
 
+/**
+ * Shows every acceleration path using the existing device capability mapping and status colors.
+ *
+ * @param isLoading Whether the hardware snapshot is still being captured.
+ * @param deviceInfo Snapshot used to derive supported, uncertain or unavailable acceleration paths.
+ * @param modifier Placement of the acceleration card in the benchmark list.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun CapabilitiesSection(
-    loading: Boolean,
+internal fun CapabilitiesSection(
+    isLoading: Boolean,
     deviceInfo: BenchmarkDeviceInfo?,
     modifier: Modifier = Modifier,
 ) {
@@ -406,7 +252,7 @@ private fun CapabilitiesSection(
         title = Localization.string("benchmark_capabilities"),
         modifier = modifier,
     ) {
-        if (loading && deviceInfo == null) {
+        if (isLoading && deviceInfo == null) {
             TableRowsSkeleton(count = 6)
         } else {
             val capabilities = deviceInfo?.accelerationCapabilities().orEmpty()
@@ -420,9 +266,18 @@ private fun CapabilitiesSection(
     }
 }
 
+/**
+ * Shows stored per-provider recommendations or the platform's local-provider placeholders before a run.
+ *
+ * @param isLoading Whether the stored result is still being read.
+ * @param deviceInfo Platform snapshot used when no saved provider recommendations exist.
+ * @param recommendations Saved recommendations from the displayed measurement.
+ * @param modifier Placement of the recommendation card in the benchmark list.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun ProviderRecommendationsSection(
-    loading: Boolean,
+internal fun ProviderRecommendationsSection(
+    isLoading: Boolean,
     deviceInfo: BenchmarkDeviceInfo?,
     recommendations: List<BenchmarkProviderRecommendation>,
     modifier: Modifier = Modifier,
@@ -448,7 +303,7 @@ private fun ProviderRecommendationsSection(
         title = Localization.string("benchmark_recommendations"),
         modifier = modifier,
     ) {
-        if (loading && recommendations.isEmpty()) {
+        if (isLoading && recommendations.isEmpty()) {
             ProviderRecommendationsSkeleton()
         } else if (providers.isEmpty()) {
             Text(

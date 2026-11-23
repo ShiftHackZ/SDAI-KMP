@@ -38,6 +38,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
             implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.compose.ui.tooling)
         }
 
         androidUnitTest.dependencies {
@@ -46,10 +47,6 @@ kotlin {
             implementation(libs.test.coroutines)
         }
     }
-}
-
-dependencies {
-    debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
 // Reports describe compiler stability/skipping decisions; they do not measure frame performance.

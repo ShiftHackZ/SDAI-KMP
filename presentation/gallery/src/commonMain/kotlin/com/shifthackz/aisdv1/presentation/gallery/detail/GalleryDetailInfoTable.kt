@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
@@ -42,6 +43,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
  * @param modifier Layout modifiers for the scrollable metadata table.
  * @param content Already formatted generation metadata.
  * @param onCopyTextClick Requests native copying of the activated nonblank value.
+ * @param scrollState Retained vertical position within the metadata table.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -49,8 +51,8 @@ internal fun GalleryDetailsTable(
     modifier: Modifier = Modifier,
     content: GalleryDetailContent,
     onCopyTextClick: (String) -> Unit = {},
+    scrollState: ScrollState = rememberScrollState(),
 ) {
-    val scrollState = rememberScrollState()
     ToolbarScrollObserver(scrollState.canScrollBackward)
     Column(
         modifier = modifier

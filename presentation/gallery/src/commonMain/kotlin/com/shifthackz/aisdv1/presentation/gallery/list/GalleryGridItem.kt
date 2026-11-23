@@ -1,7 +1,6 @@
 package com.shifthackz.aisdv1.presentation.gallery.list
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoFixNormal
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Checkbox
@@ -35,10 +33,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -60,6 +55,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.image.DecodedImageBi
  * @param onLongClick Requests entering selection mode from a normal grid cell.
  * @param onCheckedChange Reports toggling the current selection while selection mode is active.
  * @param selectionMode Whether activation toggles selection instead of opening detail.
+ * @param imageContent Optional pixel renderer receiving the selected/unselected image border color.
  *
  * @author Dmitriy Moroz
  */
@@ -73,6 +69,7 @@ fun GalleryUiItem(
     onLongClick: () -> Unit = {},
     onCheckedChange: (Boolean) -> Unit = {},
     selectionMode: Boolean = false,
+    imageContent: (@Composable (Color) -> Unit)? = null,
 ) {
     UiDiagnosticSection(UiDiagnosticSubtree.GALLERY_GRID_IMAGE) {
         val shape = RoundedCornerShape(12.dp)
@@ -85,7 +82,7 @@ fun GalleryUiItem(
             label = "border_color",
         )
         var imageEdge by remember(item.id) { mutableIntStateOf(0) }
-        val decodedImage = if (imageLoader != null) rememberGalleryImage(
+        val decodedImage = if (imageContent == null && imageLoader != null) rememberGalleryImage(
             imageLoader,
             item.id,
             item.imageRevision,
@@ -107,49 +104,12 @@ fun GalleryUiItem(
                     },
                 ),
         ) { imageBorderColor ->
-            when (val image = decodedImage) {
-                DecodedImageBitmap.Loading -> Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .border(width = 4.dp, color = imageBorderColor, shape = shape)
-                        .shimmer(),
-                )
-
-                is DecodedImageBitmap.Ready -> Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .border(width = 4.dp, color = imageBorderColor, shape = shape)
-                        .then(
-                            if (!item.hidden) Modifier
-                            else Modifier.graphicsLayer {
-                                renderEffect = BlurEffect(
-                                    radiusX = 100f,
-                                    radiusY = 100f,
-                                )
-                            }
-                        ),
-                    bitmap = image.image,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                )
-
-                DecodedImageBitmap.Unavailable -> Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .border(width = 4.dp, color = imageBorderColor, shape = shape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(36.dp),
-                        imageVector = Icons.Default.AutoFixNormal,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
+            if (imageContent != null) imageContent(imageBorderColor)
+            else GalleryGridImageContent(
+                item = item,
+                decodedImage = decodedImage,
+                borderColor = imageBorderColor,
+            )
             if (item.hidden) {
                 Icon(
                     modifier = Modifier

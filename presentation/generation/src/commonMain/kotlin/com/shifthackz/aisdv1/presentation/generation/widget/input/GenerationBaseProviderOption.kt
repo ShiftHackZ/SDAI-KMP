@@ -25,6 +25,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelecti
  * @param state Current model, available models and backend selections.
  * @param isImg2Img Selects image-to-image Fal endpoints.
  * @param onEvent Receives provider model and backend changes.
+ * @param engineContent Checkpoint picker supplied by the owning form; defaults to its live binding.
  *
  * @author Dmitriy Moroz
  */
@@ -34,6 +35,7 @@ internal fun GenerationBaseProviderOption(
     state: GenerationInputFormState,
     isImg2Img: Boolean,
     onEvent: (GenerationInputFormEvent) -> Unit,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
 ) {
     when (field) {
         GenerationBaseFormField.PROVIDER -> when (state.mode) {
@@ -46,8 +48,8 @@ internal fun GenerationBaseProviderOption(
             ServerSource.LOCAL_MICROSOFT_ONNX,
             ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
             ServerSource.LOCAL_APPLE_CORE_ML,
-            ServerSource.LOCAL_APPLE_BONSAI -> EngineSelectionComponent(
-                modifier = Modifier
+            ServerSource.LOCAL_APPLE_BONSAI -> engineContent(
+                Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
             )

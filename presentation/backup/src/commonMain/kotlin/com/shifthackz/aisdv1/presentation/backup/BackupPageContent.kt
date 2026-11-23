@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
@@ -24,6 +25,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
  * @param processIntent Caller-owned selection and file actions.
  * @param modifier Placement within the pager or first-launch content area.
  * @param canReportToolbarScroll Whether this is the active pager page controlling toolbar overlap.
+ * @param scrollState Caller-owned vertical position for this independent page.
  *
  * @author Dmitriy Moroz
  */
@@ -36,8 +38,8 @@ internal fun BackupPageContent(
     processIntent: (BackupIntent) -> Unit,
     modifier: Modifier = Modifier,
     canReportToolbarScroll: Boolean = true,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
-    val scrollState = rememberScrollState()
     if (canReportToolbarScroll) ToolbarScrollObserver(scrollState.canScrollBackward)
     Column(
         modifier.fillMaxSize()

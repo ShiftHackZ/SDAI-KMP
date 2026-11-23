@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,22 +42,22 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.presentation.onboarding.page.UniversalPageContent
+import com.shifthackz.aisdv1.presentation.onboarding.page.FormPageContent
+import com.shifthackz.aisdv1.presentation.onboarding.page.ProviderPageContent
+import com.shifthackz.aisdv1.presentation.onboarding.page.LocalDiffusionPageContent
+import com.shifthackz.aisdv1.presentation.onboarding.page.LookAndFeelPageContent
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentBottomBarWindowInsets
-import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
- * Hosts the onboarding pager and receives generation, provider and settings previews as slots.
+ * Hosts onboarding and its module-owned generation, provider and appearance illustrations.
  *
  * @param launchSource Controls whether the first page can return to settings.
  * @param state Current immutable render state supplied by the owning screen.
  * @param processIntent Sends user actions to the owning screen state holder.
- * @param formPreview Noninteractive generation-form preview supplied by the application composition root.
- * @param providerPreview Provider-selection preview receiving whether its page is currently visible.
- * @param localPreview Platform-local generation explanation and illustrative progress preview.
- * @param settingsPreview Appearance preview receiving palette, version label and current-page visibility.
  * @param modifier Layout modifiers for the pager and navigation controls.
+ * @param pagerState Current page and scroll position; defaults to the first visible page.
  *
  * @author Dmitriy Moroz
  */
@@ -65,20 +66,15 @@ fun OnBoardingContent(
     launchSource: LaunchSource,
     state: OnBoardingState,
     processIntent: (OnBoardingIntent) -> Unit,
-    formPreview: @Composable () -> Unit,
-    providerPreview: @Composable (Boolean) -> Unit,
-    localPreview: @Composable () -> Unit,
-    settingsPreview: @Composable (DarkThemeToken, String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    pagerState: PagerState = rememberPagerState(
+        pageCount = { visibleOnBoardingPages(state.showLocalDiffusionPage).size },
+    ),
 ) {
     val pages = remember(state.showLocalDiffusionPage) {
         visibleOnBoardingPages(state.showLocalDiffusionPage)
     }
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { pages.size },
-    )
 
     var scrollAnimationJob: Job? by remember { mutableStateOf(null) }
 
@@ -202,16 +198,18 @@ fun OnBoardingContent(
                 when (pages[index]) {
                     OnBoardingPage.Universal -> UniversalPageContent()
 
-                    OnBoardingPage.Providers -> providerPreview(pagerState.currentPage == index)
+                    OnBoardingPage.Providers -> ProviderPageContent(
+                        isPageVisible = pagerState.currentPage == index,
+                    )
 
-                    OnBoardingPage.Form -> formPreview()
+                    OnBoardingPage.Form -> FormPageContent()
 
-                    OnBoardingPage.LocalDiffusion -> localPreview()
+                    OnBoardingPage.LocalDiffusion -> LocalDiffusionPageContent()
 
-                    OnBoardingPage.LookAndFeel -> settingsPreview(
-                        state.darkThemeToken,
-                        state.appVersion,
-                        pagerState.currentPage == index
+                    OnBoardingPage.LookAndFeel -> LookAndFeelPageContent(
+                        darkThemeToken = state.darkThemeToken,
+                        appVersion = state.appVersion,
+                        isPageVisible = pagerState.currentPage == index,
                     )
                 }
             }

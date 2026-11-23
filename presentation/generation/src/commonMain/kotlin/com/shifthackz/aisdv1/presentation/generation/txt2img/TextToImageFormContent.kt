@@ -1,5 +1,9 @@
 package com.shifthackz.aisdv1.presentation.generation.txt2img
 
+import androidx.compose.foundation.lazy.LazyListState
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
+import androidx.compose.ui.platform.LocalInspectionMode
+import com.shifthackz.aisdv1.presentation.components.platform.ExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.rememberOverscrollEffect
@@ -38,27 +42,31 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInpu
  * the viewport are not constructed when the user expands options.
  *
  * @param state Current generation inputs, provider and status.
- * @param strings Localized screen labels retained by the screen contract.
  * @param promptChipTextFieldState Caller-owned prompt selection and chip editing state.
  * @param negativePromptChipTextFieldState Caller-owned negative-prompt chip editing state.
  * @param processIntent Receives generation edits and extension actions.
  * @param modifier Layout modifiers for the independently composed lazy generation form.
+ * @param listState Retained vertical position within the generation form.
+ * @param isInitiallyExpanded Initial disclosure state of generation options.
+ * @param engineContent Checkpoint picker supplied by the owning form.
  *
  * @author Dmitriy Moroz
  */
 @Composable
 internal fun TextToImageBody(
     state: TextToImageState,
-    strings: TextToImageStrings,
     promptChipTextFieldState: MutableState<TextFieldValue>,
     negativePromptChipTextFieldState: MutableState<TextFieldValue>,
     processIntent: (TextToImageIntent) -> Unit,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    isInitiallyExpanded: Boolean = true,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
 ) {
-    var isFormExpanded by rememberSaveable { mutableStateOf(true) }
-    val listState = rememberLazyListState()
+    var isFormExpanded by rememberSaveable { mutableStateOf(isInitiallyExpanded) }
     val overscrollEffect = rememberOverscrollEffect()
-    val urlLauncher = rememberExternalUrlLauncher()
+    val urlLauncher = if (LocalInspectionMode.current) remember { ExternalUrlLauncher {} }
+    else rememberExternalUrlLauncher()
     val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
         { event ->
             if (event == GenerationInputFormEvent.OpenADetailerInstallInstructions) {
@@ -103,6 +111,7 @@ internal fun TextToImageBody(
                 promptChipTextFieldState = promptChipTextFieldState,
                 negativePromptChipTextFieldState = negativePromptChipTextFieldState,
                 onEvent = onEvent,
+                engineContent = engineContent,
                 hasFooter = state.error != null || state.message != null || state.generating,
                 footer = {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {

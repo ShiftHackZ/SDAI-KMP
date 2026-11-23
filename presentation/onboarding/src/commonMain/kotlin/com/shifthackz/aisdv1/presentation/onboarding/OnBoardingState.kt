@@ -10,7 +10,6 @@ import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
  * @param darkThemeToken Saved dark palette demonstrated by the appearance page.
  * @param appVersion Version label shown by the settings preview.
  * @param showLocalDiffusionPage Whether the current platform/build has a local-generation page.
- *
  * @author Dmitriy Moroz
  */
 @Immutable

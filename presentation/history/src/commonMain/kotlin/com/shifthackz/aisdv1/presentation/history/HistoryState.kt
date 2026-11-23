@@ -10,7 +10,6 @@ import com.shifthackz.aisdv1.domain.entity.GalleryItemMetadata
  * @param loading Whether a persistent-history read is in progress.
  * @param items Ordered generation metadata returned by the last successful read.
  * @param error Optional user-visible load failure shown with a refresh action.
- *
  * @author Dmitriy Moroz
  */
 @Immutable

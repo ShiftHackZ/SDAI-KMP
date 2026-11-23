@@ -17,7 +17,6 @@ import platform.WebKit.WKWebView
  * @param url Configured provider WebUI URL to load.
  * @param onLoadingChanged Reports platform adapter loading activity to the route.
  * @param onControllerChanged Publishes native history controls after the browser view is available.
- *
  * @author Dmitriy Moroz
  */
 @Composable
@@ -54,7 +53,6 @@ internal actual fun WebUiBrowser(
  * Leaves system-back handling to the iOS host; the toolbar retains browser-aware navigation.
  *
  * @param onBack Route callback accepted for platform API parity.
- *
  * @author Dmitriy Moroz
  */
 @Composable

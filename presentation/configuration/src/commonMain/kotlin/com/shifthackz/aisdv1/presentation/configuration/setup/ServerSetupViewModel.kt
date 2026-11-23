@@ -113,7 +113,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param retryAuthorizationStorageUseCase Completes checked local persistence after an explicit retry.
  * @param resetAuthorizationCredentialsUseCase Resets only saved Basic Auth after dedicated confirmation.
  * @param onError Error callback forwarded to the app-level error handling pipeline.
- *
  * @author Dmitriy Moroz
  */
 class ServerSetupViewModel(

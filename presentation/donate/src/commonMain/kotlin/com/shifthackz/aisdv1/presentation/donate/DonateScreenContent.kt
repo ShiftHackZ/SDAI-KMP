@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -77,6 +78,7 @@ data class DonateScreenStrings(
  * @param processIntent Requests support-link navigation or return to the caller.
  * @param brandIcon Platform branding rendered in the donation illustration.
  * @param modifier Layout modifiers for the donation scaffold.
+ * @param listState Retained supporter-list position beneath the toolbar.
  *
  * @author Dmitriy Moroz
  */
@@ -86,6 +88,7 @@ fun DonateScreenContent(
     strings: DonateScreenStrings,
     processIntent: (DonateIntent) -> Unit,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
     brandIcon: @Composable () -> Unit = {},
 ) {
     PlatformScaffold(
@@ -172,7 +175,6 @@ fun DonateScreenContent(
         ) { contentVisible ->
             if (contentVisible) {
                 if (state.supporters.isNotEmpty()) {
-                    val listState = rememberLazyListState()
                     val shadowHeight = 150.dp
                     Box(
                         modifier = Modifier

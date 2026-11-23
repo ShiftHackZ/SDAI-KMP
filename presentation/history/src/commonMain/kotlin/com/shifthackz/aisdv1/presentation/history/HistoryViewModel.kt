@@ -19,7 +19,6 @@ import kotlinx.coroutines.withContext
  * @param galleryReads Reads generation history without loading original image payloads into list state.
  * @param router Handles back navigation from the history screen.
  * @param onError Reports history-load failures after the error state is published.
- *
  * @author Dmitriy Moroz
  */
 class HistoryViewModel(

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
-
 package com.shifthackz.aisdv1.presentation.report
 
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
@@ -12,7 +10,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -34,7 +31,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -63,7 +59,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
  * @param text Current user-entered report description.
  * @param reason Current report category.
  * @param reportSent Whether to show submission completion controls.
- *
  * @author Dmitriy Moroz
  */
 @Immutable
@@ -93,7 +88,6 @@ data class ReportScreenContentState(
  * @param reasonIntellectualProperty Label for intellectual-property reports.
  * @param reasonAdultContent Label for adult-content reports.
  * @param reasonOther Label for other report categories.
- *
  * @author Dmitriy Moroz
  */
 data class ReportScreenStrings(
@@ -124,7 +118,7 @@ data class ReportScreenStrings(
  * @param onSubmit Requests submission of the current fields.
  * @param onTextChange Reports a new user-entered report description.
  * @param onReasonChange Reports a newly selected report category.
- *
+ * @param imageContent Image renderer for the caller-sized preview slot; defaults to bounded Base64 sampling.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -136,6 +130,14 @@ fun ReportScreenContent(
     onTextChange: (String) -> Unit,
     onReasonChange: (ReportReason) -> Unit,
     modifier: Modifier = Modifier,
+    imageContent: @Composable (Modifier) -> Unit = { imageModifier ->
+        SampledBase64Image(
+            modifier = imageModifier,
+            base64 = state.imageBase64,
+            contentScale = ContentScale.Crop,
+            contentDescription = strings.imageContentDescription,
+        )
+    },
 ) {
     PlatformScaffold(
         canUnderlapToolbar = true,
@@ -200,6 +202,7 @@ fun ReportScreenContent(
                     strings = strings,
                     onTextChange = onTextChange,
                     onReasonChange = onReasonChange,
+                    imageContent = imageContent,
                 )
             } else {
                 Box(
@@ -217,6 +220,17 @@ fun ReportScreenContent(
     }
 }
 
+/**
+ * Shows editable report fields or the submitted confirmation within the scrollable content area.
+ *
+ * @param state Image presence, draft values and completion flag owned by the caller.
+ * @param strings Localized field, category and confirmation labels.
+ * @param onTextChange Receives edits to the report description.
+ * @param onReasonChange Receives selection of a report category.
+ * @param modifier Placement and external decoration of the scrollable report body.
+ * @param imageContent Renders the reported image inside the measured square slot.
+ * @author Dmitriy Moroz
+ */
 @Composable
 private fun ReportLoadedContent(
     state: ReportScreenContentState,
@@ -224,6 +238,7 @@ private fun ReportLoadedContent(
     onTextChange: (String) -> Unit,
     onReasonChange: (ReportReason) -> Unit,
     modifier: Modifier = Modifier,
+    imageContent: @Composable (Modifier) -> Unit,
 ) {
     val scrollState = rememberScrollState()
     ToolbarScrollObserver(scrollState.canScrollBackward)
@@ -251,15 +266,12 @@ private fun ReportLoadedContent(
             Spacer(modifier = Modifier.weight(1f))
         } else {
             if (state.imageBase64.isNotBlank()) {
-                SampledBase64Image(
-                    modifier = Modifier
+                imageContent(
+                    Modifier
                         .align(Alignment.CenterHorizontally)
                         .fillMaxWidth(0.45f)
                         .aspectRatio(1f)
                         .clip(RoundedCornerShape(12.dp)),
-                    base64 = state.imageBase64,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = strings.imageContentDescription,
                 )
             }
             FlowRow(

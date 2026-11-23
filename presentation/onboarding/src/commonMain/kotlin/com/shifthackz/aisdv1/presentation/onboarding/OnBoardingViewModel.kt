@@ -27,7 +27,6 @@ import kotlinx.coroutines.withContext
  * @param setBackupStartupStage Persists the fresh-install restore invitation before onboarding is consumed.
  * @param preferenceManager Supplies saved preview appearance; the checked startup transition owns onboarding completion.
  * @param buildInfoProvider Supplies the version displayed in the appearance preview.
- *
  * @author Dmitriy Moroz
  */
 class OnBoardingViewModel(

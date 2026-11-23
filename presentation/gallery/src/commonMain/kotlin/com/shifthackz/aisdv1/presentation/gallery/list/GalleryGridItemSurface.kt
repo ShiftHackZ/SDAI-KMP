@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
  * @param borderColor Animated selection accent applied to the frame on iOS or image on Android.
  * @param modifier Cell placement, rounded clipping, selection border and gesture handling.
  * @param content Square thumbnail and overlays; receives the image selection border color.
- *
  * @author Dmitriy Moroz
  */
 @Composable

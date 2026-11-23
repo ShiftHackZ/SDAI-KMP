@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -57,6 +58,7 @@ internal fun Modifier.selectionJiggle(
     enabled: Boolean,
     animationStartOffset: Int,
 ): Modifier {
+    if (LocalInspectionMode.current) return this
     val infiniteTransition = rememberInfiniteTransition(label = "selection_jiggle")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -255,8 +257,8 @@ internal fun GalleryLoadingGrid(
         modifier = modifier,
         columns = GridCells.Fixed(grid.size),
         contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         galleryShimmerItems(grid)
     }

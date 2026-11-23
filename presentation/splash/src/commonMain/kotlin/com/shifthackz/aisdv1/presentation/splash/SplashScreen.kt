@@ -13,15 +13,17 @@ import org.koin.core.parameter.parametersOf
  * The native host must initialize the application graph before composing this screen.
  *
  * @param modifier Layout modifiers for the startup-progress surface.
+ * @param router Navigation owner; defaults to the initialized application graph binding.
  *
  * @author Dmitriy Moroz
  */
 @Composable
 fun SplashScreen(
     modifier: Modifier = Modifier,
+    router: SplashRouter? = null,
 ) {
     val koin = remember { getKoin() }
-    val splashRouter = remember(koin) { koin.get<SplashRouter>() }
+    val splashRouter = remember(koin, router) { router ?: koin.get<SplashRouter>() }
     val viewModel = remember(koin, splashRouter) {
         koin.get<SplashViewModel> {
             parametersOf(splashRouter)

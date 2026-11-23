@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInputFormItems
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
 
 /**
  * Adds shared generation fields and image-to-image validation/progress feedback to a lazy form.
@@ -34,6 +35,7 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInpu
  * @param negativePromptChipTextFieldState Pending negative-prompt chip text retained by the screen.
  * @param onEvent Publishes shared generation-field edits.
  * @param afterSlidersSection Image-to-image controls appended after shared sampling sliders.
+ * @param engineContent Checkpoint picker supplied by the owning form.
  *
  * @author Dmitriy Moroz
  */
@@ -46,6 +48,7 @@ internal fun LazyListScope.imageToImageFormItems(
     negativePromptChipTextFieldState: MutableState<TextFieldValue>,
     onEvent: (GenerationInputFormEvent) -> Unit,
     afterSlidersSection: @Composable () -> Unit,
+    engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
 ) {
     val hasFooter = state.promptValidationError != null || !state.sourceSupportsImageToImage ||
             state.error != null || state.message != null || state.generating
@@ -58,6 +61,7 @@ internal fun LazyListScope.imageToImageFormItems(
         negativePromptChipTextFieldState = negativePromptChipTextFieldState,
         onEvent = onEvent,
         afterSlidersSection = afterSlidersSection,
+        engineContent = engineContent,
         hasFooter = hasFooter,
         footer = {
             if (hasFooter) Column(

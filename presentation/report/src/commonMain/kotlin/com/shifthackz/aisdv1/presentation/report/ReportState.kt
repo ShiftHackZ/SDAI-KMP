@@ -13,7 +13,6 @@ import com.shifthackz.aisdv1.presentation.components.model.ErrorState
  * @param text User-entered report description.
  * @param reason Selected report category.
  * @param reportSent Whether the submission UI should display completion.
- *
  * @author Dmitriy Moroz
  */
 data class ReportState(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TextSnippet
@@ -60,7 +61,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformTool
  * @param qualityAssuranceSection Heading for malformed-data diagnostics.
  * @param actionBadBase64 Label for deliberately inserting invalid image data.
  * @param backContentDescription Accessible label for returning to the preceding route.
- *
  * @author Dmitriy Moroz
  */
 data class DebugMenuScreenStrings(
@@ -94,7 +94,6 @@ data class DebugMenuScreenStrings(
  * @param showWorkManagerSection Whether background-work controls are supported.
  * @param showLocalDiffusionSection Whether local ONNX preferences are supported.
  * @param showQualityAssuranceSection Whether malformed-data insertion controls are visible.
- *
  * @author Dmitriy Moroz
  */
 data class DebugMenuScreenContentState(
@@ -108,46 +107,13 @@ data class DebugMenuScreenContentState(
 )
 
 /**
- * User requests emitted by the stateless developer-menu renderer.
- *
- * @author Dmitriy Moroz
- */
-sealed interface DebugMenuAction {
-
-    data object ShareUiCapture : DebugMenuAction
-
-    data object ResetUiCapture : DebugMenuAction
-
-    data object StopUiCapture : DebugMenuAction
-
-    data object StartUiCapture : DebugMenuAction
-
-    data object NavigateBack : DebugMenuAction
-
-    data object ViewLogs : DebugMenuAction
-
-    data object ClearLogs : DebugMenuAction
-
-    data object RestartTxt2Img : DebugMenuAction
-
-    data object RestartImg2Img : DebugMenuAction
-
-    data object CancelAllWork : DebugMenuAction
-
-    data object ToggleLocalDiffusionCancel : DebugMenuAction
-
-    data object RequestLocalDiffusionScheduler : DebugMenuAction
-
-    data object InsertBadBase64 : DebugMenuAction
-}
-
-/**
  * Renders capability-filtered developer controls from caller-owned state.
  *
  * @param strings Localized labels for sections, actions and accessibility.
  * @param state Current preferences and supported section visibility.
- * @param processAction Requests state changes, platform operations or navigation.
+ * @param processIntent Dispatches developer operations and navigation through the screen's MVI contract.
  * @param modifier Layout modifiers for the developer-menu scaffold.
+ * @param scrollState Retained position of the developer controls beneath the toolbar.
  *
  * @author Dmitriy Moroz
  */
@@ -155,8 +121,9 @@ sealed interface DebugMenuAction {
 fun DebugMenuScreenContent(
     strings: DebugMenuScreenStrings,
     state: DebugMenuScreenContentState,
-    processAction: (DebugMenuAction) -> Unit,
+    processIntent: (DebugMenuIntent) -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     PlatformScaffold(
         canUnderlapToolbar = true,
@@ -171,7 +138,7 @@ fun DebugMenuScreenContent(
                 },
                 navigationIcon = {
                     ToolbarBackButton(
-                        onClick = { processAction(DebugMenuAction.NavigateBack) },
+                        onClick = { processIntent(DebugMenuIntent.NavigateBack) },
                         icon = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = strings.backContentDescription,
                     )
@@ -180,7 +147,6 @@ fun DebugMenuScreenContent(
             )
         },
     ) { paddingValues ->
-        val scrollState = rememberScrollState()
         ToolbarScrollObserver(scrollState.canScrollBackward)
         Column(
             modifier = Modifier
@@ -205,14 +171,14 @@ fun DebugMenuScreenContent(
                 startIcon = Icons.AutoMirrored.Filled.TextSnippet,
                 text = strings.actionLogger,
                 helpMessage = Localization.string("debug_help_logs_view"),
-                onClick = { processAction(DebugMenuAction.ViewLogs) },
+                onClick = { processIntent(DebugMenuIntent.ViewLogs) },
             )
             DebugMenuItem(
                 modifier = itemModifier,
                 startIcon = Icons.Default.CleaningServices,
                 text = strings.actionLoggerClear,
                 helpMessage = Localization.string("debug_help_logs_clear"),
-                onClick = { processAction(DebugMenuAction.ClearLogs) },
+                onClick = { processIntent(DebugMenuIntent.ClearLogs) },
             )
 
             if (state.isUiDiagnosticsSupported) {
@@ -230,7 +196,7 @@ fun DebugMenuScreenContent(
                         text = UiText.Static(strings.diagnosticCapture),
                         isChecked = state.isUiDiagnosticsCapturing,
                         onCheckedChange = { shouldCapture ->
-                            processAction(if (shouldCapture) DebugMenuAction.StartUiCapture else DebugMenuAction.StopUiCapture)
+                            processIntent(if (shouldCapture) DebugMenuIntent.StartUiCapture else DebugMenuIntent.StopUiCapture)
                         },
                     )
                 }
@@ -238,12 +204,12 @@ fun DebugMenuScreenContent(
                     text = strings.diagnosticReset,
                     helpMessage = Localization.string("debug_help_capture_reset"),
                     modifier = itemModifier,
-                    onClick = { processAction(DebugMenuAction.ResetUiCapture) })
+                    onClick = { processIntent(DebugMenuIntent.ResetUiCapture) })
                 DebugMenuItem(
                     text = strings.diagnosticShare,
                     helpMessage = Localization.string("debug_help_capture_share"),
                     modifier = itemModifier,
-                    onClick = { processAction(DebugMenuAction.ShareUiCapture) })
+                    onClick = { processIntent(DebugMenuIntent.ShareUiCapture) })
             }
 
             if (state.showWorkManagerSection) {
@@ -257,21 +223,21 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.Refresh,
                     text = strings.actionWorkRestartTxt2Img,
                     helpMessage = Localization.string("debug_help_retry_txt"),
-                    onClick = { processAction(DebugMenuAction.RestartTxt2Img) },
+                    onClick = { processIntent(DebugMenuIntent.WorkManager.RestartTxt2Img) },
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Refresh,
                     text = strings.actionWorkRestartImg2Img,
                     helpMessage = Localization.string("debug_help_retry_img"),
-                    onClick = { processAction(DebugMenuAction.RestartImg2Img) },
+                    onClick = { processIntent(DebugMenuIntent.WorkManager.RestartImg2Img) },
                 )
                 DebugMenuItem(
                     modifier = itemModifier,
                     startIcon = Icons.Default.Cancel,
                     text = strings.actionWorkCancelAll,
                     helpMessage = Localization.string("debug_help_cancel_work"),
-                    onClick = { processAction(DebugMenuAction.CancelAllWork) },
+                    onClick = { processIntent(DebugMenuIntent.WorkManager.CancelAll) },
                 )
             }
 
@@ -286,14 +252,14 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.CancelScheduleSend,
                     text = strings.actionLocalDiffusionAllowCancel,
                     helpMessage = Localization.string("debug_help_allow_cancel"),
-                    onClick = { processAction(DebugMenuAction.ToggleLocalDiffusionCancel) },
+                    onClick = { processIntent(DebugMenuIntent.AllowLocalDiffusionCancel) },
                     showChevron = false,
                     endValueContent = {
                         PlatformSwitch(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             isChecked = state.localDiffusionAllowCancel,
                             onCheckedChange = {
-                                processAction(DebugMenuAction.ToggleLocalDiffusionCancel)
+                                processIntent(DebugMenuIntent.AllowLocalDiffusionCancel)
                             },
                         )
                     },
@@ -303,7 +269,7 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.Construction,
                     text = strings.actionLocalDiffusionScheduler,
                     helpMessage = Localization.string("debug_help_scheduler"),
-                    onClick = { processAction(DebugMenuAction.RequestLocalDiffusionScheduler) },
+                    onClick = { processIntent(DebugMenuIntent.LocalDiffusionScheduler.Request) },
                     endValueText = state.localDiffusionSchedulerThread,
                 )
             }
@@ -319,7 +285,7 @@ fun DebugMenuScreenContent(
                     startIcon = Icons.Default.SettingsEthernet,
                     text = strings.actionBadBase64,
                     helpMessage = Localization.string("debug_help_bad_image"),
-                    onClick = { processAction(DebugMenuAction.InsertBadBase64) },
+                    onClick = { processIntent(DebugMenuIntent.InsertBadBase64) },
                 )
             }
         }

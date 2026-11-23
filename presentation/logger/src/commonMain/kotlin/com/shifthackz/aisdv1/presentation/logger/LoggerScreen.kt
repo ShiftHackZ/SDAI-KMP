@@ -14,7 +14,6 @@ import org.koin.core.parameter.parametersOf
  *
  * @param modifier Layout modifiers for the log screen.
  * @param router Optional back-navigation owner; defaults to the application graph binding.
- *
  * @author Dmitriy Moroz
  */
 @Composable

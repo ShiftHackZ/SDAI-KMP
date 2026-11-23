@@ -14,7 +14,6 @@ import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformN
  * @param icon Icon displayed above the item label.
  * @param helpMessage Localized explanation of what this destination offers.
  * @param onClick Action invoked when the item is selected.
- *
  * @author Dmitriy Moroz
  */
 internal data class HomeNavigationBarItem(
@@ -40,7 +39,6 @@ internal data class HomeNavigationBarItem(
  * @param modifier Layout modifiers for the persistent navigation bar.
  * @param hasBackground Whether the native bar reserves an opaque background for fixed screen actions.
  * @param isObscured Whether the drawer covers the native navigation surface.
- *
  * @author Dmitriy Moroz
  */
 @Composable
