@@ -515,6 +515,9 @@
 					"$(inherited)",
 					"-framework",
 					AiSdPresentation,
+					/* Kotlin/Native glass classes must remain optional before iOS 26. */
+					"-weak_framework",
+					UIKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.shifthackz.aisdv1.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -552,6 +555,9 @@
 					"$(inherited)",
 					"-framework",
 					AiSdPresentation,
+					/* Kotlin/Native glass classes must remain optional before iOS 26. */
+					"-weak_framework",
+					UIKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.shifthackz.aisdv1.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
