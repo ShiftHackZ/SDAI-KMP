@@ -181,6 +181,7 @@ internal fun ContentSettingsState(
                     SettingsListItem.INFO_HEADER,
                     SettingsListItem.DONATE,
                     SettingsListItem.ONBOARDING,
+                    SettingsListItem.FAQ,
                     SettingsListItem.REPORT_PROBLEM,
                     SettingsListItem.PRIVACY,
                     SettingsListItem.LICENSE,

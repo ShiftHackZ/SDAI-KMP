@@ -1,0 +1,24 @@
+package com.shifthackz.aisdv1.data.repository
+
+import com.shifthackz.aisdv1.domain.datasource.FaqDataSource
+import com.shifthackz.aisdv1.domain.entity.FaqCategory
+import com.shifthackz.aisdv1.domain.repository.FaqRepository
+
+/**
+ * Delegates FAQ operations to the selected data source and propagates its failures.
+ *
+ * @param remoteDataSource Supplies the current published categories.
+ * @param localDataSource Reads and replaces the saved offline snapshot.
+ * @author Dmitriy Moroz
+ */
+internal class FaqRepositoryImpl(
+    private val remoteDataSource: FaqDataSource.Remote,
+    private val localDataSource: FaqDataSource.Local,
+) : FaqRepository {
+    override suspend fun fetch(): List<FaqCategory> = remoteDataSource.fetch()
+
+    override suspend fun readCache(): List<FaqCategory> = localDataSource.read()
+
+    override suspend fun writeCache(categories: List<FaqCategory>) =
+        localDataSource.save(categories)
+}

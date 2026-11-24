@@ -40,6 +40,7 @@ import com.shifthackz.aisdv1.presentation.splash.SplashScreen
 import com.shifthackz.aisdv1.presentation.statistics.storageusage.StorageUsageScreen
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageContent
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageViewModel
+import com.shifthackz.aisdv1.presentation.faq.FaqScreen
 import com.shifthackz.aisdv1.presentation.web.WebUiScreen
 import com.shifthackz.aisdv1.presentation.components.theme.global.RetainedHomeRouteTheme
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.ProgrammaticPager
@@ -260,6 +261,8 @@ internal fun OverlayRouteContent(
         AppRoute.Donate -> {
             DonateScreen(router = router)
         }
+
+        AppRoute.Faq -> FaqScreen(onBack = router::navigateBack)
 
         AppRoute.WebUi -> {
             WebUiScreen(router = router)

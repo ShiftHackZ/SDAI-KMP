@@ -277,6 +277,8 @@ import com.shifthackz.aisdv1.domain.usecase.wakelock.AcquireWakelockUseCase
 import com.shifthackz.aisdv1.domain.usecase.wakelock.AcquireWakelockUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.wakelock.ReleaseWakeLockUseCase
 import com.shifthackz.aisdv1.domain.usecase.wakelock.ReleaseWakeLockUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.faq.FetchOrGetFaqUseCase
+import com.shifthackz.aisdv1.domain.usecase.faq.FetchOrGetFaqUseCaseImpl
 import org.koin.dsl.module
 
 /**
@@ -287,6 +289,7 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val coreDomainModule = module {
+    factory<FetchOrGetFaqUseCase> { FetchOrGetFaqUseCaseImpl(repository = get()) }
     factory<CheckAppUpdateUseCase> { CheckAppUpdateUseCaseImpl(get()) }
     factory<TrackRemoteGenerationUseCase> { TrackRemoteGenerationUseCaseImpl(get(), get()) }
     factory<ObserveGenerationPerformanceUseCase> {

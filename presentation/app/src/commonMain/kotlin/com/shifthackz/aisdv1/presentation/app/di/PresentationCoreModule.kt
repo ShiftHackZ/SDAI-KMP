@@ -10,6 +10,7 @@ import com.shifthackz.aisdv1.presentation.splash.di.splashViewModelModule
 import com.shifthackz.aisdv1.presentation.donate.di.donateViewModelModule
 import com.shifthackz.aisdv1.presentation.logger.di.loggerViewModelModule
 import com.shifthackz.aisdv1.presentation.logger.di.loggerCoreModule
+import com.shifthackz.aisdv1.presentation.faq.di.faqViewModelModule
 import com.shifthackz.aisdv1.presentation.web.di.webViewModelModule
 import com.shifthackz.aisdv1.presentation.gallery.di.galleryCoreModule
 import com.shifthackz.aisdv1.presentation.gallery.di.galleryViewModelModule
@@ -46,6 +47,7 @@ val corePresentationModule = module {
         loggerCoreModule,
         appCoreModule,
         webViewModelModule,
+        faqViewModelModule,
         galleryCoreModule,
         galleryViewModelModule,
         componentsCoreModule,

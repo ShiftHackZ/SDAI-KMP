@@ -247,6 +247,7 @@ class SettingsViewModel(
 
             SettingsIntent.NavigateCivitai -> router.navigateToCivitai()
             SettingsIntent.NavigateWebUi -> router.navigateToWebUi()
+            SettingsIntent.NavigateFaq -> router.navigateToFaq()
             SettingsIntent.NavigateStorageUsage -> router.navigateToStorageUsage()
 
             SettingsIntent.NavigateNetworkUsage -> router.navigateToNetworkUsage()

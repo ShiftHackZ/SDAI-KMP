@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.DynamicForm
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FormatColorFill
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.MonetizationOn
@@ -76,6 +77,7 @@ internal val SettingsListItem.startIcon: ImageVector?
         SettingsListItem.DEVELOPER_WEBSITE -> BrandIcons.Moroz
         SettingsListItem.DONATE -> Icons.Default.MonetizationOn
         SettingsListItem.ONBOARDING -> Icons.Default.AllInclusive
+        SettingsListItem.FAQ -> Icons.Default.HelpOutline
         SettingsListItem.REPORT_PROBLEM -> Icons.Default.Report
         SettingsListItem.PRIVACY -> Icons.Default.Policy
         SettingsListItem.LICENSE -> Icons.Default.Gavel

@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.network.api.sdai
 
+import com.shifthackz.aisdv1.network.api.sdai.model.FaqResponse
 import com.shifthackz.aisdv1.network.model.SupporterRaw
 import com.shifthackz.aisdv1.network.request.ReportRequest
 import com.shifthackz.aisdv1.network.response.DownloadableModelResponse
@@ -10,6 +11,13 @@ import com.shifthackz.aisdv1.network.response.DownloadableModelResponse
  * @author Dmitriy Moroz
  */
 interface SdaiAppApi {
+
+    /**
+     * Downloads the public website FAQ. HTTP, timeout, and decoding failures propagate.
+     *
+     * @author Dmitriy Moroz
+     */
+    suspend fun fetchFaq(): FaqResponse
 
     /**
      * Fetches the current supporter list from the metadata service; HTTP and decoding failures propagate.

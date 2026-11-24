@@ -56,6 +56,7 @@ val modules = listOf(
     ":presentation:components",
     ":presentation:configuration",
     ":presentation:debug",
+    ":presentation:faq",
     ":presentation:donate",
     ":presentation:gallery",
     ":presentation:generation",

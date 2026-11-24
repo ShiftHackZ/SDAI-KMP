@@ -57,6 +57,16 @@ internal fun SettingsInfoSection(
             )
         }
 
+        SettingsListItem.FAQ -> {
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = row.startIcon,
+                text = text("faq_title"),
+                onClick = { processIntent(SettingsIntent.NavigateFaq) },
+            )
+        }
+
         SettingsListItem.REPORT_PROBLEM -> {
             SettingsItem(
                 modifier = itemModifier,

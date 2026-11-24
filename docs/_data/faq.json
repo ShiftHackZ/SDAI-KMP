@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-15",
+  "updated": "2026-11-24",
   "title": "Frequently Asked Questions",
   "intro": "Short answers for the setup and capability questions that come up most often around SDAI.",
   "categories": [
@@ -147,10 +147,45 @@
           "id": "local-slow-or-crash",
           "question": "Why is local generation slow, hot, or unstable on my phone?",
           "answer": [
-            "Mobile diffusion is memory-heavy and device-specific. Resolution, steps, model size, quantization, runtime backend, RAM pressure, and thermal limits all matter.",
-            "Use the in-app benchmark as a starting point, try smaller or quantized models, lower resolution and steps, and expect experimental acceleration such as NNAPI, Vulkan, OpenCL, or device NPUs to vary by chipset and driver."
+            "Larger models and higher resolutions need more memory. More steps take longer, and your phone may slow down as it heats up.",
+            "Use the in-app benchmark as a starting point. If generation struggles, try a smaller model, a lower resolution, or fewer steps."
           ],
-          "tags": ["local", "performance", "nnapi", "memory"]
+          "tags": ["local", "performance", "memory"]
+        },
+        {
+          "id": "android-acceleration-availability",
+          "question": "Why is hardware acceleration unavailable on my Android phone even though it has a powerful chip?",
+          "answer": [
+            "Your phone's GPU or NPU needs a driver that the selected local provider can use. That driver also has to support the calculations, data types, and input sizes used by the model.",
+            "Support can differ between Android phones with the same chip if they ship with different drivers or system software. If your provider offers a CPU option, you can try it with a compatible model."
+          ],
+          "tags": ["android", "acceleration", "gpu", "npu", "drivers"]
+        },
+        {
+          "id": "android-universal-acceleration",
+          "question": "Why can't SDAI add one GPU or NPU option for every Android phone?",
+          "answer": [
+            "Each local provider uses its own inference engine. For example, the Android SDXL provider can use Vulkan or OpenCL, and the ONNX provider can use NNAPI. Those options belong to their respective engines.",
+            "Adding another accelerator requires support in the engine, compatible models, and testing on real devices. Some accelerators also need a vendor-specific runtime or a model converted for that runtime."
+          ],
+          "tags": [
+            "android",
+            "acceleration",
+            "gpu",
+            "npu",
+            "vulkan",
+            "opencl",
+            "nnapi"
+          ]
+        },
+        {
+          "id": "android-nnapi-performance",
+          "question": "Why doesn't enabling NNAPI always make ONNX generation faster?",
+          "answer": [
+            "NNAPI can send supported parts of the model to an accelerator and run other parts on the CPU. Moving data between them can eat into the speedup, especially if only a small part of the model runs on the accelerator.",
+            "If generation is slower or fails with NNAPI enabled, turn it off to use ONNX Runtime's CPU backend."
+          ],
+          "tags": ["android", "onnx", "nnapi", "cpu", "performance"]
         },
         {
           "id": "higher-resolution",

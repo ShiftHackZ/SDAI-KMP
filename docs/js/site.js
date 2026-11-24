@@ -125,6 +125,40 @@
     schedule();
   }
 
+  function linkFaqParagraph(paragraph) {
+    const text = paragraph.textContent;
+    const urls = /(^|[\s(\[{<"'“‘])(https?:\/\/[^\s<>"'“”‘’\\]+)/gi;
+    const openers = { ")": "(", "]": "[", "}": "{" };
+    const content = document.createDocumentFragment();
+    let offset = 0;
+
+    for (const match of text.matchAll(urls)) {
+      let url = match[2];
+      while (url.length) {
+        const last = url.at(-1);
+        const opener = openers[last];
+        const hasExtraCloser =
+          opener && url.split(last).length > url.split(opener).length;
+        if (!".,;:!?…".includes(last) && !hasExtraCloser) break;
+        url = url.slice(0, -1);
+      }
+      const authority = url.split("://")[1]?.split(/[/?#]/)[0];
+      if (!authority || authority.includes("@") || !URL.canParse(url)) continue;
+
+      const start = match.index + match[1].length;
+      const link = document.createElement("a");
+      link.href = url;
+      link.textContent = url;
+      content.append(text.slice(offset, start), link);
+      offset = start + url.length;
+    }
+
+    if (offset) {
+      content.append(text.slice(offset));
+      paragraph.replaceChildren(content);
+    }
+  }
+
   function initFaqPage() {
     if (document.body.dataset.page !== "faq") return;
 
@@ -136,6 +170,8 @@
       document.querySelectorAll("[data-faq-tabs] button"),
     );
     if (!toolbar || !list || !status || !search || !tabs.length) return;
+
+    list.querySelectorAll(".faq-answer p").forEach(linkFaqParagraph);
 
     const items = Array.from(list.querySelectorAll(".faq-item")).map(
       (item) => ({

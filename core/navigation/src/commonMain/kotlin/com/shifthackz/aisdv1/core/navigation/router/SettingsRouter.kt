@@ -30,6 +30,13 @@ interface SettingsRouter {
     fun navigateToBackup()
 
     /**
+     * Opens the application's searchable FAQ.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToFaq()
+
+    /**
      * Opens the application drawer without changing the active route.
      *
      * @author Dmitriy Moroz

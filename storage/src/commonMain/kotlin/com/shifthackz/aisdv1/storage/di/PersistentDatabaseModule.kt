@@ -31,6 +31,7 @@ val persistentDatabaseModule = module {
     }
     single { get<PersistentDatabase>().generationResultDao() }
     single { get<PersistentDatabase>().civitaiUploadDao() }
+    single { get<PersistentDatabase>().faqDao() }
     single { get<PersistentDatabase>().localModelDao() }
     single { get<PersistentDatabase>().huggingFaceModelDao() }
     single { get<PersistentDatabase>().supporterDao() }

@@ -2,7 +2,6 @@
 
 package com.shifthackz.aisdv1.presentation.configuration.setup.source
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -11,21 +10,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.FeatureTag
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.ServerSourceReadiness
 import com.shifthackz.aisdv1.domain.entity.ServerSourceType
 import com.shifthackz.aisdv1.presentation.components.model.readinessFor
+import com.shifthackz.aisdv1.presentation.components.widget.input.FilterOptionChip
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
@@ -90,18 +86,18 @@ internal fun SourceFiltersBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(horizontalItemSpacing),
                 verticalArrangement = Arrangement.spacedBy(verticalItemSpacing),
             ) {
-                SourceTypeChip(
+                FilterOptionChip(
                     label = strings.sourceFilterAll,
-                    selected = state.sourceTypeFilter == null,
+                    isSelected = state.sourceTypeFilter == null,
                     onClick = {
                         processIntent(ServerSetupIntent.UpdateSourceTypeFilter(null))
                     },
                 )
                 ServerSourceType.entries.forEach { type ->
-                    SourceTypeChip(
+                    FilterOptionChip(
                         label = type.mapToUi(strings),
-                        selected = state.sourceTypeFilter == type,
-                        enabled = state.isSourceTypeEnabled(type),
+                        isSelected = state.sourceTypeFilter == type,
+                        isEnabled = state.isSourceTypeEnabled(type),
                         onClick = {
                             processIntent(ServerSetupIntent.UpdateSourceTypeFilter(type))
                         },
@@ -119,10 +115,10 @@ internal fun SourceFiltersBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(verticalItemSpacing),
             ) {
                 availableReadiness.forEach { readiness ->
-                    SourceTypeChip(
+                    FilterOptionChip(
                         label = readiness.mapToUi(strings),
-                        selected = readiness in state.sourceReadinessFilters,
-                        enabled = state.isSourceReadinessEnabled(readiness),
+                        isSelected = readiness in state.sourceReadinessFilters,
+                        isEnabled = state.isSourceReadinessEnabled(readiness),
                         onClick = {
                             processIntent(ServerSetupIntent.ToggleSourceReadinessFilter(readiness))
                         },
@@ -140,10 +136,10 @@ internal fun SourceFiltersBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(verticalItemSpacing),
             ) {
                 availableTags.forEach { tag ->
-                    SourceTypeChip(
+                    FilterOptionChip(
                         label = tag.mapToUi(),
-                        selected = tag in state.sourceTagFilters,
-                        enabled = state.isSourceTagEnabled(tag),
+                        isSelected = tag in state.sourceTagFilters,
+                        isEnabled = state.isSourceTagEnabled(tag),
                         onClick = {
                             processIntent(ServerSetupIntent.ToggleSourceTagFilter(tag))
                         },
@@ -164,46 +160,5 @@ internal fun SourceFiltersBottomSheet(
         ) {
             Text(text = strings.reset)
         }
-    }
-}
-
-@Composable
-private fun SourceTypeChip(
-    label: String,
-    selected: Boolean,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-) {
-    val shape = RoundedCornerShape(8.dp)
-    val containerColor = when {
-        selected -> MaterialTheme.colorScheme.primary
-        else -> Color.Transparent
-    }
-    val contentColor = when {
-        !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        selected -> MaterialTheme.colorScheme.onPrimary
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-    val borderColor = when {
-        !enabled -> MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)
-        else -> MaterialTheme.colorScheme.primary
-    }
-    Surface(
-        shape = shape,
-        color = containerColor,
-        contentColor = contentColor,
-        border = BorderStroke(1.dp, borderColor),
-        enabled = enabled,
-        onClick = onClick,
-        modifier = modifier,
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-            text = label,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelLarge,
-        )
     }
 }
