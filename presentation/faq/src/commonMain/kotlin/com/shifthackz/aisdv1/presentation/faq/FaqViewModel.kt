@@ -7,7 +7,6 @@ import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.diagnostics.asDiagnosticScreen
 import com.shifthackz.aisdv1.core.navigation.NavigationDestination
 import com.shifthackz.aisdv1.domain.usecase.faq.FetchOrGetFaqUseCase
-import kotlinx.coroutines.CancellationException
 
 /**
  * Resolves FAQ data on entry and serializes manual retries within this screen visit.
@@ -40,14 +39,11 @@ internal class FaqViewModel(
     private fun load() {
         emitState(FaqState.Loading)
         launch(dispatchersProvider.immediate) {
-            val result = try {
-                FaqState.Ready(fetchOrGetFaq())
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                FaqState.Error
-            }
-            emitState(result)
+            val state = fetchOrGetFaq().fold(
+                onSuccess = { FaqState.Ready(it) },
+                onFailure = { FaqState.Error },
+            )
+            emitState(state)
         }
     }
 }

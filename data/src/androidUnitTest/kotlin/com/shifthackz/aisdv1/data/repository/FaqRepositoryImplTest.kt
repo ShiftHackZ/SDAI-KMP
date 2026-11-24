@@ -28,14 +28,14 @@ class FaqRepositoryImplTest {
     fun `given FAQ repository with remote and local sources, fetch read and write run, expected each operation delegates exactly once`() =
         runTest {
             // Given
-            coEvery { remote.fetch() } returns online
-            coEvery { local.read() } returns cached
-            coEvery { local.save(online) } returns Unit
+            coEvery { remote.fetch() } returns Result.success(online)
+            coEvery { local.read() } returns Result.success(cached)
+            coEvery { local.save(online) } returns Result.success(Unit)
 
             // When
-            val fetched = repository.fetch()
-            val read = repository.readCache()
-            repository.writeCache(fetched)
+            val fetched = repository.fetch().getOrThrow()
+            val read = repository.readCache().getOrThrow()
+            repository.writeCache(fetched).getOrThrow()
 
             // Then
             assertSame(online, fetched)
@@ -52,10 +52,10 @@ class FaqRepositoryImplTest {
         runTest {
             // Given
             val failure = IllegalStateException("Offline")
-            coEvery { remote.fetch() } throws failure
+            coEvery { remote.fetch() } returns Result.failure(failure)
 
             // When
-            val result = runCatching { repository.fetch() }
+            val result = repository.fetch()
 
             // Then
             assertSame(failure, result.exceptionOrNull())
@@ -68,12 +68,12 @@ class FaqRepositoryImplTest {
             // Given
             val readFailure = IllegalStateException("Cache unavailable")
             val writeFailure = IllegalStateException("Write refused")
-            coEvery { local.read() } throws readFailure
-            coEvery { local.save(online) } throws writeFailure
+            coEvery { local.read() } returns Result.failure(readFailure)
+            coEvery { local.save(online) } returns Result.failure(writeFailure)
 
             // When
-            val read = runCatching { repository.readCache() }
-            val write = runCatching { repository.writeCache(online) }
+            val read = repository.readCache()
+            val write = repository.writeCache(online)
 
             // Then
             assertSame(readFailure, read.exceptionOrNull())

@@ -11,7 +11,9 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import com.shifthackz.aisdv1.storage.db.persistent.dao.BlogDao
 import com.shifthackz.aisdv1.storage.db.persistent.dao.FaqDao
+import com.shifthackz.aisdv1.storage.db.persistent.entity.BlogPostEntity
 import com.shifthackz.aisdv1.storage.db.persistent.entity.FaqQuestionEntity
 import com.shifthackz.aisdv1.storage.converters.ListConverters
 import com.shifthackz.aisdv1.storage.db.persistent.PersistentDatabase.Companion.DB_VERSION
@@ -32,7 +34,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 
 /**
  * Main Room database containing generated images, downloaded models, and app statistics.
- * Schema version 20 adds the last downloaded FAQ for offline reading.
+ * Schema version 21 adds a snapshot of blog articles for offline reading.
  *
  * @author Dmitriy Moroz
  */
@@ -50,6 +52,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
         RestoreSectionEntity::class,
         CivitaiUploadEntity::class,
         FaqQuestionEntity::class,
+        BlogPostEntity::class,
     ],
     autoMigrations = [
         /**
@@ -185,6 +188,12 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
          * @author Dmitriy Moroz
          */
         AutoMigration(from = 19, to = 20),
+        /**
+         * Adds [BlogPostEntity] for the last successfully downloaded blog feed.
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 20, to = 21),
     ],
 )
 @TypeConverters(
@@ -205,6 +214,13 @@ internal abstract class PersistentDatabase : RoomDatabase() {
      * @author Dmitriy Moroz
      */
     abstract fun faqDao(): FaqDao
+
+    /**
+     * Provides access to the blog feed snapshot retained across launches.
+     *
+     * @author Dmitriy Moroz
+     */
+    abstract fun blogDao(): BlogDao
 
     /**
      * Reads and mutates saved gallery images and their metadata.
@@ -273,7 +289,7 @@ internal abstract class PersistentDatabase : RoomDatabase() {
          *
          * @author Dmitriy Moroz
          */
-        const val DB_VERSION = 20
+        const val DB_VERSION = 21
     }
 }
 

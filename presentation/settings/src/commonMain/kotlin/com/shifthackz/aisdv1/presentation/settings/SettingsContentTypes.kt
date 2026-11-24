@@ -61,6 +61,7 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
     SettingsListItem.DONATE,
     SettingsListItem.ONBOARDING,
     SettingsListItem.FAQ,
+    SettingsListItem.BLOG,
     SettingsListItem.REPORT_PROBLEM,
     SettingsListItem.PRIVACY,
     SettingsListItem.LICENSE,

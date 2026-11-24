@@ -47,6 +47,7 @@ import com.shifthackz.aisdv1.data.local.StabilityAiCreditsLocalDataSource
 import com.shifthackz.aisdv1.data.local.StableDiffusionHyperNetworksLocalDataSource
 import com.shifthackz.aisdv1.data.local.StableDiffusionModelsLocalDataSource
 import com.shifthackz.aisdv1.data.local.StableDiffusionSamplersLocalDataSource
+import com.shifthackz.aisdv1.data.local.BlogLocalDataSource
 import com.shifthackz.aisdv1.data.local.FaqLocalDataSource
 import com.shifthackz.aisdv1.data.local.SupportersLocalDataSource
 import com.shifthackz.aisdv1.data.provider.ServerUrlProvider
@@ -72,6 +73,7 @@ import com.shifthackz.aisdv1.data.remote.KtorStableDiffusionLorasRemoteDataSourc
 import com.shifthackz.aisdv1.data.remote.KtorStableDiffusionModelsRemoteDataSource
 import com.shifthackz.aisdv1.data.remote.KtorStableDiffusionSamplersRemoteDataSource
 import com.shifthackz.aisdv1.data.remote.KtorStableDiffusionScriptsRemoteDataSource
+import com.shifthackz.aisdv1.data.remote.BlogRemoteDataSource
 import com.shifthackz.aisdv1.data.remote.FaqRemoteDataSource
 import com.shifthackz.aisdv1.data.remote.KtorSupportersRemoteDataSource
 import com.shifthackz.aisdv1.data.remote.KtorSwarmUiEmbeddingsRemoteDataSource
@@ -108,6 +110,7 @@ import com.shifthackz.aisdv1.data.repository.StableDiffusionHyperNetworksReposit
 import com.shifthackz.aisdv1.data.repository.StableDiffusionModelsRepositoryImpl
 import com.shifthackz.aisdv1.data.repository.StableDiffusionSamplersRepositoryImpl
 import com.shifthackz.aisdv1.data.repository.StableDiffusionScriptsRepositoryImpl
+import com.shifthackz.aisdv1.data.repository.BlogRepositoryImpl
 import com.shifthackz.aisdv1.data.repository.FaqRepositoryImpl
 import com.shifthackz.aisdv1.data.repository.SupportersRepositoryImpl
 import com.shifthackz.aisdv1.data.repository.SwarmUiGenerationRepositoryImpl
@@ -137,6 +140,7 @@ import com.shifthackz.aisdv1.domain.datasource.StableDiffusionHyperNetworksDataS
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionModelsDataSource
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionSamplersDataSource
 import com.shifthackz.aisdv1.domain.datasource.StableDiffusionScriptsDataSource
+import com.shifthackz.aisdv1.domain.datasource.BlogDataSource
 import com.shifthackz.aisdv1.domain.datasource.FaqDataSource
 import com.shifthackz.aisdv1.domain.datasource.SupportersDataSource
 import com.shifthackz.aisdv1.domain.datasource.SupportersRemoteDataSource
@@ -178,6 +182,7 @@ import com.shifthackz.aisdv1.domain.repository.StableDiffusionHyperNetworksRepos
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionModelsRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionSamplersRepository
 import com.shifthackz.aisdv1.domain.repository.StableDiffusionScriptsRepository
+import com.shifthackz.aisdv1.domain.repository.BlogRepository
 import com.shifthackz.aisdv1.domain.repository.FaqRepository
 import com.shifthackz.aisdv1.domain.repository.SupportersRepository
 import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
@@ -328,6 +333,9 @@ val coreDataModule = module {
     single<FaqDataSource.Remote> { FaqRemoteDataSource(api = get()) }
     single<FaqDataSource.Local> { FaqLocalDataSource(dao = get()) }
     single<FaqRepository> { FaqRepositoryImpl(remoteDataSource = get(), localDataSource = get()) }
+    single<BlogDataSource.Remote> { BlogRemoteDataSource(api = get()) }
+    single<BlogDataSource.Local> { BlogLocalDataSource(dao = get()) }
+    single<BlogRepository> { BlogRepositoryImpl(remoteDataSource = get(), localDataSource = get()) }
     single<SupportersRepository> {
         SupportersRepositoryImpl(remoteDataSource = get(), localDataSource = get())
     }

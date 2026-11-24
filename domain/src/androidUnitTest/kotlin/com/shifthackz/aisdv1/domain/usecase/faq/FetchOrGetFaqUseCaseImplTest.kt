@@ -32,11 +32,11 @@ class FetchOrGetFaqUseCaseImplTest {
     fun `given fetch-or-get FAQ use case and working network, FAQ is loaded, expected online result saved without reading cache`() =
         runTest {
             // Given
-            coEvery { repository.fetch() } returns online
-            coEvery { repository.writeCache(online) } returns Unit
+            coEvery { repository.fetch() } returns Result.success(online)
+            coEvery { repository.writeCache(online) } returns Result.success(Unit)
 
             // When
-            val content = useCase()
+            val content = useCase().getOrThrow()
 
             // Then
             assertEquals(FaqContent(online, isCached = false), content)
@@ -50,11 +50,11 @@ class FetchOrGetFaqUseCaseImplTest {
     fun `given fetch-or-get FAQ use case with saved answers, remote request fails, expected cached content marked and no write`() =
         runTest {
             // Given
-            coEvery { repository.fetch() } throws networkFailure
-            coEvery { repository.readCache() } returns cached
+            coEvery { repository.fetch() } returns Result.failure(networkFailure)
+            coEvery { repository.readCache() } returns Result.success(cached)
 
             // When
-            val content = useCase()
+            val content = useCase().getOrThrow()
 
             // Then
             assertEquals(FaqContent(cached, isCached = true), content)
@@ -68,11 +68,11 @@ class FetchOrGetFaqUseCaseImplTest {
     fun `given fetch-or-get FAQ use case before first download, network fails with empty cache, expected original failure`() =
         runTest {
             // Given
-            coEvery { repository.fetch() } throws networkFailure
-            coEvery { repository.readCache() } returns emptyList()
+            coEvery { repository.fetch() } returns Result.failure(networkFailure)
+            coEvery { repository.readCache() } returns Result.success(emptyList())
 
             // When
-            val result = runCatching { useCase() }
+            val result = useCase()
 
             // Then
             assertSame(networkFailure, result.exceptionOrNull())
@@ -84,11 +84,11 @@ class FetchOrGetFaqUseCaseImplTest {
         runTest {
             // Given
             val storageFailure = IllegalStateException("Room read failed")
-            coEvery { repository.fetch() } throws networkFailure
-            coEvery { repository.readCache() } throws storageFailure
+            coEvery { repository.fetch() } returns Result.failure(networkFailure)
+            coEvery { repository.readCache() } returns Result.failure(storageFailure)
 
             // When
-            val result = runCatching { useCase() }
+            val result = useCase()
 
             // Then
             assertSame(storageFailure, result.exceptionOrNull())
@@ -98,11 +98,11 @@ class FetchOrGetFaqUseCaseImplTest {
     fun `given fetch-or-get FAQ use case and working network, saving fresh answers fails, expected online answers remain available`() =
         runTest {
             // Given
-            coEvery { repository.fetch() } returns online
-            coEvery { repository.writeCache(online) } throws IllegalStateException("Disk full")
+            coEvery { repository.fetch() } returns Result.success(online)
+            coEvery { repository.writeCache(online) } returns Result.failure(IllegalStateException("Disk full"))
 
             // When
-            val content = useCase()
+            val content = useCase().getOrThrow()
 
             // Then
             assertEquals(FaqContent(online, isCached = false), content)
@@ -129,7 +129,7 @@ class FetchOrGetFaqUseCaseImplTest {
         runTest {
             // Given
             val cancellation = CancellationException("Route closed")
-            coEvery { repository.fetch() } returns online
+            coEvery { repository.fetch() } returns Result.success(online)
             coEvery { repository.writeCache(online) } throws cancellation
 
             // When

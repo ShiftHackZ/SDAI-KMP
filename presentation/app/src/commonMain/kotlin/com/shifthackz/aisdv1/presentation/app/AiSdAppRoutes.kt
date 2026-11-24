@@ -40,6 +40,8 @@ import com.shifthackz.aisdv1.presentation.splash.SplashScreen
 import com.shifthackz.aisdv1.presentation.statistics.storageusage.StorageUsageScreen
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageContent
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageViewModel
+import com.shifthackz.aisdv1.presentation.blog.detail.BlogDetailScreen
+import com.shifthackz.aisdv1.presentation.blog.list.BlogScreen
 import com.shifthackz.aisdv1.presentation.faq.FaqScreen
 import com.shifthackz.aisdv1.presentation.web.WebUiScreen
 import com.shifthackz.aisdv1.presentation.components.theme.global.RetainedHomeRouteTheme
@@ -263,6 +265,12 @@ internal fun OverlayRouteContent(
         }
 
         AppRoute.Faq -> FaqScreen(onBack = router::navigateBack)
+        AppRoute.Blog -> BlogScreen(
+            onBack = router::navigateBack,
+            onOpenPost = router::navigateToBlogDetail
+        )
+
+        is AppRoute.BlogDetail -> BlogDetailScreen(slug = route.slug, onBack = router::navigateBack)
 
         AppRoute.WebUi -> {
             WebUiScreen(router = router)

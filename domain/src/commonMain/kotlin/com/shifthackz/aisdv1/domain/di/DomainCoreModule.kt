@@ -277,6 +277,10 @@ import com.shifthackz.aisdv1.domain.usecase.wakelock.AcquireWakelockUseCase
 import com.shifthackz.aisdv1.domain.usecase.wakelock.AcquireWakelockUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.wakelock.ReleaseWakeLockUseCase
 import com.shifthackz.aisdv1.domain.usecase.wakelock.ReleaseWakeLockUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.blog.FetchOrGetBlogUseCase
+import com.shifthackz.aisdv1.domain.usecase.blog.FetchOrGetBlogUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.blog.FetchOrGetBlogPostUseCase
+import com.shifthackz.aisdv1.domain.usecase.blog.FetchOrGetBlogPostUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.faq.FetchOrGetFaqUseCase
 import com.shifthackz.aisdv1.domain.usecase.faq.FetchOrGetFaqUseCaseImpl
 import org.koin.dsl.module
@@ -290,6 +294,13 @@ import org.koin.dsl.module
  */
 val coreDomainModule = module {
     factory<FetchOrGetFaqUseCase> { FetchOrGetFaqUseCaseImpl(repository = get()) }
+    factory<FetchOrGetBlogUseCase> { FetchOrGetBlogUseCaseImpl(repository = get()) }
+    factory<FetchOrGetBlogPostUseCase> {
+        FetchOrGetBlogPostUseCaseImpl(
+            repository = get(),
+            fetchOrGetBlog = get()
+        )
+    }
     factory<CheckAppUpdateUseCase> { CheckAppUpdateUseCaseImpl(get()) }
     factory<TrackRemoteGenerationUseCase> { TrackRemoteGenerationUseCaseImpl(get(), get()) }
     factory<ObserveGenerationPerformanceUseCase> {

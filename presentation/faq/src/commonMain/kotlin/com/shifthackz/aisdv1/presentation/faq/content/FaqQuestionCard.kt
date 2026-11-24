@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,7 +57,7 @@ internal fun FaqQuestionCard(
     PlatformSurface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        contentColor = LocalContentColor.current,
     ) {
         Column(Modifier.fillMaxWidth()) {
             Row(
@@ -69,7 +71,11 @@ internal fun FaqQuestionCard(
             ) {
                 Text(
                     text = question.question,
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 18.sp,
+                        lineHeight = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
                     modifier = Modifier.weight(1f),
                 )
                 Icon(
@@ -99,7 +105,10 @@ internal fun FaqQuestionCard(
                                     ),
                                 )
                             }
-                            Text(text = text, style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp)
+                            )
                         }
                     }
                 }

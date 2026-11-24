@@ -853,6 +853,8 @@
     <string name="settings_help_info_header">查找帮助、项目信息以及支持 SDAI 的方式。</string>
     <string name="settings_help_donate">查看支持 SDAI 开发的方式。捐赠完全自愿。</string>
     <string name="settings_help_onboarding">重新查看入门介绍，了解如何开始使用应用。</string>
+    <string name="settings_help_faq">查看有关设置和使用 SDAI 的常见问题解答。</string>
+    <string name="settings_help_blog">阅读 SDAI 的版本说明、公告和文章。</string>
     <string name="settings_help_report_problem">报告应用问题。请描述发生的情况以及复现步骤。</string>
     <string name="settings_help_privacy">了解 SDAI 如何处理数据，以及使用应用时适用的条款。</string>
     <string name="settings_help_license">阅读 SDAI 使用的开源许可证。</string>
@@ -956,4 +958,10 @@
     <string name="faq_cached">正在显示已保存的答案。暂时无法获取最新常见问题。</string>
     <string name="faq_show_answer">显示答案</string>
     <string name="faq_hide_answer">隐藏答案</string>
+    <string name="blog_title">博客</string>
+    <string name="blog_cached">正在显示已保存的博客。</string>
+    <string name="blog_load_error">无法加载博客。</string>
+    <string name="blog_post_missing">这篇文章暂不可用。</string>
+    <string name="blog_share_post">分享文章</string>
+    <string name="blog_share_error">无法打开分享菜单。</string>
 </resources>

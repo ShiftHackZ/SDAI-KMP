@@ -10,6 +10,8 @@ kotlin = "2.3.21"
 ksp = "2.3.9"
 appcompat = "1.7.1"
 composeMultiplatform = "1.11.1"
+coil = "3.3.0"
+markdownRenderer = "0.40.2"
 composeMaterial3 = "1.9.0"
 composeMaterialIcons = "1.7.3"
 composeBom = "2026.05.01"
@@ -51,6 +53,9 @@ dokka = "2.3.0"
 detekt = "2.0.0-alpha.3"
 
 [libraries]
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
+markdown-material3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 google-play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playAppUpdate" }
 appauth = { group = "net.openid", name = "appauth", version = "0.11.1" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }

@@ -6,6 +6,7 @@ plugins {
 
 android {
     namespace = "com.shifthackz.aisdv1.storage"
+    sourceSets.getByName("test").resources.srcDir("schemas")
     defaultConfig {
         ksp {
             arg("room.incremental", "true")

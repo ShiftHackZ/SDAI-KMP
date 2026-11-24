@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.presentation.settings
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.AllInclusive
+import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.AutoFixNormal
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BrightnessLow
@@ -78,6 +79,7 @@ internal val SettingsListItem.startIcon: ImageVector?
         SettingsListItem.DONATE -> Icons.Default.MonetizationOn
         SettingsListItem.ONBOARDING -> Icons.Default.AllInclusive
         SettingsListItem.FAQ -> Icons.Default.HelpOutline
+        SettingsListItem.BLOG -> Icons.Default.Article
         SettingsListItem.REPORT_PROBLEM -> Icons.Default.Report
         SettingsListItem.PRIVACY -> Icons.Default.Policy
         SettingsListItem.LICENSE -> Icons.Default.Gavel

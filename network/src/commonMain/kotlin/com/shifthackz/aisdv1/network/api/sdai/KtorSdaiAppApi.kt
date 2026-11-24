@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.network.api.sdai
 
+import com.shifthackz.aisdv1.network.api.sdai.model.BlogResponse
 import com.shifthackz.aisdv1.network.api.sdai.model.FaqResponse
 import com.shifthackz.aisdv1.network.client.createConfiguredHttpClient
 import com.shifthackz.aisdv1.network.client.NetworkUsageCategory
@@ -66,7 +67,14 @@ class KtorSdaiAppApi(
     override suspend fun fetchFaq(): FaqResponse = httpClient.boundedGet {
         url.takeFrom(appBaseUrl)
         url.appendPathSegments("faq.json")
-        timeout { requestTimeoutMillis = FAQ_TIMEOUT_MILLIS }
+        timeout { requestTimeoutMillis = WEBSITE_CONTENT_TIMEOUT_MILLIS }
+        trackUsage(NetworkUsageCategory.CONFIGS)
+    }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
+
+    override suspend fun fetchBlog(): BlogResponse = httpClient.boundedGet {
+        url.takeFrom(appBaseUrl)
+        url.appendPathSegments("blog.json")
+        timeout { requestTimeoutMillis = WEBSITE_CONTENT_TIMEOUT_MILLIS }
         trackUsage(NetworkUsageCategory.CONFIGS)
     }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
@@ -168,7 +176,7 @@ class KtorSdaiAppApi(
      * @author Dmitriy Moroz
      */
     private companion object {
-        const val FAQ_TIMEOUT_MILLIS = 8_000L
+        const val WEBSITE_CONTENT_TIMEOUT_MILLIS = 8_000L
         const val PATH_SUPPORTERS = "supporters.json"
         const val PATH_MODELS = "models.json"
         const val PATH_MEDIA_PIPE = "mediapipe.json"

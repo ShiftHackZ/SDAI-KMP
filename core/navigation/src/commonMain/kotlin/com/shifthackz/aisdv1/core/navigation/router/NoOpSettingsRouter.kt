@@ -21,6 +21,8 @@ object NoOpSettingsRouter : SettingsRouter {
 
     override fun navigateToFaq() = Unit
 
+    override fun navigateToBlog() = Unit
+
     /**
      * Ignores this action because no navigation host is attached.
      *

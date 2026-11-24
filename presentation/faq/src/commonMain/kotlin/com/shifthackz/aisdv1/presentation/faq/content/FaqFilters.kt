@@ -40,7 +40,7 @@ internal fun FaqFilters(
         Text(
             text = Localization.string("provider_action_filters"),
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onBackground,
         )
         FlowRow(
             modifier = Modifier.fillMaxWidth(),

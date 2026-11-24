@@ -63,6 +63,16 @@ class RootAppRouter(
 
     override fun navigateToFaq() = navigateTo(AppRoute.Faq)
 
+    override fun navigateToBlog() = navigateTo(AppRoute.Blog)
+
+    /**
+     * Opens the selected article and leaves the blog list in the back stack.
+     *
+     * @param slug Article identifier supplied by the selected list item.
+     * @author Dmitriy Moroz
+     */
+    fun navigateToBlogDetail(slug: String) = navigateTo(AppRoute.BlogDetail(slug))
+
     /**
      * Consumes onboarding so Back cannot reopen it.
      *
@@ -496,6 +506,8 @@ fun AppRoute.isHomeRoute(): Boolean = when (this) {
     AppRoute.Donate,
     AppRoute.WebUi,
     AppRoute.Faq,
+    AppRoute.Blog,
+    is AppRoute.BlogDetail,
         -> false
 }
 
@@ -523,6 +535,8 @@ private fun AppRoute.canFallBackToTextToImage(): Boolean = when (this) {
     AppRoute.Donate,
     AppRoute.WebUi,
     AppRoute.Faq,
+    AppRoute.Blog,
+    is AppRoute.BlogDetail,
         -> true
 
     AppRoute.Home,
