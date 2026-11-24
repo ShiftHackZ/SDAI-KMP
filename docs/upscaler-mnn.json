@@ -1,0 +1,10 @@
+[
+  {
+    "id": "upscaler_mnn_anime_6b",
+    "name": "Real-ESRGAN Anime 6B (MNN)",
+    "size": "17 MB",
+    "sources": [
+      "https://huggingface.co/tumuyan2/realsr-models/resolve/2d6ddae2f31157ab1f750b5678c4cbf88e4d7ec4/models-MNNSR/RealESRGAN_x4plus_anime_6B-x4.mnn?download=true"
+    ]
+  }
+]

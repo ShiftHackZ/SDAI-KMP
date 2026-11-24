@@ -1,0 +1,18 @@
+[
+  {
+    "id": "upscaler_realesrgan_x4plus",
+    "name": "Real-ESRGAN x4plus",
+    "size": "64 MB",
+    "sources": [
+      "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
+    ]
+  },
+  {
+    "id": "upscaler_realesrgan_anime_6b",
+    "name": "Real-ESRGAN x4plus Anime 6B",
+    "size": "17 MB",
+    "sources": [
+      "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
+    ]
+  }
+]
