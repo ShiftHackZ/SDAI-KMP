@@ -67,6 +67,16 @@ internal fun SettingsInfoSection(
             )
         }
 
+        SettingsListItem.BLOG -> {
+            SettingsItem(
+                modifier = itemModifier,
+                loading = isLoading,
+                startIcon = row.startIcon,
+                text = text("blog_title"),
+                onClick = { processIntent(SettingsIntent.NavigateBlog) },
+            )
+        }
+
         SettingsListItem.REPORT_PROBLEM -> {
             SettingsItem(
                 modifier = itemModifier,

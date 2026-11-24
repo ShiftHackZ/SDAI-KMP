@@ -1,0 +1,27 @@
+---
+layout: null
+---
+{%- assign posts = site.pages | where: 'layout', 'blog-post' | sort: 'date' | reverse -%}
+{% capture front_matter_end %}
+---
+{% endcapture -%}
+{
+  "posts": [
+    {%- for post in posts -%}
+      {%- capture source -%}{% include_relative {{ post.path }} %}{%- endcapture -%}
+      {%- assign prefix = source | split: front_matter_end | first | append: front_matter_end -%}
+      {%- assign article = source | remove_first: prefix | strip -%}
+      {
+        "slug": {{ post.dir | split: '/' | last | jsonify }},
+        "title": {{ post.title | jsonify }},
+        "summary": {{ post.description | jsonify }},
+        "publishedOn": {{ post.date | date: '%Y-%m-%d' | jsonify }},
+        "category": {{ post.category | jsonify }},
+        "url": {{ post.url | absolute_url | jsonify }},
+        "coverUrl": {{ post.url | append: post.cover | absolute_url | jsonify }},
+        "coverDescription": {{ post.cover_alt | jsonify }},
+        "markdown": {{ article | jsonify }}
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}

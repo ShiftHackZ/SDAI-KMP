@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.data.local
 
+import com.shifthackz.aisdv1.data.core.dataSourceResultOf
 import com.shifthackz.aisdv1.domain.datasource.FaqDataSource
 import com.shifthackz.aisdv1.domain.entity.FaqCategory
 import com.shifthackz.aisdv1.domain.entity.FaqQuestion
@@ -15,7 +16,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.FaqQuestionEntity
 internal class FaqLocalDataSource(
     private val dao: FaqDao,
 ) : FaqDataSource.Local {
-    override suspend fun read(): List<FaqCategory> =
+    override suspend fun read(): Result<List<FaqCategory>> = dataSourceResultOf {
         dao.read().groupBy(FaqQuestionEntity::categoryId).map { (id, rows) ->
             FaqCategory(
                 id = id,
@@ -23,8 +24,9 @@ internal class FaqLocalDataSource(
                 items = rows.map { FaqQuestion(it.questionId, it.question, it.answer, it.tags) },
             )
         }
+    }
 
-    override suspend fun save(categories: List<FaqCategory>) {
+    override suspend fun save(categories: List<FaqCategory>): Result<Unit> = dataSourceResultOf {
         val questions = categories.flatMapIndexed { categoryIndex, category ->
             category.items.mapIndexed { questionIndex, item ->
                 FaqQuestionEntity(

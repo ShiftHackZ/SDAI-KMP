@@ -15,11 +15,12 @@ sealed interface FaqDataSource {
      */
     interface Remote : FaqDataSource {
         /**
-         * Returns the validated feed and propagates transport, decoding, and content errors.
+         * Returns the published feed or a failure from its download or decoding.
+         * Cancellation propagates to the caller.
          *
          * @author Dmitriy Moroz
          */
-        suspend fun fetch(): List<FaqCategory>
+        suspend fun fetch(): Result<List<FaqCategory>>
     }
 
     /**
@@ -30,17 +31,19 @@ sealed interface FaqDataSource {
     interface Local : FaqDataSource {
         /**
          * Returns the saved snapshot in publication order, or an empty list before the first write.
+         * Storage errors return failures. Cancellation propagates to the caller.
          *
          * @author Dmitriy Moroz
          */
-        suspend fun read(): List<FaqCategory>
+        suspend fun read(): Result<List<FaqCategory>>
 
         /**
-         * Replaces the snapshot atomically and propagates any storage failure.
+         * Replaces the snapshot atomically and returns a failure if storage cannot save it.
+         * Cancellation propagates to the caller.
          *
          * @param categories Validated groups and questions in publication order.
          * @author Dmitriy Moroz
          */
-        suspend fun save(categories: List<FaqCategory>)
+        suspend fun save(categories: List<FaqCategory>): Result<Unit>
     }
 }

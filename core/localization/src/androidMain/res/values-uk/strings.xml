@@ -801,6 +801,8 @@
     <string name="settings_help_info_header">Знайдіть допомогу, відомості про проєкт і способи підтримати SDAI.</string>
     <string name="settings_help_donate">Перегляньте способи підтримки розробки SDAI. Пожертви добровільні.</string>
     <string name="settings_help_onboarding">Перегляньте вступний посібник і дізнайтеся, як почати роботу із застосунком.</string>
+    <string name="settings_help_faq">Знайдіть відповіді на поширені запитання про налаштування та використання SDAI.</string>
+    <string name="settings_help_blog">Читайте примітки до випусків, оголошення та статті про SDAI.</string>
     <string name="settings_help_report_problem">Повідомте про проблему в застосунку. Опишіть, що сталося та як це відтворити.</string>
     <string name="settings_help_privacy">Прочитайте, як SDAI обробляє дані та які умови діють під час використання застосунку.</string>
     <string name="settings_help_license">Прочитайте відкриту ліцензію SDAI.</string>
@@ -904,4 +906,10 @@
     <string name="faq_cached">Показано збережені відповіді. Актуальні поширені запитання недоступні.</string>
     <string name="faq_show_answer">Показати відповідь</string>
     <string name="faq_hide_answer">Приховати відповідь</string>
+    <string name="blog_title">Блог</string>
+    <string name="blog_cached">Показано збережену копію блогу.</string>
+    <string name="blog_load_error">Не вдалося завантажити блог.</string>
+    <string name="blog_post_missing">Ця стаття недоступна.</string>
+    <string name="blog_share_post">Поділитися статтею</string>
+    <string name="blog_share_error">Не вдалося відкрити меню поширення.</string>
 </resources>

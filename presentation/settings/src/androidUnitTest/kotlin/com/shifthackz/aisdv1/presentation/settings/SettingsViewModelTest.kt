@@ -395,6 +395,20 @@ class SettingsViewModelTest {
             verify(exactly = 1) { preferenceManager.shouldShowPerformanceOverlay = true }
         }
 
+    @Test
+    fun `given settings view model on the information section, Blog is selected, expected blog navigation`() =
+        runTest {
+            // Given
+            val viewModel = createViewModel()
+
+            // When
+            viewModel.processIntent(SettingsIntent.NavigateBlog)
+            advanceUntilIdle()
+
+            // Then
+            assertTrue(router.isBlogOpened)
+        }
+
     private fun TestScope.createViewModel(
         buildInfoProvider: BuildInfoProvider = TestBuildInfoProvider,
     ): SettingsViewModel {
@@ -443,6 +457,13 @@ private object TestBuildInfoProvider : BuildInfoProvider {
 
 private class TestSettingsRouter : SettingsRouter {
     override fun navigateToFaq() = Unit
+
+    var isBlogOpened = false
+        private set
+
+    override fun navigateToBlog() {
+        isBlogOpened = true
+    }
 
     override fun navigateToWebUi() = Unit
     override fun navigateToCivitai() = Unit

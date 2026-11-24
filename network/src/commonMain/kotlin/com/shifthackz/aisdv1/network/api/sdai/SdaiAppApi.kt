@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.network.api.sdai
 
+import com.shifthackz.aisdv1.network.api.sdai.model.BlogResponse
 import com.shifthackz.aisdv1.network.api.sdai.model.FaqResponse
 import com.shifthackz.aisdv1.network.model.SupporterRaw
 import com.shifthackz.aisdv1.network.request.ReportRequest
@@ -18,6 +19,14 @@ interface SdaiAppApi {
      * @author Dmitriy Moroz
      */
     suspend fun fetchFaq(): FaqResponse
+
+    /**
+     * Downloads the site's ordered blog feed with complete Markdown articles.
+     * Transport and decoding failures propagate to the caller.
+     *
+     * @author Dmitriy Moroz
+     */
+    suspend fun fetchBlog(): BlogResponse
 
     /**
      * Fetches the current supporter list from the metadata service; HTTP and decoding failures propagate.

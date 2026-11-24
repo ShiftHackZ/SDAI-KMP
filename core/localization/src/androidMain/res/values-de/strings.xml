@@ -838,6 +838,8 @@
     <string name="settings_help_info_header">Finde Hilfe, Projektinformationen und Möglichkeiten, SDAI zu unterstützen.</string>
     <string name="settings_help_donate">Sieh dir Möglichkeiten an, die Entwicklung von SDAI zu unterstützen. Spenden sind freiwillig.</string>
     <string name="settings_help_onboarding">Sieh dir die Einführung erneut an und lerne die ersten Schritte mit der App kennen.</string>
+    <string name="settings_help_faq">Finde Antworten auf häufige Fragen zur Einrichtung und Nutzung von SDAI.</string>
+    <string name="settings_help_blog">Lies Versionshinweise, Ankündigungen und Artikel zu SDAI.</string>
     <string name="settings_help_report_problem">Melde ein Problem mit der App. Beschreibe, was passiert ist und wie es sich wiederholen lässt.</string>
     <string name="settings_help_privacy">Lies, wie SDAI mit Daten umgeht und welche Nutzungsbedingungen gelten.</string>
     <string name="settings_help_license">Lies die Open-Source-Lizenz von SDAI.</string>
@@ -941,4 +943,10 @@
     <string name="faq_cached">Gespeicherte Antworten werden angezeigt. Die aktuellen FAQ sind nicht verfügbar.</string>
     <string name="faq_show_answer">Antwort anzeigen</string>
     <string name="faq_hide_answer">Antwort ausblenden</string>
+    <string name="blog_title">Blog</string>
+    <string name="blog_cached">Der gespeicherte Blog wird angezeigt.</string>
+    <string name="blog_load_error">Der Blog konnte nicht geladen werden.</string>
+    <string name="blog_post_missing">Dieser Artikel ist nicht verfügbar.</string>
+    <string name="blog_share_post">Artikel teilen</string>
+    <string name="blog_share_error">Das Teilen-Menü konnte nicht geöffnet werden.</string>
 </resources>

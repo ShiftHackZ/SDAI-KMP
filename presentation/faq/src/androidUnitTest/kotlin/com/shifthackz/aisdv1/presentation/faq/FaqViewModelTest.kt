@@ -58,7 +58,7 @@ class FaqViewModelTest {
         runTest {
             // Given
             val pending = CompletableDeferred<FaqContent>()
-            coEvery { load() } coAnswers { pending.await() }
+            coEvery { load() } coAnswers { Result.success(pending.await()) }
             val model = createViewModel()
             assertEquals(FaqState.Loading, model.state.value)
 
@@ -76,7 +76,7 @@ class FaqViewModelTest {
         runTest {
             // Given
             val cached = online.copy(isCached = true)
-            coEvery { load() } returns cached
+            coEvery { load() } returns Result.success(cached)
 
             // When
             val model = createViewModel()
@@ -90,11 +90,11 @@ class FaqViewModelTest {
     fun `given FAQ view model with failed load, retry succeeds, expected error loading and ready transitions`() =
         runTest {
             // Given
-            coEvery { load() } throws IllegalStateException("Offline")
+            coEvery { load() } returns Result.failure(IllegalStateException("Offline"))
             val model = createViewModel()
             advanceUntilIdle()
             assertEquals(FaqState.Error, model.state.value)
-            coEvery { load() } returns online
+            coEvery { load() } returns Result.success(online)
 
             // When
             model.processIntent(FaqIntent.Retry)
@@ -111,11 +111,11 @@ class FaqViewModelTest {
     fun `given FAQ view model with active retry, another retry is requested, expected just one in-flight fetch`() =
         runTest {
             // Given
-            coEvery { load() } returns online.copy(isCached = true)
+            coEvery { load() } returns Result.success(online.copy(isCached = true))
             val model = createViewModel()
             advanceUntilIdle()
             val pending = CompletableDeferred<FaqContent>()
-            coEvery { load() } coAnswers { pending.await() }
+            coEvery { load() } coAnswers { Result.success(pending.await()) }
 
             // When
             model.processIntent(FaqIntent.Retry)

@@ -10,9 +10,9 @@ import com.shifthackz.aisdv1.domain.entity.FaqContent
 interface FetchOrGetFaqUseCase {
     /**
      * Fetches the latest content first and falls back to the saved copy on failure.
-     * If neither source can supply content, the failure propagates to the caller.
+     * If neither source can supply content, returns a failure. Cancellation propagates.
      *
      * @author Dmitriy Moroz
      */
-    suspend operator fun invoke(): FaqContent
+    suspend operator fun invoke(): Result<FaqContent>
 }

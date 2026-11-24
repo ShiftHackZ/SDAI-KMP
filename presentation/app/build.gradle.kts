@@ -32,6 +32,7 @@ kotlin {
             implementation(project(":presentation:configuration"))
             implementation(project(":presentation:debug"))
             implementation(project(":presentation:faq"))
+            implementation(project(":presentation:blog"))
             implementation(project(":presentation:donate"))
             implementation(project(":presentation:gallery"))
             implementation(project(":presentation:generation"))

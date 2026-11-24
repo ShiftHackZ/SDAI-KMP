@@ -34,5 +34,7 @@ fun AppRoute.asHomeTabRoute(): AppRoute? = when (this) {
     AppRoute.Donate,
     AppRoute.WebUi,
     AppRoute.Faq,
+    AppRoute.Blog,
+    is AppRoute.BlogDetail,
         -> null
 }

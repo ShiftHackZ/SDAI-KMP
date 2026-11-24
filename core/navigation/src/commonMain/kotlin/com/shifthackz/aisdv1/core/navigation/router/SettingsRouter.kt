@@ -37,6 +37,13 @@ interface SettingsRouter {
     fun navigateToFaq()
 
     /**
+     * Opens the list of articles published on the SDAI blog.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToBlog()
+
+    /**
      * Opens the application drawer without changing the active route.
      *
      * @author Dmitriy Moroz

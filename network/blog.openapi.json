@@ -1,0 +1,124 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SDAI Blog",
+    "version": "1.0.0",
+    "description": "Published release notes, announcements, and engineering articles shared by the website and mobile reader."
+  },
+  "servers": [
+    {
+      "url": "https://sdai.moroz.cc",
+      "description": "Published SDAI website."
+    }
+  ],
+  "paths": {
+    "/blog.json": {
+      "get": {
+        "operationId": "fetchBlog",
+        "summary": "Get the published blog",
+        "description": "Downloads the complete feed in reverse chronological order for browsing and offline reading.",
+        "responses": {
+          "200": {
+            "description": "The current website blog feed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blog",
+                  "description": "All published articles and their metadata."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Static host HTTP error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "Hosting provider error page."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Blog": {
+        "type": "object",
+        "description": "All website blog articles in reverse chronological order.",
+        "additionalProperties": false,
+        "required": ["posts"],
+        "properties": {
+          "posts": {
+            "type": "array",
+            "description": "Published posts in display order. Empty when the website has no posts.",
+            "items": {
+              "$ref": "#/components/schemas/BlogPost",
+              "description": "One published article."
+            }
+          }
+        }
+      },
+      "BlogPost": {
+        "type": "object",
+        "description": "One published article with metadata and full body.",
+        "additionalProperties": false,
+        "required": [
+          "slug",
+          "title",
+          "summary",
+          "publishedOn",
+          "category",
+          "url",
+          "coverUrl",
+          "coverDescription",
+          "markdown"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Stable article identifier derived from the website path."
+          },
+          "title": {
+            "type": "string",
+            "description": "Published article headline."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short article description for the feed list."
+          },
+          "publishedOn": {
+            "type": "string",
+            "description": "Calendar date when the article was published.",
+            "format": "date"
+          },
+          "category": {
+            "type": "string",
+            "description": "Publisher-assigned category displayed beside the date."
+          },
+          "url": {
+            "type": "string",
+            "description": "Canonical HTTPS article address used for sharing.",
+            "format": "uri"
+          },
+          "coverUrl": {
+            "type": "string",
+            "description": "HTTPS address of the article cover on the publication host.",
+            "format": "uri"
+          },
+          "coverDescription": {
+            "type": "string",
+            "description": "Alternative text describing the cover artwork."
+          },
+          "markdown": {
+            "type": "string",
+            "description": "Complete GitHub-flavored Markdown article, excluding YAML front matter."
+          }
+        }
+      }
+    }
+  }
+}

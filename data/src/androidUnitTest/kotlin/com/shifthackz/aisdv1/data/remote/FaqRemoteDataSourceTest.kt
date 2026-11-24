@@ -48,7 +48,7 @@ class FaqRemoteDataSourceTest {
                 FaqQuestion("connect", "How do I connect?", question.answer, question.tags)
 
             // When
-            val actual = source.fetch()
+            val actual = source.fetch().getOrThrow()
 
             // Then
             assertEquals(
@@ -90,7 +90,7 @@ class FaqRemoteDataSourceTest {
             // When
             val failures = invalid.mapValues { (_, categories) ->
                 coEvery { api.fetchFaq() } returns FaqResponse(categories)
-                runCatching { source.fetch() }.exceptionOrNull()
+                source.fetch().exceptionOrNull()
             }
 
             // Then
@@ -124,7 +124,7 @@ class FaqRemoteDataSourceTest {
                         )
                     )
                 )
-                runCatching { source.fetch() }.exceptionOrNull()
+                source.fetch().exceptionOrNull()
             }
 
             // Then
@@ -144,7 +144,7 @@ class FaqRemoteDataSourceTest {
             coEvery { api.fetchFaq() } throws failure
 
             // When
-            val result = runCatching { source.fetch() }
+            val result = source.fetch()
 
             // Then
             assertSame(failure, result.exceptionOrNull())

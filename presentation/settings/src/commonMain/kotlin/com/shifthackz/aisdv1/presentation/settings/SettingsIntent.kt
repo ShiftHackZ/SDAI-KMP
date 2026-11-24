@@ -85,6 +85,13 @@ sealed interface SettingsIntent : MviIntent {
      */
     data object NavigateFaq : SettingsIntent
 
+    /**
+     * Opens the native blog from the information section.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object NavigateBlog : SettingsIntent
+
     data object NavigateStorageUsage : SettingsIntent
 
     data object NavigateNetworkUsage : SettingsIntent

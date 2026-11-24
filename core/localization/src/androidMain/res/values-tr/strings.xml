@@ -801,6 +801,8 @@
     <string name="settings_help_info_header">Yardımı, proje bilgilerini ve SDAI’yi destekleme yollarını bulun.</string>
     <string name="settings_help_donate">SDAI geliştirmesini destekleme yollarını görün. Bağış yapmak isteğe bağlıdır.</string>
     <string name="settings_help_onboarding">Başlangıç tanıtımını yeniden izleyin ve uygulamayı kullanmaya nasıl başlayacağınızı öğrenin.</string>
+    <string name="settings_help_faq">SDAI kurulumu ve kullanımı hakkında sık sorulan soruların yanıtlarını bulun.</string>
+    <string name="settings_help_blog">SDAI ile ilgili sürüm notlarını, duyuruları ve yazıları okuyun.</string>
     <string name="settings_help_report_problem">Uygulamadaki bir sorunu bildirin. Ne olduğunu ve yeniden oluşturma adımlarını ekleyin.</string>
     <string name="settings_help_privacy">SDAI’nin verileri nasıl işlediğini ve uygulama kullanım koşullarını okuyun.</string>
     <string name="settings_help_license">SDAI’nin açık kaynak lisansını okuyun.</string>
@@ -904,4 +906,10 @@
     <string name="faq_cached">Kayıtlı yanıtlar gösteriliyor. Güncel sık sorulan sorulara ulaşılamıyor.</string>
     <string name="faq_show_answer">Yanıtı göster</string>
     <string name="faq_hide_answer">Yanıtı gizle</string>
+    <string name="blog_title">Blog</string>
+    <string name="blog_cached">Blogun kayıtlı kopyası gösteriliyor.</string>
+    <string name="blog_load_error">Blog yüklenemedi.</string>
+    <string name="blog_post_missing">Bu yazıya ulaşılamıyor.</string>
+    <string name="blog_share_post">Yazıyı paylaş</string>
+    <string name="blog_share_error">Paylaşım menüsü açılamadı.</string>
 </resources>

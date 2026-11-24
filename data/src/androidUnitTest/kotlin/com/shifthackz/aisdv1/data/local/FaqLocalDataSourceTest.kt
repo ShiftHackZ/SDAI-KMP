@@ -45,7 +45,7 @@ class FaqLocalDataSourceTest {
             coEvery { dao.read() } returns rows
 
             // When
-            val snapshot = source.read()
+            val snapshot = source.read().getOrThrow()
 
             // Then
             assertEquals(categories, snapshot)
@@ -58,7 +58,7 @@ class FaqLocalDataSourceTest {
             coEvery { dao.read() } returns emptyList()
 
             // When
-            val snapshot = source.read()
+            val snapshot = source.read().getOrThrow()
 
             // Then
             assertTrue(snapshot.isEmpty())
@@ -71,7 +71,7 @@ class FaqLocalDataSourceTest {
             coEvery { dao.replace(any()) } returns Unit
 
             // When
-            source.save(categories)
+            source.save(categories).getOrThrow()
 
             // Then
             coVerify(exactly = 1) { dao.replace(rows) }
@@ -87,8 +87,8 @@ class FaqLocalDataSourceTest {
             coEvery { dao.replace(any()) } throws writeFailure
 
             // When
-            val readResult = runCatching { source.read() }
-            val writeResult = runCatching { source.save(categories) }
+            val readResult = source.read()
+            val writeResult = source.save(categories)
 
             // Then
             assertSame(readFailure, readResult.exceptionOrNull())

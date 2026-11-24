@@ -243,4 +243,23 @@ sealed interface AppRoute {
         override val destination = NavigationDestination.FAQ
     }
 
+    /**
+     * Native list of published articles and release notes.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object Blog : AppRoute {
+        override val destination = NavigationDestination.BLOG
+    }
+
+    /**
+     * Native reading destination for one published article.
+     *
+     * @param slug Identifies the article in the current feed or offline snapshot.
+     * @author Dmitriy Moroz
+     */
+    data class BlogDetail(val slug: String) : AppRoute {
+        override val destination = NavigationDestination.BLOG_DETAIL
+    }
+
 }
