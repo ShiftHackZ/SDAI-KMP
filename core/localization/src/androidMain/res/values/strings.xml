@@ -933,4 +933,12 @@
     <string name="civitai_upload_failed">Upload failed — open Civitai</string>
     <string name="civitai_upload_uncertain">Upload could not be confirmed — check Civitai</string>
     <string name="backup_category_civitai">Civitai</string>
+
+    <string name="faq_title">FAQ</string>
+    <string name="faq_search">Search FAQ</string>
+    <string name="faq_no_results">No questions match your search and filters.</string>
+    <string name="faq_load_error">Could not load the FAQ. Check your connection and try again.</string>
+    <string name="faq_cached">Showing saved answers. The latest FAQ is unavailable.</string>
+    <string name="faq_show_answer">Show answer</string>
+    <string name="faq_hide_answer">Hide answer</string>
 </resources>

@@ -52,6 +52,7 @@ internal enum class SettingsListItem {
     INFO_HEADER,
     DONATE,
     ONBOARDING,
+    FAQ,
     REPORT_PROBLEM,
     PRIVACY,
     LICENSE,

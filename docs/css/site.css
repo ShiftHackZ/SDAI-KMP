@@ -918,6 +918,12 @@ a:hover {
   color: var(--muted);
 }
 
+.faq-answer a {
+  color: var(--primary-dark);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
+
 .legal-copy {
   padding: 42px;
   border: 1px solid var(--line);

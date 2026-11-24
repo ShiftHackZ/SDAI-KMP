@@ -387,6 +387,9 @@ jobs:
       - name: Test generation progress contracts
         run: python3 scripts/test_generation_progress_contracts.py
 
+      - name: Test the website FAQ contract
+        run: python3 scripts/test_faq_contract.py
+
       - name: Test release build selection
         env:
           PYTHONDONTWRITEBYTECODE: "1"

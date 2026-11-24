@@ -3,7 +3,7 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.content
 
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionToolbarReveal
-import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionToolbarHeight
+import com.shifthackz.aisdv1.presentation.components.widget.input.SearchFilterToolbarHeight
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
@@ -82,7 +82,7 @@ internal fun ServerSetupScaffold(
                     },
                     windowInsets = persistentTopAppBarWindowInsets(),
                     bottomContentHeight = configurationStepBarHeight() +
-                            if (isPlatformToolbarNative) SourceSelectionToolbarHeight * searchFraction else 0.dp,
+                            if (isPlatformToolbarNative) SearchFilterToolbarHeight * searchFraction else 0.dp,
                     bottomContent = {
                         Column {
                             ConfigurationStepBar(currentStep = state.step, strings = strings)

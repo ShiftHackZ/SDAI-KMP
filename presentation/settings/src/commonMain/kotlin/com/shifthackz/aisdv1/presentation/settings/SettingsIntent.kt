@@ -78,6 +78,13 @@ sealed interface SettingsIntent : MviIntent {
      */
     data object NavigateWebUi : SettingsIntent
 
+    /**
+     * Opens the native FAQ from the Settings information section.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object NavigateFaq : SettingsIntent
+
     data object NavigateStorageUsage : SettingsIntent
 
     data object NavigateNetworkUsage : SettingsIntent

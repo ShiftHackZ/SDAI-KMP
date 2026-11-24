@@ -11,6 +11,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import com.shifthackz.aisdv1.storage.db.persistent.dao.FaqDao
+import com.shifthackz.aisdv1.storage.db.persistent.entity.FaqQuestionEntity
 import com.shifthackz.aisdv1.storage.converters.ListConverters
 import com.shifthackz.aisdv1.storage.db.persistent.PersistentDatabase.Companion.DB_VERSION
 import com.shifthackz.aisdv1.storage.db.persistent.dao.BenchmarkResultDao
@@ -30,7 +32,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 
 /**
  * Main Room database containing generated images, downloaded models, and app statistics.
- * Schema version 19 retains generation provenance, Civitai post links and independent paginated upload receipts.
+ * Schema version 20 adds the last downloaded FAQ for offline reading.
  *
  * @author Dmitriy Moroz
  */
@@ -47,6 +49,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
         RestoreSessionEntity::class,
         RestoreSectionEntity::class,
         CivitaiUploadEntity::class,
+        FaqQuestionEntity::class,
     ],
     autoMigrations = [
         /**
@@ -176,6 +179,12 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
          * @author Dmitriy Moroz
          */
         AutoMigration(from = 18, to = 19),
+        /**
+         * Adds an initially empty [FaqQuestionEntity] table for the offline snapshot.
+         *
+         * @author Dmitriy Moroz
+         */
+        AutoMigration(from = 19, to = 20),
     ],
 )
 @TypeConverters(
@@ -189,6 +198,13 @@ internal abstract class PersistentDatabase : RoomDatabase() {
      * @author Dmitriy Moroz
      */
     abstract fun civitaiUploadDao(): CivitaiUploadDao
+
+    /**
+     * Provides access to the FAQ snapshot retained across application launches.
+     *
+     * @author Dmitriy Moroz
+     */
+    abstract fun faqDao(): FaqDao
 
     /**
      * Reads and mutates saved gallery images and their metadata.
@@ -253,11 +269,11 @@ internal abstract class PersistentDatabase : RoomDatabase() {
         const val DB_NAME = "ai_sd_v1_storage_db"
 
         /**
-         * Schema target including nullable image provenance, device information, elapsed time and public publication links.
+         * Current schema version, including the persisted FAQ snapshot.
          *
          * @author Dmitriy Moroz
          */
-        const val DB_VERSION = 19
+        const val DB_VERSION = 20
     }
 }
 

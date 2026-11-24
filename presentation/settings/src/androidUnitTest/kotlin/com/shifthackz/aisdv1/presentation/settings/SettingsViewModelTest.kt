@@ -442,6 +442,8 @@ private object TestBuildInfoProvider : BuildInfoProvider {
 }
 
 private class TestSettingsRouter : SettingsRouter {
+    override fun navigateToFaq() = Unit
+
     override fun navigateToWebUi() = Unit
     override fun navigateToCivitai() = Unit
 

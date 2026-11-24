@@ -234,4 +234,13 @@ sealed interface AppRoute {
         override val destination = NavigationDestination.WEB_UI
     }
 
+    /**
+     * Searchable help content opened from Settings.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object Faq : AppRoute {
+        override val destination = NavigationDestination.FAQ
+    }
+
 }

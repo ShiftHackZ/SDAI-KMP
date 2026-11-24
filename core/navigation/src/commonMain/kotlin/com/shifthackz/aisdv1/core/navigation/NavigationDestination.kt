@@ -30,4 +30,5 @@ enum class NavigationDestination {
     LOGGER,
     DONATE,
     WEB_UI,
+    FAQ,
 }

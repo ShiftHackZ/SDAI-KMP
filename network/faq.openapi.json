@@ -1,0 +1,145 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SDAI FAQ",
+    "version": "1.0.0",
+    "description": "Public help content shared by the SDAI website and mobile app."
+  },
+  "servers": [
+    {
+      "url": "https://sdai.moroz.cc",
+      "description": "Published SDAI website."
+    }
+  ],
+  "paths": {
+    "/faq.json": {
+      "get": {
+        "operationId": "fetchFaq",
+        "summary": "Get the published FAQ",
+        "description": "Downloads the current FAQ in display order. Mobile clients can store a successful response for offline reading.",
+        "responses": {
+          "200": {
+            "description": "Current published FAQ.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Faq",
+                  "description": "The complete FAQ document."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Static host HTTP error. The mobile client treats this as a failed update.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "Hosting provider error page."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Faq": {
+        "type": "object",
+        "description": "Website FAQ and section metadata.",
+        "additionalProperties": false,
+        "required": ["updated", "title", "intro", "categories"],
+        "properties": {
+          "updated": {
+            "type": "string",
+            "description": "Date when the published FAQ content was last revised.",
+            "format": "date"
+          },
+          "title": {
+            "type": "string",
+            "description": "Heading for the website FAQ."
+          },
+          "intro": {
+            "type": "string",
+            "description": "Short introduction displayed on the website."
+          },
+          "categories": {
+            "type": "array",
+            "description": "FAQ sections in publication order.",
+            "items": {
+              "$ref": "#/components/schemas/FaqCategory",
+              "description": "One category."
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "FaqCategory": {
+        "type": "object",
+        "description": "A named group of related questions.",
+        "additionalProperties": false,
+        "required": ["id", "label", "items"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable category identifier unique in the FAQ.",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "description": "Visible name used for the heading and category filter.",
+            "minLength": 1
+          },
+          "items": {
+            "type": "array",
+            "description": "Questions in display order.",
+            "items": {
+              "$ref": "#/components/schemas/FaqQuestion",
+              "description": "One question and its answer."
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "FaqQuestion": {
+        "type": "object",
+        "description": "One expandable question and its search metadata.",
+        "additionalProperties": false,
+        "required": ["id", "question", "answer", "tags"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable question identifier unique within its category.",
+            "minLength": 1
+          },
+          "question": {
+            "type": "string",
+            "description": "Question shown in the expandable row.",
+            "minLength": 1
+          },
+          "answer": {
+            "type": "array",
+            "description": "Answer paragraphs in reading order.",
+            "items": {
+              "type": "string",
+              "description": "One plain-text answer paragraph. Absolute HTTP and HTTPS URLs can be displayed as clickable links.",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "tags": {
+            "type": "array",
+            "description": "Additional terms used to find this question.",
+            "items": {
+              "type": "string",
+              "description": "One search term.",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

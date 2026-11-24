@@ -2,10 +2,10 @@ package com.shifthackz.aisdv1.presentation.settings
 
 /**
  * Matches explanatory help to the same localized labels used by Settings controls.
- * Warnings already display their complete explanation; the attribution footer has no setting to explain.
+ * Inline warnings, the FAQ destination, and the attribution footer need no additional tooltip.
  *
  * @receiver Stable Settings row identity, independent of its current value or loading state.
- * @return Canonical label key, or null for warnings and attribution.
+ * @return Canonical label key, or null for rows without a tooltip.
  * @author Dmitriy Moroz
  */
 internal fun SettingsListItem.helpTitleKey(): String? = when (this) {
@@ -50,6 +50,7 @@ internal fun SettingsListItem.helpTitleKey(): String? = when (this) {
     SettingsListItem.INFO_HEADER -> "settings_header_info"
     SettingsListItem.DONATE -> "settings_item_donate"
     SettingsListItem.ONBOARDING -> "settings_item_on_boarding"
+    SettingsListItem.FAQ -> null
     SettingsListItem.REPORT_PROBLEM -> "settings_item_report_problem"
     SettingsListItem.PRIVACY -> "settings_item_policy"
     SettingsListItem.LICENSE -> "settings_item_license"

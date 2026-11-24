@@ -61,6 +61,8 @@ class RootAppRouter(
      */
     override fun navigateToBackup() = navigateTo(AppRoute.Backup(LaunchSource.SETTINGS))
 
+    override fun navigateToFaq() = navigateTo(AppRoute.Faq)
+
     /**
      * Consumes onboarding so Back cannot reopen it.
      *
@@ -493,6 +495,7 @@ fun AppRoute.isHomeRoute(): Boolean = when (this) {
     AppRoute.Logger,
     AppRoute.Donate,
     AppRoute.WebUi,
+    AppRoute.Faq,
         -> false
 }
 
@@ -519,6 +522,7 @@ private fun AppRoute.canFallBackToTextToImage(): Boolean = when (this) {
     AppRoute.Logger,
     AppRoute.Donate,
     AppRoute.WebUi,
+    AppRoute.Faq,
         -> true
 
     AppRoute.Home,

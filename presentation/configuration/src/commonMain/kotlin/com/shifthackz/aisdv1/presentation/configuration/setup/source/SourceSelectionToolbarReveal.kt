@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.configuration.setup.source
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import com.shifthackz.aisdv1.presentation.components.widget.input.SearchFilterToolbarHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -38,7 +39,7 @@ internal fun SourceSelectionToolbarReveal(
         return
     }
     PlatformClippedContent(
-        modifier.fillMaxWidth().height(SourceSelectionToolbarHeight * fraction)
+        modifier.fillMaxWidth().height(SearchFilterToolbarHeight * fraction)
     ) {
         Layout(
             modifier = Modifier.fillMaxWidth().clipToBounds(),
@@ -48,7 +49,7 @@ internal fun SourceSelectionToolbarReveal(
                 })
             },
         ) { measurables, constraints ->
-            val fullHeight = SourceSelectionToolbarHeight.roundToPx()
+            val fullHeight = SearchFilterToolbarHeight.roundToPx()
             val visibleHeight = (fullHeight * fraction.coerceIn(0f, 1f)).roundToInt()
             val row = measurables.single().measure(
                 constraints.copy(minHeight = fullHeight, maxHeight = fullHeight)

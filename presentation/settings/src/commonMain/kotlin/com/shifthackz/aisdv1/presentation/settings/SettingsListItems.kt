@@ -75,6 +75,7 @@ internal fun settingsListItems(
         add(SettingsListItem.INFO_HEADER)
         add(SettingsListItem.DONATE)
         add(SettingsListItem.ONBOARDING)
+        add(SettingsListItem.FAQ)
         add(SettingsListItem.REPORT_PROBLEM)
         add(SettingsListItem.PRIVACY)
         add(SettingsListItem.LICENSE)
