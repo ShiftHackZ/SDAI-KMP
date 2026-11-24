@@ -258,6 +258,7 @@ class GalleryDetailViewModel(
                     withContext(dispatchersProvider.immediate) {
                         when (screenType) {
                             AiGenerationResult.Type.TEXT_TO_IMAGE -> router.navigateToTextToImage()
+                            AiGenerationResult.Type.UPSCALE,
                             AiGenerationResult.Type.IMAGE_TO_IMAGE -> router.navigateToImageToImage()
                         }
                     }

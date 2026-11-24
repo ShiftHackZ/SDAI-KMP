@@ -9,6 +9,7 @@ package com.shifthackz.aisdv1.presentation.settings
 internal enum class SettingsListItem {
     SERVER_HEADER,
     CONFIGURATION,
+    UPSCALER_CONFIGURATION,
     BACKUP,
     BENCHMARK,
     CREDITS,

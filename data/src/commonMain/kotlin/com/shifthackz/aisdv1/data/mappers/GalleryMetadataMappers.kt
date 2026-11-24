@@ -34,6 +34,7 @@ internal fun GenerationResultMetadataEntity.mapMetadataToDomain() = GalleryItemM
     acceleration = acceleration,
     generationDurationMillis = generationDurationMillis,
     civitaiUrl = civitaiUrl,
+    upscalerModelName = upscalerModelName,
     deviceName = deviceName,
     osVersion = osVersion,
 )

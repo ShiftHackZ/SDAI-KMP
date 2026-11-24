@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.work.mappers
 import com.shifthackz.aisdv1.domain.entity.FalAiAcceleration
 import com.shifthackz.aisdv1.domain.entity.FalAiImageSize
 import com.shifthackz.aisdv1.domain.entity.FalAiModel
+import com.shifthackz.aisdv1.domain.entity.UpscalerConfiguration
 import com.shifthackz.aisdv1.domain.entity.ImageToImagePayload
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.Scheduler
@@ -42,6 +43,8 @@ internal fun ByteArray.toImageToImagePayload(): ImageToImagePayload? {
  * @param base64Image Encoded source image bytes for image-to-image generation.
  * @param base64MaskImage Encoded inpainting mask; empty for providers without inpainting.
  * @param denoisingStrength Image-to-image denoising strength in the range zero through one.
+ * @param upscalerModelId Dedicated model captured for the optional final super-resolution stage.
+ * @param upscalerScaleFactor Captured final enlargement; defaults preserve older scheduled requests.
  * @param prompt Positive generation prompt, preserved verbatim.
  * @param negativePrompt Negative generation prompt; unsupported providers omit it.
  * @param samplingSteps Requested inference step count.
@@ -72,6 +75,8 @@ internal fun ByteArray.toImageToImagePayload(): ImageToImagePayload? {
  */
 @Serializable
 private data class ImageToImagePayloadDto(
+    val upscalerModelId: String? = null,
+    val upscalerScaleFactor: Int = 4,
     val sourceSnapshot: String? = null,
     val providerSelectionRevision: Long? = null,
     /**
@@ -250,6 +255,12 @@ private data class ImageToImagePayloadDto(
      * @author Dmitriy Moroz
      */
     fun toPayload(): ImageToImagePayload = ImageToImagePayload(
+        upscaler = upscalerModelId?.let {
+            UpscalerConfiguration(
+                it,
+                scaleFactor = upscalerScaleFactor
+            )
+        },
         sourceSnapshot = sourceSnapshot?.let { key -> requireNotNull(ServerSource.entries.firstOrNull { it.key == key }) },
         providerSelectionRevision = providerSelectionRevision,
         base64Image = base64Image,
@@ -296,6 +307,8 @@ private data class ImageToImagePayloadDto(
          * @author Dmitriy Moroz
          */
         fun from(payload: ImageToImagePayload): ImageToImagePayloadDto = ImageToImagePayloadDto(
+            upscalerModelId = payload.upscaler?.modelId,
+            upscalerScaleFactor = payload.upscaler?.scaleFactor ?: 4,
             sourceSnapshot = payload.sourceSnapshot?.key,
             providerSelectionRevision = payload.providerSelectionRevision,
             base64Image = payload.base64Image,

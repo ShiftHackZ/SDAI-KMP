@@ -5,6 +5,9 @@ import com.shifthackz.aisdv1.domain.repository.Automatic1111ProgressRepository
 import com.shifthackz.aisdv1.data.repository.RemoteGenerationProgressGatewayImpl
 import com.shifthackz.aisdv1.data.repository.Automatic1111ProgressRepositoryImpl
 
+import com.shifthackz.aisdv1.core.imageprocessing.di.imageDownscalingModule
+import com.shifthackz.aisdv1.data.repository.ImageProcessingRepositoryImpl
+import com.shifthackz.aisdv1.domain.repository.ImageProcessingRepository
 import com.shifthackz.aisdv1.data.image.BackupImageValidatorImpl
 import com.shifthackz.aisdv1.data.image.BackupImageDecoder
 import com.shifthackz.aisdv1.data.image.PlatformBackupImageDecoder
@@ -212,9 +215,11 @@ val coreDataModule = module {
             validationEdge = 256
         )
     }
+    includes(imageDownscalingModule)
+    single<ImageProcessingRepository> { ImageProcessingRepositoryImpl(get(), get()) }
     single<BackupImageDecoder> { PlatformBackupImageDecoder() }
     single<BackupImageValidator> { BackupImageValidatorImpl(get(), get()) }
-    single<GalleryReadGateway> { GalleryReadGatewayImpl(get()) }
+    single<GalleryReadGateway> { GalleryReadGatewayImpl(get(), get()) }
     single<AuthenticatedConnectionProvider> {
         AuthenticatedConnectionProviderImpl(
             get(),

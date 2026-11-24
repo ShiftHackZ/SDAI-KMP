@@ -29,6 +29,7 @@ import com.shifthackz.aisdv1.presentation.settings.platform.SettingsPlatformActi
 import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserver
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.mnn.MnnCatalogResult
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import io.mockk.coEvery
 import io.mockk.every
@@ -77,6 +78,7 @@ class SettingsViewModelTest {
     private val getLocalCoreMlModelsUseCase = mockk<GetLocalCoreMlModelsUseCase>()
     private val getLocalBonsaiModelsUseCase = mockk<GetLocalBonsaiModelsUseCase>()
     private val getLocalMnnModelsUseCase = mockk<GetLocalMnnModelsUseCase>()
+    private val getCachedLocalModelCatalogUseCase = mockk<GetCachedLocalModelCatalogUseCase>()
     private val observeNetworkUsageUseCase = mockk<ObserveNetworkUsageUseCase>()
     private val preferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val router = TestSettingsRouter()
@@ -102,6 +104,7 @@ class SettingsViewModelTest {
         coEvery { getLocalSdxlModelsUseCase() } returns emptyList()
         coEvery { getLocalCoreMlModelsUseCase() } returns emptyList()
         coEvery { getLocalBonsaiModelsUseCase() } returns emptyList()
+        coEvery { getCachedLocalModelCatalogUseCase(any()) } returns emptyList()
         coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(emptyList())
         every { observeStabilityAiCreditsUseCase() } returns stabilityCredits
         every { observeNetworkUsageUseCase() } returns networkUsage
@@ -433,6 +436,7 @@ class SettingsViewModelTest {
             getLocalCoreMlModelsUseCase = getLocalCoreMlModelsUseCase,
             getLocalBonsaiModelsUseCase = getLocalBonsaiModelsUseCase,
             getLocalMnnModelsUseCase = getLocalMnnModelsUseCase,
+            getCachedLocalModelCatalogUseCase = getCachedLocalModelCatalogUseCase,
             observeNetworkUsageUseCase = observeNetworkUsageUseCase,
             storageUsageObserver = storageUsageObserver,
             preferenceManager = preferenceManager,
@@ -456,6 +460,7 @@ private object TestBuildInfoProvider : BuildInfoProvider {
 }
 
 private class TestSettingsRouter : SettingsRouter {
+    override fun navigateToUpscalerSetup() = Unit
     override fun navigateToFaq() = Unit
 
     var isBlogOpened = false

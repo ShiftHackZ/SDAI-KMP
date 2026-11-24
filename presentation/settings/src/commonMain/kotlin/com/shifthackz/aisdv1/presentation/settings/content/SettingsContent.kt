@@ -111,6 +111,7 @@ internal fun ContentSettingsState(
 
                     SettingsListItem.SERVER_HEADER,
                     SettingsListItem.CONFIGURATION,
+                    SettingsListItem.UPSCALER_CONFIGURATION,
                     SettingsListItem.BACKUP,
                     SettingsListItem.BENCHMARK,
                     SettingsListItem.CREDITS,

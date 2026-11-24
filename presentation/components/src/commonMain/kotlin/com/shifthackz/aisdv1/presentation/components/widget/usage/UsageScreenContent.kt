@@ -602,6 +602,7 @@ fun UsageCategory.title(): String = Localization.string(
     when (this) {
         UsageCategory.CACHE -> "settings_usage_category_cache"
         UsageCategory.GALLERY -> "settings_usage_category_gallery"
+        UsageCategory.MODELS_UPSCALER -> "upscaler_models"
         UsageCategory.MODELS_ONNX -> "settings_usage_category_models_onnx"
         UsageCategory.MODELS_MEDIAPIPE -> "settings_usage_category_models_mediapipe"
         UsageCategory.MODELS_SDXL -> "settings_usage_category_models_sdxl"
@@ -624,6 +625,7 @@ fun UsageCategory.summaryTitle(): String = Localization.string(
     when (this) {
         UsageCategory.CACHE -> "settings_usage_summary_cache"
         UsageCategory.GALLERY -> "settings_usage_summary_gallery"
+        UsageCategory.MODELS_UPSCALER -> "upscaler_models"
         UsageCategory.MODELS_ONNX -> "settings_usage_summary_models_onnx"
         UsageCategory.MODELS_MEDIAPIPE -> "settings_usage_summary_models_mediapipe"
         UsageCategory.MODELS_SDXL -> "settings_usage_summary_models_sdxl"
@@ -645,6 +647,7 @@ fun UsageCategory.summaryTitle(): String = Localization.string(
 internal fun UsageCategory.color(): Color = when (this) {
     UsageCategory.CACHE -> Color(0xFF4C7EF3)
     UsageCategory.GALLERY -> Color(0xFF6EC6F2)
+    UsageCategory.MODELS_UPSCALER -> Color(0xFFB576C9)
     UsageCategory.MODELS_ONNX -> Color(0xFFF59F32)
     UsageCategory.MODELS_MEDIAPIPE -> Color(0xFFF04462)
     UsageCategory.MODELS_SDXL -> Color(0xFF59C96B)

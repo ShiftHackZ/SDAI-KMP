@@ -297,6 +297,7 @@ data class ServerSetupState(
         type: LocalAiModel.Type? = mode.localCatalogType
     ): ServerSetupState {
         val result = when (type) {
+            LocalAiModel.Type.Upscaler -> this
             LocalAiModel.Type.Mnn -> copy(localMnnModels = localMnnModels.withCommonNewState(value))
             LocalAiModel.Type.ONNX -> copy(
                 localOnnxModels = localOnnxModels.withCommonNewState(

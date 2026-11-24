@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.domain.entity.NativeGenerationRequest
 import com.shifthackz.aisdv1.domain.feature.diffusion.NativeInferenceEngine
 import com.shifthackz.aisdv1.feature.bonsai.di.bonsaiInferenceModule
 import com.shifthackz.aisdv1.feature.mnn.di.mnnModule
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import com.shifthackz.aisdv1.feature.mediapipe.di.mediaPipeInferenceModule
 import com.shifthackz.aisdv1.feature.onnx.di.onnxInferenceModule
@@ -46,12 +47,15 @@ internal class NativeInferenceEngineFactoryImpl(
 
                     NativeGenerationEngine.MEDIA_PIPE -> mediaPipeInferenceModule(context)
                     NativeGenerationEngine.SDCPP -> sdxlInferenceModule()
+                    NativeGenerationEngine.UPSCALER -> if (request.modelPath.endsWith(".mnn")) mnnModule
+                    else sdxlInferenceModule(isUpscaler = true)
+
                     NativeGenerationEngine.BONSAI -> bonsaiInferenceModule()
                 }
             )
         }
         return try {
-            val engine = graph.koin.get<NativeInferenceEngine>()
+            val engine = graph.koin.get<NativeInferenceEngine> { parametersOf(request.engine) }
             OwnedNativeInferenceEngine(engine, graph)
         } catch (failure: Throwable) {
             graph.close(); throw failure

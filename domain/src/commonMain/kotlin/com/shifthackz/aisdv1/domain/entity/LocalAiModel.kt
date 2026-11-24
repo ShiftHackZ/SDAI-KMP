@@ -30,6 +30,7 @@ data class LocalAiModel(
      * @author Dmitriy Moroz
      */
     enum class Type(val key: String) {
+        Upscaler("upscaler"),
         Mnn("mnn"),
         ONNX("onnx"),
         MediaPipe("mediapipe"),

@@ -26,17 +26,18 @@ class LocalCatalogCompatibilityUseCasesTest {
     fun `given legacy local catalog operations, every provider is requested, expected matching shared refresh type`() =
         runTest {
             // Given
-            val expected = LocalAiModel.Type.entries.associateWith { type ->
-                listOf(
-                    LocalAiModel(
-                        "${type.key}-model",
-                        type,
-                        "Model",
-                        "1 GB",
-                        emptyList()
+            val expected = LocalAiModel.Type.entries.filter { it != LocalAiModel.Type.Upscaler }
+                .associateWith { type ->
+                    listOf(
+                        LocalAiModel(
+                            "${type.key}-model",
+                            type,
+                            "Model",
+                            "1 GB",
+                            emptyList()
+                        )
                     )
-                )
-            }
+                }
             expected.forEach { (type, models) ->
                 coEvery { refresh(type) } returns LocalModelCatalogResult(
                     models
@@ -55,7 +56,7 @@ class LocalCatalogCompatibilityUseCasesTest {
 
             // Then
             assertEquals(expected, actual)
-            LocalAiModel.Type.entries.forEach { type -> coVerify(exactly = 1) { refresh(type) } }
+            expected.keys.forEach { type -> coVerify(exactly = 1) { refresh(type) } }
         }
 
     @Test

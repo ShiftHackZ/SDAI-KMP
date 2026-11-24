@@ -29,6 +29,7 @@ internal val ServerSource.localCatalogType: LocalAiModel.Type?
  */
 internal fun ServerSetupState.catalogModels(type: LocalAiModel.Type): List<ServerSetupState.LocalModel> =
     when (type) {
+        LocalAiModel.Type.Upscaler -> emptyList()
         LocalAiModel.Type.ONNX -> localOnnxModels
         LocalAiModel.Type.MediaPipe -> localMediaPipeModels
         LocalAiModel.Type.Sdxl -> localSdxlModels
@@ -86,6 +87,7 @@ internal fun ServerSetupState.withCatalogResult(
         )
     }
     val result = when (type) {
+        LocalAiModel.Type.Upscaler -> this
         LocalAiModel.Type.ONNX -> copy(localOnnxModels = merged)
         LocalAiModel.Type.MediaPipe -> copy(localMediaPipeModels = merged)
         LocalAiModel.Type.Sdxl -> copy(localSdxlModels = merged)

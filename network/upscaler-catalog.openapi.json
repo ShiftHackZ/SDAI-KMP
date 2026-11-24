@@ -1,0 +1,121 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SDAI upscaler catalogs",
+    "version": "1.0.0",
+    "description": "Independent single-file super-resolution checkpoint catalogs."
+  },
+  "servers": [
+    {
+      "url": "https://sdai.moroz.cc",
+      "description": "SDAI public metadata site."
+    }
+  ],
+  "paths": {
+    "/upscaler-esrgan.json": {
+      "get": {
+        "operationId": "fetchUpscalerEsrganModels",
+        "summary": "List PTH upscaler checkpoints",
+        "description": "Returns dedicated super-resolution weights independently of diffusion model catalogs. HTTP and decoding failures remain failures.",
+        "responses": {
+          "200": {
+            "description": "Current checkpoint list, possibly empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpscalerCatalog"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Hosting or transport failure; never decoded as an empty model list.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "Static host error document."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upscaler-mnn.json": {
+      "get": {
+        "operationId": "fetchUpscalerMnnModels",
+        "summary": "List MNN upscaler checkpoints",
+        "description": "Returns dedicated super-resolution weights independently of diffusion model catalogs. HTTP and decoding failures remain failures.",
+        "responses": {
+          "200": {
+            "description": "Current checkpoint list, possibly empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpscalerCatalog"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Hosting or transport failure; never decoded as an empty model list.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "Static host error document."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpscalerCatalog": {
+        "type": "array",
+        "description": "Dedicated super-resolution checkpoints supported by the indicated runtime.",
+        "items": {
+          "$ref": "#/components/schemas/UpscalerCatalogEntry"
+        }
+      },
+      "UpscalerCatalogEntry": {
+        "type": "object",
+        "description": "One dedicated downloadable super-resolution checkpoint. Runtime family is determined by its catalog identity.",
+        "additionalProperties": false,
+        "required": ["id", "name", "size", "sources"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable app-private model identity, prefixed upscaler_mnn_ for MNN or upscaler_realesrgan_ for SDCPP ESRGAN.",
+            "pattern": "^upscaler_[A-Za-z0-9_-]+$"
+          },
+          "name": {
+            "type": "string",
+            "description": "User-visible checkpoint name.",
+            "minLength": 1
+          },
+          "size": {
+            "type": "string",
+            "description": "Human-readable complete checkpoint download size.",
+            "minLength": 1
+          },
+          "sources": {
+            "type": "array",
+            "description": "Ordered HTTPS download sources returning a complete single-file checkpoint.",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "description": "Complete immutable checkpoint URL returning MNN or PTH bytes.",
+              "format": "uri",
+              "pattern": "^https://"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -13,6 +13,11 @@ MnnAttempt *mnn_attempt_create(void);
 int mnn_attempt_generate(MnnAttempt *attempt, const char *model, const char *prompt,
     const char *output, const char *workspace, int steps, int32_t seed,
     int use_metal, MnnProgress progress, void *context);
+/* Runs RGB8 super-resolution into caller-owned width*height*16*3 output bytes.
+ * Input dimensions must be 1..1024. The same one-owner/cancellation rules apply. */
+int mnn_attempt_upscale(MnnAttempt *attempt, const char *model,
+    const uint8_t *input, int width, int height, uint8_t *output,
+    MnnProgress progress, void *context);
 void mnn_attempt_interrupt(MnnAttempt *attempt);
 void mnn_attempt_destroy(MnnAttempt *attempt);
 int mnn_metal_available(void);

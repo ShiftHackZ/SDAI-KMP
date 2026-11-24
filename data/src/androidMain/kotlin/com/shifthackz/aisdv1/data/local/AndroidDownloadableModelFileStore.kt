@@ -1,8 +1,8 @@
 package com.shifthackz.aisdv1.data.local
 
 import com.shifthackz.aisdv1.domain.gateway.MnnModelStore
-
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import java.io.File
 
@@ -11,7 +11,6 @@ import java.io.File
  *
  * @param fileProviderDescriptor App-private root for downloaded model payloads.
  * @param mnnModels Immutable MNN roots and active attempt leases.
- *
  * @author Dmitriy Moroz
  */
 internal class AndroidDownloadableModelFileStore(
@@ -23,7 +22,6 @@ internal class AndroidDownloadableModelFileStore(
      * Checks the provider-specific complete model layout; custom legacy entries remain selectable before path validation.
      *
      * @param model Catalog or supported custom identity whose provider-specific owned layout is resolved.
-     *
      * @author Dmitriy Moroz
      */
     override fun isDownloaded(model: LocalAiModel): Boolean {
@@ -31,7 +29,6 @@ internal class AndroidDownloadableModelFileStore(
         return try {
             when (model.id) {
                 LocalAiModel.CustomMnn.id -> mnnModels.isDownloaded(model.id)
-
 
                 LocalAiModel.CustomOnnx.id,
                 LocalAiModel.CustomMediaPipe.id,
@@ -41,6 +38,13 @@ internal class AndroidDownloadableModelFileStore(
                     -> true
 
                 else -> when (model.type) {
+                    LocalAiModel.Type.Upscaler -> getLocalModelFiles(model.id).any {
+                        it.extension == (if (UpscalerSource.forModel(
+                                model.id
+                            ) == UpscalerSource.LOCAL_MNN
+                        ) "mnn" else "pth") && it.length() > 0
+                    }
+
                     LocalAiModel.Type.Mnn -> mnnModels.isDownloaded(model.id)
                     LocalAiModel.Type.ONNX -> {
                         val files = getLocalModelFiles(model.id).filter { it.isDirectory }
@@ -76,12 +80,13 @@ internal class AndroidDownloadableModelFileStore(
      * Resolves the app-accessible model root or the concrete single-file checkpoint expected by its runtime.
      *
      * @param model Catalog or supported custom identity whose provider-specific owned layout is resolved.
-     *
      * @author Dmitriy Moroz
      */
     override fun resolvePath(model: LocalAiModel): String {
         if (model.type == LocalAiModel.Type.Mnn) return mnnModels.path(model.id)
         val directory = getLocalModelDirectory(model.id)
+        if (model.type == LocalAiModel.Type.Upscaler) return directory.listFiles()!!
+            .single { it.extension == (if (UpscalerSource.forModel(model.id) == UpscalerSource.LOCAL_MNN) "mnn" else "pth") }.path
         if (model.type != LocalAiModel.Type.Sdxl) return directory.path
 
         return resolveSingleFilePath(directory.path)
@@ -91,7 +96,6 @@ internal class AndroidDownloadableModelFileStore(
      * Selects the largest supported checkpoint in a directory, preserving the input when no checkpoint is found.
      *
      * @param path raw file or directory path used by the operation.
-     *
      * @author Dmitriy Moroz
      */
     override fun resolveSingleFilePath(path: String): String {
@@ -110,7 +114,6 @@ internal class AndroidDownloadableModelFileStore(
      * Removes only the owned model payload; MNN removal waits for active inference leases.
      *
      * @param id identifier of the target entity.
-     *
      * @author Dmitriy Moroz
      */
     override fun delete(id: String) {
@@ -122,7 +125,6 @@ internal class AndroidDownloadableModelFileStore(
      * Resolves the catalog model directory under the application-owned model root.
      *
      * @param id identifier of the target entity.
-     *
      * @author Dmitriy Moroz
      */
     private fun getLocalModelDirectory(id: String): File {
@@ -133,7 +135,6 @@ internal class AndroidDownloadableModelFileStore(
      * Lists files immediately inside the owned model directory, returning an empty list when it is absent.
      *
      * @param id identifier of the target entity.
-     *
      * @author Dmitriy Moroz
      */
     private fun getLocalModelFiles(id: String): List<File> {

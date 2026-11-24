@@ -38,7 +38,8 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
 
 
 /**
- * Displays recorded generation parameters as alternating rows with per-value clipboard actions.
+ * Displays recorded image-operation metadata as alternating rows with per-value clipboard actions.
+ * Standalone upscales omit prompt, diffusion-model and sampling-only fields.
  *
  * @param modifier Layout modifiers for the scrollable metadata table.
  * @param content Already formatted generation metadata.
@@ -187,6 +188,9 @@ private fun GalleryDetailContent.detailRows(): List<GalleryDetailField> =
                 provider.orEmpty()
             )
         )
+        upscalerModelName?.let { model ->
+            add(GalleryDetailField(Localization.string("upscaler_model"), model))
+        }
         civitaiUrl?.let {
             add(
                 GalleryDetailField(
@@ -196,7 +200,9 @@ private fun GalleryDetailContent.detailRows(): List<GalleryDetailField> =
                 )
             )
         }
-        add(GalleryDetailField(Localization.string("gallery_info_field_model"), modelName))
+        if (generationType != AiGenerationResult.Type.UPSCALE) {
+            add(GalleryDetailField(Localization.string("gallery_info_field_model"), modelName))
+        }
         add(
             GalleryDetailField(
                 Localization.string("gallery_info_field_acceleration"),
@@ -216,6 +222,15 @@ private fun GalleryDetailContent.detailRows(): List<GalleryDetailField> =
             )
         )
         add(GalleryDetailField(Localization.string("gallery_info_field_os"), osVersion.orEmpty()))
+        if (generationType == AiGenerationResult.Type.UPSCALE) {
+            add(
+                GalleryDetailField(
+                    Localization.string("gallery_info_field_size"),
+                    this@detailRows.size
+                )
+            )
+            return@buildList
+        }
         add(
             GalleryDetailField(
                 name = Localization.string("gallery_info_field_prompt"),

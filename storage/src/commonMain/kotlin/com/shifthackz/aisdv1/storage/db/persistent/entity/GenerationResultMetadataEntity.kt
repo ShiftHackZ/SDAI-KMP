@@ -30,6 +30,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.contract.GenerationResultCont
  * @param deviceName Originating device vendor and model, retained across transfers; null for legacy images.
  * @param osVersion Originating OS version, including Android API level; null for legacy images.
  * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
+ * @param upscalerModelName Dedicated postprocessing checkpoint, absent for unmodified images.
  * @param civitaiUrl Public post URL after a successful Civitai publication; null for unpublished images.
  * @author Dmitriy Moroz
  */
@@ -84,4 +85,6 @@ data class GenerationResultMetadataEntity(
     val generationDurationMillis: Long? = null,
     @ColumnInfo(name = GenerationResultContract.CIVITAI_URL)
     val civitaiUrl: String? = null,
+    @ColumnInfo(name = GenerationResultContract.UPSCALER_MODEL_NAME)
+    val upscalerModelName: String? = null,
 )

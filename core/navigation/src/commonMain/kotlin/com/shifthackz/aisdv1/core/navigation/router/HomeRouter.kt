@@ -7,6 +7,13 @@ package com.shifthackz.aisdv1.core.navigation.router
  */
 interface HomeRouter {
     /**
+     * Opens standalone upscaling.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToUpscaler()
+
+    /**
      * Opens provider/server setup while preserving the source used for its completion behavior.
      *
      * @author Dmitriy Moroz

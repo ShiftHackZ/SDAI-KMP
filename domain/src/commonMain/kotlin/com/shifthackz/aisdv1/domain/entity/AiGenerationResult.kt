@@ -7,7 +7,7 @@ package com.shifthackz.aisdv1.domain.entity
  * @param image Original encoded output image as Base64.
  * @param inputImage Optional encoded source image as Base64, empty for text generation.
  * @param createdAt Creation timestamp in epoch milliseconds.
- * @param type Text-to-image or image-to-image operation.
+ * @param type Text-to-image, image-to-image or standalone upscale operation.
  * @param prompt Positive generation prompt.
  * @param negativePrompt Negative generation prompt.
  * @param width Output width in pixels.
@@ -32,6 +32,7 @@ package com.shifthackz.aisdv1.domain.entity
  * @param osVersion Originating OS version, including Android API level; null for legacy images.
  * @param generationDurationMillis Elapsed generation milliseconds, including provider setup and queueing, excluding gallery/export writes; null for legacy images.
  * @param civitaiUrl Public Civitai post URL after publication, absent for unpublished images.
+ * @param upscalerModelName Dedicated super-resolution model used after generation, absent for original output.
  * @author Dmitriy Moroz
  */
 data class AiGenerationResult(
@@ -64,6 +65,7 @@ data class AiGenerationResult(
     val osVersion: String? = null,
     val generationDurationMillis: Long? = null,
     val civitaiUrl: String? = null,
+    val upscalerModelName: String? = null,
 ) {
     /**
      * Stable gallery operation discriminator.
@@ -72,6 +74,7 @@ data class AiGenerationResult(
      * @author Dmitriy Moroz
      */
     enum class Type(val key: String) {
+        UPSCALE("upscale"),
         TEXT_TO_IMAGE("txt2img"),
         IMAGE_TO_IMAGE("img2img");
 

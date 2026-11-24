@@ -64,6 +64,7 @@ class RefreshLocalModelCatalogUseCaseImplTest(private val type: LocalAiModel.Typ
             // Then
             assertSame(failure, result.failure)
             assertEquals(cached, result.models)
+            coVerify(exactly = 1) { repository.readCachedCatalog(type) }
         }
 
     @Test

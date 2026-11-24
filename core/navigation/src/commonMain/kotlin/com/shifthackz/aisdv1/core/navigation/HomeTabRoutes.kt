@@ -11,6 +11,7 @@ fun AppRoute.asHomeTabRoute(): AppRoute? = when (this) {
         -> AppRoute.TextToImage
 
     AppRoute.ImageToImage -> AppRoute.ImageToImage
+    AppRoute.Upscaler -> AppRoute.Upscaler
     AppRoute.Gallery -> AppRoute.Gallery
     AppRoute.Settings -> AppRoute.Settings
 

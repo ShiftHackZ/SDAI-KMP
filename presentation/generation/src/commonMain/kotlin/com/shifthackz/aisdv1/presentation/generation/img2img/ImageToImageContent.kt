@@ -2,14 +2,6 @@
 
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
-import androidx.compose.foundation.lazy.LazyListState
-import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.ui.platform.LocalInspectionMode
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarNavigationButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixNormal
-import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,17 +27,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
+import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import com.shifthackz.aisdv1.presentation.components.widget.source.CurrentProviderCard
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.GenerationBottomToolbar
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.GenerationHistoryButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarNavigationButton
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import com.shifthackz.aisdv1.presentation.components.widget.work.BackgroundWorkWidget
 import com.shifthackz.aisdv1.presentation.generation.modal.GenerationModalRenderer
 import com.shifthackz.aisdv1.presentation.generation.modal.embedding.EmbeddingScreen
 import com.shifthackz.aisdv1.presentation.generation.modal.extras.ExtrasScreen
 import com.shifthackz.aisdv1.presentation.generation.modal.tag.EditTagDialog
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerFormState
 
 /**
  * Localized labels and provider capability explanations for image-to-image rendering.
@@ -88,6 +89,7 @@ data class ImageToImageStrings(
  * @param processIntent Publishes field, generation, export and navigation requests.
  * @param modifier Layout modifiers for the form scaffold.
  * @param strings Localized labels and provider capability explanations.
+ * @param upscalerFormState Independent upscaler catalog supplied by the application root; absent in isolated previews.
  * @param performanceOverlay Optional live resource panel supplied by the application root.
  * @param useDrawerNavigation Whether the toolbar opens the home drawer instead of navigating back.
  * @param listState Optional caller-owned form position; otherwise the active form retains its own state.
@@ -105,6 +107,7 @@ fun ImageToImageContent(
     strings: ImageToImageStrings = ImageToImageStrings(),
     useDrawerNavigation: Boolean = false,
     performanceOverlay: @Composable () -> Unit = {},
+    upscalerFormState: UpscalerFormState? = null,
     listState: LazyListState? = null,
     isFormInitiallyExpanded: Boolean = true,
     engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
@@ -240,6 +243,7 @@ fun ImageToImageContent(
             } else {
                 ImageToImageBody(
                     state = state,
+                    upscalerFormState = upscalerFormState,
                     strings = strings,
                     promptChipTextFieldState = promptChipTextFieldState,
                     negativePromptChipTextFieldState = negativePromptChipTextFieldState,

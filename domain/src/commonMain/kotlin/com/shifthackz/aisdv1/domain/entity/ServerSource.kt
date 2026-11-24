@@ -14,7 +14,6 @@ import com.shifthackz.aisdv1.core.common.platform.PlatformValue
  * @param featureTags searchable capability labels shown in provider selection UI.
  * @param allowedInBuilds App flavors where the provider can be selected.
  * @param allowedPlatforms Platforms whose provider catalog may expose this integration.
- *
  * @author Dmitriy Moroz
  */
 enum class ServerSource(
@@ -249,7 +248,6 @@ enum class ServerSource(
          * Resolves a stable persisted provider key, using AUTOMATIC1111 when the current catalog does not recognize it.
          *
          * @param value Stable persisted identifier to resolve against the current provider catalog.
-         *
          * @author Dmitriy Moroz
          */
         fun parse(value: String) = entries.find { it.key == value } ?: AUTOMATIC1111

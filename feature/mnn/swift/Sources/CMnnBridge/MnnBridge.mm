@@ -1,5 +1,6 @@
 #include "MnnBridge.h"
 #include "Runtime/sdai_attempt.hpp"
+#include "Runtime/sdai_upscaler.hpp"
 #include <MNN/Interpreter.hpp>
 #include <MNN/expr/ExecutorScope.hpp>
 #include <diffusion/stable_diffusion.hpp>
@@ -25,6 +26,20 @@ extern "C" void mnn_attempt_interrupt(MnnAttempt *attempt) {
     if (attempt) attempt->isCancelled.store(true);
 }
 extern "C" void mnn_attempt_destroy(MnnAttempt *attempt) { delete attempt; }
+
+extern "C" int mnn_attempt_upscale(MnnAttempt *attempt, const char *model,
+    const uint8_t *input, int width, int height, uint8_t *output,
+    MnnProgress progress, void *context) {
+    if (!attempt || attempt->hasStarted.exchange(true)) return 2;
+    try {
+        sdai::upscale(model, input, width, height, output,
+            [&] { return attempt->isCancelled.load(); },
+            [&](int percent) { if (progress) progress(context, percent); });
+        return 0;
+    } catch (...) {
+        return attempt->isCancelled.load() ? 1 : 2;
+    }
+}
 
 extern "C" int mnn_attempt_generate(MnnAttempt *attempt, const char *model,
     const char *prompt, const char *output, const char *workspace, int steps,

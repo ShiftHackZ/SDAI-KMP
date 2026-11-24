@@ -81,7 +81,17 @@ actual fun rememberImageToImagePlatformActions(budget: OriginalImageBudget): Ima
 
     return remember(context, pickerState, cameraPicker, cameraPermission, mediaPicker, budget) {
         object : ImageToImagePlatformActions {
-            override suspend fun pickImage(source: ImageToImagePickSource): ImageToImagePickResult =
+            /**
+             * Opens native acquisition and preserves the whole image when square normalization is disabled.
+             *
+             * @param source Camera or photo-library selection requested by the caller.
+             * @param shouldCropToSquare Whether to retain the img2img square normalization policy.
+             * @author Dmitriy Moroz
+             */
+            override suspend fun pickImage(
+                source: ImageToImagePickSource,
+                shouldCropToSquare: Boolean
+            ): ImageToImagePickResult =
                 when (val outcome = pickerState.await {
                     when (source) {
                         ImageToImagePickSource.Camera -> {
@@ -107,7 +117,7 @@ actual fun rememberImageToImagePlatformActions(budget: OriginalImageBudget): Ima
                     AndroidImagePickOutcome.Cancelled -> ImageToImagePickResult.Cancelled
                     is AndroidImagePickOutcome.Failed -> ImageToImagePickResult.Failed(outcome.message)
                     is AndroidImagePickOutcome.Selected -> withContext(Dispatchers.Default) {
-                        context.imageUriToPickResult(outcome.uri, budget)
+                        context.imageUriToPickResult(outcome.uri, budget, shouldCropToSquare)
                     }
                 }
         }

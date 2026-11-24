@@ -1,11 +1,13 @@
 package com.shifthackz.aisdv1.presentation.home
 
+import com.shifthackz.aisdv1.presentation.components.model.generationConfigurationIcon
+import com.shifthackz.aisdv1.presentation.components.model.upscalerConfigurationIcon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.runtime.Composable
@@ -17,7 +19,7 @@ import com.shifthackz.aisdv1.domain.entity.Settings
 import com.shifthackz.aisdv1.presentation.components.widget.source.getName
 
 /**
- * Builds the four persistent home tabs using localized labels and caller-owned selection.
+ * Builds the five persistent home tabs using localized labels and caller-owned selection.
  *
  * @param currentRoute Active destination, including the legacy home alias.
  * @param onAction Receives the selected home destination.
@@ -41,6 +43,13 @@ internal fun appBottomNavigationItems(
         icon = Icons.Default.Image,
         helpMessage = Localization.string("home_help_img_to_img"),
         onClick = { onAction(HomeNavigationAction.ImageToImage) },
+    ),
+    HomeNavigationBarItem(
+        label = Localization.string("upscaler_title"),
+        selected = currentRoute == AppRoute.Upscaler,
+        icon = Icons.Default.PhotoSizeSelectLarge,
+        helpMessage = Localization.string("upscaler_provider_help"),
+        onClick = { onAction(HomeNavigationAction.Upscaler) },
     ),
     HomeNavigationBarItem(
         label = Localization.string("home_tab_gallery"),
@@ -96,6 +105,14 @@ internal fun appDrawerItems(
         )
         add(
             DrawerSheetItem(
+                label = Localization.string("upscaler_title"),
+                selected = currentRoute == AppRoute.Upscaler,
+                icon = Icons.Default.PhotoSizeSelectLarge,
+                helpMessage = Localization.string("upscaler_provider_help"),
+                onClick = { onAction(HomeNavigationAction.Upscaler) })
+        )
+        add(
+            DrawerSheetItem(
                 label = Localization.string("title_gallery"),
                 selected = currentRoute == AppRoute.Gallery || currentRoute is AppRoute.GalleryDetail,
                 icon = Icons.Default.PhotoLibrary,
@@ -126,10 +143,19 @@ internal fun appDrawerItems(
         add(
             DrawerSheetItem(
                 label = Localization.string("settings_item_config"),
-                selected = currentRoute is AppRoute.Setup,
-                icon = Icons.Default.SettingsEthernet,
+                selected = currentRoute is AppRoute.Setup && !currentRoute.isUpscaler,
+                icon = generationConfigurationIcon,
                 helpMessage = Localization.string("settings_help_configuration"),
                 onClick = { onAction(HomeNavigationAction.Configuration) },
+            ),
+        )
+        add(
+            DrawerSheetItem(
+                label = Localization.string("upscaler_configuration"),
+                selected = currentRoute is AppRoute.Setup && currentRoute.isUpscaler,
+                icon = upscalerConfigurationIcon,
+                helpMessage = Localization.string("upscaler_provider_help"),
+                onClick = { onAction(HomeNavigationAction.UpscalerConfiguration) },
             ),
         )
         if (settings.developerMode) {

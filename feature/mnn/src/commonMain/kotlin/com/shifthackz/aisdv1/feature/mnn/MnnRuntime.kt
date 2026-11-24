@@ -11,7 +11,7 @@ interface MnnRuntime {
     /**
      * Loads and runs a fresh runtime, returning only complete PNG bytes.
      *
-     * @param request Validated immutable SD 1.5 inputs and model directory.
+     * @param request Validated diffusion inputs with a model directory, or prepared upscaler pixels with a checkpoint file.
      * @param onProgress Overall completion percentage, never a denoising step counter.
      *
      * @author Dmitriy Moroz

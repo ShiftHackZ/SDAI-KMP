@@ -15,23 +15,41 @@ final class SiliconDiffusionMnnRuntimeAdapter: NSObject, MnnAppleBridge,
     completion: @escaping @Sendable (MnnAppleResult) -> Void
   ) {
     let payload = request.payload
-    guard let seed = Int32(payload.seed),
-      let backend = MnnBackend(rawValue: payload.mnnBackend.key),
-      payload.width == 512, payload.height == 512, payload.cfgScale == 7.5,
-      payload.batchCount == 1, payload.negativePrompt.isEmpty,
-      payload.sampler == "PNDM", payload.mnnProfile == "sd15-512-general-int8-v1"
-    else {
-      completion(
-        MnnAppleResult(
-          imageBase64: nil,
-          errorMessage: MnnFailure.invalidRequest.rawValue, isCancelled: false))
-      return
+    let nativeRequest: MnnRequest
+    if let encoded = request.upscaleImage {
+      guard request.engine == .upscaler, let image = Data(base64Encoded: encoded),
+        payload.width > 0, payload.height > 0,
+        payload.width <= 4096, payload.height <= 4096
+      else {
+        completion(
+          MnnAppleResult(
+            imageBase64: nil,
+            errorMessage: MnnFailure.invalidRequest.rawValue, isCancelled: false))
+        return
+      }
+      nativeRequest = MnnRequest(
+        modelPath: request.modelPath, prompt: "", steps: 1,
+        seed: 0, backend: .cpu, upscaleImage: image)
+    } else {
+      guard let seed = Int32(payload.seed),
+        let backend = MnnBackend(rawValue: payload.mnnBackend.key),
+        payload.width == 512, payload.height == 512, payload.cfgScale == 7.5,
+        payload.batchCount == 1, payload.negativePrompt.isEmpty,
+        payload.sampler == "PNDM", payload.mnnProfile == "sd15-512-general-int8-v1"
+      else {
+        completion(
+          MnnAppleResult(
+            imageBase64: nil,
+            errorMessage: MnnFailure.invalidRequest.rawValue, isCancelled: false))
+        return
+      }
+      nativeRequest = MnnRequest(
+        modelPath: request.modelPath, prompt: payload.prompt,
+        steps: Int(payload.samplingSteps), seed: seed, backend: backend)
     }
     generator.generate(
       ownerId: ownerId,
-      request: MnnRequest(
-        modelPath: request.modelPath, prompt: payload.prompt,
-        steps: Int(payload.samplingSteps), seed: seed, backend: backend),
+      request: nativeRequest,
       onProgress: { onProgress(KotlinInt(int: Int32($0))) },
       completion: { result in
         switch result {

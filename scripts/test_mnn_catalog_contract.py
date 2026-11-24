@@ -43,13 +43,21 @@ def main():
                 value in url.lower()
                 for value in ("example.com", "localhost", "pending", "placeholder")
             )
+
+    upscale_document = json.loads((ROOT / "network/upscaler-catalog.openapi.json").read_text())
+    validate_document(upscale_document)
+    assert set(upscale_document["paths"]) == {"/upscaler-esrgan.json", "/upscaler-mnn.json"}
+    upscale_schema = upscale_document["components"]["schemas"]["UpscalerCatalogEntry"]
+    assert set(upscale_schema["properties"]) == set(upscale_schema["required"]) == fields
+    for runtime, operation_id in (("esrgan", "fetchUpscalerEsrganModels"), ("mnn", "fetchUpscalerMnnModels")):
+        assert upscale_document["paths"][f"/upscaler-{runtime}.json"]["get"]["operationId"] == operation_id
     manifest = json.loads((ROOT / "scripts/mnn/bundle.schema.json").read_text())
     assert manifest["additionalProperties"] is False
     assert set(manifest["required"]) == set(manifest["properties"])
     assert manifest["properties"]["profile"]["const"] == "sd15-512-general-int8-v1"
     assert manifest["properties"]["runtimeVersion"]["const"] == "3.6.2"
     print(
-        "MNN whole-document completeness, DTO/catalog and manifest contract gates passed."
+        "MNN/upscaler OpenAPI, DTO, MNN catalog and manifest contract gates passed."
     )
 
 

@@ -45,6 +45,8 @@ internal class TextToImageIntentProcessor(
 
     fun process(intent: TextToImageIntent) {
         when (intent) {
+            TextToImageIntent.ConfigureUpscaler -> router.navigateToUpscalerSetup()
+            is TextToImageIntent.UpdateUpscaler -> updateState { it.copy(upscaler = intent.configuration) }
             TextToImageIntent.OpenDrawer -> router.openDrawer()
             TextToImageIntent.NavigateBack -> router.navigateBack()
             TextToImageIntent.ConfigureProvider -> router.navigateToServerSetup()

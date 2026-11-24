@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.graphics.Color
@@ -19,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -63,24 +60,19 @@ fun GenerationBottomToolbar(
     content: @Composable () -> Unit,
 ) {
     val hasExtraShortcuts = mode == ServerSource.AUTOMATIC1111 || mode == ServerSource.SWARM_UI
-    CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surface) {
-        Column(
-            modifier = modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
-                .padding(top = 8.dp),
-        ) {
-            if (hasExtraShortcuts) {
-                GenerationBottomToolbarShortcuts(
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    strokeAccentState = strokeAccentState,
-                    mode = mode,
-                    prompt = prompt,
-                    negativePrompt = negativePrompt,
-                    onExtraSelected = onExtraSelected,
-                    onEmbeddingsSelected = onEmbeddingsSelected,
-                )
-            }
-            content()
+    GenerationActionBar(modifier) {
+        if (hasExtraShortcuts) {
+            GenerationBottomToolbarShortcuts(
+                modifier = Modifier.padding(bottom = 4.dp),
+                strokeAccentState = strokeAccentState,
+                mode = mode,
+                prompt = prompt,
+                negativePrompt = negativePrompt,
+                onExtraSelected = onExtraSelected,
+                onEmbeddingsSelected = onEmbeddingsSelected,
+            )
         }
+        content()
     }
 }
 

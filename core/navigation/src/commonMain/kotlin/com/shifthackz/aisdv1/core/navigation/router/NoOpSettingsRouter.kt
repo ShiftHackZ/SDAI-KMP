@@ -13,6 +13,8 @@ object NoOpSettingsRouter : SettingsRouter {
      *
      * @author Dmitriy Moroz
      */
+    override fun navigateToUpscalerSetup() = Unit
+
     override fun navigateToWebUi() = Unit
 
     override fun navigateToCivitai() = Unit

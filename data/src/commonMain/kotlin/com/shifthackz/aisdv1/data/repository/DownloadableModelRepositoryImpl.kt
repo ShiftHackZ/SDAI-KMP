@@ -16,6 +16,22 @@ internal class DownloadableModelRepositoryImpl(
     private val remoteDataSource: DownloadableModelDataSource.Remote,
     private val localDataSource: DownloadableModelDataSource.Local,
 ) : DownloadableModelRepository {
+    /**
+     * Reads current model metadata and filesystem completion without network recovery.
+     *
+     * @param id Stable catalog identity.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun getById(id: String): LocalAiModel = localDataSource.getById(id)
+
+    /**
+     * Resolves a downloaded model through the local store without changing file ownership.
+     *
+     * @param model Completed catalog download whose runtime checkpoint is requested.
+     * @author Dmitriy Moroz
+     */
+    override fun getModelPath(model: LocalAiModel): String = localDataSource.getModelPath(model)
+
 
     /**
      * Streams the selected catalog source and publishes completion only after its complete model payload is activated.
@@ -56,6 +72,7 @@ internal class DownloadableModelRepositoryImpl(
      */
     override suspend fun readCachedCatalog(type: LocalAiModel.Type): List<LocalAiModel> =
         when (type) {
+            LocalAiModel.Type.Upscaler -> localDataSource.getAllUpscalers()
             LocalAiModel.Type.ONNX -> getAllOnnx()
             LocalAiModel.Type.MediaPipe -> getAllMediaPipe()
             LocalAiModel.Type.Sdxl -> getAllSdxl()

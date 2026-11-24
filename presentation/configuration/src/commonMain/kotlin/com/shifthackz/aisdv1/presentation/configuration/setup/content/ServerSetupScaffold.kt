@@ -2,20 +2,14 @@
 
 package com.shifthackz.aisdv1.presentation.configuration.setup.content
 
+import com.shifthackz.aisdv1.presentation.configuration.setup.component.ConfigurationWizardScaffold
 import com.shifthackz.aisdv1.presentation.configuration.setup.source.SourceSelectionToolbarReveal
 import com.shifthackz.aisdv1.presentation.components.widget.input.SearchFilterToolbarHeight
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.isPlatformToolbarNative
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarBackButton
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
 import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,13 +22,10 @@ import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.LocalModelDownloadAction
 import com.shifthackz.aisdv1.presentation.configuration.setup.localCatalogType
 import com.shifthackz.aisdv1.domain.entity.ServerSource
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.ConfigurationStepBar
-import com.shifthackz.aisdv1.presentation.configuration.setup.component.configurationStepBarHeight
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.OpenAiOAuthActionBar
 import com.shifthackz.aisdv1.presentation.configuration.setup.component.mainButtonEnabled
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupIntent
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
-import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 
 
 /**
@@ -60,52 +51,31 @@ internal fun ServerSetupScaffold(
         animationSpec = tween(240),
         label = "provider-search-reveal",
     )
-    PlatformScaffold(
+    ConfigurationWizardScaffold(
         modifier = modifier,
-        canUnderlapToolbar = true,
-        topBar = {
-            Column {
-                PlatformTopAppBar(
-                    title = {
-                        Text(
-                            text = strings.title,
-                            style = platformToolbarTitleStyle(MaterialTheme.typography.headlineMedium),
-                        )
-                    },
-                    navigationIcon = {
-                        if (state.showBackNavArrow || state.step != ServerSetupState.Step.SOURCE) {
-                            ToolbarBackButton(
-                                onClick = { processIntent(ServerSetupIntent.NavigateBack) },
-                                icon = Icons.AutoMirrored.Outlined.ArrowBack
-                            )
-                        }
-                    },
-                    windowInsets = persistentTopAppBarWindowInsets(),
-                    bottomContentHeight = configurationStepBarHeight() +
-                            if (isPlatformToolbarNative) SearchFilterToolbarHeight * searchFraction else 0.dp,
-                    bottomContent = {
-                        Column {
-                            ConfigurationStepBar(currentStep = state.step, strings = strings)
-                            if (isPlatformToolbarNative) {
-                                SourceSelectionToolbarReveal(
-                                    searchFraction,
-                                    state,
-                                    strings,
-                                    processIntent
-                                )
-                            }
-                        }
-                    },
-                )
-                if (!isPlatformToolbarNative) SourceSelectionToolbarReveal(
-                    searchFraction,
-                    state,
-                    strings,
-                    processIntent
-                )
-            }
+        title = strings.title,
+        step = state.step,
+        strings = strings,
+        canNavigateBack = state.showBackNavArrow || state.step != ServerSetupState.Step.SOURCE,
+        onBack = { processIntent(ServerSetupIntent.NavigateBack) },
+        toolbarExtensionHeight = if (isPlatformToolbarNative) SearchFilterToolbarHeight * searchFraction else 0.dp,
+        toolbarExtension = {
+            if (isPlatformToolbarNative) SourceSelectionToolbarReveal(
+                searchFraction,
+                state,
+                strings,
+                processIntent
+            )
         },
-        bottomBar = {
+        afterToolbar = {
+            if (!isPlatformToolbarNative) SourceSelectionToolbarReveal(
+                searchFraction,
+                state,
+                strings,
+                processIntent
+            )
+        },
+        actions = {
             if (state.step == ServerSetupState.Step.CONFIGURE && state.mode == ServerSource.OPEN_AI_OAUTH) {
                 OpenAiOAuthActionBar(
                     state = state,

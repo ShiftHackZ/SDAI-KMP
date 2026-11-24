@@ -7,9 +7,11 @@ import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.appbuild.BuildType
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
+import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidator
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.isUpscalerInputSizeValid
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ImageToImagePayload
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundTaskManager
@@ -246,6 +248,17 @@ internal class ImageToImageActionHandler(
         val validatedState = currentState().validated(dimensionValidator)
         emitState(validatedState)
         if (!validatedState.canGenerate) return
+
+        if (!validatedState.mapToPayload().isUpscalerInputSizeValid) {
+            updateState {
+                it.copy(
+                    screenModal = GenerationModal.Error(
+                        Localization.string("error_upscaler_generation_size").asUiText()
+                    )
+                )
+            }
+            return
+        }
 
         if (backgroundWorkObserver.hasActiveTasks()) {
             updateState {

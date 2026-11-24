@@ -1,37 +1,25 @@
 package com.shifthackz.aisdv1.presentation.generation.img2img
 
-import androidx.compose.foundation.lazy.LazyListState
-import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
-import androidx.compose.ui.platform.LocalInspectionMode
-import com.shifthackz.aisdv1.presentation.components.platform.ExternalUrlLauncher
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
-import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.withoutVisualEffect
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Brush
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeviceUnknown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,17 +29,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.presentation.components.platform.ExternalUrlLauncher
 import com.shifthackz.aisdv1.presentation.components.platform.rememberExternalUrlLauncher
+import com.shifthackz.aisdv1.presentation.components.widget.engine.EngineSelectionComponent
 import com.shifthackz.aisdv1.presentation.components.widget.image.rememberPreviewImage
-import com.shifthackz.aisdv1.presentation.components.widget.imageinput.ImageInputCard
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 import com.shifthackz.aisdv1.presentation.components.widget.source.CurrentProviderCard
 import com.shifthackz.aisdv1.presentation.components.widget.surface.PlatformLazySurface
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerForm
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerFormState
+import com.shifthackz.aisdv1.presentation.generation.widget.imageinput.GenerationImageInput
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 
 /**
@@ -122,6 +116,7 @@ internal fun UnsupportedImageToImageBody(
  * @param onInPaintClick Opens the shared inpaint editor for the current source.
  * @param modifier Layout modifiers for the lazy input form.
  * @param listState Retained vertical position within the generation form.
+ * @param upscalerFormState Independent catalog snapshot shared with the other Home forms.
  * @param isInitiallyExpanded Initial disclosure state of generation options.
  * @param engineContent Checkpoint picker supplied by the owning form.
  * @param inputImageContent Optional source-image card receiving its existing spacing modifier.
@@ -139,11 +134,15 @@ internal fun ImageToImageBody(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     isInitiallyExpanded: Boolean = true,
+    upscalerFormState: UpscalerFormState? = null,
     engineContent: @Composable (Modifier) -> Unit = { EngineSelectionComponent(modifier = it) },
     inputImageContent: (@Composable (Modifier) -> Unit)? = null,
 ) {
     var isFormExpanded by rememberSaveable { mutableStateOf(isInitiallyExpanded) }
     val overscrollEffect = rememberOverscrollEffect()
+    val lastGenerationItemIndex by remember(listState) {
+        derivedStateOf { (listState.layoutInfo.totalItemsCount - 2).coerceAtLeast(2) }
+    }
     val urlLauncher = if (LocalInspectionMode.current) remember { ExternalUrlLauncher {} }
     else rememberExternalUrlLauncher()
     val onEvent: (GenerationInputFormEvent) -> Unit = remember(processIntent, urlLauncher) {
@@ -161,6 +160,7 @@ internal fun ImageToImageBody(
     PlatformLazySurface(
         state = listState,
         firstItemIndex = 2,
+        lastItemIndex = lastGenerationItemIndex,
         modifier = modifier.fillMaxSize(),
         horizontalPadding = 16.dp,
         color = MaterialTheme.colorScheme.surface,
@@ -212,6 +212,16 @@ internal fun ImageToImageBody(
                 afterSlidersSection = afterSlidersSection,
                 engineContent = engineContent,
             )
+            item(key = "upscaler-form") {
+                UpscalerForm(
+                    state = upscalerFormState,
+                    configuration = state.upscaler,
+                    onConfigurationChange = { processIntent(ImageToImageIntent.UpdateUpscaler(it)) },
+                    onConfigure = { processIntent(ImageToImageIntent.ConfigureUpscaler) },
+                    modifier = Modifier.padding(top = 16.dp),
+                    isEnabled = !state.generating
+                )
+            }
 
         }
     }
@@ -238,111 +248,17 @@ internal fun ImageInputSection(
     onInPaintClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ImageInputCard(
-        isPickingImage = state.pickingImage,
-        isEnabled = !state.pickingImage && !state.generating,
-        hasImage = state.imageBase64.isNotBlank(),
+    GenerationImageInput(
+        image = image, hasImage = state.imageBase64.isNotBlank(),
+        isPickingImage = state.pickingImage, isEnabled = !state.generating,
         onGalleryClick = { processIntent(ImageToImageIntent.PickGallery) },
         onCameraClick = { processIntent(ImageToImageIntent.PickCamera) },
         onRandomClick = { processIntent(ImageToImageIntent.PickRandom) },
         onHistoryImageSelected = { processIntent(ImageToImageIntent.ApplyImageInput(it)) },
+        onClearClick = { processIntent(ImageToImageIntent.ClearImageInput) },
         modifier = modifier,
-    ) {
-        if (image != null) {
-            SelectedImageInput(
-                image = image,
-                inPaint = if (state.sourceSupportsInPaint) state.inPaint else ImageInPaintState(),
-                strings = strings,
-                enabled = !state.pickingImage && !state.generating,
-                inPaintVisible = state.sourceSupportsInPaint,
-                onInPaintClick = onInPaintClick,
-                onClearClick = { processIntent(ImageToImageIntent.ClearImageInput) },
-            )
-        }
-    }
-}
-
-/**
- * Shows an existing source image and its mask with inpaint and clear actions.
- *
- * @param image Admitted sampled source pixels.
- * @param inPaint Stored mask strokes projected onto the preview.
- * @param strings Localized edit/clear labels.
- * @param enabled Whether source editing is currently allowed.
- * @param inPaintVisible Whether this provider exposes mask editing.
- * @param onInPaintClick Opens the full mask editor.
- * @param onClearClick Requests removal of the source image.
- * @param modifier Layout modifiers for the preview/action group.
- *
- * @author Dmitriy Moroz
- */
-@Composable
-internal fun SelectedImageInput(
-    image: ImageBitmap,
-    inPaint: ImageInPaintState,
-    strings: ImageToImageStrings,
-    enabled: Boolean,
-    inPaintVisible: Boolean,
-    onInPaintClick: () -> Unit,
-    onClearClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier,
-    ) {
-        ImageInPaintCanvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 420.dp)
-                .aspectRatio(1f),
-            image = image,
-            state = inPaint,
-            drawEnabled = false,
-            maskAlpha = 1f,
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (inPaintVisible) {
-                OutlinedButton(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    isEnabled = enabled,
-                    onClick = onInPaintClick,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Brush,
-                        contentDescription = null,
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 8.dp),
-                        text = strings.inPaint,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-            OutlinedButton(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                isEnabled = enabled,
-                onClick = onClearClick,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 8.dp),
-                    text = strings.clear,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-    }
+        inPaint = state.inPaint.takeIf { state.sourceSupportsInPaint },
+        onInPaintClick = onInPaintClick,
+        clearLabel = strings.clear, inPaintLabel = strings.inPaint,
+    )
 }

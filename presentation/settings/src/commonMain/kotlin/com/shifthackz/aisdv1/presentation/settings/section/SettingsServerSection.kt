@@ -65,6 +65,13 @@ internal fun SettingsServerSection(
             )
         }
 
+        SettingsListItem.UPSCALER_CONFIGURATION -> {
+            SettingsItem(
+                modifier = itemModifier, loading = state.loading, startIcon = row.startIcon,
+                text = text("upscaler_configuration"),
+                onClick = { processIntent(SettingsIntent.NavigateUpscalerConfiguration) })
+        }
+
         SettingsListItem.BACKUP -> {
             SettingsItem(
                 modifier = itemModifier,

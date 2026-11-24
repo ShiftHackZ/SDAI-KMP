@@ -4,6 +4,7 @@
 
 # JNI entry points and synchronous callback must retain their names.
 -keep class com.shifthackz.aisdv1.feature.mnn.MnnNativeBridgeImpl { *; }
+-keep class com.shifthackz.aisdv1.feature.mnn.MnnUpscalerNativeBridgeImpl { *; }
 
 # RegisterNatives and FindClass use these literal binary names.
 -keep class com.shifthackz.aisdv1.feature.sdxl.StableDiffusionCppNativeBridge { *; }

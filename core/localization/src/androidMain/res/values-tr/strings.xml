@@ -263,7 +263,7 @@
     <string name="title_history">Geçmiş</string>
     <string name="title_gallery_details">Detaylar</string>
     <string name="title_settings">Ayarlar</string>
-    <string name="title_server_setup">Sunucu Kurulumu</string>
+    <string name="title_server_setup">Üretim yapılandırması</string>
     <string name="title_select_sd_model">SD Modeli seçin</string>
     <string name="title_clear_app_cache">Uygulama önbelleğini temizle</string>
     <string name="title_debug_menu">Geliştirici modu</string>
@@ -302,7 +302,7 @@
     <string name="settings_header_look_and_feel">Kişiselleştirme</string>
     <string name="settings_header_community">Topluluk</string>
 
-    <string name="settings_item_config">Ayarlar</string>
+    <string name="settings_item_config">Üretim yapılandırması</string>
     <string name="settings_item_sd_model">SD Modeli</string>
     <string name="settings_item_stability_ai_credits">Stability AI Kredi</string>
     <string name="settings_item_local_nnapi">NNAPI</string>
@@ -912,4 +912,33 @@
     <string name="blog_post_missing">Bu yazıya ulaşılamıyor.</string>
     <string name="blog_share_post">Yazıyı paylaş</string>
     <string name="blog_share_error">Paylaşım menüsü açılamadı.</string>
+    <string name="generation_configuration">Üretim yapılandırması</string>
+    <string name="upscaler_configuration">Büyütücü yapılandırması</string>
+    <string name="upscaler_title">Büyütücü</string>
+    <string name="upscaler_action">Büyüt</string>
+    <string name="upscaler_local_provider">ESRGAN</string>
+    <string name="upscaler_provider_help">Ayrı bir büyütücü modeli indirin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
+    <string name="upscaler_mnn_provider">MNN</string>
+    <string name="upscaler_tag_tiled_inference">Döşemeli işleme</string>
+    <string name="upscaler_esrgan_description">ESRGAN ile cihazınızda görüntüleri büyütün. Aşağıdan bir büyütücü modeli indirip seçin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
+    <string name="upscaler_mnn_description">MNN ile cihazınızda görüntüleri büyütün. Aşağıdan bir büyütücü modeli indirip seçin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
+    <string name="upscaler_unavailable">Bu platformda kullanılabilir bir büyütücü yok.</string>
+    <string name="upscaler_model">Büyütücü modeli</string>
+    <string name="upscaler_pipeline_toggle">Üretilen görüntüleri büyüt</string>
+
+    <string name="upscaler_setup_required">Büyütücü yapılandırmasından indirilmiş bir model seçin.</string>
+    <string name="upscaler_retry">Yeniden dene</string>
+    <string name="upscaler_limits">Herhangi bir kenarı 1024 pikselden büyük görüntüler, orantılı olarak küçültülmeden önce onay gerektirir.</string>
+    <string name="upscaler_running">Büyütülüyor…</string>
+
+    <string name="settings_help_upscaler_configuration">Ayrı bir büyütücü modeli indirin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
+    <string name="upscaler_options">Büyütme parametreleri</string>
+    <string name="upscaler_provider">Büyütme sağlayıcısı</string>
+    <string name="error_upscaler_generation_size">Büyütme açıkken üretim boyutu 1024 × 1024 pikseli aşamaz. Boyutu küçültün veya büyütmeyi kapatın.</string>
+    <string name="upscaler_models">Büyütme modelleri</string>
+    <string name="generation_provider">Üretim sağlayıcısı</string>
+    <string name="upscaler_downscale_title">Giriş görüntüsü küçültülecek</string>
+    <string name="upscaler_downscale_message">Büyütücü en fazla 1024 × 1024 piksel boyutunda giriş görüntülerini destekler. Görüntünüz, en uzun kenarı 1024 piksel olacak şekilde küçültülecek. En boy oranı ve görüntünün tamamı korunacak.</string>
+    <string name="upscaler_continue">Devam et</string>
+    <string name="upscaler_scale_factor">Ölçek katsayısı</string>
 </resources>

@@ -1,27 +1,24 @@
 package com.shifthackz.aisdv1.domain.usecase.downloadable
 
-import com.shifthackz.aisdv1.domain.datasource.DownloadableModelDataSource
+import com.shifthackz.aisdv1.domain.repository.DownloadableModelRepository
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 
 /**
- * Implements `GetLocalModelUseCase` behavior in the SDAI domain layer.
+ * Reads one model with current download and independent selection state through the model repository.
+ *
+ * @param repository Catalog and owned-model metadata reader.
  *
  * @author Dmitriy Moroz
  */
 internal class GetLocalModelUseCaseImpl(
-    /**
-     * Exposes the `localDataSource` value used by the SDAI domain layer.
-     *
-     * @author Dmitriy Moroz
-     */
-    private val localDataSource: DownloadableModelDataSource.Local,
+    private val repository: DownloadableModelRepository,
 ) : GetLocalModelUseCase {
 
     /**
-     * Executes the `invoke` step in the SDAI domain layer.
+     * Reads one catalog entry; lookup and storage failures remain observable.
      *
-     * @param id identifier of the target entity.
+     * @param id Stable local model catalog identity.
      * @author Dmitriy Moroz
      */
-    override suspend fun invoke(id: String): LocalAiModel = localDataSource.getById(id)
+    override suspend fun invoke(id: String): LocalAiModel = repository.getById(id)
 }

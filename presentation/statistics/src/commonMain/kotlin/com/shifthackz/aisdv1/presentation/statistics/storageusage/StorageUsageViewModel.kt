@@ -9,9 +9,11 @@ import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnostics
 import com.shifthackz.aisdv1.core.mvi.BaseMviViewModel
 import com.shifthackz.aisdv1.core.mvi.EmptyEffect
+import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.usecase.downloadable.DeleteModelUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalCoreMlModelsUseCase
@@ -47,6 +49,7 @@ import kotlinx.coroutines.flow.map
  * @param getLocalMediaPipeModelsUseCase Reads locally configured MediaPipe models.
  * @param getLocalSdxlModelsUseCase Reads locally configured SDXL models.
  * @param getLocalCoreMlModelsUseCase Reads locally configured Core ML models on supported builds.
+ * @param getCachedLocalModelCatalogUseCase Reads dedicated downloaded upscalers without network requests.
  * @param getLocalMnnModelsUseCase Reads MNN catalog identities; custom models are excluded from accounting.
  * @param getLocalBonsaiModelsUseCase Reads catalog Bonsai downloads for supported-platform storage accounting.
  * @param deleteModelUseCase Deletes downloaded local model metadata and files.
@@ -68,6 +71,7 @@ class StorageUsageViewModel(
     private val getLocalSdxlModelsUseCase: GetLocalSdxlModelsUseCase,
     private val getLocalCoreMlModelsUseCase: GetLocalCoreMlModelsUseCase,
     private val getLocalMnnModelsUseCase: GetLocalMnnModelsUseCase,
+    private val getCachedLocalModelCatalogUseCase: GetCachedLocalModelCatalogUseCase,
     private val getLocalBonsaiModelsUseCase: GetLocalBonsaiModelsUseCase,
     private val deleteModelUseCase: DeleteModelUseCase,
     private val storageUsageObserver: StorageUsageObserver,
@@ -143,6 +147,8 @@ class StorageUsageViewModel(
         val sdxlModels = getDownloadedModels(getLocalSdxlModelsUseCase::invoke)
         val coreMlModels = getDownloadedModels(getLocalCoreMlModelsUseCase::invoke)
         val mnnModels = getDownloadedModels { getLocalMnnModelsUseCase().models }
+        val upscalerModels =
+            getDownloadedModels { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Upscaler) }
         val mnnModelIds = mnnModels.map(LocalAiModel::id)
         val bonsaiModels = getDownloadedModels(getLocalBonsaiModelsUseCase::invoke)
         val coreMlModelIds = coreMlModels.map(LocalAiModel::id)
@@ -160,6 +166,17 @@ class StorageUsageViewModel(
                     category = UsageCategory.GALLERY,
                     bytes = galleryReads.storageBytes(),
                 ),
+            )
+            if (buildInfoProvider.platform == Platform.ANDROID) add(
+                UsageItem(
+                    category = UsageCategory.MODELS_UPSCALER,
+                    bytes = platformActions.mapStorageBytesForUi(
+                        platformActions.getDownloadedModelsBytes(
+                            upscalerModels.map(LocalAiModel::id)
+                        )
+                    ),
+                    modelIds = upscalerModels.map(LocalAiModel::id)
+                )
             )
             if (ServerSource.LOCAL_MICROSOFT_ONNX in allowedModes) {
                 add(
@@ -330,6 +347,7 @@ class StorageUsageViewModel(
         when (category) {
             UsageCategory.CACHE -> platformActions.clearAppCache()
             UsageCategory.GALLERY -> deleteAllGalleryUseCase()
+            UsageCategory.MODELS_UPSCALER,
             UsageCategory.MODELS_ONNX,
             UsageCategory.MODELS_MEDIAPIPE,
             UsageCategory.MODELS_SDXL,

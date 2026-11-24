@@ -75,7 +75,7 @@ internal fun SourceSelectionStep(
             ) { index, source ->
                 SourceModeItem(
                     source = source,
-                    selected = state.mode == source,
+                    isSelected = state.mode == source,
                     platform = state.platform,
                     strings = strings,
                     onClick = {
@@ -107,8 +107,15 @@ internal fun LazyListState.isItemFullyVisible(index: Int): Boolean {
             item.offset + item.size <= layoutInfo.viewportEndOffset
 }
 
+/**
+ * Displays the shared provider-search empty state without changing the selected draft.
+ *
+ * @param text Localized no-results message.
+ * @param modifier Placement within the provider list.
+ * @author Dmitriy Moroz
+ */
 @Composable
-private fun SourceEmptyState(
+internal fun SourceEmptyState(
     text: String,
     modifier: Modifier = Modifier,
 ) {

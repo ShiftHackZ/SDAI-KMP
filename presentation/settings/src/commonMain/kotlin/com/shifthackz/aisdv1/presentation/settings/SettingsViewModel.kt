@@ -18,6 +18,7 @@ import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.caching.ClearAppCacheUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalCoreMlModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMediaPipeModelsUseCase
@@ -62,6 +63,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param getLocalSdxlModelsUseCase Reads locally configured SDXL models.
  * @param getLocalCoreMlModelsUseCase Reads locally configured Core ML models on supported builds.
  * @param getLocalBonsaiModelsUseCase Reads locally configured Bonsai models on supported builds.
+ * @param getCachedLocalModelCatalogUseCase Reads dedicated downloaded upscalers without network requests.
  * @param getLocalMnnModelsUseCase Reads MNN catalog identities; custom models are excluded from totals.
  * @param observeNetworkUsageUseCase Live Room-backed network usage stream.
  * @param storageUsageObserver Shared invalidation stream for non-Room storage usage.
@@ -89,6 +91,7 @@ class SettingsViewModel(
     private val getLocalCoreMlModelsUseCase: GetLocalCoreMlModelsUseCase,
     private val getLocalBonsaiModelsUseCase: GetLocalBonsaiModelsUseCase,
     private val getLocalMnnModelsUseCase: GetLocalMnnModelsUseCase,
+    private val getCachedLocalModelCatalogUseCase: GetCachedLocalModelCatalogUseCase,
     private val observeNetworkUsageUseCase: ObserveNetworkUsageUseCase,
     private val storageUsageObserver: StorageUsageObserver,
     private val preferenceManager: PreferenceManager,
@@ -216,6 +219,7 @@ class SettingsViewModel(
 
             SettingsIntent.NavigateBackup -> router.navigateToBackup()
 
+            SettingsIntent.NavigateUpscalerConfiguration -> router.navigateToUpscalerSetup()
             SettingsIntent.NavigateConfiguration -> router.navigateToServerSetup(
                 LaunchSource.SETTINGS,
             )
@@ -447,10 +451,15 @@ class SettingsViewModel(
         val coreMlModels = getDownloadedModels(getLocalCoreMlModelsUseCase::invoke)
         val bonsaiModels = getDownloadedModels(getLocalBonsaiModelsUseCase::invoke)
         val mnnModels = getDownloadedModels { getLocalMnnModelsUseCase().models }
+        val upscalerModels =
+            getDownloadedModels { getCachedLocalModelCatalogUseCase(LocalAiModel.Type.Upscaler) }
         val coreMlModelIds = coreMlModels.map(LocalAiModel::id)
         val allowedModes = buildInfoProvider.setupAllowedModes()
         val galleryBytes = galleryReads.storageBytes()
-        var modelBytes = 0L
+        var modelBytes =
+            if (buildInfoProvider.platform == Platform.ANDROID) platformActions.mapStorageBytesForUi(
+                platformActions.getDownloadedModelsBytes(upscalerModels.map(LocalAiModel::id))
+            ) else 0L
         if (ServerSource.LOCAL_MICROSOFT_ONNX in allowedModes) {
             modelBytes += platformActions.mapStorageBytesForUi(
                 platformActions.getDownloadedModelsBytes(onnxModels.map(LocalAiModel::id)),

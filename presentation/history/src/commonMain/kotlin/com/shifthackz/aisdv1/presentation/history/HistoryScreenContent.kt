@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.core.localization.Localization
+import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.GalleryItemMetadata
 import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
@@ -53,7 +54,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalSc
  * @param empty Message displayed before any history entries exist.
  * @param refresh Accessible label for reloading history after an error.
  * @param imageUnavailable Description for an absent or undecodable preview.
- * @param resultMeta Formats an entry's dimensions, steps and guidance scale.
+ * @param resultMeta Formats dimensions and only the sampling fields applicable to the entry type.
  *
  * @author Dmitriy Moroz
  */
@@ -63,7 +64,8 @@ data class HistoryStrings(
     val refresh: String = Localization.string("action_update"),
     val imageUnavailable: String = Localization.string("message_image_unavailable"),
     val resultMeta: (GalleryItemMetadata) -> String = { item ->
-        Localization.string(
+        if (item.type == AiGenerationResult.Type.UPSCALE) "${item.width} X ${item.height}"
+        else Localization.string(
             "history_result_meta",
             item.width,
             item.height,

@@ -5,6 +5,7 @@ import com.shifthackz.aisdv1.domain.gateway.BenchmarkDeviceProbe
 import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
 import com.shifthackz.aisdv1.domain.entity.RemoteGenerationProgressContext
 import kotlinx.coroutines.withContext
+import com.shifthackz.aisdv1.domain.entity.GenerationFinalizationContext
 
 import com.shifthackz.aisdv1.domain.usecase.easydiffusion.CaptureEasyDiffusionConnectionUseCase
 
@@ -14,6 +15,7 @@ import com.shifthackz.aisdv1.domain.usecase.easydiffusion.toEasyDiffusionRequest
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.coroutineContext
 import com.shifthackz.aisdv1.domain.gateway.GenerationRestoreGate
+import com.shifthackz.aisdv1.domain.entity.isUpscalerInputSizeValid
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
@@ -55,6 +57,8 @@ import com.shifthackz.aisdv1.domain.repository.SwarmUiGenerationRepository
  * @param coreMlGenerationRepository Generation and result persistence for Core ML.
  * @param bonsaiGenerationRepository Generation and result persistence for Bonsai.
  * @param mnnGenerationRepository Isolated MNN request execution after fixed-profile and seed admission.
+ * @param upscaleImageUseCase Applies the captured final-stage super-resolution selection.
+ * @param finalizeGenerationUseCase Saves only completed upscaled pixels using normal gallery policy.
  * @param deviceProbe Captures originating hardware and OS without loading model runtimes.
  * @param autoUploadToCivitaiUseCase Applies optional public sharing only after a generation completes.
  * @param preferenceManager Current provider selection and independent generation preferences.
@@ -95,6 +99,8 @@ internal class TextToImageUseCaseImpl(
     private val bonsaiGenerationRepository: BonsaiGenerationRepository,
     private val mnnGenerationRepository: MnnGenerationRepository,
 
+    private val upscaleImageUseCase: UpscaleImageUseCase,
+    private val finalizeGenerationUseCase: FinalizeGenerationUseCase,
     private val deviceProbe: BenchmarkDeviceProbe,
     private val autoUploadToCivitaiUseCase: AutoUploadToCivitaiUseCase,
     private val preferenceManager: PreferenceManager,
@@ -116,6 +122,8 @@ internal class TextToImageUseCaseImpl(
      */
     override suspend operator fun invoke(payload: TextToImagePayload): List<AiGenerationResult> =
         generationRestoreGate.generating {
+            require(payload.isUpscalerInputSizeValid) { "With upscaling enabled, generation size must not exceed 1024 × 1024" }
+            require(payload.upscaler?.modelId?.isBlank() != true) { "Configure an upscaler model first" }
             val source = payload.sourceSnapshot ?: preferenceManager.source
             val device = deviceProbe.capture()
             withGenerationMetadata(
@@ -126,9 +134,18 @@ internal class TextToImageUseCaseImpl(
                     osVersion = device.generationOsVersion(),
                 )
             ) {
-                if (source == ServerSource.AUTOMATIC1111 || source == ServerSource.SWARM_UI) {
-                    trackRemoteGenerationUseCase(source) { generate(payload) }
-                } else generate(payload)
+                suspend fun execute() =
+                    if (source == ServerSource.AUTOMATIC1111 || source == ServerSource.SWARM_UI) {
+                        trackRemoteGenerationUseCase(source) { generate(payload) }
+                    } else generate(payload)
+
+                val upscaler = payload.upscaler
+                if (upscaler == null) execute()
+                else withContext(GenerationFinalizationContext()) {
+                    execute().map { result ->
+                        finalizeGenerationUseCase(upscaleImageUseCase(result, upscaler))
+                    }
+                }
             }.map { autoUploadToCivitaiUseCase(it) }
         }
 

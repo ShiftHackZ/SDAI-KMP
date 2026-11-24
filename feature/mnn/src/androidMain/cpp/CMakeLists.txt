@@ -73,7 +73,7 @@ target_include_directories(diffusion PRIVATE "${SDAI_MNN_SOURCE}/tools/cv/includ
     "${SDAI_MNN_ADAPTER}" "${SDAI_MNN_SOURCE}/schema/current"
     "${SDAI_MNN_SOURCE}/3rd_party/flatbuffers/include")
 
-add_library(sdai_mnn SHARED mnn_jni.cpp)
+add_library(sdai_mnn SHARED mnn_jni.cpp mnn_upscaler_jni.cpp)
 target_include_directories(sdai_mnn PRIVATE "${SDAI_MNN_SOURCE}/include"
     "${SDAI_MNN_ADAPTER}"
     "${SDAI_MNN_SOURCE}/transformers/diffusion/engine/include")

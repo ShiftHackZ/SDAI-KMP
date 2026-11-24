@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.work.mappers
 import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
+import com.shifthackz.aisdv1.domain.entity.UpscalerConfiguration
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -41,6 +42,33 @@ class MnnWorkPayloadMappersTest {
         mnnActivationId = "a".repeat(64),
         mnnProfile = "sd15-512-general-int8-v1"
     )
+
+    @Test
+    fun `given upscaler work payload, x2 selection is queued, expected model and scale round trip unchanged`() {
+        // Given
+        val original =
+            payload.copy(upscaler = UpscalerConfiguration("upscaler_mnn_anime_6b", scaleFactor = 2))
+
+        // When
+        val restored = original.toByteArray().toTextToImagePayload()
+
+        // Then
+        assertEquals(original, restored)
+    }
+
+    @Test
+    fun `given legacy upscaler work payload, scale is absent, expected native x4 compatibility`() {
+        // Given
+        val original = payload.copy(upscaler = UpscalerConfiguration("upscaler_mnn_anime_6b"))
+        val fields = Json.parseToJsonElement(original.toByteArray().decodeToString()).jsonObject
+        val legacy = JsonObject(fields.filterKeys { it != "upscalerScaleFactor" })
+
+        // When
+        val restored = legacy.toString().encodeToByteArray().toTextToImagePayload()
+
+        // Then
+        assertEquals(original, restored)
+    }
 
     @Test
     fun `given MNN work payload, CPU request is serialized, expected complete round trip`() {

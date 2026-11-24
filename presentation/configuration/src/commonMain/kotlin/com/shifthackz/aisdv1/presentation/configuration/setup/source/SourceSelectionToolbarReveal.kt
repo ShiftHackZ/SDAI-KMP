@@ -1,5 +1,6 @@
 package com.shifthackz.aisdv1.presentation.configuration.setup.source
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import com.shifthackz.aisdv1.presentation.components.widget.input.SearchFilterToolbarHeight
@@ -33,9 +34,29 @@ internal fun SourceSelectionToolbarReveal(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    ProviderDiscoveryToolbarReveal(fraction, modifier) {
+        SourceSelectionToolbar(state, strings, processIntent = {
+            if (state.step == ServerSetupState.Step.SOURCE) processIntent(it)
+        })
+    }
+}
+
+/**
+ * Keeps discovery controls at their full size while revealing the same native and Compose height.
+ *
+ * @param fraction Visible proportion from zero through one.
+ * @param modifier Placement under the fixed step strip.
+ * @param content Discovery row retained by the owning provider picker.
+ * @author Dmitriy Moroz
+ */
+@Composable
+internal fun ProviderDiscoveryToolbarReveal(
+    fraction: Float, modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
     if (fraction <= 0f) return
     if (fraction >= 1f) {
-        SourceSelectionToolbar(state, strings, processIntent, modifier)
+        Box(modifier) { content() }
         return
     }
     PlatformClippedContent(
@@ -43,11 +64,7 @@ internal fun SourceSelectionToolbarReveal(
     ) {
         Layout(
             modifier = Modifier.fillMaxWidth().clipToBounds(),
-            content = {
-                SourceSelectionToolbar(state, strings, processIntent = {
-                    if (state.step == ServerSetupState.Step.SOURCE) processIntent(it)
-                })
-            },
+            content = content,
         ) { measurables, constraints ->
             val fullHeight = SearchFilterToolbarHeight.roundToPx()
             val visibleHeight = (fullHeight * fraction.coerceIn(0f, 1f)).roundToInt()

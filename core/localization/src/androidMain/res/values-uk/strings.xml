@@ -263,7 +263,7 @@
     <string name="title_history">Історія</string>
     <string name="title_gallery_details">Результат генерації</string>
     <string name="title_settings">Параметри</string>
-    <string name="title_server_setup">Конфігурація</string>
+    <string name="title_server_setup">Налаштування генерації</string>
     <string name="title_select_sd_model">Оберіть SD ML модель</string>
     <string name="title_clear_app_cache">Очистити кеш додатку</string>
     <string name="title_debug_menu">Меню розробника</string>
@@ -302,7 +302,7 @@
     <string name="settings_header_look_and_feel">Інтерфейс</string>
     <string name="settings_header_community">Спільнота</string>
 
-    <string name="settings_item_config">Конфігурація</string>
+    <string name="settings_item_config">Налаштування генерації</string>
     <string name="settings_item_sd_model">SD Модель</string>
     <string name="settings_item_stability_ai_credits">Stability AI Кредити</string>
     <string name="settings_item_local_nnapi">NNAPI</string>
@@ -912,4 +912,33 @@
     <string name="blog_post_missing">Ця стаття недоступна.</string>
     <string name="blog_share_post">Поділитися статтею</string>
     <string name="blog_share_error">Не вдалося відкрити меню поширення.</string>
+    <string name="generation_configuration">Налаштування генерації</string>
+    <string name="upscaler_configuration">Налаштування апскейлера</string>
+    <string name="upscaler_title">Апскейлер</string>
+    <string name="upscaler_action">Збільшити</string>
+    <string name="upscaler_local_provider">ESRGAN</string>
+    <string name="upscaler_provider_help">Завантажте окрему модель апскейлера. Цей вибір не залежить від провайдера генерації.</string>
+    <string name="upscaler_mnn_provider">MNN</string>
+    <string name="upscaler_tag_tiled_inference">Обробка плитками</string>
+    <string name="upscaler_esrgan_description">Збільшуйте зображення на пристрої за допомогою ESRGAN. Завантажте та виберіть модель апскейлера нижче. Цей вибір не залежить від провайдера генерації.</string>
+    <string name="upscaler_mnn_description">Збільшуйте зображення на пристрої за допомогою MNN. Завантажте та виберіть модель апскейлера нижче. Цей вибір не залежить від провайдера генерації.</string>
+    <string name="upscaler_unavailable">Для цієї платформи немає доступних апскейлерів.</string>
+    <string name="upscaler_model">Модель апскейлера</string>
+    <string name="upscaler_pipeline_toggle">Збільшувати згенеровані зображення</string>
+
+    <string name="upscaler_setup_required">Виберіть завантажену модель у налаштуваннях апскейлера.</string>
+    <string name="upscaler_retry">Повторити</string>
+    <string name="upscaler_limits">Для пропорційного зменшення зображень зі стороною понад 1024 пікселі потрібне підтвердження.</string>
+    <string name="upscaler_running">Збільшення…</string>
+
+    <string name="settings_help_upscaler_configuration">Завантажте окрему модель апскейлера. Цей вибір не залежить від провайдера генерації.</string>
+    <string name="upscaler_options">Параметри масштабування</string>
+    <string name="upscaler_provider">Провайдер масштабування</string>
+    <string name="error_upscaler_generation_size">Коли збільшення увімкнено, розмір генерації не має перевищувати 1024 × 1024 пікселі. Зменште розмір або вимкніть збільшення.</string>
+    <string name="upscaler_models">Моделі апскейлера</string>
+    <string name="generation_provider">Провайдер генерації</string>
+    <string name="upscaler_downscale_title">Зображення буде зменшено</string>
+    <string name="upscaler_downscale_message">Апскейлер підтримує вхідні зображення розміром до 1024 × 1024 пікселів. Зображення буде зменшено так, щоб його довша сторона становила 1024 пікселі. Пропорції та все зображення буде збережено.</string>
+    <string name="upscaler_continue">Продовжити</string>
+    <string name="upscaler_scale_factor">Масштаб</string>
 </resources>

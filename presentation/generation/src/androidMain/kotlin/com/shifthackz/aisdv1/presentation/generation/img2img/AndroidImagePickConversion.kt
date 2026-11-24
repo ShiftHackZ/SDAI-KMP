@@ -13,20 +13,22 @@ import kotlinx.coroutines.ensureActive
 import java.io.IOException
 
 /**
- * Converts a picked URI off main using bounded sampling and the existing square/JPEG normalization.
+ * Converts a picked URI off main using bounded sampling and caller-selected aspect-ratio normalization.
  * Large camera originals are sampled to fit the allocation budget instead of rejected by source size.
  * Every bitmap here is owned solely by conversion and is released before returning encoded content.
  *
  * @receiver Picker context used only for content-resolver streams.
  * @param uri Selected gallery or camera source.
  * @param budget Sampled pixel and final encoded-output admission.
+ * @param shouldCropToSquare Whether img2img requires square pixels; false retains the complete composition.
  * @return Selected normalized content, or a localized controlled conversion failure.
  * @throws CancellationException when the calling picker operation is cancelled.
  * @author Dmitriy Moroz
  */
 internal suspend fun Context.imageUriToPickResult(
     uri: Uri,
-    budget: OriginalImageBudget
+    budget: OriginalImageBudget,
+    shouldCropToSquare: Boolean = true,
 ): ImageToImagePickResult {
     val operation = currentCoroutineContext()
     var source: Bitmap? = null
@@ -36,7 +38,7 @@ internal suspend fun Context.imageUriToPickResult(
         val decoded = decodePickedBitmap(uri, budget) ?: throw IOException("Image decode failed")
         source = decoded
         operation.ensureActive()
-        val output = decoded.normalizePickedBitmap()
+        val output = decoded.normalizePickedBitmap(shouldCropToSquare)
         normalized = output
         operation.ensureActive()
         return BoundedImageOutputStream(budget.encodedChars) { operation.ensureActive() }.use { stream ->
@@ -107,14 +109,26 @@ private fun Context.decodePickedBitmap(uri: Uri, budget: OriginalImageBudget): B
 }
 
 /**
- * Keeps the existing center crop, 1536px maximum edge and JPEG quality semantics.
+ * Keeps the 1536px maximum edge and optionally applies the img2img center crop.
  * Intermediate crops are released on both successful scaling and exceptional paths.
  *
  * @receiver Owned sampled bitmap; ownership remains with the caller.
+ * @param shouldCropToSquare Whether to apply the existing square crop instead of fitting the whole image.
  * @return Owned normalized bitmap, which can be identical to the receiver.
  * @author Dmitriy Moroz
  */
-private fun Bitmap.normalizePickedBitmap(): Bitmap {
+private fun Bitmap.normalizePickedBitmap(shouldCropToSquare: Boolean): Bitmap {
+    if (!shouldCropToSquare) {
+        val longestEdge = maxOf(width, height)
+        if (longestEdge <= MAX_PICKED_IMAGE_SIDE) return this
+        val scale = MAX_PICKED_IMAGE_SIDE.toDouble() / longestEdge
+        return Bitmap.createScaledBitmap(
+            this,
+            (width * scale).toInt().coerceAtLeast(1),
+            (height * scale).toInt().coerceAtLeast(1),
+            true
+        )
+    }
     val side = minOf(width, height)
     val cropped = if (width == side && height == side) this else Bitmap.createBitmap(
         this,

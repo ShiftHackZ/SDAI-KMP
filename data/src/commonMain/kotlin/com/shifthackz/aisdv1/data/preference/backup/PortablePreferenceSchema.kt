@@ -151,6 +151,10 @@ internal object PortablePreferenceSchema {
             "key_performance_overlay",
             PortablePreferenceType.FLAG
         ),
+        "upscalerModel" to PortablePreferenceField(
+            "upscaler_model_id",
+            PortablePreferenceType.TEXT
+        ),
         "dimScreen" to PortablePreferenceField("key_dim_screen", PortablePreferenceType.FLAG),
         "backgroundGeneration" to PortablePreferenceField(
             "key_background_generation",

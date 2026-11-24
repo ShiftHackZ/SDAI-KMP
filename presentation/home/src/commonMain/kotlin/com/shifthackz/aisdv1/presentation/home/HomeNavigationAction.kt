@@ -9,9 +9,11 @@ package com.shifthackz.aisdv1.presentation.home
 internal enum class HomeNavigationAction {
     TextToImage,
     ImageToImage,
+    Upscaler,
     Gallery,
     Settings,
     WebUi,
     Configuration,
+    UpscalerConfiguration,
     Debug,
 }

@@ -5,15 +5,19 @@ import com.shifthackz.aisdv1.data.mappers.mapPreviewEntityToDomain
 import com.shifthackz.aisdv1.domain.entity.GalleryItemMetadata
 import com.shifthackz.aisdv1.domain.gateway.GalleryReadGateway
 import com.shifthackz.aisdv1.storage.db.persistent.dao.GenerationResultDao
+import com.shifthackz.aisdv1.storage.gateway.GalleryImagePayloadReader
 import kotlinx.coroutines.flow.map
 
 /**
  * SQLite projection owner; selection reads stay below the platform bind-parameter limit.
  *
- * @param dao Persistent gallery access.
+ * @param dao Persistent gallery metadata access.
+ * @param payloads Platform bulk reader for revision- and size-admitted image bytes.
  * @author Dmitriy Moroz
  */
-internal class GalleryReadGatewayImpl(private val dao: GenerationResultDao) : GalleryReadGateway {
+internal class GalleryReadGatewayImpl(
+    private val dao: GenerationResultDao, private val payloads: GalleryImagePayloadReader,
+) : GalleryReadGateway {
     /**
      * Observes IDs without images.
      *
@@ -78,6 +82,7 @@ internal class GalleryReadGatewayImpl(private val dao: GenerationResultDao) : Ga
     /**
      * Reads one revision-matching encoded image only when its SQL length fits the character budget.
      * A missing, replaced or oversized image returns null before payload materialization.
+     * SQLite returns UTF8 bytes, decoded in bulk to avoid Kotlin/Native's per-character TEXT conversion.
      *
      * @param id Image identity.
      * @param revision Expected content identity.
@@ -86,5 +91,6 @@ internal class GalleryReadGatewayImpl(private val dao: GenerationResultDao) : Ga
      * @author Dmitriy Moroz
      */
     override suspend fun image(id: Long, revision: String, isInput: Boolean, maxChars: Int) =
-        dao.queryImage(id, revision, isInput, maxChars.coerceIn(1, 32 * 1024 * 1024))
+        payloads.read(id, revision, isInput, maxChars.coerceIn(1, 32 * 1024 * 1024))
+            ?.decodeToString()
 }

@@ -10,7 +10,6 @@ import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
 interface BenchmarkDeviceProbe {
     /**
      * Captures a best-effort hardware snapshot.
-     *
      * Implementations must catch platform API failures internally and return
      * conservative fallback values instead of throwing.
      *

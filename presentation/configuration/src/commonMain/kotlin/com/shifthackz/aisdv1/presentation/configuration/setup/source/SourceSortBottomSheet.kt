@@ -35,6 +35,31 @@ internal fun SourceSortBottomSheet(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    ProviderSortBottomSheet(
+        selected = state.sourceSortOrder, strings = strings,
+        onSelect = {
+            processIntent(ServerSetupIntent.UpdateSourceSortOrder(it))
+            processIntent(ServerSetupIntent.DismissDialog)
+        },
+        modifier = modifier,
+    )
+}
+
+/**
+ * Shared provider date-order choices for either configuration picker.
+ *
+ * @param selected Current ordering.
+ * @param strings Localized title and ordering labels.
+ * @param onSelect Publishes selection and dismisses the owning sheet.
+ * @param modifier Layout of the complete sheet.
+ * @author Dmitriy Moroz
+ */
+@Composable
+internal fun ProviderSortBottomSheet(
+    selected: ServerSetupState.SourceSortOrder,
+    strings: ServerSetupStrings, onSelect: (ServerSetupState.SourceSortOrder) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -54,13 +79,12 @@ internal fun SourceSortBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 2.dp),
-                selected = state.sourceSortOrder == sortOrder,
+                selected = selected == sortOrder,
                 showChevron = false,
-                startIcon = if (state.sourceSortOrder == sortOrder) Icons.Default.Check else null,
+                startIcon = if (selected == sortOrder) Icons.Default.Check else null,
                 text = sortOrder.mapToUi(strings).asUiText(),
                 onClick = {
-                    processIntent(ServerSetupIntent.UpdateSourceSortOrder(sortOrder))
-                    processIntent(ServerSetupIntent.DismissDialog)
+                    onSelect(sortOrder)
                 },
             )
         }

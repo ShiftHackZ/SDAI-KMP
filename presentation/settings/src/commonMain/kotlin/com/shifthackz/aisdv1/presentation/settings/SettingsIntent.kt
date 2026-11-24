@@ -19,6 +19,7 @@ sealed interface SettingsIntent : MviIntent {
      * @author Dmitriy Moroz
      */
     data object NavigateConfiguration : SettingsIntent
+    data object NavigateUpscalerConfiguration : SettingsIntent
 
     /**
      * Opens portable selective backup and restore.

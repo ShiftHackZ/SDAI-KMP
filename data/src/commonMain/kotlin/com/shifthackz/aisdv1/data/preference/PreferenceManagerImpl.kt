@@ -29,6 +29,14 @@ internal class PreferenceManagerImpl(
 
     private val keyValueStore: KeyValueStore,
 ) : PreferenceManager {
+    /**
+     * Retains the dedicated upscaler selection without changing generation configuration.
+     *
+     * @author Dmitriy Moroz
+     */
+    override var upscalerModelId: String
+        get() = keyValueStore.getString("upscaler_model_id")
+        set(value) = putString("upscaler_model_id", value)
 
 
     private val preferencesChangedState = MutableStateFlow(Any())

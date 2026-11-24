@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.feature.mnn.di
 
+import com.shifthackz.aisdv1.domain.gateway.UpscalerGateway
+import com.shifthackz.aisdv1.feature.mnn.MnnUpscalerGateway
 import com.shifthackz.aisdv1.feature.mnn.MnnAppleBridge
 import com.shifthackz.aisdv1.feature.mnn.UnavailableMnnAppleBridge
 import com.shifthackz.aisdv1.feature.mnn.MnnRuntime
@@ -21,4 +23,5 @@ internal actual fun platformMnnHostModule() = platformMnnModule()
 internal actual fun platformMnnModule() = module {
     single<MnnAppleBridge> { UnavailableMnnAppleBridge() }
     single<MnnRuntime> { MnnRuntimeImpl(get()) }
+    single<UpscalerGateway> { MnnUpscalerGateway(get()) }
 }

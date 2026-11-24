@@ -41,6 +41,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.assertSame
 import org.junit.Test
 import org.junit.Assert.assertNotSame
+import com.shifthackz.aisdv1.domain.entity.GenerationFinalizationContext
+import com.shifthackz.aisdv1.domain.entity.UpscalerConfiguration
 import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkDeviceInfo
 import com.shifthackz.aisdv1.domain.entity.benchmark.BenchmarkPlatform
@@ -79,7 +81,11 @@ class TextToImageUseCaseImplTest {
 
     private val deviceProbe = mockk<BenchmarkDeviceProbe>(relaxed = true)
 
+    private val upscaleImage = mockk<UpscaleImageUseCase>()
+    private val finalizeImage = mockk<FinalizeGenerationUseCase>()
+
     private val useCase = TextToImageUseCaseImpl(
+        upscaleImageUseCase = upscaleImage, finalizeGenerationUseCase = finalizeImage,
         deviceProbe = deviceProbe,
         autoUploadToCivitaiUseCase = AutoUploadToCivitaiUseCase { it },
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(
@@ -107,6 +113,69 @@ class TextToImageUseCaseImplTest {
         mnnGenerationRepository = mockk(),
         preferenceManager = stubPreferenceManager,
     )
+
+    @Test
+    fun `given text generation with upscaling, requested size exceeds bounds, expected rejection before provider dispatch`() =
+        runTest {
+            // Given
+            val payload =
+                mockTextToImagePayload.copy(width = 1536, upscaler = UpscalerConfiguration("model"))
+            // When
+            val failure = runCatching { useCase(payload) }.exceptionOrNull()
+            // Then
+            assertTrue(failure is IllegalArgumentException)
+            coVerify(exactly = 0) { deviceProbe.capture() }
+            coVerify(exactly = 0) { stubStableDiffusionGenerationRepository.generateFromText(any()) }
+        }
+
+    @Test
+    fun `given text generation with upscaler, provider completes, expected deferred save and enlarged final result`() =
+        runTest {
+            // Given
+            val selection = UpscalerConfiguration("upscaler_model")
+            val original = mockAiGenerationResult.copy(id = 0L)
+            val enlarged = original.copy(image = "enlarged", width = 2048, height = 2048)
+            val saved = enlarged.copy(id = 42L)
+            every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
+            var hasDeferredSave = false
+            coEvery { stubStableDiffusionGenerationRepository.generateFromText(any()) } coAnswers {
+                hasDeferredSave = currentCoroutineContext()[GenerationFinalizationContext] != null
+                listOf(original)
+            }
+            coEvery { upscaleImage(original, selection) } returns enlarged
+            coEvery { finalizeImage(enlarged) } returns saved
+
+            // When
+            val result = useCase(mockTextToImagePayload.copy(upscaler = selection))
+
+            // Then
+            assertTrue(hasDeferredSave)
+            assertEquals(listOf(saved), result)
+            coVerify(exactly = 1) { upscaleImage(original, selection) }
+            coVerify(exactly = 1) { finalizeImage(enlarged) }
+        }
+
+    @Test
+    fun `given text generation with upscaler, upscaling fails, expected failure without final persistence`() =
+        runTest {
+            // Given
+            val selection = UpscalerConfiguration("upscaler_model")
+            val original = mockAiGenerationResult.copy(id = 0L)
+            every { stubPreferenceManager.source } returns ServerSource.AUTOMATIC1111
+            coEvery { stubStableDiffusionGenerationRepository.generateFromText(any()) } returns listOf(
+                original
+            )
+            coEvery { upscaleImage(original, selection) } throws stubException
+
+            // When
+            val failure =
+                runCatching { useCase(mockTextToImagePayload.copy(upscaler = selection)) }.exceptionOrNull()
+
+            // Then
+            assertTrue(failure is RuntimeException)
+            assertEquals(stubException.message, failure?.message)
+            coVerify(exactly = 0) { finalizeImage(any()) }
+        }
 
     @Test
     fun `given Easy Diffusion generation, complete batch is requested, expected one immutable connection capture`() =

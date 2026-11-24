@@ -3,6 +3,8 @@ package com.shifthackz.aisdv1.presentation.app
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -25,6 +27,8 @@ import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageViewMod
 import com.shifthackz.aisdv1.presentation.generation.img2img.rememberImageToImagePlatformActions
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageIntent
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageViewModel
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerFormViewModel
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -55,12 +59,25 @@ fun AiSdApp(
     val imageToImageViewModel = remember(koin, router, imageToImagePlatformActions) {
         koin.get<ImageToImageViewModel> { parametersOf(router, imageToImagePlatformActions) }
     }
-    val generationActivity = remember(textToImageViewModel, imageToImageViewModel) {
-        combine(
-            textToImageViewModel.state.map { it.generating }.distinctUntilChanged(),
-            imageToImageViewModel.state.map { it.generating }.distinctUntilChanged(),
-        ) { isTextGenerating, isImageGenerating -> isTextGenerating || isImageGenerating }
+    val upscalerViewModel = remember(koin, router, imageToImagePlatformActions) {
+        koin.get<UpscalerViewModel> { parametersOf(router, imageToImagePlatformActions) }
     }
+    val upscalerFormViewModel = remember(koin) { koin.get<UpscalerFormViewModel>() }
+    val upscalerFormState by upscalerFormViewModel.state.collectAsState()
+    DisposableEffect(upscalerViewModel, upscalerFormViewModel) {
+        val store = ViewModelStore()
+        store.put("Upscaler", upscalerViewModel)
+        store.put("UpscalerForm", upscalerFormViewModel)
+        onDispose { store.clear() }
+    }
+    val generationActivity =
+        remember(textToImageViewModel, imageToImageViewModel, upscalerViewModel) {
+            combine(
+                textToImageViewModel.state.map { it.generating }.distinctUntilChanged(),
+                imageToImageViewModel.state.map { it.generating }.distinctUntilChanged(),
+                upscalerViewModel.state.map { it.isRunning }.distinctUntilChanged(),
+            ) { isTextGenerating, isImageGenerating, isUpscaling -> isTextGenerating || isImageGenerating || isUpscaling }
+        }
     val viewModel = remember(koin, router, generationActivity) {
         koin.get<AiSdAppViewModel> { parametersOf(router, generationActivity) }
     }
@@ -94,6 +111,8 @@ fun AiSdApp(
                     preferenceManager = preferenceManager,
                     shouldShowHomeChrome = shouldShowHomeChrome,
                     observePerformance = observePerformance,
+                    upscalerViewModel = upscalerViewModel,
+                    upscalerFormState = upscalerFormState,
                     textToImageViewModel = textToImageViewModel,
                     imageToImageViewModel = imageToImageViewModel,
                 )
