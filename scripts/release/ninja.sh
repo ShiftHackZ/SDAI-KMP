@@ -6,4 +6,4 @@ for arg in "$@"; do
         exec "${SDAI_REAL_NINJA:?Pinned Ninja path required}" "$@"
     fi
 done
-exec "${SDAI_REAL_NINJA:?Pinned Ninja path required}" "$@" -j2
+exec "${SDAI_REAL_NINJA:?Pinned Ninja path required}" "$@" "-j${SDAI_NATIVE_WORKERS:-2}"

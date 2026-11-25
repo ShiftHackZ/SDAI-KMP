@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.22.1)
 project(sdai_mnn_runtime LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Build IDs hash debug inputs before stripping and can retain build-path variance.
+# Apply before adding any dependency targets, as recommended by F-Droid.
+add_link_options("LINKER:--build-id=none")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384")
 
 # Keep source locations and debug/build-id inputs independent of checkout paths.

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Run FOSS builds under distinct real users/hostnames on disposable Linux runners.
+set -euo pipefail
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source_dir="$(cd "${1:?Source required}" && pwd)"
+flavor="${2:?Flavor required}"
+format="${3:?Format required}"
+output_dir="${4:?Output required}"
+sha="${5:?Source SHA required}"
+profile="${6:?Profile required}"
+if [[ "$flavor" != foss ]]; then
+    exec bash "$script_dir/build.sh" "$source_dir" "$flavor" "$format" "$output_dir" "$sha"
+fi
+case "$profile" in baseline|varied) ;; *) echo 'Invalid FOSS build profile' >&2; exit 1 ;; esac
+build_user="sdai-$profile"
+sudo useradd --create-home --user-group --shell /bin/bash "$build_user"
+printf '127.0.1.1 sdai-build-%s\n' "$profile" | sudo tee -a /etc/hosts >/dev/null
+sudo hostname "sdai-build-$profile"
+sudo chown -R "$build_user:$build_user" "$source_dir" "$SDAI_TOOLCHAIN_DIR" "$ANDROID_HOME"
+build_temp="$RUNNER_TEMP/build-$profile"
+sudo install -d -o "$build_user" -g "$build_user" "$output_dir" "$build_temp"
+# Restore artifact ownership even on failure so Actions can retain private build evidence.
+runner_owner="$(id -u):$(id -g)"
+trap 'sudo chown -R "$runner_owner" "$output_dir"' EXIT
+build_command=(bash "$script_dir/build.sh" "$source_dir" "$flavor" "$format" "$output_dir" "$sha")
+if [[ "$profile" == varied ]]; then
+    mounted_source="$build_temp/source-with-reordered-directories"
+    build_command=(python3 "$script_dir/prepare_rebuild.py" "$source_dir" "$mounted_source" --
+        faketime -f '+2d' bash "$script_dir/build.sh" "$mounted_source" "$flavor" "$format" "$output_dir" "$sha")
+fi
+sudo --user "$build_user" --set-home env \
+    PATH="$PATH" JAVA_HOME="$JAVA_HOME" \
+    ANDROID_HOME="$ANDROID_HOME" ANDROID_SDK_ROOT="$ANDROID_HOME" \
+    GRADLE_USER_HOME="$GRADLE_USER_HOME" SDAI_GRADLE="$SDAI_GRADLE" \
+    SDAI_TOOLCHAIN_DIR="$SDAI_TOOLCHAIN_DIR" RUNNER_TEMP="$build_temp" \
+    SDAI_REPRO_PROFILE="$profile" \
+    FAKETIME_DONT_FAKE_MONOTONIC=1 \
+    "${build_command[@]}"

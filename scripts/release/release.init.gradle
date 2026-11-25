@@ -3,6 +3,15 @@ import groovy.json.JsonSlurper
 // Apply the release profile without modifying the target commit's source files.
 def profile = new JsonSlurper().parse(new File(System.getenv('SDAI_RELEASE_PROFILE')))
 gradle.beforeProject { project ->
+    if (System.getenv('SDAI_RELEASE_FLAVOR') == 'foss') {
+        // Reject time-dependent dependency selection in every project and buildscript.
+        project.configurations.configureEach {
+            resolutionStrategy.failOnNonReproducibleResolution()
+        }
+        project.buildscript.configurations.configureEach {
+            resolutionStrategy.failOnNonReproducibleResolution()
+        }
+    }
     project.afterEvaluate {
         def android = project.extensions.findByName('android')
         if (android != null) {
@@ -13,6 +22,13 @@ gradle.beforeProject { project ->
                 android.defaultConfig.externalNativeBuild.cmake.arguments(
                     "-DCMAKE_MAKE_PROGRAM=${System.getenv('SDAI_NINJA_WRAPPER')}"
                 )
+            }
+            if (System.getenv('SDAI_RELEASE_FLAVOR') == 'foss') {
+                // Apply to every native Android module, including future CMake/ndk-build projects.
+                android.defaultConfig.externalNativeBuild.cmake.cFlags('-Werror=date-time')
+                android.defaultConfig.externalNativeBuild.cmake.cppFlags('-Werror=date-time')
+                android.defaultConfig.externalNativeBuild.ndkBuild.cFlags('-Werror=date-time')
+                android.defaultConfig.externalNativeBuild.ndkBuild.cppFlags('-Werror=date-time')
             }
             if (project.plugins.hasPlugin('com.android.application')) {
                 android.buildTypes.getByName('release').signingConfig = null
