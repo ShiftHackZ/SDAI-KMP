@@ -52,6 +52,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
 import org.junit.Before
 import org.junit.Test
 
@@ -137,6 +139,56 @@ class SettingsViewModelTest {
             assertEquals(0f, actual.stabilityAiCredits)
             assertEquals("test-version", actual.appVersion)
 
+        }
+
+    @Test
+    fun `given settings with configured upscaler, screen opens, expected active provider in state`() =
+        runTest {
+            // Given
+            every { preferenceManager.upscalerModelId } returns "upscaler_mnn_anime"
+
+            // When
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(UpscalerSource.LOCAL_MNN, viewModel.state.value.upscalerSource)
+        }
+
+    @Test
+    fun `given settings with configured upscaler, selection invalidates preferences, expected provider refreshed independently`() =
+        runTest {
+            // Given
+            every { preferenceManager.upscalerModelId } returns "upscaler_mnn_anime"
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+            val generationProvider = viewModel.state.value.serverSource
+
+            // When
+            every { preferenceManager.upscalerModelId } returns "upscaler_esrgan_anime"
+            settings.value = settings.value.copy(monitorConnectivity = true)
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(UpscalerSource.LOCAL_ESRGAN, viewModel.state.value.upscalerSource)
+            assertEquals(generationProvider, viewModel.state.value.serverSource)
+        }
+
+    @Test
+    fun `given settings with configured upscaler, selection is removed, expected no active provider`() =
+        runTest {
+            // Given
+            every { preferenceManager.upscalerModelId } returns "upscaler_mnn_anime"
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            // When
+            every { preferenceManager.upscalerModelId } returns ""
+            settings.value = settings.value.copy(monitorConnectivity = true)
+            advanceUntilIdle()
+
+            // Then
+            assertNull(viewModel.state.value.upscalerSource)
         }
 
     @Test

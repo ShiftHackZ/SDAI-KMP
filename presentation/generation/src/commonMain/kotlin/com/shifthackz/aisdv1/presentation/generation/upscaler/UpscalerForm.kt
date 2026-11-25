@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.generation.upscaler
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,6 +14,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,6 +28,7 @@ import com.shifthackz.aisdv1.domain.entity.UpscalerImageSize
 /**
  * Shared upscaler controls for standalone execution and the optional generation final stage.
  * Optional provider and parameter cards expand and collapse together below the enable switch.
+ * User activation lets the owning screen follow the expanding controls with its scroll position.
  *
  * @param state Configuration/catalog state observed by the application composition root.
  * @param configuration Captured model selection; null disables the optional pipeline stage.
@@ -32,6 +38,7 @@ import com.shifthackz.aisdv1.domain.entity.UpscalerImageSize
  * @param isEnabled Whether the owning screen currently accepts edits.
  * @param isStandalone Whether upscaling is mandatory rather than an optional stage.
  * @param outputSize Predicted standalone output dimensions; null leaves dimension fields empty.
+ * @param onRevealControls Follows user-triggered expansion; the supplied predicate remains true until expansion settles.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -40,9 +47,20 @@ internal fun UpscalerForm(
     configuration: UpscalerConfiguration?,
     onConfigurationChange: (UpscalerConfiguration?) -> Unit, onConfigure: () -> Unit,
     modifier: Modifier = Modifier, isEnabled: Boolean = true, isStandalone: Boolean = false,
-    outputSize: UpscalerImageSize? = null
+    outputSize: UpscalerImageSize? = null,
+    onRevealControls: suspend (isExpanding: () -> Boolean) -> Unit = {},
 ) {
     if (state == null || !state.isSupported) return
+    val isVisible = isStandalone || configuration != null
+    val visibility = remember { MutableTransitionState(isVisible) }
+    visibility.targetState = isVisible
+    var shouldRevealControls by remember { mutableStateOf(false) }
+    LaunchedEffect(shouldRevealControls, isVisible) {
+        if (shouldRevealControls && isVisible) {
+            onRevealControls { !visibility.isIdle || !visibility.currentState }
+            shouldRevealControls = false
+        }
+    }
     val defaultModel = state.model?.takeIf { it.downloaded }
     val source = configuration?.source ?: state.model?.let { UpscalerSource.forModel(it.id) }
     ?: UpscalerSource.availableOn(state.platform).first()
@@ -82,6 +100,7 @@ internal fun UpscalerForm(
         if (!isStandalone) UpscalerEnableCard(
             isChecked = configuration != null, isEnabled = isEnabled,
             onCheckedChange = { shouldUpscale ->
+                shouldRevealControls = shouldUpscale
                 onConfigurationChange(
                     if (shouldUpscale) UpscalerConfiguration(
                         defaultModel?.id.orEmpty(),
@@ -91,7 +110,7 @@ internal fun UpscalerForm(
             },
         )
         AnimatedVisibility(
-            visible = isStandalone || configuration != null,
+            visibleState = visibility,
             enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
             exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
         ) {

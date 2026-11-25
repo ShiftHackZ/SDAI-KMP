@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import com.shifthackz.aisdv1.core.common.platform.Platform
@@ -122,6 +123,33 @@ class UpscalerSetupUiTest {
         compose.onNodeWithText("MNN").assertIsDisplayed()
         compose.onNodeWithText(UpscalerSource.LOCAL_MNN.description).assertIsDisplayed()
         compose.onNodeWithText(model.name).assertIsDisplayed()
+    }
+
+    @Test
+    fun `given configured upscaler wizard, toolbar Back is pressed, expected provider step with draft preserved`() {
+        // Given
+        var draft by mutableStateOf(
+            state.copy(
+                step = ServerSetupState.Step.CONFIGURE,
+                discovery = UpscalerDiscoveryState(query = "MNN"),
+            )
+        )
+        render {
+            UpscalerSetupContent(draft, { intent ->
+                if (intent == UpscalerSetupIntent.Back) draft =
+                    draft.copy(step = ServerSetupState.Step.SOURCE)
+            })
+        }
+        // When
+        compose.onNodeWithContentDescription(ServerSetupStrings().backContentDescription)
+            .performClick()
+        compose.waitForIdle()
+        // Then
+        assertEquals(ServerSetupState.Step.SOURCE, draft.step)
+        assertEquals(UpscalerSource.LOCAL_MNN, draft.source)
+        assertEquals(model.id, draft.selectedId)
+        assertEquals("MNN", draft.discovery.query)
+        compose.onAllNodesWithText("MNN")[0].assertIsDisplayed()
     }
 
     @Test

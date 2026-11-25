@@ -917,11 +917,11 @@
     <string name="upscaler_title">Апскейлер</string>
     <string name="upscaler_action">Увеличить</string>
     <string name="upscaler_local_provider">ESRGAN</string>
-    <string name="upscaler_provider_help">Загрузите отдельную модель апскейлера. Этот выбор не зависит от провайдера генерации.</string>
+    <string name="upscaler_provider_help">Апскейлер увеличивает разрешение изображения и улучшает чёткость контуров и мелких деталей с помощью ИИ. Его можно применять к готовым изображениям или после генерации.</string>
     <string name="upscaler_mnn_provider">MNN</string>
     <string name="upscaler_tag_tiled_inference">Обработка по плиткам</string>
-    <string name="upscaler_esrgan_description">Увеличивайте изображения на устройстве с помощью ESRGAN. Загрузите и выберите модель апскейлера ниже. Этот выбор не зависит от провайдера генерации.</string>
-    <string name="upscaler_mnn_description">Увеличивайте изображения на устройстве с помощью MNN. Загрузите и выберите модель апскейлера ниже. Этот выбор не зависит от провайдера генерации.</string>
+    <string name="upscaler_esrgan_description">ESRGAN увеличивает изображения и улучшает чёткость контуров и мелких деталей с помощью ИИ на вашем устройстве. Применяйте его к готовым изображениям или после генерации.</string>
+    <string name="upscaler_mnn_description">MNN увеличивает изображения и улучшает чёткость контуров и мелких деталей с помощью ИИ на вашем устройстве. Применяйте его к готовым изображениям или после генерации.</string>
     <string name="upscaler_unavailable">Для этой платформы нет доступных апскейлеров.</string>
     <string name="upscaler_model">Модель апскейлера</string>
     <string name="upscaler_pipeline_toggle">Увеличивать сгенерированные изображения</string>
@@ -931,7 +931,7 @@
     <string name="upscaler_limits">Для пропорционального уменьшения изображений со стороной более 1024 пикселей потребуется подтверждение.</string>
     <string name="upscaler_running">Увеличение…</string>
 
-    <string name="settings_help_upscaler_configuration">Загрузите отдельную модель апскейлера. Этот выбор не зависит от провайдера генерации.</string>
+    <string name="settings_help_upscaler_configuration">Выберите провайдера апскейлинга и настройте его локальные модели.</string>
     <string name="upscaler_options">Параметры масштабирования</string>
     <string name="upscaler_provider">Провайдер масштабирования</string>
     <string name="error_upscaler_generation_size">При включённом увеличении размер генерации не должен превышать 1024 × 1024 пикселя. Уменьшите размер или отключите увеличение.</string>

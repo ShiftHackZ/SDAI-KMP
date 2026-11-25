@@ -37,6 +37,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbar
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
 import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerForm
 import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerFormState
+import com.shifthackz.aisdv1.presentation.generation.upscaler.revealUpscalerControls
 import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInputFormEvent
 import com.shifthackz.aisdv1.presentation.generation.widget.input.generationInputFormItems
 
@@ -157,7 +158,8 @@ internal fun TextToImageBody(
                     onConfigurationChange = { processIntent(TextToImageIntent.UpdateUpscaler(it)) },
                     onConfigure = { processIntent(TextToImageIntent.ConfigureUpscaler) },
                     modifier = Modifier.padding(top = 16.dp),
-                    isEnabled = !state.generating
+                    isEnabled = !state.generating,
+                    onRevealControls = { isExpanding -> listState.revealUpscalerControls(isExpanding) },
                 )
             }
         }

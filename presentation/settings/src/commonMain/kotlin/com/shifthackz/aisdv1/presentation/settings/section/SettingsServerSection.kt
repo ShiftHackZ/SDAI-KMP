@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.common.math.roundTo
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
+import com.shifthackz.aisdv1.presentation.components.model.displayName
 import com.shifthackz.aisdv1.presentation.settings.SettingsIntent
 import com.shifthackz.aisdv1.presentation.settings.startIcon
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
@@ -69,6 +70,7 @@ internal fun SettingsServerSection(
             SettingsItem(
                 modifier = itemModifier, loading = state.loading, startIcon = row.startIcon,
                 text = text("upscaler_configuration"),
+                endValueText = state.upscalerSource?.displayName.orEmpty().asUiText(),
                 onClick = { processIntent(SettingsIntent.NavigateUpscalerConfiguration) })
         }
 

@@ -4,6 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
 import com.shifthackz.aisdv1.presentation.settings.SettingsListItem
 import com.shifthackz.aisdv1.presentation.settings.SettingsState
 
@@ -19,6 +20,11 @@ internal class SettingsContentPreviewParameterProvider :
     private val cases = listOf(
         SettingsPreviewCase("Loading", SettingsState()),
         SettingsPreviewCase("Automatic1111 · Model selected", ready),
+        SettingsPreviewCase(
+            "Upscaler · ESRGAN",
+            ready.copy(upscalerSource = UpscalerSource.LOCAL_ESRGAN)
+        ),
+        SettingsPreviewCase("Upscaler · Not configured", ready.copy(upscalerSource = null)),
         SettingsPreviewCase(
             "Automatic1111 · No models",
             ready.copy(sdModels = emptyList(), sdModelSelected = "")

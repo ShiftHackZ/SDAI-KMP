@@ -30,6 +30,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,9 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.form.remote.FormTi
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
 import com.shifthackz.aisdv1.presentation.components.widget.action.ScreenActionBar
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.PlatformBackHandler
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalBackTransitionState
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationInputEnabled
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.rememberBackTransitionState
 import com.shifthackz.aisdv1.presentation.components.widget.navigation.ProgrammaticPager
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupState
 import com.shifthackz.aisdv1.presentation.configuration.setup.LocalCatalogStatus
@@ -52,6 +58,7 @@ import com.shifthackz.aisdv1.presentation.configuration.setup.form.local.LocalMo
 
 /**
  * Reuses the generation wizard's scaffold, step strip, pager and downloaded-model rows.
+ * iOS Back previews the provider step and commits only after the local transition completes.
  *
  * @param state Dedicated configuration draft and transfer snapshots.
  * @param processIntent Dispatches configuration and transfer actions.
@@ -63,6 +70,31 @@ internal fun UpscalerSetupContent(
     state: UpscalerSetupState, processIntent: (UpscalerSetupIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localBack = rememberBackTransitionState()
+    val routeBack = LocalBackTransitionState.current
+    val currentState by rememberUpdatedState(state)
+    val currentIntent by rememberUpdatedState(processIntent)
+    val isConfiguration = state.step == ServerSetupState.Step.CONFIGURE
+    val shouldAnimateStepBack = isConfiguration && isPlatformToolbarNative
+    val canStartGesture = state.error == null && state.pendingDeleteId == null &&
+            !state.discovery.isFilterVisible && !state.discovery.isSortVisible
+    val currentCanStartGesture by rememberUpdatedState(canStartGesture)
+    LaunchedEffect(state.step) {
+        if (!isConfiguration) {
+            withFrameNanos { }
+            localBack.reset()
+        }
+    }
+    val onBack = {
+        if (shouldAnimateStepBack) {
+            localBack.complete(
+                canCommit = {
+                    currentState.step == ServerSetupState.Step.CONFIGURE && currentCanStartGesture
+                },
+                onBack = { currentIntent(UpscalerSetupIntent.Back) },
+            )
+        } else currentIntent(UpscalerSetupIntent.Back)
+    }
     val strings = ServerSetupStrings(title = Localization.string("upscaler_configuration"))
     val fraction by animateFloatAsState(
         targetValue = if (state.step == ServerSetupState.Step.SOURCE) 1f else 0f,
@@ -85,8 +117,10 @@ internal fun UpscalerSetupContent(
     }
     if (!LocalInspectionMode.current) {
         PlatformBackHandler(
-            isEnabled = true, onBack = { processIntent(UpscalerSetupIntent.Back) },
-            canStartGesture = state.step == ServerSetupState.Step.SOURCE
+            isEnabled = true,
+            onBack = { currentIntent(UpscalerSetupIntent.Back) },
+            canStartGesture = canStartGesture && (!isConfiguration || shouldAnimateStepBack),
+            transitionState = if (isConfiguration) localBack else routeBack,
         )
     }
     ConfigurationWizardScaffold(
@@ -94,7 +128,7 @@ internal fun UpscalerSetupContent(
         step = state.step,
         strings = strings,
         canNavigateBack = true,
-        onBack = { processIntent(UpscalerSetupIntent.Back) },
+        onBack = onBack,
         modifier = modifier,
         toolbarExtensionHeight = if (isPlatformToolbarNative) SearchFilterToolbarHeight * fraction else 0.dp,
         toolbarExtension = { if (isPlatformToolbarNative) toolbar() },
@@ -115,13 +149,17 @@ internal fun UpscalerSetupContent(
         }) { padding ->
         ProgrammaticPager(
             selectedPage = state.step.ordinal, pageCount = 2,
-            modifier = Modifier.padding(padding).fillMaxSize()
+            modifier = Modifier.padding(padding).fillMaxSize(),
+            shouldAnimate = !LocalInspectionMode.current && !localBack.hasCommittedGesture,
+            backProgress = if (shouldAnimateStepBack && localBack.isActive) localBack.progress else null,
         ) { page ->
+            val canSendIntent = LocalNavigationInputEnabled.current && page == state.step.ordinal
+            val pageIntent: (UpscalerSetupIntent) -> Unit = { if (canSendIntent) currentIntent(it) }
             if (page == 0) {
                 UpscalerSourceSelectionStep(
                     state,
                     strings,
-                    processIntent,
+                    pageIntent,
                     Modifier.fillMaxSize()
                 )
             } else {
@@ -159,8 +197,8 @@ internal fun UpscalerSetupContent(
                                     transfer?.progress ?: DownloadState.Unknown
                                 ),
                                 selected = model.id == state.selectedId, strings = strings,
-                                onSelect = { processIntent(UpscalerSetupIntent.Select(model.id)) },
-                                onAction = { processIntent(UpscalerSetupIntent.ModelAction(model.id)) })
+                                onSelect = { pageIntent(UpscalerSetupIntent.Select(model.id)) },
+                                onAction = { pageIntent(UpscalerSetupIntent.ModelAction(model.id)) })
                         }
                         if (state.catalogStatus == LocalCatalogStatus.ERROR ||
                             (!state.isLoading && state.models.none { UpscalerSource.forModel(it.id) == state.source })
@@ -168,7 +206,7 @@ internal fun UpscalerSetupContent(
                             item {
                                 LocalCatalogStatusCard(
                                     state.catalogStatus, state.isLoading,
-                                    onRetry = { processIntent(UpscalerSetupIntent.Retry) })
+                                    onRetry = { pageIntent(UpscalerSetupIntent.Retry) })
                             }
                         }
                     }

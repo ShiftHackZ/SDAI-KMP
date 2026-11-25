@@ -154,7 +154,7 @@ internal fun appDrawerItems(
                 label = Localization.string("upscaler_configuration"),
                 selected = currentRoute is AppRoute.Setup && currentRoute.isUpscaler,
                 icon = upscalerConfigurationIcon,
-                helpMessage = Localization.string("upscaler_provider_help"),
+                helpMessage = Localization.string("settings_help_upscaler_configuration"),
                 onClick = { onAction(HomeNavigationAction.UpscalerConfiguration) },
             ),
         )

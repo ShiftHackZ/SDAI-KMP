@@ -15,6 +15,7 @@ import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
 import com.shifthackz.aisdv1.domain.usecase.caching.ClearAppCacheUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalBonsaiModelsUseCase
@@ -164,6 +165,10 @@ class SettingsViewModel(
                         state.copy(
                             loading = false,
                             serverSource = settings.source,
+                            upscalerSource = preferenceManager.upscalerModelId
+                                .takeIf(String::isNotBlank)
+                                ?.let(UpscalerSource::forModel)
+                                ?.takeIf { buildInfoProvider.platform in it.allowedPlatforms },
                             generationRequestTimeout = settings.generationRequestTimeout,
                             connectionTimeout = settings.connectionTimeout,
                             sdModels = modelTitles,

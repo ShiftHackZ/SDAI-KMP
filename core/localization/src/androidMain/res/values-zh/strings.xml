@@ -969,11 +969,11 @@
     <string name="upscaler_title">放大器</string>
     <string name="upscaler_action">放大</string>
     <string name="upscaler_local_provider">ESRGAN</string>
-    <string name="upscaler_provider_help">下载独立的放大模型。此选择与生成服务提供商无关。</string>
+    <string name="upscaler_provider_help">AI 图像放大可提高分辨率，并增强边缘和细节。既可用于已有图像，也可作为图像生成后的最后一步。</string>
     <string name="upscaler_mnn_provider">MNN</string>
     <string name="upscaler_tag_tiled_inference">分块推理</string>
-    <string name="upscaler_esrgan_description">使用 ESRGAN 在设备上放大图像。请在下方下载并选择放大模型。此选择与生成服务提供商无关。</string>
-    <string name="upscaler_mnn_description">使用 MNN 在设备上放大图像。请在下方下载并选择放大模型。此选择与生成服务提供商无关。</string>
+    <string name="upscaler_esrgan_description">ESRGAN 在设备上使用 AI 放大图像，并增强边缘和细节。既可用于已有图像，也可在图像生成后使用。</string>
+    <string name="upscaler_mnn_description">MNN 在设备上使用 AI 放大图像，并增强边缘和细节。既可用于已有图像，也可在图像生成后使用。</string>
     <string name="upscaler_unavailable">此平台没有可用的放大器。</string>
     <string name="upscaler_model">放大模型</string>
     <string name="upscaler_pipeline_toggle">放大生成的图像</string>
@@ -983,7 +983,7 @@
     <string name="upscaler_limits">任一边超过 1024 像素的图像，需要确认后才会按比例缩小。</string>
     <string name="upscaler_running">正在放大…</string>
 
-    <string name="settings_help_upscaler_configuration">下载独立的放大模型。此选择与生成服务提供商无关。</string>
+    <string name="settings_help_upscaler_configuration">选择图像放大服务提供商并配置其本地模型。</string>
     <string name="upscaler_options">放大参数</string>
     <string name="upscaler_provider">超分辨率提供方</string>
     <string name="error_upscaler_generation_size">启用放大时，生成尺寸不能超过 1024 × 1024 像素。请缩小尺寸或关闭放大。</string>

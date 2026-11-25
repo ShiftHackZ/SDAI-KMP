@@ -954,11 +954,11 @@
     <string name="upscaler_title">Upscaler</string>
     <string name="upscaler_action">Upscale</string>
     <string name="upscaler_local_provider">ESRGAN</string>
-    <string name="upscaler_provider_help">Download a dedicated upscaler model. This selection is independent of your generation provider.</string>
+    <string name="upscaler_provider_help">AI upscaling increases image resolution and enhances edges and fine detail. Use it with existing images or as a final step after generation.</string>
     <string name="upscaler_mnn_provider">MNN</string>
     <string name="upscaler_tag_tiled_inference">Tiled inference</string>
-    <string name="upscaler_esrgan_description">Upscale images on your device with ESRGAN. Download and select an upscaler model below. This selection is independent of your generation provider.</string>
-    <string name="upscaler_mnn_description">Upscale images on your device with MNN. Download and select an upscaler model below. This selection is independent of your generation provider.</string>
+    <string name="upscaler_esrgan_description">ESRGAN uses AI to enlarge images and enhance edges and fine detail on your device. Use it with existing images or after generation.</string>
+    <string name="upscaler_mnn_description">MNN uses AI to enlarge images and enhance edges and fine detail on your device. Use it with existing images or after generation.</string>
     <string name="upscaler_unavailable">No upscaler is available on this platform.</string>
     <string name="upscaler_model">Upscaler model</string>
     <string name="upscaler_pipeline_toggle">Upscale generated images</string>
@@ -968,7 +968,7 @@
     <string name="upscaler_limits">Images larger than 1024 pixels on either edge require confirmation before proportional downscaling.</string>
     <string name="upscaler_running">Upscaling…</string>
 
-    <string name="settings_help_upscaler_configuration">Download a dedicated upscaler model. This selection is independent of your generation provider.</string>
+    <string name="settings_help_upscaler_configuration">Choose an upscaling provider and configure its local models.</string>
     <string name="upscaler_options">Upscaler parameters</string>
     <string name="upscaler_provider">Upscaler provider</string>
     <string name="error_upscaler_generation_size">With upscaling enabled, generation size must not exceed 1024 × 1024 pixels. Reduce the size or disable upscaling.</string>

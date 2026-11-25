@@ -954,11 +954,11 @@
     <string name="upscaler_title">Upscaler</string>
     <string name="upscaler_action">Vergrößern</string>
     <string name="upscaler_local_provider">ESRGAN</string>
-    <string name="upscaler_provider_help">Lade ein eigenes Upscaler-Modell herunter. Diese Auswahl ist unabhängig vom Generierungsanbieter.</string>
+    <string name="upscaler_provider_help">KI-Upscaling erhöht die Bildauflösung und verbessert Kanten und feine Details. Nutze es für vorhandene Bilder oder als letzten Schritt nach der Generierung.</string>
     <string name="upscaler_mnn_provider">MNN</string>
     <string name="upscaler_tag_tiled_inference">Kachelbasierte Verarbeitung</string>
-    <string name="upscaler_esrgan_description">Vergrößere Bilder auf deinem Gerät mit ESRGAN. Lade unten ein Upscaler-Modell herunter und wähle es aus. Diese Auswahl ist unabhängig vom Generierungsanbieter.</string>
-    <string name="upscaler_mnn_description">Vergrößere Bilder auf deinem Gerät mit MNN. Lade unten ein Upscaler-Modell herunter und wähle es aus. Diese Auswahl ist unabhängig vom Generierungsanbieter.</string>
+    <string name="upscaler_esrgan_description">ESRGAN vergrößert Bilder mit KI und verbessert Kanten und feine Details direkt auf deinem Gerät. Nutze es für vorhandene Bilder oder nach der Generierung.</string>
+    <string name="upscaler_mnn_description">MNN vergrößert Bilder mit KI und verbessert Kanten und feine Details direkt auf deinem Gerät. Nutze es für vorhandene Bilder oder nach der Generierung.</string>
     <string name="upscaler_unavailable">Für diese Plattform ist kein Upscaler verfügbar.</string>
     <string name="upscaler_model">Upscaler-Modell</string>
     <string name="upscaler_pipeline_toggle">Generierte Bilder vergrößern</string>
@@ -968,7 +968,7 @@
     <string name="upscaler_limits">Bilder mit mehr als 1024 Pixeln auf einer Seite werden erst nach Bestätigung proportional verkleinert.</string>
     <string name="upscaler_running">Bild wird vergrößert…</string>
 
-    <string name="settings_help_upscaler_configuration">Lade ein eigenes Upscaler-Modell herunter. Diese Auswahl ist unabhängig vom Generierungsanbieter.</string>
+    <string name="settings_help_upscaler_configuration">Wähle einen Upscaling-Anbieter und konfiguriere seine lokalen Modelle.</string>
     <string name="upscaler_options">Upscaler-Parameter</string>
     <string name="upscaler_provider">Upscaler-Anbieter</string>
     <string name="error_upscaler_generation_size">Bei aktiviertem Hochskalieren darf die Bildgröße 1024 × 1024 Pixel nicht überschreiten. Verringern Sie die Größe oder deaktivieren Sie das Hochskalieren.</string>

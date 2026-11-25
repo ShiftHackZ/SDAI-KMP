@@ -917,11 +917,11 @@
     <string name="upscaler_title">Büyütücü</string>
     <string name="upscaler_action">Büyüt</string>
     <string name="upscaler_local_provider">ESRGAN</string>
-    <string name="upscaler_provider_help">Ayrı bir büyütücü modeli indirin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
+    <string name="upscaler_provider_help">Yapay zekâ ile büyütme, görüntü çözünürlüğünü artırır, kenarları ve ince ayrıntıları iyileştirir. Mevcut görüntülerde veya üretimden sonra son adım olarak kullanabilirsiniz.</string>
     <string name="upscaler_mnn_provider">MNN</string>
     <string name="upscaler_tag_tiled_inference">Döşemeli işleme</string>
-    <string name="upscaler_esrgan_description">ESRGAN ile cihazınızda görüntüleri büyütün. Aşağıdan bir büyütücü modeli indirip seçin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
-    <string name="upscaler_mnn_description">MNN ile cihazınızda görüntüleri büyütün. Aşağıdan bir büyütücü modeli indirip seçin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
+    <string name="upscaler_esrgan_description">ESRGAN, cihazınızda yapay zekâ ile görüntüleri büyütür, kenarları ve ince ayrıntıları iyileştirir. Mevcut görüntülerde veya üretimden sonra kullanabilirsiniz.</string>
+    <string name="upscaler_mnn_description">MNN, cihazınızda yapay zekâ ile görüntüleri büyütür, kenarları ve ince ayrıntıları iyileştirir. Mevcut görüntülerde veya üretimden sonra kullanabilirsiniz.</string>
     <string name="upscaler_unavailable">Bu platformda kullanılabilir bir büyütücü yok.</string>
     <string name="upscaler_model">Büyütücü modeli</string>
     <string name="upscaler_pipeline_toggle">Üretilen görüntüleri büyüt</string>
@@ -931,7 +931,7 @@
     <string name="upscaler_limits">Herhangi bir kenarı 1024 pikselden büyük görüntüler, orantılı olarak küçültülmeden önce onay gerektirir.</string>
     <string name="upscaler_running">Büyütülüyor…</string>
 
-    <string name="settings_help_upscaler_configuration">Ayrı bir büyütücü modeli indirin. Bu seçim üretim sağlayıcısından bağımsızdır.</string>
+    <string name="settings_help_upscaler_configuration">Bir büyütme sağlayıcısı seçin ve yerel modellerini yapılandırın.</string>
     <string name="upscaler_options">Büyütme parametreleri</string>
     <string name="upscaler_provider">Büyütme sağlayıcısı</string>
     <string name="error_upscaler_generation_size">Büyütme açıkken üretim boyutu 1024 × 1024 pikseli aşamaz. Boyutu küçültün veya büyütmeyi kapatın.</string>
