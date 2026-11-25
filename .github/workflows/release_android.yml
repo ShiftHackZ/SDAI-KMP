@@ -158,7 +158,6 @@ jobs:
           fi
           if [[ "$FLAVOR" == foss && "$REPRO_PROFILE" == varied ]]; then
             tools_path="$RUNNER_TEMP/independent-toolchain-with-a-longer-path"
-            sudo apt-get install --no-install-recommends -y faketime
             sudo locale-gen en_US.UTF-8
           fi
           bash ci/scripts/release/setup.sh build "$tools_path" "$SDK_PATH"

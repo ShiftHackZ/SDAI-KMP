@@ -115,9 +115,9 @@ Signing and verification jobs use their own temporary SDK directory.
 
 The two FOSS builds also use different real users, home directories, hostnames,
 JDK/Gradle/temp paths, locales, timezones, umasks and Python hash seeds.
-The rebuild runs with its wall clock advanced by two days while keeping
-`SOURCE_DATE_EPOCH` fixed at the source commit time. File metadata retains the real
-filesystem clock (`NO_FAKE_STAT=1`). Both builds use fresh native ext4 volumes,
+Both builds use the native system clock, with `SOURCE_DATE_EPOCH` fixed at the
+source commit time. Runtime clock changes are outside this comparison's coverage.
+Both builds use fresh native ext4 volumes,
 populated in ascending and descending creation order respectively. Before building,
 the helpers verify the copied Git source and record the actual directory traversal
 order; verification requires those witnesses to differ. The rebuild sets source

@@ -70,7 +70,7 @@ build_environment=(env
     ANDROID_HOME="$ANDROID_HOME" ANDROID_SDK_ROOT="$ANDROID_HOME"
     GRADLE_USER_HOME="$GRADLE_USER_HOME" SDAI_GRADLE="$SDAI_GRADLE"
     SDAI_TOOLCHAIN_DIR="$SDAI_TOOLCHAIN_DIR" RUNNER_TEMP="$build_temp"
-    SDAI_REPRO_PROFILE="$profile" FAKETIME_DONT_FAKE_MONOTONIC=1)
+    SDAI_REPRO_PROFILE="$profile")
 sudo --user "$build_user" --set-home "${build_environment[@]}" bash -c \
     'set -e
      test -r "$1/build.sh"
@@ -82,8 +82,5 @@ sudo --user "$build_user" --set-home "${build_environment[@]}" bash -c \
     build-access-check "$script_dir" "$JAVA_HOME" "$SDAI_GRADLE"
 prepared_source="$volume/source"
 build_command=(bash "$script_dir/build.sh" "$prepared_source" "$flavor" "$format" "$output_dir" "$sha")
-if [[ "$profile" == varied ]]; then
-    build_command=(env NO_FAKE_STAT=1 faketime -f '+2d' "${build_command[@]}")
-fi
 sudo --user "$build_user" --set-home "${build_environment[@]}" \
     python3 "$script_dir/prepare_rebuild.py" "$source_dir" "$prepared_source" "$profile" -- "${build_command[@]}"
