@@ -30,24 +30,27 @@ fi
 export TZ=UTC LC_ALL=C.UTF-8 LANG=C.UTF-8
 export SDAI_RELEASE_FLAVOR="$flavor"
 export SDAI_NATIVE_WORKERS=2
+export SDAI_GRADLE_WORKERS=2
 gradle_jvm_args='-Xmx4g -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8'
 if [[ "$flavor" == foss ]]; then
+    # Keep Gradle/JVM throughput independent of the native concurrency variation.
+    SDAI_GRADLE_WORKERS="$(getconf _NPROCESSORS_ONLN)"
     case "${SDAI_REPRO_PROFILE:?FOSS reproducibility profile required}" in
         baseline)
             umask 022
-            export PYTHONHASHSEED=1
+            export PYTHONHASHSEED=1 SDAI_NATIVE_WORKERS=4
             ;;
         varied)
             umask 077
             export TZ=Pacific/Honolulu LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-            export PYTHONHASHSEED=8675309 SDAI_NATIVE_WORKERS=1
+            export PYTHONHASHSEED=8675309 SDAI_NATIVE_WORKERS=2
             ;;
         *) echo 'Unknown FOSS reproducibility profile' >&2; exit 1 ;;
     esac
     export TMPDIR="${RUNNER_TEMP:?Runner temp required}/build-tmp-$SDAI_REPRO_PROFILE"
     mkdir -p "$TMPDIR"
     locale charmap >/dev/null
-    gradle_jvm_args+=" -XX:ActiveProcessorCount=$SDAI_NATIVE_WORKERS -Djava.io.tmpdir=$TMPDIR"
+    gradle_jvm_args+=" -Djava.io.tmpdir=$TMPDIR"
 fi
 export SOURCE_DATE_EPOCH
 SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
@@ -89,6 +92,7 @@ os.umask(current_umask)
     "locale": os.environ["LC_ALL"],
     "python_hash_seed": os.environ["PYTHONHASHSEED"],
     "workers": int(os.environ["SDAI_NATIVE_WORKERS"]),
+    "gradle_workers": int(os.environ["SDAI_GRADLE_WORKERS"]),
     "umask": oct(current_umask),
     "source_mtime": (Path(source) / "gradle/libs.versions.toml").stat().st_mtime_ns,
     "wall_clock_date": datetime.now(timezone.utc).date().isoformat(),
@@ -100,7 +104,7 @@ fi
 /usr/bin/time -v "$SDAI_GRADLE" ":app:${task}" \
     --init-script "${script_dir}/release.init.gradle" \
     --no-daemon --no-parallel --no-build-cache --no-configuration-cache \
-    --max-workers="$SDAI_NATIVE_WORKERS" --stacktrace \
+    --max-workers="$SDAI_GRADLE_WORKERS" --stacktrace \
     -Dorg.gradle.java.home="$JAVA_HOME" \
     "-Dorg.gradle.jvmargs=$gradle_jvm_args" \
     -Dorg.gradle.vfs.watch=false \
