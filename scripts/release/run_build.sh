@@ -32,8 +32,24 @@ done
 # Restore artifact ownership even on failure so Actions can retain private build evidence.
 runner_owner="$(id -u):$(id -g)"
 trap 'sudo chown -R "$runner_owner" "$output_dir"' EXIT
-sudo --user "$build_user" --set-home bash -c \
-    'test -r "$1/build.sh" && test -r "$1/prepare_rebuild.py" && test -x "$2/bin/java" && test -x "$3"' \
+# PAM can inject the runner's XDG paths even with sudo --set-home. Clear those
+# paths after sudo so Android and other tools use the executing user's home.
+build_environment=(env
+    -u XDG_CONFIG_HOME -u XDG_CACHE_HOME -u XDG_DATA_HOME -u XDG_STATE_HOME -u XDG_RUNTIME_DIR
+    -u ANDROID_USER_HOME -u ANDROID_PREFS_ROOT -u ANDROID_SDK_HOME
+    PATH="$PATH" JAVA_HOME="$JAVA_HOME"
+    ANDROID_HOME="$ANDROID_HOME" ANDROID_SDK_ROOT="$ANDROID_HOME"
+    GRADLE_USER_HOME="$GRADLE_USER_HOME" SDAI_GRADLE="$SDAI_GRADLE"
+    SDAI_TOOLCHAIN_DIR="$SDAI_TOOLCHAIN_DIR" RUNNER_TEMP="$build_temp"
+    SDAI_REPRO_PROFILE="$profile" FAKETIME_DONT_FAKE_MONOTONIC=1)
+sudo --user "$build_user" --set-home "${build_environment[@]}" bash -c \
+    'set -e
+     test -r "$1/build.sh"
+     test -r "$1/prepare_rebuild.py"
+     test -x "$2/bin/java"
+     test -x "$3"
+     mkdir -p "$HOME/.android" "$HOME/.config" "$HOME/.cache"
+     test -w "$HOME/.android"' \
     build-access-check "$script_dir" "$JAVA_HOME" "$SDAI_GRADLE"
 build_command=(bash "$script_dir/build.sh" "$source_dir" "$flavor" "$format" "$output_dir" "$sha")
 if [[ "$profile" == varied ]]; then
@@ -41,11 +57,4 @@ if [[ "$profile" == varied ]]; then
     build_command=(python3 "$script_dir/prepare_rebuild.py" "$source_dir" "$mounted_source" --
         faketime -f '+2d' bash "$script_dir/build.sh" "$mounted_source" "$flavor" "$format" "$output_dir" "$sha")
 fi
-sudo --user "$build_user" --set-home env \
-    PATH="$PATH" JAVA_HOME="$JAVA_HOME" \
-    ANDROID_HOME="$ANDROID_HOME" ANDROID_SDK_ROOT="$ANDROID_HOME" \
-    GRADLE_USER_HOME="$GRADLE_USER_HOME" SDAI_GRADLE="$SDAI_GRADLE" \
-    SDAI_TOOLCHAIN_DIR="$SDAI_TOOLCHAIN_DIR" RUNNER_TEMP="$build_temp" \
-    SDAI_REPRO_PROFILE="$profile" \
-    FAKETIME_DONT_FAKE_MONOTONIC=1 \
-    "${build_command[@]}"
+sudo --user "$build_user" --set-home "${build_environment[@]}" "${build_command[@]}"
