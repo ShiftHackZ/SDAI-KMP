@@ -114,8 +114,8 @@ header paths, which can affect linker build IDs even after stripping the APK.
 Signing and verification jobs use their own temporary SDK directory.
 
 The two FOSS builds also use different real users, home directories, hostnames,
-JDK/Gradle/temp paths, locales, timezones, umasks, Python hash seeds and native worker
-limits. The rebuild runs with its wall clock advanced by two days while keeping
+JDK/Gradle/temp paths, locales, timezones, umasks and Python hash seeds.
+The rebuild runs with its wall clock advanced by two days while keeping
 `SOURCE_DATE_EPOCH` fixed at the source commit time. File metadata retains the real
 filesystem clock (`NO_FAKE_STAT=1`). The rebuild reads its checkout through Linux
 `disorderfs` with reverse directory ordering and source mtimes set one day before
@@ -154,10 +154,9 @@ and use `diffoscope` on the retained artifacts; fix the differing build input
 before signing. Keep the signed-versus-independent-APK signature-copy gate enabled.
 
 Gradle runs with a 4 GiB heap, no parallel project execution, and the Kotlin compiler
-inside the Gradle process. FOSS builds use the runner's available processor count
-for Gradle workers and leave JVM processor detection unrestricted. Native concurrency
-varies independently: four Ninja jobs for the baseline and two for the rebuild,
-including direct Ninja invocations from AGP. Full and Play Store retain two Gradle
+inside the Gradle process. Both FOSS builds use the runner's available processor
+count for Gradle workers and native jobs, including direct Ninja invocations from
+AGP, and leave JVM processor detection unrestricted. Full and Play Store retain two Gradle
 workers and two native jobs. Each selected output
 and each rebuild use separate runners and fresh Gradle homes. Build logs include
 process resource usage; environment reports include runner memory and disk space.

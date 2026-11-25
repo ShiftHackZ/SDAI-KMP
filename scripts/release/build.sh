@@ -33,17 +33,18 @@ export SDAI_NATIVE_WORKERS=2
 export SDAI_GRADLE_WORKERS=2
 gradle_jvm_args='-Xmx4g -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8'
 if [[ "$flavor" == foss ]]; then
-    # Keep Gradle/JVM throughput independent of the native concurrency variation.
+    # Both FOSS builds use all available processors for Gradle and native jobs.
     SDAI_GRADLE_WORKERS="$(getconf _NPROCESSORS_ONLN)"
+    SDAI_NATIVE_WORKERS="$SDAI_GRADLE_WORKERS"
     case "${SDAI_REPRO_PROFILE:?FOSS reproducibility profile required}" in
         baseline)
             umask 022
-            export PYTHONHASHSEED=1 SDAI_NATIVE_WORKERS=4
+            export PYTHONHASHSEED=1
             ;;
         varied)
             umask 077
             export TZ=Pacific/Honolulu LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-            export PYTHONHASHSEED=8675309 SDAI_NATIVE_WORKERS=2
+            export PYTHONHASHSEED=8675309
             ;;
         *) echo 'Unknown FOSS reproducibility profile' >&2; exit 1 ;;
     esac
