@@ -19,9 +19,22 @@ sudo hostname "sdai-build-$profile"
 sudo chown -R "$build_user:$build_user" "$source_dir" "$SDAI_TOOLCHAIN_DIR" "$ANDROID_HOME"
 build_temp="$RUNNER_TEMP/build-$profile"
 sudo install -d -o "$build_user" -g "$build_user" "$output_dir" "$build_temp"
+# Runner workspace ancestors may be private to the runner identity. Grant this
+# build identity traversal, and read/execute access only to the public CI tools.
+sudo setfacl -R -m "u:$build_user:rX" "$script_dir"
+for required_path in "$script_dir" "$source_dir" "$SDAI_TOOLCHAIN_DIR" "$ANDROID_HOME" "$output_dir" "$build_temp"; do
+    access_parent="$(dirname "$required_path")"
+    while [[ "$access_parent" != / ]]; do
+        sudo setfacl -m "u:$build_user:x" "$access_parent"
+        access_parent="$(dirname "$access_parent")"
+    done
+done
 # Restore artifact ownership even on failure so Actions can retain private build evidence.
 runner_owner="$(id -u):$(id -g)"
 trap 'sudo chown -R "$runner_owner" "$output_dir"' EXIT
+sudo --user "$build_user" --set-home bash -c \
+    'test -r "$1/build.sh" && test -r "$1/prepare_rebuild.py" && test -x "$2/bin/java" && test -x "$3"' \
+    build-access-check "$script_dir" "$JAVA_HOME" "$SDAI_GRADLE"
 build_command=(bash "$script_dir/build.sh" "$source_dir" "$flavor" "$format" "$output_dir" "$sha")
 if [[ "$profile" == varied ]]; then
     mounted_source="$build_temp/source-with-reordered-directories"

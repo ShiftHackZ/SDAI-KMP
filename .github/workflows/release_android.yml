@@ -151,9 +151,12 @@ jobs:
           test ! -e "$SDK_PATH"
           sudo install -d -o "$(id -u)" -g "$(id -g)" "$SDK_PATH"
           tools_path="$RUNNER_TEMP/release-tools"
+          if [[ "$REPRO_PROFILE" != single ]]; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y acl
+          fi
           if [[ "$REPRO_PROFILE" == varied ]]; then
             tools_path="$RUNNER_TEMP/independent-toolchain-with-a-longer-path"
-            sudo apt-get update
             sudo apt-get install --no-install-recommends -y faketime disorderfs
             test -c /dev/fuse
             sudo locale-gen en_US.UTF-8
