@@ -116,9 +116,11 @@ Signing and verification jobs use their own temporary SDK directory.
 The two FOSS builds also use different real users, home directories, hostnames,
 JDK/Gradle/temp paths, locales, timezones, umasks, Python hash seeds and CPU/worker
 limits. The rebuild runs with its wall clock advanced by two days while keeping
-`SOURCE_DATE_EPOCH` fixed at the source commit time. The rebuild reads its checkout
-through Linux `disorderfs` with reverse directory ordering and different mtimes,
-preserving tracked bytes, executable bits and symlinks. The foreground FUSE process
+`SOURCE_DATE_EPOCH` fixed at the source commit time. File metadata retains the real
+filesystem clock (`NO_FAKE_STAT=1`). The rebuild reads its checkout through Linux
+`disorderfs` with reverse directory ordering and source mtimes set one day before
+the commit time, preserving tracked bytes, executable bits and symlinks. Source
+mtimes must precede newly generated Ninja manifests. The foreground FUSE process
 is owned by the build wrapper and unmounted on exit. macOS cannot run this variation.
 Verification requires the recorded differences;
 a missing variation fails the gate. Full and Play Store retain their single build.

@@ -171,7 +171,7 @@ def main():
                 "FOSS comparison requires baseline and varied build profiles")
         require(environments[0]["source_date_epoch"] == environments[1]["source_date_epoch"],
                 "SOURCE_DATE_EPOCH must remain fixed across rebuilds")
-        require(environments[1]["source_mtime"] == (environments[1]["source_date_epoch"] + 86400) * 1000000000,
+        require(environments[1]["source_mtime"] == (environments[1]["source_date_epoch"] - 86400) * 1000000000,
                 "Rebuild source mtimes were not varied")
         require(environments[1]["reordered_directories"] > 0, "Rebuild filesystem order was not varied")
         for environment in environments:

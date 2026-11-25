@@ -33,7 +33,11 @@ def main():
         raise ValueError("An independent checkout with its own Git directory is required")
     if subprocess.check_output(["git", "-C", str(original), "status", "--porcelain"]):
         raise ValueError("Rebuild preparation requires a clean checkout")
-    timestamp = int(subprocess.check_output(["git", "-C", str(original), "show", "-s", "--format=%ct"])) + 86400
+    # Inputs must precede newly generated Ninja manifests in real filesystem time.
+    # A shifted process clock does not advance kernel-created file timestamps.
+    timestamp = int(subprocess.check_output(["git", "-C", str(original), "show", "-s", "--format=%ct"])) - 86400
+    if timestamp >= time.time():
+        raise ValueError("Rebuild source mtimes must precede the real filesystem clock")
     if source.exists():
         raise ValueError("Rebuild mountpoint already exists")
     process = None

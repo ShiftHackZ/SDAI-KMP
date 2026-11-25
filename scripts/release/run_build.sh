@@ -55,6 +55,6 @@ build_command=(bash "$script_dir/build.sh" "$source_dir" "$flavor" "$format" "$o
 if [[ "$profile" == varied ]]; then
     mounted_source="$build_temp/source-with-reordered-directories"
     build_command=(python3 "$script_dir/prepare_rebuild.py" "$source_dir" "$mounted_source" --
-        faketime -f '+2d' bash "$script_dir/build.sh" "$mounted_source" "$flavor" "$format" "$output_dir" "$sha")
+        env NO_FAKE_STAT=1 faketime -f '+2d' bash "$script_dir/build.sh" "$mounted_source" "$flavor" "$format" "$output_dir" "$sha")
 fi
 sudo --user "$build_user" --set-home "${build_environment[@]}" "${build_command[@]}"
