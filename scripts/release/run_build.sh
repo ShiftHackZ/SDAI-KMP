@@ -12,6 +12,9 @@ if [[ "$flavor" != foss ]]; then
     exec bash "$script_dir/build.sh" "$source_dir" "$flavor" "$format" "$output_dir" "$sha"
 fi
 case "$profile" in baseline|varied) ;; *) echo 'Invalid FOSS build profile' >&2; exit 1 ;; esac
+for required_variable in SDAI_TOOLCHAIN_DIR ANDROID_HOME JAVA_HOME SDAI_GRADLE GRADLE_USER_HOME RUNNER_TEMP; do
+    [[ -n "${!required_variable:-}" ]] || { printf 'Missing build environment: %s\n' "$required_variable" >&2; exit 1; }
+done
 build_user="sdai-$profile"
 sudo useradd --create-home --user-group --shell /bin/bash "$build_user"
 printf '127.0.1.1 sdai-build-%s\n' "$profile" | sudo tee -a /etc/hosts >/dev/null
@@ -31,7 +34,33 @@ for required_path in "$script_dir" "$source_dir" "$SDAI_TOOLCHAIN_DIR" "$ANDROID
 done
 # Restore artifact ownership even on failure so Actions can retain private build evidence.
 runner_owner="$(id -u):$(id -g)"
-trap 'sudo chown -R "$runner_owner" "$output_dir"' EXIT
+volume="$RUNNER_TEMP/source-volume-$profile"
+image="$RUNNER_TEMP/source-$profile.ext4"
+cleanup() {
+    build_status=$?
+    trap - EXIT
+    sudo chown -R "$runner_owner" "$output_dir" || build_status=1
+    if mountpoint -q "$volume"; then
+        # Never remove an image while its owned mount is still active.
+        sudo umount "$volume" || exit 1
+    fi
+    [[ ! -d "$volume" ]] || rmdir "$volume" || build_status=1
+    [[ ! -f "$image" ]] || rm -- "$image" || build_status=1
+    exit "$build_status"
+}
+[[ ! -e "$volume" && ! -e "$image" ]] || { echo 'Build volume already exists' >&2; exit 1; }
+trap cleanup EXIT
+# Use the same native filesystem setup for both builds. The sparse image consumes
+# only written blocks; reserve host space for dependency caches and final artifacts.
+available_bytes="$(df --output=avail -B1 "$build_temp" | tail -n 1)"
+image_bytes=$((available_bytes - 8 * 1024 * 1024 * 1024))
+(( image_bytes <= 32 * 1024 * 1024 * 1024 )) || image_bytes=$((32 * 1024 * 1024 * 1024))
+(( image_bytes >= 8 * 1024 * 1024 * 1024 )) || { echo 'Insufficient space for native build volume' >&2; exit 1; }
+truncate -s "$image_bytes" "$image"
+mkfs.ext4 -q -F -m 0 -E lazy_itable_init=0,lazy_journal_init=0 "$image"
+mkdir "$volume"
+sudo mount -o loop,nodev,nosuid "$image" "$volume"
+sudo chown "$build_user:$build_user" "$volume"
 # PAM can inject the runner's XDG paths even with sudo --set-home. Clear those
 # paths after sudo so Android and other tools use the executing user's home.
 build_environment=(env
@@ -51,10 +80,10 @@ sudo --user "$build_user" --set-home "${build_environment[@]}" bash -c \
      mkdir -p "$HOME/.android" "$HOME/.config" "$HOME/.cache"
      test -w "$HOME/.android"' \
     build-access-check "$script_dir" "$JAVA_HOME" "$SDAI_GRADLE"
-build_command=(bash "$script_dir/build.sh" "$source_dir" "$flavor" "$format" "$output_dir" "$sha")
+prepared_source="$volume/source"
+build_command=(bash "$script_dir/build.sh" "$prepared_source" "$flavor" "$format" "$output_dir" "$sha")
 if [[ "$profile" == varied ]]; then
-    mounted_source="$build_temp/source-with-reordered-directories"
-    build_command=(python3 "$script_dir/prepare_rebuild.py" "$source_dir" "$mounted_source" --
-        env NO_FAKE_STAT=1 faketime -f '+2d' bash "$script_dir/build.sh" "$mounted_source" "$flavor" "$format" "$output_dir" "$sha")
+    build_command=(env NO_FAKE_STAT=1 faketime -f '+2d' "${build_command[@]}")
 fi
-sudo --user "$build_user" --set-home "${build_environment[@]}" "${build_command[@]}"
+sudo --user "$build_user" --set-home "${build_environment[@]}" \
+    python3 "$script_dir/prepare_rebuild.py" "$source_dir" "$prepared_source" "$profile" -- "${build_command[@]}"

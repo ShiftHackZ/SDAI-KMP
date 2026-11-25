@@ -174,12 +174,18 @@ def main():
         require(environments[1]["source_mtime"] == (environments[1]["source_date_epoch"] - 86400) * 1000000000,
                 "Rebuild source mtimes were not varied")
         require(environments[1]["reordered_directories"] > 0, "Rebuild filesystem order was not varied")
+        require([environment["creation_order"] for environment in environments] == ["ascending", "descending"],
+                "FOSS source creation order must differ")
         for environment in environments:
+            require(environment["filesystem"] == "ext4", "FOSS builds require native ext4 storage")
+            require(re.fullmatch(r"[0-9a-f]{64}", environment["directory_order_sha256"]),
+                    "Missing source directory traversal witness")
             require(environment["source_sha"] == sha, "Build environment source revision mismatch.")
             for field in ("source_path", "sdk_path", "java_path", "gradle_path", "home_path", "temp_path"):
                 require(Path(environment[field]).is_absolute(), "Build environment paths must be absolute.")
         for field in ("source_path", "sdk_path", "java_path", "gradle_path", "home_path", "temp_path",
-                      "user", "hostname", "timezone", "locale", "umask", "python_hash_seed", "source_mtime", "wall_clock_date"):
+                      "user", "hostname", "timezone", "locale", "umask", "python_hash_seed", "source_mtime", "wall_clock_date",
+                      "directory_order_sha256"):
             require(environments[0][field] != environments[1][field], "Independent rebuild must vary " + field)
     output.mkdir(parents=True, exist_ok=True)
     require(not (output / ("unsigned." + format_)).exists(), "Verified output already exists.")

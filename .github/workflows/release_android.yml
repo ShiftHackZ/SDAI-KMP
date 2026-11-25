@@ -144,6 +144,7 @@ jobs:
 
       - name: Install pinned native Linux toolchain
         env:
+          FLAVOR: ${{ matrix.flavor }}
           SDK_PATH: ${{ matrix.sdk_path }}
           REPRO_PROFILE: ${{ matrix.repro_profile }}
         run: |
@@ -151,14 +152,13 @@ jobs:
           test ! -e "$SDK_PATH"
           sudo install -d -o "$(id -u)" -g "$(id -g)" "$SDK_PATH"
           tools_path="$RUNNER_TEMP/release-tools"
-          if [[ "$REPRO_PROFILE" != single ]]; then
+          if [[ "$FLAVOR" == foss ]]; then
             sudo apt-get update
-            sudo apt-get install --no-install-recommends -y acl
+            sudo apt-get install --no-install-recommends -y acl e2fsprogs
           fi
-          if [[ "$REPRO_PROFILE" == varied ]]; then
+          if [[ "$FLAVOR" == foss && "$REPRO_PROFILE" == varied ]]; then
             tools_path="$RUNNER_TEMP/independent-toolchain-with-a-longer-path"
-            sudo apt-get install --no-install-recommends -y faketime disorderfs
-            test -c /dev/fuse
+            sudo apt-get install --no-install-recommends -y faketime
             sudo locale-gen en_US.UTF-8
           fi
           bash ci/scripts/release/setup.sh build "$tools_path" "$SDK_PATH"
@@ -170,7 +170,12 @@ jobs:
           SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
           SOURCE_PATH: ${{ matrix.source_path }}
           REPRO_PROFILE: ${{ matrix.repro_profile }}
-        run: bash ci/scripts/release/run_build.sh "$SOURCE_PATH" "$FLAVOR" "$FORMAT" "$RUNNER_TEMP/output" "$SOURCE_SHA" "$REPRO_PROFILE"
+        run: |
+          if [[ "$FLAVOR" == foss ]]; then
+            bash ci/scripts/release/run_build.sh "$SOURCE_PATH" "$FLAVOR" "$FORMAT" "$RUNNER_TEMP/output" "$SOURCE_SHA" "$REPRO_PROFILE"
+          else
+            bash ci/scripts/release/build.sh "$SOURCE_PATH" "$FLAVOR" "$FORMAT" "$RUNNER_TEMP/output" "$SOURCE_SHA"
+          fi
 
       - name: Preserve unsigned output and build evidence
         if: always()

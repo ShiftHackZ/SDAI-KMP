@@ -32,7 +32,9 @@ export SDAI_RELEASE_FLAVOR="$flavor"
 export SDAI_NATIVE_WORKERS=2
 export SDAI_GRADLE_WORKERS=2
 gradle_jvm_args='-Xmx4g -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8'
+gradle_reporting=()
 if [[ "$flavor" == foss ]]; then
+    gradle_reporting=(--console=plain --info)
     # Both FOSS builds use all available processors for Gradle and native jobs.
     SDAI_GRADLE_WORKERS="$(getconf _NPROCESSORS_ONLN)"
     SDAI_NATIVE_WORKERS="$SDAI_GRADLE_WORKERS"
@@ -72,8 +74,7 @@ import socket
 import sys
 
 source, sdk, sha, output = sys.argv[1:]
-preparation = ({"reordered_directories": 0} if os.environ["SDAI_REPRO_PROFILE"] == "baseline" else
-               json.loads((Path(source) / ".git/sdai-repro-inputs.json").read_text()))
+preparation = json.loads((Path(source) / ".git/sdai-repro-inputs.json").read_text())
 current_umask = os.umask(0)
 os.umask(current_umask)
 (Path(output) / "build-environment.json").write_text(json.dumps({
@@ -83,6 +84,9 @@ os.umask(current_umask)
     "source_date_epoch": int(os.environ["SOURCE_DATE_EPOCH"]),
     "repro_profile": os.environ["SDAI_REPRO_PROFILE"],
     "reordered_directories": preparation["reordered_directories"],
+    "filesystem": preparation["filesystem"],
+    "creation_order": preparation["creation_order"],
+    "directory_order_sha256": preparation["directory_order_sha256"],
     "java_path": str(Path(os.environ["JAVA_HOME"]).resolve()),
     "gradle_path": str(Path(os.environ["GRADLE_USER_HOME"]).resolve()),
     "home_path": str(Path.home()),
@@ -102,10 +106,14 @@ PY
 fi
 
 # No restored task outputs or compiler caches participate in either build.
+if [[ "$flavor" == foss ]]; then
+    printf 'Build profile: %s; Gradle workers: %s; native jobs: %s\n' \
+        "$SDAI_REPRO_PROFILE" "$SDAI_GRADLE_WORKERS" "$SDAI_NATIVE_WORKERS"
+fi
 /usr/bin/time -v "$SDAI_GRADLE" ":app:${task}" \
     --init-script "${script_dir}/release.init.gradle" \
     --no-daemon --no-parallel --no-build-cache --no-configuration-cache \
-    --max-workers="$SDAI_GRADLE_WORKERS" --stacktrace \
+    --max-workers="$SDAI_GRADLE_WORKERS" --stacktrace "${gradle_reporting[@]}" \
     -Dorg.gradle.java.home="$JAVA_HOME" \
     "-Dorg.gradle.jvmargs=$gradle_jvm_args" \
     -Dorg.gradle.vfs.watch=false \
