@@ -137,24 +137,44 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.plan.outputs.source_sha }}
-          path: source
+          path: ${{ matrix.source_path }}
           fetch-depth: 0
           submodules: recursive
           persist-credentials: false
 
       - name: Install pinned native Linux toolchain
+        env:
+          FLAVOR: ${{ matrix.flavor }}
+          SDK_PATH: ${{ matrix.sdk_path }}
+          REPRO_PROFILE: ${{ matrix.repro_profile }}
         run: |
-          # Keep NDK header paths consistent with the F-Droid build environment.
-          test ! -e /opt/android-sdk
-          sudo install -d -o "$(id -u)" -g "$(id -g)" /opt/android-sdk
-          bash ci/scripts/release/setup.sh build "$RUNNER_TEMP/release-tools" /opt/android-sdk
+          # The second build must not reuse the first build's SDK/NDK path.
+          test ! -e "$SDK_PATH"
+          sudo install -d -o "$(id -u)" -g "$(id -g)" "$SDK_PATH"
+          tools_path="$RUNNER_TEMP/release-tools"
+          if [[ "$FLAVOR" == foss ]]; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y acl e2fsprogs
+          fi
+          if [[ "$FLAVOR" == foss && "$REPRO_PROFILE" == varied ]]; then
+            tools_path="$RUNNER_TEMP/independent-toolchain-with-a-longer-path"
+            sudo locale-gen en_US.UTF-8
+          fi
+          bash ci/scripts/release/setup.sh build "$tools_path" "$SDK_PATH"
 
       - name: Build unsigned artifact
         env:
           FLAVOR: ${{ matrix.flavor }}
           FORMAT: ${{ matrix.format }}
           SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
-        run: bash ci/scripts/release/build.sh source "$FLAVOR" "$FORMAT" "$RUNNER_TEMP/output" "$SOURCE_SHA"
+          SOURCE_PATH: ${{ matrix.source_path }}
+          REPRO_PROFILE: ${{ matrix.repro_profile }}
+        run: |
+          if [[ "$FLAVOR" == foss ]]; then
+            bash ci/scripts/release/run_build.sh "$SOURCE_PATH" "$FLAVOR" "$FORMAT" "$RUNNER_TEMP/output" "$SOURCE_SHA" "$REPRO_PROFILE"
+          else
+            bash ci/scripts/release/build.sh "$SOURCE_PATH" "$FLAVOR" "$FORMAT" "$RUNNER_TEMP/output" "$SOURCE_SHA"
+          fi
 
       - name: Preserve unsigned output and build evidence
         if: always()
@@ -311,6 +331,10 @@ jobs:
         run: |
           bash ci/scripts/release/sign.sh "$FLAVOR" "$FORMAT" "verified/unsigned.$FORMAT" "$RUNNER_TEMP/signed" "$VERSION_NAME"
           cp verified/metadata.json verified/toolchain.json verified/submodules.txt "$RUNNER_TEMP/signed/"
+          if [[ "$FLAVOR" == foss ]]; then
+            cp verified/build-environments.json "$RUNNER_TEMP/signed/"
+            cp verified/native-reproducibility.json "$RUNNER_TEMP/signed/"
+          fi
           cp verified/native-diagnostics.zip "$RUNNER_TEMP/signed/sdai-$FLAVOR-$FORMAT-$VERSION_NAME-native-diagnostics.zip"
 
       - name: Verify signed APK against the independent rebuild

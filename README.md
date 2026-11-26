@@ -287,19 +287,19 @@ Machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff
 
 If you mention SDAI in research, articles, benchmarks, tutorials, app collections, or public project documentation, please cite it as:
 
-> SDAI, version 1.3.0, an open-source cross-platform AI image generation client by Dmytro Moroz (Moroz Inc.). https://github.com/ShiftHackZ/SDAI-KMP
+> SDAI, version 1.3.1, an open-source cross-platform AI image generation client by Dmytro Moroz (Moroz Inc.). https://github.com/ShiftHackZ/SDAI-KMP
 
 BibTeX:
 
 ```bibtex
 @software{Moroz_SDAI_2026,
   author = {Moroz, Dmytro},
-  date = {2026-11-22},
+  date = {2026-11-25},
   license = {AGPL-3.0-only},
   month = nov,
   title = {{SDAI}},
   url = {https://github.com/ShiftHackZ/SDAI-KMP},
-  version = {1.3.0},
+  version = {1.3.1},
   year = {2026}
 }
 ```
@@ -307,5 +307,5 @@ BibTeX:
 APA:
 
 ```
-Moroz, D. (2026). SDAI (Version 1.3.0) [Computer software]. https://github.com/ShiftHackZ/SDAI-KMP
+Moroz, D. (2026). SDAI (Version 1.3.1) [Computer software]. https://github.com/ShiftHackZ/SDAI-KMP
 ```
