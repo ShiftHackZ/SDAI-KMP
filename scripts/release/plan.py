@@ -62,7 +62,11 @@ def main():
         "version_code": version_code,
         "targets": json.dumps({"include": targets}, separators=(",", ":")),
         "builds": json.dumps(
-            {"include": [dict(t, attempt=a) for t in targets for a in range(1, t["attempts"] + 1)]},
+            {"include": [dict(t, attempt=a,
+                              repro_profile=("baseline" if a == 1 else "varied") if t["flavor"] == "foss" else "single",
+                              source_path="source" if a == 1 else "independent-rebuild/source-with-a-different-path",
+                              sdk_path="/opt/android-sdk" if a == 1 else "/opt/independent-android-sdk")
+                         for t in targets for a in range(1, t["attempts"] + 1)]},
             separators=(",", ":"),
         ),
     }
@@ -74,8 +78,8 @@ def main():
         summary.write("| Flavor | Format | Gradle task |\n| --- | --- | --- |\n")
         for target in targets:
             summary.write(f"| {target['flavor']} | {target['format']} | `{target['task']}` |\n")
-        summary.write("\nFOSS outputs are built twice on separate runners and compared before signing. "
-                      "Full and Play Store outputs are built once.\n")
+        summary.write("\nFOSS outputs are built twice on separate clean runners with different source and SDK paths, "
+                      "then compared byte-for-byte before signing. Full and Play Store outputs are built once.\n")
 
 
 if __name__ == "__main__":

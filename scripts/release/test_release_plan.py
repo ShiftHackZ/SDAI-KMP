@@ -51,6 +51,7 @@ class ReleasePlanTests(unittest.TestCase):
         self.assertEqual({(b["flavor"], b["format"]) for b in builds},
                          {("full", "apk"), ("full", "aab"), ("playstore", "apk"), ("playstore", "aab")})
         self.assertTrue(all(b["attempt"] == b["attempts"] == 1 for b in builds))
+        self.assertTrue(all(b["repro_profile"] == "single" for b in builds))
 
     def test_given_foss_outputs_when_both_formats_selected_expected_two_builds_per_output(self):
         # Given
@@ -63,6 +64,20 @@ class ReleasePlanTests(unittest.TestCase):
         self.assertEqual([(b["format"], b["attempt"]) for b in builds],
                          [("apk", 1), ("apk", 2), ("aab", 1), ("aab", 2)])
         self.assertTrue(all(b["flavor"] == "foss" and b["attempts"] == 2 for b in builds))
+
+    def test_given_foss_rebuild_when_planned_expected_different_source_and_sdk_paths(self):
+        # Given
+        selections = ("apk", "skip", "skip")
+
+        # When
+        first, second = planned_builds(*selections)
+
+        # Then
+        self.assertEqual(first["source_path"], "source")
+        self.assertEqual(first["sdk_path"], "/opt/android-sdk")
+        self.assertNotEqual(first["source_path"], second["source_path"])
+        self.assertNotEqual(first["sdk_path"], second["sdk_path"])
+        self.assertEqual((first["repro_profile"], second["repro_profile"]), ("baseline", "varied"))
 
     def test_given_playstore_aab_when_selected_alone_expected_one_build_runner(self):
         # Given

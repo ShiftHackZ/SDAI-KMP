@@ -28,22 +28,94 @@ if grep -Eq '^[-+U]' "${RUNNER_TEMP:-/tmp}/sdai-submodules.txt"; then
 fi
 
 export TZ=UTC LC_ALL=C.UTF-8 LANG=C.UTF-8
+export SDAI_RELEASE_FLAVOR="$flavor"
+export SDAI_NATIVE_WORKERS=2
+export SDAI_GRADLE_WORKERS=2
+gradle_jvm_args='-Xmx4g -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8'
+gradle_reporting=()
+if [[ "$flavor" == foss ]]; then
+    gradle_reporting=(--console=plain --info)
+    # Both FOSS builds use all available processors for Gradle and native jobs.
+    SDAI_GRADLE_WORKERS="$(getconf _NPROCESSORS_ONLN)"
+    SDAI_NATIVE_WORKERS="$SDAI_GRADLE_WORKERS"
+    case "${SDAI_REPRO_PROFILE:?FOSS reproducibility profile required}" in
+        baseline)
+            umask 022
+            export PYTHONHASHSEED=1
+            ;;
+        varied)
+            umask 077
+            export TZ=Pacific/Honolulu LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+            export PYTHONHASHSEED=8675309
+            ;;
+        *) echo 'Unknown FOSS reproducibility profile' >&2; exit 1 ;;
+    esac
+    export TMPDIR="${RUNNER_TEMP:?Runner temp required}/build-tmp-$SDAI_REPRO_PROFILE"
+    mkdir -p "$TMPDIR"
+    locale charmap >/dev/null
+    gradle_jvm_args+=" -Djava.io.tmpdir=$TMPDIR"
+fi
 export SOURCE_DATE_EPOCH
 SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
-export CMAKE_BUILD_PARALLEL_LEVEL=2
+export CMAKE_BUILD_PARALLEL_LEVEL="$SDAI_NATIVE_WORKERS"
 export SDAI_REAL_NINJA="${ANDROID_HOME}/cmake/3.22.1/bin/ninja"
 export SDAI_NINJA_WRAPPER="${script_dir}/ninja.sh"
 export SDAI_RELEASE_PROFILE="${script_dir}/toolchain.json"
 mkdir -p "$output_dir"
 output_dir="$(cd "$output_dir" && pwd)"
+if [[ "$flavor" == foss ]]; then
+    python3 - "$source_dir" "$ANDROID_HOME" "$expected_sha" "$output_dir" <<'PY'
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+import pwd
+import socket
+import sys
+
+source, sdk, sha, output = sys.argv[1:]
+preparation = json.loads((Path(source) / ".git/sdai-repro-inputs.json").read_text())
+current_umask = os.umask(0)
+os.umask(current_umask)
+(Path(output) / "build-environment.json").write_text(json.dumps({
+    "source_path": str(Path(source).resolve()),
+    "sdk_path": str(Path(sdk).resolve()),
+    "source_sha": sha,
+    "source_date_epoch": int(os.environ["SOURCE_DATE_EPOCH"]),
+    "repro_profile": os.environ["SDAI_REPRO_PROFILE"],
+    "reordered_directories": preparation["reordered_directories"],
+    "filesystem": preparation["filesystem"],
+    "creation_order": preparation["creation_order"],
+    "directory_order_sha256": preparation["directory_order_sha256"],
+    "java_path": str(Path(os.environ["JAVA_HOME"]).resolve()),
+    "gradle_path": str(Path(os.environ["GRADLE_USER_HOME"]).resolve()),
+    "home_path": str(Path.home()),
+    "temp_path": str(Path(os.environ["TMPDIR"]).resolve()),
+    "user": pwd.getpwuid(os.getuid()).pw_name,
+    "hostname": socket.gethostname(),
+    "timezone": os.environ["TZ"],
+    "locale": os.environ["LC_ALL"],
+    "python_hash_seed": os.environ["PYTHONHASHSEED"],
+    "workers": int(os.environ["SDAI_NATIVE_WORKERS"]),
+    "gradle_workers": int(os.environ["SDAI_GRADLE_WORKERS"]),
+    "umask": oct(current_umask),
+    "source_mtime": (Path(source) / "gradle/libs.versions.toml").stat().st_mtime_ns,
+    "wall_clock_date": datetime.now(timezone.utc).date().isoformat(),
+}, indent=2) + "\n")
+PY
+fi
 
 # No restored task outputs or compiler caches participate in either build.
+if [[ "$flavor" == foss ]]; then
+    printf 'Build profile: %s; Gradle workers: %s; native jobs: %s\n' \
+        "$SDAI_REPRO_PROFILE" "$SDAI_GRADLE_WORKERS" "$SDAI_NATIVE_WORKERS"
+fi
 /usr/bin/time -v "$SDAI_GRADLE" ":app:${task}" \
     --init-script "${script_dir}/release.init.gradle" \
     --no-daemon --no-parallel --no-build-cache --no-configuration-cache \
-    --max-workers=2 --stacktrace \
+    --max-workers="$SDAI_GRADLE_WORKERS" --stacktrace "${gradle_reporting[@]}" \
     -Dorg.gradle.java.home="$JAVA_HOME" \
-    '-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8' \
+    "-Dorg.gradle.jvmargs=$gradle_jvm_args" \
     -Dorg.gradle.vfs.watch=false \
     -Pkotlin.compiler.execution.strategy=in-process \
     -Porg.gradle.java.installations.auto-download=false \
@@ -63,6 +135,10 @@ mapfile -t artifacts < <(find "$artifact_dir" -maxdepth 1 -type f -name "*.${for
 [[ "${#artifacts[@]}" == 1 ]] || { echo 'Expected exactly one unsigned artifact' >&2; exit 1; }
 cp "${artifacts[0]}" "${output_dir}/unsigned.${format}"
 cp "${script_dir}/toolchain.json" "${output_dir}/toolchain.json"
+if [[ "$flavor" == foss ]]; then
+    SDAI_NATIVE_TEST_PACKAGE="${output_dir}/unsigned.${format}" \
+        python3 -m unittest discover -s "$script_dir" -p test_native_reproducibility_checker.py
+fi
 python3 "${script_dir}/native_symbols.py" "$source_dir" "${output_dir}/unsigned.${format}" \
     "${output_dir}/native-diagnostics.zip" --flavor "$flavor" \
     --source-sha "$expected_sha" --toolchain "${script_dir}/toolchain.json"

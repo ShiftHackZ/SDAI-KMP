@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate unsigned release artifacts, comparing independent rebuilds only for FOSS."""
+"""Validate release artifacts, requiring independent path-varied rebuilds only for FOSS."""
 import hashlib
 import json
 import os
@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 from native_symbols import verify_archive
+from test_native_reproducibility import compare_native_packages
 
 MAX_REFERENCE_BYTES = 512 * 1024 * 1024
 FOSS_CERTIFICATE = "8974efc853e2d5e93eb29dd809fc57cae7411fcfaca03de3f7c152f441a90064"
@@ -53,6 +54,9 @@ def zip_inventory(path):
                     "compressed_size": entry.compress_size, "compression": entry.compress_type,
                     "timestamp": entry.date_time, "order": index,
                     "extra_sha256": hashlib.sha256(entry.extra).hexdigest(),
+                    "flags": entry.flag_bits, "external_attributes": entry.external_attr,
+                    "internal_attributes": entry.internal_attr, "creator_system": entry.create_system,
+                    "comment_sha256": hashlib.sha256(entry.comment).hexdigest(),
                 }
     return result
 
@@ -160,8 +164,37 @@ def main():
     require(first.is_file(), "The unsigned build artifact is missing.")
     if second is not None:
         require(second.is_file() and not first.samefile(second), "Two separate FOSS build artifacts are required.")
+    environments = []
+    if second is not None:
+        environments = [json.loads((path.parent / "build-environment.json").read_text()) for path in (first, second)]
+        require([environment["repro_profile"] for environment in environments] == ["baseline", "varied"],
+                "FOSS comparison requires baseline and varied build profiles")
+        require(environments[0]["source_date_epoch"] == environments[1]["source_date_epoch"],
+                "SOURCE_DATE_EPOCH must remain fixed across rebuilds")
+        require(environments[1]["source_mtime"] == (environments[1]["source_date_epoch"] - 86400) * 1000000000,
+                "Rebuild source mtimes were not varied")
+        require(environments[1]["reordered_directories"] > 0, "Rebuild filesystem order was not varied")
+        require([environment["creation_order"] for environment in environments] == ["ascending", "descending"],
+                "FOSS source creation order must differ")
+        for environment in environments:
+            require(environment["filesystem"] == "ext4", "FOSS builds require native ext4 storage")
+            require(re.fullmatch(r"[0-9a-f]{64}", environment["directory_order_sha256"]),
+                    "Missing source directory traversal witness")
+            require(environment["source_sha"] == sha, "Build environment source revision mismatch.")
+            for field in ("source_path", "sdk_path", "java_path", "gradle_path", "home_path", "temp_path"):
+                require(Path(environment[field]).is_absolute(), "Build environment paths must be absolute.")
+        for field in ("source_path", "sdk_path", "java_path", "gradle_path", "home_path", "temp_path",
+                      "user", "hostname", "timezone", "locale", "umask", "python_hash_seed", "source_mtime",
+                      "directory_order_sha256"):
+            require(environments[0][field] != environments[1][field], "Independent rebuild must vary " + field)
     output.mkdir(parents=True, exist_ok=True)
     require(not (output / ("unsigned." + format_)).exists(), "Verified output already exists.")
+    if second is not None:
+        forbidden_paths = [environment[field] for environment in environments
+                           for field in ("source_path", "sdk_path", "java_path", "gradle_path", "home_path", "temp_path")]
+        native_report = compare_native_packages(first, second, forbidden_paths)
+        write_json(output / "native-reproducibility.json", native_report)
+        write_json(output / "build-environments.json", environments)
     hashes = [file_digest(first)]
     if second is not None:
         hashes.append(file_digest(second))

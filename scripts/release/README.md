@@ -2,7 +2,7 @@
 
 [Android Release](../../.github/workflows/release_android.yml) builds selected Android
 artifacts on native Ubuntu 24.04 x86-64 GitHub runners. FOSS artifacts are built twice
-on separate fresh runners and must be byte-identical. Full and Play Store artifacts
+on separate fresh runners with different source and SDK paths and must be byte-identical. Full and Play Store artifacts
 are built once. Every output must have the expected package, version and embedded
 Git revision before signing. Signing is enabled
 by default; no separate unsigned run or existing-release reference is required.
@@ -105,14 +105,61 @@ installing the pinned SDK. Android archive checksums were calculated from the
 official downloads and cross-checked against Google's repository metadata. JDK,
 Gradle and bundletool checksum sources are recorded in the profile.
 
-Build jobs install the SDK at `/opt/android-sdk`, matching the F-Droid build
-environment. Native debug information can include NDK header paths, which can
-affect linker build IDs even after debug sections are stripped from the APK.
+The first build installs the SDK at `/opt/android-sdk`, matching the F-Droid build
+environment. The FOSS rebuild uses `/opt/independent-android-sdk` and a different,
+longer checkout path. Both use fresh runners and Gradle homes. Verification requires
+the recorded source and SDK paths to differ, so repeating an identical environment
+cannot silently replace this check. Native debug information can include NDK
+header paths, which can affect linker build IDs even after stripping the APK.
 Signing and verification jobs use their own temporary SDK directory.
 
-Gradle runs with a 4 GiB heap, at most two workers, no parallel project execution,
-and the Kotlin compiler inside the Gradle process. Native Ninja compilation is limited
-to two workers, including direct Ninja invocations from AGP. Each selected output
+The two FOSS builds also use different real users, home directories, hostnames,
+JDK/Gradle/temp paths, locales, timezones, umasks and Python hash seeds.
+Both builds use the native system clock, with `SOURCE_DATE_EPOCH` fixed at the
+source commit time. Runtime clock changes are outside this comparison's coverage.
+Both builds use fresh native ext4 volumes,
+populated in ascending and descending creation order respectively. Before building,
+the helpers verify the copied Git source and record the actual directory traversal
+order; verification requires those witnesses to differ. The rebuild sets source
+mtimes one day before the commit time, preserving tracked bytes, executable bits
+and symlinks. Source mtimes must precede newly generated Ninja manifests. Owned
+volumes are unmounted and removed on exit. Linux is required for this preparation.
+Verification requires the recorded differences;
+a missing variation fails the gate. Full and Play Store retain their single build.
+
+Follow [F-Droid's reproducible-build guidance](https://f-droid.org/docs/Reproducible_Builds/)
+and the [Reproducible Builds build-path guidance](https://reproducible-builds.org/docs/build-path/)
+when adding native modules: pin downloaded sources and tools, map source/build/NDK
+paths before adding dependency targets, and avoid embedded timestamps and host paths.
+The FOSS native checker discovers ELF magic bytes in every archive entry, including
+extensionless executables and native files stored in assets. There is no library,
+module or ABI allowlist. It records and compares complete ELF hashes, build IDs
+and ABI identities. A deterministic build ID is allowed; any differing ELF byte
+fails the whole-archive comparison. Adding a native dependency requires no checker
+registration. Build-time regression tests discover the actual FOSS ELF inventory
+and verify detection of a byte change in each file and an arbitrary extensionless
+ELF path. These are checker tests using compiled native inputs, not application QA.
+
+The release init script applies `-Werror=date-time` to C and C++ compilation in
+every Android CMake and ndk-build module, including modules added later. Expanding
+`__DATE__`, `__TIME__` or `__TIMESTAMP__` fails the FOSS build. The package gate
+compares all APK/AAB bytes: DEX, manifests, resources, assets, native libraries,
+archive ordering and ZIP metadata. It never strips or normalizes an artifact to
+force equality. APK signing also retains the independent signature-copy check.
+Gradle rejects dynamic and changing dependencies in every project's dependency
+and buildscript configurations through `failOnNonReproducibleResolution()`.
+
+These checks cover the selected toolchain and exercised path variations. They do
+not prove equivalence under every possible environment or replace an independent
+F-Droid recipe rebuild. When a comparison fails, inspect `reproducibility-diff.json`
+and use `diffoscope` on the retained artifacts; fix the differing build input
+before signing. Keep the signed-versus-independent-APK signature-copy gate enabled.
+
+Gradle runs with a 4 GiB heap, no parallel project execution, and the Kotlin compiler
+inside the Gradle process. Both FOSS builds use the runner's available processor
+count for Gradle workers and native jobs, including direct Ninja invocations from
+AGP, and leave JVM processor detection unrestricted. Full and Play Store retain two Gradle
+workers and two native jobs. Each selected output
 and each rebuild use separate runners and fresh Gradle homes. Build logs include
 process resource usage; environment reports include runner memory and disk space.
 
@@ -129,7 +176,8 @@ submodules and a separate checkout containing these workflow tools:
 ```sh
 bash /path/to/ci/scripts/release/setup.sh build /path/to/empty-toolchain-directory /opt/android-sdk
 source /path/to/empty-toolchain-directory/environment.sh
-bash /path/to/ci/scripts/release/build.sh \
+RUNNER_TEMP=/path/to/empty-run-directory SDAI_REPRO_PROFILE=baseline \
+  bash /path/to/ci/scripts/release/build.sh \
   /path/to/source foss apk /path/to/output FULL_SOURCE_COMMIT_SHA
 ```
 
@@ -154,6 +202,10 @@ gh workflow run release_android.yml --ref master \
 Leave both `foss_reference_*` inputs empty. The historical `1.1.2` tag points at a
 different revision, so use the full commit above. Download and extract the signed
 `sdai-foss-apk-1.1.2` workflow artifact after the run.
+
+Historical source revisions may fail the current path-varied checks if they lack
+later native path fixes. Reproducing a historical release does not justify
+disabling the checks for a new release.
 
 Compare that signed CI APK locally against the published F-Droid APK of the same
 version. [F-Droid verifies reproducibility](https://f-droid.org/docs/Reproducible_Builds/)
@@ -247,6 +299,9 @@ status. `unsigned_rebuild_comparison` is `byte_identical` for FOSS and
 `not_requested` for Full and Play Store. Signed FOSS APK artifacts also contain
 `signature-copy-comparison.json` from comparison with the independent CI rebuild.
 ZIP entry differences are retained if the two FOSS unsigned builds disagree.
+FOSS outputs also contain `build-environments.json`, recording the environments
+used for the comparison, and `native-reproducibility.json`, recording every
+discovered ELF and any per-file differences.
 
 Actions artifacts are retained for 14 days. Download the verified signed files for
 the normal release process. FOSS AAB repeatability is checked before signing; JAR

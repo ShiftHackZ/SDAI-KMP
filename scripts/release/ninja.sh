@@ -6,4 +6,8 @@ for arg in "$@"; do
         exec "${SDAI_REAL_NINJA:?Pinned Ninja path required}" "$@"
     fi
 done
-exec "${SDAI_REAL_NINJA:?Pinned Ninja path required}" "$@" -j2
+native_workers=2
+if [[ "${SDAI_RELEASE_FLAVOR:-}" == foss ]]; then
+    native_workers="${SDAI_NATIVE_WORKERS:?FOSS native worker count required}"
+fi
+exec "${SDAI_REAL_NINJA:?Pinned Ninja path required}" "$@" "-j$native_workers"
