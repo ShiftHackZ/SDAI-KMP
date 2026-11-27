@@ -91,6 +91,18 @@ def main():
         help="Only check this provider or integration; default checks all registered contracts",
     )
     parser.add_argument(
+        "--schema-cache",
+        type=Path,
+        default=ROOT / "build/cache/provider-schemas",
+        help="Directory for downloaded public schemas",
+    )
+    parser.add_argument(
+        "--schema-cache-max-age",
+        type=int,
+        default=86400,
+        help="Maximum cached schema age in seconds; 0 forces fresh downloads",
+    )
+    parser.add_argument(
         "--models",
         type=Path,
         default=ROOT / "network/build/provider-contracts/models.json",
@@ -101,6 +113,8 @@ def main():
         default=ROOT / "build/reports/provider-contracts/report.json",
     )
     args = parser.parse_args()
+    if args.schema_cache_max_age < 0:
+        parser.error("Schema cache age must not be negative")
     verify_inventory(ROOT)
     metadata = json.loads(args.models.read_text())
     if metadata["explicitNulls"] or not metadata["encodeDefaults"]:
@@ -108,6 +122,7 @@ def main():
             "Serializer omission policy changed; update the compatibility checker"
         )
     report = {
+        "schema_cache_max_age_seconds": args.schema_cache_max_age,
         "skipped": sorted(SKIPPED),
         "limits": [
             "Structural schema compatibility only; no authenticated API or generation calls.",
@@ -122,7 +137,9 @@ def main():
             continue
         result = {"provider": provider, "url": url, "checks": []}
         try:
-            document, provenance = fetch(url)
+            document, provenance = fetch(
+                url, cache_dir=args.schema_cache, max_age_seconds=args.schema_cache_max_age
+            )
             result.update(provenance)
         except Exception as error:
             result["download_error"] = f"{type(error).__name__}: {error}"
@@ -191,7 +208,11 @@ def main():
         lines.append(f"### {provider}: {status}")
         lines.extend(f"- {error}" for error in errors)
         lines.extend(f"- WARNING: {note}" for note in warnings)
-        lines.extend([f"- Source: {entry['url']}" for entry in entries])
+        for entry in entries:
+            lines.append(f"- Source: {entry['url']}")
+            if "fetched_at" in entry:
+                source = "cache hit" if entry["is_cache_hit"] else "downloaded"
+                lines.append(f"  - {source}; fetched {entry['fetched_at']}; SHA-256 {entry['sha256']}")
         lines.append("")
         has_failed = has_failed or bool(errors)
     lines.extend(

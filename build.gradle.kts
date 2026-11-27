@@ -1,4 +1,6 @@
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
+import org.jetbrains.dokka.gradle.tasks.DokkaGenerateModuleTask
+import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 import java.net.URI
 
 plugins {
@@ -20,6 +22,8 @@ apply(from = "gradle/presentation-architecture.gradle.kts")
 
 // Grouping projects such as :core and :feature have no build script or sources.
 val documentedProjects = subprojects.filter { it.buildFile.isFile }
+val shouldAssembleDokka =
+    providers.gradleProperty("dokkaAssembleOnly").map(String::toBooleanStrict).getOrElse(false)
 
 dokka {
     moduleName.set("SDAI")
@@ -34,10 +38,15 @@ dependencies {
 
 configure(documentedProjects) {
     pluginManager.apply("org.jetbrains.dokka")
+    val documentationPath = path.removePrefix(":").replace(':', '/')
+
+    tasks.named<DokkaGenerateModuleTask>("dokkaGenerateModuleHtml") {
+        outputDirectory.set(rootProject.layout.buildDirectory.dir("dokka-modules/$documentationPath"))
+    }
 
     dokka {
-        moduleName.set(path.removePrefix(":").replace(':', '/'))
-        modulePath.set(path.removePrefix(":").replace(':', '/'))
+        moduleName.set(documentationPath)
+        modulePath.set(documentationPath)
         dokkaSourceSets.configureEach {
             documentedVisibilities.set(
                 setOf(
@@ -57,6 +66,39 @@ configure(documentedProjects) {
                     )
                 )
                 remoteLineSuffix.set("#L")
+            }
+        }
+    }
+}
+
+// Split module generation using the same project inventory as the aggregate reference.
+val dokkaShardCount = providers.gradleProperty("dokkaShardCount").map(String::toInt).getOrElse(1)
+val dokkaShardIndex = providers.gradleProperty("dokkaShardIndex").map(String::toInt).getOrElse(0)
+require(dokkaShardCount in 1..documentedProjects.size && dokkaShardIndex in 0 until dokkaShardCount) {
+    "Dokka shard count must be between 1 and ${documentedProjects.size}, with a zero-based shard index."
+}
+val dokkaModuleTasks = documentedProjects.sortedBy { it.path }.map {
+    it.tasks.named("dokkaGenerateModuleHtml")
+}
+tasks.register("dokkaGenerateShard") {
+    group = "documentation"
+    description = "Generates one partition of the complete API reference for later aggregation."
+    dependsOn(dokkaModuleTasks.filterIndexed { index, _ -> index % dokkaShardCount == dokkaShardIndex })
+}
+
+// Prebuilt modules come from successful shard jobs in the same workflow run.
+if (shouldAssembleDokka) {
+    tasks.named<DokkaGeneratePublicationTask>("dokkaGeneratePublicationHtml") {
+        val moduleDirectories = documentedProjects.map {
+            val modulePath = it.path.removePrefix(":").replace(':', '/')
+            layout.buildDirectory.dir("dokka-modules/$modulePath").get().asFile
+        }
+        generator.moduleOutputDirectories.setFrom(moduleDirectories)
+        doFirst {
+            documentedProjects.zip(moduleDirectories).forEach { (moduleProject, moduleDir) ->
+                check(moduleDir.resolve("module-descriptor.json").isFile && moduleDir.resolve("module").isDirectory) {
+                    "Missing completed Dokka module: ${moduleProject.path}"
+                }
             }
         }
     }
