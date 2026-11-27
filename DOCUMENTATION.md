@@ -372,6 +372,15 @@ API reference, removes obsolete pages and commits only `docs/docs/` to `master`.
 Only one generation job runs at a time. If `master` advances during generation,
 that result is discarded and a later check uses its latest inputs.
 
+Generation enables Gradle parallel execution and the build cache so independent
+modules can run concurrently and unchanged compilation/documentation outputs can
+be reused across runs. It selects the root `:dokkaGeneratePublicationHtml` task,
+which aggregates every module without also rendering standalone module websites.
+The Gradle action persists its build cache; a separate
+cache preserves Kotlin/Native toolchains and dependencies in `~/.konan`. All
+Android and iOS source sets remain included. The `dokka-build-profile` artifact
+contains Gradle timing reports when available for investigating slow builds.
+
 Updating `master` is independent of the state of `develop`, including when
 `master` has extra hotfix commits. Immediately before publication, the workflow
 checks whether both tips have the same full commit SHA and 0 commits ahead/behind.
@@ -401,7 +410,7 @@ Generated-only pushes skip Project Tests and do not trigger another Dokka run.
 Run Dokka from the repository root:
 
 ```bash
-./gradlew dokkaGeneratePublicationHtml
+./gradlew :dokkaGeneratePublicationHtml
 ```
 
 The root Gradle build discovers all subprojects with their own build script,
@@ -478,7 +487,7 @@ Before a release or store upload:
 
 - Run Optimize Imports in Android Studio:
   `Project right click -> Refactor -> Optimize Imports`.
-- Run `./gradlew dokkaGeneratePublicationHtml` after KDoc changes.
+- Run `./gradlew :dokkaGeneratePublicationHtml` after KDoc changes.
 - Review `git diff -- docs/docs` to make sure generated documentation reflects
   the intended API changes.
 - Keep unrelated generated website or screenshot changes out of documentation
