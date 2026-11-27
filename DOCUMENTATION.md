@@ -369,17 +369,22 @@ gh workflow run dokka.yml --ref master
 
 The workflow uses macOS so iOS source sets are available. It regenerates the full
 API reference, removes obsolete pages and commits only `docs/docs/` to `master`.
-Only one generation job runs at a time. If `master` advances during generation,
+Only one publication job runs at a time. If `master` advances during generation,
 that result is discarded and a later check uses its latest inputs.
 
-Generation enables Gradle parallel execution and the build cache so independent
-modules can run concurrently and unchanged compilation/documentation outputs can
-be reused across runs. It selects the root `:dokkaGeneratePublicationHtml` task,
-which aggregates every module without also rendering standalone module websites.
-The Gradle action persists its build cache; a separate
-cache preserves Kotlin/Native toolchains and dependencies in `~/.konan`. All
-Android and iOS source sets remain included. The `dokka-build-profile` artifact
-contains Gradle timing reports when available for investigating slow builds.
+After KDoc validation, four macOS jobs generate disjoint groups of modules in
+parallel. Each job uses the same source commit and the Gradle project inventory;
+new modules are assigned automatically. Successful jobs upload their complete
+Dokka module outputs. A final job downloads all four artifacts and assembles the
+aggregate reference without repeating module analysis or platform compilation.
+Missing module outputs fail assembly rather than publishing a partial reference.
+Each job keeps the 45-minute limit; publication waits for every shard to succeed.
+
+Gradle parallel execution and build caching remain enabled for module generation.
+The Gradle action persists its build cache; a separate cache preserves Kotlin/Native
+toolchains and dependencies in `~/.konan`. All Android and iOS source sets remain
+included. Gradle timing reports are uploaded when available as
+`dokka-module-profile-<shard>` and `dokka-build-profile`.
 
 Updating `master` is independent of the state of `develop`, including when
 `master` has extra hotfix commits. Immediately before publication, the workflow
@@ -417,6 +422,17 @@ The root Gradle build discovers all subprojects with their own build script,
 applies Dokka to them, and aggregates their API documentation. Grouping projects
 such as `:core` and `:feature` have no build script and are excluded. The separate
 `build-logic` included build is not part of the application's API reference.
+
+To reproduce one CI partition locally, run
+`./gradlew :dokkaGenerateShard -PdokkaShardCount=4 -PdokkaShardIndex=0`, using
+indices 0 through 3. Module outputs are written to `build/dokka-modules/`.
+Once all partitions have completed, assemble their outputs without regenerating modules:
+
+```sh
+./gradlew :dokkaGeneratePublicationHtml -PdokkaAssembleOnly=true
+```
+
+The normal local generation command above generates everything automatically.
 
 The generated HTML is written to:
 
