@@ -26,7 +26,7 @@ with the implementation.
 
 ### Current upstream schema checks
 
-Project Tests downloads the current official schemas for OpenAI, AI Horde,
+Project Tests checks official schemas for OpenAI, AI Horde,
 Stability AI v1, Hugging Face and every Fal AI endpoint in the app catalogue.
 Each provider runs as a separate matrix job with its own CI result and artifact;
 one provider's failure does not cancel the others.
@@ -35,6 +35,11 @@ exported from the compiled application serializers. Hugging Face inference uses
 its official task JSON Schema alongside the Hub OpenAPI document. ArliAI and
 ChatGPT OAuth are excluded until public upstream schemas are available.
 
+One Gradle job exports the compiled serializer contracts and shares them with all
+provider jobs. Gradle dependencies and build outputs are cached; Python jobs
+also cache pip downloads. Same-repository PRs can save their branch-scoped Gradle
+caches; forked PRs only restore them.
+
 Run the same checks locally with JDK 17, the Android SDK and Python 3.10 or newer:
 
 ```sh
@@ -42,11 +47,17 @@ python3 -m venv /tmp/sdai-provider-contracts
 /tmp/sdai-provider-contracts/bin/pip install -r scripts/provider_contracts/requirements.txt
 ./gradlew :network:exportProviderContracts --no-daemon
 /tmp/sdai-provider-contracts/bin/python scripts/test_provider_contract_checker.py
-/tmp/sdai-provider-contracts/bin/python scripts/check_provider_contracts.py
+/tmp/sdai-provider-contracts/bin/python scripts/test_provider_contracts.py
 ```
 
-Each invocation fetches fresh upstream documents. A failed download or invalid
-document fails the check; there is no bundled-spec fallback. CI uploads differences,
+Downloaded schemas are cached for up to 24 hours in `build/cache/provider-schemas/`.
+Cache entries are keyed by the full source URL and verified against their SHA-256
+hash before reuse. Missing, invalid or expired entries require a successful fresh
+download; stale data never conceals a download failure. Use
+`--schema-cache-max-age 0` to force fresh downloads, or `--schema-cache` to select
+another cache directory. CI persists schema caches separately for each provider,
+with daily refresh keys, and records cache hits alongside the original fetch time.
+A failed download or invalid document fails the check. CI uploads differences,
 source URLs, fetch times and SHA-256 hashes under `upstream-provider-contracts-<provider>`.
 Use `--provider OPEN_AI` (or `HORDE`, `HUGGING_FACE`, `STABILITY_AI`, `FAL_AI`) to
 check one provider. Missing routes, removed consumed response fields and incompatible wire

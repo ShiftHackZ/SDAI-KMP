@@ -145,6 +145,11 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "17"
+      - name: Set up Gradle dependency cache
+        if: runner.os == 'macOS'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
       - name: Test MNN iOS storage, model leases and host admission
         if: runner.os == 'macOS'
         run: ./gradlew :data:iosSimulatorArm64Test :feature:mnn:iosSimulatorArm64Test --no-daemon
@@ -168,8 +173,36 @@ jobs:
             feature/mnn/build/test-results/iosSimulatorArm64Test/*.xml
           if-no-files-found: warn
 
+  export-provider-contracts:
+    name: Export compiled provider contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.0
+        with:
+          persist-credentials: false
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3.13.0
+        with:
+          distribution: "adopt"
+          java-version: "17"
+      - name: Set up Gradle dependency cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
+      - name: Export compiled provider wire contracts
+        run: ./gradlew :network:exportProviderContracts --no-daemon --build-cache
+      - name: Share compiled provider contracts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-provider-contracts
+          path: network/build/provider-contracts/models.json
+          if-no-files-found: error
+
   test-cloud-contracts:
     name: ${{ matrix.name }} — API contracts
+    needs: export-provider-contracts
     strategy:
       fail-fast: false
       matrix:
@@ -191,7 +224,8 @@ jobs:
     env:
       JOB_DESCRIPTION: >-
         Checks consumed routes and wire types against compiled application serializers.
-        Cloud providers use current official schemas; Civitai uses the application API document.
+        Cloud providers use official schemas cached for at most 24 hours;
+        Civitai uses the application API document.
     steps:
       - name: Describe API contract checks
         run: printf '%s\n' "$JOB_DESCRIPTION" >> "$GITHUB_STEP_SUMMARY"
@@ -199,23 +233,40 @@ jobs:
         uses: actions/checkout@v4.1.0
         with:
           persist-credentials: false
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3.13.0
-        with:
-          distribution: "adopt"
-          java-version: "17"
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/provider_contracts/requirements.txt
       - name: Install schema parser
         run: python3 -m pip install -r scripts/provider_contracts/requirements.txt
       - name: Check schema comparison logic
         run: python3 scripts/test_provider_contract_checker.py
-      - name: Export compiled provider wire contracts
-        run: ./gradlew :network:exportProviderContracts --no-daemon
+      - name: Download compiled provider wire contracts
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-provider-contracts
+          path: network/build/provider-contracts/
+      - name: Select schema cache refresh bucket
+        if: matrix.provider != 'CIVITAI'
+        id: schema-date
+        run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      - name: Restore upstream schemas
+        if: matrix.provider != 'CIVITAI'
+        id: schemas
+        uses: actions/cache/restore@v4
+        with:
+          path: build/cache/provider-schemas/
+          key: provider-schemas-v1-${{ matrix.provider }}-${{ hashFiles('scripts/provider_contracts/*.py', 'domain/src/commonMain/kotlin/com/shifthackz/aisdv1/domain/entity/FalAiModel.kt') }}-${{ steps.schema-date.outputs.day }}
       - name: Test provider and integration API contracts
         run: python3 scripts/test_provider_contracts.py --provider "${{ matrix.provider }}"
+      - name: Save downloaded upstream schemas
+        if: always() && steps.schemas.outputs.cache-primary-key != '' && steps.schemas.outputs.cache-hit != 'true' && hashFiles('build/cache/provider-schemas/*.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: build/cache/provider-schemas/
+          key: ${{ steps.schemas.outputs.cache-primary-key }}
       - name: Upload API contract report
         if: always()
         uses: actions/upload-artifact@v4
@@ -255,6 +306,11 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "17"
+
+      - name: Set up Gradle dependency cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
 
       - name: Grant execute permissions for gradlew
         run: chmod +x ./gradlew
