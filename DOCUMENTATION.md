@@ -26,7 +26,7 @@ with the implementation.
 
 ### Current upstream schema checks
 
-Project Tests downloads the current official schemas for OpenAI, AI Horde,
+Project Tests checks official schemas for OpenAI, AI Horde,
 Stability AI v1, Hugging Face and every Fal AI endpoint in the app catalogue.
 Each provider runs as a separate matrix job with its own CI result and artifact;
 one provider's failure does not cancel the others.
@@ -35,6 +35,11 @@ exported from the compiled application serializers. Hugging Face inference uses
 its official task JSON Schema alongside the Hub OpenAPI document. ArliAI and
 ChatGPT OAuth are excluded until public upstream schemas are available.
 
+One Gradle job exports the compiled serializer contracts and shares them with all
+provider jobs. Gradle dependencies and build outputs are cached; Python jobs
+also cache pip downloads. Same-repository PRs can save their branch-scoped Gradle
+caches; forked PRs only restore them.
+
 Run the same checks locally with JDK 17, the Android SDK and Python 3.10 or newer:
 
 ```sh
@@ -42,11 +47,17 @@ python3 -m venv /tmp/sdai-provider-contracts
 /tmp/sdai-provider-contracts/bin/pip install -r scripts/provider_contracts/requirements.txt
 ./gradlew :network:exportProviderContracts --no-daemon
 /tmp/sdai-provider-contracts/bin/python scripts/test_provider_contract_checker.py
-/tmp/sdai-provider-contracts/bin/python scripts/check_provider_contracts.py
+/tmp/sdai-provider-contracts/bin/python scripts/test_provider_contracts.py
 ```
 
-Each invocation fetches fresh upstream documents. A failed download or invalid
-document fails the check; there is no bundled-spec fallback. CI uploads differences,
+Downloaded schemas are cached for up to 24 hours in `build/cache/provider-schemas/`.
+Cache entries are keyed by the full source URL and verified against their SHA-256
+hash before reuse. Missing, invalid or expired entries require a successful fresh
+download; stale data never conceals a download failure. Use
+`--schema-cache-max-age 0` to force fresh downloads, or `--schema-cache` to select
+another cache directory. CI persists schema caches separately for each provider,
+with daily refresh keys, and records cache hits alongside the original fetch time.
+A failed download or invalid document fails the check. CI uploads differences,
 source URLs, fetch times and SHA-256 hashes under `upstream-provider-contracts-<provider>`.
 Use `--provider OPEN_AI` (or `HORDE`, `HUGGING_FACE`, `STABILITY_AI`, `FAL_AI`) to
 check one provider. Missing routes, removed consumed response fields and incompatible wire
@@ -369,17 +380,22 @@ gh workflow run dokka.yml --ref master
 
 The workflow uses macOS so iOS source sets are available. It regenerates the full
 API reference, removes obsolete pages and commits only `docs/docs/` to `master`.
-Only one generation job runs at a time. If `master` advances during generation,
+Only one publication job runs at a time. If `master` advances during generation,
 that result is discarded and a later check uses its latest inputs.
 
-Generation enables Gradle parallel execution and the build cache so independent
-modules can run concurrently and unchanged compilation/documentation outputs can
-be reused across runs. It selects the root `:dokkaGeneratePublicationHtml` task,
-which aggregates every module without also rendering standalone module websites.
-The Gradle action persists its build cache; a separate
-cache preserves Kotlin/Native toolchains and dependencies in `~/.konan`. All
-Android and iOS source sets remain included. The `dokka-build-profile` artifact
-contains Gradle timing reports when available for investigating slow builds.
+After KDoc validation, four macOS jobs generate disjoint groups of modules in
+parallel. Each job uses the same source commit and the Gradle project inventory;
+new modules are assigned automatically. Successful jobs upload their complete
+Dokka module outputs. A final job downloads all four artifacts and assembles the
+aggregate reference without repeating module analysis or platform compilation.
+Missing module outputs fail assembly rather than publishing a partial reference.
+Each job keeps the 45-minute limit; publication waits for every shard to succeed.
+
+Gradle parallel execution and build caching remain enabled for module generation.
+The Gradle action persists its build cache; a separate cache preserves Kotlin/Native
+toolchains and dependencies in `~/.konan`. All Android and iOS source sets remain
+included. Gradle timing reports are uploaded when available as
+`dokka-module-profile-<shard>` and `dokka-build-profile`.
 
 Updating `master` is independent of the state of `develop`, including when
 `master` has extra hotfix commits. Immediately before publication, the workflow
@@ -417,6 +433,17 @@ The root Gradle build discovers all subprojects with their own build script,
 applies Dokka to them, and aggregates their API documentation. Grouping projects
 such as `:core` and `:feature` have no build script and are excluded. The separate
 `build-logic` included build is not part of the application's API reference.
+
+To reproduce one CI partition locally, run
+`./gradlew :dokkaGenerateShard -PdokkaShardCount=4 -PdokkaShardIndex=0`, using
+indices 0 through 3. Module outputs are written to `build/dokka-modules/`.
+Once all partitions have completed, assemble their outputs without regenerating modules:
+
+```sh
+./gradlew :dokkaGeneratePublicationHtml -PdokkaAssembleOnly=true
+```
+
+The normal local generation command above generates everything automatically.
 
 The generated HTML is written to:
 

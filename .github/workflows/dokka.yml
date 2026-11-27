@@ -72,9 +72,127 @@ jobs:
           fi
           python3 scripts/dokka.py plan "${args[@]}"
 
+  validate:
+    name: Validate documentation source
+    needs: plan
+    if: needs.plan.outputs.should_generate == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+    outputs:
+      should_generate: ${{ steps.current.outputs.should_generate }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.source_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout workflow tooling
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .dokka-automation
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: Check whether the planned source is still current
+        id: current
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin refs/heads/master
+          if [[ "$(git rev-parse FETCH_HEAD)" == "${SOURCE_SHA}" ]]; then
+            echo "should_generate=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "::notice::Master advanced; leaving generation for the next check."
+          fi
+
+      - name: Test KDoc formatting on the complete change range
+        if: steps.current.outputs.should_generate == 'true'
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .dokka-automation/scripts/kdoc -p 'test_kdoc_*.py'
+          base_sha="${PUSH_BASE_SHA}"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            base_sha="$(git log -1 --format=%H "${SOURCE_SHA}" -- docs/docs/.dokka-inputs.sha256)"
+          fi
+          python3 .dokka-automation/scripts/kdoc/test_kdoc_formatting.py \
+            --base "${base_sha}" --head "${SOURCE_SHA}"
+
+  modules:
+    name: Generate API modules — shard ${{ matrix.shard }}
+    needs: [plan, validate]
+    if: needs.validate.outputs.should_generate == 'true'
+    runs-on: macos-15
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    concurrency:
+      group: dokka-modules-${{ matrix.shard }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.source_sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Install the configured Android platform
+        run: |
+          set -euo pipefail
+          compile_sdk="$(sed -n 's/^compileSdk = "\([0-9]*\)"/\1/p' gradle/libs.versions.toml)"
+          [[ "${compile_sdk}" =~ ^[0-9]+$ ]]
+          sdkmanager "platforms;android-${compile_sdk}"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Cache Kotlin Native toolchains and dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: dokka-konan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            dokka-konan-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Generate assigned modules
+        run: >-
+          ./gradlew :dokkaGenerateShard
+          -PdokkaShardCount=4 -PdokkaShardIndex=${{ matrix.shard }}
+          --no-daemon --parallel --build-cache --profile
+
+      - name: Upload completed API modules
+        uses: actions/upload-artifact@v4
+        with:
+          name: dokka-modules-${{ matrix.shard }}
+          path: build/dokka-modules/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 1
+
+      - name: Upload module generation profile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dokka-module-profile-${{ matrix.shard }}
+          path: build/reports/profile/
+          if-no-files-found: ignore
+
   generate:
     name: Update master documentation
-    needs: plan
+    needs: [plan, modules]
     if: needs.plan.outputs.should_generate == 'true'
     # macOS keeps iOS source sets available, matching local documentation builds.
     runs-on: macos-15
@@ -121,22 +239,6 @@ jobs:
             echo "::notice::Master advanced; the next check will inspect its latest inputs."
           fi
 
-      - name: Test KDoc formatting on the complete change range
-        if: steps.current.outputs.should_generate == 'true'
-        env:
-          PYTHONDONTWRITEBYTECODE: "1"
-          EVENT_NAME: ${{ github.event_name }}
-          PUSH_BASE_SHA: ${{ github.event.before }}
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s .dokka-automation/scripts/kdoc -p 'test_kdoc_*.py'
-          base_sha="${PUSH_BASE_SHA}"
-          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
-            base_sha="$(git log -1 --format=%H "${SOURCE_SHA}" -- docs/docs/.dokka-inputs.sha256)"
-          fi
-          python3 .dokka-automation/scripts/kdoc/test_kdoc_formatting.py \
-            --base "${base_sha}" --head "${SOURCE_SHA}"
-
       - uses: actions/setup-java@v4
         if: steps.current.outputs.should_generate == 'true'
         with:
@@ -159,14 +261,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         if: steps.current.outputs.should_generate == 'true'
 
-      - name: Cache Kotlin Native toolchains and dependencies
+      - name: Download completed API modules
         if: steps.current.outputs.should_generate == 'true'
-        uses: actions/cache@v4
+        uses: actions/download-artifact@v4
         with:
-          path: ~/.konan
-          key: dokka-konan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            dokka-konan-${{ runner.os }}-${{ runner.arch }}-
+          pattern: dokka-modules-*
+          path: build/dokka-modules/
+          merge-multiple: true
 
       - name: Regenerate the complete API reference
         if: steps.current.outputs.should_generate == 'true'
@@ -174,7 +275,7 @@ jobs:
           set -euo pipefail
           # Remove obsolete pages for deleted/renamed declarations.
           rm -rf docs/docs
-          ./gradlew :dokkaGeneratePublicationHtml --no-daemon --parallel --build-cache --profile
+          ./gradlew :dokkaGeneratePublicationHtml -PdokkaAssembleOnly=true --no-daemon --build-cache --profile
           python3 .dokka-automation/scripts/dokka.py record "${INPUT_DIGEST}"
 
       - name: Upload documentation build profile
