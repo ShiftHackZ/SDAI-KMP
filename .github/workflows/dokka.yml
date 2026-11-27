@@ -159,14 +159,31 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         if: steps.current.outputs.should_generate == 'true'
 
+      - name: Cache Kotlin Native toolchains and dependencies
+        if: steps.current.outputs.should_generate == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: dokka-konan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            dokka-konan-${{ runner.os }}-${{ runner.arch }}-
+
       - name: Regenerate the complete API reference
         if: steps.current.outputs.should_generate == 'true'
         run: |
           set -euo pipefail
           # Remove obsolete pages for deleted/renamed declarations.
           rm -rf docs/docs
-          ./gradlew dokkaGeneratePublicationHtml --no-daemon
+          ./gradlew :dokkaGeneratePublicationHtml --no-daemon --parallel --build-cache --profile
           python3 .dokka-automation/scripts/dokka.py record "${INPUT_DIGEST}"
+
+      - name: Upload documentation build profile
+        if: always() && steps.current.outputs.should_generate == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dokka-build-profile
+          path: build/reports/profile/
+          if-no-files-found: ignore
 
       - name: Commit documentation and preserve aligned branches
         if: steps.current.outputs.should_generate == 'true'
