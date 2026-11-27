@@ -7,6 +7,13 @@ package com.shifthackz.aisdv1.core.navigation.router
  */
 interface ImageToImageRouter {
     /**
+     * Opens independent upscaler setup without changing generation selection.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToUpscalerSetup()
+
+    /**
      * Opens the application drawer without changing the active route.
      *
      * @author Dmitriy Moroz

@@ -50,6 +50,20 @@ interface SdaiAppApi {
     suspend fun fetchMnnModels(): List<DownloadableModelResponse>
 
     /**
+     * Fetches the dedicated SDCPP ESRGAN checkpoint catalog; HTTP and decoding failures propagate.
+     *
+     * @author Dmitriy Moroz
+     */
+    suspend fun fetchUpscalerEsrganModels(): List<DownloadableModelResponse>
+
+    /**
+     * Fetches the dedicated cross-platform MNN upscaler catalog; HTTP and decoding failures propagate.
+     *
+     * @author Dmitriy Moroz
+     */
+    suspend fun fetchUpscalerMnnModels(): List<DownloadableModelResponse>
+
+    /**
      * Fetches MediaPipe download metadata and accounts its response bytes as configuration traffic.
      *
      * @author Dmitriy Moroz

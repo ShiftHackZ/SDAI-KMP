@@ -19,6 +19,8 @@ data object NoOpImageToImageRouter : ImageToImageRouter {
      *
      * @author Dmitriy Moroz
      */
+    override fun navigateToUpscalerSetup() = Unit
+
     override fun navigateBack() = Unit
 
     /**

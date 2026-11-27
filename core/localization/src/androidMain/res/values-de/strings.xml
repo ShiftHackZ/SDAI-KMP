@@ -294,7 +294,7 @@
     <string name="title_history">Verlauf</string>
     <string name="title_gallery_details">Details</string>
     <string name="title_settings">Einstellungen</string>
-    <string name="title_server_setup">Konfiguration</string>
+    <string name="title_server_setup">Generierung konfigurieren</string>
     <string name="title_select_sd_model">SD-KI-Modell auswählen</string>
     <string name="title_clear_app_cache">App-Cache leeren</string>
     <string name="title_debug_menu">Entwicklermodus</string>
@@ -335,7 +335,7 @@
     <string name="settings_header_look_and_feel">Darstellung</string>
     <string name="settings_header_community">Community</string>
 
-    <string name="settings_item_config">Konfiguration</string>
+    <string name="settings_item_config">Generierung konfigurieren</string>
     <string name="settings_item_sd_model">SD-Modell</string>
     <string name="settings_item_stability_ai_credits">Stability-AI-Guthaben</string>
     <string name="settings_item_local_nnapi">NNAPI verwenden</string>
@@ -949,4 +949,33 @@
     <string name="blog_post_missing">Dieser Artikel ist nicht verfügbar.</string>
     <string name="blog_share_post">Artikel teilen</string>
     <string name="blog_share_error">Das Teilen-Menü konnte nicht geöffnet werden.</string>
+    <string name="generation_configuration">Generierung konfigurieren</string>
+    <string name="upscaler_configuration">Upscaler konfigurieren</string>
+    <string name="upscaler_title">Upscaler</string>
+    <string name="upscaler_action">Vergrößern</string>
+    <string name="upscaler_local_provider">ESRGAN</string>
+    <string name="upscaler_provider_help">KI-Upscaling erhöht die Bildauflösung und verbessert Kanten und feine Details. Nutze es für vorhandene Bilder oder als letzten Schritt nach der Generierung.</string>
+    <string name="upscaler_mnn_provider">MNN</string>
+    <string name="upscaler_tag_tiled_inference">Kachelbasierte Verarbeitung</string>
+    <string name="upscaler_esrgan_description">ESRGAN vergrößert Bilder mit KI und verbessert Kanten und feine Details direkt auf deinem Gerät. Nutze es für vorhandene Bilder oder nach der Generierung.</string>
+    <string name="upscaler_mnn_description">MNN vergrößert Bilder mit KI und verbessert Kanten und feine Details direkt auf deinem Gerät. Nutze es für vorhandene Bilder oder nach der Generierung.</string>
+    <string name="upscaler_unavailable">Für diese Plattform ist kein Upscaler verfügbar.</string>
+    <string name="upscaler_model">Upscaler-Modell</string>
+    <string name="upscaler_pipeline_toggle">Generierte Bilder vergrößern</string>
+
+    <string name="upscaler_setup_required">Wähle ein heruntergeladenes Modell in der Upscaler-Konfiguration.</string>
+    <string name="upscaler_retry">Erneut versuchen</string>
+    <string name="upscaler_limits">Bilder mit mehr als 1024 Pixeln auf einer Seite werden erst nach Bestätigung proportional verkleinert.</string>
+    <string name="upscaler_running">Bild wird vergrößert…</string>
+
+    <string name="settings_help_upscaler_configuration">Wähle einen Upscaling-Anbieter und konfiguriere seine lokalen Modelle.</string>
+    <string name="upscaler_options">Upscaler-Parameter</string>
+    <string name="upscaler_provider">Upscaler-Anbieter</string>
+    <string name="error_upscaler_generation_size">Bei aktiviertem Hochskalieren darf die Bildgröße 1024 × 1024 Pixel nicht überschreiten. Verringern Sie die Größe oder deaktivieren Sie das Hochskalieren.</string>
+    <string name="upscaler_models">Upscaler-Modelle</string>
+    <string name="generation_provider">Generierungsanbieter</string>
+    <string name="upscaler_downscale_title">Eingabebild wird verkleinert</string>
+    <string name="upscaler_downscale_message">Der Upscaler unterstützt Eingabebilder bis zu 1024 × 1024 Pixeln. Ihr Bild wird so verkleinert, dass die längste Seite 1024 Pixel beträgt. Das Seitenverhältnis und das gesamte Bild bleiben erhalten.</string>
+    <string name="upscaler_continue">Weiter</string>
+    <string name="upscaler_scale_factor">Skalierungsfaktor</string>
 </resources>

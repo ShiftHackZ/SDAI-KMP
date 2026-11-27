@@ -10,6 +10,8 @@ import com.shifthackz.aisdv1.app.inference.AndroidInferenceConnectionFactory
 import com.shifthackz.aisdv1.app.inference.CompletePngImageValidator
 import com.shifthackz.aisdv1.app.inference.FileGenerationFileStore
 import com.shifthackz.aisdv1.app.inference.NativeGenerationGatewayImpl
+import com.shifthackz.aisdv1.domain.gateway.UpscalerGateway
+import com.shifthackz.aisdv1.app.inference.RemoteUpscalerGateway
 import com.shifthackz.aisdv1.app.inference.RemoteStableDiffusionCpp
 import com.shifthackz.aisdv1.app.diagnostics.AndroidProcessExitDiagnosticsGateway
 import com.shifthackz.aisdv1.app.diagnostics.FileGenerationAttemptJournal
@@ -100,6 +102,11 @@ internal class NativeHostBindings(private val context: Context) : AndroidHostBin
     override val processExitDiagnosticsGateway: ProcessExitDiagnosticsGateway by lazy {
         AndroidProcessExitDiagnosticsGateway(
             context
+        )
+    }
+    override val upscalerGateway: UpscalerGateway by lazy {
+        RemoteUpscalerGateway(
+            nativeGenerationGateway
         )
     }
     override val stableDiffusionCpp: StableDiffusionCpp by lazy {

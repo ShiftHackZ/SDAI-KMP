@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.core.mvi.MviState
 import com.shifthackz.aisdv1.domain.entity.ADetailerConfig
+import com.shifthackz.aisdv1.domain.entity.UpscalerConfiguration
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
@@ -50,6 +51,7 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  * @param advancedToggleButtonVisible Whether the user can expand the provider's advanced controls.
  * @param advancedOptionsVisible Whether advanced generation controls are currently expanded.
  * @param formPromptTaggedInput Whether prompts are edited as tags instead of plain text.
+ * @param upscaler Captured final-stage provider/model; null disables optional upscaling.
  * @param prompt Positive prompt describing the requested image.
  * @param negativePrompt Prompt describing content the selected provider should avoid.
  * @param width Width editor text in pixels; invalid values remain visible with inline feedback.
@@ -103,6 +105,7 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  */
 @Immutable
 data class TextToImageState(
+    val upscaler: UpscalerConfiguration? = null,
     val loadingConfiguration: Boolean = true,
     val generationStartedAt: TimeMark? = null,
     val generating: Boolean = false,
@@ -193,6 +196,7 @@ data class TextToImageState(
  * @author Dmitriy Moroz
  */
 internal fun TextToImageState.mapToPayload(): TextToImagePayload = TextToImagePayload(
+    upscaler = upscaler,
     prompt = prompt.trim(),
     negativePrompt = negativePrompt.trim(),
     samplingSteps = samplingSteps,

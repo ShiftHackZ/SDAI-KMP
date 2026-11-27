@@ -13,6 +13,12 @@ public final class MnnNativeExecutionAttempt: MnnExecutionAttempt, @unchecked Se
     request: MnnRequest, workspace: URL,
     onProgress: @escaping @Sendable (Int) -> Void
   ) throws -> Data {
+    if let image = request.upscaleImage {
+      guard !request.modelPath.utf8.contains(0), request.modelPath.hasPrefix("/"), handle != nil
+      else { throw MnnFailure.invalidRequest }
+      return try MnnUpscalerExecution.run(
+        handle: handle, modelPath: request.modelPath, encoded: image, onProgress: onProgress)
+    }
     #if targetEnvironment(simulator) || os(macOS)
       throw MnnFailure.unavailable
     #else

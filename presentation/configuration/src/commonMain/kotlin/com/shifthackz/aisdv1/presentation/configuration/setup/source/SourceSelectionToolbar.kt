@@ -31,21 +31,50 @@ internal fun SourceSelectionToolbar(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SearchFilterToolbar(
+    ProviderDiscoveryToolbar(
         query = state.sourceSearchQuery,
+        hasActiveFilters = state.hasActiveSourceFilters,
+        strings = strings,
+        onQueryChange = { processIntent(ServerSetupIntent.UpdateSourceSearchQuery(it)) },
+        onOpenFilters = { processIntent(ServerSetupIntent.ShowSourceFilters) },
+        onOpenSort = { processIntent(ServerSetupIntent.ShowSourceSort) },
+        modifier = modifier,
+    )
+}
+
+/**
+ * Shared search, active-filter indicator and sort action for both provider pickers.
+ *
+ * @param query Current search editor contents.
+ * @param hasActiveFilters Whether any capability, hosting or readiness filter is active.
+ * @param strings Localized search and action labels.
+ * @param onQueryChange Publishes edits immediately to the owning draft.
+ * @param onOpenFilters Opens the owning filter sheet.
+ * @param onOpenSort Opens the owning sort sheet.
+ * @param modifier Layout of the complete discovery row.
+ * @author Dmitriy Moroz
+ */
+@Composable
+internal fun ProviderDiscoveryToolbar(
+    query: String, hasActiveFilters: Boolean,
+    strings: ServerSetupStrings, onQueryChange: (String) -> Unit,
+    onOpenFilters: () -> Unit, onOpenSort: () -> Unit, modifier: Modifier = Modifier
+) {
+    SearchFilterToolbar(
+        query = query,
         searchHint = strings.sourceSearchHint,
         clearLabel = strings.clear,
         filterLabel = strings.sourceFilterAction,
-        hasActiveFilters = state.hasActiveSourceFilters,
-        onQueryChange = { processIntent(ServerSetupIntent.UpdateSourceSearchQuery(it)) },
-        onOpenFilters = { processIntent(ServerSetupIntent.ShowSourceFilters) },
+        hasActiveFilters = hasActiveFilters,
+        onQueryChange = onQueryChange,
+        onOpenFilters = onOpenFilters,
         modifier = modifier,
     ) {
         SearchToolbarAction(
             contentDescription = strings.sourceSortAction,
             shouldShowDot = false,
             icon = MobileDataArrowsIcon,
-            onClick = { processIntent(ServerSetupIntent.ShowSourceSort) },
+            onClick = onOpenSort,
         )
     }
 }

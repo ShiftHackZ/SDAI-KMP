@@ -12,6 +12,7 @@ import com.shifthackz.aisdv1.core.notification.di.notificationModule
 import com.shifthackz.aisdv1.core.mvi.diagnostics.uiDiagnosticsModule
 import com.shifthackz.aisdv1.domain.di.domainModule
 import com.shifthackz.aisdv1.domain.feature.sdxl.StableDiffusionCpp
+import com.shifthackz.aisdv1.domain.gateway.UpscalerGateway
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.domain.gateway.ProcessExitDiagnosticsGateway
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
@@ -55,6 +56,7 @@ fun startAndroidApplication(
             single<NativeGenerationGateway> { bindings.nativeGenerationGateway }
             single<ProcessExitDiagnosticsGateway> { bindings.processExitDiagnosticsGateway }
             single<StableDiffusionCpp> { bindings.stableDiffusionCpp }
+            single<UpscalerGateway> { bindings.upscalerGateway }
         })
     }.koin
     initializeApplicationLanguage(graph)

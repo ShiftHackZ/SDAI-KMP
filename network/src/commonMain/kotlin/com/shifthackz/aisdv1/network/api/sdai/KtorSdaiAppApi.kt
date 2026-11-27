@@ -90,6 +90,30 @@ class KtorSdaiAppApi(
     }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
 
     /**
+     * Downloads the dedicated ESRGAN checkpoint list and records configuration traffic.
+     *
+     * @author Dmitriy Moroz
+     */
+    override suspend fun fetchUpscalerEsrganModels(): List<DownloadableModelResponse> =
+        httpClient.boundedGet {
+            url.takeFrom(appBaseUrl)
+            url.appendPathSegments("upscaler-esrgan.json")
+            trackUsage(NetworkUsageCategory.CONFIGS)
+        }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
+
+    /**
+     * Downloads the dedicated MNN super-resolution list and records configuration traffic.
+     *
+     * @author Dmitriy Moroz
+     */
+    override suspend fun fetchUpscalerMnnModels(): List<DownloadableModelResponse> =
+        httpClient.boundedGet {
+            url.takeFrom(appBaseUrl)
+            url.appendPathSegments("upscaler-mnn.json")
+            trackUsage(NetworkUsageCategory.CONFIGS)
+        }.trackedJsonBody(NetworkUsageCategory.CONFIGS)
+
+    /**
      * Fetches ONNX catalog metadata and accounts response bytes as configuration traffic.
      *
      * @author Dmitriy Moroz

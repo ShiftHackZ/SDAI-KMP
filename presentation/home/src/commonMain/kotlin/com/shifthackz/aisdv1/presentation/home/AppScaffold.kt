@@ -67,10 +67,12 @@ fun AppScaffold(
             when (action) {
                 HomeNavigationAction.TextToImage -> router.navigateToTextToImage()
                 HomeNavigationAction.ImageToImage -> router.navigateToImageToImage()
+                HomeNavigationAction.Upscaler -> router.navigateToUpscaler()
                 HomeNavigationAction.Gallery -> router.navigateToGallery()
                 HomeNavigationAction.Settings -> router.navigateToSettings()
                 HomeNavigationAction.WebUi -> router.navigateToWebUi()
                 HomeNavigationAction.Configuration -> router.navigateToServerSetup(LaunchSource.SETTINGS)
+                HomeNavigationAction.UpscalerConfiguration -> router.navigateToUpscalerSetup()
                 HomeNavigationAction.Debug -> router.navigateToDebugMenu()
             }
         },

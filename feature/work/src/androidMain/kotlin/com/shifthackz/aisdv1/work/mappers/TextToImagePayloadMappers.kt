@@ -11,6 +11,7 @@ import com.shifthackz.aisdv1.domain.entity.SdxlBackend
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.domain.entity.StabilityAiClipGuidance
 import com.shifthackz.aisdv1.domain.entity.StabilityAiStylePreset
+import com.shifthackz.aisdv1.domain.entity.UpscalerConfiguration
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -61,6 +62,8 @@ internal fun ByteArray.toTextToImagePayload(): TextToImagePayload? {
  * The DTO stores provider-specific options as strings so enum aliases can be
  * parsed with backwards-compatible defaults when app versions change.
  *
+ * @param upscalerModelId Dedicated model captured for the optional final super-resolution stage.
+ * @param upscalerScaleFactor Captured final enlargement; defaults preserve older scheduled requests.
  * @param prompt Positive prompt describing the requested image.
  * @param negativePrompt Prompt describing content the selected provider should avoid.
  * @param samplingSteps Requested denoising iteration count, subject to the provider profile.
@@ -103,6 +106,8 @@ internal fun ByteArray.toTextToImagePayload(): TextToImagePayload? {
  */
 @Serializable
 private data class TextToImagePayloadDto(
+    val upscalerModelId: String? = null,
+    val upscalerScaleFactor: Int = 4,
     val prompt: String,
     val negativePrompt: String,
     val samplingSteps: Int,
@@ -147,6 +152,12 @@ private data class TextToImagePayloadDto(
     val falAiSyncMode: Boolean = false,
 ) {
     fun toPayload(): TextToImagePayload = TextToImagePayload(
+        upscaler = upscalerModelId?.let {
+            UpscalerConfiguration(
+                it,
+                scaleFactor = upscalerScaleFactor
+            )
+        },
         prompt = prompt,
         negativePrompt = negativePrompt,
         samplingSteps = samplingSteps,
@@ -189,6 +200,8 @@ private data class TextToImagePayloadDto(
 
     companion object {
         fun from(payload: TextToImagePayload): TextToImagePayloadDto = TextToImagePayloadDto(
+            upscalerModelId = payload.upscaler?.modelId,
+            upscalerScaleFactor = payload.upscaler?.scaleFactor ?: 4,
             prompt = payload.prompt,
             negativePrompt = payload.negativePrompt,
             samplingSteps = payload.samplingSteps,

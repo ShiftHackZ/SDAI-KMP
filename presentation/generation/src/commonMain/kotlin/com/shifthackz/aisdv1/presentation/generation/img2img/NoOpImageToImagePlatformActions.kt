@@ -7,6 +7,16 @@ package com.shifthackz.aisdv1.presentation.generation.img2img
  */
 internal data object NoOpImageToImagePlatformActions : ImageToImagePlatformActions {
 
-    override suspend fun pickImage(source: ImageToImagePickSource): ImageToImagePickResult =
+    /**
+     * Reports unavailable acquisition without modifying input or opening platform UI.
+     *
+     * @param source Requested native acquisition route.
+     * @param shouldCropToSquare Requested normalization policy, unused when acquisition is unavailable.
+     * @author Dmitriy Moroz
+     */
+    override suspend fun pickImage(
+        source: ImageToImagePickSource,
+        shouldCropToSquare: Boolean
+    ): ImageToImagePickResult =
         ImageToImagePickResult.Unsupported
 }

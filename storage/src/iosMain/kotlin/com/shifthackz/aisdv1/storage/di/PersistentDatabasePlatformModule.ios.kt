@@ -3,6 +3,8 @@ package com.shifthackz.aisdv1.storage.di
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.shifthackz.aisdv1.storage.db.persistent.PersistentDatabase
+import com.shifthackz.aisdv1.storage.gateway.GalleryImagePayloadReader
+import com.shifthackz.aisdv1.storage.gateway.NativeGalleryImagePayloadReader
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.dsl.module
 import platform.Foundation.NSApplicationSupportDirectory
@@ -10,11 +12,17 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
 /**
- * Exposes the `persistentDatabasePlatformModule` value used by the SDAI storage layer.
+ * Binds Room's persistent path and the read-only native image-payload reader to the same database.
  *
  * @author Dmitriy Moroz
  */
 actual val persistentDatabasePlatformModule = module {
+    single<GalleryImagePayloadReader> {
+        NativeGalleryImagePayloadReader(
+            get(),
+            "${applicationSupportDirectory()}/${PersistentDatabase.DB_NAME}"
+        )
+    }
     single<RoomDatabase.Builder<PersistentDatabase>> {
         Room.databaseBuilder<PersistentDatabase>(
             name = "${applicationSupportDirectory()}/${PersistentDatabase.DB_NAME}",
@@ -23,9 +31,9 @@ actual val persistentDatabasePlatformModule = module {
 }
 
 /**
- * Executes the `applicationSupportDirectory` step in the SDAI storage layer.
+ * Resolves and creates the application-owned support directory shared by persistent database access.
  *
- * @return Result produced by `applicationSupportDirectory`.
+ * @return Absolute application-support directory path.
  * @author Dmitriy Moroz
  */
 @OptIn(ExperimentalForeignApi::class)

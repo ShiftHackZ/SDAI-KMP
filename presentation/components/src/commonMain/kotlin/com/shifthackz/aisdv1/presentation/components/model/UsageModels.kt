@@ -33,6 +33,7 @@ enum class UsageScreenKind {
 enum class UsageCategory {
     CACHE,
     GALLERY,
+    MODELS_UPSCALER,
     MODELS_ONNX,
     MODELS_MEDIAPIPE,
     MODELS_SDXL,
@@ -121,6 +122,7 @@ fun List<UsageItem>.resolveSelectedCategory(
 fun UsageCategory.isStorageCategory(): Boolean = when (this) {
     UsageCategory.CACHE,
     UsageCategory.GALLERY,
+    UsageCategory.MODELS_UPSCALER,
     UsageCategory.MODELS_ONNX,
     UsageCategory.MODELS_MEDIAPIPE,
     UsageCategory.MODELS_SDXL,
@@ -142,6 +144,7 @@ fun UsageCategory.isStorageCategory(): Boolean = when (this) {
  * @author Dmitriy Moroz
  */
 fun UsageCategory.isModelCategory(): Boolean = when (this) {
+    UsageCategory.MODELS_UPSCALER,
     UsageCategory.MODELS_ONNX,
     UsageCategory.MODELS_MEDIAPIPE,
     UsageCategory.MODELS_SDXL,

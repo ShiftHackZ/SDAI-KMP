@@ -53,6 +53,7 @@ class MnnTextToImageUseCaseTest {
         mnnProfile = "sd15-512-general-int8-v1"
     )
     private val useCase = TextToImageUseCaseImpl(
+        upscaleImageUseCase = mockk(), finalizeGenerationUseCase = mockk(),
         deviceProbe = mockk<BenchmarkDeviceProbe>(relaxed = true),
         autoUploadToCivitaiUseCase = AutoUploadToCivitaiUseCase { it },
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(

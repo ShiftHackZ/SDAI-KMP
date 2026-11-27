@@ -68,6 +68,7 @@ class ImageToImageUseCaseImplTest {
     private val deviceProbe = mockk<BenchmarkDeviceProbe>(relaxed = true)
 
     private val useCase = ImageToImageUseCaseImpl(
+        upscaleImageUseCase = mockk(), finalizeGenerationUseCase = mockk(),
         deviceProbe = deviceProbe,
         autoUploadToCivitaiUseCase = AutoUploadToCivitaiUseCase { it },
         trackRemoteGenerationUseCase = TrackRemoteGenerationUseCaseImpl(

@@ -61,7 +61,8 @@ internal class IosDownloadableModelFileDownloader(
         val isMnn = id.startsWith("mnn_")
         val modelDir =
             if (isMnn) "${fileProviderDescriptor.localModelDirPath}/.mnn-download-${NSUUID().UUIDString}" else "${fileProviderDescriptor.localModelDirPath}/$id"
-        val destinationPath = "$modelDir/$MODEL_ARCHIVE_NAME"
+        val isUpscaler = id.startsWith("upscaler_mnn_")
+        val destinationPath = "$modelDir/${if (isUpscaler) "model.mnn" else MODEL_ARCHIVE_NAME}"
         val temporaryPath = "$destinationPath$DOWNLOAD_FILE_SUFFIX"
         val fileManager = NSFileManager.defaultManager
 
@@ -125,7 +126,7 @@ internal class IosDownloadableModelFileDownloader(
                                 error = null,
                             )
                         ) {
-                            if (destinationPath.hasZipArchiveSignature()) {
+                            if (isUpscaler || destinationPath.hasZipArchiveSignature()) {
                                 trySend(DownloadState.Downloading(100))
                                 trySend(DownloadState.Complete(destinationPath))
                             } else {

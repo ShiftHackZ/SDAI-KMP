@@ -301,34 +301,49 @@ private fun InputHistoryItem(
             ) {
                 val textStyle = MaterialTheme.typography.bodySmall
                 val textModifier = Modifier.padding(horizontal = 4.dp)
-                Text(
-                    modifier = textModifier.padding(top = 2.dp),
-                    text = itemPropertyText("hint_prompt", generation.prompt),
-                    style = textStyle,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = LocalContentColor.current,
-                )
-                Text(
-                    modifier = textModifier,
-                    text = itemPropertyText("hint_prompt_negative", generation.negativePrompt),
-                    style = textStyle,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = LocalContentColor.current,
-                )
+                if (generation.type == AiGenerationResult.Type.UPSCALE) {
+                    Text(
+                        generation.upscalerModelName ?: Localization.string("upscaler_title"),
+                        modifier = textModifier.padding(top = 2.dp), style = textStyle,
+                        maxLines = 2, overflow = TextOverflow.Ellipsis
+                    )
+                } else {
+                    Text(
+                        modifier = textModifier.padding(top = 2.dp),
+                        text = itemPropertyText("hint_prompt", generation.prompt),
+                        style = textStyle,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = LocalContentColor.current,
+                    )
+                    Text(
+                        modifier = textModifier,
+                        text = itemPropertyText("hint_prompt_negative", generation.negativePrompt),
+                        style = textStyle,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = LocalContentColor.current,
+                    )
+                }
                 val tags = buildList {
                     add(generation.type.key)
                     add("${generation.width} X ${generation.height}")
-                    add(generation.sampler)
-                    add(Localization.string("tag_steps", generation.samplingSteps))
-                    add(Localization.string("tag_cfg", "${generation.cfgScale}"))
-                    if (generation.type == AiGenerationResult.Type.IMAGE_TO_IMAGE) {
-                        add(Localization.string("tag_denoising", "${generation.denoisingStrength}"))
+                    if (generation.type != AiGenerationResult.Type.UPSCALE) {
+                        add(generation.sampler)
+                        add(Localization.string("tag_steps", generation.samplingSteps))
+                        add(Localization.string("tag_cfg", "${generation.cfgScale}"))
+                        if (generation.type == AiGenerationResult.Type.IMAGE_TO_IMAGE) {
+                            add(
+                                Localization.string(
+                                    "tag_denoising",
+                                    "${generation.denoisingStrength}"
+                                )
+                            )
+                        }
+                        add(generation.seed)
+                        add(generation.subSeed)
+                        add("${generation.subSeedStrength}")
                     }
-                    add(generation.seed)
-                    add(generation.subSeed)
-                    add("${generation.subSeedStrength}")
                 }.filter(String::isNotEmpty)
                 FlowRow(
                     modifier = Modifier.padding(horizontal = 2.dp),

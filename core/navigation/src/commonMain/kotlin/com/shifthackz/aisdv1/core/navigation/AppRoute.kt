@@ -55,9 +55,13 @@ sealed interface AppRoute {
      * Provider/server configuration flow carrying its caller context.
      *
      * @param source Launch context controlling setup/onboarding completion behavior.
+     * @param isUpscaler Whether this wizard edits the independent upscaler configuration.
      * @author Dmitriy Moroz
      */
-    data class Setup(val source: LaunchSource = LaunchSource.SPLASH) : AppRoute {
+    data class Setup(
+        val source: LaunchSource = LaunchSource.SPLASH,
+        val isUpscaler: Boolean = false
+    ) : AppRoute {
         override val destination = NavigationDestination.SERVER_SETUP
     }
 
@@ -95,6 +99,15 @@ sealed interface AppRoute {
      */
     data object ImageToImage : AppRoute {
         override val destination = NavigationDestination.IMAGE_TO_IMAGE
+    }
+
+    /**
+     * Standalone image super-resolution.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object Upscaler : AppRoute {
+        override val destination = NavigationDestination.UPSCALER
     }
 
     /**

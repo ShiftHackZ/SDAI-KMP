@@ -25,6 +25,12 @@ internal class IosDownloadableModelFileStore(
 
     override fun isDownloaded(model: LocalAiModel): Boolean {
         if (model.type == LocalAiModel.Type.Mnn) return mnnModels.isDownloaded(model.id)
+        if (model.type == LocalAiModel.Type.Upscaler) {
+            val path = resolvePath(model)
+            return path.endsWith(".mnn") && NSFileManager.defaultManager.fileExistsAtPath(path) &&
+                    (path.fileSize() ?: 0) > 0 &&
+                    !NSFileManager.defaultManager.fileExistsAtPath("$path.download")
+        }
         return try {
             when (model.id) {
                 LocalAiModel.CustomOnnx.id,
@@ -43,7 +49,9 @@ internal class IosDownloadableModelFileStore(
     }
 
     override fun resolvePath(model: LocalAiModel): String =
-        "${fileProviderDescriptor.localModelDirPath}/${model.id}"
+        if (model.type == LocalAiModel.Type.Upscaler) {
+            "${fileProviderDescriptor.localModelDirPath}/${model.id}/model.mnn"
+        } else "${fileProviderDescriptor.localModelDirPath}/${model.id}"
 
     override fun resolveSingleFilePath(path: String): String = path
 

@@ -34,7 +34,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
 
 /**
  * Main Room database containing generated images, downloaded models, and app statistics.
- * Schema version 21 adds a snapshot of blog articles for offline reading.
+ * Schema version 22 retains independent upscaler provenance on gallery images.
  *
  * @author Dmitriy Moroz
  */
@@ -194,6 +194,7 @@ import com.shifthackz.aisdv1.storage.db.persistent.entity.SupporterEntity
          * @author Dmitriy Moroz
          */
         AutoMigration(from = 20, to = 21),
+        AutoMigration(from = 21, to = 22),
     ],
 )
 @TypeConverters(
@@ -285,11 +286,11 @@ internal abstract class PersistentDatabase : RoomDatabase() {
         const val DB_NAME = "ai_sd_v1_storage_db"
 
         /**
-         * Current schema version, including the persisted FAQ snapshot.
+         * Current schema version, including dedicated upscaler provenance.
          *
          * @author Dmitriy Moroz
          */
-        const val DB_VERSION = 21
+        const val DB_VERSION = 22
     }
 }
 

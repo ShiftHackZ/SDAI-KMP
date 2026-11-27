@@ -18,7 +18,7 @@ internal class DeleteModelUseCaseImpl(
 ) : DeleteModelUseCase {
 
     /**
-     * Deletes the selected owned payload, clearing MNN selection only after removal is accepted.
+     * Deletes the owned payload, clearing affected MNN and upscaler selections only after removal is accepted.
      *
      * @param id identifier of the target entity.
      *
@@ -26,6 +26,7 @@ internal class DeleteModelUseCaseImpl(
      */
     override suspend fun invoke(id: String) {
         downloadableModelRepository.delete(id)
+        if (preferenceManager.upscalerModelId == id) preferenceManager.upscalerModelId = ""
         if (id == "mnn_custom" || id == LocalAiModel.CustomMnn.id) preferenceManager.localMnnCustomActivationId =
             ""
         if ((id.startsWith("mnn_") && preferenceManager.localMnnModelId == id) ||

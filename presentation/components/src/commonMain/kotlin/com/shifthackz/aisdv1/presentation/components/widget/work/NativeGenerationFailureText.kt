@@ -17,6 +17,7 @@ fun NativeGenerationFailure.toUserMessage(): String {
         NativeGenerationEngine.MNN -> "MNN"
         NativeGenerationEngine.ONNX -> "ONNX"
         NativeGenerationEngine.MEDIA_PIPE -> "MediaPipe"
+        NativeGenerationEngine.UPSCALER -> "ESRGAN"
         NativeGenerationEngine.SDCPP -> "SDCPP"
         NativeGenerationEngine.BONSAI -> "Bonsai"
         null -> Localization.string("native_generation_engine_unknown")

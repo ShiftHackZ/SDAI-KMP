@@ -25,6 +25,7 @@ val statisticsViewModelModule = module {
             getLocalSdxlModelsUseCase = get(),
             getLocalCoreMlModelsUseCase = get(),
             getLocalMnnModelsUseCase = get(),
+            getCachedLocalModelCatalogUseCase = get(),
             getLocalBonsaiModelsUseCase = get(),
             deleteModelUseCase = get(),
             storageUsageObserver = get(),

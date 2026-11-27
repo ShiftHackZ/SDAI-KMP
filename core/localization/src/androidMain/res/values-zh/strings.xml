@@ -292,7 +292,7 @@
     <string name="title_history">历史</string>
     <string name="title_gallery_details">详情</string>
     <string name="title_settings">设置</string>
-    <string name="title_server_setup">配置</string>
+    <string name="title_server_setup">生成配置</string>
     <string name="title_select_sd_model">选择 SD ML 模型</string>
     <string name="title_clear_app_cache">清除应用缓存</string>
     <string name="title_debug_menu">开发者模式</string>
@@ -334,7 +334,7 @@
     <string name="settings_header_community">社区</string>
 
     <!-- 设置项 -->
-    <string name="settings_item_config">配置</string>
+    <string name="settings_item_config">生成配置</string>
     <string name="settings_item_sd_model">SD 模型</string>
     <string name="settings_item_stability_ai_credits">Stability AI 积分</string>
     <string name="settings_item_local_nnapi">使用 NNAPI</string>
@@ -964,4 +964,33 @@
     <string name="blog_post_missing">这篇文章暂不可用。</string>
     <string name="blog_share_post">分享文章</string>
     <string name="blog_share_error">无法打开分享菜单。</string>
+    <string name="generation_configuration">生成配置</string>
+    <string name="upscaler_configuration">放大器配置</string>
+    <string name="upscaler_title">放大器</string>
+    <string name="upscaler_action">放大</string>
+    <string name="upscaler_local_provider">ESRGAN</string>
+    <string name="upscaler_provider_help">AI 图像放大可提高分辨率，并增强边缘和细节。既可用于已有图像，也可作为图像生成后的最后一步。</string>
+    <string name="upscaler_mnn_provider">MNN</string>
+    <string name="upscaler_tag_tiled_inference">分块推理</string>
+    <string name="upscaler_esrgan_description">ESRGAN 在设备上使用 AI 放大图像，并增强边缘和细节。既可用于已有图像，也可在图像生成后使用。</string>
+    <string name="upscaler_mnn_description">MNN 在设备上使用 AI 放大图像，并增强边缘和细节。既可用于已有图像，也可在图像生成后使用。</string>
+    <string name="upscaler_unavailable">此平台没有可用的放大器。</string>
+    <string name="upscaler_model">放大模型</string>
+    <string name="upscaler_pipeline_toggle">放大生成的图像</string>
+
+    <string name="upscaler_setup_required">请在放大器配置中选择已下载的模型。</string>
+    <string name="upscaler_retry">重试</string>
+    <string name="upscaler_limits">任一边超过 1024 像素的图像，需要确认后才会按比例缩小。</string>
+    <string name="upscaler_running">正在放大…</string>
+
+    <string name="settings_help_upscaler_configuration">选择图像放大服务提供商并配置其本地模型。</string>
+    <string name="upscaler_options">放大参数</string>
+    <string name="upscaler_provider">超分辨率提供方</string>
+    <string name="error_upscaler_generation_size">启用放大时，生成尺寸不能超过 1024 × 1024 像素。请缩小尺寸或关闭放大。</string>
+    <string name="upscaler_models">放大模型</string>
+    <string name="generation_provider">生成提供商</string>
+    <string name="upscaler_downscale_title">输入图像将缩小</string>
+    <string name="upscaler_downscale_message">放大器支持最大 1024 × 1024 像素的输入图像。图像将按比例缩小，使最长边为 1024 像素，同时保留完整画面。</string>
+    <string name="upscaler_continue">继续</string>
+    <string name="upscaler_scale_factor">缩放倍数</string>
 </resources>

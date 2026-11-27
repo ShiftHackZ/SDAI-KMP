@@ -202,6 +202,16 @@ import com.shifthackz.aisdv1.domain.usecase.generation.ObserveStableDiffusionCpp
 import com.shifthackz.aisdv1.domain.usecase.generation.SaveGenerationResultUseCase
 import com.shifthackz.aisdv1.domain.usecase.generation.SaveGenerationResultUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.ConfigureUpscalerUseCase
+import com.shifthackz.aisdv1.domain.usecase.settings.ConfigureUpscalerUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.UpscaleImageUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.ReadUpscalerImageUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.GetUpscalerOutputSizeUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.GetUpscalerOutputSizeUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.ReadUpscalerImageUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.UpscaleImageUseCaseImpl
+import com.shifthackz.aisdv1.domain.usecase.generation.FinalizeGenerationUseCase
+import com.shifthackz.aisdv1.domain.usecase.generation.FinalizeGenerationUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.generation.TextToImageUseCaseImpl
 import com.shifthackz.aisdv1.domain.usecase.huggingface.FetchHuggingFaceModelsUseCase
 import com.shifthackz.aisdv1.domain.usecase.huggingface.FetchHuggingFaceModelsUseCaseImpl
@@ -471,7 +481,7 @@ val coreDomainModule = module {
         GetLocalBonsaiModelsUseCaseImpl(refreshCatalog = get())
     }
     factory<GetLocalModelUseCase> {
-        GetLocalModelUseCaseImpl(localDataSource = get())
+        GetLocalModelUseCaseImpl(repository = get())
     }
     factory<DownloadModelsUseCase> { DownloadModelsUseCaseImpl(get(), get()) }
     single<DownloadModelUseCase> {
@@ -480,8 +490,14 @@ val coreDomainModule = module {
     factory<DeleteModelUseCase> {
         DeleteModelUseCaseImpl(downloadableModelRepository = get(), preferenceManager = get())
     }
+    factory<ConfigureUpscalerUseCase> { ConfigureUpscalerUseCaseImpl(get(), get(), get()) }
+    factory<GetUpscalerOutputSizeUseCase> { GetUpscalerOutputSizeUseCaseImpl() }
+    factory<ReadUpscalerImageUseCase> { ReadUpscalerImageUseCaseImpl(get()) }
+    factory<UpscaleImageUseCase> { UpscaleImageUseCaseImpl(get(), get(), get(), get(), get()) }
+    factory<FinalizeGenerationUseCase> { FinalizeGenerationUseCaseImpl(get(), get(), get()) }
     factory<TextToImageUseCase> {
         TextToImageUseCaseImpl(
+            upscaleImageUseCase = get(), finalizeGenerationUseCase = get(),
             deviceProbe = get(),
             trackRemoteGenerationUseCase = get(),
             generationRestoreGate = get(),
@@ -509,6 +525,7 @@ val coreDomainModule = module {
     }
     factory<ImageToImageUseCase> {
         ImageToImageUseCaseImpl(
+            upscaleImageUseCase = get(), finalizeGenerationUseCase = get(),
             deviceProbe = get(),
             trackRemoteGenerationUseCase = get(),
             generationRestoreGate = get(),

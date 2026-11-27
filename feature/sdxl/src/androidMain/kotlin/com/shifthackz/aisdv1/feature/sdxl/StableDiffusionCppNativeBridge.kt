@@ -31,6 +31,24 @@ internal object StableDiffusionCppNativeBridge {
         callback: ProgressCallback,
     ): ByteArray
 
+    /**
+     * Runs a dedicated CPU ESRGAN context with bounded tiled activations.
+     *
+     * @param modelPath Dedicated checkpoint file.
+     * @param pixels Packed RGB source.
+     * @param width Source width.
+     * @param height Source height.
+     * @param shape Receives output width, height and channel count.
+     * @author Dmitriy Moroz
+     */
+    external fun upscale(
+        modelPath: String,
+        pixels: ByteArray,
+        width: Int,
+        height: Int,
+        shape: IntArray
+    ): ByteArray
+
     external fun interrupt()
 
     interface ProgressCallback {

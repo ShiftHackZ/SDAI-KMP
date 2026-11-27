@@ -16,6 +16,7 @@ enum class NavigationDestination {
     TEXT_TO_IMAGE,
     IMAGE_TO_IMAGE,
     IMAGE_IN_PAINT,
+    UPSCALER,
     GALLERY,
     GALLERY_DETAIL,
     SETTINGS,

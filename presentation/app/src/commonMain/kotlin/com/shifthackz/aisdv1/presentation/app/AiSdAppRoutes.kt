@@ -1,57 +1,59 @@
 package com.shifthackz.aisdv1.presentation.app
 
-import com.shifthackz.aisdv1.presentation.home.AppScaffold
-import com.shifthackz.aisdv1.core.navigation.LaunchSource
-import com.shifthackz.aisdv1.presentation.backup.BackupScreen
-import com.shifthackz.aisdv1.presentation.backup.BackupScreenMode
-
-import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
+import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
 import com.shifthackz.aisdv1.core.mvi.MviComponent
 import com.shifthackz.aisdv1.core.navigation.AppRoute
+import com.shifthackz.aisdv1.core.navigation.LaunchSource
 import com.shifthackz.aisdv1.core.navigation.RootAppRouter
 import com.shifthackz.aisdv1.domain.preference.PreferenceManager
-import com.shifthackz.aisdv1.presentation.components.platform.ExternalUrlLauncher
+import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
+import com.shifthackz.aisdv1.presentation.backup.BackupScreen
+import com.shifthackz.aisdv1.presentation.backup.BackupScreenMode
 import com.shifthackz.aisdv1.presentation.benchmark.BenchmarkScreen
+import com.shifthackz.aisdv1.presentation.blog.detail.BlogDetailScreen
+import com.shifthackz.aisdv1.presentation.blog.list.BlogScreen
+import com.shifthackz.aisdv1.presentation.civitai.history.CivitaiHistoryScreen
+import com.shifthackz.aisdv1.presentation.civitai.settings.CivitaiScreen
+import com.shifthackz.aisdv1.presentation.civitai.upload.CivitaiUploadAction
+import com.shifthackz.aisdv1.presentation.civitai.upload.CivitaiUploadViewModel
+import com.shifthackz.aisdv1.presentation.components.platform.ExternalUrlLauncher
+import com.shifthackz.aisdv1.presentation.components.theme.global.RetainedHomeRouteTheme
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.ProgrammaticPager
+import com.shifthackz.aisdv1.presentation.configuration.loader.ConfigurationLoaderScreen
+import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupScreen
+import com.shifthackz.aisdv1.presentation.configuration.upscaler.UpscalerSetupScreen
 import com.shifthackz.aisdv1.presentation.debug.DebugMenuScreen
 import com.shifthackz.aisdv1.presentation.donate.DonateScreen
+import com.shifthackz.aisdv1.presentation.faq.FaqScreen
 import com.shifthackz.aisdv1.presentation.gallery.detail.GalleryDetailScreen
 import com.shifthackz.aisdv1.presentation.gallery.list.GalleryScreen
-import com.shifthackz.aisdv1.presentation.history.HistoryScreen
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageInPaintScreen
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageContent
 import com.shifthackz.aisdv1.presentation.generation.img2img.ImageToImageViewModel
-import com.shifthackz.aisdv1.presentation.configuration.loader.ConfigurationLoaderScreen
-import com.shifthackz.aisdv1.presentation.logger.LoggerScreen
-import com.shifthackz.aisdv1.presentation.statistics.networkusage.NetworkUsageScreen
-import com.shifthackz.aisdv1.presentation.onboarding.OnBoardingScreen
-import com.shifthackz.aisdv1.presentation.report.ReportScreen
-import com.shifthackz.aisdv1.presentation.civitai.upload.CivitaiUploadViewModel
-import com.shifthackz.aisdv1.presentation.civitai.upload.CivitaiUploadAction
-import com.shifthackz.aisdv1.presentation.civitai.settings.CivitaiScreen
-import com.shifthackz.aisdv1.presentation.civitai.history.CivitaiHistoryScreen
-import com.shifthackz.aisdv1.presentation.settings.SettingsScreen
-import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupScreen
-import com.shifthackz.aisdv1.presentation.splash.SplashScreen
-import com.shifthackz.aisdv1.presentation.statistics.storageusage.StorageUsageScreen
+import com.shifthackz.aisdv1.presentation.generation.performance.GenerationPerformanceOverlay
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageContent
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageViewModel
-import com.shifthackz.aisdv1.presentation.blog.detail.BlogDetailScreen
-import com.shifthackz.aisdv1.presentation.blog.list.BlogScreen
-import com.shifthackz.aisdv1.presentation.faq.FaqScreen
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerFormState
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerScreen
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerViewModel
+import com.shifthackz.aisdv1.presentation.history.HistoryScreen
+import com.shifthackz.aisdv1.presentation.home.AppScaffold
+import com.shifthackz.aisdv1.presentation.logger.LoggerScreen
+import com.shifthackz.aisdv1.presentation.onboarding.OnBoardingScreen
+import com.shifthackz.aisdv1.presentation.report.ReportScreen
+import com.shifthackz.aisdv1.presentation.settings.SettingsScreen
+import com.shifthackz.aisdv1.presentation.splash.SplashScreen
+import com.shifthackz.aisdv1.presentation.statistics.networkusage.NetworkUsageScreen
+import com.shifthackz.aisdv1.presentation.statistics.storageusage.StorageUsageScreen
 import com.shifthackz.aisdv1.presentation.web.WebUiScreen
-import com.shifthackz.aisdv1.presentation.components.theme.global.RetainedHomeRouteTheme
-import com.shifthackz.aisdv1.presentation.components.widget.navigation.ProgrammaticPager
-import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
-import com.shifthackz.aisdv1.domain.usecase.generation.ObserveGenerationPerformanceUseCase
-import com.shifthackz.aisdv1.presentation.generation.performance.GenerationPerformanceOverlay
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
-
 
 /**
  * Hosts the persistent bottom-tab routes inside the app scaffold.
@@ -68,6 +70,8 @@ import org.koin.core.parameter.parametersOf
  * @param observePerformance Cold opt-in sampler shared with visible generation dialogs.
  * @param textToImageViewModel Shared Text-to-Image ViewModel kept alive with its tab.
  * @param imageToImageViewModel Shared Image-to-Image ViewModel kept alive with its tab.
+ * @param upscalerFormState Shared independent catalog observed by the application root.
+ * @param upscalerViewModel Shared upscaler inputs retained with the third Home tab.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -82,6 +86,8 @@ internal fun HomeRoutesScaffold(
     observePerformance: ObserveGenerationPerformanceUseCase,
     textToImageViewModel: TextToImageViewModel,
     imageToImageViewModel: ImageToImageViewModel,
+    upscalerViewModel: UpscalerViewModel,
+    upscalerFormState: UpscalerFormState,
 ) {
     AppScaffold(
         currentRoute = activeRoute,
@@ -92,7 +98,13 @@ internal fun HomeRoutesScaffold(
         modifier = modifier,
     ) { contentModifier ->
         val pages =
-            listOf(AppRoute.TextToImage, AppRoute.ImageToImage, AppRoute.Gallery, AppRoute.Settings)
+            listOf(
+                AppRoute.TextToImage,
+                AppRoute.ImageToImage,
+                AppRoute.Upscaler,
+                AppRoute.Gallery,
+                AppRoute.Settings
+            )
         ProgrammaticPager(
             selectedPage = pages.indexOf(activeRoute).coerceAtLeast(0),
             pageCount = pages.size,
@@ -104,6 +116,7 @@ internal fun HomeRoutesScaffold(
                     AppRoute.TextToImage -> {
                         MviComponent(viewModel = textToImageViewModel) { state, processIntent ->
                             TextToImageContent(
+                                upscalerFormState = upscalerFormState,
                                 modifier = Modifier.fillMaxSize(),
                                 state = state,
                                 processIntent = processIntent,
@@ -120,6 +133,7 @@ internal fun HomeRoutesScaffold(
                     AppRoute.ImageToImage -> {
                         MviComponent(viewModel = imageToImageViewModel) { state, processIntent ->
                             ImageToImageContent(
+                                upscalerFormState = upscalerFormState,
                                 modifier = Modifier.fillMaxSize(),
                                 state = state,
                                 processIntent = processIntent,
@@ -132,6 +146,14 @@ internal fun HomeRoutesScaffold(
                             )
                         }
                     }
+
+                    AppRoute.Upscaler -> UpscalerScreen(
+                        upscalerViewModel, upscalerFormState, Modifier.fillMaxSize(),
+                        performanceOverlay = {
+                            val history = remember(observePerformance) { observePerformance() }
+                            GenerationPerformanceOverlay(history)
+                        },
+                    )
 
                     AppRoute.Gallery -> {
                         GalleryScreen(
@@ -177,6 +199,7 @@ internal fun OverlayRouteContent(
         AppRoute.Home,
         AppRoute.TextToImage,
         AppRoute.ImageToImage,
+        AppRoute.Upscaler,
         AppRoute.Gallery,
         AppRoute.Settings,
             -> Unit
@@ -212,7 +235,7 @@ internal fun OverlayRouteContent(
 
         is AppRoute.OnBoarding -> OnBoardingScreen(launchSource = route.source, router = router)
 
-        is AppRoute.Setup -> ServerSetupScreen(
+        is AppRoute.Setup -> if (route.isUpscaler) UpscalerSetupScreen(router) else ServerSetupScreen(
             launchSource = route.source,
             router = router,
             urlLauncher = urlLauncher,

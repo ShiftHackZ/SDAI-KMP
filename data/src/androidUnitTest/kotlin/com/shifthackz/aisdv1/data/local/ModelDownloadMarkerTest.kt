@@ -59,6 +59,11 @@ class ModelDownloadMarkerTest(private val type: LocalAiModel.Type) {
         ).forEach { File(directory, it).mkdirs() }
         File(directory, "transformer-packed-mflux/quantization_config.json").writeText("{}")
         if (type == LocalAiModel.Type.Bonsai) File(directory, "scheduler").mkdirs()
+        if (type == LocalAiModel.Type.Upscaler) File(directory, "model.pth").writeBytes(
+            byteArrayOf(
+                1
+            )
+        )
         val pending = File(directory, ".download-in-progress").apply { createNewFile() }
         val descriptor =
             mockk<FileProviderDescriptor> { every { localModelDirPath } returns folder.root.path }

@@ -13,6 +13,7 @@ import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.core.validation.dimension.DimensionValidator
+import com.shifthackz.aisdv1.domain.entity.isUpscalerInputSizeValid
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.TextToImagePayload
 import com.shifthackz.aisdv1.domain.entity.ServerSource
@@ -151,6 +152,17 @@ internal class TextToImageActionHandler(
         val validatedState = currentState().validated(dimensionValidator)
         emitState(validatedState)
         if (!validatedState.canGenerate()) return
+
+        if (!validatedState.mapToPayload().isUpscalerInputSizeValid) {
+            updateState {
+                it.copy(
+                    screenModal = GenerationModal.Error(
+                        Localization.string("error_upscaler_generation_size").asUiText()
+                    )
+                )
+            }
+            return
+        }
 
         val payload = validatedState.mapToPayload()
         if (backgroundWorkObserver.hasActiveTasks()) {

@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.settings.preview
 
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
 import com.shifthackz.aisdv1.presentation.settings.SettingsState
 
 /**
@@ -17,6 +18,7 @@ internal object SettingsPreviewFixtures {
     val ready = SettingsState(
         loading = false,
         serverSource = ServerSource.AUTOMATIC1111,
+        upscalerSource = UpscalerSource.LOCAL_MNN,
         sdModels = listOf("sd15-pruned-emaonly.safetensors", "dreamshaper_8.safetensors"),
         sdModelSelected = "sd15-pruned-emaonly.safetensors",
         backgroundGenerationAvailable = true,

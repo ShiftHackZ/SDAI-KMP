@@ -19,6 +19,7 @@ kotlin {
             implementation(libs.test.coroutines)
         }
         commonMain.dependencies {
+            implementation(project(":core:imageprocessing"))
             implementation(project(":core:common"))
             implementation(project(":domain"))
             implementation(project(":feature:openai-oauth"))
@@ -30,7 +31,6 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(project(":core:common"))
-            implementation(project(":core:imageprocessing"))
             implementation(project(":domain"))
             implementation(project(":network"))
             implementation(project(":storage"))

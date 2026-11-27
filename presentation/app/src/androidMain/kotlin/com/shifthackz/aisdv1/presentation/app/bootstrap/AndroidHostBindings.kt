@@ -5,6 +5,7 @@ import com.shifthackz.aisdv1.core.common.appbuild.BuildInfoProvider
 import com.shifthackz.aisdv1.core.common.file.FileProviderDescriptor
 import com.shifthackz.aisdv1.core.common.schedulers.DispatchersProvider
 import com.shifthackz.aisdv1.core.common.time.TimeProvider
+import com.shifthackz.aisdv1.domain.gateway.UpscalerGateway
 import com.shifthackz.aisdv1.domain.gateway.NativeGenerationGateway
 import com.shifthackz.aisdv1.domain.gateway.ProcessExitDiagnosticsGateway
 import com.shifthackz.aisdv1.domain.feature.sdxl.StableDiffusionCpp
@@ -15,6 +16,13 @@ import com.shifthackz.aisdv1.domain.feature.sdxl.StableDiffusionCpp
  * @author Dmitriy Moroz
  */
 interface AndroidHostBindings {
+    /**
+     * Isolated local super-resolution without loading native code in the host.
+     *
+     * @author Dmitriy Moroz
+     */
+    val upscalerGateway: UpscalerGateway
+
     /**
      * Package version, native platform and distribution flavor.
      *

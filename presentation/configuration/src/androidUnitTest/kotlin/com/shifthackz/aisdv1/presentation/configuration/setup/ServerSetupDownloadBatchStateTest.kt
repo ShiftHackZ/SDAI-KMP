@@ -145,6 +145,7 @@ class ServerSetupDownloadBatchStateTest(private val type: LocalAiModel.Type) {
          */
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
-        fun providers() = LocalAiModel.Type.entries.map { arrayOf(it) }
+        fun providers() = LocalAiModel.Type.entries.filter { it != LocalAiModel.Type.Upscaler }
+            .map { arrayOf(it) }
     }
 }

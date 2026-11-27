@@ -53,6 +53,7 @@ data class GalleryDetailState(
  * @param createdAt Formatted creation timestamp for display.
  * @param type Serialized generation-kind label displayed/exported as metadata.
  * @param modelName Recorded checkpoint/model display name.
+ * @param upscalerModelName Dedicated postprocessing checkpoint, absent for original output.
  * @param civitaiUrl Public Civitai post URL displayed alongside the recorded generation metadata.
  * @param provider Recorded provider display name; null for legacy images.
  * @param acceleration Recorded execution configuration; null when unavailable.
@@ -88,6 +89,7 @@ data class GalleryDetailContent(
     val type: String,
     val modelName: String = "",
     val civitaiUrl: String? = null,
+    val upscalerModelName: String? = null,
     val provider: String? = null,
     val acceleration: String? = null,
     val generationDuration: String? = null,
@@ -149,7 +151,7 @@ enum class GalleryDetailTab {
          */
         fun consume(type: AiGenerationResult.Type): List<GalleryDetailTab> = when (type) {
             AiGenerationResult.Type.TEXT_TO_IMAGE -> listOf(IMAGE, INFO)
-            AiGenerationResult.Type.IMAGE_TO_IMAGE -> entries
+            AiGenerationResult.Type.IMAGE_TO_IMAGE, AiGenerationResult.Type.UPSCALE -> entries
         }
     }
 }
@@ -173,12 +175,13 @@ internal fun AiGenerationResult.toGalleryDetailContent(
         imageBase64 = image,
         imageRevision = imageRevision.ifBlank { Uuid.random().toString() },
         image = null,
-        inputImageBase64 = inputImage.takeIf { type == AiGenerationResult.Type.IMAGE_TO_IMAGE },
+        inputImageBase64 = inputImage.takeIf { type != AiGenerationResult.Type.TEXT_TO_IMAGE },
         inputImage = null,
         createdAt = formatGalleryCreatedAt(createdAt),
         type = type.key,
         modelName = modelName,
         civitaiUrl = civitaiUrl,
+        upscalerModelName = upscalerModelName,
         provider = providerKey?.let { key ->
             ServerSource.entries.find { it.key == key }?.shortDisplayName() ?: key
         },
@@ -212,13 +215,19 @@ internal fun GalleryDetailContent.paramsText(): String = buildString {
     appendLine("${Localization.string("gallery_info_field_type")}: $type")
 
     provider?.let { appendLine("${Localization.string("gallery_info_field_provider")}: $it") }
-    if (modelName.isNotBlank()) {
+    upscalerModelName?.let { appendLine("${Localization.string("upscaler_model")}: $it") }
+    if (generationType != AiGenerationResult.Type.UPSCALE && modelName.isNotBlank()) {
         appendLine("${Localization.string("gallery_info_field_model")}: $modelName")
     }
     acceleration?.let { appendLine("${Localization.string("gallery_info_field_acceleration")}: $it") }
     deviceName?.let { appendLine("${Localization.string("gallery_info_field_device")}: $it") }
     osVersion?.let { appendLine("${Localization.string("gallery_info_field_os")}: $it") }
     generationDuration?.let { appendLine("${Localization.string("gallery_info_field_duration")}: $it") }
+
+    if (generationType == AiGenerationResult.Type.UPSCALE) {
+        appendLine("${Localization.string("gallery_info_field_size")}: $size")
+        return@buildString
+    }
 
     if (prompt.isNotEmpty()) {
         appendLine("${Localization.string("gallery_info_field_prompt")}: $prompt")

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Computer
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
 import com.shifthackz.aisdv1.presentation.components.widget.icon.BrandIcons
 
 /**
@@ -37,8 +38,20 @@ fun ServerSource.providerIcon(platform: Platform): ImageVector = when (this) {
     ServerSource.LOCAL_GOOGLE_MEDIA_PIPE,
     ServerSource.LOCAL_STABLE_DIFFUSION_CPP,
     ServerSource.LOCAL_APPLE_CORE_ML,
-    ServerSource.LOCAL_APPLE_BONSAI -> when (platform) {
-        Platform.ANDROID -> Icons.Default.Android
-        Platform.IOS -> BrandIcons.Apple
-    }
+    ServerSource.LOCAL_APPLE_BONSAI -> localProviderIcon(platform)
+}
+
+/**
+ * Uses the current platform's local-provider artwork for independent upscaler sources.
+ *
+ * @param platform Host platform selecting Android or Apple branding.
+ * @author Dmitriy Moroz
+ */
+fun UpscalerSource.providerIcon(platform: Platform): ImageVector = when (this) {
+    UpscalerSource.LOCAL_ESRGAN, UpscalerSource.LOCAL_MNN -> localProviderIcon(platform)
+}
+
+private fun localProviderIcon(platform: Platform): ImageVector = when (platform) {
+    Platform.ANDROID -> Icons.Default.Android
+    Platform.IOS -> BrandIcons.Apple
 }

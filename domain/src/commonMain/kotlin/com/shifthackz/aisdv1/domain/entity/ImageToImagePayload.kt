@@ -8,6 +8,7 @@ package com.shifthackz.aisdv1.domain.entity
  * @param base64Image Encoded source image bytes for image-to-image generation.
  * @param base64MaskImage Encoded inpainting mask; empty for providers without inpainting.
  * @param denoisingStrength Image-to-image denoising strength in the range zero through one.
+ * @param upscaler Independent provider and model for optional final super-resolution; null leaves generation output unchanged.
  * @param prompt Positive generation prompt, preserved verbatim.
  * @param negativePrompt Negative generation prompt; unsupported providers omit it.
  * @param samplingSteps Requested inference step count.
@@ -220,4 +221,5 @@ data class ImageToImagePayload(
      * @author Dmitriy Moroz
      */
     val arliAiModel: String = "",
+    val upscaler: UpscalerConfiguration? = null,
 )

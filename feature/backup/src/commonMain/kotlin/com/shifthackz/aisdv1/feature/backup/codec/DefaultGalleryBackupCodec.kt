@@ -54,6 +54,7 @@ internal class DefaultGalleryBackupCodec(
             deviceName = row.deviceName,
             osVersion = row.osVersion,
             civitaiUrl = row.civitaiUrl,
+            upscalerModelName = row.upscalerModelName,
         )
         archive.writeJson(sink, json.encodeToString(record))
         val outputBytes = writeImage(sink, row.imageBase64, false, budget.maxEncodedBytes)
@@ -64,7 +65,7 @@ internal class DefaultGalleryBackupCodec(
         val record = json.decodeFromString<GalleryBackupRecord>(archive.readJson(source))
         val (image, outputBytes) = readImage(source, false, budget.maxEncodedBytes)
         val (original, _) = readImage(source, true, budget.maxEncodedBytes - outputBytes)
-        if (record.generationType !in setOf("txt2img", "img2img")) return null
+        if (record.generationType !in setOf("txt2img", "img2img", "upscale")) return null
         require(record.width > 0 && record.height > 0 && record.samplingSteps >= 0 && record.cfgScale.isFinite()) { "Invalid gallery metadata" }
         require(record.subSeedStrength.isFinite() && record.denoisingStrength.isFinite()) { "Invalid gallery metadata" }
         require(record.generationDurationMillis == null || record.generationDurationMillis >= 0) { "Invalid generation duration" }
@@ -97,6 +98,7 @@ internal class DefaultGalleryBackupCodec(
             deviceName = record.deviceName,
             osVersion = record.osVersion,
             civitaiUrl = record.civitaiUrl,
+            upscalerModelName = record.upscalerModelName,
         )
     }
 

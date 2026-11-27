@@ -15,6 +15,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -502,6 +503,44 @@ jbyteArray native_generate(
     return nullptr;
 }
 
+// This entry point runs only in the disposable inference child.
+jbyteArray native_upscale(JNIEnv* env, jobject, jstring model_path, jbyteArray pixels,
+                         jint width, jint height, jintArray shape) try {
+    std::lock_guard<std::mutex> lock(g_context_mutex);
+    if (width <= 0 || height <= 0 || width > 1024 || height > 1024 ||
+        env->GetArrayLength(pixels) != width * height * 3 || env->GetArrayLength(shape) != 3) {
+        throw_illegal_state(env, "Invalid upscaler input dimensions.");
+        return nullptr;
+    }
+    g_cancel_requested = false;
+    JStringChars path(env, model_path);
+    std::unique_ptr<upscaler_ctx_t, decltype(&free_upscaler_ctx)> context(
+        new_upscaler_ctx(path.c_str(), true, false, 4, 128, "cpu", "cpu"),
+        free_upscaler_ctx);
+    if (!context || get_upscale_factor(context.get()) != 4) {
+        throw_illegal_state(env, "The selected checkpoint is not a supported 4x ESRGAN model.");
+        return nullptr;
+    }
+    std::vector<uint8_t> input(width * height * 3);
+    env->GetByteArrayRegion(pixels, 0, input.size(), reinterpret_cast<jbyte*>(input.data()));
+    if (env->ExceptionCheck()) return nullptr;
+    sd_image_t source = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 3, input.data()};
+    sd_image_t output = upscale(context.get(), source, 4);
+    std::unique_ptr<uint8_t, decltype(&std::free)> owned_output(output.data, std::free);
+    if (g_cancel_requested) { throw_cancelled(env); return nullptr; }
+    if (output.width != width * 4 || output.height != height * 4 || output.channel != 3) {
+        throw_illegal_state(env, "Invalid upscaler output dimensions.");
+        return nullptr;
+    }
+    return copy_first_image(env, &output, 1, shape);
+} catch (const std::bad_alloc&) {
+    if (!env->ExceptionCheck()) throw_java(env, "java/lang/OutOfMemoryError", "Upscaler allocation failed.");
+    return nullptr;
+} catch (...) {
+    if (!env->ExceptionCheck()) throw_illegal_state(env, "Upscaler model is unavailable or incompatible.");
+    return nullptr;
+}
+
 void native_interrupt(JNIEnv* env, jobject thiz) {
     g_cancel_requested = true;
 }
@@ -518,6 +557,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     }
 
     JNINativeMethod methods[] = {
+        {const_cast<char*>("upscale"), const_cast<char*>("(Ljava/lang/String;[BII[I)[B"),
+         reinterpret_cast<void*>(native_upscale)},
         {
             const_cast<char*>("generate"),
             const_cast<char*>(

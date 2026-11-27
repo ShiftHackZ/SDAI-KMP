@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.data.core
 import com.shifthackz.aisdv1.domain.datasource.GenerationResultDataSource
 import kotlin.coroutines.coroutineContext
 import com.shifthackz.aisdv1.domain.entity.GenerationMetadataContext
+import com.shifthackz.aisdv1.domain.entity.GenerationFinalizationContext
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.feature.work.BackgroundWorkObserver
 import com.shifthackz.aisdv1.domain.gateway.MediaStoreGateway
@@ -33,6 +34,7 @@ internal abstract class CoreGenerationRepository(
      */
     protected suspend fun insertGenerationResult(ai: AiGenerationResult): AiGenerationResult {
         val result = coroutineContext[GenerationMetadataContext]?.completed(ai) ?: ai
+        if (coroutineContext[GenerationFinalizationContext] != null) return result
         if (backgroundWorkObserver.hasActiveTasks() || preferenceManager.autoSaveAiResults) {
             val id = localDataSource.insert(result)
             exportToMediaStoreAsync(result)

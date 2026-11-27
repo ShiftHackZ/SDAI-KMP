@@ -11,6 +11,23 @@ import kotlinx.coroutines.flow.Flow
  */
 interface DownloadableModelRepository {
     /**
+     * Reads a catalog model with its current download and independent selection state.
+     * Storage and lookup failures propagate to the caller.
+     *
+     * @param id Stable catalog identity.
+     * @author Dmitriy Moroz
+     */
+    suspend fun getById(id: String): LocalAiModel
+
+    /**
+     * Resolves the owned checkpoint for a completed catalog download.
+     *
+     * @param model Downloaded catalog model; user-managed custom sources are excluded.
+     * @author Dmitriy Moroz
+     */
+    fun getModelPath(model: LocalAiModel): String
+
+    /**
      * Streams the selected catalog source and publishes completion only after its complete model payload is activated.
      *
      * @param id identifier of the target entity.

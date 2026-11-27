@@ -14,6 +14,7 @@ import com.shifthackz.aisdv1.core.navigation.router.LoggerRouter
 import com.shifthackz.aisdv1.core.navigation.router.NetworkUsageRouter
 import com.shifthackz.aisdv1.core.navigation.router.OnBoardingRouter
 import com.shifthackz.aisdv1.core.navigation.router.ReportRouter
+import com.shifthackz.aisdv1.core.navigation.router.UpscalerRouter
 import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
 import com.shifthackz.aisdv1.core.navigation.router.SettingsRouter
 import com.shifthackz.aisdv1.core.navigation.router.SplashRouter
@@ -32,7 +33,7 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class RootAppRouter(
     initialRoute: AppRoute = AppRoute.Splash,
-) : ServerSetupRouter,
+) : UpscalerRouter, ServerSetupRouter,
     BackupRouter,
     ConfigurationLoaderRouter,
     SplashRouter,
@@ -225,7 +226,16 @@ class RootAppRouter(
     }
 
     /**
-     * Opens provider/server setup while preserving the source used for its completion behavior.
+     * Selects the retained Upscaler Home tab and closes the navigation drawer.
+     *
+     * @author Dmitriy Moroz
+     */
+    override fun navigateToUpscaler() {
+        navigateToGenerationHomeRoute(AppRoute.Upscaler)
+    }
+
+    /**
+     * Opens generation setup while preserving the caller beneath the wizard.
      *
      * @author Dmitriy Moroz
      */
@@ -234,9 +244,18 @@ class RootAppRouter(
     }
 
     /**
-     * Opens provider/server setup while preserving the source used for its completion behavior.
+     * Opens independent upscaler setup while preserving the caller's route.
      *
-     * @param source Launch context for setup/onboarding completion.
+     * @author Dmitriy Moroz
+     */
+    override fun navigateToUpscalerSetup() {
+        navigateTo(AppRoute.Setup(LaunchSource.SETTINGS, isUpscaler = true))
+    }
+
+    /**
+     * Opens generation setup with caller-specific completion behavior.
+     *
+     * @param source Launch context retained through setup.
      * @author Dmitriy Moroz
      */
     override fun navigateToServerSetup(source: LaunchSource) {
@@ -479,6 +498,7 @@ class RootAppRouter(
  * @author Dmitriy Moroz
  */
 fun AppRoute.isHomeRoute(): Boolean = when (this) {
+    AppRoute.Upscaler,
     AppRoute.Home,
     AppRoute.TextToImage,
     AppRoute.ImageToImage,
@@ -519,6 +539,7 @@ fun AppRoute.isHomeRoute(): Boolean = when (this) {
 private fun AppRoute.canFallBackToTextToImage(): Boolean = when (this) {
     is AppRoute.Backup -> source == LaunchSource.SETTINGS
     AppRoute.ImageToImage,
+    AppRoute.Upscaler,
     AppRoute.ImageInPaint,
     AppRoute.Gallery,
     AppRoute.Settings,

@@ -40,6 +40,7 @@ import com.shifthackz.aisdv1.presentation.components.theme.textFieldColors
  * @param onItemSelected Receives a newly selected value different from the current selection.
  * @param displayDelegate Converts each choice to its localized display label.
  *
+ * @param isEnabled Whether the field and menu accept input.
  * @param isInitiallyExpanded Initial menu visibility; later changes are owned by user interaction.
  * @author Dmitriy Moroz
  */
@@ -53,12 +54,13 @@ fun <T : Any> DropdownTextField(
     onItemSelected: (T) -> Unit = {},
     displayDelegate: (T) -> UiText = { t -> t.toString().asUiText() },
     isInitiallyExpanded: Boolean = false,
+    isEnabled: Boolean = true,
 ) {
     var expanded by remember { mutableStateOf(isInitiallyExpanded) }
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
+        onExpandedChange = { if (isEnabled) expanded = !expanded },
     ) {
         if (!loading) {
             OutlinedTextField(
@@ -68,6 +70,7 @@ fun <T : Any> DropdownTextField(
                 value = value?.let { displayDelegate(it).asString() } ?: "",
                 onValueChange = {},
                 readOnly = true,
+                enabled = isEnabled,
                 label = { Text(label.asString()) },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -84,7 +87,7 @@ fun <T : Any> DropdownTextField(
             )
         }
         ExposedDropdownMenu(
-            expanded = expanded && !loading,
+            expanded = expanded && !loading && isEnabled,
             onDismissRequest = { expanded = false },
             containerColor = MaterialTheme.colorScheme.background,
         ) {

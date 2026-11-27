@@ -9,6 +9,13 @@ import com.shifthackz.aisdv1.core.navigation.LaunchSource
  */
 interface SettingsRouter {
     /**
+     * Opens the independent two-step upscaler configuration wizard.
+     *
+     * @author Dmitriy Moroz
+     */
+    fun navigateToUpscalerSetup()
+
+    /**
      * Opens the configured server's web interface inside the application.
      *
      * @author Dmitriy Moroz

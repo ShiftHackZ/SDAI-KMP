@@ -18,6 +18,12 @@ import com.shifthackz.aisdv1.domain.preference.PreferenceManager
  * @author Dmitriy Moroz
  */
 internal class GenerationTestPreferences : PreferenceManager {
+    override var upscalerModelId: String
+        get() = error("Unexpected preference read: upscalerModelId")
+        set(value) {
+            error("Unexpected preference write: upscalerModelId = $value")
+        }
+
     override var textToImageSamplingSteps: Int
         get() = error("Unexpected preference read: textToImageSamplingSteps")
         set(value) {

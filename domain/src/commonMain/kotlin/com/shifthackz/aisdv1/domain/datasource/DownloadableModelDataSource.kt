@@ -44,6 +44,21 @@ sealed interface DownloadableModelDataSource {
      */
     interface Local : DownloadableModelDataSource {
         /**
+         * Reads dedicated ESRGAN metadata and current app-owned download state.
+         *
+         * @author Dmitriy Moroz
+         */
+        suspend fun getAllUpscalers(): List<LocalAiModel>
+
+        /**
+         * Resolves the complete owned checkpoint for a downloaded catalog model.
+         *
+         * @param model Downloaded catalog entry; custom source paths are not accepted.
+         * @author Dmitriy Moroz
+         */
+        fun getModelPath(model: LocalAiModel): String
+
+        /**
          * Reads ONNX catalog models with current downloaded and selected state, including the custom entry outside Play.
          *
          * @author Dmitriy Moroz

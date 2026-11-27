@@ -7,6 +7,7 @@ import com.shifthackz.aisdv1.core.navigation.router.ServerSetupRouter
 import com.shifthackz.aisdv1.presentation.configuration.loader.ConfigurationLoaderViewModel
 import com.shifthackz.aisdv1.presentation.configuration.setup.ServerSetupViewModel
 import org.koin.dsl.module
+import com.shifthackz.aisdv1.presentation.configuration.upscaler.UpscalerSetupViewModel
 
 /**
  * Creates startup loaders, model-mirror selectors and provider-setup ViewModels.
@@ -16,6 +17,13 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val configurationViewModelModule = module {
+    factory { (router: ServerSetupRouter) ->
+        UpscalerSetupViewModel(
+            diagnostics = get(), dispatchers = get(), refresh = get(), cached = get(),
+            configure = get(), delete = get(), downloads = get(), preferences = get(),
+            buildInfo = get(), router = router, storageObserver = get(),
+        )
+    }
     factory { (router: ConfigurationLoaderRouter) ->
         ConfigurationLoaderViewModel(
             diagnostics = get(),

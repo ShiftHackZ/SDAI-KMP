@@ -8,6 +8,7 @@ package com.shifthackz.aisdv1.domain.entity
  * their provider, including Android local runtime backend choices such as SDXL
  * and Bonsai.
  *
+ * @param upscaler Independent provider and model for optional final super-resolution; null leaves generation output unchanged.
  * @param prompt Positive prompt describing the requested image.
  * @param negativePrompt Prompt describing content the selected provider should avoid.
  * @param samplingSteps Requested denoising iteration count, subject to the provider profile.
@@ -113,4 +114,5 @@ data class TextToImagePayload(
      * @author Dmitriy Moroz
      */
     val openAiOAuthRevision: String? = null,
+    val upscaler: UpscalerConfiguration? = null,
 )

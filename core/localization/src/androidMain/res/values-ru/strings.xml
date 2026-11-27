@@ -263,7 +263,7 @@
     <string name="title_history">История</string>
     <string name="title_gallery_details">Результат генерации</string>
     <string name="title_settings">Параметры</string>
-    <string name="title_server_setup">Конфигурация</string>
+    <string name="title_server_setup">Настройки генерации</string>
     <string name="title_select_sd_model">Выберите SD ML модель</string>
     <string name="title_clear_app_cache">Очистить кэш приложения</string>
     <string name="title_debug_menu">Режим разработчика</string>
@@ -302,7 +302,7 @@
     <string name="settings_header_look_and_feel">Персонализация</string>
     <string name="settings_header_community">Сообщество</string>
 
-    <string name="settings_item_config">Конфигурация</string>
+    <string name="settings_item_config">Настройки генерации</string>
     <string name="settings_item_sd_model">SD Модель</string>
     <string name="settings_item_stability_ai_credits">Stability AI Кредиты</string>
     <string name="settings_item_local_nnapi">NNAPI</string>
@@ -912,4 +912,33 @@
     <string name="blog_post_missing">Эта статья недоступна.</string>
     <string name="blog_share_post">Поделиться статьёй</string>
     <string name="blog_share_error">Не удалось открыть меню «Поделиться».</string>
+    <string name="generation_configuration">Настройки генерации</string>
+    <string name="upscaler_configuration">Настройки апскейлера</string>
+    <string name="upscaler_title">Апскейлер</string>
+    <string name="upscaler_action">Увеличить</string>
+    <string name="upscaler_local_provider">ESRGAN</string>
+    <string name="upscaler_provider_help">Апскейлер увеличивает разрешение изображения и улучшает чёткость контуров и мелких деталей с помощью ИИ. Его можно применять к готовым изображениям или после генерации.</string>
+    <string name="upscaler_mnn_provider">MNN</string>
+    <string name="upscaler_tag_tiled_inference">Обработка по плиткам</string>
+    <string name="upscaler_esrgan_description">ESRGAN увеличивает изображения и улучшает чёткость контуров и мелких деталей с помощью ИИ на вашем устройстве. Применяйте его к готовым изображениям или после генерации.</string>
+    <string name="upscaler_mnn_description">MNN увеличивает изображения и улучшает чёткость контуров и мелких деталей с помощью ИИ на вашем устройстве. Применяйте его к готовым изображениям или после генерации.</string>
+    <string name="upscaler_unavailable">Для этой платформы нет доступных апскейлеров.</string>
+    <string name="upscaler_model">Модель апскейлера</string>
+    <string name="upscaler_pipeline_toggle">Увеличивать сгенерированные изображения</string>
+
+    <string name="upscaler_setup_required">Выберите загруженную модель в настройках апскейлера.</string>
+    <string name="upscaler_retry">Повторить</string>
+    <string name="upscaler_limits">Для пропорционального уменьшения изображений со стороной более 1024 пикселей потребуется подтверждение.</string>
+    <string name="upscaler_running">Увеличение…</string>
+
+    <string name="settings_help_upscaler_configuration">Выберите провайдера апскейлинга и настройте его локальные модели.</string>
+    <string name="upscaler_options">Параметры масштабирования</string>
+    <string name="upscaler_provider">Провайдер масштабирования</string>
+    <string name="error_upscaler_generation_size">При включённом увеличении размер генерации не должен превышать 1024 × 1024 пикселя. Уменьшите размер или отключите увеличение.</string>
+    <string name="upscaler_models">Модели апскейлера</string>
+    <string name="generation_provider">Провайдер генерации</string>
+    <string name="upscaler_downscale_title">Изображение будет уменьшено</string>
+    <string name="upscaler_downscale_message">Апскейлер поддерживает входные изображения размером до 1024 × 1024 пикселей. Изображение будет уменьшено так, чтобы его длинная сторона составляла 1024 пикселя. Пропорции и всё изображение будут сохранены.</string>
+    <string name="upscaler_continue">Продолжить</string>
+    <string name="upscaler_scale_factor">Масштаб</string>
 </resources>

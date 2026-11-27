@@ -11,6 +11,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.Modifier
+import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.onFirst
@@ -44,6 +45,36 @@ class GalleryMetadataLayoutTest {
     @Before
     fun initializeLocalization() {
         Localization.setLanguageCode("en")
+    }
+
+    @Test
+    fun `given standalone upscale metadata, details are rendered, expected device OS size and upscaler without diffusion fields`() {
+        // Given
+        val content = mockAiGenerationResult.copy(
+            type = AiGenerationResult.Type.UPSCALE, providerKey = "local_esrgan",
+            upscalerModelName = "Anime 6B", deviceName = "Google Pixel 10 Pro",
+            osVersion = "Android 17 (API 37)", width = 2048, height = 2048,
+        ).toGalleryDetailContent(false)
+        compose.setContent { MaterialTheme { GalleryDetailsTable(content = content) } }
+
+        // When
+        compose.waitForIdle()
+
+        // Then
+        compose.onNodeWithText("Google Pixel 10 Pro").assertExists()
+        compose.onNodeWithText("Android 17 (API 37)").assertExists()
+        compose.onNodeWithText("2048 X 2048").assertExists()
+        listOf(
+            "Model",
+            "Prompt",
+            "Negative prompt",
+            "Sampling steps",
+            "CFG scale",
+            "Seed",
+            "Sampler"
+        ).forEach {
+            compose.onNodeWithText(it).assertDoesNotExist()
+        }
     }
 
     @Test

@@ -27,6 +27,7 @@ val settingsViewModelModule = module {
             getLocalCoreMlModelsUseCase = get(),
             getLocalBonsaiModelsUseCase = get(),
             getLocalMnnModelsUseCase = get(),
+            getCachedLocalModelCatalogUseCase = get(),
             observeNetworkUsageUseCase = get(),
             storageUsageObserver = get(),
             preferenceManager = get(),

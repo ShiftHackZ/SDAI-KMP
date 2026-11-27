@@ -16,6 +16,13 @@ import kotlinx.coroutines.flow.Flow
  */
 interface PreferenceManager {
     /**
+     * Independently selected downloaded ESRGAN checkpoint; empty until upscaler setup completes.
+     *
+     * @author Dmitriy Moroz
+     */
+    var upscalerModelId: String
+
+    /**
      * Last sampling step count in the txt2img form; defaults to 20 on first launch.
      *
      * @author Dmitriy Moroz

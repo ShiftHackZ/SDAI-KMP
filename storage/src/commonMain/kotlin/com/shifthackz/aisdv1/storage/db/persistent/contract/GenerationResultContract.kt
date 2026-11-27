@@ -208,4 +208,11 @@ internal object GenerationResultContract {
      * @author Dmitriy Moroz
      */
     const val CIVITAI_URL = "civitai_url"
+
+    /**
+     * Dedicated super-resolution checkpoint provenance.
+     *
+     * @author Dmitriy Moroz
+     */
+    const val UPSCALER_MODEL_NAME = "upscaler_model_name"
 }

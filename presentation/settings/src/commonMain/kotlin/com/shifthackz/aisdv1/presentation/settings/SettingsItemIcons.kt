@@ -1,5 +1,7 @@
 package com.shifthackz.aisdv1.presentation.settings
 
+import com.shifthackz.aisdv1.presentation.components.model.generationConfigurationIcon
+import com.shifthackz.aisdv1.presentation.components.model.upscalerConfigurationIcon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.AllInclusive
@@ -25,7 +27,6 @@ import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tag
@@ -47,7 +48,9 @@ internal val SettingsListItem.startIcon: ImageVector?
     get() = when (this) {
         SettingsListItem.CIVITAI -> BrandIcons.Civitai
         SettingsListItem.WEB_UI -> Icons.Default.Web
-        SettingsListItem.CONFIGURATION -> Icons.Default.SettingsEthernet
+        SettingsListItem.UPSCALER_CONFIGURATION -> upscalerConfigurationIcon
+        SettingsListItem.CONFIGURATION -> generationConfigurationIcon
+
         SettingsListItem.BACKUP -> Icons.Default.Backup
         SettingsListItem.BENCHMARK -> Icons.Default.Speed
         SettingsListItem.CREDITS -> Icons.Default.Circle

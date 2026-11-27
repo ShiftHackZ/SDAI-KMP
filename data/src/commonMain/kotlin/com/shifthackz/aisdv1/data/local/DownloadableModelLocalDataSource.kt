@@ -28,6 +28,25 @@ internal class DownloadableModelLocalDataSource(
     private val buildInfoProvider: BuildInfoProvider,
     private val fileStore: DownloadableModelFileStore,
 ) : DownloadableModelDataSource.Local {
+    /**
+     * Reads the dedicated upscaler family without mixing it with generation checkpoints.
+     *
+     * @author Dmitriy Moroz
+     */
+    override suspend fun getAllUpscalers() =
+        dao.queryByType(LocalAiModel.Type.Upscaler.key).mapEntityToDomain().withLocalData()
+
+    /**
+     * Resolves a completed catalog payload through the platform file store.
+     *
+     * @param model Downloaded catalog entry whose owned checkpoint is needed.
+     * @author Dmitriy Moroz
+     */
+    override fun getModelPath(model: LocalAiModel): String {
+        require(model.downloaded && model.sources.isNotEmpty())
+        return fileStore.resolvePath(model)
+    }
+
 
     /**
      * Reads MNN model metadata with current completion and independent selection state.
@@ -291,6 +310,7 @@ internal class DownloadableModelLocalDataSource(
     private fun LocalAiModel.withLocalData() = copy(
         downloaded = fileStore.isDownloaded(this),
         selected = when (this.type) {
+            LocalAiModel.Type.Upscaler -> preferenceManager.upscalerModelId == id
             LocalAiModel.Type.Mnn -> preferenceManager.localMnnModelId == id
             LocalAiModel.Type.ONNX -> preferenceManager.localOnnxModelId == id
             LocalAiModel.Type.MediaPipe -> preferenceManager.localMediaPipeModelId == id

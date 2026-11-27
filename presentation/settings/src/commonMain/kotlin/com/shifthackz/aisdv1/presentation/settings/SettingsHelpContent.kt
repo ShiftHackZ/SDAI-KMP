@@ -13,6 +13,7 @@ internal fun SettingsListItem.helpTitleKey(): String? = when (this) {
     SettingsListItem.WEB_UI -> "drawer_web_ui"
     SettingsListItem.CIVITAI -> "civitai_title"
     SettingsListItem.SERVER_HEADER -> "settings_header_server"
+    SettingsListItem.UPSCALER_CONFIGURATION -> "upscaler_configuration"
     SettingsListItem.CONFIGURATION -> "settings_item_config"
     SettingsListItem.BACKUP -> "backup_title"
     SettingsListItem.BENCHMARK -> "settings_item_benchmark"

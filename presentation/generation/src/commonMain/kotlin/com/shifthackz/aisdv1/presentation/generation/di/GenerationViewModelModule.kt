@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.generation.di
 
 import com.shifthackz.aisdv1.core.navigation.router.ImageToImageRouter
 import com.shifthackz.aisdv1.core.navigation.router.TextToImageRouter
+import com.shifthackz.aisdv1.core.navigation.router.UpscalerRouter
 import com.shifthackz.aisdv1.core.validation.di.easyDiffusionSeedValidatorQualifier
 import com.shifthackz.aisdv1.core.validation.di.mnnSeedValidatorQualifier
 import com.shifthackz.aisdv1.core.validation.di.nativeSeedValidatorQualifier
@@ -12,6 +13,8 @@ import com.shifthackz.aisdv1.presentation.generation.modal.embedding.EmbeddingVi
 import com.shifthackz.aisdv1.presentation.generation.modal.extras.ExtrasViewModel
 import com.shifthackz.aisdv1.presentation.generation.modal.tag.EditTagViewModel
 import com.shifthackz.aisdv1.presentation.generation.txt2img.TextToImageViewModel
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerFormViewModel
+import com.shifthackz.aisdv1.presentation.generation.upscaler.UpscalerViewModel
 import org.koin.dsl.module
 
 /**
@@ -22,6 +25,29 @@ import org.koin.dsl.module
  * @author Dmitriy Moroz
  */
 val generationViewModelModule = module {
+    factory { UpscalerFormViewModel(get(), get(), get(), get()) }
+    factory { (router: UpscalerRouter, picker: ImageToImagePlatformActions) ->
+        UpscalerViewModel(
+            diagnostics = get(),
+            dispatchers = get(),
+            readImage = get(),
+            outputSize = get(),
+            upscale = get(),
+            save = get(),
+            finalize = get(),
+            cache = get(),
+            randomImage = get(),
+            time = get(),
+            restoreGate = get(),
+            picker = picker,
+            router = router,
+            buildInfo = get(),
+            gateway = get(),
+            preferences = get(),
+            wakeLock = get(),
+            platformServices = get(),
+        )
+    }
     factory { (prompt: String, negativePrompt: String, type: ExtraType) ->
         ExtrasViewModel(
             diagnostics = get(),

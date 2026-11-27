@@ -140,6 +140,7 @@ class ServerSetupCatalogStateTest(private val type: LocalAiModel.Type) {
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun catalogs(): List<Array<LocalAiModel.Type>> =
-            LocalAiModel.Type.entries.map { arrayOf(it) }
+            LocalAiModel.Type.entries.filter { it != LocalAiModel.Type.Upscaler }
+                .map { arrayOf(it) }
     }
 }

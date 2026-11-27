@@ -23,6 +23,7 @@ import com.shifthackz.aisdv1.domain.usecase.gallery.GetAllGalleryUseCase
 import com.shifthackz.aisdv1.core.navigation.router.StorageUsageRouter
 import com.shifthackz.aisdv1.presentation.statistics.storageusage.platform.StorageUsagePlatformActions
 import com.shifthackz.aisdv1.presentation.components.model.UsageCategory
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import io.mockk.coVerify
 import io.mockk.coEvery
@@ -64,6 +65,7 @@ class StorageUsageViewModelTest {
     private val getLocalCoreMlModelsUseCase = mockk<GetLocalCoreMlModelsUseCase>()
     private val getLocalBonsaiModelsUseCase = mockk<GetLocalBonsaiModelsUseCase>()
     private val getLocalMnnModelsUseCase = mockk<GetLocalMnnModelsUseCase>()
+    private val getCachedLocalModelCatalogUseCase = mockk<GetCachedLocalModelCatalogUseCase>()
     private val deleteModelUseCase = mockk<DeleteModelUseCase>()
     private val storageUsageObserver = FakeStorageUsageObserver()
     private val router = TestStorageUsageRouter()
@@ -86,6 +88,7 @@ class StorageUsageViewModelTest {
         coEvery { getLocalSdxlModelsUseCase() } returns emptyList()
         coEvery { getLocalCoreMlModelsUseCase() } returns emptyList()
         coEvery { getLocalBonsaiModelsUseCase() } returns emptyList()
+        coEvery { getCachedLocalModelCatalogUseCase(any()) } returns emptyList()
         coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(emptyList())
         coEvery { deleteModelUseCase(any()) } returns Unit
     }
@@ -405,6 +408,7 @@ class StorageUsageViewModelTest {
             getLocalSdxlModelsUseCase = getLocalSdxlModelsUseCase,
             getLocalCoreMlModelsUseCase = getLocalCoreMlModelsUseCase,
             getLocalMnnModelsUseCase = getLocalMnnModelsUseCase,
+            getCachedLocalModelCatalogUseCase = getCachedLocalModelCatalogUseCase,
             getLocalBonsaiModelsUseCase = getLocalBonsaiModelsUseCase,
             deleteModelUseCase = deleteModelUseCase,
             storageUsageObserver = storageUsageObserver,

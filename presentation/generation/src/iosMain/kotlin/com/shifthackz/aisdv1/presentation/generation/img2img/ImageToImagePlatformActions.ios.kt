@@ -48,7 +48,17 @@ actual fun rememberImageToImagePlatformActions(budget: OriginalImageBudget): Ima
     val picker = remember { IosImagePicker() }
     return remember(picker, budget) {
         object : ImageToImagePlatformActions {
-            override suspend fun pickImage(source: ImageToImagePickSource): ImageToImagePickResult =
+            /**
+             * Opens native acquisition and preserves the whole image when square normalization is disabled.
+             *
+             * @param source Camera or photo-library selection requested by the caller.
+             * @param shouldCropToSquare Whether to retain the img2img square normalization policy.
+             * @author Dmitriy Moroz
+             */
+            override suspend fun pickImage(
+                source: ImageToImagePickSource,
+                shouldCropToSquare: Boolean
+            ): ImageToImagePickResult =
                 when (val outcome = picker.pick(source)) {
                     IosImagePickOutcome.Cancelled -> ImageToImagePickResult.Cancelled
                     is IosImagePickOutcome.Failed -> ImageToImagePickResult.Failed(outcome.message)
@@ -59,7 +69,10 @@ actual fun rememberImageToImagePlatformActions(budget: OriginalImageBudget): Ima
                         )
                         outcome.image
                             .base64Jpeg()
-                            ?.let { cropBase64ImageToSquare(it, budget) }
+                            ?.let { encoded ->
+                                if (shouldCropToSquare) cropBase64ImageToSquare(encoded, budget)
+                                else encoded.takeIf { it.length <= budget.encodedChars }
+                            }
                             ?.let(ImageToImagePickResult::Selected)
                             ?: ImageToImagePickResult.Failed("Unable to read selected image")
                     }

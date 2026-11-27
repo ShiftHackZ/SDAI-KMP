@@ -29,6 +29,7 @@ import com.shifthackz.aisdv1.presentation.settings.platform.SettingsPlatformActi
 import com.shifthackz.aisdv1.presentation.components.service.storage.StorageUsageObserver
 import com.shifthackz.aisdv1.domain.entity.LocalAiModel
 import com.shifthackz.aisdv1.domain.entity.mnn.MnnCatalogResult
+import com.shifthackz.aisdv1.domain.usecase.downloadable.GetCachedLocalModelCatalogUseCase
 import com.shifthackz.aisdv1.domain.usecase.downloadable.GetLocalMnnModelsUseCase
 import io.mockk.coEvery
 import io.mockk.every
@@ -51,6 +52,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
 import org.junit.Before
 import org.junit.Test
 
@@ -77,6 +80,7 @@ class SettingsViewModelTest {
     private val getLocalCoreMlModelsUseCase = mockk<GetLocalCoreMlModelsUseCase>()
     private val getLocalBonsaiModelsUseCase = mockk<GetLocalBonsaiModelsUseCase>()
     private val getLocalMnnModelsUseCase = mockk<GetLocalMnnModelsUseCase>()
+    private val getCachedLocalModelCatalogUseCase = mockk<GetCachedLocalModelCatalogUseCase>()
     private val observeNetworkUsageUseCase = mockk<ObserveNetworkUsageUseCase>()
     private val preferenceManager = mockk<PreferenceManager>(relaxed = true)
     private val router = TestSettingsRouter()
@@ -102,6 +106,7 @@ class SettingsViewModelTest {
         coEvery { getLocalSdxlModelsUseCase() } returns emptyList()
         coEvery { getLocalCoreMlModelsUseCase() } returns emptyList()
         coEvery { getLocalBonsaiModelsUseCase() } returns emptyList()
+        coEvery { getCachedLocalModelCatalogUseCase(any()) } returns emptyList()
         coEvery { getLocalMnnModelsUseCase() } returns MnnCatalogResult(emptyList())
         every { observeStabilityAiCreditsUseCase() } returns stabilityCredits
         every { observeNetworkUsageUseCase() } returns networkUsage
@@ -134,6 +139,56 @@ class SettingsViewModelTest {
             assertEquals(0f, actual.stabilityAiCredits)
             assertEquals("test-version", actual.appVersion)
 
+        }
+
+    @Test
+    fun `given settings with configured upscaler, screen opens, expected active provider in state`() =
+        runTest {
+            // Given
+            every { preferenceManager.upscalerModelId } returns "upscaler_mnn_anime"
+
+            // When
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(UpscalerSource.LOCAL_MNN, viewModel.state.value.upscalerSource)
+        }
+
+    @Test
+    fun `given settings with configured upscaler, selection invalidates preferences, expected provider refreshed independently`() =
+        runTest {
+            // Given
+            every { preferenceManager.upscalerModelId } returns "upscaler_mnn_anime"
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+            val generationProvider = viewModel.state.value.serverSource
+
+            // When
+            every { preferenceManager.upscalerModelId } returns "upscaler_esrgan_anime"
+            settings.value = settings.value.copy(monitorConnectivity = true)
+            advanceUntilIdle()
+
+            // Then
+            assertEquals(UpscalerSource.LOCAL_ESRGAN, viewModel.state.value.upscalerSource)
+            assertEquals(generationProvider, viewModel.state.value.serverSource)
+        }
+
+    @Test
+    fun `given settings with configured upscaler, selection is removed, expected no active provider`() =
+        runTest {
+            // Given
+            every { preferenceManager.upscalerModelId } returns "upscaler_mnn_anime"
+            val viewModel = createViewModel()
+            advanceUntilIdle()
+
+            // When
+            every { preferenceManager.upscalerModelId } returns ""
+            settings.value = settings.value.copy(monitorConnectivity = true)
+            advanceUntilIdle()
+
+            // Then
+            assertNull(viewModel.state.value.upscalerSource)
         }
 
     @Test
@@ -433,6 +488,7 @@ class SettingsViewModelTest {
             getLocalCoreMlModelsUseCase = getLocalCoreMlModelsUseCase,
             getLocalBonsaiModelsUseCase = getLocalBonsaiModelsUseCase,
             getLocalMnnModelsUseCase = getLocalMnnModelsUseCase,
+            getCachedLocalModelCatalogUseCase = getCachedLocalModelCatalogUseCase,
             observeNetworkUsageUseCase = observeNetworkUsageUseCase,
             storageUsageObserver = storageUsageObserver,
             preferenceManager = preferenceManager,
@@ -456,6 +512,7 @@ private object TestBuildInfoProvider : BuildInfoProvider {
 }
 
 private class TestSettingsRouter : SettingsRouter {
+    override fun navigateToUpscalerSetup() = Unit
     override fun navigateToFaq() = Unit
 
     var isBlogOpened = false

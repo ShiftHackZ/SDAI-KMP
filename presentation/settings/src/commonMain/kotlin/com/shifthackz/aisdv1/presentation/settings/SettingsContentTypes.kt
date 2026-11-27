@@ -42,6 +42,7 @@ internal fun SettingsListItem.contentType(): SettingsContentType = when (this) {
     SettingsListItem.CIVITAI,
     SettingsListItem.WEB_UI,
     SettingsListItem.CONFIGURATION,
+    SettingsListItem.UPSCALER_CONFIGURATION,
     SettingsListItem.BACKUP,
     SettingsListItem.BENCHMARK,
     SettingsListItem.CREDITS,

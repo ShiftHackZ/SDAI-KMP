@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.presentation.generation.txt2img
 
 import com.shifthackz.aisdv1.core.mvi.MviIntent
 import com.shifthackz.aisdv1.domain.entity.ADetailerConfig
+import com.shifthackz.aisdv1.domain.entity.UpscalerConfiguration
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
@@ -29,6 +30,21 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationAspe
  * @author Dmitriy Moroz
  */
 sealed interface TextToImageIntent : MviIntent {
+    /**
+     * Opens independent provider/model setup.
+     *
+     * @author Dmitriy Moroz
+     */
+    data object ConfigureUpscaler : TextToImageIntent
+
+    /**
+     * Captures the selected input for the owning screen action.
+     *
+     * @param configuration Captured optional final-stage model.
+     * @author Dmitriy Moroz
+     */
+    data class UpdateUpscaler(val configuration: UpscalerConfiguration?) : TextToImageIntent
+
     /**
      * Retries an empty AUTOMATIC1111 sampler list after foregrounding or a user retry.
      *

@@ -6,6 +6,7 @@ import com.shifthackz.aisdv1.core.common.platform.Platform
 import com.shifthackz.aisdv1.core.model.UiText
 import com.shifthackz.aisdv1.core.mvi.MviState
 import com.shifthackz.aisdv1.domain.entity.ADetailerConfig
+import com.shifthackz.aisdv1.domain.entity.UpscalerConfiguration
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.FalAiAcceleration
@@ -54,6 +55,7 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  * @param advancedToggleButtonVisible Whether the form exposes the advanced-control expansion action.
  * @param advancedOptionsVisible Whether advanced generation controls are currently expanded.
  * @param formPromptTaggedInput Whether prompts use the tag editor instead of plain text input.
+ * @param upscaler Captured final-stage provider/model; null disables optional upscaling.
  * @param prompt Positive generation prompt, preserved verbatim.
  * @param negativePrompt Edited negative prompt; payload mapping trims its surrounding whitespace.
  * @param width Edited output width text; payload mapping uses a provider preset or a numeric fallback.
@@ -99,6 +101,7 @@ import com.shifthackz.aisdv1.presentation.generation.widget.input.GenerationInpu
  */
 @Immutable
 data class ImageToImageState(
+    val upscaler: UpscalerConfiguration? = null,
     val loadingConfiguration: Boolean = true,
     val imageBase64: String = "",
     val denoisingStrength: Float = DEFAULT_DENOISING_STRENGTH,
@@ -239,6 +242,7 @@ data class ImageToImageState(
 internal fun ImageToImageState.mapToPayload(
     maskBase64: String? = null,
 ): ImageToImagePayload = ImageToImagePayload(
+    upscaler = upscaler,
     sourceSnapshot = mode,
     providerSelectionRevision = providerSelectionRevision,
     base64Image = imageBase64,

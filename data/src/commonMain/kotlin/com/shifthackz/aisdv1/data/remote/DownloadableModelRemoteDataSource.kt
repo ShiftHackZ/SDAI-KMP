@@ -25,14 +25,18 @@ internal class DownloadableModelRemoteDataSource(
      *
      * @author Dmitriy Moroz
      */
-    override suspend fun fetchCatalog(type: LocalAiModel.Type): List<LocalAiModel> = when (type) {
-        LocalAiModel.Type.ONNX -> api.fetchOnnxModels()
-        LocalAiModel.Type.MediaPipe -> api.fetchMediaPipeModels()
-        LocalAiModel.Type.Sdxl -> api.fetchSdxlModels()
-        LocalAiModel.Type.CoreMl -> api.fetchCoreMlModels()
-        LocalAiModel.Type.Bonsai -> api.fetchBonsaiModels()
-        LocalAiModel.Type.Mnn -> api.fetchMnnModels()
-    }.mapRawToCheckpointDomain(type)
+    override suspend fun fetchCatalog(type: LocalAiModel.Type): List<LocalAiModel> {
+        val raw = when (type) {
+            LocalAiModel.Type.Upscaler -> api.fetchUpscalerEsrganModels() + api.fetchUpscalerMnnModels()
+            LocalAiModel.Type.ONNX -> api.fetchOnnxModels()
+            LocalAiModel.Type.MediaPipe -> api.fetchMediaPipeModels()
+            LocalAiModel.Type.Sdxl -> api.fetchSdxlModels()
+            LocalAiModel.Type.CoreMl -> api.fetchCoreMlModels()
+            LocalAiModel.Type.Bonsai -> api.fetchBonsaiModels()
+            LocalAiModel.Type.Mnn -> api.fetchMnnModels()
+        }
+        return raw.mapRawToCheckpointDomain(type)
+    }
 
     /**
      * Streams the selected catalog source and publishes completion only after its complete model payload is activated.

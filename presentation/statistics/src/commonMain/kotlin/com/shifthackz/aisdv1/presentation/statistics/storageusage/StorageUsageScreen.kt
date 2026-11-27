@@ -131,6 +131,7 @@ private fun UsageItem.deleteDescription(): String = when (category) {
         bytes.formatBytes(),
     )
 
+    UsageCategory.MODELS_UPSCALER,
     UsageCategory.MODELS_ONNX,
     UsageCategory.MODELS_MEDIAPIPE,
     UsageCategory.MODELS_SDXL,

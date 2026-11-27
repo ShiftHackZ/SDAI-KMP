@@ -294,7 +294,7 @@
     <string name="title_history">History</string>
     <string name="title_gallery_details">Details</string>
     <string name="title_settings">Settings</string>
-    <string name="title_server_setup">Configuration</string>
+    <string name="title_server_setup">Generation configuration</string>
     <string name="title_select_sd_model">Select SD ML Model</string>
     <string name="title_clear_app_cache">Clear app cache</string>
     <string name="title_debug_menu">Developer mode</string>
@@ -335,7 +335,7 @@
     <string name="settings_header_look_and_feel">Look and feel</string>
     <string name="settings_header_community">Community</string>
 
-    <string name="settings_item_config">Configuration</string>
+    <string name="settings_item_config">Generation configuration</string>
     <string name="settings_item_sd_model">SD Model</string>
     <string name="settings_item_stability_ai_credits">Stability AI Credits</string>
     <string name="settings_item_local_nnapi">Use NNAPI</string>
@@ -949,4 +949,33 @@
     <string name="blog_post_missing">This article is unavailable.</string>
     <string name="blog_share_post">Share article</string>
     <string name="blog_share_error">Couldn’t open the share sheet.</string>
+    <string name="generation_configuration">Generation configuration</string>
+    <string name="upscaler_configuration">Upscaler configuration</string>
+    <string name="upscaler_title">Upscaler</string>
+    <string name="upscaler_action">Upscale</string>
+    <string name="upscaler_local_provider">ESRGAN</string>
+    <string name="upscaler_provider_help">AI upscaling increases image resolution and enhances edges and fine detail. Use it with existing images or as a final step after generation.</string>
+    <string name="upscaler_mnn_provider">MNN</string>
+    <string name="upscaler_tag_tiled_inference">Tiled inference</string>
+    <string name="upscaler_esrgan_description">ESRGAN uses AI to enlarge images and enhance edges and fine detail on your device. Use it with existing images or after generation.</string>
+    <string name="upscaler_mnn_description">MNN uses AI to enlarge images and enhance edges and fine detail on your device. Use it with existing images or after generation.</string>
+    <string name="upscaler_unavailable">No upscaler is available on this platform.</string>
+    <string name="upscaler_model">Upscaler model</string>
+    <string name="upscaler_pipeline_toggle">Upscale generated images</string>
+
+    <string name="upscaler_setup_required">Choose a downloaded upscaler model in configuration.</string>
+    <string name="upscaler_retry">Retry</string>
+    <string name="upscaler_limits">Images larger than 1024 pixels on either edge require confirmation before proportional downscaling.</string>
+    <string name="upscaler_running">Upscaling…</string>
+
+    <string name="settings_help_upscaler_configuration">Choose an upscaling provider and configure its local models.</string>
+    <string name="upscaler_options">Upscaler parameters</string>
+    <string name="upscaler_provider">Upscaler provider</string>
+    <string name="error_upscaler_generation_size">With upscaling enabled, generation size must not exceed 1024 × 1024 pixels. Reduce the size or disable upscaling.</string>
+    <string name="upscaler_models">Upscaler models</string>
+    <string name="generation_provider">Generation provider</string>
+    <string name="upscaler_downscale_title">Input image will be downscaled</string>
+    <string name="upscaler_downscale_message">The upscaler supports input images up to 1024 × 1024 pixels. Your image will be downscaled so its longest edge is 1024 pixels, preserving its aspect ratio and the whole image.</string>
+    <string name="upscaler_continue">Continue</string>
+    <string name="upscaler_scale_factor">Scale factor</string>
 </resources>

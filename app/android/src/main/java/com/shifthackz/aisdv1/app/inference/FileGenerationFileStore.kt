@@ -2,6 +2,7 @@ package com.shifthackz.aisdv1.app.inference
 
 import android.content.Context
 import android.util.AtomicFile
+import android.util.Base64
 import com.shifthackz.aisdv1.domain.entity.MnnBackend
 import com.shifthackz.aisdv1.domain.entity.BonsaiBackend
 import com.shifthackz.aisdv1.domain.entity.NativeGenerationEngine
@@ -35,6 +36,10 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
      * @author Dmitriy Moroz
      */
     override fun writeRequest(job: String, request: NativeGenerationRequest) {
+        request.upscaleImage?.let { image ->
+            val bytes = Base64.decode(image, Base64.DEFAULT)
+            write(job, "upscale-input.image", bytes, MAX_RESULT_BYTES)
+        }
         val p = request.payload
         val json = JSONObject().put("version", 4).put("engine", request.engine.name)
             .put("model", request.modelPath).put("nnapi", request.isNnapiEnabled)
@@ -73,6 +78,12 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
             engine = NativeGenerationEngine.valueOf(json.getString("engine")),
             modelPath = File(path).canonicalPath,
             isNnapiEnabled = json.getBoolean("nnapi"),
+            upscaleImage = if (json.getString("engine") == NativeGenerationEngine.UPSCALER.name)
+                Base64.encodeToString(
+                    read(job, "upscale-input.image", MAX_RESULT_BYTES),
+                    Base64.NO_WRAP
+                )
+            else null,
             payload = TextToImagePayload(
                 prompt = json.getString("prompt"),
                 negativePrompt = json.getString("negative"),
@@ -194,6 +205,5 @@ internal class FileGenerationFileStore(context: Context, private val validator: 
     private companion object {
         const val MAX_REQUEST_BYTES = 4L * 1024 * 1024
         const val MAX_RESULT_BYTES = 128L * 1024 * 1024
-        val PNG_SIGNATURE = byteArrayOf(137.toByte(), 80, 78, 71, 13, 10, 26, 10)
     }
 }

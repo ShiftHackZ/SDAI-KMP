@@ -2,6 +2,8 @@ package com.shifthackz.aisdv1.presentation.gallery.detail
 
 import com.shifthackz.aisdv1.core.localization.formatter.formatGenerationDuration
 import com.shifthackz.aisdv1.domain.entity.ServerSource
+import com.shifthackz.aisdv1.domain.entity.UpscalerSource
+import com.shifthackz.aisdv1.presentation.components.model.displayName
 import com.shifthackz.aisdv1.presentation.components.model.shortDisplayName
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.AiGenerationResult
@@ -24,14 +26,16 @@ internal fun GalleryItemMetadata.toGalleryDetailContent(
         imageBase64 = "",
         imageRevision = imageRevision,
         image = null,
-        inputImageBase64 = "".takeIf { type == AiGenerationResult.Type.IMAGE_TO_IMAGE },
+        inputImageBase64 = "".takeIf { type != AiGenerationResult.Type.TEXT_TO_IMAGE },
         inputImage = null,
         createdAt = formatGalleryCreatedAt(createdAt),
         type = type.key,
         modelName = modelName,
         civitaiUrl = civitaiUrl,
+        upscalerModelName = upscalerModelName,
         provider = providerKey?.let { key ->
-            ServerSource.entries.find { it.key == key }?.shortDisplayName() ?: key
+            ServerSource.entries.find { it.key == key }?.shortDisplayName()
+                ?: UpscalerSource.entries.find { it.key == key }?.displayName ?: key
         },
         acceleration = acceleration?.let { if (it == "None") Localization.string("gallery_info_acceleration_none") else it },
         generationDuration = generationDurationMillis?.let(::formatGenerationDuration),

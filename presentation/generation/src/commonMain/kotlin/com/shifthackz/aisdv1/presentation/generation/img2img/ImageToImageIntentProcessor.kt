@@ -52,6 +52,8 @@ internal class ImageToImageIntentProcessor(
      */
     fun process(intent: ImageToImageIntent) {
         when (intent) {
+            ImageToImageIntent.ConfigureUpscaler -> router.navigateToUpscalerSetup()
+            is ImageToImageIntent.UpdateUpscaler -> updateState { it.copy(upscaler = intent.configuration) }
             ImageToImageIntent.OpenDrawer -> router.openDrawer()
             ImageToImageIntent.NavigateBack -> router.navigateBack()
             ImageToImageIntent.ConfigureProvider -> router.navigateToServerSetup()

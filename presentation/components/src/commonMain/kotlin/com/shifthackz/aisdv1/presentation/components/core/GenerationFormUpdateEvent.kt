@@ -34,6 +34,7 @@ class GenerationFormUpdateEvent {
     ) {
         when (route) {
             AiGenerationResult.Type.TEXT_TO_IMAGE -> sTxt2Img.value = Payload.T2IForm(generation)
+            AiGenerationResult.Type.UPSCALE,
             AiGenerationResult.Type.IMAGE_TO_IMAGE -> sImg2Img.value =
                 Payload.I2IForm(generation, inputImage)
         }
