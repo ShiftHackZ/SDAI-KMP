@@ -5,6 +5,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  additionalOutputSpecs,
+  captureProfile,
+  validateCapture,
+} from "./store_screenshots/profiles.mjs";
+import { deviceFrame, framedSize } from "./store_screenshots/device-frame.mjs";
+import { shouldRenderCutout } from "./store_screenshots/capture-cutout.mjs";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const deckFile = path.join(root, "docs", "screenshots", "deck.json");
@@ -19,7 +27,7 @@ const platformDefaults = {
     defaultDevice: "emulator-5554",
     packageByFlavor: {
       playstore: "com.shifthackz.aisdv1.app",
-      full: "com.shifthackz.aisdv1.app.full",
+      full: "com.shifthackz.aisdv1.app.full.dev",
       foss: "com.shifthackz.aisdv1.app.foss",
     },
   },
@@ -54,6 +62,7 @@ const localeTags = {
 };
 
 const outputSpecs = {
+  ...additionalOutputSpecs(root),
   fastlane: {
     label: "F-Droid fastlane phone screenshots",
     width: 778,
@@ -68,7 +77,7 @@ const outputSpecs = {
         "android",
         localeFolders[locale],
         "images",
-        "phoneScreenshots"
+        "phoneScreenshots",
       ),
     file: (_slide, index) => `${index + 1}.png`,
   },
@@ -85,7 +94,7 @@ const outputSpecs = {
         "screenshots",
         "googleplay",
         localeFolders[locale],
-        "phoneScreenshots"
+        "phoneScreenshots",
       ),
     file: (slide, index) =>
       `${String(index + 1).padStart(2, "0")}-${slide.id}.png`,
@@ -103,7 +112,7 @@ const outputSpecs = {
         "screenshots",
         "appstore",
         localeFolders[locale],
-        "iphone-6.9"
+        "iphone-6.9",
       ),
     file: (slide, index) =>
       `${String(index + 1).padStart(2, "0")}-${slide.id}.png`,
@@ -263,8 +272,8 @@ function slideCopy(deck, locale, slideId) {
     throw new Error(
       `Missing localized copy for ${locale}/${slideId} in ${path.relative(
         root,
-        deckFile
-      )}`
+        deckFile,
+      )}`,
     );
   }
   return copy;
@@ -280,14 +289,24 @@ function rawDirFor(platform, locale, args) {
   return path.resolve(
     root,
     args["raw-dir"] ||
-      path.join("docs", "screenshots", "raw", platform, localeFolders[locale])
+      path.join(
+        "docs",
+        "screenshots",
+        "raw",
+        platform,
+        ...(args["form-factor"] &&
+        !["iphone", "phone"].includes(args["form-factor"])
+          ? [args["form-factor"]]
+          : []),
+        localeFolders[locale],
+      ),
   );
 }
 
 function rawFileFor(rawDir, slide, index) {
   return path.join(
     rawDir,
-    `${String(index + 1).padStart(2, "0")}-${slide.id}.png`
+    `${String(index + 1).padStart(2, "0")}-${slide.id}.png`,
   );
 }
 
@@ -302,7 +321,7 @@ function sourceForSlide(rawDir, slide, index) {
     throw new Error(
       `Missing raw simulator screenshot: ${path.relative(root, file)}\n` +
         `Run capture first, for example:\n` +
-        `  node scripts/generate_store_screenshots.mjs capture --platform android --locale en-US --package com.shifthackz.aisdv1.app.full`
+        `  node scripts/generate_store_screenshots.mjs capture --platform android --locale en-US --package com.shifthackz.aisdv1.app.full.dev`,
     );
   }
   return { file, size: pngSize(file) };
@@ -311,32 +330,39 @@ function sourceForSlide(rawDir, slide, index) {
 function prepareAndroid({ args, packageName, locale }) {
   requireCommand(
     "adb",
-    "Install Android platform tools or make sure adb is in PATH."
+    "Install Android platform tools or make sure adb is in PATH.",
   );
   const device = args.device || platformDefaults.android.defaultDevice;
   const deviceArgs = device ? ["-s", device] : [];
-  const shouldReset = args.reset !== false && args["keep-state"] !== true;
+  const shouldReset =
+    args.prepare !== "existing" &&
+    args.reset !== false &&
+    args["keep-state"] !== true;
   const tag = localeTags[locale].android;
+
+  run("adb", [...deviceArgs, "shell", "wm", "user-rotation", "lock", "0"]);
 
   tryRun("adb", [...deviceArgs, "shell", "input", "keyevent", "KEYCODE_BACK"]);
   tryRun("adb", [...deviceArgs, "shell", "input", "keyevent", "KEYCODE_BACK"]);
-  tryRun("adb", [
-    ...deviceArgs,
-    "shell",
-    "am",
-    "force-stop",
-    "com.google.android.googlequicksearchbox",
-  ]);
-  tryRun("adb", [
-    ...deviceArgs,
-    "shell",
-    "am",
-    "force-stop",
-    "com.google.android.apps.nexuslauncher",
-  ]);
 
   if (shouldReset) {
     run("adb", [...deviceArgs, "shell", "pm", "clear", packageName]);
+  }
+
+  for (const setting of [
+    "window_animation_scale",
+    "transition_animation_scale",
+    "animator_duration_scale",
+  ]) {
+    tryRun("adb", [
+      ...deviceArgs,
+      "shell",
+      "settings",
+      "put",
+      "global",
+      setting,
+      "0",
+    ]);
   }
 
   if (args["light-theme"] !== false) {
@@ -458,14 +484,12 @@ function prepareAndroid({ args, packageName, locale }) {
   }
 }
 
-function prepareIos({ args, bundleId, locale }) {
+function prepareIos({ args, bundleId }) {
   requireCommand(
     "xcrun",
-    "Install Xcode command line tools or make sure xcrun is in PATH."
+    "Install Xcode command line tools or make sure xcrun is in PATH.",
   );
   const device = args.device || platformDefaults.ios.defaultDevice;
-  const tag = localeTags[locale];
-
   tryRun("xcrun", ["simctl", "terminate", device, bundleId]);
   if (args["light-theme"] !== false) {
     tryRun("xcrun", ["simctl", "ui", device, "appearance", "light"]);
@@ -486,59 +510,48 @@ function prepareIos({ args, bundleId, locale }) {
     "--batteryLevel",
     "100",
   ]);
-  tryRun("xcrun", [
-    "simctl",
-    "spawn",
-    device,
-    "defaults",
-    "write",
-    "NSGlobalDomain",
-    "AppleLanguages",
-    "-array",
-    tag.iosLanguage,
-  ]);
-  tryRun("xcrun", [
-    "simctl",
-    "spawn",
-    device,
-    "defaults",
-    "write",
-    "NSGlobalDomain",
-    "AppleLocale",
-    tag.iosLocale,
-  ]);
 }
 
-function setupDemoFlow(deck, locale, prepareMode, platform) {
+function setupDemoFlow(deck, locale, prepareMode) {
   if (prepareMode === "existing") return [];
   const l = labels(deck, locale);
   return [
-    ...onboardingFlow(),
-    ...maybeTap(l.next),
-    ...waitDone(),
-    ...tapPoint("8%,9%"),
-    ...waitDone(),
-    ...swipeDown(),
-    ...waitDone(),
-    ...swipeDown(),
-    ...waitDone(),
-    ...waitVisible(l.automatic1111, 45000),
-    ...tap(l.automatic1111),
+    ...onboardingFlow(l),
+    ...maybeTap(l.startFresh),
     ...waitDone(),
     ...tap(l.next),
-    ...waitDone(),
     ...waitVisible(l.demoMode, 45000),
     ...tap(l.demoMode),
     ...waitDone(),
     ...tap(l.connect),
+    "- runFlow:",
+    "    when:",
+    `      visible: ${yamlString(l.demoTitle)}`,
+    "    commands:",
+    "      - scrollUntilVisible:",
+    "          element:",
+    `            text: ${yamlString(l.demoUnderstand)}`,
+    "          direction: DOWN",
+    `      - tapOn: ${yamlString(l.demoUnderstand)}`,
+    "      - scrollUntilVisible:",
+    "          element:",
+    `            text: ${yamlString(l.demoFeedback)}`,
+    "          direction: DOWN",
+    `      - tapOn: ${yamlString(l.demoFeedback)}`,
+    `      - tapOn: ${yamlString(l.demoContinue)}`,
     ...waitVisible(l.txt2img, 45000),
   ];
 }
 
-function onboardingFlow() {
-  const commands = [];
-  for (let index = 0; index < 7; index += 1) {
-    commands.push(...tapPoint("82%,90%"), ...waitDone(5000));
+function onboardingFlow(l) {
+  const commands = [...waitVisible(l.next, 45000)];
+  for (let index = 0; index < 5; index += 1) {
+    commands.push(
+      "- tapOn:",
+      `    text: ${yamlString(l.next)}`,
+      `    index: ${index === 1 ? 1 : 0}`,
+      ...waitDone(1500),
+    );
   }
   return commands;
 }
@@ -549,15 +562,6 @@ function tap(text) {
 
 function tapPoint(point) {
   return ["- tapOn:", `    point: ${yamlString(point)}`];
-}
-
-function doubleTapPoint(point) {
-  return [
-    ...tapPoint(point),
-    ...waitDone(350),
-    ...tapPoint(point),
-    ...waitDone(1000),
-  ];
 }
 
 function waitVisible(text, timeout = 20000) {
@@ -582,7 +586,7 @@ function takeNamed(rawDir, name) {
   const file = path.join(rawDir, `${name}.png`);
   return [
     `- takeScreenshot: ${yamlString(
-      path.relative(root, file).replace(/\.png$/i, "")
+      path.relative(root, file).replace(/\.png$/i, ""),
     )}`,
   ];
 }
@@ -595,71 +599,23 @@ function hideKeyboard() {
   return ["- hideKeyboard"];
 }
 
-function dismissKeyboard() {
-  return [...tapPoint("50%,17%"), ...waitDone(1000)];
-}
-
-function swipeUp() {
-  return [
-    "- swipe:",
-    "    start: 50%,76%",
-    "    end: 50%,34%",
-    "    duration: 650",
-  ];
-}
-
-function swipeUpToAccentColors(platform) {
-  if (platform === "ios") {
+function fillPromptFlow(localeDeck, l, prepareMode) {
+  if (prepareMode === "existing")
     return [
-      "- swipe:",
-      "    start: 50%,73%",
-      "    end: 50%,43%",
-      "    duration: 1800",
+      ...tap(l.txt2img),
+      ...waitVisible(l.textToImageTitle),
+      ...maybeTap(l.showAdvanced),
     ];
-  }
-
-  return [
-    "- swipe:",
-    "    start: 50%,73%",
-    "    end: 50%,53%",
-    "    duration: 500",
-  ];
-}
-
-function swipeDown() {
-  return [
-    "- swipe:",
-    "    start: 50%,34%",
-    "    end: 50%,76%",
-    "    duration: 650",
-  ];
-}
-
-function settingsPreferencesFlow(l) {
-  return [
-    ...tap(l.settings),
-    ...waitVisible(l.settings, 20000),
-    ...waitDone(),
-    ...tap(l.taggedInput),
-    ...waitDone(1500),
-    ...tap(l.advancedFormDefault),
-    ...waitDone(1500),
-  ];
-}
-
-function fillPromptFlow(localeDeck, l) {
   return [
     ...tap(l.txt2img),
     ...waitVisible(l.textToImageTitle, 20000),
     ...waitDone(),
     ...tap(l.prompt),
-    "- eraseText",
     `- inputText: ${yamlString(`${localeDeck.mockPrompt},`)}`,
-    ...dismissKeyboard(),
+    ...hideKeyboard(),
     ...tap(l.negativePrompt),
-    "- eraseText",
     `- inputText: ${yamlString(`${localeDeck.mockNegativePrompt},`)}`,
-    ...dismissKeyboard(),
+    ...hideKeyboard(),
     ...tap(l.textToImageTitle),
     ...waitDone(),
     ...maybeTap(l.showAdvanced),
@@ -675,33 +631,32 @@ function extraGenerationsFlow(l, count = 2) {
       ...waitVisible(l.close, 90000),
       ...waitDone(9000),
       ...tap(l.close),
-      ...waitDone(3000)
+      ...waitDone(3000),
     );
   }
   return commands;
 }
 
-function zoomOpenImageFlow(platform) {
-  return platform === "ios" ? doubleTapPoint("50%,45%") : [];
-}
-
-function lookAndFeelFlow(l, rawDir, platform) {
+function lookAndFeelFlow(l, rawDir) {
   return [
-    ...tapPoint("8%,9%"),
+    ...tap(l.back),
     ...waitVisible(l.settings, 20000),
     ...waitDone(),
-    ...swipeUp(),
-    ...waitDone(),
-    ...waitVisible(l.lookAndFeel, 20000),
+    ...appearanceFlow(l, rawDir),
+  ];
+}
+
+function appearanceFlow(l, rawDir) {
+  return [
+    "- scrollUntilVisible:",
+    "    element:",
+    `      text: ${yamlString(l.accentColor)}`,
+    "    direction: DOWN",
+    "    centerElement: true",
+    "    timeout: 45000",
     ...waitDone(),
     ...takeNamed(rawDir, "settings-light"),
-    ...tap(l.systemDarkTheme),
-    ...waitDone(3000),
-    ...takeNamed(rawDir, "settings-dark"),
-    ...swipeUpToAccentColors(platform),
-    ...waitDone(),
-    ...waitVisible(l.accentColor, 20000),
-    ...takeNamed(rawDir, "settings-dark-accent"),
+    ...takeNamed(rawDir, "05-settings"),
   ];
 }
 
@@ -709,24 +664,41 @@ function buildMaestroFlow({ deck, platform, locale, appId, rawDir, args }) {
   const l = labels(deck, locale);
   const localeDeck = deck.locales[locale];
   const prepareMode = args.prepare || "demo";
-  const reset = args.reset !== false && args["keep-state"] !== true;
-  const launchClearState = platform === "android" ? false : reset;
+  const shouldReset =
+    args.prepare !== "existing" &&
+    args.reset !== false &&
+    args["keep-state"] !== true;
+  const shouldClearStateOnLaunch = platform === "android" ? false : shouldReset;
   const slidesById = new Map(
-    deck.slides.map((slide, index) => [slide.id, { slide, index }])
+    deck.slides.map((slide, index) => [slide.id, { slide, index }]),
   );
+  if (args.section === "appearance") {
+    return (
+      [
+        `appId: ${yamlString(appId)}`,
+        "---",
+        "- launchApp:",
+        `    clearState: ${shouldClearStateOnLaunch ? "true" : "false"}`,
+        "    stopApp: true",
+        ...setupDemoFlow(deck, locale, prepareMode),
+        ...tap(l.settings),
+        ...waitVisible(l.settings),
+        ...appearanceFlow(l, rawDir),
+      ].join("\n") + "\n"
+    );
+  }
   const output = [
     `appId: ${yamlString(appId)}`,
     "---",
     "- launchApp:",
-    `    clearState: ${launchClearState ? "true" : "false"}`,
+    `    clearState: ${shouldClearStateOnLaunch ? "true" : "false"}`,
     "    stopApp: true",
-    ...setupDemoFlow(deck, locale, prepareMode, platform),
-    ...settingsPreferencesFlow(l),
-    ...fillPromptFlow(localeDeck, l),
+    ...setupDemoFlow(deck, locale, prepareMode),
+    ...fillPromptFlow(localeDeck, l, prepareMode),
     ...take(
       rawDir,
       slidesById.get("controls").slide,
-      slidesById.get("controls").index
+      slidesById.get("controls").index,
     ),
     ...tap(l.generate),
     ...waitVisible(l.close, 90000),
@@ -734,7 +706,7 @@ function buildMaestroFlow({ deck, platform, locale, appId, rawDir, args }) {
     ...take(
       rawDir,
       slidesById.get("create").slide,
-      slidesById.get("create").index
+      slidesById.get("create").index,
     ),
     ...tap(l.close),
     ...waitDone(3000),
@@ -745,7 +717,7 @@ function buildMaestroFlow({ deck, platform, locale, appId, rawDir, args }) {
     ...take(
       rawDir,
       slidesById.get("gallery").slide,
-      slidesById.get("gallery").index
+      slidesById.get("gallery").index,
     ),
     ...tapPoint("72%,30%"),
     ...waitVisible(l.galleryDetails, 30000),
@@ -753,21 +725,20 @@ function buildMaestroFlow({ deck, platform, locale, appId, rawDir, args }) {
     ...tap(l.galleryInfo),
     ...waitDone(),
     ...take(rawDir, slidesById.get("open").slide, slidesById.get("open").index),
-    ...tapPoint("8%,9%"),
+    ...tap(l.back),
     ...waitVisible(l.gallery, 20000),
     ...waitDone(),
     ...tap(l.settings),
     ...waitVisible(l.settings, 20000),
     ...tap(l.configuration),
-    ...waitVisible(l.configuration, 20000),
-    ...waitVisible(l.automatic1111, 45000),
+    ...waitVisible(l.setProvider, 20000),
     ...waitDone(2000),
     ...take(
       rawDir,
       slidesById.get("providers").slide,
-      slidesById.get("providers").index
+      slidesById.get("providers").index,
     ),
-    ...lookAndFeelFlow(l, rawDir, platform),
+    ...lookAndFeelFlow(l, rawDir),
   ];
 
   if (platform === "ios") {
@@ -777,110 +748,11 @@ function buildMaestroFlow({ deck, platform, locale, appId, rawDir, args }) {
   return `${output.join("\n")}\n`;
 }
 
-function composeSettingsSplit(rawDir, slide, index) {
-  const lightFile = path.join(rawDir, "settings-light.png");
-  const darkFile = path.join(rawDir, "settings-dark.png");
-  const darkAccentFile = path.join(rawDir, "settings-dark-accent.png");
-  const outFile = rawFileFor(rawDir, slide, index);
-
-  if (
-    !fs.existsSync(lightFile) ||
-    !fs.existsSync(darkFile) ||
-    !fs.existsSync(darkAccentFile)
-  ) {
-    throw new Error(
-      `Missing Look & Feel source screenshots for ${path.relative(
-        root,
-        outFile
-      )}.\n` +
-        `Expected ${path.relative(root, lightFile)}, ${path.relative(
-          root,
-          darkFile
-        )}, and ${path.relative(root, darkAccentFile)}.`
-    );
-  }
-
-  const lightSize = pngSize(lightFile);
-  const darkSize = pngSize(darkFile);
-  const darkAccentSize = pngSize(darkAccentFile);
-  if (
-    lightSize.width !== darkSize.width ||
-    lightSize.height !== darkSize.height ||
-    lightSize.width !== darkAccentSize.width ||
-    lightSize.height !== darkAccentSize.height
-  ) {
-    throw new Error(
-      `Settings split sources have different sizes: ` +
-        `${lightSize.width}x${lightSize.height}, ` +
-        `${darkSize.width}x${darkSize.height}, ` +
-        `${darkAccentSize.width}x${darkAccentSize.height}`
-    );
-  }
-
-  const { width, height } = lightSize;
-  const id = `settings-split-${width}-${height}`;
-  const isIosSource = width < 1250;
-  const splitTopX = Math.round(width * 0.72);
-  const splitBottomX = Math.round(width * 0.32);
-  const accentTargetY = Math.round(height * (isIosSource ? 0.544 : 0.626));
-  const accentSourceY = Math.round(height * (isIosSource ? 0.444 : 0.574));
-  const accentYOffset = isIosSource ? -13 : 10;
-  const bottomBarYOffset = isIosSource ? -11 : -38;
-  const bottomBarY =
-    Math.round(height * (isIosSource ? 0.874 : 0.904)) + bottomBarYOffset;
-  const darkAccentY = accentTargetY - accentSourceY + accentYOffset;
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-      <defs>
-        <clipPath id="${id}-dark-side">
-          <polygon points="${splitTopX},0 ${width},0 ${width},${height} ${splitBottomX},${height}"/>
-        </clipPath>
-        <clipPath id="${id}-accent-patch">
-          <rect x="0" y="${accentTargetY}" width="${width}" height="${
-    bottomBarY - accentTargetY
-  }"/>
-        </clipPath>
-      </defs>
-      <image href="${imageHref(
-        lightFile
-      )}" x="0" y="0" width="${width}" height="${height}"/>
-      <g clip-path="url(#${id}-dark-side)">
-        <image href="${imageHref(
-          darkFile
-        )}" x="0" y="0" width="${width}" height="${height}"/>
-        <g clip-path="url(#${id}-accent-patch)">
-          <image href="${imageHref(
-            darkAccentFile
-          )}" x="0" y="${darkAccentY}" width="${width}" height="${height}"/>
-        </g>
-      </g>
-      <path d="M ${splitTopX} 0 L ${splitBottomX} ${height}" stroke="#ffffff" stroke-opacity="0.78" stroke-width="${Math.max(
-    3,
-    Math.round(width * 0.006)
-  )}"/>
-    </svg>
-  `;
-
-  renderSvg(svg, outFile);
-}
-
-function prepareDerivedRawScreenshots({ deck, rawDir }) {
-  requireCommand(
-    "rsvg-convert",
-    "Install librsvg or set rsvg-convert in PATH."
-  );
-  const settingsEntry = deck.slides
-    .map((slide, index) => ({ slide, index }))
-    .find((entry) => entry.slide.id === "settings");
-  if (settingsEntry) {
-    composeSettingsSplit(rawDir, settingsEntry.slide, settingsEntry.index);
-  }
-}
-
 function capture(args) {
   const deck = readDeck();
   const platform = args.platform || deck.defaultPlatform || "android";
   const locale = canonicalLocale(args.locale || deck.defaultLocale);
+  const profile = captureProfile(platform, args["form-factor"]);
   const rawDir = rawDirFor(platform, locale, args);
   mkdirp(rawDir);
 
@@ -897,12 +769,17 @@ function capture(args) {
     throw new Error(`Unknown platform: ${platform}`);
   }
 
-  const flowDir = path.join(root, "docs", "screenshots", "raw", ".maestro");
+  const flowDir = path.resolve(
+    args["flow-dir"] || path.join(root, "tmp", "store-screenshots", "maestro"),
+  );
   mkdirp(flowDir);
-  const flowFile = path.join(flowDir, `${platform}-${locale}.yaml`);
+  const flowFile = path.join(
+    flowDir,
+    `${platform}-${args["form-factor"] || "phone"}-${locale}.yaml`,
+  );
   fs.writeFileSync(
     flowFile,
-    buildMaestroFlow({ deck, platform, locale, appId, rawDir, args })
+    buildMaestroFlow({ deck, platform, locale, appId, rawDir, args }),
   );
 
   if (args["dry-run"]) {
@@ -910,15 +787,52 @@ function capture(args) {
     return;
   }
 
+  if (platform === "ios" && args["capture-backend"] !== "maestro") {
+    if (!args.device || args.device === "booted")
+      throw new Error("Native iOS capture requires an explicit --device UDID");
+    const configFile = path.join(flowDir, `${profile.key}-${locale}.json`);
+    fs.writeFileSync(
+      configFile,
+      JSON.stringify({
+        device: args.device,
+        section: args.section,
+        profile: profile.key,
+        bundle: appId,
+        language: localeTags[locale].iosLanguage,
+        locale: localeTags[locale].iosLocale,
+        labels: labels(deck, locale),
+        prompt: deck.locales[locale].mockPrompt,
+        shouldUseLightTheme: args["light-theme"] !== false,
+        output: rawDir,
+        display: Number(
+          args["ios-display"] || (profile.key === "duo-inner" ? 3 : 1),
+        ),
+        prepare: args.prepare || "demo",
+        shouldReset:
+          args.section !== "appearance" &&
+          args.prepare !== "existing" &&
+          args.reset !== false &&
+          args["keep-state"] !== true,
+      }),
+    );
+    run("python3", [
+      path.join(__dirname, "store_screenshots", "capture_ios.py"),
+      configFile,
+    ]);
+    deck.slides.forEach((slide, index) =>
+      validateCapture(profile, pngSize(rawFileFor(rawDir, slide, index))),
+    );
+    return;
+  }
   requireCommand(
     "maestro",
-    "Install Maestro first: https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli"
+    "Install Maestro before capturing Android screens.",
   );
 
   if (platform === "android") {
     prepareAndroid({ args, packageName: appId, locale });
   } else {
-    prepareIos({ args, bundleId: appId, locale });
+    prepareIos({ args, bundleId: appId });
   }
 
   const maestroArgs = ["test", "--platform", platform];
@@ -928,16 +842,14 @@ function capture(args) {
   maestroArgs.push(flowFile);
   run("maestro", maestroArgs);
 
-  prepareDerivedRawScreenshots({ deck, rawDir });
-
   deck.slides.forEach((slide, index) => {
-    pngSize(rawFileFor(rawDir, slide, index));
+    validateCapture(profile, pngSize(rawFileFor(rawDir, slide, index)));
   });
 
   console.log(
     `Captured ${
       deck.slides.length
-    } raw ${platform} screenshots into ${path.relative(root, rawDir)}`
+    } raw ${platform} screenshots into ${path.relative(root, rawDir)}`,
   );
 }
 
@@ -979,234 +891,92 @@ function background(id, width, height, theme) {
   `;
 }
 
-function renderTextBlock({
-  x,
-  y,
-  width,
-  copy,
-  theme,
-  scale = 1,
-  align = "start",
-  eyebrow = false,
-}) {
-  const anchor = align === "middle" ? "middle" : "start";
-  const headlineSize = Math.round(84 * scale);
-  const sublineSize = Math.round(30 * scale);
-  const headlineStart = eyebrow ? Math.round(52 * scale) : 0;
-  const lineHeight = Math.round(headlineSize * 1.13);
-  const subY =
-    y +
-    headlineStart +
-    copy.headline.length * lineHeight +
-    Math.round(46 * scale);
-  const lines = [];
-
-  if (eyebrow) {
-    lines.push(
-      `<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${
-        theme.accent
-      }" font-size="${Math.round(22 * scale)}" font-weight="800">SDAI</text>`
-    );
-  }
-  copy.headline.forEach((line, index) => {
-    lines.push(
-      `<text x="${x}" y="${
-        y + headlineStart + index * lineHeight
-      }" text-anchor="${anchor}" fill="${
-        theme.ink
-      }" font-size="${headlineSize}" font-weight="800">${escapeXml(
-        line
-      )}</text>`
-    );
-  });
-
-  wrapWords(copy.subline, Math.max(24, Math.round(width / (sublineSize * 0.5))))
-    .slice(0, 3)
-    .forEach((line, index) => {
-      lines.push(
-        `<text x="${x}" y="${
-          subY + index * Math.round(sublineSize * 1.48)
-        }" text-anchor="${anchor}" fill="${
-          theme.muted
-        }" font-size="${sublineSize}" font-weight="600">${escapeXml(
-          line
-        )}</text>`
-      );
-    });
-
-  return lines.join("\n");
-}
-
 function renderStoreHeadline({ x, y, width, copy, theme, scale = 1 }) {
-  const headlineSize = Math.round(122 * scale);
+  const longestLine = Math.max(
+    ...copy.headline.map((line) => [...line].length),
+  );
+  const headlineSize = Math.round(
+    Math.min(122 * scale, width / (longestLine * 0.62)),
+  );
   const lineHeight = Math.round(headlineSize * 1.08);
   const lines = copy.headline.map(
     (line, index) =>
       `<text x="${x}" y="${
         y + index * lineHeight
       }" text-anchor="middle" fill="${theme.ink}" font-family="${escapeXml(
-        storeHeadlineFontFamily
+        storeHeadlineFontFamily,
       )}" font-size="${headlineSize}" font-weight="900">${escapeXml(
-        line
-      )}</text>`
+        line,
+      )}</text>`,
   );
   return lines.join("\n");
 }
 
-function wrapWords(text, maxChars) {
-  const words = String(text).split(/\s+/).filter(Boolean);
-  const lines = [];
-  let line = "";
-  for (const word of words) {
-    const next = line ? `${line} ${word}` : word;
-    if (next.length > maxChars && line) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = next;
-    }
-  }
-  if (line) lines.push(line);
-  return lines;
-}
-
-function phoneFrame({ id, platform, source, x, y, width, height }) {
-  const isIos = platform === "ios";
-  const outerRadius = width * (isIos ? 0.132 : 0.115);
-  const sideInset = width * 0.042;
-  const topInset = width * (isIos ? 0.044 : 0.042);
-  const bottomInset = width * (isIos ? 0.044 : 0.042);
-  const screen = {
-    x: x + sideInset,
-    y: y + topInset,
-    width: width - sideInset * 2,
-    height: height - topInset - bottomInset,
-    radius: outerRadius * (isIos ? 0.78 : 0.82),
-  };
-
-  const buttons = isIos
-    ? `
-      <rect x="${x - width * 0.012}" y="${y + height * 0.18}" width="${
-        width * 0.012
-      }" height="${height * 0.075}" rx="${width * 0.006}" fill="#7f7b76"/>
-      <rect x="${x - width * 0.014}" y="${y + height * 0.31}" width="${
-        width * 0.014
-      }" height="${height * 0.115}" rx="${width * 0.007}" fill="#7f7b76"/>
-      <rect x="${x + width}" y="${y + height * 0.265}" width="${
-        width * 0.013
-      }" height="${height * 0.135}" rx="${width * 0.006}" fill="#d8d0c4"/>
-    `
-    : `
-      <rect x="${x + width}" y="${y + height * 0.19}" width="${
-        width * 0.011
-      }" height="${height * 0.095}" rx="${width * 0.0055}" fill="#7f838d"/>
-      <rect x="${x + width}" y="${y + height * 0.33}" width="${
-        width * 0.011
-      }" height="${height * 0.13}" rx="${width * 0.0055}" fill="#7f838d"/>
-    `;
-
-  const sensor = isIos
-    ? `<rect x="${screen.x + screen.width * 0.335}" y="${
-        screen.y + width * 0.024
-      }" width="${screen.width * 0.33}" height="${width * 0.066}" rx="${
-        width * 0.033
-      }" fill="#050508"/>`
-    : `<circle cx="${x + width / 2}" cy="${screen.y + width * 0.04}" r="${
-        width * 0.023
-      }" fill="#050508"/><circle cx="${x + width / 2}" cy="${
-        screen.y + width * 0.04
-      }" r="${width * 0.01}" fill="#202334"/>`;
-
-  return `
-    <defs>
-      <linearGradient id="phone-edge-${id}" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="${isIos ? "#eee7dc" : "#23252c"}"/>
-        <stop offset="0.42" stop-color="${isIos ? "#a8a096" : "#090a0d"}"/>
-        <stop offset="1" stop-color="${isIos ? "#f8f4eb" : "#424650"}"/>
-      </linearGradient>
-      <linearGradient id="phone-glass-${id}" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#20212a"/>
-        <stop offset="0.52" stop-color="#050508"/>
-        <stop offset="1" stop-color="#161821"/>
-      </linearGradient>
-    </defs>
-    <g filter="url(#shadow-${id})">
-      ${buttons}
-      <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${outerRadius}" fill="url(#phone-edge-${id})"/>
-      <rect x="${x + width * 0.01}" y="${y + width * 0.01}" width="${
-    width * 0.98
-  }" height="${height - width * 0.02}" rx="${
-    outerRadius * 0.93
-  }" fill="url(#phone-glass-${id})"/>
-      <rect x="${x + width * 0.02}" y="${y + width * 0.02}" width="${
-    width * 0.96
-  }" height="${height - width * 0.04}" rx="${
-    outerRadius * 0.84
-  }" fill="#050508"/>
-      <clipPath id="screen-${id}">
-        <rect x="${screen.x}" y="${screen.y}" width="${screen.width}" height="${
-    screen.height
-  }" rx="${screen.radius}"/>
-      </clipPath>
-      <g clip-path="url(#screen-${id})">
-        <image href="${imageHref(source.file)}" x="${screen.x}" y="${
-    screen.y
-  }" width="${screen.width}" height="${
-    screen.height
-  }" preserveAspectRatio="xMidYMid slice"/>
-      </g>
-      ${sensor}
-      <rect x="${x + width * 0.012}" y="${y + width * 0.012}" width="${
-    width * 0.976
-  }" height="${height - width * 0.024}" rx="${
-    outerRadius * 0.91
-  }" fill="none" stroke="#ffffff" stroke-opacity="${
-    isIos ? "0.28" : "0.1"
-  }" stroke-width="${Math.max(1.5, width * 0.004)}"/>
-      <rect x="${screen.x}" y="${screen.y}" width="${screen.width}" height="${
-    screen.height
-  }" rx="${
-    screen.radius
-  }" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="2"/>
-    </g>
-  `;
-}
-
-function renderStoreSvg({
-  deck,
+function phoneFrame({
+  id,
   platform,
-  locale,
-  slide,
-  index,
   source,
-  spec,
+  x,
+  y,
+  width,
+  kind = "phone",
+  profile = platform === "ios" ? "iphone" : "phone",
 }) {
+  return deviceFrame({
+    id,
+    sourceHref: imageHref(source.file),
+    sourceSize: source.size,
+    platform,
+    profile,
+    shouldRenderCutout: shouldRenderCutout(source, profile),
+    x,
+    y,
+    width,
+    kind,
+  });
+}
+
+function renderStoreSvg({ deck, platform, locale, slide, source, spec }) {
   const id = `${platform}-${locale}-${slide.id}-${spec.width}`;
   const copy = slideCopy(deck, locale, slide.id);
   const theme = slide.theme;
   const { width, height } = spec;
-  const phoneTop = Math.round(height * (platform === "ios" ? 0.205 : 0.225));
-  const phoneBottom = Math.round(height * (platform === "ios" ? 0.035 : 0.028));
-  const phoneHeight = height - phoneTop - phoneBottom;
-  const phoneWidth = Math.round(
-    phoneHeight / (platform === "ios" ? 2.12 : 2.08)
-  );
-  const phoneX = Math.round((width - phoneWidth) / 2);
-  const phoneY = phoneTop;
-  const textX = width / 2;
-  const textY = Math.round(height * (platform === "ios" ? 0.072 : 0.078));
-  const textScale = width / 1240;
+  const profile = captureProfile(platform, spec.profile);
+  const isLandscape = width > height;
+  const phoneTop = Math.round(height * (isLandscape ? 0.04 : 0.23));
+  const availableWidth = width * (isLandscape ? 0.6 : 0.91);
+  const availableHeight = height - phoneTop - height * 0.04;
+  const unitHeight = framedSize(
+    source.size,
+    1,
+    profile.kind,
+    profile.key,
+  ).height;
+  const phoneWidth = Math.min(availableWidth, availableHeight / unitHeight);
+  const phoneHeight = framedSize(
+    source.size,
+    phoneWidth,
+    profile.kind,
+    profile.key,
+  ).height;
+  const phoneX = isLandscape
+    ? width - phoneWidth - width * 0.035
+    : (width - phoneWidth) / 2;
+  const phoneY = isLandscape ? (height - phoneHeight) / 2 : phoneTop;
+  const textX = isLandscape ? width * 0.19 : width / 2;
+  const textY = height * (isLandscape ? 0.44 : 0.075);
+  const textScale = (isLandscape ? width * 0.38 : width) / 1240;
 
   return `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="${escapeXml(
-    svgFontFamily
-  )}">
+      svgFontFamily,
+    )}">
       ${defs(id, theme)}
       ${background(id, width, height, theme)}
       ${renderStoreHeadline({
         x: textX,
         y: textY,
-        width: width * 0.86,
+        width: width * (isLandscape ? 0.33 : 0.86),
         copy,
         theme,
         scale: textScale,
@@ -1218,27 +988,41 @@ function renderStoreSvg({
         x: phoneX,
         y: phoneY,
         width: phoneWidth,
-        height: phoneHeight,
+        kind: profile.kind,
+        profile: profile.key,
       })}
     </svg>
   `;
 }
 
-function renderSiteSvg({ deck, platform, locale, slide, index, source, spec }) {
+function renderTabletSvg({ source, spec, id }) {
+  const width = spec.width * 0.94;
+  const size = framedSize(source.size, width, "tablet", spec.profile);
+  const fit = Math.min(1, (spec.height * 0.95) / size.height);
+  const deviceWidth = width * fit;
+  const deviceHeight = size.height * fit;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${spec.width}" height="${spec.height}" viewBox="0 0 ${spec.width} ${spec.height}">
+    ${defs(id, { background: ["#161921", "#161921", "#161921"], ink: "#fff", accent: "#fff" })}
+    <rect width="100%" height="100%" fill="#161921"/>
+    ${phoneFrame({ id, platform: "android", profile: spec.profile, source, x: (spec.width - deviceWidth) / 2, y: (spec.height - deviceHeight) / 2, width: deviceWidth, kind: "tablet" })}
+  </svg>`;
+}
+
+function renderSiteSvg({ platform, locale, slide, source, spec }) {
   const id = `site-${platform}-${locale}-${slide.id}`;
   const theme = slide.theme;
   const { width, height } = spec;
   const phoneHeight = height - 88;
-  const phoneWidth = Math.round(
-    phoneHeight / (platform === "ios" ? 2.12 : 2.08)
-  );
+  const profile = captureProfile(platform, spec.profile);
+  const phoneWidth =
+    phoneHeight / framedSize(source.size, 1, profile.kind, profile.key).height;
   const phoneY = Math.round((height - phoneHeight) / 2);
   const phoneX = width - phoneWidth - 136;
 
   return `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="${escapeXml(
-    svgFontFamily
-  )}">
+      svgFontFamily,
+    )}">
       ${defs(id, theme)}
       ${background(id, width, height, theme)}
       ${phoneFrame({
@@ -1248,7 +1032,6 @@ function renderSiteSvg({ deck, platform, locale, slide, index, source, spec }) {
         x: phoneX,
         y: phoneY,
         width: phoneWidth,
-        height: phoneHeight,
       })}
     </svg>
   `;
@@ -1284,46 +1067,46 @@ function renderFeatureGraphic({ deck, locale, target }) {
           "metadata",
           "android",
           localeFolders[locale],
-          "images"
+          "images",
         )
       : path.join(
           root,
           "docs",
           "screenshots",
           "googleplay",
-          localeFolders[locale]
+          localeFolders[locale],
         );
   mkdirp(dir);
 
   const { headline, subline } = copy;
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="${escapeXml(
-    svgFontFamily
-  )}">
+      svgFontFamily,
+    )}">
       ${defs(id, theme)}
       ${background(id, width, height, theme)}
       <defs>
         <clipPath id="feature-icon-${id}">
           <rect x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" rx="${Math.round(
-    iconSize * 0.22
-  )}"/>
+            iconSize * 0.22,
+          )}"/>
         </clipPath>
       </defs>
       <rect x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" rx="${Math.round(
-    iconSize * 0.22
-  )}" fill="#ffffff" opacity="0.94" filter="url(#shadow-${id})"/>
+        iconSize * 0.22,
+      )}" fill="#ffffff" opacity="0.94" filter="url(#shadow-${id})"/>
       <image href="${imageHref(
-        iconFile
+        iconFile,
       )}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" preserveAspectRatio="xMidYMid meet" clip-path="url(#feature-icon-${id})"/>
       <text x="${textX}" y="${Math.round(height * 0.41)}" fill="${
-    theme.ink
-  }" font-size="${titleSize}" font-weight="800">SDAI</text>
+        theme.ink
+      }" font-size="${titleSize}" font-weight="800">SDAI</text>
       <text x="${textX}" y="${Math.round(height * 0.61)}" fill="${
-    theme.accent
-  }" font-size="${lineSize}" font-weight="800">${escapeXml(headline)}</text>
+        theme.accent
+      }" font-size="${lineSize}" font-weight="800">${escapeXml(headline)}</text>
       <text x="${textX}" y="${Math.round(height * 0.78)}" fill="${
-    theme.muted
-  }" font-size="${smallSize}" font-weight="600">${escapeXml(subline)}</text>
+        theme.muted
+      }" font-size="${smallSize}" font-weight="600">${escapeXml(subline)}</text>
     </svg>
   `;
 
@@ -1339,7 +1122,7 @@ function renderSvg(svg, outFile) {
   mkdirp(path.join("/tmp", "sdai-fontconfig-cache"));
   const tempFile = path.join(
     path.dirname(outFile),
-    `.${path.basename(outFile)}.svg`
+    `.${path.basename(outFile)}.svg`,
   );
   fs.writeFileSync(tempFile, svg);
   try {
@@ -1369,8 +1152,8 @@ function renderReadmeRows(deck) {
   if (missing.length) {
     console.warn(
       `Skipped README screenshot rows. Missing iOS App Store screenshots:\n- ${missing.join(
-        "\n- "
-      )}`
+        "\n- ",
+      )}`,
     );
     return;
   }
@@ -1385,7 +1168,7 @@ function renderReadmeRows(deck) {
           throw new Error(
             `${path.relative(root, file)} is ${size.width}x${
               size.height
-            }, expected ${spec.width}x${spec.height}`
+            }, expected ${spec.width}x${spec.height}`,
           );
         }
         return `<image href="${imageHref(file)}" x="${
@@ -1405,11 +1188,11 @@ function renderReadmeRows(deck) {
       throw new Error(
         `${path.relative(root, row.file)} rendered as ${size.width}x${
           size.height
-        }, expected ${rowWidth}x${rowHeight}`
+        }, expected ${rowWidth}x${rowHeight}`,
       );
     }
     console.log(
-      `Rendered README screenshot row: ${path.relative(root, row.file)}`
+      `Rendered README screenshot row: ${path.relative(root, row.file)}`,
     );
   });
 }
@@ -1422,57 +1205,68 @@ function render(args) {
   ]);
   const targets = list(
     args.targets,
-    platform === "ios" ? ["appstore", "site"] : ["fastlane", "googleplay"]
+    captureProfile(platform, args["form-factor"]).targets,
   );
   requireCommand(
     "rsvg-convert",
-    "Install librsvg or set rsvg-convert in PATH."
+    "Install librsvg or set rsvg-convert in PATH.",
   );
 
   for (const rawLocale of localeList) {
     const locale = canonicalLocale(rawLocale);
-    const rawDir = rawDirFor(platform, locale, args);
-    prepareDerivedRawScreenshots({ deck, rawDir });
 
     for (const target of targets) {
       const spec = outputSpecs[target];
       if (!spec) throw new Error(`Unknown target: ${target}`);
       if (spec.platform && spec.platform !== platform) {
         throw new Error(
-          `${target} is for ${spec.platform}, but --platform ${platform} was selected.`
+          `${target} is for ${spec.platform}, but --platform ${platform} was selected.`,
         );
       }
       if (target === "site" && locale !== "en-US") {
         console.log(
-          `Skipped ${spec.label} for ${locale}; website screenshots use ios/en-US only.`
+          `Skipped ${spec.label} for ${locale}; website screenshots use ios/en-US only.`,
         );
         continue;
       }
 
+      const profile = captureProfile(platform, spec.profile);
+      if (args["form-factor"] && args["form-factor"] !== profile.key)
+        throw new Error(
+          `Target ${target} requires --form-factor ${profile.key}`,
+        );
+      const rawDir = rawDirFor(platform, locale, {
+        ...args,
+        "form-factor": profile.key,
+      });
       const outDir = spec.dir(locale, platform);
       mkdirp(outDir);
       deck.slides.forEach((slide, index) => {
         const source = sourceForSlide(rawDir, slide, index);
+        validateCapture(profile, source.size);
         const svg =
-          spec.type === "site"
-            ? renderSiteSvg({
-                deck,
-                platform,
-                locale,
-                slide,
-                index,
+          spec.type === "tablet"
+            ? renderTabletSvg({
                 source,
                 spec,
+                id: `${target}-${locale}-${slide.id}`,
               })
-            : renderStoreSvg({
-                deck,
-                platform,
-                locale,
-                slide,
-                index,
-                source,
-                spec,
-              });
+            : spec.type === "site"
+              ? renderSiteSvg({
+                  platform,
+                  locale,
+                  slide,
+                  source,
+                  spec,
+                })
+              : renderStoreSvg({
+                  deck,
+                  platform,
+                  locale,
+                  slide,
+                  source,
+                  spec,
+                });
         const outFile = path.join(outDir, spec.file(slide, index));
         renderSvg(svg, outFile);
         const size = pngSize(outFile);
@@ -1480,7 +1274,7 @@ function render(args) {
           throw new Error(
             `${path.relative(root, outFile)} rendered as ${size.width}x${
               size.height
-            }, expected ${spec.width}x${spec.height}`
+            }, expected ${spec.width}x${spec.height}`,
           );
         }
       });
@@ -1490,7 +1284,12 @@ function render(args) {
     }
   }
 
-  renderReadmeRows(deck);
+  if (
+    platform === "ios" &&
+    targets.includes("appstore") &&
+    localeList.some((locale) => canonicalLocale(locale) === "en-US")
+  )
+    renderReadmeRows(deck);
 }
 
 function featureGraphics(args) {
@@ -1502,7 +1301,7 @@ function featureGraphics(args) {
   for (const target of targets) {
     if (!featureSpecs[target])
       throw new Error(
-        `Unknown feature graphics target: ${target}. Use fastlane or googleplay.`
+        `Unknown feature graphics target: ${target}. Use fastlane or googleplay.`,
       );
   }
 
@@ -1512,12 +1311,12 @@ function featureGraphics(args) {
     throw new Error(
       `${path.relative(root, iconFile)} is ${size.width}x${
         size.height
-      }, expected 512x512`
+      }, expected 512x512`,
     );
   }
   requireCommand(
     "rsvg-convert",
-    "Install librsvg or set rsvg-convert in PATH."
+    "Install librsvg or set rsvg-convert in PATH.",
   );
 
   for (const locale of locales) {
@@ -1526,7 +1325,7 @@ function featureGraphics(args) {
       console.log(
         `Rendered ${target} feature graphic for ${locale}${
           target === "fastlane" ? " and copied icon.png" : ""
-        }.`
+        }.`,
       );
     }
   }
@@ -1546,7 +1345,7 @@ function plan(args) {
     const copy = slideCopy(deck, locale, slide.id);
     console.log(`${index + 1}. ${slide.id}`);
     console.log(
-      `   raw: ${path.relative(root, rawFileFor(rawDir, slide, index))}`
+      `   raw: ${path.relative(root, rawFileFor(rawDir, slide, index))}`,
     );
     console.log(`   headline: ${copy.headline.join(" / ")}`);
     console.log(`   subline: ${copy.subline}`);
@@ -1562,15 +1361,15 @@ function printHelp() {
   console.log(`
 Usage:
   node scripts/generate_store_screenshots.mjs plan --platform android --locale en-US
-  node scripts/generate_store_screenshots.mjs capture --platform android --locale en-US --package com.shifthackz.aisdv1.app.full
+  node scripts/generate_store_screenshots.mjs capture --platform android --locale en-US --package com.shifthackz.aisdv1.app.full.dev
   node scripts/generate_store_screenshots.mjs render --platform android --locale en-US --targets fastlane,googleplay
   node scripts/generate_store_screenshots.mjs feature-graphics --locales en-US,ru,uk --targets fastlane,googleplay
-  node scripts/generate_store_screenshots.mjs capture --platform ios --locale uk --device booted
+  node scripts/generate_store_screenshots.mjs capture --platform ios --locale uk --device <udid>
   node scripts/generate_store_screenshots.mjs render --platform ios --locale en-US --targets appstore,site
 
 Commands:
   plan              Print the localized screenshot deck and required raw files.
-  capture           Generate and run a Maestro flow against a real simulator/emulator.
+  capture           Drive the real app using native iOS XCTest or Android Maestro.
   render            Render raw simulator captures into store/site marketing screenshots.
   feature-graphics  Render featureGraphic.png and copy the Fastlane icon for selected locales.
   all               Run capture, then render.
@@ -1578,17 +1377,21 @@ Commands:
 Capture options:
   --platform android|ios
   --locale en-US|ru|uk
+  --form-factor iphone|duo-outer|duo-inner|ipad|phone|tablet-7|tablet-10
   --device <id>             adb device id or xcrun simctl device id.
   --package <id>            Android package id. Defaults to full flavor.
   --flavor playstore|full|foss
   --bundle <id>             iOS bundle id.
+  --ios-display <id>        simctl display ID; use 3 for an active Duo inner screen.
+  --capture-backend maestro Use legacy Maestro instead of native iOS capture.
   --prepare demo|existing   demo resets/configures A1111 demo mode. existing skips setup.
+  --section appearance      Retake the Settings view in an existing deck.
   --keep-state              Do not clear app state before capture.
   --no-light-theme          Do not force the simulator/emulator into light appearance.
   --dry-run                 Only write the Maestro flow.
 
 Render options:
-  --targets fastlane,googleplay,appstore,site
+  --targets fastlane,googleplay,appstore,site,appstore-duo-outer,appstore-duo-inner,appstore-ipad,googleplay-tablet-7,googleplay-tablet-10
   --raw-dir <path>          Raw simulator screenshot directory.
   --locales en-US,ru,uk     Render multiple locales for the same platform.
 
@@ -1602,8 +1405,7 @@ Notes:
   - Raw screenshots must come from capture and live in docs/screenshots/raw/<platform>/<locale>/.
   - Website screenshots are generated from iOS en-US only.
   - README screenshot rows are generated from iOS en-US App Store screenshots.
-  - Maestro is required for capture: https://docs.maestro.dev/getting-started/installing-maestro
-  - Maestro is required for capture: https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli
+  - Maestro is required for Android capture: https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli
 `);
 }
 
