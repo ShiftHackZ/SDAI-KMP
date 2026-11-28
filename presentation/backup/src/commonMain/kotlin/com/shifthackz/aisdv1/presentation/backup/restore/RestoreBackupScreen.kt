@@ -2,7 +2,6 @@ package com.shifthackz.aisdv1.presentation.backup.restore
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -47,7 +46,6 @@ internal fun RestoreBackupScreen(
             OutlinedButton(
                 onClick = { processIntent(BackupIntent.ChooseFile) },
                 isEnabled = isEnabled,
-                modifier = Modifier.heightIn(min = 48.dp),
             ) { Text(Localization.string("backup_choose_file")) }
         }
         state.inspection?.let { archive ->

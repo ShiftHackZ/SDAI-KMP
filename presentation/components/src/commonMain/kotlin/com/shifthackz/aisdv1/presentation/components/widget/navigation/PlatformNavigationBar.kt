@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
  * @param modifier Placement of the whole navigation area, including its safe-area padding.
  * @param hasBackground Whether iOS reserves an opaque backing instead of floating above screen content.
  * @param isObscured Whether shared chrome covers the bar; native rendering must not cover that chrome.
+ * @param shouldReserveBottomInset Whether adaptive iOS navigation reserves its bottom obstruction here.
+ * Disable when a parent already reserves it. Embedded UIKit and Material bars retain their own height.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -20,4 +22,5 @@ expect fun PlatformNavigationBar(
     modifier: Modifier = Modifier,
     hasBackground: Boolean = true,
     isObscured: Boolean = false,
+    shouldReserveBottomInset: Boolean = true,
 )

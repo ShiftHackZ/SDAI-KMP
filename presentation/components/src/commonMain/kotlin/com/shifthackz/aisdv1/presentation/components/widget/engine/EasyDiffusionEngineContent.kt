@@ -3,7 +3,7 @@ package com.shifthackz.aisdv1.presentation.components.widget.engine
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -40,8 +40,8 @@ internal fun EasyDiffusionEngineContent(
         ) {
             Text(Localization.string(if (state.hasEasyDiffusionModelLoadFailed) "easy_diffusion_models_failed" else "easy_diffusion_models_empty"))
         }
-        TextButton(
-            enabled = !state.loading,
+        TextActionButton(
+            isEnabled = !state.loading,
             onClick = { processIntent(EngineSelectionIntent(shouldRefresh = true)) }) {
             Text(Localization.string("easy_diffusion_refresh_models"))
         }

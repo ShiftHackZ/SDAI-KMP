@@ -14,6 +14,7 @@ import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.domain.entity.ColorToken
 import com.shifthackz.aisdv1.domain.entity.DarkThemeToken
 import com.shifthackz.aisdv1.domain.entity.Grid
+import com.shifthackz.aisdv1.presentation.components.modal.grid.densityLabel
 import com.shifthackz.aisdv1.presentation.components.widget.color.AccentColorSelector
 import com.shifthackz.aisdv1.presentation.components.widget.color.DarkThemeColorSelector
 import com.shifthackz.aisdv1.presentation.components.widget.item.GridIcon
@@ -32,7 +33,7 @@ import com.shifthackz.aisdv1.presentation.settings.text
  *
  * @param row Logical list item to compose; siblings remain owned by the parent lazy list.
  * @param isLoading Whether preference placeholders are visible.
- * @param galleryGrid Selected gallery column layout.
+ * @param galleryGrid Selected adaptive gallery density preset.
  * @param shouldUseSystemColorPalette Persisted dynamic color selection.
  * @param shouldUseSystemDarkTheme Whether system appearance determines dark mode.
  * @param isDarkTheme Persisted manual dark-mode selection.
@@ -85,7 +86,7 @@ internal fun SettingsLookAndFeelSection(
                 modifier = itemModifier,
                 loading = isLoading,
                 text = text("settings_item_lf_gallery_grid"),
-                endValueText = galleryGrid.size.toString().asUiText(),
+                endValueText = galleryGrid.densityLabel().asUiText(),
                 startIconContent = {
                     GridIcon(
                         modifier = Modifier.padding(horizontal = 8.dp),

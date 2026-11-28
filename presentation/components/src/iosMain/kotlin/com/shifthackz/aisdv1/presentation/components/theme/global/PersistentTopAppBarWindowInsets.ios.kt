@@ -2,17 +2,24 @@ package com.shifthackz.aisdv1.presentation.components.theme.global
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.interop.LocalUIViewController
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.appNavigationHost
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationBarInsetsEnabled
 
 /**
- * iOS implementation for the status-bar color spacer used by top app bars.
+ * Keeps status-bar protection while including UIKit's adaptive top reservation inside shared chrome.
+ * A horizontal tab container may report a content guide starting at zero on an ordinary iPhone;
+ * taking the larger inset keeps toolbar controls below system indicators without adding both spaces.
  *
- * iOS keeps the expected safe-area behavior for the Compose host: the app bar background must extend
- * through the status-bar area, and the layout must reserve that safe area so titles and controls do
- * not collide with system indicators. The duplicated-top-inset bug was Android-specific and came from
- * mixing a legacy resized content window with explicit Compose status-bar padding. Returning
- * `WindowInsets.statusBars` here keeps the iOS behavior unchanged while documenting that the Android
- * zero-inset branch is a compatibility workaround, not a cross-platform design decision.
+ * @return The larger of the system status inset and native content-guide top protection.
+ * @author Dmitriy Moroz
  */
 @Composable
-actual fun persistentTopAppBarWindowInsets(): WindowInsets = WindowInsets.statusBars
+actual fun persistentTopAppBarWindowInsets(): WindowInsets {
+    val host = LocalUIViewController.current.appNavigationHost()
+    return if (host != null && LocalNavigationBarInsetsEnabled.current) {
+        WindowInsets.statusBars.union(WindowInsets(top = host.topInset))
+    } else WindowInsets.statusBars
+}

@@ -158,8 +158,7 @@ fun DonateScreenContent(
                 )
                 PrimaryButton(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
+                        .fillMaxWidth(),
                     onClick = { processIntent(DonateIntent.LaunchDonate) },
                 ) {
                     Text(text = strings.title)

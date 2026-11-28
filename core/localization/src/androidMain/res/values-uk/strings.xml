@@ -19,10 +19,10 @@
     <string name="success">✅ Успіх</string>
     <string name="failure">❌ Помилка</string>
 
-    <string name="two">Два</string>
-    <string name="three">Три</string>
-    <string name="four">Чотири</string>
-    <string name="five">П\'ять</string>
+    <string name="gallery_grid_spacious">Простора</string>
+    <string name="gallery_grid_balanced">Збалансована</string>
+    <string name="gallery_grid_compact">Компактна</string>
+    <string name="gallery_grid_dense">Щільна</string>
 
     <string name="version">Версія %1$s</string>
     <string name="settings_footer_developed_by">Розроблено Moroz Inc.</string>
@@ -362,7 +362,7 @@
     <string name="settings_usage_network_note">Включає завантаження моделей, синхронізацію конфігурації, запити генерації та публікації в Civitai.</string>
 
     <string name="settings_item_lf_lang">Мова</string>
-    <string name="settings_item_lf_gallery_grid">Розмір сітки галереї</string>
+    <string name="settings_item_lf_gallery_grid">Щільність сітки галереї</string>
     <string name="settings_item_lf_dynamic_colors">Системні кольори</string>
     <string name="settings_item_lf_system_dark_theme">Системна тема</string>
     <string name="settings_item_lf_dark_theme">Темна тема</string>
@@ -786,7 +786,7 @@
     <string name="settings_help_network_usage">Перегляньте врахований SDAI трафік за провайдерами. Трафік інших застосунків сюди не входить.</string>
     <string name="settings_help_look_header">Налаштуйте мову, вигляд галереї й кольори застосунку.</string>
     <string name="settings_help_language">Виберіть мову написів і повідомлень застосунку.</string>
-    <string name="settings_help_gallery_grid">Виберіть кількість стовпців у галереї. Більше стовпців — більше мініатюр на екрані.</string>
+    <string name="settings_help_gallery_grid">Виберіть щільність мініатюр. Щільніша сітка вміщує більше зображень меншого розміру. Кількість стовпців залежить від доступної ширини.</string>
     <string name="settings_help_dynamic_colors">Використовуйте кольори шпалер пристрою, якщо це підтримується. Якщо вимкнути, використовуються кольори, вибрані в застосунку.</string>
     <string name="settings_help_system_dark">Дотримуйтеся світлої або темної теми пристрою. Вимкніть, щоб вибрати тему тут.</string>
     <string name="settings_help_manual_dark">Використовуйте темну тему застосунку. Вимкніть для світлої теми.</string>

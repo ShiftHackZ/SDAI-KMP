@@ -19,7 +19,8 @@ import com.shifthackz.aisdv1.presentation.components.widget.navigation.isPlatfor
 
 /**
  * Shows current-image actions and output/source/info tabs, each with explanatory help.
- * iOS uses the screen background behind both rows; Android retains its Material surface.
+ * iOS follows the app's native control edge and reserves bottom-bar clearance below the action row.
+ * The footer uses the screen background on iOS; Android retains its Material surface and tab row.
  *
  * @param state Current image flags, reporting capability and selected detail tab.
  * @param modifier Placement of the persistent action area.

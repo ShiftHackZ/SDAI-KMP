@@ -3,17 +3,23 @@ package com.shifthackz.aisdv1.presentation.components.theme.global
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.interop.LocalUIViewController
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.appNavigationHost
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.LocalNavigationBarInsetsEnabled
 
 /**
- * iOS implementation for bottom bars that remain pinned to the screen edge.
+ * Reserves the native bottom obstruction while allowing bars to move to a side edge.
+ * The adaptive host reports remaining native protection or floating-bar clearance. Compose's
+ * corner-adapted inset can otherwise reserve extra space after controls have moved clear of corners.
+ * Older hosts retain the existing navigation-bar inset and home-indicator protection.
  *
- * The Android workaround must not leak into iOS because the UIKit/Compose host keeps the usual safe
- * area contract for home indicator and bottom system affordances. Persistent buttons and navigation
- * bars still need `WindowInsets.navigationBars` here to avoid sitting under the home indicator. The
- * release regression was caused by Android's split behavior between legacy resized windows and
- * enforced edge-to-edge, not by a common Compose layout problem. Keeping the iOS actual explicit makes
- * the platform split intentional and protects future cleanups from flattening both platforms back to
- * the same, Android-biased inset rule.
+ * @return Native remaining bottom space, or the embedded bar's existing platform inset.
+ * @author Dmitriy Moroz
  */
 @Composable
-actual fun persistentBottomBarWindowInsets(): WindowInsets = WindowInsets.navigationBars
+actual fun persistentBottomBarWindowInsets(): WindowInsets {
+    val host = LocalUIViewController.current.appNavigationHost()
+    return if (host != null) {
+        WindowInsets(bottom = if (LocalNavigationBarInsetsEnabled.current) host.bottomInset else host.systemBottomInset)
+    } else WindowInsets.navigationBars
+}

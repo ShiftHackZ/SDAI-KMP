@@ -2,10 +2,8 @@ package com.shifthackz.aisdv1.presentation.components.widget.action
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
 /**
  * Matches primary action dimensions while retaining the outlined treatment for secondary operations.
@@ -25,7 +23,7 @@ fun SecondaryActionButton(
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
+        modifier = modifier.fillMaxWidth(),
         isEnabled = isEnabled,
         content = content
     )

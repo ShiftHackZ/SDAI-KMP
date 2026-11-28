@@ -14,8 +14,8 @@ node scripts/generate_store_screenshots.mjs <command> [options]
 Commands:
 
 - `plan` prints the localized screenshot deck and expected raw screenshot files.
-- `capture` runs a Maestro flow on a real simulator/emulator and saves raw app
-  screenshots.
+- `capture` drives the installed app with native XCTest on iOS or Maestro on
+  Android, then saves raw app screenshots.
 - `render` turns raw app screenshots into store, website, and README marketing
   assets.
 - `all` runs `capture`, then `render`.
@@ -24,8 +24,10 @@ Commands:
 
 - Node.js.
 - `rsvg-convert` from librsvg for rendering SVG templates to PNG.
-- Maestro for automated navigation and capture.
+- Android: Maestro for automated navigation and capture.
 - Android: `adb` and a running emulator.
+- For Maestro 2.6 captures, use an Android 15 (API 35) emulator. Android 16/17
+  can stall text input; see [Maestro issue 2718](https://github.com/mobile-dev-inc/maestro/issues/2718).
 - iOS: Xcode command line tools and a booted iOS simulator.
 
 The capture flow assumes the app is already installed on the selected device.
@@ -57,8 +59,8 @@ Useful Android options:
 - `--flavor playstore|full|foss` selects the package id.
 - `--package com.example.app` overrides the Android package id.
 - `--keep-state` keeps existing app data.
-- `--prepare existing` skips onboarding/demo setup and captures the current app
-  state.
+- `--prepare existing` preserves app data, skips onboarding/demo setup, and
+  captures the current app state.
 
 Render all Android locales:
 
@@ -76,18 +78,17 @@ Android outputs:
 Capture from a booted simulator:
 
 ```bash
-node scripts/generate_store_screenshots.mjs capture --platform ios --locale en-US
+node scripts/generate_store_screenshots.mjs capture --platform ios --locale en-US --device <udid>
 node scripts/generate_store_screenshots.mjs render --platform ios --locale en-US --targets appstore,site
 ```
 
 Useful iOS options:
 
-- `--device booted` uses the currently booted simulator.
-- `--device <udid>` targets a specific simulator UDID.
+- `--device <udid>` is required and targets a specific simulator.
 - `--bundle com.shifthackz.aisdv1.app` overrides the iOS bundle id.
 - `--keep-state` keeps existing app data.
-- `--prepare existing` skips onboarding/demo setup and captures the current app
-  state.
+- `--prepare existing` preserves app data, skips onboarding/demo setup, and
+  captures the current app state.
 
 Render all iOS locales:
 
@@ -132,14 +133,9 @@ Expected slide files:
 - `05-settings.png`
 - `06-open.png`
 
-The `05-settings` slide is derived from three raw captures:
-
-- `settings-light.png`
-- `settings-dark.png`
-- `settings-dark-accent.png`
-
-The script combines them into a diagonal light/dark Look & Feel screenshot before
-rendering store assets.
+The `05-settings` slide is an unmodified Settings view, also saved as
+`settings-light.png`. Light and dark layouts are never spliced together because
+theme-specific settings change row positions.
 
 ## Full Regeneration
 
@@ -156,9 +152,9 @@ node scripts/generate_store_screenshots.mjs capture --platform android --locale 
 node scripts/generate_store_screenshots.mjs capture --platform android --locale ru --flavor full
 node scripts/generate_store_screenshots.mjs capture --platform android --locale uk --flavor full
 
-node scripts/generate_store_screenshots.mjs capture --platform ios --locale en-US
-node scripts/generate_store_screenshots.mjs capture --platform ios --locale ru
-node scripts/generate_store_screenshots.mjs capture --platform ios --locale uk
+node scripts/generate_store_screenshots.mjs capture --platform ios --locale en-US --device <udid>
+node scripts/generate_store_screenshots.mjs capture --platform ios --locale ru --device <udid>
+node scripts/generate_store_screenshots.mjs capture --platform ios --locale uk --device <udid>
 
 node scripts/generate_store_screenshots.mjs render --platform android --locales en-US,ru,uk --targets fastlane,googleplay
 node scripts/generate_store_screenshots.mjs render --platform ios --locales en-US,ru,uk --targets appstore
@@ -174,7 +170,7 @@ that produces:
 - `01-create.png`, because it shows the generated image result.
 - `04-gallery.png`, because it shows the gallery grid.
 
-Running full capture is usually safer because the Maestro flow naturally creates
+Running full capture is usually safer because the capture flow naturally creates
 the generated result, fills the gallery with six images, opens details, and then
 captures settings.
 
@@ -186,3 +182,62 @@ captures settings.
 - Empty gallery: capture in normal demo preparation mode, not `--prepare existing`.
 - Android status bar is not normalized: keep `--demo-status-bar` enabled.
 - Need current app state only: use `--prepare existing --keep-state`.
+- Retake only Settings views in an existing deck: use `--section appearance`.
+  Add `--prepare existing --keep-state` to reuse an already configured device.
+  It captures the actual visible Settings layout without compositing theme variants.
+
+## Device families and store sizes
+
+Keep each device family's captures separate. A phone capture must never be
+stretched into a tablet or unfolded-phone frame. Frames preserve the full captured display aspect ratio. Metal edges and side
+buttons sit outside the capture. The renderer checks each iOS capture for its
+Dynamic Island or Duo camera cutout and draws one only when the capture omits it.
+Duo frames retain their hinge edge. Tablet and unfolded-device frames
+use their own chrome.
+
+| Form factor | Platform | Export target            | Export size             | Raw directory below `docs/screenshots/raw/` |
+| ----------- | -------- | ------------------------ | ----------------------- | ------------------------------------------- |
+| `iphone`    | iOS      | `appstore`               | 1320 × 2868             | `ios/<locale>/`                             |
+| `duo-outer` | iOS      | `appstore-duo-outer`     | 1398 × 2034             | `ios/duo-outer/<locale>/`                   |
+| `duo-inner` | iOS      | `appstore-duo-inner`     | 2853 × 2007             | `ios/duo-inner/<locale>/`                   |
+| `ipad`      | iOS      | `appstore-ipad`          | 2064 × 2752             | `ios/ipad/<locale>/`                        |
+| `phone`     | Android  | `googleplay`, `fastlane` | 1080 × 1920; 778 × 1440 | `android/<locale>/`                         |
+| `tablet-7`  | Android  | `googleplay-tablet-7`    | 1080 × 1920             | `android/tablet-7/<locale>/`                |
+| `tablet-10` | Android  | `googleplay-tablet-10`   | 1920 × 1080             | `android/tablet-10/<locale>/`               |
+
+Apple also accepts the transposed Duo sizes, and 2048 × 2732 or landscape
+variants for 13-inch iPad. The generator uses an unfolded landscape Duo capture
+and a portrait 13-inch iPad capture. See Apple's
+[screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications).
+
+Google Play has 7-inch and 10-inch tablet slots. Its large-screen guidance calls
+for at least four screenshots, 1080–7680 pixels per side, 16:9 landscape or 9:16
+portrait, and no additional marketing copy. Both tablet exports contain six real
+app views in their captured proportions without headlines. See Google's
+[preview asset guidance](https://support.google.com/googleplay/android-developer/answer/9866151?hl=en).
+
+Select a family for capture and rendering:
+
+```bash
+node scripts/generate_store_screenshots.mjs capture --platform ios --form-factor ipad --device <ipad-udid> --locale en-US
+node scripts/generate_store_screenshots.mjs render --platform ios --form-factor ipad --locales en-US,ru,uk
+node scripts/generate_store_screenshots.mjs render --platform ios --form-factor duo-inner --locales en-US,ru,uk
+node scripts/generate_store_screenshots.mjs render --platform android --form-factor tablet-10 --locales en-US,ru,uk
+```
+
+Omitting `--targets` selects the targets for that family. Explicit targets must
+match `--form-factor`; source dimensions are checked before export. Capture flows
+are temporary files under ignored `tmp/store-screenshots/maestro/`, or a custom
+`--flow-dir`. Use dedicated capture simulators/emulators: the default demo flow
+clears app data and generates sample images through the app's Demo mode. These
+sample images demonstrate the interface; they are not evidence of inference by
+any advertised provider. The Android full flavor uses the development package
+`com.shifthackz.aisdv1.app.full.dev`.
+
+For Duo capture, select the target device in Device Hub and use Closed for the
+outer display, or Open and landscape orientation for the inner display. Native
+capture selects display 1 for outer and display 3 for inner; `--ios-display` can
+override this. Use portrait orientation for 7-inch Android captures and landscape for 10-inch captures.
+
+Automatic unfolded-Duo capture leaves the Demo prompt empty to keep its floating
+keyboard from covering the controls used for the rest of the deck.

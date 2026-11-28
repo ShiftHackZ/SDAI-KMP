@@ -110,7 +110,6 @@ fun UsageScreenContent(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .fillMaxWidth()
-                    .height(68.dp)
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp, top = 8.dp),

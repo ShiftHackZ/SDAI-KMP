@@ -15,7 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,7 +85,7 @@ internal fun FaqLoadError(onRetry: () -> Unit, modifier: Modifier = Modifier) {
                 modifier = Modifier.widthIn(max = 480.dp)
                     .semantics { liveRegion = LiveRegionMode.Polite },
             )
-            TextButton(onClick = onRetry) { Text(Localization.string("retry")) }
+            TextActionButton(onClick = onRetry) { Text(Localization.string("retry")) }
         }
     }
 }
@@ -110,7 +110,7 @@ internal fun FaqCachedNotice(onRetry: () -> Unit, modifier: Modifier = Modifier)
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp),
             )
-            TextButton(onClick = onRetry, modifier = Modifier.align(Alignment.End)) {
+            TextActionButton(onClick = onRetry, modifier = Modifier.align(Alignment.End)) {
                 Text(Localization.string("retry"))
             }
         }

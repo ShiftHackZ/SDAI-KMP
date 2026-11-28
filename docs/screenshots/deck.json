@@ -15,54 +15,53 @@
       "mockNegativePrompt": "bad anatomy, bad fingers, distorted, jpeg artifacts",
       "labels": {
         "txt2img": "Txt2Img",
-        "img2img": "Img2Img",
         "gallery": "Gallery",
         "settings": "Settings",
-        "configuration": "Configuration",
-        "serverUrl": "Server URL",
+        "configuration": "Generation configuration",
         "textToImageTitle": "Text to Image",
         "prompt": "Prompt",
         "negativePrompt": "Negative prompt",
         "showAdvanced": "Show advanced options",
-        "automatic1111": "Automatic 1111",
         "next": "Next",
         "connect": "Connect",
         "demoMode": "Demo mode",
-        "language": "Language",
         "generate": "Imagine",
         "close": "Close",
         "galleryDetails": "Details",
         "galleryInfo": "Info",
-        "taggedInput": "Tagged input",
-        "advancedFormDefault": "Always show advanced options",
-        "lookAndFeel": "Look and feel",
-        "systemDarkTheme": "System dark theme",
-        "accentColor": "Accent color"
+        "accentColor": "Accent color",
+        "setProvider": "Set provider",
+        "back": "Back",
+        "demoTitle": "Before you try Demo mode",
+        "demoUnderstand": "I understand that Demo mode uses no AI and its sample images won’t match my prompt.",
+        "demoFeedback": "I agree not to post misleading reviews or issue reports claiming the app is broken because demo images don’t match my prompt.",
+        "demoContinue": "Agree and continue",
+        "startFresh": "Continue"
       },
       "slides": {
         "create": {
-          "headline": ["Preview results", "right away"],
-          "subline": "Generate in demo or production mode, inspect the image, and keep the result in your local gallery."
+          "headline": ["Turn words", "into images"],
+          "subline": "Create with cloud services, your own server, or supported on-device models."
         },
         "controls": {
-          "headline": ["Prompt with", "clean tags"],
-          "subline": "Use tagged positive and negative prompts, size, seed, sampler, CFG, LoRA, embeddings, and advanced options where supported."
+          "headline": ["Shape every", "detail"],
+          "subline": "Fine-tune prompts, image size, seed, and model controls where supported."
         },
         "providers": {
-          "headline": ["Choose your", "AI provider"],
-          "subline": "Connect AUTOMATIC1111, SwarmUI, OpenAI-compatible, AI Horde, Hugging Face, OpenAI, ChatGPT OAuth, Stability AI, or supported local Android engines."
+          "headline": ["Your models.", "Your choice."],
+          "subline": "Choose a cloud service, connect your server, or use a supported local engine."
         },
         "gallery": {
-          "headline": ["Build your", "image library"],
-          "subline": "Review generated images, open details, share, save, and export your local collection without leaving the app."
+          "headline": ["Keep your", "creations"],
+          "subline": "Browse your image library, revisit favorites, and share what you make."
         },
         "settings": {
-          "headline": ["Tune the", "look and feel"],
-          "subline": "Set language, gallery density, system theme behavior, dark theme palette, and accent color for your workflow."
+          "headline": ["Your app.", "Your style."],
+          "subline": "Choose your language, colors, theme, and gallery layout."
         },
         "open": {
-          "headline": ["Inspect every", "generation"],
-          "subline": "Open result details, copy the prompt, send images back to Txt2Img or Img2Img, and keep full context for reuse."
+          "headline": ["Revisit ideas.", "Create again."],
+          "subline": "Recover prompts and settings from saved images to explore another variation."
         }
       }
     },
@@ -77,54 +76,53 @@
       "mockNegativePrompt": "bad anatomy, bad fingers, distorted, jpeg artifacts",
       "labels": {
         "txt2img": "Txt2Img",
-        "img2img": "Img2Img",
         "gallery": "Галерея",
         "settings": "Параметры",
-        "configuration": "Конфигурация",
-        "serverUrl": "URL-адрес сервера",
+        "configuration": "Настройки генерации",
         "textToImageTitle": "Текст в Картинку",
         "prompt": "Запрос",
         "negativePrompt": "Отрицательный запрос",
         "showAdvanced": "Показать все опции",
-        "automatic1111": "Automatic 1111",
         "next": "Далее",
         "connect": "Подключиться",
         "demoMode": "Демо режим",
-        "language": "Язык",
         "generate": "Генерировать",
         "close": "Закрыть",
         "galleryDetails": "Результат генерации",
         "galleryInfo": "Подробности",
-        "taggedInput": "Ввод с тегами",
-        "advancedFormDefault": "Всегда показывать все опции",
-        "lookAndFeel": "Персонализация",
-        "systemDarkTheme": "Системная тема",
-        "accentColor": "Цвет акцента"
+        "accentColor": "Цвет акцента",
+        "setProvider": "Выбор провайдера",
+        "back": "Назад",
+        "demoTitle": "Перед запуском деморежима",
+        "demoUnderstand": "Я понимаю, что в деморежиме не используется ИИ, а примеры изображений не будут соответствовать моему запросу.",
+        "demoFeedback": "Я соглашаюсь не публиковать вводящие в заблуждение отзывы или сообщения об ошибках с утверждением, что приложение не работает, потому что демонстрационные изображения не соответствуют моему запросу.",
+        "demoContinue": "Согласиться и продолжить",
+        "startFresh": "Продолжить"
       },
       "slides": {
         "create": {
-          "headline": ["Смотри результат", "сразу"],
-          "subline": "Генерируй в демо или рабочем режиме, открывай изображение и сохраняй результат в локальную галерею."
+          "headline": ["Создавай образы", "из слов"],
+          "subline": "Создавай с облачными сервисами, своим сервером или поддерживаемыми моделями на устройстве."
         },
         "controls": {
-          "headline": ["Промпты", "тегами"],
-          "subline": "Позитивный и негативный промпт тегами, размер, seed, sampler, CFG, LoRA, embeddings и расширенные опции там, где это поддержано."
+          "headline": ["Продумай", "каждую деталь"],
+          "subline": "Настраивай промпты, размер, seed и параметры выбранной модели."
         },
         "providers": {
-          "headline": ["Выбирай", "AI provider"],
-          "subline": "AUTOMATIC1111, SwarmUI, OpenAI-compatible, AI Horde, Hugging Face, OpenAI, ChatGPT OAuth, Stability AI или поддерживаемые локальные движки Android."
+          "headline": ["Твои модели.", "Твой выбор."],
+          "subline": "Выбирай облачный сервис, подключай свой сервер или локальный движок."
         },
         "gallery": {
-          "headline": ["Собирай", "свою галерею"],
-          "subline": "Просматривай результаты, открывай детали, делись, сохраняй и экспортируй локальную коллекцию прямо из приложения."
+          "headline": ["Твои работы", "в одной галерее"],
+          "subline": "Просматривай изображения, возвращайся к любимым работам и делись ими."
         },
         "settings": {
-          "headline": ["Настрой", "интерфейс"],
-          "subline": "Язык, размер сетки галереи, поведение системной темы, палитра темной темы и акцентный цвет под твой workflow."
+          "headline": ["Твой интерфейс.", "Твой стиль."],
+          "subline": "Выбирай язык, цвета, тему и вид галереи."
         },
         "open": {
-          "headline": ["Открывай", "детали"],
-          "subline": "Смотри параметры генерации, копируй промпт, отправляй результат в Txt2Img или Img2Img и возвращайся к идеям позже."
+          "headline": ["Вернись к идее.", "Создай ещё."],
+          "subline": "Используй промпты и параметры сохранённых изображений для новых вариантов."
         }
       }
     },
@@ -139,54 +137,53 @@
       "mockNegativePrompt": "bad anatomy, bad fingers, distorted, jpeg artifacts",
       "labels": {
         "txt2img": "Txt2Img",
-        "img2img": "Img2Img",
         "gallery": "Галерея",
         "settings": "Параметри",
-        "configuration": "Конфігурація",
-        "serverUrl": "URL-адреса сервера",
+        "configuration": "Налаштування генерації",
         "textToImageTitle": "Текст в Картинку",
         "prompt": "Запит",
         "negativePrompt": "Негативний запит",
         "showAdvanced": "Показати всі опції",
-        "automatic1111": "Automatic 1111",
         "next": "Далі",
         "connect": "Підключитися",
         "demoMode": "Демо режим",
-        "language": "Мова",
         "generate": "Уявити",
         "close": "Закрити",
         "galleryDetails": "Результат генерації",
         "galleryInfo": "Подробиці",
-        "taggedInput": "Введення тегами",
-        "advancedFormDefault": "Завжди показувати всі опції",
-        "lookAndFeel": "Інтерфейс",
-        "systemDarkTheme": "Системна тема",
-        "accentColor": "Акцентний колір"
+        "accentColor": "Акцентний колір",
+        "setProvider": "Вибір провайдера",
+        "back": "Назад",
+        "demoTitle": "Перед запуском деморежиму",
+        "demoUnderstand": "Я розумію, що в деморежимі не використовується ШІ, а приклади зображень не відповідатимуть моєму запиту.",
+        "demoFeedback": "Я погоджуюся не публікувати оманливі відгуки чи повідомлення про помилки з твердженням, що застосунок не працює, бо демонстраційні зображення не відповідають моєму запиту.",
+        "demoContinue": "Погодитися й продовжити",
+        "startFresh": "Продовжити"
       },
       "slides": {
         "create": {
-          "headline": ["Дивись результат", "одразу"],
-          "subline": "Генеруй у демо або робочому режимі, відкривай зображення та зберігай результат у локальну галерею."
+          "headline": ["Створюй образи", "зі слів"],
+          "subline": "Створюй із хмарними сервісами, власним сервером або підтримуваними моделями на пристрої."
         },
         "controls": {
-          "headline": ["Промпти", "тегами"],
-          "subline": "Позитивний і негативний промпт тегами, розмір, seed, sampler, CFG, LoRA, embeddings і розширені опції там, де це підтримано."
+          "headline": ["Продумай", "кожну деталь"],
+          "subline": "Налаштовуй промпти, розмір, seed і параметри вибраної моделі."
         },
         "providers": {
-          "headline": ["Обирай", "AI provider"],
-          "subline": "AUTOMATIC1111, SwarmUI, OpenAI-compatible, AI Horde, Hugging Face, OpenAI, ChatGPT OAuth, Stability AI або підтримувані локальні рушії Android."
+          "headline": ["Твої моделі.", "Твій вибір."],
+          "subline": "Вибирай хмарний сервіс, підключай власний сервер або локальний рушій."
         },
         "gallery": {
-          "headline": ["Збирай", "свою галерею"],
-          "subline": "Переглядай результати, відкривай деталі, ділись, зберігай та експортуй локальну колекцію прямо із застосунку."
+          "headline": ["Твої роботи", "в одній галереї"],
+          "subline": "Переглядай зображення, повертайся до улюблених робіт і ділися ними."
         },
         "settings": {
-          "headline": ["Налаштуй", "інтерфейс"],
-          "subline": "Мова, розмір сітки галереї, поведінка системної теми, палітра темної теми та акцентний колір під твій workflow."
+          "headline": ["Твій інтерфейс.", "Твій стиль."],
+          "subline": "Вибирай мову, кольори, тему та вигляд галереї."
         },
         "open": {
-          "headline": ["Відкривай", "деталі"],
-          "subline": "Дивись параметри генерації, копіюй промпт, відправляй результат у Txt2Img або Img2Img і повертайся до ідей пізніше."
+          "headline": ["Повернись до ідеї.", "Створи ще."],
+          "subline": "Використовуй промпти й параметри збережених зображень для нових варіантів."
         }
       }
     }

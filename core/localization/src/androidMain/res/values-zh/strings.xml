@@ -23,10 +23,10 @@
     <string name="success">✅ 成功</string>
     <string name="failure">❌ 失败</string>
 
-    <string name="two">二</string>
-    <string name="three">三</string>
-    <string name="four">四</string>
-    <string name="five">五</string>
+    <string name="gallery_grid_spacious">宽松</string>
+    <string name="gallery_grid_balanced">均衡</string>
+    <string name="gallery_grid_compact">紧凑</string>
+    <string name="gallery_grid_dense">密集</string>
 
     <!-- 设置和配置 -->
     <string name="version">版本 %1$s</string>
@@ -396,7 +396,7 @@
 
     <!-- 外观和感觉设置 -->
     <string name="settings_item_lf_lang">语言</string>
-    <string name="settings_item_lf_gallery_grid">图库网格大小</string>
+    <string name="settings_item_lf_gallery_grid">图库网格密度</string>
     <string name="settings_item_lf_dynamic_colors">动态颜色</string>
     <string name="settings_item_lf_system_dark_theme">系统暗色主题</string>
     <string name="settings_item_lf_dark_theme">暗色主题</string>
@@ -838,7 +838,7 @@
     <string name="settings_help_network_usage">按服务查看 SDAI 记录的网络流量。不包含其他应用的流量。</string>
     <string name="settings_help_look_header">个性化设置应用语言、图库布局和颜色。</string>
     <string name="settings_help_language">选择应用标签和消息使用的语言。</string>
-    <string name="settings_help_gallery_grid">选择图库中的图像列数。列数越多，屏幕上可显示的缩略图越多。</string>
+    <string name="settings_help_gallery_grid">选择缩略图密度。布局越密集，屏幕上显示的图像越多、尺寸越小。列数会根据可用宽度自动调整。</string>
     <string name="settings_help_dynamic_colors">在支持的设备上使用壁纸颜色。关闭后使用应用内选择的颜色。</string>
     <string name="settings_help_system_dark">跟随设备的浅色或深色外观。关闭后可在这里自行选择。</string>
     <string name="settings_help_manual_dark">在应用中使用深色外观。关闭后使用浅色外观。</string>

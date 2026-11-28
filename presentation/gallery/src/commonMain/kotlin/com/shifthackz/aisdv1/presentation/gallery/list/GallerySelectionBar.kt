@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -156,11 +156,11 @@ private fun GallerySelectionSummary(state: GalleryState, processIntent: (Gallery
             fontWeight = FontWeight.W400,
         )
         if (isPlatformToolbarNative) {
-            PrimaryButton(onClick = onClearSelection, modifier = Modifier.height(48.dp)) {
+            PrimaryButton(onClick = onClearSelection, modifier = Modifier) {
                 Text(actionText, textAlign = TextAlign.Center)
             }
         } else {
-            TextButton(modifier = Modifier.padding(end = 16.dp), onClick = onClearSelection) {
+            TextActionButton(modifier = Modifier.padding(end = 16.dp), onClick = onClearSelection) {
                 Text(
                     actionText.uppercase(),
                     textAlign = TextAlign.Center,

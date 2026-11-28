@@ -24,7 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSubtree
 import androidx.compose.runtime.Composable
@@ -175,7 +175,7 @@ internal fun BackgroundWorkWidgetContent(
                         }
                     }
                     if (state.dismissible) {
-                        TextButton(onClick = { processIntent(BackgroundWorkIntent.Dismiss) }) {
+                        TextActionButton(onClick = { processIntent(BackgroundWorkIntent.Dismiss) }) {
                             Text(
                                 text = Localization.string("ok"),
                                 maxLines = 1,

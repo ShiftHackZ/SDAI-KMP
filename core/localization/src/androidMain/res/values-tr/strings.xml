@@ -19,10 +19,10 @@
     <string name="success">✅ Başarılı</string>
     <string name="failure">❌ Başarısızlık</string>
 
-    <string name="two">İki</string>
-    <string name="three">Üç</string>
-    <string name="four">Dört</string>
-    <string name="five">Beş</string>
+    <string name="gallery_grid_spacious">Ferah</string>
+    <string name="gallery_grid_balanced">Dengeli</string>
+    <string name="gallery_grid_compact">Kompakt</string>
+    <string name="gallery_grid_dense">Yoğun</string>
 
     <string name="version">Versiyon %1$s</string>
     <string name="settings_footer_developed_by">Moroz Inc. tarafından geliştirildi.</string>
@@ -362,7 +362,7 @@
     <string name="settings_usage_network_note">Model indirmelerini, yapılandırma eşitlemesini, çıkarım isteklerini ve Civitai yüklemelerini içerir.</string>
 
     <string name="settings_item_lf_lang">Dil</string>
-    <string name="settings_item_lf_gallery_grid">Galeri ızgara boyutu</string>
+    <string name="settings_item_lf_gallery_grid">Galeri ızgarası yoğunluğu</string>
     <string name="settings_item_lf_dynamic_colors">Dinamik renkler</string>
     <string name="settings_item_lf_system_dark_theme">Sistemin koyu teması</string>
     <string name="settings_item_lf_dark_theme">Koyu tema</string>
@@ -786,7 +786,7 @@
     <string name="settings_help_network_usage">SDAI’nin kaydettiği ağ verilerini sağlayıcıya göre görün. Diğer uygulamaların trafiği dahil değildir.</string>
     <string name="settings_help_look_header">Uygulama dilini, galeri düzenini ve renklerini kişiselleştirin.</string>
     <string name="settings_help_language">Uygulama etiketleri ve mesajları için dili seçin.</string>
-    <string name="settings_help_gallery_grid">Galerideki görsel sütunu sayısını seçin. Daha fazla sütun, ekrana daha fazla küçük resim sığdırır.</string>
+    <string name="settings_help_gallery_grid">Küçük resim yoğunluğunu seçin. Daha yoğun düzenler ekrana daha fazla, daha küçük görsel sığdırır. Sütun sayısı kullanılabilir genişliğe göre uyarlanır.</string>
     <string name="settings_help_dynamic_colors">Destekleniyorsa cihaz duvar kâğıdının renklerini kullanın. Uygulamada seçilen renkleri kullanmak için kapatın.</string>
     <string name="settings_help_system_dark">Cihazın açık veya koyu görünümünü izleyin. Görünümü burada seçmek için kapatın.</string>
     <string name="settings_help_manual_dark">Uygulamada koyu görünüm kullanın. Açık görünüm için kapatın.</string>

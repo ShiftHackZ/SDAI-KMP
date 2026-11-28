@@ -3,7 +3,6 @@ package com.shifthackz.aisdv1.presentation.generation.upscaler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
@@ -11,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,6 +22,9 @@ import com.shifthackz.aisdv1.presentation.components.widget.dialog.DecisionInter
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.GenerationActionBar
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarScrollObserver
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.platformToolbarTitleStyle
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformTopAppBar
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.ToolbarNavigationButton
 import com.shifthackz.aisdv1.presentation.generation.modal.GenerationModalRenderer
@@ -51,10 +54,15 @@ internal fun UpscalerScreenContent(
     performanceOverlay: @Composable () -> Unit = {},
     inputImageContent: @Composable () -> Unit = { UpscalerImageInput(state, processIntent) },
 ) {
-    PlatformScaffold(modifier = modifier, topBar = {
+    PlatformScaffold(modifier = modifier, canUnderlapToolbar = true, topBar = {
         PlatformTopAppBar(
             windowInsets = WindowInsets(0, 0, 0, 0),
-            title = { Text(Localization.string("upscaler_title")) },
+            title = {
+                Text(
+                    text = Localization.string("upscaler_title"),
+                    style = platformToolbarTitleStyle(MaterialTheme.typography.titleLarge),
+                )
+            },
             navigationIcon = {
                 ToolbarNavigationButton(
                     canNavigateBack = false,
@@ -63,7 +71,7 @@ internal fun UpscalerScreenContent(
     }, bottomBar = {
         GenerationActionBar {
             PrimaryButton(
-                modifier = Modifier.fillMaxWidth().height(60.dp)
+                modifier = Modifier.fillMaxWidth()
                     .padding(horizontal = 16.dp).padding(bottom = 16.dp),
                 isEnabled = !state.isRunning && state.image.isNotEmpty() &&
                         !state.configuration?.modelId.isNullOrBlank() && !state.isPickingImage,
@@ -77,10 +85,11 @@ internal fun UpscalerScreenContent(
             }
         }
     }) { padding ->
+        ToolbarScrollObserver(listState.canScrollBackward)
         LazyColumn(
             Modifier.padding(padding).fillMaxSize().padding(horizontal = 16.dp),
             state = listState,
-            contentPadding = PaddingValues(bottom = 16.dp),
+            contentPadding = PaddingValues(top = LocalToolbarContentInset.current, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {

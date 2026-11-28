@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,12 +47,10 @@ import androidx.compose.ui.unit.sp
 import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.domain.entity.ServerSource
 import com.shifthackz.aisdv1.presentation.onboarding.buildOnBoardingText
-import com.shifthackz.aisdv1.presentation.onboarding.onBoardingDensity
-import com.shifthackz.aisdv1.presentation.onboarding.onBoardingPhoneAspectRatio
 import com.shifthackz.aisdv1.presentation.onboarding.onBoardingPhoneWidthFraction
 import com.shifthackz.aisdv1.presentation.configuration.setup.content.ServerSetupStrings
 import com.shifthackz.aisdv1.presentation.configuration.setup.mappers.mapToUi
-import com.shifthackz.aisdv1.presentation.components.widget.frame.PhoneFrame
+import com.shifthackz.aisdv1.presentation.onboarding.OnBoardingDeviceFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -96,17 +93,17 @@ internal fun ProviderPageContent(
         fontWeight = FontWeight(450),
     )
     Spacer(modifier = Modifier.weight(1f))
-    PhoneFrame(
+    OnBoardingDeviceFrame(
         modifier = Modifier.fillMaxWidth(onBoardingPhoneWidthFraction),
-    ) {
-        CompositionLocalProvider(LocalDensity provides onBoardingDensity) {
-            ProviderPreviewScreen(
-                modifier = Modifier.aspectRatio(onBoardingPhoneAspectRatio),
-                strings = strings,
-                sources = previewSources,
-                selectedSource = selectedSource,
-            )
-        }
+    ) { previewModifier ->
+
+        ProviderPreviewScreen(
+            modifier = previewModifier,
+            strings = strings,
+            sources = previewSources,
+            selectedSource = selectedSource,
+        )
+
     }
     Spacer(modifier = Modifier.weight(1f))
 
@@ -163,6 +160,8 @@ private fun ProviderPreviewScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
                     .padding(top = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -174,7 +173,6 @@ private fun ProviderPreviewScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
             PrimaryButton(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -87,21 +86,19 @@ internal fun FaqScreenContent(
                 windowInsets = persistentTopAppBarWindowInsets(),
                 bottomContentHeight = if (ready == null) 0.dp else SearchFilterToolbarHeight,
                 bottomContent = {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        SearchFilterToolbar(
-                            query = query,
-                            searchHint = Localization.string("faq_search"),
-                            clearLabel = Localization.string("action_clear"),
-                            filterLabel = Localization.string("provider_action_filters"),
-                            hasActiveFilters = selectedCategory != null,
-                            onQueryChange = {
-                                onQueryChange(it)
-                                listState.requestScrollToItem(0)
-                            },
-                            onOpenFilters = { isFilterSheetOpen = true },
-                            modifier = Modifier.widthIn(max = 720.dp),
-                        )
-                    }
+                    SearchFilterToolbar(
+                        query = query,
+                        searchHint = Localization.string("faq_search"),
+                        clearLabel = Localization.string("action_clear"),
+                        filterLabel = Localization.string("provider_action_filters"),
+                        hasActiveFilters = selectedCategory != null,
+                        onQueryChange = {
+                            onQueryChange(it)
+                            listState.requestScrollToItem(0)
+                        },
+                        onOpenFilters = { isFilterSheetOpen = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 },
             )
         },
@@ -115,7 +112,7 @@ internal fun FaqScreenContent(
                 .imePadding(),
             contentAlignment = Alignment.TopCenter,
         ) {
-            val contentModifier = Modifier.widthIn(max = 720.dp).fillMaxWidth()
+            val contentModifier = Modifier.fillMaxWidth()
             val statusModifier = contentModifier.padding(top = LocalToolbarContentInset.current)
             when (state) {
                 FaqState.Loading -> FaqLoading(modifier = statusModifier)

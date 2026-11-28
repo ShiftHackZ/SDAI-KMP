@@ -1,6 +1,7 @@
 package com.shifthackz.aisdv1.presentation.app
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -65,6 +66,7 @@ internal fun AiSdAppShell(
 /**
  * Renders the themed application surface and route slots from an explicit shell snapshot.
  * Dependency resolution, state observation and platform effects belong to the host and shell.
+ * Each retained route owns its safe areas, keeping its viewport stable during screen transitions.
  *
  * @param state Shell snapshot determining retained tabs and the foreground destination.
  * @param router Navigation owner providing capture timing before a screen is covered.
@@ -85,7 +87,8 @@ private fun AiSdAppShellContent(
 ) {
     val backTransition = rememberBackTransitionState()
     Surface(
-        modifier = modifier.fillMaxSize().generationBrightnessInteraction().clearFocusOnTap(),
+        modifier = modifier.fillMaxSize().generationBrightnessInteraction().clearFocusOnTap()
+            .background(MaterialTheme.colorScheme.background),
         color = MaterialTheme.colorScheme.background,
     ) {
         CompositionLocalProvider(LocalBackTransitionState provides backTransition) {

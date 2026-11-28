@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import com.shifthackz.aisdv1.presentation.components.widget.toolbar.LocalToolbarContentInset
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,7 +27,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
@@ -241,14 +240,14 @@ internal fun UpscalerSetupContent(
             onDismissRequest = { processIntent(UpscalerSetupIntent.Dismiss) },
             title = { Text(strings.errorTitle) }, text = { Text(state.error) },
             confirmButton = {
-                TextButton(onClick = { processIntent(UpscalerSetupIntent.Retry) }) {
+                TextActionButton(onClick = { processIntent(UpscalerSetupIntent.Retry) }) {
                     Text(
                         Localization.string("upscaler_retry")
                     )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { processIntent(UpscalerSetupIntent.Dismiss) }) {
+                TextActionButton(onClick = { processIntent(UpscalerSetupIntent.Dismiss) }) {
                     Text(
                         strings.cancel
                     )
@@ -261,14 +260,14 @@ internal fun UpscalerSetupContent(
             onDismissRequest = { processIntent(UpscalerSetupIntent.Dismiss) },
             title = { Text(strings.deleteLocalModelTitle) },
             confirmButton = {
-                TextButton(onClick = { processIntent(UpscalerSetupIntent.ConfirmDelete) }) {
+                TextActionButton(onClick = { processIntent(UpscalerSetupIntent.ConfirmDelete) }) {
                     Text(
                         strings.ok
                     )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { processIntent(UpscalerSetupIntent.Dismiss) }) {
+                TextActionButton(onClick = { processIntent(UpscalerSetupIntent.Dismiss) }) {
                     Text(
                         strings.cancel
                     )
