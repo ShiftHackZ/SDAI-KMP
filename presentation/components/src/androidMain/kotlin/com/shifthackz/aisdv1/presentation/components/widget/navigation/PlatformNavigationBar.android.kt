@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
  * @param modifier Placement of the navigation surface.
  * @param hasBackground iOS backing preference; Android retains its opaque Material surface.
  * @param isObscured Shared chrome visibility; Material already participates in Compose drawing order.
+ * @param shouldReserveBottomInset Adaptive iOS inset policy; Material reserves its own height.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -18,6 +19,7 @@ actual fun PlatformNavigationBar(
     modifier: Modifier,
     hasBackground: Boolean,
     isObscured: Boolean,
+    shouldReserveBottomInset: Boolean,
 ) {
     MaterialNavigationBar(items, modifier)
 }

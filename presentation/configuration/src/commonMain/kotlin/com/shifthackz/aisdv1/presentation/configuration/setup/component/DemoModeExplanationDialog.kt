@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryActionButton
+import com.shifthackz.aisdv1.presentation.components.widget.scrollbar.verticalScrollbar
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -52,6 +53,7 @@ internal fun DemoModeExplanationDialog(
     processIntent: (ServerSetupIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val scrollState = rememberScrollState()
     val titleStyle = MaterialTheme.typography.headlineSmall
     val titleLineHeight = with(LocalDensity.current) { titleStyle.lineHeight.toDp() }
     val closeVerticalOffset = (titleLineHeight - 48.dp) / 2
@@ -90,7 +92,12 @@ internal fun DemoModeExplanationDialog(
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+                Column(
+                    Modifier.weight(1f, fill = false)
+                        .verticalScrollbar(scrollState)
+                        .verticalScroll(scrollState)
+                        .padding(end = 8.dp),
+                ) {
                     Text(
                         Localization.string("demo_explanation_body"),
                         style = MaterialTheme.typography.bodyLarge

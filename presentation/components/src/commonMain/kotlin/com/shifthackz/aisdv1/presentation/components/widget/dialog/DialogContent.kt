@@ -13,7 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.focusProperties
@@ -44,7 +44,7 @@ fun InfoDialogContent(
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            TextButton(onClick = onDismissRequest) {
+            TextActionButton(onClick = onDismissRequest) {
                 Text(text = okText)
             }
         },
@@ -86,7 +86,7 @@ fun ErrorDialogContent(
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            TextButton(onClick = onDismissRequest) {
+            TextActionButton(onClick = onDismissRequest) {
                 Text(text = okText)
             }
         },
@@ -138,12 +138,12 @@ fun DecisionInteractiveDialogContent(
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            TextButton(onClick = onConfirmAction, modifier = actionModifier) {
+            TextActionButton(onClick = onConfirmAction, modifier = actionModifier) {
                 Text(text = confirmActionText)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest, modifier = actionModifier) {
+            TextActionButton(onClick = onDismissRequest, modifier = actionModifier) {
                 Text(text = dismissActionText)
             }
         },

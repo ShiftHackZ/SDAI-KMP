@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSection
 import com.shifthackz.aisdv1.core.mvi.diagnostics.UiDiagnosticSubtree
 import androidx.compose.runtime.Composable
@@ -68,8 +68,8 @@ internal fun GenerationSamplerField(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
-                TextButton(
-                    enabled = !isLoadingSamplers,
+                TextActionButton(
+                    isEnabled = !isLoadingSamplers,
                     onClick = { onEvent(GenerationInputFormEvent.RetrySamplers) },
                 ) {
                     Text(Localization.string("retry"))

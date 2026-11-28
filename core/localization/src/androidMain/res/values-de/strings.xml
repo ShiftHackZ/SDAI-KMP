@@ -23,10 +23,10 @@
     <string name="success">✅ Erfolg</string>
     <string name="failure">❌ Fehlgeschlagen</string>
 
-    <string name="two">Zwei</string>
-    <string name="three">Drei</string>
-    <string name="four">Vier</string>
-    <string name="five">Fünf</string>
+    <string name="gallery_grid_spacious">Großzügig</string>
+    <string name="gallery_grid_balanced">Ausgewogen</string>
+    <string name="gallery_grid_compact">Kompakt</string>
+    <string name="gallery_grid_dense">Dicht</string>
 
     <string name="version">Version %1$s</string>
     <string name="settings_footer_developed_by">Entwickelt von Moroz Inc.</string>
@@ -395,7 +395,7 @@
     <string name="settings_usage_network_note">Umfasst Modelldownloads, Konfigurationsabgleiche, Inferenzanfragen und Civitai-Uploads.</string>
 
     <string name="settings_item_lf_lang">Sprache</string>
-    <string name="settings_item_lf_gallery_grid">Galerierastergröße</string>
+    <string name="settings_item_lf_gallery_grid">Galerieraster-Dichte</string>
     <string name="settings_item_lf_dynamic_colors">Dynamische Farben</string>
     <string name="settings_item_lf_system_dark_theme">Dunkles Systemdesign</string>
     <string name="settings_item_lf_dark_theme">Dunkles Design</string>
@@ -823,7 +823,7 @@
     <string name="settings_help_network_usage">Sieh den von SDAI erfassten Datenverkehr nach Anbieter. Daten anderer Apps sind nicht enthalten.</string>
     <string name="settings_help_look_header">Passe Sprache, Galerieansicht und Farben der App an.</string>
     <string name="settings_help_language">Wähle die Sprache für Beschriftungen und Meldungen der App.</string>
-    <string name="settings_help_gallery_grid">Wähle die Spaltenzahl der Galerie. Mehr Spalten zeigen mehr Vorschaubilder auf dem Bildschirm.</string>
+    <string name="settings_help_gallery_grid">Wähle die Dichte der Vorschaubilder. Dichtere Raster zeigen mehr, kleinere Bilder. Die Spaltenzahl passt sich der verfügbaren Breite an.</string>
     <string name="settings_help_dynamic_colors">Nutze Farben des Gerätehintergrunds, sofern verfügbar. Ausgeschaltet gelten die Farbauswahlen der App.</string>
     <string name="settings_help_system_dark">Übernimm den hellen oder dunklen Modus des Geräts. Schalte dies aus, um den Modus hier selbst zu wählen.</string>
     <string name="settings_help_manual_dark">Verwende einen dunklen App-Hintergrund. Schalte dies für eine helle Darstellung aus.</string>

@@ -11,7 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.sheet.PlatformModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import kotlin.time.TimeMark
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -188,13 +188,13 @@ private fun BenchmarkExceedsActions(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        TextButton(onClick = onContinueRequest) {
+        TextActionButton(onClick = onContinueRequest) {
             Text(Localization.string("yes"))
         }
-        TextButton(onClick = onDismissRequest) {
+        TextActionButton(onClick = onDismissRequest) {
             Text(Localization.string("no"))
         }
-        TextButton(onClick = onDoNotAskRequest) {
+        TextActionButton(onClick = onDoNotAskRequest) {
             Text(Localization.string("benchmark_exceeded_do_not_ask"))
         }
     }

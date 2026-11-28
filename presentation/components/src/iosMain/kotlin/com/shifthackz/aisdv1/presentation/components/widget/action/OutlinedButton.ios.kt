@@ -8,7 +8,8 @@ import androidx.compose.ui.graphics.Shape
 
 /**
  * Presents a secondary action using the platform surface and shared label/icon content.
- * State stays with the caller; platform rendering preserves the supplied geometry and typography.
+ * State stays with the caller. Regular actions share a 48dp minimum height and grow for larger labels;
+ * explicit illustration and image-tile bounds remain caller-owned.
  *
  * @param onClick Receives a single activation when the action is enabled.
  * @param modifier Layout and accessibility modifiers for the entire button.
@@ -31,7 +32,7 @@ actual fun OutlinedButton(
 ) {
     IosActionButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.actionButtonSize(),
         isEnabled = isEnabled,
         shape = shape,
         contentPadding = contentPadding,

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -91,7 +90,6 @@ fun BenchmarkScreenContent(
                 modifier = Modifier
                     .windowInsetsPadding(persistentBottomBarWindowInsets())
                     .fillMaxWidth()
-                    .height(68.dp)
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp, top = 8.dp),

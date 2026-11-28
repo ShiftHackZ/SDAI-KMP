@@ -21,6 +21,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
@@ -31,6 +33,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.viewinterop.UIKitInteropInteractionMode
@@ -52,6 +55,9 @@ import kotlinx.coroutines.launch
  * @param modifier Bounds of the bar and its bottom safe area.
  * @param hasBackground Whether the bar has an opaque backing or samples content through system glass.
  * @param isObscured Whether shared chrome covers the bar, concealing floating native content.
+ * @param shouldReserveBottomInset Whether adaptive bottom navigation leaves its obstruction below
+ * the caller's content. Disable when a parent already reserves it. Top and side tabs use the same
+ * system placement as app navigation; older hosts retain the measured embedded bar height.
  * @author Dmitriy Moroz
  */
 @Composable
@@ -60,6 +66,7 @@ actual fun PlatformNavigationBar(
     modifier: Modifier,
     hasBackground: Boolean,
     isObscured: Boolean,
+    shouldReserveBottomInset: Boolean,
 ) {
     if (items.isEmpty()) return
     val colors = MaterialTheme.colorScheme
@@ -67,6 +74,46 @@ actual fun PlatformNavigationBar(
     val states = items.map { rememberTooltipState(isPersistent = true) }
     val scope = rememberCoroutineScope()
     val images = items.map { rememberNativeIconImage(it.icon) }
+    val host = LocalUIViewController.current.appNavigationHost()
+    val isVisible = LocalNavigationBarOwnerEnabled.current
+    val isInputEnabled = LocalNavigationInputEnabled.current
+    if (host != null) {
+        val owner = remember { Any() }
+        if (isVisible) {
+            DisposableEffect(host, owner) {
+                onDispose { host.clear(owner) }
+            }
+            SideEffect {
+                host.update(
+                    owner = owner,
+                    items = items,
+                    images = images,
+                    accent = colors.primary.toUIColor(),
+                    foreground = colors.onSurface.toUIColor(),
+                    backingColor = backingColor.toUIColor(),
+                    hasBackground = hasBackground,
+                    isObscured = isObscured,
+                    isInputEnabled = isInputEnabled,
+                    isDark = colors.background.luminance() < 0.5f,
+                    onHelp = { index -> scope.launch { states[index].show() }; Unit },
+                )
+            }
+        }
+        items.forEachIndexed { index, item ->
+            ContextualHelpAnchor(
+                title = item.label,
+                message = item.helpMessage,
+                titleStartIcon = item.icon,
+                state = states[index],
+                shouldHandleGestures = false,
+                shouldExposeAccessibilityAction = false,
+            ) { Spacer(Modifier.height(0.dp)) }
+        }
+        Spacer(
+            modifier.fillMaxWidth().height(if (shouldReserveBottomInset) host.bottomInset else 0.dp)
+        )
+        return
+    }
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     var nativeHeight by remember { mutableStateOf(83.dp) }
     val shouldConcealNativeBar = isPlatformNavigationBarFloating && !hasBackground && isObscured

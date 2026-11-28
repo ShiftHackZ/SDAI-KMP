@@ -8,7 +8,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.shifthackz.aisdv1.core.localization.Localization
 import com.shifthackz.aisdv1.core.model.asUiText
 import com.shifthackz.aisdv1.domain.entity.Grid
 import com.shifthackz.aisdv1.presentation.components.widget.item.GridIcon
@@ -37,20 +36,12 @@ fun GridBottomSheet(
             .padding(bottom = 16.dp),
     ) {
         Grid.entries.forEach { grid ->
-            val textCount = Localization.string(
-                when (grid) {
-                    Grid.Fixed2 -> "two"
-                    Grid.Fixed3 -> "three"
-                    Grid.Fixed4 -> "four"
-                    Grid.Fixed5 -> "five"
-                },
-            )
             SettingsItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 selected = grid == currentGrid,
-                text = "$textCount (${grid.size})".asUiText(),
+                text = grid.densityLabel().asUiText(),
                 showChevron = false,
                 onClick = { onSelected(grid) },
                 startIconContent = {

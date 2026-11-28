@@ -61,5 +61,6 @@ internal fun HomeNavigationBar(
         modifier = modifier,
         hasBackground = hasBackground,
         isObscured = isObscured,
+        shouldReserveBottomInset = false,
     )
 }

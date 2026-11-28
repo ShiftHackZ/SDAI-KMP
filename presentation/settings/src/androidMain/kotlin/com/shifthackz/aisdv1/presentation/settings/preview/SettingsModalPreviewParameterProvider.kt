@@ -3,6 +3,7 @@ package com.shifthackz.aisdv1.presentation.settings.preview
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.shifthackz.aisdv1.domain.entity.Grid
 import com.shifthackz.aisdv1.domain.entity.NetworkTimeout
+import com.shifthackz.aisdv1.presentation.components.modal.grid.densityLabel
 import com.shifthackz.aisdv1.presentation.settings.SettingsModal
 
 /**
@@ -36,7 +37,7 @@ internal class SettingsModalPreviewParameterProvider :
             supported = false
         ),
     ) + Grid.entries.map { grid ->
-        "Gallery grid · ${grid.size} columns" to SettingsModal.GalleryGrid(grid)
+        "Gallery grid · ${grid.densityLabel()}" to SettingsModal.GalleryGrid(grid)
     } + NetworkTimeout.entries.map { timeout ->
         "Generation timeout · $timeout" to SettingsModal.GenerationTimeout(timeout)
     }

@@ -2,7 +2,6 @@ package com.shifthackz.aisdv1.presentation.blog.detail
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
@@ -56,7 +55,7 @@ internal fun BlogDetailScreenContent(
         },
     ) {
         val toolbarInset = LocalToolbarContentInset.current
-        val body = Modifier.align(Alignment.TopCenter).widthIn(max = 720.dp).fillMaxSize()
+        val body = Modifier.fillMaxSize()
         val status = body.padding(top = toolbarInset)
         if (!isArticleReady) ToolbarScrollObserver(false)
         when (state) {

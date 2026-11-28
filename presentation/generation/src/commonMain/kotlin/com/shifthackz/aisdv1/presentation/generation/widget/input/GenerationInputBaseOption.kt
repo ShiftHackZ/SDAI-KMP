@@ -11,7 +11,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
@@ -108,7 +108,7 @@ internal fun GenerationInputBaseOption(
             val areAdvancedOptionsVisible = state.advancedOptionsVisible
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
 
-                TextButton(
+                TextActionButton(
                     modifier = Modifier,
                     onClick = {
                         onEvent(

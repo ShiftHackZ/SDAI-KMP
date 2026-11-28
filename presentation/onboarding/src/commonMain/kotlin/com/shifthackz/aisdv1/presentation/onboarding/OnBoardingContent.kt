@@ -25,7 +25,7 @@ import com.shifthackz.aisdv1.presentation.components.widget.action.PrimaryButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
-import androidx.compose.material3.Scaffold
+import com.shifthackz.aisdv1.presentation.components.widget.toolbar.PlatformScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.shifthackz.aisdv1.presentation.components.platform.LocalPlatformControlBackgroundColor
@@ -95,7 +95,7 @@ fun OnBoardingContent(
         scrollToPage(pagerState.currentPage - 1)
     }
 
-    Scaffold(
+    PlatformScaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
             CompositionLocalProvider(LocalPlatformControlBackgroundColor provides MaterialTheme.colorScheme.surface) {

@@ -6,7 +6,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.shifthackz.aisdv1.core.localization.Localization
@@ -44,8 +44,8 @@ internal fun AuthorizationStorageRecovery(
             isEnabled = !state.isAuthorizationStorageBusy,
             onClick = { processIntent(ServerSetupIntent.RetryAuthorizationStorage) },
         ) { Text(Localization.string("retry")) }
-        TextButton(
-            enabled = !state.isAuthorizationStorageBusy,
+        TextActionButton(
+            isEnabled = !state.isAuthorizationStorageBusy,
             onClick = { processIntent(ServerSetupIntent.RequestAuthorizationReset) },
         ) { Text(Localization.string("auth_storage_reset")) }
     }
@@ -55,12 +55,12 @@ internal fun AuthorizationStorageRecovery(
             title = { Text(Localization.string("auth_storage_reset")) },
             text = { Text(Localization.string("auth_storage_reset_confirm")) },
             confirmButton = {
-                TextButton(onClick = { processIntent(ServerSetupIntent.ConfirmAuthorizationReset) }) {
+                TextActionButton(onClick = { processIntent(ServerSetupIntent.ConfirmAuthorizationReset) }) {
                     Text(Localization.string("auth_storage_reset"))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { processIntent(ServerSetupIntent.CancelAuthorizationReset) }) {
+                TextActionButton(onClick = { processIntent(ServerSetupIntent.CancelAuthorizationReset) }) {
                     Text(Localization.string("cancel"))
                 }
             },

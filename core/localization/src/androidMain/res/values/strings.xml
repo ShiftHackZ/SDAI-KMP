@@ -23,10 +23,10 @@
     <string name="success">✅ Success</string>
     <string name="failure">❌ Failure</string>
 
-    <string name="two">Two</string>
-    <string name="three">Three</string>
-    <string name="four">Four</string>
-    <string name="five">Five</string>
+    <string name="gallery_grid_spacious">Spacious</string>
+    <string name="gallery_grid_balanced">Balanced</string>
+    <string name="gallery_grid_compact">Compact</string>
+    <string name="gallery_grid_dense">Dense</string>
 
     <string name="version">Version %1$s</string>
     <string name="settings_footer_developed_by">Developed by Moroz Inc.</string>
@@ -395,7 +395,7 @@
     <string name="settings_usage_network_note">Includes model downloads, configuration sync, inference requests, and Civitai uploads.</string>
 
     <string name="settings_item_lf_lang">Language</string>
-    <string name="settings_item_lf_gallery_grid">Gallery grid size</string>
+    <string name="settings_item_lf_gallery_grid">Gallery grid density</string>
     <string name="settings_item_lf_dynamic_colors">Dynamic colors</string>
     <string name="settings_item_lf_system_dark_theme">System dark theme</string>
     <string name="settings_item_lf_dark_theme">Dark theme</string>
@@ -823,7 +823,7 @@
     <string name="settings_help_network_usage">See network data recorded by SDAI, grouped by provider. This does not include traffic from other apps.</string>
     <string name="settings_help_look_header">Personalize the app language, gallery layout and colors.</string>
     <string name="settings_help_language">Choose the language used for app labels and messages.</string>
-    <string name="settings_help_gallery_grid">Choose how many image columns appear in the gallery. More columns fit more thumbnails on screen.</string>
+    <string name="settings_help_gallery_grid">Choose the thumbnail density. Denser layouts fit more, smaller images on screen. The number of columns adapts to the available width.</string>
     <string name="settings_help_dynamic_colors">Use colors from your device wallpaper when available. Turn this off to use the app color choices.</string>
     <string name="settings_help_system_dark">Match the app to your device light or dark appearance. Turn this off to choose the appearance here.</string>
     <string name="settings_help_manual_dark">Use a dark appearance in the app. Turn this off for a light appearance.</string>

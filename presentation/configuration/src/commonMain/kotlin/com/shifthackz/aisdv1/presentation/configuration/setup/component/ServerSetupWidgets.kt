@@ -9,7 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import com.shifthackz.aisdv1.presentation.components.widget.action.OutlinedButton
 import com.shifthackz.aisdv1.presentation.components.widget.input.PlatformSwitch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.shifthackz.aisdv1.presentation.components.widget.action.TextActionButton
 import com.shifthackz.aisdv1.presentation.components.widget.help.ContextualHelp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -99,12 +99,12 @@ internal fun ServerSetupModal(
             title = { Text(Localization.string("download_switch_title")) },
             text = { Text(Localization.string("download_switch_message")) },
             confirmButton = {
-                TextButton(onClick = { processIntent(ServerSetupIntent.ConfirmModelDownloadSwitch) }) {
+                TextActionButton(onClick = { processIntent(ServerSetupIntent.ConfirmModelDownloadSwitch) }) {
                     Text(Localization.string("download_switch_confirm"))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { processIntent(ServerSetupIntent.DismissDialog) }) {
+                TextActionButton(onClick = { processIntent(ServerSetupIntent.DismissDialog) }) {
                     Text(Localization.string("close"))
                 }
             },
@@ -115,7 +115,7 @@ internal fun ServerSetupModal(
             title = { Text(strings.connectionUnverifiedTitle) },
             text = { Text(strings.connectionUnverifiedText) },
             confirmButton = {
-                TextButton(onClick = { processIntent(ServerSetupIntent.AcknowledgeUnverifiedConnection) }) {
+                TextActionButton(onClick = { processIntent(ServerSetupIntent.AcknowledgeUnverifiedConnection) }) {
                     Text(strings.ok)
                 }
             },
@@ -135,7 +135,7 @@ internal fun ServerSetupModal(
                 processIntent(ServerSetupIntent.DismissDialog)
             },
             confirmButton = {
-                TextButton(
+                TextActionButton(
                     onClick = {
                         processIntent(ServerSetupIntent.ConnectToLocalHost)
                     },
@@ -170,7 +170,7 @@ internal fun ServerSetupModal(
                 processIntent(ServerSetupIntent.DismissDialog)
             },
             confirmButton = {
-                TextButton(
+                TextActionButton(
                     onClick = {
                         processIntent(
                             ServerSetupIntent.LocalModel.DeleteConfirm(

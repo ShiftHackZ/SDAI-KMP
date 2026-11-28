@@ -19,10 +19,10 @@
     <string name="success">✅ Успешно</string>
     <string name="failure">❌ Ошибка</string>
 
-    <string name="two">Два</string>
-    <string name="three">Три</string>
-    <string name="four">Четыре</string>
-    <string name="five">Пять</string>
+    <string name="gallery_grid_spacious">Просторная</string>
+    <string name="gallery_grid_balanced">Сбалансированная</string>
+    <string name="gallery_grid_compact">Компактная</string>
+    <string name="gallery_grid_dense">Плотная</string>
 
     <string name="version">Версия %1$s</string>
     <string name="settings_footer_developed_by">Разработано Moroz Inc.</string>
@@ -362,7 +362,7 @@
     <string name="settings_usage_network_note">Включает загрузку моделей, синхронизацию конфигурации, запросы генерации и публикации в Civitai.</string>
 
     <string name="settings_item_lf_lang">Язык</string>
-    <string name="settings_item_lf_gallery_grid">Размер сетки галереи</string>
+    <string name="settings_item_lf_gallery_grid">Плотность сетки галереи</string>
     <string name="settings_item_lf_dynamic_colors">Системные цвета</string>
     <string name="settings_item_lf_system_dark_theme">Системная тема</string>
     <string name="settings_item_lf_dark_theme">Темная тема</string>
@@ -786,7 +786,7 @@
     <string name="settings_help_network_usage">Посмотрите учтённый SDAI трафик по провайдерам. Трафик других приложений сюда не входит.</string>
     <string name="settings_help_look_header">Настройте язык, вид галереи и цвета приложения.</string>
     <string name="settings_help_language">Выберите язык подписей и сообщений приложения.</string>
-    <string name="settings_help_gallery_grid">Выберите число столбцов в галерее. Больше столбцов — больше миниатюр на экране.</string>
+    <string name="settings_help_gallery_grid">Выберите плотность миниатюр. Более плотная сетка вмещает больше изображений меньшего размера. Число столбцов зависит от доступной ширины.</string>
     <string name="settings_help_dynamic_colors">Используйте цвета обоев устройства, если это поддерживается. При выключении используются цвета, выбранные в приложении.</string>
     <string name="settings_help_system_dark">Следуйте светлой или тёмной теме устройства. Выключите, чтобы выбрать тему здесь.</string>
     <string name="settings_help_manual_dark">Используйте тёмную тему приложения. Выключите для светлой темы.</string>

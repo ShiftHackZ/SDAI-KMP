@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.interop.LocalUIViewController
+import com.shifthackz.aisdv1.presentation.components.widget.navigation.appNavigationHost
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -59,6 +63,7 @@ import com.shifthackz.aisdv1.core.mvi.LocalMviVisibility
 import com.shifthackz.aisdv1.presentation.components.platform.toUIColor
 import com.shifthackz.aisdv1.presentation.components.platform.NativeBlurViewController
 import com.shifthackz.aisdv1.presentation.components.platform.rememberThemedNativeContent
+import com.shifthackz.aisdv1.presentation.components.theme.global.persistentTopAppBarWindowInsets
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.accessibilityElementsHidden
 
@@ -75,6 +80,7 @@ actual val isPlatformToolbarNative: Boolean = true
 /**
  * Moves the initial top inset inside opted-in scroll containers while retaining bottom action padding.
  * Native toolbar material samples the composited UIKit hierarchy, so body capture is unnecessary.
+ * The adaptive host owns horizontal and bottom reservations, including retained routes.
  *
  * @param modifier Route placement.
  * @param topBar Persistent toolbar content.
@@ -100,6 +106,20 @@ actual fun PlatformScaffold(
     val overlap = remember { mutableStateOf(false) }
     val direction = LocalLayoutDirection.current
     val shouldUnderlapToolbar = canUnderlapToolbar && !LocalPlatformControlPreview.current
+    val host = LocalUIViewController.current.appNavigationHost()
+    val routeInsets = if (host != null) {
+        val density = LocalDensity.current
+        val bottomInset = with(density) {
+            minOf(contentWindowInsets.getBottom(this).toDp(), host.bottomInset)
+        }
+        contentWindowInsets.only(WindowInsetsSides.Top).union(WindowInsets(bottom = bottomInset))
+    } else contentWindowInsets
+    val canUpdateCanvas = LocalMviVisibility.current && LocalPlatformControlVisibility.current &&
+            !LocalPlatformControlPreview.current
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    SideEffect {
+        if (canUpdateCanvas) host?.updateCanvas(containerColor.toUIColor(), isDark)
+    }
     CompositionLocalProvider(
         LocalToolbarUnderlap provides shouldUnderlapToolbar,
         LocalToolbarOverlap provides overlap,
@@ -108,7 +128,7 @@ actual fun PlatformScaffold(
             modifier = modifier,
             topBar = topBar,
             bottomBar = bottomBar,
-            contentWindowInsets = contentWindowInsets,
+            contentWindowInsets = routeInsets,
             containerColor = containerColor,
             contentColor = contentColor,
         ) { padding ->
@@ -165,7 +185,7 @@ actual fun PlatformTopAppBar(
         return
     }
     val density = LocalDensity.current
-    val topPixels = WindowInsets.statusBars.getTop(density)
+    val topPixels = persistentTopAppBarWindowInsets().getTop(density)
     val topContent = LocalToolbarTopContent.current
     var topContentPixels by remember { mutableStateOf(0) }
     val height =

@@ -4,12 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shifthackz.aisdv1.presentation.blog.content.BlogCachedNotice
@@ -41,8 +39,8 @@ internal fun BlogScreenContent(
     val listState = rememberLazyListState()
     BlogScaffold(onBack = onBack, modifier = modifier) {
         val toolbarInset = LocalToolbarContentInset.current
-        val body = Modifier.align(Alignment.TopCenter).widthIn(max = 720.dp)
-        val status = body.fillMaxSize().padding(top = toolbarInset)
+        val body = Modifier.fillMaxSize()
+        val status = body.padding(top = toolbarInset)
         ToolbarScrollObserver(state is BlogState.Ready && listState.canScrollBackward)
         when (state) {
             BlogState.Loading -> BlogLoading(modifier = status)
@@ -54,7 +52,7 @@ internal fun BlogScreenContent(
 
             is BlogState.Ready -> LazyColumn(
                 state = listState,
-                modifier = body.fillMaxSize().verticalScrollbar(listState, topInset = toolbarInset),
+                modifier = body.verticalScrollbar(listState, topInset = toolbarInset),
                 contentPadding = PaddingValues(
                     start = 16.dp, top = 16.dp + toolbarInset, end = 16.dp, bottom = 24.dp,
                 ),

@@ -121,6 +121,8 @@ internal fun NavigationStackHost(
             RetainedRouteLayer(
                 isPlaced = isHomePlaced,
                 isForeground = pendingMotion == null && isHomeForeground && current?.route?.isHomeRoute() == true,
+                hasNavigationBar = true,
+                ownsNavigationBar = current?.route?.isHomeRoute() == true,
                 modifier = Modifier.fillMaxSize().offset {
                     IntOffset(
                         (width * direction * if (isHomeBackground) backgroundOffset else if (isHomeForeground) foregroundOffset else 0f).roundToInt(),
@@ -128,7 +130,11 @@ internal fun NavigationStackHost(
                     )
                 },
             ) {
-                homeContent(homeRoute, state.renderedHomeRoutes, isHomePlaced)
+                homeContent(
+                    homeRoute,
+                    state.renderedHomeRoutes,
+                    isHomePlaced || current?.route?.isHomeRoute() == true,
+                )
             }
         }
         if (preview != null) {
@@ -149,6 +155,8 @@ internal fun NavigationStackHost(
                 RetainedRouteLayer(
                     isPlaced = isFront || (isBehind && preview == null),
                     isForeground = pendingMotion == null && entry.id == current?.id,
+                    hasNavigationBar = entry.route is AppRoute.GalleryDetail,
+                    ownsNavigationBar = entry.id == current?.id,
                     modifier = Modifier.fillMaxSize().offset {
                         val offset =
                             if (isFront) foregroundOffset else if (isBehind) backgroundOffset else 0f
